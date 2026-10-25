@@ -17,7 +17,7 @@ function Notification({ id, icone: Icone, titre, texte }: { id: string | number;
       <div className="flex-1 min-w-0">
         <p className="font-heading font-bold text-[15px] leading-snug">{titre}</p>
         <p className="text-sm text-white/80 mt-0.5">{texte}</p>
-        <Link href="/agent" onClick={() => toast.dismiss(id)} className="inline-block mt-2 text-sm font-bold underline underline-offset-2">
+        <Link href="/agent/a-faire" onClick={() => toast.dismiss(id)} className="inline-block mt-2 text-sm font-bold underline underline-offset-2">
           Voir les vérifications
         </Link>
       </div>
@@ -54,8 +54,7 @@ export default function AlerteVerifications({ compteurs }: { compteurs?: Compteu
       notifier(House, "Nouvelle annonce à visiter", "Un logement attend la visite d'un agent.");
     }
     if (compteurs.pieces !== avant.pieces || compteurs.visites !== avant.visites) {
-      queryClient.invalidateQueries({ queryKey: ["verification", "identites"] });
-      queryClient.invalidateQueries({ queryKey: ["verification", "visites"] });
+      queryClient.invalidateQueries({ queryKey: ["agent"] });
     }
   }, [compteurs, queryClient]);
 

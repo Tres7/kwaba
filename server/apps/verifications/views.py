@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Count, Prefetch
 from django.http import FileResponse, Http404
 from rest_framework import status
@@ -12,6 +13,7 @@ from rest_framework.views import APIView
 
 from apps.hebergements.models import HebergementModel
 from apps.securite.audit import journaliser
+from apps.terrain import services as terrain
 
 from . import services
 from .fichiers import FichierInvalide, piece_identite
@@ -121,8 +123,16 @@ class PieceDecisionView(APIView):
             return Response({'detail': 'Hôte introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         decision = str(request.data.get('decision', ''))
         try:
-            piece = services.decider_piece(hote, request.user, decision=decision,
-                                           motif=str(request.data.get('motif', '')))
+            # Dans la file commune : refusé si un autre agent a pris cette pièce ; sa mission est close sinon
+            with transaction.atomic():
+                terrain.verifier_peut_decider('piece', hote.pk, request.user)
+                piece = services.decider_piece(hote, request.user, decision=decision,
+                                               motif=str(request.data.get('motif', '')))
+                terrain.terminer('piece', hote.pk, request.user,
+                                 decision='validee' if piece.statut == 'verifiee' else 'refusee',
+                                 titre=terrain.nom(hote), sous_titre=piece.get_type_piece_display())
+        except terrain.MissionErreur as exc:
+            return Response({'detail': str(exc)}, status=exc.code)
         except services.VerificationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser('identite_verifiee' if piece.statut == 'verifiee' else 'identite_refusee', request,
@@ -166,10 +176,17 @@ class DecisionView(APIView):
         if not isinstance(controles, dict):
             return Response({'controles': ['Format invalide.']}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            visite = services.decider(
-                hebergement, request.user, decision=str(request.data.get('decision', '')), controles=controles,
-                commentaire=str(request.data.get('commentaire', '')), photos=request.FILES.getlist('photos'),
-            )
+            # Dans la file commune : refusé si un autre agent a pris cette visite ; sa mission est close sinon
+            with transaction.atomic():
+                terrain.verifier_peut_decider('logement', hebergement.pk, request.user)
+                visite = services.decider(
+                    hebergement, request.user, decision=str(request.data.get('decision', '')), controles=controles,
+                    commentaire=str(request.data.get('commentaire', '')), photos=request.FILES.getlist('photos'),
+                )
+                terrain.terminer('logement', hebergement.pk, request.user, decision=visite.decision,
+                                 titre=hebergement.name, sous_titre=hebergement.get_type_display(), ville=hebergement.city)
+        except terrain.MissionErreur as exc:
+            return Response({'detail': str(exc)}, status=exc.code)
         except (services.VerificationErreur, FichierInvalide) as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser('annonce_verifiee' if visite.decision == 'validee' else 'annonce_refusee', request,
