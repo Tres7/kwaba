@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'apps.documents.apps.DocumentsConfig',
     'apps.contrats.apps.ContratsConfig',
     'apps.experiences.apps.ExperiencesConfig',
+    'apps.terrain.apps.TerrainConfig',
 ]
 
 MIDDLEWARE = [
