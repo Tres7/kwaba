@@ -1,7 +1,7 @@
-"""Client minimal de l'API PayPal Checkout (commandes v2) : https://developer.paypal.com/docs/api/orders/v2/
+"""Minimal client of the PayPal Checkout API (v2 orders): https://developer.paypal.com/docs/api/orders/v2/
 
-PayPal n'accepte pas le franc CFA : le voyageur paie en euros, au taux fixe de la parité
-FCFA/euro. L'hôte est toujours payé en FCFA par FedaPay.
+PayPal does not accept the CFA franc: the traveller pays in euros, at the fixed FCFA/euro
+parity rate. The host is always paid in FCFA through FedaPay.
 """
 import logging
 import time
@@ -17,7 +17,7 @@ URLS = {
     'live': 'https://api-m.paypal.com',
 }
 
-FCFA_PAR_EURO = Decimal('655.957')  # parité fixe XOF/EUR
+FCFA_PAR_EURO = Decimal('655.957')  # fixed XOF/EUR parity
 
 STATUTS_COMMANDE = {
     'COMPLETED': 'reussi',
@@ -42,7 +42,7 @@ def id_capture(commande: dict) -> str:
 
 
 class PayPal:
-    _jeton: tuple[str, float] | None = None  # partagé par processus : (jeton, expiration)
+    _jeton: tuple[str, float] | None = None  # shared per process: (token, expiry)
 
     def __init__(self, client_id: str, secret: str, environnement: str = 'sandbox'):
         if not client_id or not secret:
@@ -87,7 +87,7 @@ class PayPal:
 
     def creer_commande(self, *, montant_eur: Decimal, description: str, reference: str,
                        url_retour: str, url_annulation: str) -> tuple[str, str]:
-        """Renvoie (identifiant de la commande, adresse où le voyageur valide le paiement)."""
+        """Returns (order id, address where the traveller approves the payment)."""
         commande = self._appel('POST', '/v2/checkout/orders', {
             'intent': 'CAPTURE',
             'purchase_units': [{
@@ -113,7 +113,7 @@ class PayPal:
         return self._appel('GET', f'/v2/checkout/orders/{identifiant}')
 
     def capturer(self, identifiant: str) -> dict:
-        """Encaisse une commande validée par le voyageur (idempotent côté PayPal)."""
+        """Captures an order approved by the traveller (idempotent on PayPal's side)."""
         return self._appel('POST', f'/v2/checkout/orders/{identifiant}/capture', {}, idempotence=f'capture-{identifiant}')
 
     def rembourser(self, capture: str, montant_eur: Decimal, reference: str) -> dict:

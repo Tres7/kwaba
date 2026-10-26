@@ -27,8 +27,8 @@ const inter = Inter({
 });
 
 /**
- * Valeurs par défaut de toutes les pages. Pas d'URL canonique ni de versions linguistiques ici : elles sont
- * propres à chaque page (lib/seo.ts), sinon toutes les pages se déclareraient variantes de l'accueil.
+ * Default values of all pages. No canonical URL nor language versions here: they are specific to each page
+ * (lib/seo.ts), otherwise every page would declare itself a variant of the home page.
  */
 export async function metadataDuSite(locale: Langue): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "meta" });
@@ -53,9 +53,9 @@ export async function metadataDuSite(locale: Langue): Promise<Metadata> {
 }
 
 /**
- * Page HTML complète (polices, fournisseurs, lien d'évitement) dans une langue donnée.
- * Rendue par app/[locale]/layout.tsx : changer de langue reconstruit tout l'arbre,
- * textes des composants client compris.
+ * Full HTML page (fonts, providers, skip link) in a given language.
+ * Rendered by app/[locale]/layout.tsx: changing the language rebuilds the whole tree,
+ * texts of the client components included.
  */
 export default async function Document({ locale, children }: { locale: Langue; children: React.ReactNode }) {
   const t = await getTranslations({ locale, namespace: "commun" });
@@ -69,7 +69,7 @@ export default async function Document({ locale, children }: { locale: Langue; c
           <AuthProvider>
             <Providers>
               <ConsentProvider>
-              {/* Lien d'évitement : premier élément atteint au clavier */}
+              {/* Skip link: first element reached with the keyboard */}
               <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:px-4 focus:py-3 focus:rounded-xl focus:bg-dark focus:text-white focus:font-bold">
                 {t("allerAuContenu")}
               </a>

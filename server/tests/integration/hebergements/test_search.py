@@ -139,5 +139,5 @@ def test_filtre_par_equipements_et_quartier(api_client, make_hebergement):
     assert noms({'equipements': 'wifi'}) == {'Villa piscine', 'Studio wifi'}
     assert noms({'equipements': 'piscine,wifi'}) == {piscine_wifi.name}
     assert noms({'equipements': 'spa'}) == set()
-    # Un quartier de Lomé choisi dans le champ destination cherche aussi dans l'adresse
+    # A Lomé district chosen in the destination field also searches in the address
     assert noms({'city': 'Tokoin'}) == {'Studio wifi', 'Sans rien'}

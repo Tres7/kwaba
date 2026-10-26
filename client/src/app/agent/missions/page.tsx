@@ -5,7 +5,7 @@ import { useMissions } from "@/lib/agent";
 import CarteMission from "@/components/agent/CarteMission";
 import ListeMissions from "@/components/agent/ListeMissions";
 
-/** Missions en cours : les miennes, ou celles des autres agents (pour savoir qui fait quoi). */
+/** Ongoing missions: mine, or those of the other agents (to know who does what). */
 export default function MesMissionsPage() {
   const [vue, setVue] = useState<"miennes" | "equipe">("miennes");
   const { data, isLoading, isError } = useMissions(vue);

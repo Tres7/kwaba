@@ -10,7 +10,7 @@ class JournalAuditAdmin(admin.ModelAdmin):
     search_fields = ('email', 'ip')
     date_hierarchy = 'cree_le'
 
-    # Journal en lecture seule : personne ne peut le modifier ni l'effacer depuis l'administration
+    # Read-only log: nobody can change or delete it from the administration
     def has_add_permission(self, request):
         return False
 

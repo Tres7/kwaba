@@ -20,7 +20,7 @@ const UNREAD_POLL_INTERVAL_MS = 10_000;
 const NAV_LINKS = [
   { href: "/recherche", label: "hebergements" },
   { href: "/decouvrir", label: "experiences" },
-  // Affichés seulement sur grand écran (sinon la barre déborde) ; toujours présents dans le menu mobile et le pied de page
+  // Shown only on large screens (otherwise the bar overflows); always present in the mobile menu and the footer
   { href: "/transfert", label: "transferts", large: true },
   { href: "/together", label: "together", large: true },
   { href: "/give", label: "give", large: true },
@@ -33,7 +33,7 @@ function SearchForm({ onDone, className, focus }: { onDone?: () => void; classNa
   const [q, setQ] = useState("");
   const champ = useRef<HTMLInputElement>(null);
 
-  // Champ déjà présent mais masqué (CSS) : autoFocus ne jouerait pas, on place le curseur à l'ouverture
+  // Field already present but hidden (CSS): autoFocus would not apply, the cursor is placed on opening
   useEffect(() => {
     if (focus) champ.current?.focus();
   }, [focus]);
@@ -78,8 +78,8 @@ export default function Navbar() {
   const t = useTranslations("nav");
   const tRoles = useTranslations("roles");
   const [mobileOpen, setMobileOpen] = useState(false);
-  // Écrans de 1024 à 1535 px : la barre n'a pas la place d'un champ de recherche lisible à côté des liens ;
-  // une loupe ouvre la recherche pleine largeur sous la barre
+  // Screens from 1024 to 1535 px: the bar has no room for a readable search field next to the links;
+  // a magnifier opens the full-width search under the bar
   const [rechercheOuverte, setRechercheOuverte] = useState(false);
   const { data: session, status } = useSession();
   const authenticated = status === "authenticated" && !!session && !session.error;
@@ -90,8 +90,8 @@ export default function Navbar() {
     setUnread(res.data.unread_count);
   }, []);
 
-  // Rafraîchi à chaque changement de page (le badge baisse dès qu'on a lu un fil),
-  // puis toutes les 10 s et au retour du focus sur la fenêtre
+  // Refreshed at every page change (the badge goes down as soon as a thread is read),
+  // then every 10 s and when the window gets the focus back
   useEffect(() => {
     if (!authenticated) {
       setUnread(0);
@@ -102,7 +102,7 @@ export default function Navbar() {
 
   usePolling(fetchUnread, UNREAD_POLL_INTERVAL_MS, authenticated);
 
-  // Ferme le menu mobile à chaque navigation (le panneau gère lui-même le blocage du défilement)
+  // Closes the mobile menu at every navigation (the panel handles the scroll lock itself)
   useEffect(() => {
     setMobileOpen(false);
     setRechercheOuverte(false);
@@ -111,7 +111,7 @@ export default function Navbar() {
   const roleLabel = tRoles(session?.user?.role ?? "voyageur");
   const isHost = session?.user?.role === "hote" || session?.user?.role === "admin";
   const isAdmin = session?.user?.role === "admin";
-  // Espace des agents de terrain : ouvert aux agents et aux administrateurs (servi hors des routes de langue)
+  // Field agents' space: open to agents and administrators (served outside the language routes)
   const isAgent = session?.user?.role === "agent" || isAdmin;
   const modules = useReglagesSite().data?.modules;
   const liensBarre = filtrerLiens(NAV_LINKS, modules);
@@ -132,7 +132,7 @@ export default function Navbar() {
       <div className="max-w-7xl 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between gap-4 lg:gap-6">
         <Logo />
 
-        {/* Champ intégré à la barre seulement quand il a la place d'être lisible (≥ 1536 px) */}
+        {/* Field built into the bar only when it has room to be readable (≥ 1536 px) */}
         <div className="hidden 2xl:flex flex-1 min-w-[280px] max-w-md mx-auto">
           <SearchForm />
         </div>
@@ -224,7 +224,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Recherche sous la barre : toujours sur tablette, à la demande (loupe) de 1024 à 1535 px */}
+      {/* Search under the bar: always on tablets, on demand (magnifier) from 1024 to 1535 px */}
       <div id="recherche-barre" className={cn("hidden md:block lg:hidden px-6 pb-3", rechercheOuverte && "lg:block 2xl:hidden")}>
         <div className="max-w-2xl mx-auto">
           <SearchForm focus={rechercheOuverte} onDone={() => setRechercheOuverte(false)} />
@@ -248,7 +248,7 @@ export default function Navbar() {
           </DrawerItem>
         )}
 
-        {/* Les agents arrivent ici pour travailler : leur espace en tête du menu */}
+        {/* Agents come here to work: their space at the top of the menu */}
         {isAgent && (
           <DrawerItem className="mt-3">
             <Link href="/agent" onClick={() => setMobileOpen(false)}

@@ -2,7 +2,7 @@ import type { CategorieExperience } from "./admin";
 
 export type { CategorieExperience };
 
-/** Expérience publiée sur la page Découvrir (le client choisit la langue ; un texte anglais vide reprend le français). */
+/** Experience published on the Discover page (the client chooses the language; an empty English text falls back to French). */
 export interface Experience {
   id: number;
   categorie: CategorieExperience;
@@ -15,7 +15,7 @@ export interface Experience {
   pays_en: string;
   description: string;
   description_en: string;
-  /** FCFA, indicatif ; null : pas de prix affiché. */
+  /** FCFA, indicative; null: no price displayed. */
   prix: number | null;
   gratuit: boolean;
   image: string | null;

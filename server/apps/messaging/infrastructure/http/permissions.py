@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 
 
 class IsVerified(BasePermission):
-    """Anti-abus : seule une adresse email vérifiée peut démarrer un fil ou envoyer un message."""
+    """Anti-abuse: only a verified email address can start a thread or send a message."""
 
     message = "Vérifiez votre adresse email pour utiliser la messagerie."
 

@@ -36,7 +36,7 @@ const PIECE: Record<Logement["hote"]["piece"]["statut"], { libelle: string; clas
   refusee: { libelle: "Pièce d'identité refusée, à renvoyer", classe: "bg-red-50 text-red-700" },
 };
 
-/** Visite d'un logement : l'annonce à comparer, la grille de contrôle, les photos prises sur place, la décision. */
+/** Visit of a listing: the listing to compare, the checklist, the photos taken on site, the decision. */
 export default function FicheLogement({ logement, controlesLibelles, maxPhotos, peutDecider, onTerminee }: {
   logement: Logement;
   controlesLibelles: Record<string, string>;
@@ -104,7 +104,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         {logement.amenities.length > 0 && <p className="text-sm text-gray-600">Équipements annoncés : {logement.amenities.join(", ")}</p>}
         {logement.description && <p className="text-sm text-gray-600 whitespace-pre-line">{logement.description}</p>}
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {/* La couverture figure aussi dans la galerie : chaque photo une seule fois */}
+          {/* The cover also appears in the gallery: each photo only once */}
           {Array.from(new Set(logement.photos)).map((url) => (
             <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
               <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg" />

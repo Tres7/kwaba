@@ -17,12 +17,12 @@ from .models import CategorieVehiculeModel, LieuRemiseModel, LocationModel, Para
 
 
 def _photos(request, categorie) -> list[str]:
-    # La photo principale d'abord (ordre du modèle) ; prefetch_related('photos') évite une requête par catégorie
+    # Main photo first (model order); prefetch_related('photos') avoids one query per category
     return [request.build_absolute_uri(p.image.url) for p in categorie.photos.all()]
 
 
 def _categorie_json(request, c: CategorieVehiculeModel | None) -> dict | None:
-    """Véhicule proposé (le propriétaire n'est jamais montré). None pour un chauffeur seul."""
+    """Offered vehicle (the owner is never shown). None for a driver alone."""
     if c is None:
         return None
     photos = _photos(request, c)
@@ -31,7 +31,7 @@ def _categorie_json(request, c: CategorieVehiculeModel | None) -> dict | None:
         'exemple_modele': c.exemple_modele, 'description': c.description, 'places': c.places, 'bagages': c.bagages,
         'boite': c.boite, 'carburant': c.carburant, 'climatisation': c.climatisation, 'image': photos[0] if photos else None,
         'photos': photos, 'annee': c.annee,
-        # Prix du véhicule par jour, fixé par le propriétaire ; le chauffeur est en plus (7 000 FCFA par jour)
+        # Vehicle price per day, set by the owner; the driver comes on top (7,000 FCFA per day)
         'prix_jour': c.prix_jour, 'formules': {'sans_chauffeur': c.sans_chauffeur, 'avec_chauffeur': c.avec_chauffeur},
         'caution': c.caution, 'caution_jours': c.caution_jours,
     }
@@ -48,7 +48,7 @@ def _lieu_json(lieu: LieuRemiseModel) -> dict:
 
 
 class CatalogueView(APIView):
-    """Ce que la page de location affiche : catégories proposées, lieux, règles et valeurs des filtres."""
+    """What the rental page shows: offered categories, places, rules and filter values."""
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -83,7 +83,7 @@ def _heure(lieu, brut):
 
 class DevisView(APIView):
     """GET ?categorie=&formule=&lieu_prise=&lieu_retour=&debut=2026-12-02T10:00&fin=…&jours_hors_lome=&jours_hors_pays=
-    → prix détaillé. Connecté, la caution tient compte des locations sans incident du voyageur."""
+    → detailed price. When signed in, the deposit takes the traveller's rentals without incident into account."""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -165,14 +165,14 @@ class LocationSerializer(serializers.ModelSerializer):
         return obj.fin.astimezone(services.ZoneInfo(obj.lieu_retour.fuseau)).strftime('%Y-%m-%dT%H:%M')
 
     def get_vehicule_attribue(self, obj):
-        # Le site n'affiche jamais le propriétaire ni le chauffeur (nom, téléphone) : leurs coordonnées partent
-        # seulement par email au voyageur, une fois la location payée et attribuée (notifications.partenaire_au_voyageur)
+        # The site never shows the owner nor the driver (name, phone): their contact details are only sent
+        # by email to the traveller, once the rental is paid and assigned (notifications.partenaire_au_voyageur)
         if not (obj.partenaire_id or obj.chauffeur_partenaire_id) or obj.statut not in ('partenaire_assigne', 'terminee'):
             return None
         return {'vehicule': obj.vehicule, 'immatriculation': obj.immatriculation}
 
     def get_caution_etat(self, obj):
-        """Caution gardée par Kwa-Ba : rendue ou non, retenue et motif, délai de restitution après le retour."""
+        """Deposit kept by Kwa-Ba: given back or not, withheld amount and reason, return period after the vehicle return."""
         if not obj.caution_gardee:
             return None
         params = ParametresLocationModel.courants()
@@ -197,7 +197,7 @@ class LocationSerializer(serializers.ModelSerializer):
         return services.annulation_gratuite(obj)
 
     def get_rembourse_si_annulation(self, obj):
-        """Montant rendu si le voyageur annule maintenant (location et caution), avant le début."""
+        """Amount given back if the traveller cancels now (rental and deposit), before the start."""
         if obj.statut not in ('confirmee', 'partenaire_assigne') or obj.debut <= timezone.now():
             return None
         return obj.prix - services.retenue_si_annulation(obj) + obj.caution_gardee
@@ -235,7 +235,7 @@ class LocationCreationSerializer(serializers.Serializer):
         return valeur
 
     def validate(self, data):
-        # Heures saisies dans le fuseau des lieux de remise et de retour
+        # Times typed in the time zone of the handover and return places
         for champ, lieu in (('debut', data['lieu_prise']), ('fin', data['lieu_retour'])):
             valeur = data[champ]
             naive = timezone.make_naive(valeur) if timezone.is_aware(valeur) else valeur
@@ -244,7 +244,7 @@ class LocationCreationSerializer(serializers.Serializer):
 
 
 class MesChauffeursView(APIView):
-    """« Mon chauffeur » : chauffeurs qui ont déjà conduit le voyageur, qu'il peut redemander (prénom et initiale)."""
+    """\"My driver\": drivers who have already driven the traveller, whom they can ask for again (first name and initial)."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -284,7 +284,7 @@ class LocationView(APIView):
         location = _de_l_utilisateur(pk, request.user)
         if not location:
             return Response({'detail': 'Location introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        # Page de retour après paiement : on relit la transaction chez le prestataire
+        # Return page after payment: the transaction is read again at the provider
         dernier = location.paiements.order_by('-cree_le').first()
         if dernier and dernier.statut == 'en_attente':
             paiements.synchroniser_paiement(dernier)

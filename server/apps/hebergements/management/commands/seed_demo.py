@@ -55,7 +55,7 @@ DEMO = [
 ]
 
 
-# Détails typiques par type de logement (surface, chambres, lits, petit-déjeuner)
+# Typical details per listing type (area, bedrooms, beds, breakfast)
 DETAILS = {
     'villa': {'surface_m2': 180, 'chambres': 4, 'salles_de_bain': 3, 'lits_doubles': 3, 'lits_simples': 2,
               'petit_dejeuner': 'option', 'petit_dejeuner_prix': 5000},

@@ -13,7 +13,7 @@ const CATEGORIES = [
   { value: "hotel", label: "Hôtel ou résidence hôtelière (12 %)" },
 ];
 
-/** Commission d'un hôte (grille du 18 octobre 2026) : catégorie et Programme Fondateurs (5 % pendant 6 mois, 50 hôtes). */
+/** A host's commission (grid of 18 October 2026): category and Founders Programme (5 % for 6 months, 50 hosts). */
 export default function ConditionsHote({ hote, onFermer }: { hote: AdminUser | null; onFermer: () => void }) {
   const queryClient = useQueryClient();
   const actuelles = hote?.conditions;

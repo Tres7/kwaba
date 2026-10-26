@@ -12,7 +12,7 @@ import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { CritereAvis, Reservation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 
-// Libellés des notes 1 à 5 : messages avisDepot.notes.1 … 5
+// Labels of ratings 1 to 5: messages avisDepot.notes.1 … 5
 
 const CRITERES: { id: CritereAvis }[] = [
   { id: "proprete" },

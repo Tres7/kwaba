@@ -17,9 +17,9 @@ class OutboxEntry:
 
 
 class NotificationOutbox(ABC):
-    """Notifications à publier, écrites dans la même transaction que le message (pattern outbox).
+    """Notifications to publish, written in the same transaction as the message (outbox pattern).
 
-    Statuts : pending (à publier), sent (publiée), skipped (devenue inutile).
+    Statuses: pending (to publish), sent (published), skipped (no longer needed).
     """
 
     @abstractmethod
@@ -36,8 +36,8 @@ class NotificationOutbox(ABC):
 
     @abstractmethod
     def claim_next_due(self, now: datetime.datetime) -> Optional[OutboxEntry]:
-        """Verrouille la prochaine ligne pending échue, en ignorant celles déjà verrouillées
-        par un autre relais (skip locked). À appeler dans une transaction."""
+        """Locks the next due pending row, skipping those already locked
+        by another relay (skip locked). To call inside a transaction."""
         pass
 
     @abstractmethod
@@ -50,20 +50,20 @@ class NotificationOutbox(ABC):
 
     @abstractmethod
     def postpone(self, entry_id: int, available_at: datetime.datetime) -> None:
-        """Report sans échec (plafond atteint) : le compteur de tentatives ne bouge pas."""
+        """Postpones without failure (cap reached): the attempt counter does not move."""
         pass
 
     @abstractmethod
     def record_failure(self, entry_id: int, available_at: datetime.datetime, error: str) -> int:
-        """Incrémente les tentatives, garde l'erreur, reporte la ligne. Renvoie le nouveau nombre de tentatives."""
+        """Increments the attempts, keeps the error, postpones the row. Returns the new number of attempts."""
         pass
 
     @abstractmethod
     def sent_since(self, recipient_id: uuid.UUID, since: datetime.datetime) -> list:
-        """Dates d'envoi (croissantes) des notifications déjà publiées pour ce destinataire depuis `since`."""
+        """Sending dates (ascending) of the notifications already published for this recipient since `since`."""
         pass
 
     @abstractmethod
     def purge_processed_before(self, before: datetime.datetime) -> int:
-        """Supprime les lignes sent/skipped traitées avant `before`. Renvoie le nombre supprimé."""
+        """Deletes the sent/skipped rows processed before `before`. Returns the number deleted."""
         pass

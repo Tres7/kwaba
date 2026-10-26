@@ -1,11 +1,11 @@
 import { defineRouting } from "next-intl/routing";
 
-/** Langues du site : le français sans préfixe (kwa-ba.com/…), l'anglais sous /en (kwa-ba.com/en/…). */
+/** Site languages: French without prefix (kwa-ba.com/…), English under /en (kwa-ba.com/en/…). */
 export const routing = defineRouting({
   locales: ["fr", "en"],
   defaultLocale: "fr",
   localePrefix: "as-needed",
-  // Cookie NEXT_LOCALE (langue choisie) : 1 an, déclaré dans la politique de cookies
+  // NEXT_LOCALE cookie (chosen language): 1 year, declared in the cookie policy
   localeCookie: { maxAge: 60 * 60 * 24 * 365 },
 });
 

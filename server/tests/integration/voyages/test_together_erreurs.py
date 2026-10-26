@@ -1,4 +1,4 @@
-"""Kwa-Ba Together : refus et cas limites de l'API."""
+"""Kwa-Ba Together: refusals and edge cases of the API."""
 from datetime import timedelta
 
 import pytest
@@ -49,7 +49,7 @@ def test_elements_inconnus_et_droits(client_for, make_user, make_hebergement, vo
     assert orga.delete(f'{VOYAGES}{vid}/reservations/999/').status_code == 404
     assert orga.post(f'{VOYAGES}{vid}/reservations/', {'reservation': INCONNU}, format='json').status_code == 400
 
-    # Un membre ne peut retirer ni la proposition ni l'étape d'un autre, ni régénérer le lien
+    # A member can neither remove another one's suggestion or step, nor regenerate the link
     ami = client_for(make_user())
     ami.post(f"{VOYAGES}invitations/{v['code_invitation']}/")
     d = orga.post(f'{VOYAGES}{vid}/propositions/', {'hebergement': str(make_hebergement().id)}, format='json').data
@@ -63,16 +63,16 @@ def test_elements_inconnus_et_droits(client_for, make_user, make_hebergement, vo
     assert orga.delete(f"{VOYAGES}{vid}/etapes/{e['etapes'][0]['id']}/").status_code == 204
     assert ami.delete(f'{VOYAGES}{vid}/membres/{make_user().id}/').status_code == 403
 
-    # Retirer son vote, annuler le choix retenu, retirer la proposition
+    # Remove one's vote, cancel the chosen option, remove the suggestion
     orga.post(f'{VOYAGES}{vid}/vote/', {'proposition': pid}, format='json')
     assert orga.delete(f'{VOYAGES}{vid}/vote/').data['mon_vote'] is None
     orga.post(f'{VOYAGES}{vid}/retenir/', {'proposition': pid}, format='json')
     assert orga.post(f'{VOYAGES}{vid}/retenir/', {'proposition': None}, format='json').data['proposition_retenue'] is None
     assert orga.delete(f'{VOYAGES}{vid}/propositions/{pid}/').status_code == 204
-    # Modification des dates par l'organisateur, puis suppression du voyage
+    # Change of the dates by the organiser, then deletion of the trip
     assert orga.patch(f'{VOYAGES}{vid}/', {'nb_voyageurs': 3}, format='json').data['nb_voyageurs'] == 3
     apres_fin = (timezone.localdate() + timedelta(days=40)).isoformat()
-    assert orga.patch(f'{VOYAGES}{vid}/', {'date_debut': apres_fin}, format='json').status_code == 400  # arrivée après le départ
+    assert orga.patch(f'{VOYAGES}{vid}/', {'date_debut': apres_fin}, format='json').status_code == 400  # arrival after departure
     assert orga.delete(f'{VOYAGES}{vid}/').status_code == 204
 
 

@@ -1,4 +1,4 @@
-"""Signature des contrats (lien personnel ou espace hôte) et gestion dans le back-office."""
+"""Contract signature (personal link or host space) and management in the back-office."""
 from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
@@ -31,7 +31,7 @@ def _pdf(contrat: ContratModel) -> HttpResponse:
 
 
 def _public(c: ContratModel) -> dict:
-    """Ce que voit le signataire (jamais les preuves techniques ni l'identifiant interne)."""
+    """What the signer sees (never the technical proofs nor the internal id)."""
     return {
         'reference': c.reference, 'titre': c.titre, 'type': c.type, 'type_libelle': c.get_type_display(),
         'statut': c.statut, 'partie_nom': c.partie_nom, 'kwaba_signataire': c.kwaba_signataire,
@@ -55,7 +55,7 @@ def _signer(request, contrat, methode):
     return Response(_public(contrat))
 
 
-# --- Lien personnel (loueur, chauffeur, ONG, ou hôte invité par email) ----------------------------
+# --- Personal link (rental company, driver, NGO, or host invited by email) ----------------------------
 
 class SignaturePubliqueView(APIView):
     permission_classes = [AllowAny]
@@ -94,10 +94,10 @@ class SignerPubliqueView(APIView):
         return _signer(request, contrat, 'lien personnel')
 
 
-# --- Espace hôte -----------------------------------------------------------------------------------
+# --- Host space -----------------------------------------------------------------------------------
 
 def _apercu_hote(user) -> dict | None:
-    """Contrat que l'hôte va signer : le sien s'il existe, sinon le texte qui sera émis à la signature."""
+    """Contract the host is going to sign: theirs if it exists, otherwise the text that will be issued at signature."""
     contrat = ContratModel.objects.filter(hote=user).exclude(statut='annule').first()
     if contrat:
         return _public(contrat)
@@ -123,7 +123,7 @@ class EstHote(IsAuthenticated):
 
 
 class ContratHoteView(APIView):
-    """GET : contrat hôte de l'utilisateur connecté (404 tant que Kwa-Ba n'a pas renseigné ses informations légales)."""
+    """GET: host contract of the signed-in user (404 while Kwa-Ba has not filled in its legal information)."""
     permission_classes = [EstHote]
 
     def get(self, request):
@@ -134,7 +134,7 @@ class ContratHoteView(APIView):
 
 
 class SignerHoteView(APIView):
-    """POST {nom, signature, accepte, version} : émet le contrat (s'il ne l'est pas) puis le signe."""
+    """POST {nom, signature, accepte, version}: issues the contract (if it is not yet) then signs it."""
     permission_classes = [EstHote]
     throttle_classes = [LimiteSignature]
 
@@ -147,7 +147,7 @@ class SignerHoteView(APIView):
             return Response({'detail': 'Le contrat hôte sera bientôt disponible.'}, status=status.HTTP_404_NOT_FOUND)
         if apercu['statut'] == 'signe':
             return Response({'detail': 'Votre contrat est déjà signé.'}, status=status.HTTP_400_BAD_REQUEST)
-        # Le texte a pu changer depuis que l'hôte l'a lu : il signe ce qu'il a lu, ou relit
+        # The text may have changed since the host read it: they sign what they read, or read again
         if str(request.data.get('version')) != str(apercu['version']):
             return Response({'detail': 'Le contrat vient d\'être mis à jour : relisez-le avant de signer.', 'code': 'version'},
                             status=status.HTTP_409_CONFLICT)
@@ -198,7 +198,7 @@ def _cible(type_contrat: str, pk):
 
 
 class ContratsAdminView(APIView):
-    """GET : contrats (q, type, statut). POST {type, partie_id} : émet le contrat et envoie le lien de signature."""
+    """GET: contracts (q, type, statut). POST {type, partie_id}: issues the contract and sends the signature link."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -229,7 +229,7 @@ class ContratsAdminView(APIView):
 
 
 class PartiesAdminView(APIView):
-    """Parties possibles pour un type de contrat (?type=, ?q=), avec l'état de leur contrat."""
+    """Possible parties for a contract type (?type=, ?q=), with the state of their contract."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -313,7 +313,7 @@ class ModelesAdminView(APIView):
 
 
 class ModeleAdminView(APIView):
-    """PUT {titre, corps} : nouvelle version du modèle (les contrats déjà émis gardent leur texte)."""
+    """PUT {titre, corps}: new version of the template (contracts already issued keep their text)."""
     permission_classes = [EstAdministrateur]
 
     def put(self, request, type_contrat):

@@ -1,12 +1,12 @@
-"""Pays ouverts au paiement et opérateurs Mobile Money utilisables pour les versements aux hôtes.
+"""Countries open to payment and Mobile Money operators usable for payouts to hosts.
 
-`mode` = identifiant du moyen de versement chez FedaPay. À vérifier dans le tableau de bord
-FedaPay (Paramètres → Moyens de paiement / Payouts) avant la mise en production : un mode
-non activé sur le compte est refusé par l'API, et le versement passe alors en échec avec le
-message de FedaPay (visible dans l'admin Django).
+`mode` = id of the payout method at FedaPay. To check in the FedaPay dashboard
+(Settings → Payment methods / Payouts) before going live: a mode not enabled on the account
+is refused by the API, and the payout then fails with FedaPay's message (visible in the
+Django admin).
 
-Au lancement, seuls Moov Money (Flooz) et Mixx by Yas (T-Money) sont ouverts : les autres opérateurs restent
-définis ici mais ne sont proposés que si l'interrupteur MODULE_PAIEMENTS_NON_OUVERTS est actif (config/site.py).
+At launch, only Moov Money (Flooz) and Mixx by Yas (T-Money) are open: the other operators stay
+defined here but are only offered if the MODULE_PAIEMENTS_NON_OUVERTS switch is on (config/site.py).
 """
 from django.conf import settings
 
@@ -41,7 +41,7 @@ OUVERTS = {'moov_tg', 'togocel'}
 
 
 def pays_ouverts() -> dict:
-    """Pays et opérateurs proposés aux utilisateurs (remboursement, versement de l'hôte)."""
+    """Countries and operators offered to users (refund, host payout)."""
     if settings.MODULES['paiements_non_ouverts']:
         return PAYS
     ouverts = {code: {**p, 'operateurs': [op for op in p['operateurs'] if op[0] in OUVERTS]} for code, p in PAYS.items()}
@@ -49,12 +49,12 @@ def pays_ouverts() -> dict:
 
 
 def operateurs_du_pays(pays: str) -> dict[str, str]:
-    """Tous les opérateurs du pays (versements aux partenaires saisis par l'équipe dans le back-office)."""
+    """All operators of the country (payouts to partners entered by the team in the back-office)."""
     return dict(PAYS.get(pays, {}).get('operateurs', []))
 
 
 def operateurs_ouverts(pays: str) -> dict[str, str]:
-    """Opérateurs proposés aux utilisateurs (numéro de remboursement, compte de versement de l'hôte)."""
+    """Operators offered to users (refund number, host payout account)."""
     return dict(pays_ouverts().get(pays, {}).get('operateurs', []))
 
 

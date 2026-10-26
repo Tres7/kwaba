@@ -11,25 +11,25 @@ const api = axios.create({
   },
 });
 
-// Token tenu à jour par SessionTokenSync (providers/AuthProvider.tsx) à chaque changement de session.
-// undefined = session pas encore connue : on la demande alors une fois à NextAuth.
+// Token kept up to date by SessionTokenSync (providers/AuthProvider.tsx) at every session change.
+// undefined = session not known yet: it is then asked once from NextAuth.
 let accessToken: string | null | undefined;
 
 export function setApiAccessToken(token: string | null) {
   accessToken = token;
 }
 
-/** Jeton d'accès courant, pour les requêtes faites hors d'axios (flux SSE du Concierge). */
+/** Current access token, for requests made outside axios (Concierge SSE stream). */
 export async function jetonAcces(): Promise<string | null> {
   if (accessToken !== undefined) return accessToken;
   return (await getSession())?.accessToken ?? null;
 }
 
 api.interceptors.request.use(async (config) => {
-  // Langue de l'utilisateur : réponses du Concierge et, à terme, messages de l'API
+  // User's language: Concierge answers and, eventually, API messages
   config.headers["Accept-Language"] = langue();
   if (typeof window !== "undefined") {
-    // Évite un appel à /api/auth/session par requête (le polling de la messagerie en ferait un toutes les 4 s)
+    // Avoids a call to /api/auth/session per request (the messaging polling would make one every 4 s)
     const token = accessToken !== undefined ? accessToken : (await getSession())?.accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -38,14 +38,14 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Plusieurs requêtes peuvent échouer en même temps : un seul renouvellement partagé
+// Several requests may fail at the same time: a single shared renewal
 let refreshing: Promise<{ token: string | null; expiree: boolean }> | null = null;
 
-/** `expiree` : l'API a refusé le refresh token (session réellement terminée). Une session illisible
- * (réseau coupé au réveil de l'ordinateur, par ex.) n'est pas une expiration : on ne déconnecte pas. */
+/** `expiree`: the API refused the refresh token (session really over). An unreadable session
+ * (network down when the computer wakes up, for example) is not an expiry: the user is not signed out. */
 async function refreshAccessToken(): Promise<{ token: string | null; expiree: boolean }> {
   if (!refreshing) {
-    // getSession() rappelle NextAuth, dont le callback jwt renouvelle le token Django expiré
+    // getSession() calls NextAuth again, whose jwt callback renews the expired Django token
     refreshing = getSession()
       .then((session) => {
         const expiree = session?.error === "RefreshAccessTokenError";
@@ -64,7 +64,7 @@ api.interceptors.response.use(
     const config = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
 
     if (typeof window !== "undefined" && error.response?.status === 401 && config?.headers?.Authorization) {
-      // Token en cache expiré : on le renouvelle puis on rejoue la requête une seule fois
+      // Cached token expired: it is renewed, then the request is replayed once
       if (config._retried) return Promise.reject(error);
       config._retried = true;
       const { token, expiree } = await refreshAccessToken();
@@ -72,11 +72,11 @@ api.interceptors.response.use(
         config.headers.Authorization = `Bearer ${token}`;
         return api(config);
       }
-      // Renouvellement impossible pour l'instant (API ou réseau indisponible) : la session est gardée
+      // Renewal impossible for now (API or network unavailable): the session is kept
       if (!expiree) return Promise.reject(error);
-      // Refresh token Django refusé : déconnexion propre
+      // Django refresh token refused: clean sign-out
       setApiAccessToken(null);
-      // La page de connexion reste dans la langue courante ; le retour se fait sans le préfixe /en (ajouté par le routeur)
+      // The sign-in page stays in the current language; the return goes without the /en prefix (added by the router)
       const prefixe = langue() === "en" ? "/en" : "";
       const chemin = window.location.pathname.replace(/^\/en(?=\/|$)/, "") || "/";
       const callbackUrl = `${prefixe}/login?expired=1&callbackUrl=${encodeURIComponent(chemin)}`;
@@ -86,7 +86,7 @@ api.interceptors.response.use(
   }
 );
 
-/** Extrait un message lisible d'une erreur DRF ({detail}, {champ: [msg]}, ...). */
+/** Extracts a readable message from a DRF error ({detail}, {field: [msg]}, ...). */
 export function apiErrorMessage(err: unknown, fallback?: string): string {
   const e = err as AxiosError<Record<string, unknown>>;
   if (!e?.response) return selon({ fr: "Impossible de contacter le serveur.", en: "Unable to reach the server." });

@@ -2,9 +2,9 @@ import Credentials from "next-auth/providers/credentials";
 import { fetchBackendUser } from "@/lib/api/auth/me";
 
 /**
- * Ouvre la session avec des jetons déjà obtenus de l'API (vérification d'email, connexion Google).
- * Seuls les jetons sont pris au navigateur : identifiant, email, nom et rôle sont relus auprès de l'API avec le
- * jeton d'accès, sinon n'importe qui pourrait se fabriquer une session « admin ».
+ * Opens the session with tokens already obtained from the API (email verification, Google sign-in).
+ * Only the tokens are taken from the browser: id, email, name and role are read again from the API with the
+ * access token, otherwise anyone could forge an "admin" session.
  */
 export const backendSessionProvider = Credentials({
   id: "backend-session",

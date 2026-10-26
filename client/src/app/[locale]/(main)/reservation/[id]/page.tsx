@@ -69,7 +69,7 @@ function ReservationContent() {
   const nights = calculateNights(checkIn, checkOut);
   const datesInvalid = !checkIn || !checkOut || nights <= 0 || checkIn < isoDate();
   const subtotal = hebergement.price_per_night * nights;
-  // Taux du visiteur : 6 %, ou 3 % s'il a déjà séjourné chez cet hôte (le serveur applique le même calcul)
+  // Visitor's rate: 6 %, or 3 % if they already stayed with this host (the server applies the same calculation)
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
   const serviceFee = calculateServiceFee(subtotal, tauxFrais);
   const total = subtotal + serviceFee;
@@ -87,7 +87,7 @@ function ReservationContent() {
         guests_count: guestsCount,
         payment_method: moyenChoisi,
         message: message.trim(),
-        // Le serveur recalcule le total et refuse s'il a changé depuis l'affichage de ce récapitulatif
+        // The server computes the total again and refuses if it changed since this summary was displayed
         total_attendu: total,
       });
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
@@ -95,7 +95,7 @@ function ReservationContent() {
         router.push(`/reservation/confirmation/${res.data.id}`);
         return;
       }
-      // Dates bloquées : direction la page de paiement sécurisée du prestataire
+      // Dates held: on to the provider's secure payment page
       try {
         await allerPayer(res.data.id, moyenChoisi);
       } catch (err) {
@@ -103,7 +103,7 @@ function ReservationContent() {
       }
     } catch (err) {
       setError(apiErrorMessage(err, t("reservationNonEnregistree")));
-      // Prix modifié entre-temps : le récapitulatif se met à jour avec le nouveau total
+      // Price changed in the meantime: the summary is updated with the new total
       queryClient.invalidateQueries({ queryKey: ["hebergement", params.id, "reservation"] });
       setSubmitting(false);
     }
@@ -253,7 +253,7 @@ function ReservationContent() {
                 <PolitiqueAnnulation politique={hebergement.politique_annulation ?? "moderee"} compact />
               </div>
 
-              {/* Acceptation expresse des CGV, des règles de l'annonce et de la politique d'annulation (CGV, art. 5.2) */}
+              {/* Express acceptance of the terms of sale, the listing rules and the cancellation policy (terms of sale, art. 5.2) */}
               <label className="flex items-start gap-2.5 text-xs text-gray-600 leading-relaxed mb-4 cursor-pointer">
                 <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)}
                   className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-primary focus:ring-primary" />

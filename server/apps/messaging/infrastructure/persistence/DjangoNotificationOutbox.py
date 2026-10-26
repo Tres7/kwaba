@@ -29,7 +29,7 @@ class DjangoNotificationOutbox(NotificationOutbox):
         )
 
     def claim_next_due(self, now: datetime.datetime) -> Optional[OutboxEntry]:
-        # SELECT ... FOR UPDATE SKIP LOCKED : une ligne déjà prise par un autre relais est ignorée
+        # SELECT ... FOR UPDATE SKIP LOCKED: a row already taken by another relay is skipped
         model = (
             Outbox.objects.select_for_update(skip_locked=True)
             .filter(status=Outbox.STATUS_PENDING, available_at__lte=now)

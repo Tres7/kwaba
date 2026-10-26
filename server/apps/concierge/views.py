@@ -14,7 +14,7 @@ LONGUEUR_MAX = 2000
 
 
 class ModuleOuvert(BasePermission):
-    """Concierge masqué (MODULE_CONCIERGE) : ses adresses répondent 404, aucune requête ne part vers Gemini."""
+    """Concierge hidden (MODULE_CONCIERGE): its addresses answer 404, no request goes to Gemini."""
 
     def has_permission(self, request, view):
         exiger_module('concierge')
@@ -34,7 +34,7 @@ class ConversationsView(APIView):
     throttle_scope = 'concierge_conversation'
 
     def get_throttles(self):
-        # Création de conversations limitée ; la lecture de la liste ne l'est pas
+        # Conversation creation is limited; reading the list is not
         return [ScopedRateThrottle()] if self.request.method == 'POST' else []
 
     def get(self, request):
@@ -70,7 +70,7 @@ class ConversationView(APIView):
 
 
 class MessagesView(APIView):
-    """POST {texte} → réponse du Concierge en flux SSE (text/event-stream)."""
+    """POST {texte} → Concierge answer as an SSE stream (text/event-stream)."""
     permission_classes = [ModuleOuvert, IsAuthenticated]
 
     def post(self, request, pk):
@@ -92,5 +92,5 @@ class MessagesView(APIView):
         langue = services.langue_de(request.headers.get('Accept-Language', ''))
         reponse = StreamingHttpResponse(services.repondre(conversation, texte, langue), content_type='text/event-stream')
         reponse['Cache-Control'] = 'no-cache'
-        reponse['X-Accel-Buffering'] = 'no'  # pas de mise en tampon derrière nginx
+        reponse['X-Accel-Buffering'] = 'no'  # no buffering behind nginx
         return reponse

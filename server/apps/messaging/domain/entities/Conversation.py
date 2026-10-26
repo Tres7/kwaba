@@ -14,10 +14,10 @@ def _now() -> datetime.datetime:
 
 @dataclass
 class Conversation:
-    """Fil entre un voyageur (guest) et l'hôte d'un hébergement.
+    """Thread between a traveller (guest) and the host of a listing.
 
-    Chaque participant a un curseur de lecture : l'id du dernier message qu'il a lu.
-    Ses messages non lus sont ceux de l'autre participant dont l'id est supérieur à ce curseur.
+    Each participant has a read cursor: the id of the last message they read.
+    Their unread messages are those of the other participant whose id is greater than this cursor.
     """
     hebergement_id: uuid.UUID
     guest_id: uuid.UUID
@@ -50,7 +50,7 @@ class Conversation:
         return self.guest_last_read_id if user_id == self.guest_id else self.host_last_read_id
 
     def mark_read(self, user_id: uuid.UUID, message_id: int) -> None:
-        """Avance le curseur de lecture. Il ne recule jamais."""
+        """Moves the read cursor forward. It never goes back."""
         self._ensure_participant(user_id)
         if user_id == self.guest_id:
             self.guest_last_read_id = max(self.guest_last_read_id, message_id)
@@ -58,7 +58,7 @@ class Conversation:
             self.host_last_read_id = max(self.host_last_read_id, message_id)
 
     def record_message(self, sender_id: uuid.UUID, message_id: int, sent_at: datetime.datetime) -> None:
-        """Un message envoyé compte comme lu par son expéditeur."""
+        """A sent message counts as read by its sender."""
         self.mark_read(sender_id, message_id)
         self.last_message_at = sent_at
 

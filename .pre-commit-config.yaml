@@ -1,11 +1,11 @@
-# Retour rapide avant chaque push. La CI rejoue les mêmes contrôles sur la branche poussée.
+# Fast feedback before every push. The CI runs the same checks again on the pushed branch.
 # Installation : make install
-# Les hooks locaux utilisent server/.venv et client/node_modules, préparés par make install.
+# Local hooks use server/.venv and client/node_modules, prepared by make install.
 default_install_hook_types: [pre-push]
 default_stages: [pre-push]
 
 repos:
-  # Secrets dans les commits poussés (et non dans les fichiers indexés : on est en pre-push)
+  # Secrets in the pushed commits (not in the staged files: this is pre-push)
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:

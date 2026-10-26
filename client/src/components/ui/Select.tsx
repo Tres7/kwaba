@@ -17,7 +17,7 @@ interface SelectProps<T extends string> {
   value: T;
   onChange: (v: T) => void;
   options: SelectOption<T>[];
-  /** Nom accessible du champ (lu par les lecteurs d'écran). */
+  /** Accessible name of the field (read by screen readers). */
   label: string;
   id?: string;
   icon?: React.ReactNode;
@@ -25,7 +25,7 @@ interface SelectProps<T extends string> {
   buttonClassName?: string;
 }
 
-/** Liste déroulante personnalisée : souris, toucher et clavier (flèches, Entrée, Échap). */
+/** Custom dropdown: mouse, touch and keyboard (arrows, Enter, Escape). */
 export default function Select<T extends string>({ value, onChange, options, label, id, icon, className, buttonClassName }: SelectProps<T>) {
   const t = useTranslations("commun");
   const { open, setOpen, ref, panelRef } = usePopover();

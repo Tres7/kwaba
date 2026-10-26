@@ -1,7 +1,7 @@
-"""Catégories de véhicules, calcul du prix d'un transfert et règles de délai.
+"""Vehicle categories, transfer price computation and timing rules.
 
-Les prix de base par aéroport et par catégorie sont dans TarifTransfertModel (modifiables
-dans l'admin Django) ; ce module applique les règles communes.
+Base prices per airport and per category are in TarifTransfertModel (editable
+in the Django admin); this module applies the shared rules.
 """
 from dataclasses import dataclass
 from datetime import timedelta
@@ -14,16 +14,16 @@ CATEGORIES = {
 }
 CATEGORIE_CHOICES = [(code, c['nom']) for code, c in CATEGORIES.items()]
 
-# Part du prix conservée par Kwa-Ba, le reste revient au chauffeur partenaire (grille du 18 octobre 2026)
+# Share of the price kept by Kwa-Ba, the rest goes to the partner driver (grid of 18 October 2026)
 COMMISSION_CHAUFFEUR = Decimal('0.15')
 
-# Il faut le temps d'attribuer un chauffeur : réservation au plus tard 6 h avant l'arrivée
+# Assigning a driver takes time: booking at the latest 6 h before arrival
 DELAI_MIN_RESERVATION = timedelta(hours=6)
-# Annulation gratuite jusqu'à 24 h avant l'arrivée ; ensuite le chauffeur est payé
+# Free cancellation until 24 h before arrival; afterwards the driver is paid
 DELAI_ANNULATION_GRATUITE = timedelta(hours=24)
-# Le chauffeur est payé 24 h après la prise en charge (le temps de signaler un problème)
+# The driver is paid 24 h after the pick-up (time to report a problem)
 DELAI_VERSEMENT = timedelta(hours=24)
-# Attente gratuite du chauffeur après l'atterrissage
+# Free waiting time of the driver after landing
 ATTENTE_INCLUSE_MINUTES = 60
 
 
@@ -38,14 +38,14 @@ class Prix:
 
 
 def calculer(prix_base: int) -> Prix:
-    """Même prix de jour comme de nuit (la majoration de nuit a été supprimée le 23 octobre 2026)."""
+    """Same price by day and by night (the night surcharge was removed on 23 October 2026)."""
     prix = int(prix_base)
     commission = int((Decimal(prix) * COMMISSION_CHAUFFEUR).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
     return Prix(prix=prix, commission=commission)
 
 
 def capacite_suffisante(categorie: str, passagers: int, bagages: int) -> str | None:
-    """Explique pourquoi le véhicule ne convient pas, ou None."""
+    """Explains why the vehicle does not fit, or None."""
     c = CATEGORIES[categorie]
     if passagers > c['passagers']:
         return f"{c['passagers']} passagers maximum"

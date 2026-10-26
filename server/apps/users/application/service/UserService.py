@@ -115,7 +115,7 @@ class UserService:
         self._repository.update(user)
 
     def find_for_authentication(self, email: str) -> User:
-        """Retourne l'entité complète avec password_hash pour l'authentification."""
+        """Returns the full entity with password_hash for authentication."""
         user = self._repository.find_by_email(email)
         if not user:
             raise UserNotFoundException(email)

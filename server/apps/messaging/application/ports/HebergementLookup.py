@@ -14,7 +14,7 @@ class HebergementInfo:
 
 
 class HebergementLookup(ABC):
-    """Accès en lecture au contexte hébergements, sans dépendre de ses modèles."""
+    """Read access to the listings context, without depending on its models."""
 
     @abstractmethod
     def get(self, hebergement_id: uuid.UUID) -> Optional[HebergementInfo]:

@@ -21,14 +21,14 @@ from apps.contrats import preinscription
 from apps.verifications import services as verifications
 
 HOST_ROLES = ('hote', 'admin')
-MAX_FENETRE_JOURS = 548  # 18 mois de calendrier par requête
+MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
 MAX_RESULTATS = 200
 
 
 def _context(request, proprietaire=False):
-    """Ajoute les ids favoris de l'utilisateur connecté pour calculer is_favorite.
+    """Adds the signed-in user's favourite ids to compute is_favorite.
 
-    `proprietaire` : l'hôte voit en plus le motif d'un refus de vérification.
+    `proprietaire`: the host also sees the reason of a verification refusal.
     """
     contexte = {'request': request, 'proprietaire': proprietaire}
     if request.user and request.user.is_authenticated:
@@ -39,7 +39,7 @@ def _context(request, proprietaire=False):
 
 
 def _signaler_coordonnees(request, serializer, objet_id) -> None:
-    """Coordonnées refusées dans une annonce : tentative signalée au back-office (Anti-fraude)."""
+    """Contact details refused in a listing: attempt reported to the back-office (Anti-fraud)."""
     trouvailles = getattr(serializer, 'trouvailles', None)
     if trouvailles:
         fraude.signaler(request.user.id, 'annonce', objet_id, trouvailles)
@@ -73,7 +73,7 @@ class HebergementListView(APIView):
             qs = qs.filter(max_guests__gte=int(guests))
         if request.query_params.get('petit_dejeuner') == 'inclus':
             qs = qs.filter(petit_dejeuner='inclus')
-        # Équipements demandés (?equipements=piscine,wifi) : l'annonce doit les avoir tous
+        # Requested amenities (?equipements=piscine,wifi): the listing must have all of them
         equipements = [e.strip() for e in request.query_params.get('equipements', '').split(',') if e.strip()]
         for equipement in equipements[:10]:
             qs = qs.filter(amenities__contains=[equipement])
@@ -82,7 +82,7 @@ class HebergementListView(APIView):
         if search:
             qs = qs.filter(Q(name__icontains=search) | Q(city__icontains=search) | Q(location__icontains=search))
 
-        # Exclut les logements déjà réservés sur la période demandée
+        # Excludes the listings already booked over the requested period
         check_in, check_out = filtres.get('check_in'), filtres.get('check_out')
         if check_in and check_out:
             busy = HebergementModel.objects.filter(
@@ -104,8 +104,8 @@ class HebergementListView(APIView):
             # Hosts who signed up first come first: promise made to the hosts registered before the opening
             qs = qs.order_by('created_at')
 
-        # Au plus MAX_RESULTATS annonces par requête : la liste n'est pas paginée, une requête ne doit pas pouvoir
-        # charger (et sérialiser) toute la base
+        # At most MAX_RESULTATS listings per request: the list is not paginated, a request must not be able to
+        # load (and serialise) the whole database
         limit = request.query_params.get('limit')
         limite = min(int(limit), MAX_RESULTATS) if limit and limit.isdigit() else MAX_RESULTATS
         qs = qs[:limite]
@@ -137,7 +137,7 @@ class HebergementListView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         hebergement = serializer.save(host=request.user)
-        # Visible des voyageurs seulement après la visite d'un agent (proposée une fois l'identité de l'hôte vérifiée)
+        # Visible to travellers only after an agent's visit (offered once the host's identity is verified)
         verifications.visite_a_planifier(hebergement)
         return Response(
             HebergementSerializer(hebergement, context=_context(request, proprietaire=True)).data,
@@ -155,7 +155,7 @@ class MyHebergementsView(APIView):
 
 
 class CityListView(APIView):
-    """Destinations populaires : villes avec leur nombre d'hébergements disponibles."""
+    """Popular destinations: cities with their number of available listings."""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -179,16 +179,16 @@ class CityListView(APIView):
 
 
 def _sans_accents(texte):
-    """« Lomé » → « lome » : les voyageurs tapent souvent sans accents."""
+    """"Lomé" → "lome": travellers often type without accents."""
     decompose = unicodedata.normalize('NFKD', texte.casefold())
     return ''.join(c for c in decompose if not unicodedata.combining(c)).strip()
 
 
 class SuggestionsView(APIView):
-    """Autocomplétion de la barre de recherche : villes puis logements dont le nom correspond.
+    """Autocompletion of the search bar: cities then listings whose name matches.
 
-    Les villes publiées sont peu nombreuses : on les compare en Python, sans accents ni casse
-    (« lome » trouve « Lomé »), celles qui commencent par la saisie en premier.
+    Published cities are few: they are compared in Python, ignoring accents and case
+    ("lome" finds "Lomé"), those starting with the input first.
     """
     permission_classes = [AllowAny]
     MAX_VILLES = 5
@@ -232,7 +232,7 @@ class HebergementDetailView(APIView):
         obj = self._get_object(pk)
         proprietaire = request.user.is_authenticated and obj is not None and obj.host_id == request.user.id
         verificateur = request.user.is_authenticated and request.user.role in verifications.ROLES_VERIFICATEURS
-        # Annonce pas encore vérifiée (ou masquée) : visible seulement de son hôte et des agents
+        # Listing not verified yet (or hidden): visible only to its host and the agents
         if not obj or not (obj.est_publiee or proprietaire or verificateur):
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(HebergementSerializer(obj, context=_context(request, proprietaire=proprietaire)).data)
@@ -270,7 +270,7 @@ class HebergementDetailView(APIView):
 
 
 class PhotoUploadView(APIView):
-    """POST multipart (champ « file ») : enregistre une photo normalisée et renvoie son URL publique."""
+    """POST multipart ("file" field): saves a normalised photo and returns its public URL."""
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
     throttle_classes = [ScopedRateThrottle]
@@ -326,7 +326,7 @@ def _parse_date(value, defaut):
 
 
 class DisponibiliteView(APIView):
-    """GET ?debut=&fin= : périodes indisponibles. L'hôte du logement reçoit le détail (réservations, blocages)."""
+    """GET ?debut=&fin=: unavailable periods. The listing's host receives the details (bookings, blocks)."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
@@ -366,9 +366,9 @@ class BlocageCreateView(APIView):
         debut, fin = serializer.validated_data['debut'], serializer.validated_data['fin']
 
         with transaction.atomic():
-            # Verrou du logement : une réservation simultanée ne peut pas prendre ces nuits pendant la fermeture
+            # Listing lock: a simultaneous booking cannot take these nights during the closure
             verrouiller(hebergement.id)
-            # On ne ferme pas des nuits déjà réservées : l'hôte doit d'abord gérer la réservation
+            # Nights already booked are not closed: the host must first handle the booking
             if a_des_reservations(hebergement.id, debut, fin):
                 return Response(
                     {'detail': 'Cette période contient une réservation. Contactez le voyageur avant de fermer ces dates.'},

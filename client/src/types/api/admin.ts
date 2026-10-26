@@ -34,7 +34,7 @@ export interface AdminUser {
   last_login: string | null;
   nb_reservations: number;
   nb_annonces: number;
-  /** Hôtes seulement : commission réglée par l'équipe. */
+  /** Hosts only: commission set by the team. */
   conditions: ConditionsHote | null;
 }
 
@@ -42,7 +42,7 @@ export interface ConditionsHote {
   categorie: "particulier" | "hotel";
   fondateur_debut: string | null;
   fondateur_fin: string | null;
-  /** Taux appliqué aujourd'hui : 8, 12 (hôtel) ou 5 (Programme Fondateurs). */
+  /** Rate applied today: 8, 12 (hotel) or 5 (Founders Programme). */
   commission_pourcent: number;
 }
 
@@ -55,7 +55,7 @@ export interface AdminHebergement {
   price_per_night: number;
   image_url: string;
   is_available: boolean;
-  /** Vérifiée par un agent (ou validée par un admin) : seule une annonce vérifiée et visible est publiée. */
+  /** Verified by an agent (or validated by an admin): only a verified and visible listing is published. */
   est_verifie: boolean;
   statut_verification: "en_attente" | "verifiee" | "refusee";
   rating: number;
@@ -105,7 +105,7 @@ export interface ReglesLocation {
 
 export type CategorieExperience = "activites" | "restaurants" | "loisirs" | "sites";
 
-/** Expérience de la page Découvrir, telle que le back-office la gère (textes français et anglais). */
+/** Experience of the Discover page, as managed by the back-office (French and English texts). */
 export interface ExperienceAdmin {
   id: number;
   categorie: CategorieExperience;
@@ -120,7 +120,7 @@ export interface ExperienceAdmin {
   description_en: string;
   prix: number | null;
   gratuit: boolean;
-  /** Photo affichée (envoyée depuis le back-office, ou externe pour le guide d'origine). */
+  /** Displayed photo (uploaded from the back-office, or external for the original guide). */
   photo: string | null;
   actif: boolean;
   ordre: number;
@@ -131,7 +131,7 @@ export interface PhotoVehicule {
   url: string;
 }
 
-/** Véhicule d'un propriétaire partenaire (nom technique historique : catégorie). */
+/** Vehicle of a partner owner (historical technical name: category). */
 export interface CategorieVehicule {
   id: number;
   nom: string;
@@ -143,16 +143,16 @@ export interface CategorieVehicule {
   boite: "manuelle" | "automatique";
   carburant: "essence" | "diesel" | "hybride" | "electrique";
   climatisation: boolean;
-  /** La première est la photo principale. */
+  /** The first one is the main photo. */
   photos: PhotoVehicule[];
   proprietaire: number | null;
-  /** Prix du véhicule par jour, fixé par le propriétaire (sans le chauffeur). */
+  /** Vehicle price per day, set by the owner (without the driver). */
   prix_jour: number | null;
   sans_chauffeur: boolean;
   avec_chauffeur: boolean;
-  /** Caution choisie par le propriétaire : 0, une ou deux journées. */
+  /** Deposit chosen by the owner: 0, one or two days. */
   caution_jours: 0 | 1 | 2;
-  /** Calculée : journées × prix par jour, 100 000 FCFA au plus. */
+  /** Computed: days × price per day, 100,000 FCFA at most. */
   caution: number;
   immatriculation: string;
   annee: number | null;
@@ -189,7 +189,7 @@ export interface Loueur {
   numero_versement: string;
   nb_locations: number;
   nb_vehicules: number;
-  /** Taux appliqué aujourd'hui : 15, 10 (fondateur) ou 12 (Propriétaire Fidèle). */
+  /** Rate applied today: 15, 10 (founder) or 12 (Loyal Owner). */
   commission_pourcent: number | null;
 }
 
@@ -239,7 +239,7 @@ export interface AdminLocation {
   cree_le: string;
 }
 
-// --- Transferts aéroport (back-office) ---------------------------------------------------------
+// --- Airport transfers (back-office) ---------------------------------------------------------
 
 export type CategorieTransfert = "berline" | "confort" | "van";
 
@@ -264,7 +264,7 @@ export interface ChauffeurAdmin {
   vehicule: string;
   immatriculation: string;
   actif: boolean;
-  /** Statut « Chauffeur Excellence » : 6 500 FCFA par jour au lieu de 6 000. */
+  /** "Excellence Driver" status: 6,500 FCFA per day instead of 6,000. */
   excellence: boolean;
   pays_versement: string;
   operateur_versement: string;
@@ -272,7 +272,7 @@ export interface ChauffeurAdmin {
   nb_transferts: number;
 }
 
-/** Choix d'attribution d'une location : propriétaires du véhicule et chauffeurs partenaires. */
+/** Assignment choices of a rental: vehicle owners and partner drivers. */
 export interface ChoixAttribution {
   partenaires: { id: number; nom: string; telephone: string }[];
   chauffeurs: { id: number; nom: string; telephone: string; excellence: boolean; demande: boolean }[];

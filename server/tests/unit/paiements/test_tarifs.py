@@ -9,7 +9,7 @@ from apps.paiements import paypal, tarifs
 
 
 def test_montants_grille_particulier():
-    # Exemple de la grille : 2,5 nuits à 25 000 FCFA, soit 62 500 FCFA (ici 1 nuit à 62 500)
+    # Example of the grid: 2.5 nights at 25,000 FCFA, i.e. 62,500 FCFA (here 1 night at 62,500)
     m = tarifs.calculer(62500, 1)
     assert (m.prix_nuits, m.frais_service, m.commission_hote) == (62500, 3750, 5000)
     assert (m.total, m.montant_hote, m.taux_frais) == (66250, 57500, 6)
@@ -40,11 +40,11 @@ M = tarifs.calculer(20000, 3)  # 60 000 + 3 600 de frais ; commission 4 800
 
 
 @pytest.mark.parametrize('politique, jours, rembourse, retenu', [
-    # Souple : intégral jusqu'à 24 h, puis la première nuit est retenue (frais conservés)
+    # Flexible: full refund until 24 h, then the first night is kept (fees retained)
     ('souple', 2, 63600, 0), ('souple', 0, 40000, 20000),
-    # Modérée : intégral jusqu'à 5 jours, 50 % jusqu'à 24 h, rien ensuite
+    # Moderate: full refund until 5 days, 50 % until 24 h, nothing afterwards
     ('moderee', 6, 63600, 0), ('moderee', 3, 30000, 30000), ('moderee', 0, 0, 60000),
-    # Ferme : intégral jusqu'à 30 jours, 50 % jusqu'à 7 jours, rien ensuite
+    # Strict: full refund until 30 days, 50 % until 7 days, nothing afterwards
     ('ferme', 31, 63600, 0), ('ferme', 10, 30000, 30000), ('ferme', 5, 0, 60000),
 ])
 def test_bareme_selon_la_politique(politique, jours, rembourse, retenu):
@@ -59,9 +59,9 @@ def test_commission_au_taux_de_la_reservation():
 
 
 def test_delai_de_reflexion_de_48_heures():
-    # Réservée hier, arrivée dans 10 jours : même en politique Ferme, tout est remboursé
+    # Booked yesterday, arrival in 10 days: even with the Strict policy, everything is refunded
     assert tarifs.bareme_voyageur(M, _resa(10, politique='ferme', reservee_il_y_a=timedelta(days=1))).rembourse_voyageur == 63600
-    # Arrivée dans moins de 7 jours : le délai de réflexion ne s'applique pas
+    # Arrival in less than 7 days: the cooling-off period does not apply
     assert tarifs.bareme_voyageur(M, _resa(5, politique='ferme', reservee_il_y_a=timedelta(hours=2))).rembourse_voyageur == 0
 
 

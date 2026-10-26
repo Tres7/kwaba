@@ -11,8 +11,8 @@ export const MAX_PHOTOS_VEHICULE = 10;
 const FORMATS = ["image/jpeg", "image/png", "image/webp"];
 const url = (categorieId: number) => `/v1/admin/location/categories/${categorieId}/photos/`;
 
-/** Envoie une photo (une requête par photo : plusieurs à la fois dépasseraient la taille acceptée par le serveur).
- * Renvoie toutes les photos de la catégorie, dans l'ordre. */
+/** Sends one photo (one request per photo: several at once would exceed the size accepted by the server).
+ * Returns all the photos of the category, in order. */
 export async function envoyerPhotoVehicule(categorieId: number, fichier: File): Promise<PhotoVehicule[]> {
   const corps = new FormData();
   corps.append("image", await compressImage(fichier));
@@ -27,9 +27,9 @@ const cle = () => `v${++sequence}`;
 export const liberer = (liste: { apercu: string }[]) => liste.forEach((f) => URL.revokeObjectURL(f.apercu));
 
 /**
- * Photos d'une catégorie de véhicule. Catégorie existante : chaque photo choisie est envoyée aussitôt, la photo principale
- * et les retraits s'appliquent tout de suite. Nouvelle catégorie (`categorieId` nul) : les photos attendent dans
- * `enAttente` et sont envoyées après sa création (voir Categories.tsx).
+ * Photos of a vehicle category. Existing category: each chosen photo is sent right away, the main photo and the
+ * removals apply immediately. New category (`categorieId` null): the photos wait in `enAttente` and are sent
+ * after it is created (see Categories.tsx).
  */
 export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttente, onEnAttente, erreur }: {
   categorieId: number | null;
@@ -47,7 +47,7 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
   const total = photos.length + envois.length + enAttente.length;
   const complet = total >= MAX_PHOTOS_VEHICULE;
 
-  // Aperçus locaux libérés quand le panneau se ferme
+  // Local previews released when the panel closes
   const envoisCourants = useRef(envois);
   envoisCourants.current = envois;
   useEffect(() => () => liberer(envoisCourants.current), []);
@@ -66,7 +66,7 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
       return;
     }
     setEnvois((e) => [...e, ...nouveaux.map(({ cle, apercu }) => ({ cle, apercu }))]);
-    // L'une après l'autre : plus fiable sur une connexion lente
+    // One after the other: more reliable on a slow connection
     for (const n of nouveaux) {
       try {
         onPhotos(await envoyerPhotoVehicule(categorieId, n.fichier));

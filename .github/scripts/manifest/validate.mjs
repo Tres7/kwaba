@@ -1,4 +1,4 @@
-// Valide tous les manifests du dossier (schéma, nom de fichier, versions strictement croissantes).
+// Validates all manifests of the folder (schema, file name, strictly increasing versions).
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 

@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from apps.give.models import OrganisationModel, ProjetModel
 
-# ONG fictives, pour essayer Kwa-Ba Give en local : ne jamais lancer cette commande en production
+# Fictional NGOs, to try Kwa-Ba Give locally: never run this command in production
 DEMO = [
     {
         'slug': 'demo-ecoles-du-mono', 'nom': 'Écoles du Mono (démo)', 'cause': 'education', 'pays': 'TG', 'ville': 'Aného',

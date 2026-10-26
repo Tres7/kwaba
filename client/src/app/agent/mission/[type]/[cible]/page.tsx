@@ -22,14 +22,14 @@ interface Fiche {
   ville: string;
   mission: MissionEtat | null;
   droits: { prendre: boolean; liberer: boolean; decider: boolean };
-  // Selon le type
+  // Depending on the type
   logement?: Logement;
   controles?: Record<string, string>;
   max_photos?: number;
   piece?: Piece;
 }
 
-/** Fiche d'une mission : qui s'en occupe, puis le contrôle lui-même (selon le type). */
+/** Page of a mission: who handles it, then the check itself (depending on the type). */
 export default function FicheMissionPage() {
   const { type, cible } = useParams<{ type: string; cible: string }>();
   const router = useRouter();
@@ -92,7 +92,7 @@ export default function FicheMissionPage() {
         <p className="text-sm text-gray-500 mt-1">{[data.sous_titre, data.ville].filter(Boolean).join(" · ")}</p>
       )}
 
-      {/* Qui s'en occupe */}
+      {/* Who handles it */}
       <div className="mt-5 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 bg-white border border-gray-100 shadow-sm">
         <p className="flex items-center gap-2 text-sm text-dark">
           <UserRound size={18} className="text-primary flex-shrink-0" aria-hidden />

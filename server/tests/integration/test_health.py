@@ -19,7 +19,7 @@ def test_health_reports_unavailable_database(api_client, monkeypatch):
 
 
 def test_health_is_exempt_from_https_redirect(api_client, settings):
-    # La sonde de Render arrive en HTTP interne : elle ne doit pas être redirigée vers HTTPS
+    # Render's probe arrives over internal HTTP: it must not be redirected to HTTPS
     settings.SECURE_SSL_REDIRECT = True
     assert api_client.get('/api/health/').status_code == 200
     assert api_client.get('/api/v1/hebergements/').status_code == 301

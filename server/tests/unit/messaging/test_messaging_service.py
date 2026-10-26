@@ -97,7 +97,7 @@ class TestSendMessage:
     def test_reply_does_not_count_as_read_for_the_other_side(self, world, service, conversation_id):
         service.send_message(world.guest.id, conversation_id, 'Question')
         service.send_message(world.host.id, conversation_id, 'Réponse')
-        # L'hôte a lu en répondant ; le voyageur reçoit sa première notification
+        # The host read while replying; the traveller receives their first notification
         assert [r.entry.recipient_id for r in world.outbox.rows] == [world.host.id, world.guest.id]
 
     def test_non_participant_gets_not_found(self, world, service, conversation_id):

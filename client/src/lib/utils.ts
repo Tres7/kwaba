@@ -5,13 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Frais de service du voyageur (CGV, art. 6.4) ; l'annonce donne le taux exact du visiteur (3 % en Client fidèle). */
+/** Traveller's service fees (terms of sale, art. 6.4); the listing gives the visitor's exact rate (3 % for loyal customers). */
 export const SERVICE_FEE_RATE = 0.06;
 
 export const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1542314831-c6a4d27ce6a2?q=80&w=1200&auto=format&fit=crop";
 
-// Langue d'affichage des dates, prix et libellés : définie à chaque rendu par <SynchroLangue /> (racine du site)
+// Display language of dates, prices and labels: set at every render by <SynchroLangue /> (site root)
 let langueCourante: "fr" | "en" = "fr";
 const LOCALES = { fr: "fr-FR", en: "en-GB" } as const;
 
@@ -23,7 +23,7 @@ export function langue(): "fr" | "en" {
   return langueCourante;
 }
 
-/** Choisit le texte de la langue courante : selon({ fr: "…", en: "…" }). */
+/** Picks the text of the current language: selon({ fr: "…", en: "…" }). */
 export function selon<T>(textes: { fr: T; en: T }): T {
   return textes[langueCourante];
 }
@@ -36,9 +36,9 @@ const TYPES: Record<string, { fr: string; en: string }> = {
 };
 
 /**
- * Libellés des types de logement, dans la langue courante (TYPE_LABELS[type]).
- * La cible du Proxy est la table elle-même : Object.keys(TYPE_LABELS) liste les types. Sur un objet vide, la liste
- * serait vide et le choix du type disparaîtrait du formulaire de l'hôte.
+ * Labels of the listing types, in the current language (TYPE_LABELS[type]).
+ * The Proxy's target is the table itself: Object.keys(TYPE_LABELS) lists the types. On an empty object, the list
+ * would be empty and the type choice would disappear from the host's form.
  */
 export const TYPE_LABELS: Record<string, string> = new Proxy(TYPES as unknown as Record<string, string>, {
   get: (_, type: string) => (TYPES[type] ? TYPES[type][langueCourante] : type),
@@ -51,19 +51,19 @@ const ROLES: Record<string, { fr: string; en: string }> = {
   agent: { fr: "Agent de terrain", en: "Field agent" },
 };
 
-/** Libellés des rôles, dans la langue courante (ROLE_LABELS[role]). */
+/** Role labels, in the current language (ROLE_LABELS[role]). */
 export const ROLE_LABELS: Record<string, string> = new Proxy(ROLES as unknown as Record<string, string>, {
   get: (_, role: string) => (ROLES[role] ? ROLES[role][langueCourante] : role),
 });
 
-/** Libellé d'un type de logement dans une langue donnée (côté serveur, où il n'y a pas de langue courante). */
+/** Label of a listing type in a given language (server side, where there is no current language). */
 export function libelleType(type: string, locale: "fr" | "en"): string {
   return TYPES[type]?.[locale] ?? type;
 }
 
-// Devise d'affichage des prix, choisie par le visiteur (<DeviseProvider />). Les paiements restent en FCFA.
+// Display currency of prices, chosen by the visitor (<DeviseProvider />). Payments stay in FCFA.
 export type Devise = "XOF" | "EUR";
-/** Parité fixe du franc CFA (UEMOA) : 1 € = 655,957 FCFA. */
+/** Fixed parity of the CFA franc (WAEMU): 1 € = 655.957 FCFA. */
 export const FCFA_PAR_EURO = 655.957;
 let deviseCourante: Devise = "XOF";
 
@@ -75,16 +75,16 @@ export function devise(): Devise {
   return deviseCourante;
 }
 
-// fr-FR sépare les milliers par une espace fine (U+202F) quasi invisible dans certaines polices :
-// on la remplace par une espace insécable classique (U+00A0)
+// fr-FR separates thousands with a narrow space (U+202F) almost invisible in some fonts:
+// it is replaced with a regular non-breaking space (U+00A0)
 const espaces = (texte: string) => texte.replace(/\u202f/g, "\u00a0");
 
-/** Montant en FCFA quelle que soit la devise choisie : montants débités, boutons de paiement. */
+/** Amount in FCFA whatever the chosen currency: charged amounts, payment buttons. */
 export function formatFcfa(price: number | string): string {
   return `${espaces(Math.round(Number(price)).toLocaleString(LOCALES[langueCourante]))}\u00a0FCFA`;
 }
 
-/** Prix stockés en FCFA, affichés dans la devise choisie par le visiteur (euros arrondis à l'unité dès 10 €). */
+/** Prices stored in FCFA, displayed in the currency chosen by the visitor (euros rounded to the unit from 10 €). */
 export function formatPrice(price: number | string): string {
   if (deviseCourante === "XOF") return formatFcfa(price);
   const euros = Number(price) / FCFA_PAR_EURO;
@@ -105,9 +105,9 @@ export function calculateServiceFee(subtotal: number, rate = SERVICE_FEE_RATE): 
 }
 
 /**
- * Prix d'une nuit pour le voyageur, frais de service inclus (100 000 FCFA à 6 % : 106 000 FCFA). Aperçu calculé à
- * part, sans toucher au prix de l'hôte ; même arrondi au franc que le serveur (apps/paiements/tarifs.py), qui
- * recalcule toujours le montant définitif.
+ * Price of a night for the traveller, service fees included (100,000 FCFA at 6 %: 106,000 FCFA). Preview computed
+ * separately, without touching the host's price; same rounding to the franc as the server (apps/paiements/tarifs.py),
+ * which always computes the final amount again.
  */
 export function prixNuitFraisInclus(prixParNuit: number, rate = SERVICE_FEE_RATE): { frais: number; total: number } {
   const frais = calculateServiceFee(prixParNuit, rate);
@@ -119,7 +119,7 @@ export function formatDate(d: string, opts: Intl.DateTimeFormatOptions = { day: 
   return new Date(d).toLocaleDateString(LOCALES[langueCourante], opts);
 }
 
-/** Date locale au format AAAA-MM-JJ (évite le décalage UTC de toISOString). */
+/** Local date in YYYY-MM-DD format (avoids the UTC shift of toISOString). */
 export function isoDate(date: Date = new Date()): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");

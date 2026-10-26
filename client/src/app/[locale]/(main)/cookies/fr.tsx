@@ -2,7 +2,7 @@ import { Link } from "@/i18n/navigation";
 import LegalPage from "@/components/legal/LegalPage";
 import GererCookiesBouton from "@/components/legal/GererCookiesBouton";
 
-/** Version française. */
+/** French version. */
 export default function ContenuFr() {
   return (
     <LegalPage

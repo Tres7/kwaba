@@ -6,15 +6,15 @@ import { useTranslations } from "next-intl";
 import { cn, definirDevise, formatFcfa, type Devise } from "@/lib/utils";
 
 const CLE = "kwaba_devise";
-// Back-office et agents : toujours en FCFA (montants réels, versements, factures)
+// Back-office and agents: always in FCFA (actual amounts, payouts, invoices)
 const ESPACES_INTERNES = /^\/(backoffice|agent)(\/|$)/;
 
 const Contexte = createContext<{ devise: Devise; choisir: (d: Devise) => void }>({ devise: "XOF", choisir: () => {} });
 
 export const useDevise = () => useContext(Contexte);
 
-/** Devise d'affichage des prix (FCFA ou euros), mémorisée sur l'appareil. Changer de devise recrée le contenu de
- *  la page : tous les prix (formatPrice) sont réaffichés dans la nouvelle devise. */
+/** Display currency of prices (FCFA or euros), remembered on the device. Changing the currency rebuilds the page
+ *  content: all prices (formatPrice) are displayed again in the new currency. */
 export function DeviseProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [choix, setChoix] = useState<Devise>("XOF");
@@ -29,11 +29,11 @@ export function DeviseProvider({ children }: { children: React.ReactNode }) {
     setChoix(d);
     try {
       window.localStorage.setItem(CLE, d);
-    } catch { /* le choix vaut pour la visite en cours */ }
+    } catch { /* the choice applies to the current visit */ }
   }, []);
 
   const effective: Devise = ESPACES_INTERNES.test(pathname) ? "XOF" : choix;
-  // Comme la langue (SynchroLangue) : fixée pendant le rendu, avant les composants qui affichent des prix
+  // Like the language (SynchroLangue): set during rendering, before the components that display prices
   definirDevise(effective);
 
   return (
@@ -43,7 +43,7 @@ export function DeviseProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Bascule FCFA / € (à côté du choix de la langue). */
+/** FCFA / € switch (next to the language choice). */
 export function SelecteurDevise({ className, complet = false }: { className?: string; complet?: boolean }) {
   const t = useTranslations("devise");
   const { devise, choisir } = useDevise();
@@ -64,13 +64,13 @@ export function SelecteurDevise({ className, complet = false }: { className?: st
   );
 }
 
-/** À côté du sélecteur de devise : les euros ne sont qu'un équivalent, le débit se fait en FCFA. */
+/** Next to the currency selector: euros are only an equivalent, the charge is made in FCFA. */
 export function MentionDevise({ className }: { className?: string }) {
   const t = useTranslations("devise");
   return <p className={cn("text-xs text-gray-500", className)}>{t("indicatif")}</p>;
 }
 
-/** Sous un total affiché en euros : le montant réellement débité, en FCFA (Mobile Money et carte). */
+/** Under a total displayed in euros: the amount actually charged, in FCFA (Mobile Money and card). */
 export function MontantDebite({ montant }: { montant: number }) {
   const t = useTranslations("devise");
   const { devise } = useDevise();

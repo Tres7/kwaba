@@ -7,7 +7,7 @@ from apps.messaging.application.ports.UserLookup import UserInfo, UserLookup
 
 
 class DjangoUserLookup(UserLookup):
-    """Seul point de contact de messaging avec le modèle utilisateur."""
+    """Only contact point of messaging with the user model."""
 
     def _to_info(self, user) -> UserInfo:
         return UserInfo(

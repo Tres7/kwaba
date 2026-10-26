@@ -1,4 +1,4 @@
-"""Cycle complet du paiement (PostgreSQL). FedaPay et PayPal sont simulés : aucun appel réseau."""
+"""Full payment cycle (PostgreSQL). FedaPay and PayPal are simulated: no network call."""
 import hashlib
 import hmac
 import json
@@ -143,7 +143,7 @@ class CycleTests(TestCase):
         self.api.post(f'/api/v1/paiements/reservations/{resa.id}/payer/')
         ReservationModel.objects.filter(pk=resa.pk).update(expire_le=timezone.now() - timedelta(minutes=1))
         services.expirer_reservations()
-        autre = self.reserver()  # quelqu'un d'autre prend les dates libérées
+        autre = self.reserver()  # someone else takes the released dates
         self.assertNotEqual(autre.pk, resa.pk)
 
         self.faux.statut_transaction = 'approved'
@@ -238,14 +238,14 @@ class CycleTests(TestCase):
         self.assertIn('paypal.com', r.data['url'])
         self.assertEqual(str(self.faux_paypal.commande['montant_eur']), '96.96')  # 63 600 FCFA
 
-        self.faux_paypal.statut = 'APPROVED'  # le voyageur a validé chez PayPal
+        self.faux_paypal.statut = 'APPROVED'  # the traveller approved at PayPal
         statut = self.api.get(f'/api/v1/paiements/reservations/{resa.id}/statut/').data
         self.assertEqual(statut['reservation'], 'confirmed')
         paiement = PaiementModel.objects.get(reservation=resa)
         self.assertEqual((paiement.prestataire, paiement.capture_id), ('paypal', 'CAP1'))
         resa.refresh_from_db()
         self.assertEqual(resa.payment_method, 'paypal')
-        self.assertEqual(resa.versement.montant, 55200)  # l'hôte est payé en FCFA comme les autres
+        self.assertEqual(resa.versement.montant, 55200)  # the host is paid in FCFA like the others
 
         self.api.delete(f'/api/v1/reservations/{resa.id}/')
         services.envoyer_remboursements()
@@ -267,13 +267,13 @@ class CycleTests(TestCase):
     def test_remboursement_mobile_money_demande_le_numero(self):
         resa = self.reserver(dans_jours=10)
         self.api.post(f'/api/v1/paiements/reservations/{resa.id}/payer/')
-        self.faux.lire_transaction = lambda i: {'id': i, 'status': 'approved', 'mode': 'momo_test'}  # sans numéro, comme FedaPay
+        self.faux.lire_transaction = lambda i: {'id': i, 'status': 'approved', 'mode': 'momo_test'}  # without a number, like FedaPay
         services.synchroniser_paiement(PaiementModel.objects.get(reservation=resa))
 
         r = self.api.delete(f'/api/v1/reservations/{resa.id}/')
         self.assertTrue(r.data['numero_requis'])
         self.assertEqual(self.api.get(f'/api/v1/reservations/{resa.id}/').data['remboursement']['statut'], 'attente_numero')
-        self.assertEqual(services.envoyer_remboursements(), 0)  # rien ne part sans numéro
+        self.assertEqual(services.envoyer_remboursements(), 0)  # nothing goes out without a number
 
         url = f'/api/v1/paiements/reservations/{resa.id}/compte-remboursement/'
         self.assertEqual(self.api.put(url, {'pays': 'TG', 'operateur': 'mtn_open', 'numero': '90000003'}, format='json').status_code, 400)
@@ -297,7 +297,7 @@ class CycleTests(TestCase):
         services.envoyer_remboursements()
         remboursement.refresh_from_db()
         self.assertEqual((remboursement.statut, remboursement.tentatives), ('a_envoyer', 1))
-        services.envoyer_remboursements()  # trop tôt : pas de nouvel essai
+        services.envoyer_remboursements()  # too early: no new try
         remboursement.refresh_from_db()
         self.assertEqual(remboursement.tentatives, 1)
         RemboursementModel.objects.filter(pk=remboursement.pk).update(mis_a_jour_le=timezone.now() - timedelta(minutes=16))
@@ -316,7 +316,7 @@ class CycleTests(TestCase):
         self.assertIn('63 600 FCFA', [m for m in mail.outbox if m.to == ['voy@test.tg']][0].body)
         self.assertIn("pas encore indiqué où recevoir", [m for m in mail.outbox if m.to == ['hote@test.tg']][0].body)
         services.passe()
-        self.assertEqual(len(mail.outbox), 2)  # pas de doublon
+        self.assertEqual(len(mail.outbox), 2)  # no duplicate
 
         VersementModel.objects.filter(reservation=resa).update(statut='echoue', derniere_erreur='Numéro invalide')
         services.passe()

@@ -1,4 +1,4 @@
-"""Expériences de la page Découvrir : guide repris de l'ancienne page, gestion depuis le back-office."""
+"""Experiences of the Discover page: guide taken from the old page, management from the back-office."""
 from io import BytesIO
 
 import pytest
@@ -31,7 +31,7 @@ def _photo():
 
 
 def test_guide_repris_de_l_ancienne_page():
-    # Les 12 fiches du guide restent en base ; seules celles du Togo sont publiées (audit n° 3)
+    # The 12 entries of the guide stay in the database; only the Togo ones are published (audit no. 3)
     assert ExperienceModel.objects.filter(actif=True).count() == 12
     reponse = APIClient().get(PUBLIC)
     assert reponse.status_code == 200 and [e['ville'] for e in reponse.data] == ['Lomé']
@@ -49,20 +49,20 @@ def test_ajout_modification_publication_suppression(admin):
     reponse = admin.post(ADMIN, {
         'categorie': 'sites', 'nom': 'Monument de l\'Indépendance', 'nom_en': 'Independence Monument', 'etiquette': 'Histoire',
         'ville': 'Lomé', 'pays': 'Togo', 'description': 'Symbole du 27 avril 1960.', 'prix': '', 'gratuit': 'true',
-        'image': _photo(), 'ordre': '0', 'actif': 'true',  # en multipart, un booléen absent vaut faux (règle des formulaires HTML)
+        'image': _photo(), 'ordre': '0', 'actif': 'true',  # in multipart, a missing boolean is false (HTML form rule)
     }, format='multipart')
     assert reponse.status_code == 201, reponse.data
     experience = reponse.data
     assert experience['photo'].endswith('.jpg') and experience['prix'] is None and experience['actif'] is True
-    assert 'image' not in experience  # écriture seule : l'adresse affichée est « photo »
+    assert 'image' not in experience  # write only: the displayed address is "photo"
     assert any(e['id'] == experience['id'] for e in APIClient().get(PUBLIC).data)
 
     url = f"{ADMIN}{experience['id']}/"
-    # Plus gratuite : un prix ; puis retirée du site
+    # No longer free: a price; then removed from the site
     assert admin.patch(url, {'gratuit': False, 'prix': 2000}, format='json').data['prix'] == 2000
     assert admin.patch(url, {'actif': False}, format='json').status_code == 200
     assert all(e['id'] != experience['id'] for e in APIClient().get(PUBLIC).data)
-    # Gratuite : le prix est effacé
+    # Free: the price is cleared
     assert admin.patch(url, {'gratuit': True, 'prix': 5000}, format='json').data['prix'] is None
 
     assert admin.delete(url).status_code == 204

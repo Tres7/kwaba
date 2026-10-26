@@ -23,7 +23,7 @@ const FILTRE_TYPES = [{ value: "", label: "Tous les types" }, ...TYPES];
 const STATUTS = [{ value: "", label: "Tous" }, { value: "a_signer", label: "À signer" }, { value: "signe", label: "Signés" }, { value: "annule", label: "Annulés" }];
 const date = (d: string | null) => (d ? formatDate(d, { day: "numeric", month: "short", year: "numeric" }) : "-");
 
-/** Contrats émis : envoi pour signature, relance, annulation, PDF signé avec certificat. */
+/** Issued contracts: sending for signature, reminder, cancellation, signed PDF with certificate. */
 export default function Contrats() {
   const queryClient = useQueryClient();
   const [q, setQ] = useState("");

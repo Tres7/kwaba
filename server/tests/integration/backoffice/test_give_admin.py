@@ -1,4 +1,4 @@
-"""Back-office : Kwa-Ba Give (ONG, projets, reversements avec preuve, dons)."""
+"""Back-office: Kwa-Ba Give (NGOs, projects, transfers with proof, donations)."""
 from datetime import date, timedelta
 from io import BytesIO
 
@@ -47,7 +47,7 @@ def test_creer_une_ong_puis_la_publier(admin):
     assert reponse.status_code == 201, reponse.data
     assert reponse.data['slug'] == 'cotes-vivantes' and reponse.data['image'].endswith('.jpg')
     url = f"{B}organisations/{reponse.data['id']}/"
-    # Publier exige de dire ce qui a été vérifié
+    # Publishing requires saying what was verified
     assert admin.patch(url, {'verifiee_le': '2026-10-01'}, format='json').status_code == 400
     publie = admin.patch(url, {'verifiee_le': '2026-10-01', 'verification': 'Récépissé et statuts vérifiés'}, format='json')
     assert publie.status_code == 200

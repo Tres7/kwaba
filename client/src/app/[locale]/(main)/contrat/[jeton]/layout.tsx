@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-/** Lien personnel de signature : jamais indexé, jamais transmis en référent. */
+/** Personal signature link: never indexed, never sent as a referrer. */
 export const metadata: Metadata = {
   title: "Contrat",
   robots: { index: false, follow: false },

@@ -37,12 +37,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const { data: compteurs } = useCompteursVerification(session?.user?.role === "admin");
   const enAttente = compteurs?.total ?? 0;
 
-  // Ferme le panneau mobile après chaque navigation
+  // Closes the mobile panel after every navigation
   useEffect(() => setMenuOuvert(false), [pathname]);
 
   if (status === "loading") return <div className="min-h-screen bg-gray-50" />;
 
-  // Le middleware filtre déjà ; double contrôle côté page (le backend reste seul juge : 403 sinon)
+  // The middleware already filters; second check on the page (the backend remains the only judge: 403 otherwise)
   if (session?.user?.role !== "admin") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center bg-gray-50">

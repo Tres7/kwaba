@@ -1,6 +1,6 @@
 /**
- * Quartiers de Lomé proposés dans le champ destination. Les choisir cherche ce nom dans la ville et l'adresse des
- * annonces (filtre city de l'API).
+ * Lomé districts offered in the destination field. Choosing one searches this name in the city and address of
+ * the listings (city filter of the API).
  */
 export const QUARTIERS_LOME = [
   "Adakpamé", "Adidogomé", "Agbalépédogan", "Agoè", "Amoutivé", "Avédji", "Baguida", "Bè", "Bè Kpota", "Cacavéli",
@@ -10,7 +10,7 @@ export const QUARTIERS_LOME = [
 
 const sansAccents = (texte: string) => texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-/** Quartiers dont le nom contient la saisie, sans tenir compte des accents ni des majuscules (« nyeko » → Nyékonakpoè). */
+/** Districts whose name contains the input, ignoring accents and case ("nyeko" → Nyékonakpoè). */
 export function quartiersCorrespondants(saisie: string): string[] {
   const s = sansAccents(saisie.trim());
   if (!s) return [];

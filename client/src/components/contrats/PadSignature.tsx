@@ -7,20 +7,20 @@ import { useTranslations } from "next-intl";
 const HAUTEUR = 180;
 const ENCRE = "#1E2A4A";
 
-/** Zone de signature : au doigt, au stylet ou à la souris ; ou le nom tapé, écrit en manuscrit (accessibilité).
- *  `onChange` reçoit l'image PNG (data URL), ou null si la zone est vide. */
+/** Signature area: with a finger, a stylus or the mouse; or the typed name, written in handwriting (accessibility).
+ *  `onChange` receives the PNG image (data URL), or null if the area is empty. */
 export default function PadSignature({ onChange, nom, desactive }: { onChange: (png: string | null) => void; nom: string; desactive?: boolean }) {
   const t = useTranslations("contrat");
   const canvas = useRef<HTMLCanvasElement>(null);
   const dessin = useRef<{ x: number; y: number } | null>(null);
   const [vide, setVide] = useState(true);
-  // Le parent peut passer une nouvelle fonction à chaque rendu : la zone ne doit pas s'effacer pour autant
+  // The parent may pass a new function at every render: the area must not be cleared because of it
   const rappel = useRef(onChange);
   useEffect(() => { rappel.current = onChange; }, [onChange]);
 
   const contexte = useCallback(() => canvas.current?.getContext("2d") ?? null, []);
 
-  // Résolution adaptée à l'écran (trait net sur mobile) ; redimensionner efface la signature
+  // Resolution adapted to the screen (sharp stroke on mobile); resizing clears the signature
   const preparer = useCallback(() => {
     const c = canvas.current;
     const ctx = contexte();

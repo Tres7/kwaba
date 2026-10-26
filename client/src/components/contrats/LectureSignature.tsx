@@ -11,7 +11,7 @@ import { formatDate, langue } from "@/lib/utils";
 import PadSignature from "@/components/contrats/PadSignature";
 import type { ContratPublic, SignatureContrat } from "@/types/api/contrat";
 
-/** Lecture du contrat puis signature : nom tapé, signature dessinée, consentement exprès. */
+/** Reading the contract then signing: typed name, drawn signature, express consent. */
 export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
   contrat: ContratPublic;
   onSigner: (donnees: SignatureContrat) => Promise<void>;
@@ -88,7 +88,7 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
           : <p key={i} className="text-sm text-dark leading-relaxed mb-3 whitespace-pre-line text-justify">{b.texte}</p>)}
       </article>
 
-      {/* Contrat hôte pas encore émis (il l'est à la signature) : pas encore de PDF */}
+      {/* Host agreement not issued yet (it is at signature): no PDF yet */}
       {contrat.reference && (
         <button type="button" onClick={telecharger} disabled={telechargement}
           className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full border border-gray-200 bg-white text-sm font-semibold text-dark hover:border-primary hover:text-primary disabled:opacity-60">

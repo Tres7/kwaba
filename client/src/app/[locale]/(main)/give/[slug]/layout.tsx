@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { langueDe, lireApi, metadataPage } from "@/lib/seo";
 import type { Organisation } from "@/types/api/give";
 
-/** Fiche d'une association Give : nom, présentation et image rendus par le serveur. */
+/** Page of a Give organisation: name, presentation and image rendered by the server. */
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale: brut, slug } = await params;
   const locale = langueDe(brut);

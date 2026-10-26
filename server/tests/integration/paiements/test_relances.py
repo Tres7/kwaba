@@ -1,4 +1,4 @@
-"""Paiement obligatoire en production, et emails d'une réservation en attente de paiement."""
+"""Payment required in production, and emails of a booking waiting for payment."""
 from datetime import timedelta
 
 import pytest
@@ -18,7 +18,7 @@ def pas_de_pause(settings):
 
 @pytest.fixture
 def en_attente(make_hebergement, make_reservation):
-    """Réservation créée à l'instant, à payer dans les 30 minutes."""
+    """Booking created just now, to pay within 30 minutes."""
     resa = make_reservation(make_hebergement(name='Villa Lagune', city='Lomé'), status='pending')
     ReservationModel.objects.filter(pk=resa.pk).update(expire_le=timezone.now() + timedelta(minutes=30))
     resa.refresh_from_db()
@@ -74,7 +74,7 @@ class TestRelances:
         assert email.subject.startswith('Payez avant')
         assert 'Villa Lagune' in email.body and f'/reservation/paiement/{en_attente.id}' in email.body
 
-        # Rien de nouveau tant qu'il reste plus de la moitié du délai
+        # Nothing new while more than half of the delay is left
         assert relances.envoyer_relances() == 0
         _decaler(en_attente, 12)
         assert relances.envoyer_relances() == 1

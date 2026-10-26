@@ -17,10 +17,10 @@ import type { CatalogueLocation, CategorieVehicule, DevisLocation, Formule, Loca
 
 const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
-// « Je conduis » (sans chauffeur) n'est pas dans l'offre de lancement : proposé seulement si son interrupteur est allumé
+// "I drive" (without a driver) is not in the launch offer: offered only if its switch is on
 const FORMULES: Formule[] = ["avec_chauffeur", "sans_chauffeur", "chauffeur_seul"];
 
-/** Date et heure locales au format des champs datetime-local, `jours` jours après maintenant. */
+/** Local date and time in the datetime-local field format, `jours` days from now. */
 function dansJours(jours: number, heure = "10:00") {
   const d = new Date();
   d.setDate(d.getDate() + jours);
@@ -38,7 +38,7 @@ function Puce({ actif, onClick, children }: { actif: boolean; onClick: () => voi
   );
 }
 
-/** Photos du véhicule : défilement au doigt (aimanté), flèches au survol sur ordinateur, points de position. */
+/** Vehicle photos: swipe scrolling (snapping), arrows on hover on computers, position dots. */
 function Galerie({ photos, nom }: { photos: string[]; nom: string }) {
   const t = useTranslations("location");
   const rail = useRef<HTMLDivElement>(null);
@@ -147,7 +147,7 @@ function FormulaireLocation({ catalogue, categorie, formule, onChanger }: {
   const retour = lieux.find((l) => String(l.id) === lieuRetour);
   const optionsLieux = lieux.map((l) => ({ value: String(l.id), label: l.nom, hint: l.frais && formule !== "chauffeur_seul" ? `+ ${formatPrice(l.frais)}` : undefined }));
 
-  // « Mon chauffeur » et Pack Séjour : seulement pour un voyageur connecté
+  // "My driver" and Stay Pack: only for a signed-in traveller
   const mesChauffeurs = useQuery({
     queryKey: ["location", "mes-chauffeurs"],
     queryFn: async () => (await api.get<MonChauffeur[]>("/v1/locations/mes-chauffeurs/")).data,
@@ -368,7 +368,7 @@ function MesLocations() {
   );
 }
 
-/** Location de voitures et chauffeurs : véhicules des propriétaires partenaires, filtres, demande détaillée, paiement en ligne. */
+/** Car and driver hire: partner owners' vehicles, filters, detailed request, online payment. */
 export default function LocationPage() {
   const t = useTranslations("location");
   const tNav = useTranslations("nav");

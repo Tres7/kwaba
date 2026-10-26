@@ -1,4 +1,4 @@
-"""Emails des locations, envoyés par le worker (même principe que apps.transferts.notifications)."""
+"""Rental emails, sent by the worker (same principle as apps.transferts.notifications)."""
 import logging
 from datetime import timedelta
 from zoneinfo import ZoneInfo
@@ -78,8 +78,8 @@ def partenaire_au_voyageur(loc: LocationModel):
 
 
 def _sans_telephone_du_voyageur(loc: LocationModel) -> dict:
-    """Les partenaires ne reçoivent pas le téléphone du voyageur (ni ceux glissés dans ses précisions ou son adresse) :
-    pour le joindre, ils passent par Kwa-Ba."""
+    """Partners do not receive the traveller's phone number (nor those slipped into their details or address):
+    to reach them, they go through Kwa-Ba."""
     infos = _location(loc)
     del infos['telephone_voyageur']
     return {**infos, **{cle: coordonnees.analyser(infos[cle])[0] for cle in ('prise', 'retour', 'precisions')}}
@@ -88,7 +88,7 @@ def _sans_telephone_du_voyageur(loc: LocationModel) -> dict:
 def location_au_partenaire(loc: LocationModel):
     p = loc.partenaire
     if not p or not p.email:
-        return  # propriétaire prévenu par téléphone par l'équipe
+        return  # owner told by phone by the team
     _envoyer('emails/locations/location_partenaire.txt', f"Nouvelle location Kwa-Ba : {_date(loc, loc.debut)}", [p.email], {
         **_sans_telephone_du_voyageur(loc), 'contact': p.contact,
         'montant': _fcfa(loc.montant_partenaire), 'assistance': settings.ASSISTANCE_CONTACT,
@@ -98,7 +98,7 @@ def location_au_partenaire(loc: LocationModel):
 def mission_au_chauffeur(loc: LocationModel):
     c = loc.chauffeur_partenaire
     if not c or not c.email:
-        return  # chauffeur prévenu par téléphone par l'équipe
+        return  # driver told by phone by the team
     _envoyer('emails/locations/mission_chauffeur.txt', f"Mission Kwa-Ba : {_date(loc, loc.debut)}", [c.email], {
         **_sans_telephone_du_voyageur(loc), 'prenom_chauffeur': c.prenom,
         'montant': _fcfa(loc.montant_chauffeur), 'assistance': settings.ASSISTANCE_CONTACT,
@@ -117,7 +117,7 @@ def versement_au_partenaire(v: VersementPartenaireModel):
 
 
 def caution_au_voyageur(loc: LocationModel):
-    """Restitution de la caution : montant rendu, retenue et son motif ; numéro Mobile Money à indiquer si besoin."""
+    """Deposit return: amount given back, withheld amount and its reason; Mobile Money number to give if needed."""
     rendu = loc.caution - loc.caution_retenue
     _envoyer('emails/locations/caution_restituee.txt', f"Restitution de votre caution : {loc.reference}", [loc.voyageur.email], {
         'prenom': loc.voyageur.first_name, 'reference': loc.reference, 'caution': _fcfa(loc.caution),
@@ -171,7 +171,7 @@ def envoyer_notifications() -> int:
         'notifie',
     )
     chauffeurs = VersementChauffeurLocationModel.objects.select_related('chauffeur', 'location__lieu_prise')
-    # Versement envoyé : rien à annoncer au chauffeur (il le voit sur son Mobile Money) ; échec : alerte à l'équipe
+    # Payout sent: nothing to tell the driver (they see it on their Mobile Money); failure: alert to the team
     total += _traiter(chauffeurs.filter(statut='envoye', notifie=False), lambda v: None, 'notifie')
     total += _traiter(
         chauffeurs.filter(statut='echoue', notifie=False),

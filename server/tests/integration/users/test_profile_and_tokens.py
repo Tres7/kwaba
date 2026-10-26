@@ -64,7 +64,7 @@ class TestRefresh:
         assert api_client.post(REFRESH, {'refresh': refresh}, format='json').data['refresh'] != refresh
 
     def test_reuse_within_grace_period_returns_the_same_pair(self, api_client, make_user, password):
-        # NextAuth renouvelle le même jeton en parallèle au chargement d'une page : aucun appel ne doit échouer
+        # NextAuth renews the same token in parallel when a page loads: no call must fail
         refresh = _login(api_client, make_user(), password)['refresh']
         first = api_client.post(REFRESH, {'refresh': refresh}, format='json')
         second = api_client.post(REFRESH, {'refresh': refresh}, format='json')
@@ -72,7 +72,7 @@ class TestRefresh:
         assert second.data == first.data
 
     def test_rotated_refresh_token_rejected_after_grace_period(self, api_client, make_user, password, settings):
-        settings.JWT_REFRESH_GRACE_SECONDS = 0  # délai écoulé
+        settings.JWT_REFRESH_GRACE_SECONDS = 0  # delay elapsed
         refresh = _login(api_client, make_user(), password)['refresh']
         new_refresh = api_client.post(REFRESH, {'refresh': refresh}, format='json').data['refresh']
 
@@ -84,8 +84,8 @@ class TestRefresh:
 def test_simultaneous_refreshes_of_the_same_token_all_succeed(make_user, password, monkeypatch):
     refresh = _login(APIClient(), make_user(), password)['refresh']
 
-    # Force les deux appels à entrer ensemble dans la rotation : sans le verrou, chacun produirait
-    # sa propre paire (et l'un des deux verrait le jeton déjà sur liste noire)
+    # Forces both calls to enter the rotation together: without the lock, each would produce
+    # its own pair (and one of them would see the token already blacklisted)
     barrier = threading.Barrier(2, timeout=3)
     original = TokenRefreshSerializer.validate
 

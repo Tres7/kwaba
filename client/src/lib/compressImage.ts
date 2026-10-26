@@ -1,18 +1,18 @@
 const MAX_DIMENSION = 2000;
 const QUALITY = 0.85;
-// En dessous, l'image part telle quelle (le serveur la normalise de toute façon)
+// Below this, the image is sent as is (the server normalises it anyway)
 const SKIP_BELOW_BYTES = 800 * 1024;
 
 /**
- * Réduit une photo dans le navigateur avant l'envoi (moins de données sur les connexions mobiles lentes).
- * Renvoie le fichier d'origine si le navigateur ne sait pas la décoder (ex. HEIC) ou si la réduction n'apporte rien.
+ * Shrinks a photo in the browser before upload (less data on slow mobile connections).
+ * Returns the original file if the browser cannot decode it (e.g. HEIC) or if shrinking brings nothing.
  */
 export async function compressImage(file: File): Promise<File> {
   if (file.size <= SKIP_BELOW_BYTES || typeof createImageBitmap === "undefined") return file;
 
   let bitmap: ImageBitmap;
   try {
-    // imageOrientation : applique la rotation EXIF du téléphone
+    // imageOrientation: applies the phone's EXIF rotation
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   } catch {
     return file;
@@ -30,7 +30,7 @@ export async function compressImage(file: File): Promise<File> {
     bitmap.close();
     return file;
   }
-  // Fond blanc : les zones transparentes d'un PNG ne deviennent pas noires en JPEG
+  // White background: transparent areas of a PNG do not turn black in JPEG
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, width, height);
   ctx.drawImage(bitmap, 0, 0, width, height);

@@ -1,4 +1,4 @@
-// Que faut-il produire pour l'état actuel de main ? Sortie au format GITHUB_OUTPUT (clé=valeur).
+// What must be produced for the current state of main? Output in GITHUB_OUTPUT format (key=value).
 import { parseArgs } from 'node:util';
 
 import { imageRepository, lastCommitTouching, latestManifest, plan } from './lib.mjs';

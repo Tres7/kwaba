@@ -9,16 +9,16 @@ import { calculateServiceFee, cn, formatFcfa } from "@/lib/utils";
 export type Partenaire = "particulier" | "fondateur" | "hotel";
 
 const PARTENAIRES: Partenaire[] = ["particulier", "fondateur", "hotel"];
-// Grille tarifaire, utilisée tant que la configuration de l'API n'est pas lue (le serveur fait foi)
+// Price grid, used while the API configuration has not been read (the server is authoritative)
 const TAUX_PAR_DEFAUT = { particulier: 0.08, hotel: 0.12, fondateur: 0.05, voyageur: 0.06 };
 
 /**
- * Estimation des revenus d'un hôte : prix par nuit qu'il fixe, nombre de nuits et type de partenaire. La commission
- * Kwa-Ba est prise sur le prix des nuits ; les frais de service du voyageur s'y ajoutent sans réduire le revenu de
- * l'hôte. Même arrondi au franc que le serveur (apps/paiements/tarifs.py).
+ * Estimate of a host's income: price per night they set, number of nights and partner type. The Kwa-Ba
+ * commission is taken on the price of the nights; the traveller's service fees are added without reducing the
+ * host's income. Same rounding to the franc as the server (apps/paiements/tarifs.py).
  *
- * - page « Devenir hôte » : le visiteur choisit son type de partenaire et saisit un prix ;
- * - formulaire d'annonce : `partenaire` (réglé par l'équipe) et `prix` (champ du formulaire) sont imposés.
+ * - "Become a host" page: the visitor chooses their partner type and types a price;
+ * - listing form: `partenaire` (set by the team) and `prix` (form field) are imposed.
  */
 export default function EstimateurRevenus({ partenaire: partenaireImpose, prix: prixImpose, className }: {
   partenaire?: Partenaire;

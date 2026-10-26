@@ -74,8 +74,8 @@ def _not_found(e: Exception) -> Response:
 
 
 class WriteGuardsMixin:
-    """Lecture : utilisateur connecté. Écriture (POST) : email vérifié + throttle du scope de la vue.
-    Les GET (polling) ne sont pas throttlés."""
+    """Read: signed-in user. Write (POST): verified email + throttle of the view's scope.
+    GETs (polling) are not throttled."""
 
     def get_permissions(self):
         if self.request.method == 'POST':
@@ -103,8 +103,8 @@ class ConversationListCreateView(WriteGuardsMixin, APIView):
         if hebergement_id is None:
             return Response({'detail': 'hebergement_id invalide ou manquant.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        from apps.hebergements.models import HebergementModel  # contrôle propre à cette route, comme ci-dessous
-        # Annonce pas encore vérifiée ou masquée : on ne peut pas encore contacter son hôte
+        from apps.hebergements.models import HebergementModel  # check specific to this route, as below
+        # Listing not verified yet or hidden: its host cannot be contacted yet
         if not HebergementModel.objects.publiees().filter(pk=hebergement_id).exists():
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -122,17 +122,17 @@ class ConversationListCreateView(WriteGuardsMixin, APIView):
 
 
 class ConversationWithGuestView(WriteGuardsMixin, APIView):
-    """L'hôte ouvre (ou retrouve) le fil avec le voyageur d'une de ses réservations."""
+    """The host opens (or finds) the thread with the traveller of one of their bookings."""
     throttle_scope = 'messaging_conversation_create'
 
     def post(self, request):
-        from apps.reservations.models import ReservationModel  # contrôle d'accès propre à cette route
+        from apps.reservations.models import ReservationModel  # access check specific to this route
 
         reservation_id = _parse_uuid(request.data.get('reservation_id'))
         if reservation_id is None:
             return Response({'detail': 'reservation_id invalide ou manquant.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Anti-abus : un hôte ne peut écrire qu'à un voyageur ayant réservé ET payé l'un de ses logements
+        # Anti-abuse: a host can only write to a traveller who booked AND paid one of their listings
         reservation = (
             ReservationModel.objects
             .filter(pk=reservation_id, hebergement__host_id=request.user.id, status='confirmed')

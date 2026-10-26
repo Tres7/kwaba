@@ -7,7 +7,7 @@ export interface Colonne<T> {
   titre: string;
   cellule: (ligne: T) => React.ReactNode;
   className?: string;
-  /** Masquée dans la carte mobile (déjà présente dans l'en-tête de carte par exemple). */
+  /** Hidden in the mobile card (already shown in the card header for example). */
   masquerMobile?: boolean;
 }
 
@@ -15,7 +15,7 @@ interface AdminTableProps<T> {
   colonnes: Colonne<T>[];
   lignes: T[] | undefined;
   cle: (ligne: T) => string;
-  /** En-tête de la carte mobile (titre principal de la ligne). */
+  /** Header of the mobile card (main title of the row). */
   titreMobile: (ligne: T) => React.ReactNode;
   actions?: (ligne: T) => React.ReactNode;
   chargement?: boolean;
@@ -23,7 +23,7 @@ interface AdminTableProps<T> {
   onReessayer?: () => void;
 }
 
-/** Tableau sur grand écran, cartes empilées sur mobile. */
+/** Table on large screens, stacked cards on mobile. */
 export default function AdminTable<T>({ colonnes, lignes, cle, titreMobile, actions, chargement, erreur, onReessayer }: AdminTableProps<T>) {
   if (erreur) {
     return (

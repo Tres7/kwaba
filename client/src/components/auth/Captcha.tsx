@@ -37,25 +37,25 @@ function chargerScript(): Promise<void> {
 }
 
 export interface CaptchaHandle {
-  /** Nouveau défi (un jeton ne sert qu'une fois : à appeler après chaque envoi refusé). */
+  /** New challenge (a token can only be used once: to call after every refused submission). */
   reset: () => void;
 }
 
 interface CaptchaProps {
-  /** Jeton à envoyer avec le formulaire, ou null tant que la case n'est pas validée (ou après expiration). */
+  /** Token to send with the form, or null while the box is not validated (or after it expired). */
   onToken: (jeton: string | null) => void;
-  /** Captcha actif (clé reçue) : le formulaire doit attendre un jeton. Tant qu'il n'est pas appelé, rien n'est exigé
-   *  côté navigateur (le serveur refuse de toute façon un jeton manquant quand le captcha est actif). */
+  /** Captcha active (key received): the form must wait for a token. Until it is called, nothing is required
+   *  in the browser (the server refuses a missing token anyway when the captcha is active). */
   onActif?: () => void;
 }
 
-/** Case « Je suis humain » (Cloudflare Turnstile), souvent validée sans clic. Clé lue sur l'API au chargement. */
+/** "I am human" box (Cloudflare Turnstile), often validated without a click. Key read from the API on load. */
 const Captcha = forwardRef<CaptchaHandle, CaptchaProps>(function Captcha({ onToken, onActif }, ref) {
   const locale = useLocale();
   const zone = useRef<HTMLDivElement>(null);
   const widget = useRef<string | null>(null);
   const [indisponible, setIndisponible] = useState(false);
-  // Les callbacks changent à chaque rendu du parent : le widget lit toujours la dernière version
+  // The callbacks change at every render of the parent: the widget always reads the latest version
   const rappels = useRef({ onToken, onActif });
   rappels.current = { onToken, onActif };
 
@@ -66,7 +66,7 @@ const Captcha = forwardRef<CaptchaHandle, CaptchaProps>(function Captcha({ onTok
     },
   }));
 
-  // Clé publique lue sur l'API (vide : captcha désactivé) ; le widget est affiché ensuite
+  // Public key read from the API (empty: captcha disabled); the widget is shown afterwards
   const [cle, setCle] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ const Captcha = forwardRef<CaptchaHandle, CaptchaProps>(function Captcha({ onTok
         if (data.site_key) rappels.current.onActif?.();
         setCle(data.site_key);
       })
-      // API injoignable : on laisse envoyer, le serveur décidera (il refuse un jeton manquant si le captcha est actif)
+      // API unreachable: submission is allowed, the server decides (it refuses a missing token if the captcha is active)
       .catch(() => !annule && setIndisponible(true));
     return () => { annule = true; };
   }, []);

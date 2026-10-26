@@ -1,4 +1,4 @@
-"""Chemins complémentaires du paiement : worker, échecs de versement, remboursements PayPal, annulations."""
+"""Additional payment paths: worker, payout failures, PayPal refunds, cancellations."""
 from datetime import timedelta
 from unittest import mock
 
@@ -16,7 +16,7 @@ FEDAPAY_TEST = {'SECRET_KEY': 'sk_sandbox_test', 'ENV': 'sandbox', 'WEBHOOK_SECR
 
 
 class Faux:
-    """FedaPay et PayPal simulés, réglables test par test."""
+    """Simulated FedaPay and PayPal, adjustable test by test."""
 
     def __init__(self):
         self.transaction = 'approved'
@@ -90,7 +90,7 @@ def _reservation_payee(client, hebergement, moyen='mobile_money', dans=10):
 
 
 def test_worker_une_passe(faux, make_user, make_hebergement, monkeypatch):
-    # Le worker ferme les connexions périmées à chaque passe : à neutraliser dans la transaction de test
+    # The worker closes stale connections at every pass: to neutralise in the test transaction
     monkeypatch.setattr('apps.paiements.management.commands.traiter_paiements.close_old_connections', lambda: None)
     hote = make_user(role='hote')
     voyageur = _client(make_user())
@@ -98,8 +98,8 @@ def test_worker_une_passe(faux, make_user, make_hebergement, monkeypatch):
     ProfilVersementModel.objects.create(hote=hote, pays='TG', operateur='togocel', numero='90000001', titulaire='Ama Hote')
     VersementModel.objects.filter(reservation=resa).update(date_prevue=timezone.now() - timedelta(minutes=1))
 
-    call_command('traiter_paiements', '--once')  # envoi du versement
-    call_command('traiter_paiements', '--once')  # FedaPay confirme : versé, email à l'hôte
+    call_command('traiter_paiements', '--once')  # sending of the payout
+    call_command('traiter_paiements', '--once')  # FedaPay confirms: paid, email to the host
     v = VersementModel.objects.get(reservation=resa)
     assert v.statut == 'envoye' and v.notifie
     assert any('Versement de' in m.subject for m in mail.outbox)
@@ -131,8 +131,8 @@ def test_versement_signale_en_echec_par_fedapay_puis_webhook(faux, make_user, ma
     faux.payout_statut = 'failed'
     services.traiter_evenement({'name': 'payout.failed', 'entity': {'id': 'P7'}})
     v.refresh_from_db()
-    assert (v.statut, v.derniere_erreur) == ('planifie', 'invalid_number')  # nouvel essai prévu
-    services.traiter_evenement({'name': 'payout.sent', 'entity': {}})  # sans identifiant : ignoré
+    assert (v.statut, v.derniere_erreur) == ('planifie', 'invalid_number')  # new try scheduled
+    services.traiter_evenement({'name': 'payout.sent', 'entity': {}})  # without an id: ignored
 
 
 def test_remboursement_paypal_en_attente_puis_confirme(faux, make_user, make_hebergement):
@@ -191,7 +191,7 @@ def test_demarrer_paiement_refuse(faux, make_user, make_hebergement, settings):
     voyageur = _client(make_user())
     resa = _reservation_payee(voyageur, make_hebergement())
     url = f'/api/v1/paiements/reservations/{resa.id}/payer/'
-    assert voyageur.post(url, {'moyen': 'mobile_money'}, format='json').status_code == 400  # déjà confirmée
+    assert voyageur.post(url, {'moyen': 'mobile_money'}, format='json').status_code == 400  # already confirmed
     assert voyageur.post('/api/v1/paiements/reservations/00000000-0000-0000-0000-000000000000/payer/').status_code == 404
 
     faux.transaction = 'pending'

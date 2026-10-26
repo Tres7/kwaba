@@ -15,7 +15,7 @@ LIMITE = 200
 
 
 class EstAgent(IsAuthenticated):
-    """Agents de terrain et administrateurs : rôle lu en base à chaque requête."""
+    """Field agents and administrators: role read from the database at every request."""
     message = "Réservé aux agents de terrain."
 
     def has_permission(self, request, view):
@@ -51,7 +51,7 @@ def _codes(request) -> list[str]:
 
 
 class TableauView(APIView):
-    """GET : accueil de l'espace agent. Par type : missions libres, les miennes, celles des autres agents."""
+    """GET: home of the agent space. Per type: free missions, mine, those of the other agents."""
     permission_classes = [EstAgent]
 
     def get(self, request):
@@ -75,8 +75,8 @@ class TableauView(APIView):
 
 
 class MissionsView(APIView):
-    """GET ?vue=a_faire|miennes|equipe|historique&type=&q= : la file commune, mes missions, celles de l'équipe, ou
-    l'historique (le mien ; tout le monde pour un administrateur). Les plus anciennes d'abord, sauf l'historique."""
+    """GET ?vue=a_faire|miennes|equipe|historique&type=&q=: the shared queue, my missions, the team's, or
+    the history (mine; everybody's for an administrator). Oldest first, except for the history."""
     permission_classes = [EstAgent]
 
     def get(self, request):
@@ -126,7 +126,7 @@ class MissionsView(APIView):
 
 
 class MissionView(APIView):
-    """GET : fiche d'une mission à faire (de quoi faire le contrôle) et ce que je peux faire dessus."""
+    """GET: page of a mission to do (what is needed for the check) and what I can do on it."""
     permission_classes = [EstAgent]
 
     def get(self, request, type_mission, cible):
@@ -147,7 +147,7 @@ class MissionView(APIView):
             'droits': {
                 'prendre': mission is None,
                 'liberer': bool(mission) and (a_moi or admin),
-                # Libre ou à moi ; un administrateur décide toujours
+                # Free or mine; an administrator can always decide
                 'decider': mission is None or a_moi or admin,
             },
         })
@@ -168,10 +168,10 @@ class _ActionMission(APIView):
 
 
 class PrendreView(_ActionMission):
-    """POST : « Je m'en occupe » (409 si un autre agent l'a déjà prise)."""
+    """POST: "I'll handle it" (409 if another agent already took it)."""
     action = 'prendre'
 
 
 class LibererView(_ActionMission):
-    """POST : relâcher la mission, qui revient dans la file commune (la mienne ; n'importe laquelle pour un admin)."""
+    """POST: release the mission, which goes back to the shared queue (mine; any of them for an admin)."""
     action = 'liberer'

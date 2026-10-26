@@ -4,34 +4,34 @@ import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 import { moduleDuChemin, type ReglagesSite } from "@/lib/modules";
 
-// Pages réservées aux utilisateurs connectés (le centre d'aide reste public)
+// Pages reserved for signed-in users (the help centre stays public)
 const PROTECTED = ["/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/backoffice", "/agent", "/give/don"];
 const PUBLIC_EXCEPTIONS = ["/profil/aide"];
-// Pages d'accueil publiques ; leurs sous-pages (suivi d'un transfert, voyage de groupe, invitation) exigent d'être connecté
+// Public landing pages; their sub-pages (transfer tracking, group trip, invitation) require signing in
 const PROTECTED_SUBPATHS = ["/transfert", "/together", "/location"];
-// Pages d'authentification inutiles une fois connecté
+// Authentication pages useless once signed in
 const GUEST_ONLY = ["/login", "/register"];
-// Espaces internes servis hors des routes de langue (app/backoffice, app/agent)
+// Internal spaces served outside the language routes (app/backoffice, app/agent)
 const SANS_LANGUE = ["/backoffice", "/agent"];
 
-// Langue : préfixe /en, sinon cookie NEXT_LOCALE, sinon langue du navigateur (première visite)
+// Language: /en prefix, otherwise NEXT_LOCALE cookie, otherwise browser language (first visit)
 const intl = createIntlMiddleware(routing);
 
-/** Chemin sans le préfixe de langue (/en/profil → /profil) et préfixe à remettre dans les redirections. */
+/** Path without the language prefix (/en/profil → /profil) and prefix to put back in redirects. */
 function sansLangue(pathname: string) {
   const langue = routing.locales.find((l) => l !== routing.defaultLocale && (pathname === `/${l}` || pathname.startsWith(`/${l}/`)));
   if (!langue) return { chemin: pathname, prefixe: "" };
   return { chemin: pathname.slice(langue.length + 1) || "/", prefixe: `/${langue}` };
 }
 
-// Session lue directement dans le cookie, sans le wrapper auth() : avec AUTH_URL (indispensable en production
-// derrière nginx), ce wrapper réécrit l'origine de la requête et Next.js traite alors la réécriture de langue
-// de next-intl comme un proxy externe (erreur 500 en mode standalone). Le renouvellement des jetons reste
-// fait par les routes Auth.js et les composants serveur.
+// Session read directly from the cookie, without the auth() wrapper: with AUTH_URL (required in production
+// behind nginx), this wrapper rewrites the request origin and Next.js then treats the next-intl language
+// rewrite as an external proxy (500 error in standalone mode). Token renewal is still done by the Auth.js
+// routes and the server components.
 const secureCookie = (process.env.AUTH_URL ?? "").startsWith("https://");
 
-// Modules affichés, relus dans l'API au plus toutes les minutes. API injoignable : tout module est considéré
-// comme masqué (état du lancement), pour ne jamais montrer une page qui devait l'être.
+// Displayed modules, read again from the API at most every minute. API unreachable: every module is considered
+// hidden (launch state), so as never to show a page that should be hidden.
 const DUREE_MODULES_MS = 60_000;
 let modulesEnCache: { valeur: ReglagesSite["modules"] | null; lu: number } = { valeur: null, lu: 0 };
 
@@ -55,13 +55,13 @@ export default async function middleware(req: NextRequest) {
   const isLoggedIn = !!token && !token.error;
   const { chemin, prefixe } = sansLangue(pathname);
 
-  // Back-office et espace agent n'existent qu'en français, sans préfixe : /en/agent (après une connexion faite
-  // sur le site anglais, par ex.) n'a pas de page et ferait échouer le rendu. On renvoie vers /agent.
+  // Back-office and agent space only exist in French, without prefix: /en/agent (after signing in
+  // on the English site, for example) has no page and would make the rendering fail. Redirect to /agent.
   if (prefixe && SANS_LANGUE.some((p) => chemin === p || chemin.startsWith(`${p}/`))) {
     return NextResponse.redirect(new URL(chemin + search, req.nextUrl.origin));
   }
 
-  // Module masqué (Expériences, Voyager à plusieurs, Give, Concierge) : son adresse renvoie vers l'accueil
+  // Hidden module (Experiences, Group travel, Give, Concierge): its address redirects to the home page
   const moduleDeLaPage = moduleDuChemin(chemin);
   if (moduleDeLaPage && !(await modulesAffiches())?.[moduleDeLaPage]) {
     return NextResponse.redirect(new URL(prefixe || "/", req.nextUrl.origin));
@@ -78,7 +78,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Back-office : administrateurs uniquement (l'API vérifie aussi le rôle), en français
+  // Back-office: administrators only (the API also checks the role), in French
   if (chemin.startsWith("/backoffice")) {
     if (isLoggedIn && token?.role !== "admin") {
       return NextResponse.redirect(new URL(prefixe || "/", req.nextUrl.origin));
@@ -86,8 +86,8 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Espace des agents de terrain (vérification des logements), en français. Confort d'affichage seulement :
-  // l'API vérifie le rôle en base à chaque requête.
+  // Field agents' space (listing verification), in French. Display comfort only:
+  // the API checks the role in the database at every request.
   if (chemin.startsWith("/agent")) {
     if (isLoggedIn && token?.role !== "agent" && token?.role !== "admin") {
       return NextResponse.redirect(new URL(prefixe || "/", req.nextUrl.origin));
@@ -103,6 +103,6 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Toutes les pages, sauf l'API, les fichiers internes de Next.js et les fichiers statiques
+  // All pages, except the API, Next.js internal files and static files
   matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };

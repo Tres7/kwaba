@@ -1,25 +1,26 @@
-"""Cycle d'une location de voiture (ou d'un chauffeur pour le véhicule du client).
+"""Life cycle of a car rental (or of a driver for the customer's vehicle).
 
-    demande (véhicule, formule, lieux, dates, précisions) au moins `delai_min_jours` avant la prise
-        → « en_attente_paiement » (même délai de paiement que les séjours)
-        → paiement reçu → « confirmee » : les administrateurs sont prévenus pour attribuer
-        → propriétaire et/ou chauffeur attribués (admin) → « partenaire_assigne » : le voyageur reçoit leurs
-          coordonnées, eux le détail, et leurs versements sont planifiés
-        → le worker paie le propriétaire et le chauffeur, puis passe la location à « terminee »
-    annulation par le voyageur (CGV, annexe 1) : intégral jusqu'à `annulation_gratuite_heures` (48 h) avant la prise,
-    50 % jusqu'à 24 h avant, rien ensuite ; délai de réflexion de 48 h au moins 7 jours avant (CGV, art. 10.3)
-    annulation par Kwa-Ba (aucun propriétaire ou chauffeur disponible…) : remboursement intégral
+    request (vehicle, option, places, dates, details) at least `delai_min_jours` before the pick-up
+        → "en_attente_paiement" (same payment period as stays)
+        → payment received → "confirmee": administrators are notified to assign
+        → owner and/or driver assigned (admin) → "partenaire_assigne": the traveller receives their
+          contact details, they receive the details, and their payouts are scheduled
+        → the worker pays the owner and the driver, then sets the rental to "terminee"
+    cancellation by the traveller (terms of sale, appendix 1): full refund until `annulation_gratuite_heures` (48 h)
+    before the pick-up, 50 % until 24 h before, nothing afterwards; 48 h cooling-off period at least 7 days before
+    (terms of sale, art. 10.3)
+    cancellation by Kwa-Ba (no owner or driver available…): full refund
 
-Prix (CGV, art. 6.5) : prix du véhicule fixé par le propriétaire (aucun frais de service pour le client) ; chauffeur
-7 000 FCFA par jour, dont 6 000 pour lui (6 500 au statut Excellence ou s'il est redemandé : « Mon chauffeur ») ; primes
-de déplacement (1 500 FCFA par jour hors de Lomé, 2 000 hors du pays) reversées en totalité au chauffeur. Commission du
-propriétaire : 15 %, 10 % pendant le Programme Fondateurs, 12 % après 20 locations sans incident.
+Prices (terms of sale, art. 6.5): vehicle price set by the owner (no service fees for the customer); driver
+7,000 FCFA per day, of which 6,000 for them (6,500 with the Excellence status or if asked for again: "My driver");
+travel allowances (1,500 FCFA per day outside Lomé, 2,000 outside the country) fully paid to the driver. Owner's
+commission: 15 %, 10 % during the Founders Programme, 12 % after 20 rentals without incident.
 
-Caution (voiture seule) : payée en ligne avec la location et gardée par Kwa-Ba, le voyageur ne règle rien au
-propriétaire ; divisée par deux après 3 locations sans incident. Après le retour, le propriétaire a
-`restitution_caution_heures` pour signaler un dommage à Kwa-Ba, qui enregistre une retenue (back-office) ; la caution
-moins la retenue est alors remboursée au voyageur, la retenue versée au propriétaire. Une location annulée rend toujours
-la caution.
+Deposit (car only): paid online with the rental and kept by Kwa-Ba, the traveller pays nothing to the
+owner; halved after 3 rentals without incident. After the return, the owner has `restitution_caution_heures`
+to report damage to Kwa-Ba, which records a withheld amount (back-office); the deposit minus the withheld
+amount is then refunded to the traveller, the withheld amount paid to the owner. A cancelled rental always
+gives the deposit back.
 """
 import logging
 import math
@@ -45,25 +46,25 @@ logger = logging.getLogger('apps.locations')
 
 DELAI_VERSEMENT = timedelta(hours=24)
 
-# Chauffeur (offre mobilité, CGV art. 6.5, contrat chauffeur art. 3)
+# Driver (mobility offer, terms of sale art. 6.5, driver contract art. 3)
 CHAUFFEUR_JOUR = 7000
 PART_KWABA_JOUR = 1000
-PART_KWABA_JOUR_REDUITE = 500  # Chauffeur Excellence ou « Mon chauffeur » : le chauffeur touche 6 500
+PART_KWABA_JOUR_REDUITE = 500  # Excellence driver or "My driver": the driver gets 6,500
 PRIME_HORS_LOME = 1500
 PRIME_HORS_PAYS = 2000
-# Commission du propriétaire
+# Owner's commission
 COMMISSION_FONDATEUR = Decimal('10')
 COMMISSION_FIDELE = Decimal('12')
 LOCATIONS_FIDELE = 20
-# Caution divisée par deux pour un client qui a fait 3 locations sans incident
+# Deposit halved for a customer who has made 3 rentals without incident
 LOCATIONS_CLIENT_FIDELE = 3
-# Annulation (CGV, annexe 1) et délai de réflexion (art. 10.3)
+# Cancellation (terms of sale, appendix 1) and cooling-off period (art. 10.3)
 DEMI_REMBOURSEMENT = timedelta(hours=24)
 REFLEXION, REFLEXION_AVANT = timedelta(hours=48), timedelta(days=7)
 
 
 class LocationErreur(Exception):
-    """Erreur dont le message peut être affiché tel quel au voyageur."""
+    """Error whose message can be shown as is to the traveller."""
 
 
 def _arrondi(montant) -> int:
@@ -71,7 +72,7 @@ def _arrondi(montant) -> int:
 
 
 def categories_proposees():
-    """Véhicules actifs, avec un prix, et dont l'assurance et la visite technique ne sont pas expirées."""
+    """Active vehicles, with a price, whose insurance and roadworthiness test have not expired."""
     aujourd_hui = timezone.localdate()
     return (CategorieVehiculeModel.objects.filter(actif=True, prix_jour__isnull=False)
             .filter(Q(sans_chauffeur=True) | Q(avec_chauffeur=True))
@@ -81,25 +82,25 @@ def categories_proposees():
 
 
 def active() -> bool:
-    """La location n'est proposée que si l'administration l'a entièrement paramétrée."""
+    """Rental is offered only if the administration has fully set it up."""
     return (ParametresLocationModel.courants() is not None and categories_proposees().exists()
             and LieuRemiseModel.objects.filter(actif=True).exists())
 
 
 def heure_locale(lieu: LieuRemiseModel, naive: datetime) -> datetime:
-    """Heure saisie par le voyageur (heure locale du lieu de remise) → datetime avec fuseau."""
+    """Time typed by the traveller (local time of the handover place) → timezone-aware datetime."""
     return naive.replace(tzinfo=ZoneInfo(lieu.fuseau))
 
 
 def nombre_de_jours(debut: datetime, fin: datetime) -> int:
-    """Par tranche de 24 h entamée (prise à 10 h, retour le lendemain à 12 h : 2 jours)."""
+    """Per started 24 h period (pick-up at 10 am, return the next day at 12 pm: 2 days)."""
     return max(1, math.ceil((fin - debut) / timedelta(hours=24)))
 
 
 # --- Taux -------------------------------------------------------------------------------------------
 
 def taux_commission(params: ParametresLocationModel, partenaire: PartenaireLocationModel | None, jour=None) -> Decimal:
-    """Commission du propriétaire en % : 15 (paramètres), 10 pendant le Programme Fondateurs, 12 au statut Fidèle."""
+    """Owner's commission in %: 15 (settings), 10 during the Founders Programme, 12 with the Loyal status."""
     taux = Decimal(params.commission_pourcent)
     if partenaire is None:
         return taux
@@ -112,14 +113,14 @@ def taux_commission(params: ParametresLocationModel, partenaire: PartenaireLocat
 
 
 def client_sans_incident(voyageur) -> bool:
-    """Au moins 3 locations terminées sans retenue sur la caution : caution divisée par deux."""
+    """At least 3 finished rentals without any amount withheld from the deposit: deposit halved."""
     if not voyageur or not getattr(voyageur, 'is_authenticated', False):
         return False
     return LocationModel.objects.filter(voyageur=voyageur, statut='terminee', caution_retenue=0).count() >= LOCATIONS_CLIENT_FIDELE
 
 
 def mes_chauffeurs(voyageur):
-    """Chauffeurs qui ont déjà conduit ce voyageur (location ou transfert terminés) : « Mon chauffeur »."""
+    """Drivers who have already driven this traveller (finished rental or transfer): "My driver"."""
     from apps.transferts.models import ChauffeurModel
 
     return ChauffeurModel.objects.filter(actif=True).filter(
@@ -249,8 +250,8 @@ def demarrer_paiement(location: LocationModel, moyen: str) -> str:
 
 
 def appliquer_pack_sejour(location: LocationModel) -> int:
-    """Pack Séjour + Chauffeur (CGV, art. 6.4) : un séjour Kwa-Ba à venir réservé avec une formule avec chauffeur a des
-    frais de service ramenés à 3 % ; la différence est remboursée au voyageur. Renvoie le montant remboursé."""
+    """Stay Pack + Driver (terms of sale, art. 6.4): an upcoming Kwa-Ba stay booked with an option with a driver gets
+    service fees lowered to 3 %; the difference is refunded to the traveller. Returns the refunded amount."""
     from apps.paiements import tarifs
     from apps.reservations.models import ReservationModel
 
@@ -275,7 +276,7 @@ def appliquer_pack_sejour(location: LocationModel) -> int:
 
 
 def paiement_recu(paiement):
-    """Appelé par apps.paiements, dans sa transaction, quand un paiement de location réussit."""
+    """Called by apps.paiements, in its transaction, when a rental payment succeeds."""
     location = LocationModel.objects.select_for_update().get(pk=paiement.location_id)
     if location.paiements.filter(statut='reussi').exclude(pk=paiement.pk).exists():
         paiements.rembourser(paiement, paiement.montant, "Paiement reçu en double")
@@ -293,8 +294,8 @@ def paiement_recu(paiement):
 # --- Attribution ------------------------------------------------------------------------------------
 
 def partenaires_disponibles(location: LocationModel):
-    """Propriétaire du véhicule ; pour les anciennes catégories sans propriétaire, les loueurs qui la proposent à ce
-    lieu de remise. Aucun pour un chauffeur seul."""
+    """Owner of the vehicle; for old categories without an owner, the rental companies offering it at this
+    handover place. None for a driver alone."""
     if location.categorie_id is None:
         return PartenaireLocationModel.objects.none()
     if location.categorie.proprietaire_id:
@@ -305,7 +306,7 @@ def partenaires_disponibles(location: LocationModel):
 
 
 def chauffeurs_disponibles(location: LocationModel):
-    """Chauffeurs partenaires actifs, le chauffeur redemandé (« Mon chauffeur ») et les Excellence d'abord."""
+    """Active partner drivers, the driver asked for again ("My driver") and the Excellence ones first."""
     from django.db.models import Case, IntegerField, Value, When
 
     from apps.transferts.models import ChauffeurModel
@@ -316,8 +317,8 @@ def chauffeurs_disponibles(location: LocationModel):
 
 
 def _date_versement(location: LocationModel):
-    """Propriétaire : 24 h après le début de la location ; avec une caution en ligne, après le retour et la fin du délai
-    de signalement des dommages, pour verser la retenue éventuelle avec la location."""
+    """Owner: 24 h after the start of the rental; with an online deposit, after the return and the end of the
+    damage reporting period, to pay any withheld amount with the rental."""
     if location.caution_gardee:
         params = ParametresLocationModel.courants()
         return location.fin + max(DELAI_VERSEMENT, timedelta(hours=params.restitution_caution_heures if params else 24))
@@ -325,8 +326,8 @@ def _date_versement(location: LocationModel):
 
 
 def _montants_versement(location: LocationModel, part: Decimal = Decimal(1)) -> dict:
-    """Propriétaire : véhicule et frais de remise (et retenue sur la caution), moins la commission. `part` : fraction
-    retenue après une annulation tardive."""
+    """Owner: vehicle and handover fees (and amount withheld from the deposit), minus the commission. `part`: fraction
+    kept after a late cancellation."""
     brut = _arrondi(location.part_proprietaire * part) + location.caution_retenue
     commission = _arrondi(location.commission * part)
     return {'montant_brut': brut, 'commission': commission, 'montant': brut - commission}
@@ -340,8 +341,8 @@ def _montants_chauffeur(location: LocationModel, part: Decimal = Decimal(1)) -> 
 
 def attribuer(location: LocationModel, *, partenaire: PartenaireLocationModel | None = None, chauffeur=None,
               vehicule: str = '', immatriculation: str = ''):
-    """Attribue (ou change) le propriétaire et/ou le chauffeur partenaire, enregistre le véhicule remis, planifie les
-    versements. Le chauffeur touche 6 500 FCFA par jour au statut Excellence ou s'il a été redemandé."""
+    """Assigns (or changes) the owner and/or the partner driver, records the handed-over vehicle, schedules the
+    payouts. The driver gets 6,500 FCFA per day with the Excellence status or if they were asked for again."""
     with transaction.atomic():
         location = LocationModel.objects.select_for_update(of=('self',)).select_related('categorie').get(pk=location.pk)
         if location.statut not in ('confirmee', 'partenaire_assigne'):
@@ -370,7 +371,7 @@ def attribuer(location: LocationModel, *, partenaire: PartenaireLocationModel | 
         else:
             location.chauffeur_nom = location.chauffeur_telephone = ''
         if changement:
-            # Le voyageur reçoit les nouvelles coordonnées, et les nouveaux partenaires le détail
+            # The traveller receives the new contact details, and the new partners the details
             location.partenaire_notifie = location.location_envoyee_partenaire = location.mission_envoyee_chauffeur = False
         location.save()
 
@@ -396,7 +397,7 @@ def attribuer(location: LocationModel, *, partenaire: PartenaireLocationModel | 
 # --- Annulation ----------------------------------------------------------------------------------
 
 def retenue_si_annulation(location: LocationModel, maintenant=None) -> int:
-    """Part du prix gardée si le voyageur annule maintenant (CGV, annexe 1 et art. 10.3)."""
+    """Share of the price kept if the traveller cancels now (terms of sale, appendix 1 and art. 10.3)."""
     maintenant = maintenant or timezone.now()
     delai = location.debut - maintenant
     if maintenant - location.cree_le <= REFLEXION and delai >= REFLEXION_AVANT:
@@ -414,8 +415,8 @@ def annulation_gratuite(location: LocationModel) -> bool:
 
 
 def annuler(location: LocationModel, par: str) -> int:
-    """Annule la location ; renvoie le montant remboursé au voyageur. En cas d'annulation tardive, la part retenue est
-    versée au propriétaire et au chauffeur, au prorata."""
+    """Cancels the rental; returns the amount refunded to the traveller. For a late cancellation, the kept share is
+    paid to the owner and the driver, pro rata."""
     with transaction.atomic():
         location = LocationModel.objects.select_for_update().get(pk=location.pk)
         if location.statut in ('annulee', 'terminee'):
@@ -438,7 +439,7 @@ def annuler(location: LocationModel, par: str) -> int:
                     else:
                         v.statut = 'annule'
                     v.save()
-            # La caution est toujours rendue : le véhicule n'a pas été remis
+            # The deposit is always given back: the vehicle was not handed over
             if location.caution_gardee and not location.caution_restituee_le:
                 rembourse += location.caution_gardee
                 location.caution_retenue, location.caution_restituee_le = 0, timezone.now()
@@ -451,8 +452,8 @@ def annuler(location: LocationModel, par: str) -> int:
 
 
 def retenir_caution(location: LocationModel, montant: int, motif: str) -> LocationModel:
-    """Retenue sur la caution (dommage, carburant manquant… signalé par le propriétaire), avant sa restitution. Elle est
-    versée au propriétaire avec la location ; 0 annule la retenue."""
+    """Amount withheld from the deposit (damage, missing fuel… reported by the owner), before it is returned. It is
+    paid to the owner with the rental; 0 cancels the withheld amount."""
     with transaction.atomic():
         location = LocationModel.objects.select_for_update().get(pk=location.pk)
         if not location.caution_gardee:
@@ -489,7 +490,7 @@ def expirer() -> int:
 
 
 def restituer_cautions() -> int:
-    """Fin du délai de signalement des dommages : rembourse au voyageur la caution moins la retenue."""
+    """End of the damage reporting period: refunds the traveller the deposit minus the withheld amount."""
     params = ParametresLocationModel.courants()
     limite = timezone.now() - timedelta(hours=params.restitution_caution_heures if params else 24)
     restituees = 0
@@ -516,9 +517,9 @@ def envoyer_versements_partenaires() -> int:
         return 0
     envoyes = 0
     maintenant = timezone.now()
-    # Annulation tardive : la location est annulée, mais la part retenue reste versée au prorata
+    # Late cancellation: the rental is cancelled, but the kept share is still paid pro rata
     statuts = ('partenaire_assigne', 'annulee')
-    # Caution en ligne : le propriétaire est payé une fois la caution réglée (la retenue éventuelle s'ajoute)
+    # Online deposit: the owner is paid once the deposit is settled (any withheld amount is added)
     dus = VersementPartenaireModel.objects.filter(
         statut='planifie', date_prevue__lte=maintenant, location__statut__in=statuts,
     ).exclude(
@@ -542,7 +543,7 @@ def envoyer_versements_partenaires() -> int:
     for modele in (VersementPartenaireModel, VersementChauffeurLocationModel):
         for v in modele.objects.filter(statut='en_cours').exclude(payout_id='')[:50]:
             paiements.synchroniser_payout(v)
-    # Propriétaire et chauffeur payés : la location est terminée
+    # Owner and driver paid: the rental is finished
     (LocationModel.objects.filter(statut='partenaire_assigne')
      .filter(Q(versement__isnull=False) | Q(versement_chauffeur__isnull=False))
      .exclude(Q(versement__isnull=False) & ~Q(versement__statut__in=('envoye', 'annule')))
@@ -552,7 +553,7 @@ def envoyer_versements_partenaires() -> int:
 
 
 def passe() -> dict:
-    from . import notifications  # import local : notifications importe les modèles
+    from . import notifications  # local import: notifications imports the models
 
     return {
         'locations_expirees': expirer(),

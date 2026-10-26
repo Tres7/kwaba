@@ -15,7 +15,7 @@ export const CATEGORIES_EXPERIENCE: { value: CategorieExperience; label: string 
   { value: "loisirs", label: "Loisir" }, { value: "sites", label: "Site touristique" },
 ];
 const ADRESSE = "/v1/admin/experiences/";
-// Le client API envoie du JSON par défaut : en-tête nécessaire pour transmettre la photo
+// The API client sends JSON by default: header needed to send the photo
 const MULTIPART = { headers: { "Content-Type": "multipart/form-data" } };
 
 type Formulaire = Omit<ExperienceAdmin, "id" | "photo" | "prix" | "ordre"> & { prix: string; ordre: string };
@@ -44,7 +44,7 @@ export default function Experiences() {
   const [envoi, setEnvoi] = useState(false);
   const champ = <K extends keyof Formulaire>(k: K) => (v: Formulaire[K]) => setForm((f) => ({ ...f, [k]: v }));
 
-  // Aperçu de la photo choisie, libéré quand elle change
+  // Preview of the chosen photo, released when it changes
   useEffect(() => {
     if (!photo) return setApercu(null);
     const url = URL.createObjectURL(photo);
@@ -62,7 +62,7 @@ export default function Experiences() {
   const enregistrer = async () => {
     setEnvoi(true);
     setErreurs({});
-    // Multipart (pour la photo) : booléens envoyés explicitement, prix vide = pas de prix
+    // Multipart (for the photo): booleans sent explicitly, empty price = no price
     const corps = new FormData();
     for (const [k, v] of Object.entries(form)) corps.append(k, typeof v === "boolean" ? (v ? "true" : "false") : String(v));
     if (photo) corps.append("image", photo);

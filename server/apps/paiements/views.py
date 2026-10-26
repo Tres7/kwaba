@@ -23,14 +23,14 @@ logger = logging.getLogger('apps.paiements')
 
 
 class ConfigView(APIView):
-    """Ce que le frontend doit savoir pour afficher le paiement (public)."""
+    """What the frontend needs to know to display the payment (public)."""
     permission_classes = [AllowAny]
     authentication_classes = []
 
     def get(self, request):
         return Response({
             'actif': services.paiement_actif(),
-            # Moyens proposés au voyageur : mobile_money et carte (FedaPay), paypal (en euros)
+            # Methods offered to the traveller: mobile_money and carte (FedaPay), paypal (in euros)
             'moyens': services.moyens_actifs(),
             'fcfa_par_euro': float(paypal.FCFA_PAR_EURO),
             'environnement': settings.FEDAPAY['ENV'],
@@ -69,7 +69,7 @@ class PayerView(APIView):
 
 
 class StatutView(APIView):
-    """Interrogé par la page de retour après paiement : relit la transaction chez FedaPay si besoin."""
+    """Polled by the return page after payment: reads the transaction again from FedaPay if needed."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -97,7 +97,7 @@ class WebhookFedaPayView(APIView):
         corps = request.body
         secret = settings.FEDAPAY['WEBHOOK_SECRET']
         if not secret and not settings.DEBUG:
-            # Sans secret, n'importe qui pourrait appeler ce point d'entrée : refusé hors développement
+            # Without a secret, anyone could call this endpoint: refused outside development
             logger.error("Webhook FedaPay refusé : FEDAPAY_WEBHOOK_SECRET n'est pas configurée")
             journaliser('webhook_refuse', request, motif='secret_absent')
             return Response({'detail': 'Webhook non configuré.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -112,13 +112,13 @@ class WebhookFedaPayView(APIView):
         try:
             services.traiter_evenement(evenement)
         except Exception:
-            # 500 : FedaPay renverra l'événement plus tard
+            # 500: FedaPay will send the event again later
             logger.exception("Erreur pendant le traitement du webhook %s", evenement.get('name'))
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({'recu': True})
 
 
-# --- Hôte --------------------------------------------------------------------------------
+# --- Host --------------------------------------------------------------------------------
 
 class EstHote(IsAuthenticated):
     message = "Réservé aux hôtes."
@@ -128,7 +128,7 @@ class EstHote(IsAuthenticated):
 
 
 def _valider_compte(data):
-    """Opérateur disponible dans le pays, numéro au bon nombre de chiffres."""
+    """Operator available in the country, number with the right number of digits."""
     pays = data['pays']
     if data['operateur'] not in operateurs_ouverts(pays):
         raise serializers.ValidationError({'operateur': "Cet opérateur n'est pas disponible dans le pays choisi."})
@@ -155,7 +155,7 @@ class CompteRemboursementSerializer(serializers.Serializer):
 
 
 class CompteRemboursementView(APIView):
-    """Le voyageur indique le compte Mobile Money sur lequel être remboursé."""
+    """The traveller gives the Mobile Money account to be refunded on."""
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
@@ -202,10 +202,10 @@ class ProfilVersementView(APIView):
         ancien = (profil.operateur, profil.numero) if profil else None
         serializer.save(hote=request.user)
         if ancien != (serializer.instance.operateur, serializer.instance.numero):
-            # Changer le compte qui reçoit l'argent est l'action visée en cas de vol de compte : on la trace
+            # Changing the account that receives the money is the action targeted after an account takeover: it is logged
             journaliser('profil_versement_modifie', request, utilisateur=request.user,
                         operateur=serializer.instance.operateur, numero_fin=serializer.instance.numero[-2:])
-        # Les versements bloqués faute de profil repartent à la prochaine passe du worker
+        # Payouts blocked for lack of a profile start again at the next pass of the worker
         VersementModel.objects.filter(hote=request.user, statut__in=('planifie', 'echoue')).update(
             statut='planifie', derniere_erreur='', tentatives=0,
         )
@@ -213,7 +213,7 @@ class ProfilVersementView(APIView):
 
 
 def _type_partenaire(hote) -> str:
-    """particulier, hotel ou fondateur (Programme Fondateurs en cours) : réglé dans le back-office."""
+    """particulier, hotel or fondateur (Founders Programme ongoing): set in the back-office."""
     conditions = tarifs.conditions(hote)
     if conditions and conditions.categorie == 'hotel':
         return 'hotel'
@@ -244,9 +244,9 @@ class RevenusView(APIView):
                 'commission': versements.aggregate(s=Sum('commission'))['s'] or 0,
             },
             'profil_complet': ProfilVersementModel.objects.filter(hote=request.user).exists(),
-            # Taux de commission de cet hôte aujourd'hui (8 %, 12 % pour un hôtel, 5 % pendant le Programme Fondateurs)
+            # This host's commission rate today (8 %, 12 % for a hotel, 5 % during the Founders Programme)
             'commission_pourcent': float(tarifs.taux_commission(request.user) * 100),
-            # Type de partenaire enregistré par l'équipe (jamais modifiable par l'hôte) et taux des frais du voyageur
+            # Partner type saved by the team (never editable by the host) and traveller's fee rate
             'partenaire': _type_partenaire(request.user),
             'frais_voyageur_pourcent': float(tarifs.FRAIS_VOYAGEUR * 100),
             'versements': [

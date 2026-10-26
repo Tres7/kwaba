@@ -45,7 +45,7 @@ function RegisterForm() {
   const [existingAccount, setExistingAccount] = useState(false);
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [captchaRequis, setCaptchaRequis] = useState(false);
-  // Bouton actif une fois la page prête (JavaScript chargé) : un clic plus tôt enverrait le formulaire sans lui
+  // Button enabled once the page is ready (JavaScript loaded): an earlier click would send the form without it
   const [pret, setPret] = useState(false);
   useEffect(() => setPret(true), []);
   const captchaRef = useRef<CaptchaHandle>(null);
@@ -90,7 +90,7 @@ function RegisterForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        // Le jeton du captcha ne sert qu'une fois
+        // The captcha token can only be used once
         captchaRef.current?.reset();
         if ((data as { code?: string }).code === "captcha") {
           setError(t("captchaRequis"));
@@ -223,7 +223,7 @@ function RegisterForm() {
           </label>
         </div>
 
-        {/* Information RGPD : le compte repose sur le contrat (CGU), pas sur un consentement à cocher */}
+        {/* GDPR notice: the account relies on the contract (terms of use), not on a consent box to tick */}
         <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 rounded-xl p-3">
           {t("rgpd")}{" "}
           <Link href="/confidentialite" target="_blank" className="text-primary font-medium underline">

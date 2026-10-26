@@ -13,7 +13,7 @@ class ProjetInline(admin.StackedInline):
 
 @admin.register(OrganisationModel)
 class OrganisationAdmin(admin.ModelAdmin):
-    """Une ONG n'apparaît sur le site qu'une fois la date de vérification renseignée."""
+    """An NGO only appears on the site once the verification date is filled in."""
     list_display = ['nom', 'cause', 'pays', 'ville', 'verifiee_le', 'actif']
     list_filter = ['cause', 'pays', 'actif']
     search_fields = ['nom', 'numero_enregistrement', 'contact_email']
@@ -37,7 +37,7 @@ class DonInline(admin.TabularInline):
 
     @admin.display(description='Donateur')
     def donateur_affiche(self, don):
-        # Identité transmise à l'ONG seulement avec l'accord du donateur
+        # Identity passed on to the NGO only with the donor's consent
         return f"{don.donateur.get_full_name()} <{don.donateur.email}>" if don.partage_identite else 'Anonyme'
 
     def has_add_permission(self, request, obj=None):
@@ -46,7 +46,7 @@ class DonInline(admin.TabularInline):
 
 @admin.register(ReversementModel)
 class ReversementAdmin(admin.ModelAdmin):
-    """Après le virement : joindre la preuve, renseigner la référence et passer à « Effectué »."""
+    """After the transfer: attach the proof, fill in the reference and switch to "Done"."""
     list_display = ['reference', 'organisation', 'periode', 'montant', 'nb_dons', 'date_prevue', 'statut', 'effectue_le']
     list_filter = ['statut', 'organisation']
     readonly_fields = ['organisation', 'periode', 'montant', 'nb_dons', 'date_prevue', 'coordonnees']
@@ -59,7 +59,7 @@ class ReversementAdmin(admin.ModelAdmin):
         return r.organisation.coordonnees_reversement or 'À renseigner sur la fiche de l\'ONG'
 
     def has_add_permission(self, request):
-        return False  # créés chaque mois par le worker
+        return False  # created every month by the worker
 
     def save_model(self, request, obj, form, change):
         if obj.statut == 'effectue':

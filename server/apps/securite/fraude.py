@@ -1,6 +1,6 @@
-"""Alertes anti-fraude : chaque tentative de contournement est enregistrée pour un administrateur.
+"""Anti-fraud alerts: every bypass attempt is recorded for an administrator.
 
-Au SEUIL-ième signalement d'un même compte sur 30 jours, les administrateurs sont prévenus par email (une fois).
+At the SEUIL-th report of the same account over 30 days, the administrators are notified by email (once).
 """
 import logging
 from datetime import timedelta

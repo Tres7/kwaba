@@ -10,7 +10,7 @@ interface LogoProps {
 
 const SIZES = { sm: "text-lg", md: "text-[22px]", lg: "text-3xl" };
 
-/** Le « A » orange de la charte (dégradé ambre → orange brûlé). */
+/** The brand's orange "A" (amber → burnt orange gradient). */
 export function LettreA() {
   return (
     <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(160deg, #FBBF24 0%, #F59E0B 45%, #C2410C 100%)" }}>
@@ -19,7 +19,7 @@ export function LettreA() {
   );
 }
 
-/** Logotype Kwa-Ba : « KWA-BA », lettres vert profond (blanches sur fond sombre) et deux A orange. */
+/** Kwa-Ba logotype: "KWA-BA", deep green letters (white on a dark background) and two orange A's. */
 export function Logotype({ inverted = false, className }: { inverted?: boolean; className?: string }) {
   return (
     <span className={cn("font-heading font-extrabold tracking-[0.04em] leading-none select-none", inverted ? "text-white" : "text-primary dark:text-white", className)}>

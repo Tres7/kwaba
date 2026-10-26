@@ -1,7 +1,7 @@
-"""Disponibilité d'un logement : une nuit est prise si une réservation active ou un blocage de l'hôte la couvre.
+"""Availability of a listing: a night is taken if an active booking or a host block covers it.
 
-Convention commune : une période [debut, fin) couvre les nuits de debut à fin - 1 ;
-le jour `fin` (départ) reste libre pour une nouvelle arrivée.
+Shared convention: a period [debut, fin) covers the nights from debut to fin - 1;
+the `fin` day (departure) stays free for a new arrival.
 """
 from datetime import date
 
@@ -12,17 +12,17 @@ from .models import BlocageModel, HebergementModel
 
 
 def verrouiller(hebergement_id) -> None:
-    """Verrouille le logement jusqu'à la fin de la transaction en cours.
+    """Locks the listing until the end of the current transaction.
 
-    À appeler avant conflit() ou a_des_reservations() dès que la décision mène à une écriture
-    (réservation, confirmation de paiement, blocage) : sans verrou, deux requêtes simultanées voient
-    toutes deux les dates libres et réservent les mêmes nuits. Lève une erreur hors transaction.
+    To call before conflit() or a_des_reservations() as soon as the decision leads to a write
+    (booking, payment confirmation, block): without a lock, two simultaneous requests both see
+    the dates free and book the same nights. Raises an error outside a transaction.
     """
     list(HebergementModel.objects.select_for_update().filter(pk=hebergement_id).values_list('pk', flat=True))
 
 
 def filtre_actives(prefixe: str = ''):
-    """Réservations qui occupent leurs dates : confirmées, ou en attente de paiement non expirées."""
+    """Bookings that hold their dates: confirmed, or waiting for a non-expired payment."""
     p = prefixe
     return (
         Q(**{f'{p}status': 'confirmed'})
@@ -32,7 +32,7 @@ def filtre_actives(prefixe: str = ''):
 
 
 def _reservations(hebergement_id, debut: date, fin: date, exclure=None):
-    from apps.reservations.models import ReservationModel  # import local : évite un import circulaire
+    from apps.reservations.models import ReservationModel  # local import: avoids a circular import
     qs = ReservationModel.objects.filter(
         filtre_actives(),
         hebergement_id=hebergement_id,
@@ -55,9 +55,9 @@ def est_disponible(hebergement_id, debut: date, fin: date) -> bool:
 
 
 def conflit(hebergement_id, debut: date, fin: date, exclure=None) -> str | None:
-    """Explique pourquoi la période n'est pas libre (message destiné au voyageur), ou None.
+    """Explains why the period is not free (message for the traveller), or None.
 
-    `exclure` : identifiant d'une réservation à ignorer (celle que l'on est en train de confirmer).
+    `exclure`: id of a booking to ignore (the one being confirmed).
     """
     if _reservations(hebergement_id, debut, fin, exclure).exists():
         return "Ces dates sont déjà réservées pour cet hébergement."
@@ -67,7 +67,7 @@ def conflit(hebergement_id, debut: date, fin: date, exclure=None) -> str | None:
 
 
 def periodes_indisponibles(hebergement_id, debut: date, fin: date, detail: bool = False) -> list[dict]:
-    """Périodes occupées sur [debut, fin). En mode public, fusionnées et sans aucune information sur leur origine."""
+    """Taken periods over [debut, fin). In public mode, merged and without any information on their origin."""
     periodes = []
     for r in _reservations(hebergement_id, debut, fin).select_related('guest'):
         p = {'debut': r.check_in, 'fin': r.check_out}
@@ -85,7 +85,7 @@ def periodes_indisponibles(hebergement_id, debut: date, fin: date, detail: bool 
     if detail:
         return periodes
 
-    # Fusion des périodes qui se touchent : le voyageur voit seulement « libre / pris »
+    # Merges touching periods: the traveller only sees "free / taken"
     fusion = []
     for p in periodes:
         if fusion and p['debut'] <= fusion[-1]['fin']:

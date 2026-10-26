@@ -1,12 +1,12 @@
-"""Version HTML des emails, construite à partir de leur version texte.
+"""HTML version of the emails, built from their text version.
 
-Les gabarits restent en texte (lisibles partout) ; leur mise en forme suit des conventions simples,
-converties ici en HTML aux couleurs de Kwa-Ba :
-- une ligne seule de 4 à 8 chiffres (en retrait)  → code mis en évidence ;
-- un bloc de lignes en retrait (« Clé : valeur »)  → carte de détails ;
-- « Libellé : https://… » ou un lien seul           → bouton (le libellé vient de la ligne ou de la précédente) ;
-- « L'équipe Kwa-Ba » et la formule qui précède     → signature.
-Le logo est joint à l'email (Content-ID) : il s'affiche sans charger d'image depuis Internet.
+Templates stay as text (readable everywhere); their layout follows simple conventions,
+converted here into HTML in the Kwa-Ba colours:
+- a single line of 4 to 8 digits (indented)            → highlighted code;
+- a block of indented lines ("Key: value")             → details card;
+- "Label: https://…" or a link alone                   → button (the label comes from the line or the previous one);
+- "L'équipe Kwa-Ba" and the closing line before it     → signature.
+The logo is attached to the email (Content-ID): it shows without loading an image from the Internet.
 """
 import html
 import re
@@ -58,7 +58,7 @@ def _code(code: str) -> str:
 
 
 def corps_html(texte: str) -> str:
-    """Convertit le texte d'un email en blocs HTML."""
+    """Converts the text of an email into HTML blocks."""
     blocs = re.split(r'\n\s*\n', texte.strip().replace('\r', ''))
     sortie = []
     for i, bloc in enumerate(blocs):
@@ -78,7 +78,7 @@ def corps_html(texte: str) -> str:
                           + ('<br>' if len(lignes) > 1 else '')
                           + f'<strong style="color:{VERT}">{html.escape(lignes[-1].strip())}</strong></p>')
             continue
-        # Lignes de texte, avec boutons pour les liens d'action
+        # Text lines, with buttons for the action links
         tampon = []
         for j, ligne in enumerate(lignes):
             seule = _URL_SEULE.match(ligne)
@@ -102,7 +102,7 @@ def corps_html(texte: str) -> str:
 
 
 def page_html(texte: str, sujet: str) -> str:
-    """Email complet : en-tête avec le logo, contenu, pied de page."""
+    """Full email: header with the logo, content, footer."""
     contact = getattr(settings, 'EMAIL_REPLY_TO', '') or getattr(settings, 'ASSISTANCE_CONTACT', '')
     pied_contact = (f'Une question ? Répondez à cet email ou écrivez à '
                     f'<a href="mailto:{html.escape(contact)}" style="color:{VERT}">{html.escape(contact)}</a>.<br>') if contact else ''

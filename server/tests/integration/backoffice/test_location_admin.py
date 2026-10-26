@@ -1,4 +1,4 @@
-"""Back-office : gestion de la location de voiture."""
+"""Back-office: car hire management."""
 from datetime import timedelta
 from io import BytesIO
 
@@ -82,11 +82,11 @@ def test_vehicule_prix_caution_et_activation(admin, lieu):
     citadine = CategorieVehiculeModel.objects.get(nom='Citadine')
     url = f'{B}categories/{citadine.id}/'
     proprietaire = _loueur(citadine, lieu)
-    # Pas d'activation sans prix ni propriétaire
+    # No activation without a price nor an owner
     assert admin.patch(url, {'actif': True}, format='json').status_code == 400
     assert admin.patch(url, {'prix_jour': 25000, 'actif': True}, format='json').status_code == 400
     reponse = admin.patch(url, {'prix_jour': 25000, 'proprietaire': proprietaire.id, 'caution_jours': 2, 'actif': True}, format='json')
-    assert reponse.data['actif'] is True and reponse.data['caution'] == 50000  # deux journées
+    assert reponse.data['actif'] is True and reponse.data['caution'] == 50000  # two days
     assert admin.patch(url, {'prix_jour': 80000}, format='json').data['caution'] == 100000  # plafond
     assert JournalAuditModel.objects.filter(action='backoffice_modification', details__objet='categorie_vehicule').exists()
 
@@ -103,12 +103,12 @@ def test_categorie_plusieurs_photos(admin, monkeypatch):
     assert [p['id'] for p in admin.get(f'{B}categories/{citadine.id}/').data['photos']] == ids
     assert admin.post(url, {'image': SimpleUploadedFile('x.txt', b'pas une image')}, format='multipart').status_code == 400
 
-    # La troisième devient la photo principale, puis la première est retirée
+    # The third one becomes the main photo, then the first one is removed
     assert [p['id'] for p in admin.patch(f'{url}{ids[2]}/', {'principale': True}, format='json').data] == [ids[2], ids[0], ids[1]]
     assert [p['id'] for p in admin.delete(f'{url}{ids[0]}/').data] == [ids[2], ids[1]]
     assert admin.delete(f'{url}{ids[0]}/').status_code == 404
 
-    # Le catalogue public montre toutes les photos, la principale en premier (aussi dans « image »)
+    # The public catalogue shows all the photos, the main one first (also in "image")
     citadine.prix_jour, citadine.actif = 25000, True
     citadine.save()
     from apps.locations.models import ParametresLocationModel
@@ -117,7 +117,7 @@ def test_categorie_plusieurs_photos(admin, monkeypatch):
     publique = next(c for c in admin.get('/api/v1/locations/catalogue/').data['categories'] if c['id'] == citadine.id)
     assert len(publique['photos']) == 2 and publique['image'] == publique['photos'][0]
 
-    # Limite par catégorie
+    # Limit per category
     monkeypatch.setattr(PhotoVehiculeModel, 'MAX_PAR_CATEGORIE', 2)
     assert admin.post(url, {'image': _photo()}, format='multipart').status_code == 400
     assert JournalAuditModel.objects.filter(details__objet='categorie_vehicule', details__champs=['photos']).count() == 5
@@ -145,20 +145,20 @@ def test_attribuer_proprietaire_et_chauffeur(admin, location, berline, lieu):
     chauffeur = ChauffeurModel.objects.create(prenom='Komlan', nom='Ade', telephone='+22890998877', categorie='berline',
                                               vehicule='-', immatriculation='-', pays_versement='TG',
                                               operateur_versement='togocel', numero_versement='90998877', excellence=True)
-    # Le véhicule a un propriétaire : lui seul est proposé
+    # The vehicle has an owner: only they are offered
     choix = admin.get(f'{B}locations/{location.id}/loueurs/', {'chauffeurs': 1}).data
     assert [p['id'] for p in choix['partenaires']] == [bon.id]
     assert choix['chauffeurs'] == [{'id': chauffeur.id, 'nom': 'Komlan Ade', 'telephone': '+22890998877', 'excellence': True, 'demande': False}]
 
     url = f'{B}locations/{location.id}/attribuer/'
     assert admin.post(url, {'partenaire': autre.id, 'chauffeur': chauffeur.id}, format='json').status_code == 400
-    # Formule avec chauffeur : chauffeur partenaire exigé
+    # Option with a driver: partner driver required
     assert admin.post(url, {'partenaire': bon.id, 'vehicule': 'Toyota Corolla grise'}, format='json').status_code == 400
     reponse = admin.post(url, {'partenaire': bon.id, 'chauffeur': chauffeur.id, 'vehicule': 'Toyota Corolla grise',
                                'immatriculation': 'TG 1234 AB'}, format='json')
     assert reponse.status_code == 200, reponse.data
     assert reponse.data['statut'] == 'partenaire_assigne' and reponse.data['partenaire']['nom'] == 'Lomé Auto'
-    # Chauffeur Excellence : Kwa-Ba garde 500 FCFA par jour au lieu de 1 000
+    # Excellence driver: Kwa-Ba keeps 500 FCFA per day instead of 1,000
     assert (reponse.data['chauffeur_partenaire']['nom'], reponse.data['part_kwaba_chauffeur']) == ('Komlan Ade', 1500)
 
 
@@ -169,7 +169,7 @@ def test_proprietaire_fondateur(admin, lieu):
         'fondateur_debut': jour.isoformat(), 'pays_versement': 'TG', 'operateur_versement': 'togocel',
         'numero_versement': '90000001',
     }, format='json')
-    assert reponse.status_code == 400  # début sans fin
+    assert reponse.status_code == 400  # start without end
     reponse = admin.post(B + 'loueurs/', {
         'nom': 'Ama Location', 'contact': 'Ama', 'telephone': '+22890000001', 'lieux': [lieu.id],
         'fondateur_debut': jour.isoformat(), 'fondateur_fin': (jour + timedelta(days=180)).isoformat(),

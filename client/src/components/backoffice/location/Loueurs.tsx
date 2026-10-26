@@ -16,7 +16,7 @@ type Formulaire = Omit<Loueur, "id" | "nb_locations" | "nb_vehicules" | "commiss
 const VIDE: Formulaire = { nom: "", contact: "", telephone: "", email: "", categories: [], lieux: [], actif: true,
   fondateur_debut: "", fondateur_fin: "", pays_versement: "TG", operateur_versement: "", numero_versement: "" };
 
-/** Cases à cocher en puces (catégories, lieux). */
+/** Checkboxes as chips (categories, places). */
 function Choix<T extends { id: number; nom: string }>({ label, elements, valeur, onChange, erreur }: {
   label: string; elements: T[]; valeur: number[]; onChange: (v: number[]) => void; erreur?: string;
 }) {
@@ -39,7 +39,7 @@ function Choix<T extends { id: number; nom: string }>({ label, elements, valeur,
   );
 }
 
-/** Propriétaires de véhicules partenaires (particuliers ou agences), payés après chaque location moins la commission. */
+/** Partner vehicle owners (individuals or agencies), paid after each rental minus the commission. */
 export default function Loueurs() {
   const queryClient = useQueryClient();
   const { data: config } = useConfigPaiement();

@@ -16,13 +16,13 @@ PASSWORD = 'Kwaba-Test-2026!'
 
 @pytest.fixture(autouse=True)
 def _db_and_fast_hasher(db, settings):
-    # Tous les tests d'intégration ont accès à la base ; un hachage rapide évite ~0,3 s par mot de passe
+    # All integration tests have access to the database; a fast hasher saves ~0.3 s per password
     settings.PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 
 @pytest.fixture(autouse=True)
 def _paiement_hors_ligne(settings):
-    # Sans FedaPay configuré, les tests réservent sans paiement (comme en développement) ; voir test_paiement_obligatoire
+    # Without FedaPay configured, tests book without payment (like in development); see test_paiement_obligatoire
     settings.PAIEMENT_HORS_LIGNE = True
 
 
@@ -34,9 +34,9 @@ def _site_ouvert(settings):
 
 @pytest.fixture(autouse=True)
 def _broker_down(monkeypatch):
-    """Sans RabbitMQ, FallbackEventBus envoie l'email directement (mail.outbox).
+    """Without RabbitMQ, FallbackEventBus sends the email directly (mail.outbox).
 
-    Les vrais échanges avec le broker sont testés dans tests/broker.
+    Real exchanges with the broker are tested in tests/broker.
     """
     def refuse_connection(self, event):
         raise ConnectionError('RabbitMQ indisponible (tests d\'intégration)')
@@ -64,7 +64,7 @@ def make_user():
         fields.setdefault('first_name', 'Test')
         fields.setdefault('last_name', f'{role.capitalize()} {n}')
         if role == 'hote':
-            # Téléphone exigé pour publier une annonce (l'agent appelle l'hôte pour la visite)
+            # Phone required to publish a listing (the agent calls the host for the visit)
             fields.setdefault('phone', f'+22991{n:06d}')
         return UserModel.objects.create_user(password=PASSWORD, role=role, is_verified=is_verified, **fields)
 
@@ -73,7 +73,7 @@ def make_user():
 
 @pytest.fixture
 def code_envoye():
-    """Dernier code à 6 chiffres envoyé par email à cette adresse (la base n'en garde que l'empreinte)."""
+    """Last 6-digit code emailed to this address (the database only keeps its fingerprint)."""
     def _lire(email):
         for message in reversed(mail.outbox):
             if email.lower() in [d.lower() for d in message.to]:
@@ -91,7 +91,7 @@ def make_hebergement(make_user):
         fields.setdefault('name', 'Villa test')
         fields.setdefault('city', 'Lomé')
         fields.setdefault('price_per_night', 25000)
-        # Annonce déjà vérifiée par un agent (publiée) ; les tests de la vérification passent statut_verification
+        # Listing already verified by an agent (published); the verification tests pass statut_verification
         fields.setdefault('statut_verification', 'verifiee')
         return HebergementModel.objects.create(host=host or make_user(role='hote'), **fields)
 
@@ -100,7 +100,7 @@ def make_hebergement(make_user):
 
 @pytest.fixture
 def raw_client():
-    """Client qui renvoie la réponse 500 au lieu de lever l'exception de la vue (tests « jamais 500 »)."""
+    """Client that returns the 500 response instead of raising the view's exception ("never 500" tests)."""
     client = APIClient()
     client.raise_request_exception = False
     return client
@@ -108,7 +108,7 @@ def raw_client():
 
 @pytest.fixture
 def client_for():
-    """Un client authentifié distinct par utilisateur."""
+    """A separate authenticated client per user."""
     def _login_as(user):
         client = APIClient()
         client.force_authenticate(user=user)
@@ -119,7 +119,7 @@ def client_for():
 
 @pytest.fixture
 def make_reservation(make_user):
-    """Réservation écrite directement en base (y compris dans le passé, impossible via l'API)."""
+    """Booking written directly in the database (including in the past, impossible through the API)."""
     def _make(hebergement, guest=None, starts_in=10, nights=3, status='confirmed'):
         check_in = timezone.localdate() + timedelta(days=starts_in)
         return ReservationModel.objects.create(

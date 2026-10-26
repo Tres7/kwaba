@@ -1,5 +1,5 @@
 failure-threshold: warning
 ignored:
-  # Épingler les versions apt sur une image -slim casse le build à chaque mise à jour de Debian ;
-  # l'image de base est mise à jour par Dependabot.
+  # Pinning apt versions on a -slim image breaks the build at every Debian update;
+  # the base image is updated by Dependabot.
   - DL3008

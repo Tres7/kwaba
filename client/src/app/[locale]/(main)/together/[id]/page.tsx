@@ -49,7 +49,7 @@ function VoyageContent() {
   const { data: v, isError } = useQuery({
     queryKey: cle,
     queryFn: async () => (await api.get<Voyage>(`/v1/voyages/${params.id}/`)).data,
-    // Les autres membres votent et proposent : on rafraîchit régulièrement
+    // The other members vote and suggest: refresh regularly
     refetchInterval: 15000,
     retry: false,
   });

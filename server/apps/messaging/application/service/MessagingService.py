@@ -31,13 +31,13 @@ logger = logging.getLogger(__name__)
 
 
 class MessagingService:
-    """Messagerie voyageur ↔ hôte.
+    """Traveller ↔ host messaging.
 
-    Anti-contournement : tout passe par la messagerie, avant comme après la réservation.
-    - les coordonnées (téléphone, email, liens, réseaux sociaux) sont masquées dans chaque message, et les
-      tentatives signalées aux administrateurs (ContactGuard) ;
-    - tant que le voyageur n'a pas de réservation payée du logement, il reste anonyme pour l'hôte (« Voyageur »,
-      sans nom ni photo) : un hôte ne peut pas l'identifier pour lui proposer un arrangement hors du site.
+    Anti-bypass: everything goes through the messaging, before as after the booking.
+    - contact details (phone, email, links, social networks) are hidden in every message, and the
+      attempts reported to the administrators (ContactGuard);
+    - as long as the traveller has no paid booking for the listing, they stay anonymous to the host ("Voyageur",
+      without name nor photo): a host cannot identify them to offer an arrangement outside the site.
     """
 
     ANONYMOUS_GUEST = 'Voyageur'
@@ -67,7 +67,7 @@ class MessagingService:
         self._bookings = bookings or EveryoneBooked()
 
     def start_conversation(self, user_id: uuid.UUID, hebergement_id: uuid.UUID) -> Tuple[ConversationSummaryDTO, bool]:
-        """Idempotent : renvoie le fil existant s'il y en a déjà un. Le booléen indique une création."""
+        """Idempotent: returns the existing thread if there is already one. The boolean tells a creation."""
         hebergement = self._hebergements.get(hebergement_id)
         if hebergement is None:
             raise HebergementNotFoundException(str(hebergement_id))
@@ -76,9 +76,9 @@ class MessagingService:
     def open_as_host(
         self, host_id: uuid.UUID, hebergement_id: uuid.UUID, guest_id: uuid.UUID,
     ) -> Tuple[ConversationSummaryDTO, bool]:
-        """L'hôte ouvre (ou retrouve) le fil avec un voyageur de son logement.
+        """The host opens (or finds) the thread with a traveller of their listing.
 
-        Le contrôle « ce voyageur a bien réservé ce logement » est fait par l'appelant.
+        The "this traveller did book this listing" check is made by the caller.
         """
         hebergement = self._hebergements.get(hebergement_id)
         if hebergement is None:
@@ -88,7 +88,7 @@ class MessagingService:
         return self._open(hebergement, guest_id=guest_id, viewer_id=host_id)
 
     def _open(self, hebergement, guest_id: uuid.UUID, viewer_id: uuid.UUID) -> Tuple[ConversationSummaryDTO, bool]:
-        # Lève CannotContactOwnHebergementException si le voyageur est l'hôte
+        # Raises CannotContactOwnHebergementException if the traveller is the host
         conversation = Conversation.start(hebergement.id, guest_id, hebergement.host_id)
 
         existing = self._conversations.find_by_hebergement_and_guest(hebergement.id, guest_id)
@@ -98,10 +98,10 @@ class MessagingService:
         try:
             created = self._conversations.create(conversation)
         except ConversationAlreadyExistsException:
-            # Création concurrente : l'autre requête a gagné, on renvoie son fil
+            # Concurrent creation: the other request won, its thread is returned
             existing = self._conversations.find_by_hebergement_and_guest(hebergement.id, guest_id)
             if existing is None:
-                # Violation d'intégrité d'une autre nature (hébergement supprimé entre-temps)
+                # Integrity violation of another kind (listing deleted in the meantime)
                 raise HebergementNotFoundException(str(hebergement.id))
             return self._summaries([existing], viewer_id)[0], False
 
@@ -111,7 +111,7 @@ class MessagingService:
         return self._summaries(self._conversations.list_for_user(user_id), user_id)
 
     def unread_total(self, user_id: uuid.UUID) -> int:
-        """Nombre total de messages non lus, tous fils confondus (badge de la navbar)."""
+        """Total number of unread messages, all threads together (navbar badge)."""
         conversations = self._conversations.list_for_user(user_id)
         return sum(self._messages.unread_counts(user_id, conversations).values())
 
@@ -132,15 +132,15 @@ class MessagingService:
         return [MessageDTO.from_entity(m, user_id) for m in messages]
 
     def send_message(self, user_id: uuid.UUID, conversation_id: uuid.UUID, content: str) -> MessageDTO:
-        Message.compose(conversation_id, user_id, content)  # validation du texte saisi (vide, longueur)
+        Message.compose(conversation_id, user_id, content)  # validation of the typed text (empty, length)
         screening = self._guard.screen(content)
         message = Message.compose(conversation_id, user_id, screening.content)
         message.masked = screening.masked
 
         with self._tx.atomic():
-            # Le verrou sérialise les envois d'un même fil : les ids des messages y sont donc
-            # validés dans l'ordre (curseur fiable pour ?after=), et la décision 0→1 ne peut
-            # pas être prise deux fois en parallèle.
+            # The lock serialises the sending in a thread: message ids are therefore
+            # committed in order (reliable cursor for ?after=), and the 0→1 decision cannot
+            # be taken twice in parallel.
             conversation = self._conversations.find_by_id_for_update(conversation_id)
             if conversation is None or not conversation.is_participant(user_id):
                 raise ConversationNotFoundException(str(conversation_id))
@@ -160,7 +160,7 @@ class MessagingService:
         return MessageDTO.from_entity(saved, user_id)
 
     def mark_as_read(self, user_id: uuid.UUID, conversation_id: uuid.UUID, up_to_id: Optional[int] = None) -> int:
-        """Avance le curseur de lecture (jusqu'au dernier message par défaut). Renvoie le curseur."""
+        """Moves the read cursor forward (up to the last message by default). Returns the cursor."""
         with self._tx.atomic():
             conversation = self._conversations.find_by_id_for_update(conversation_id)
             if conversation is None or not conversation.is_participant(user_id):
@@ -175,8 +175,8 @@ class MessagingService:
             return conversation.last_read_id_for(user_id)
 
     def _schedule_new_message_email(self, conversation: Conversation, message: Message, recipient_id: uuid.UUID) -> None:
-        """Écrit la notification dans l'outbox, dans la transaction de l'envoi.
-        Le relais la publiera après le délai, si le destinataire n'a pas lu entre-temps."""
+        """Writes the notification into the outbox, in the sending transaction.
+        The relay will publish it after the delay, if the recipient has not read in the meantime."""
         people = self._users.get_many([recipient_id, message.sender_id])
         recipient = people.get(recipient_id)
         sender = people.get(message.sender_id)
@@ -211,7 +211,7 @@ class MessagingService:
         return pair in self._bookings.booked([pair])
 
     def _participant_conversation(self, conversation_id: uuid.UUID, user_id: uuid.UUID) -> Conversation:
-        # Un non-participant reçoit la même réponse qu'un fil inexistant : on ne révèle pas son existence
+        # A non-participant gets the same response as a missing thread: its existence is not revealed
         conversation = self._conversations.find_by_id(conversation_id)
         if conversation is None or not conversation.is_participant(user_id):
             raise ConversationNotFoundException(str(conversation_id))
@@ -221,7 +221,7 @@ class MessagingService:
         if not conversations:
             return []
 
-        # Nombre de requêtes constant, quel que soit le nombre de fils
+        # Constant number of queries, whatever the number of threads
         ids = [c.id for c in conversations]
         last_messages = self._messages.last_messages(ids)
         unread = self._messages.unread_counts(user_id, conversations)
@@ -235,7 +235,7 @@ class MessagingService:
             other = others.get(c.other_participant(user_id))
             last = last_messages.get(c.id)
             is_booked = (c.hebergement_id, c.guest_id) in booked
-            # Côté hôte, voyageur anonyme tant qu'il n'a pas payé
+            # On the host's side, anonymous traveller as long as they have not paid
             anonymous = other is not None and c.role_of(user_id) == 'host' and not is_booked
             summaries.append(ConversationSummaryDTO(
                 id=c.id,

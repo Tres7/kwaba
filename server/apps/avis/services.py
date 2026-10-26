@@ -6,12 +6,12 @@ from django.utils import timezone
 from apps.hebergements.models import HebergementModel
 from apps.reservations.models import ReservationModel
 
-# Délai pour laisser un avis après le départ (au-delà, le souvenir n'est plus fiable)
+# Time allowed to leave a review after departure (beyond it, memories are no longer reliable)
 DELAI_AVIS_JOURS = 14
 
 
 def motif_refus(reservation: ReservationModel, user) -> str | None:
-    """Renvoie la raison pour laquelle l'utilisateur ne peut pas évaluer ce séjour, ou None s'il le peut."""
+    """Returns the reason why the user cannot review this stay, or None if they can."""
     today = timezone.localdate()
     if reservation.guest_id != user.id:
         return "Seul le voyageur qui a séjourné peut laisser un avis."
@@ -43,7 +43,7 @@ def sejours_a_evaluer(user):
 
 
 def recalculer_note(hebergement_id) -> None:
-    """La note affichée et le nombre d'avis ne proviennent que des avis vérifiés."""
+    """The displayed rating and the number of reviews only come from verified reviews."""
     stats = HebergementModel.objects.filter(pk=hebergement_id).aggregate(
         moyenne=Avg('avis__note'), total=Count('avis'),
     )

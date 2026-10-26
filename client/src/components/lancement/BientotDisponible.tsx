@@ -13,14 +13,14 @@ import { EVENEMENT, lireConsentement } from "@/lib/consentement";
 import { langue } from "@/lib/utils";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
 
-// Ancienne clé qui empêchait la fenêtre de revenir : effacée des navigateurs qui l'ont encore
+// Old key that kept the window from coming back: cleared from the browsers that still have it
 const ANCIENNE_CLE = "kwaba_bientot_ferme";
-// Laisse passer l'écran d'accueil animé (2 s) avant d'ouvrir la fenêtre
+// Lets the animated splash screen (2 s) go by before opening the window
 const DELAI_MS = 2400;
-// Pages où la fenêtre gênerait : devenir hôte, signature d'un contrat
+// Pages where the window would get in the way: becoming a host, signing a contract
 const PAGES_EXCLUES = /^\/(en\/)?(hote|contrat)(\/|$)/;
 
-/** Vrai tant qu'aucun logement n'est publié (la fenêtre et le bandeau disparaissent d'eux-mêmes au premier). */
+/** True while no listing is published (the window and the banner disappear by themselves with the first one). */
 export function useAucunLogement(): boolean {
   const { data } = useQuery({
     queryKey: ["lancement", "aucun-logement"],
@@ -30,7 +30,7 @@ export function useAucunLogement(): boolean {
   return data === true;
 }
 
-/** Formulaire « Prévenez-moi » : l'email n'est utilisé que pour annoncer l'ouverture. */
+/** "Notify me" form: the email is only used to announce the opening. */
 export function PrevenezMoi({ compact }: { compact?: boolean }) {
   const t = useTranslations("bientot");
   const [email, setEmail] = useState("");
@@ -75,15 +75,15 @@ export function PrevenezMoi({ compact }: { compact?: boolean }) {
   );
 }
 
-/** Fenêtre affichée à chaque visite tant que le site n'a aucun logement publié : à l'arrivée sur le site et à chaque
- * actualisation, une fois par chargement de page (la navigation d'une page à l'autre ne la rouvre pas). */
+/** Window shown at every visit while the site has no published listing: on arrival on the site and at every
+ * refresh, once per page load (navigating from page to page does not open it again). */
 export default function BientotDisponible() {
   const t = useTranslations("bientot");
   const pathname = usePathname();
   const aucunLogement = useAucunLogement();
   const modules = useReglagesSite().data?.modules;
   const [ouverte, setOuverte] = useState(false);
-  // Rendu côté client seulement (portail) : pas d'écart avec le HTML du serveur
+  // Client-side rendering only (portal): no mismatch with the server HTML
   const [monte, setMonte] = useState(false);
   useEffect(() => setMonte(true), []);
   const panneau = useRef<HTMLDivElement>(null);
@@ -96,7 +96,7 @@ export default function BientotDisponible() {
     } catch { /* stockage indisponible */ }
   }, []);
 
-  // Après le choix des cookies (le bandeau de consentement passe en premier) et l'écran d'accueil
+  // After the cookie choice (the consent banner comes first) and the splash screen
   useEffect(() => {
     if (!aucunLogement || exclue || montree.current) return;
     let minuteur: ReturnType<typeof setTimeout> | undefined;
@@ -184,7 +184,7 @@ export default function BientotDisponible() {
   );
 }
 
-/** Bandeau des pages de recherche tant qu'aucun logement n'est publié. */
+/** Banner of the search pages while no listing is published. */
 export function BandeauBientot() {
   const t = useTranslations("bientot");
   const aucunLogement = useAucunLogement();

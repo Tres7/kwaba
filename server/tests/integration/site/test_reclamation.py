@@ -1,4 +1,4 @@
-"""Formulaire de réclamation du centre d'aide : un email à l'adresse de contact, rien n'est enregistré."""
+"""Complaint form of the help centre: an email to the contact address, nothing is saved."""
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient

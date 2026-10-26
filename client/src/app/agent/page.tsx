@@ -7,7 +7,7 @@ import { useTableauAgent, type TypeMission } from "@/lib/agent";
 
 const ICONES: Record<TypeMission, typeof Home> = { logement: Home, piece: IdCard };
 
-/** Accueil de l'espace agent : ce qui attend dans la file commune, mes missions en cours, mon activité du mois. */
+/** Home of the agent space: what waits in the shared queue, my ongoing missions, my activity this month. */
 export default function AccueilAgentPage() {
   const { data: session } = useSession();
   const { data, isLoading, isError } = useTableauAgent();

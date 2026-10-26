@@ -1,4 +1,4 @@
-# validation of json, deserialization et serialization
+# JSON validation, deserialization and serialization
 import hashlib
 import re
 
@@ -11,7 +11,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from apps.users.domain.entities.User import UserRole
 
-# Le rôle admin ne peut jamais être choisi à l'inscription publique
+# The admin role can never be chosen at public sign-up
 PUBLIC_ROLES = [UserRole.VOYAGEUR.value, UserRole.HOTE.value]
 
 
@@ -89,12 +89,12 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 
 class RefreshWithGracePeriodSerializer(TokenRefreshSerializer):
-    """Rotation avec liste noire, et délai de grâce pour les renouvellements parallèles du même jeton.
+    """Rotation with blacklist, and grace period for parallel renewals of the same token.
 
-    Le premier appel renouvelle la paire et met l'ancien refresh token sur liste noire. Pendant
-    JWT_REFRESH_GRACE_SECONDS, l'ancien jeton renvoie cette même nouvelle paire au lieu d'un 401 ;
-    ensuite il est refusé. Les appels simultanés sont sérialisés par un verrou PostgreSQL : la liste noire
-    et le cache (DatabaseCache) sont validés dans la même transaction, l'appel suivant trouve donc la paire.
+    The first call renews the pair and blacklists the old refresh token. During
+    JWT_REFRESH_GRACE_SECONDS, the old token returns this same new pair instead of a 401;
+    afterwards it is refused. Simultaneous calls are serialised by a PostgreSQL lock: the blacklist
+    and the cache (DatabaseCache) are committed in the same transaction, so the next call finds the pair.
     """
 
     def validate(self, attrs):

@@ -1,7 +1,7 @@
-"""API du back-office. Contrat : documentation/modules/backoffice-api.md.
+"""Back-office API. Contract: documentation/modules/backoffice-api.md.
 
-Toutes les vues exigent le rôle admin, lu en base à chaque requête (EstAdministrateur). Chaque écriture est
-tracée dans le journal d'audit (apps.securite) avec l'administrateur, la cible et le motif.
+Every view requires the admin role, read from the database at every request (EstAdministrateur). Every write is
+recorded in the audit log (apps.securite) with the administrator, the target and the reason.
 """
 from datetime import timedelta
 
@@ -57,12 +57,12 @@ def _paginer(request, qs, serialiser) -> Response:
 
 
 def _booleen(valeur):
-    """'true' / 'false' (paramètre d'URL) → bool ; toute autre valeur → None (filtre ignoré)."""
+    """'true' / 'false' (URL parameter) → bool; any other value → None (filter ignored)."""
     return {'true': True, 'false': False}.get((valeur or '').lower())
 
 
 def _motif(valeur):
-    """Motif obligatoire des suppressions et annulations : (motif, réponse d'erreur ou None)."""
+    """Required reason for deletions and cancellations: (reason, error response or None)."""
     motif = (valeur or '').strip()
     if not MOTIF_MIN <= len(motif) <= MOTIF_MAX:
         return motif, Response(
@@ -116,7 +116,7 @@ class StatsView(VueAdmin):
         avis = AvisModel.objects.aggregate(total=Count('id'), moyenne=Avg('note'))
         avis['moyenne'] = round(avis['moyenne'], 1) if avis['moyenne'] is not None else None
 
-        # Une entrée par jour sur 30 jours (aujourd'hui inclus), à 0 les jours sans réservation confirmée
+        # One entry per day over 30 days (today included), 0 on days without a confirmed booking
         par_jour = {
             ligne['jour']: ligne
             for ligne in ReservationModel.objects
@@ -143,7 +143,7 @@ class StatsView(VueAdmin):
 # --- 2. Utilisateurs --------------------------------------------------------------------------------
 
 def _conditions(u) -> dict | None:
-    """Commission de l'hôte : catégorie, Programme Fondateurs et taux appliqué aujourd'hui."""
+    """Host's commission: category, Founders Programme and rate applied today."""
     if u.role != 'hote':
         return None
     c = getattr(u, 'conditions_hote', None)
@@ -215,13 +215,13 @@ class UtilisateurDetailView(VueAdmin):
                 return Response({'conditions': [erreur]}, status=status.HTTP_400_BAD_REQUEST)
         cible.save(update_fields=['role', 'is_active'])
         if not cible.is_active:
-            # Ferme ses sessions : sans refresh token valide, il est déconnecté au plus tard à l'expiration du jeton d'accès
+            # Closes their sessions: without a valid refresh token, they are signed out at the latest when the access token expires
             revoquer_jetons(cible.pk)
         return Response(_utilisateur(_utilisateurs().get(pk=cible.pk)))
 
 
 def _modifier_conditions(cible, valeurs, request) -> str | None:
-    """Catégorie (particulier, hôtel) et dates du Programme Fondateurs d'un hôte. Renvoie un message d'erreur."""
+    """Category (individual, hotel) and Founders Programme dates of a host. Returns an error message."""
     if cible.role != 'hote' or not isinstance(valeurs, dict):
         return "Seul un hôte a des conditions de commission."
     categorie = valeurs.get('categorie', 'particulier')
@@ -298,8 +298,8 @@ class HebergementDetailView(VueAdmin):
             changements['is_available'] = annonce.is_available = donnees['is_available']
         a_verifier = False
         if 'est_verifie' in donnees and donnees['est_verifie'] != (annonce.statut_verification == 'verifiee'):
-            # Valider ici publie l'annonce sans visite d'agent ; retirer la validation la retire du site
-            # et prévient les agents qu'une visite est à faire
+            # Validating here publishes the listing without an agent visit; removing the validation takes it off the site
+            # and tells the agents that a visit is needed
             annonce.statut_verification = 'verifiee' if donnees['est_verifie'] else 'en_attente'
             if donnees['est_verifie']:
                 annonce.motif_refus = ''
@@ -334,7 +334,7 @@ class HebergementDetailView(VueAdmin):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# --- 4. Réservations --------------------------------------------------------------------------------
+# --- 4. Bookings --------------------------------------------------------------------------------
 
 def _reservation(r) -> dict:
     h = r.hebergement
@@ -359,7 +359,7 @@ class ReservationListView(VueAdmin):
         params = request.query_params
         if q := params.get('q', '').strip():
             filtre = Q(hebergement__name__icontains=q) | Q(guest__email__icontains=q)
-            # Référence RES-AF2026-3A43 : les 4 derniers caractères sont le début de l'identifiant
+            # Reference RES-AF2026-3A43: the last 4 characters are the start of the id
             if q.upper().startswith('RES-'):
                 fin = q.rsplit('-', 1)[-1]
                 if len(fin) >= 2:
@@ -367,7 +367,7 @@ class ReservationListView(VueAdmin):
             qs = qs.filter(filtre)
         if (statut := params.get('statut')) in dict(ReservationModel.STATUS_CHOICES):
             qs = qs.filter(status=statut)
-        # Séjours qui chevauchent la période demandée
+        # Stays that overlap the requested period
         if debut := parse_date(params.get('debut', '') or ''):
             qs = qs.filter(check_out__gt=debut)
         if fin := parse_date(params.get('fin', '') or ''):
@@ -384,7 +384,7 @@ class ReservationAnnulerView(VueAdmin):
         if not reservation:
             return _introuvable('Réservation')
         try:
-            # Annulation par Kwa-Ba : le voyageur est remboursé en totalité s'il a payé (même séjour commencé)
+            # Cancellation by Kwa-Ba: the traveller is fully refunded if they paid (even for a stay already started)
             rembourse = paiements.annuler(reservation, par='plateforme')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
@@ -425,6 +425,6 @@ class AvisDetailView(VueAdmin):
             return _introuvable('Avis')
         trace = {'avis_id': str(avis.pk), 'annonce': avis.hebergement.name, 'auteur': avis.auteur.email,
                  'note': avis.note, 'motif': motif}
-        avis.delete()  # le signal post_delete de l'app avis recalcule la note de l'annonce
+        avis.delete()  # the post_delete signal of the avis app computes the listing's rating again
         journaliser('avis_supprime', request, utilisateur=request.user, **trace)
         return Response(status=status.HTTP_204_NO_CONTENT)

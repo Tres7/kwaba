@@ -1,4 +1,4 @@
-"""Kwa-Ba Together : voyage de groupe, invitation, votes, budget par personne, itinéraire."""
+"""Kwa-Ba Together: group trip, invitation, votes, budget per person, itinerary."""
 from datetime import timedelta
 
 import pytest
@@ -10,7 +10,7 @@ VOYAGES = '/api/v1/voyages/'
 
 @pytest.fixture
 def client_for():
-    """Un client par utilisateur : plusieurs membres agissent dans le même test."""
+    """One client per user: several members act in the same test."""
     def _client(user):
         client = APIClient()
         client.force_authenticate(user=user)
@@ -45,7 +45,7 @@ def test_creer_inviter_rejoindre(client_for, make_user):
     invite = client_for(make_user(first_name='Kofi'))
     apercu = invite.get(f"{VOYAGES}invitations/{v['code_invitation']}/").data
     assert (apercu['nom'], apercu['organisateur'], apercu['deja_membre']) == ('Abidjan entre amis', 'Ama K.', False)
-    # Avant d'avoir rejoint, le voyage est invisible
+    # Before joining, the trip is invisible
     assert invite.get(f"{VOYAGES}{v['id']}/").status_code == 404
     assert invite.post(f"{VOYAGES}invitations/{v['code_invitation']}/").status_code == 200
     assert invite.post(f"{VOYAGES}invitations/{v['code_invitation']}/").status_code == 200  # idempotent
@@ -67,7 +67,7 @@ def test_votes_et_budget_par_personne(client_for, make_user, make_hebergement):
     assert doublon.status_code == 409
 
     p_appart = next(p for p in d['propositions'] if p['hebergement']['name'] == 'Appartement Cocody')
-    # 4 nuits x 40 000 + 6 % = 169 600, à 4 : 42 400 chacun
+    # 4 nights x 40,000 + 6 % = 169,600, for 4: 42,400 each
     assert p_appart['budget'] == {'nuits': 4, 'total': 169600, 'par_personne': 42400, 'personnes': 4}
     assert p_appart['disponible'] is True and p_appart['assez_grand'] is True
 
@@ -75,10 +75,10 @@ def test_votes_et_budget_par_personne(client_for, make_user, make_hebergement):
     p_villa = next(p for p in d['propositions'] if p['hebergement']['name'] == 'Villa Assinie')
     orga.post(f"{VOYAGES}{v['id']}/vote/", {'proposition': p_villa['id']}, format='json')
     d = ami.post(f"{VOYAGES}{v['id']}/vote/", {'proposition': p_villa['id']}, format='json').data
-    assert d['propositions'][0]['hebergement']['name'] == 'Villa Assinie'  # trié par votes
+    assert d['propositions'][0]['hebergement']['name'] == 'Villa Assinie'  # sorted by votes
     assert d['propositions'][0]['votes'] == 2 and d['mon_vote'] == p_villa['id']
 
-    # Changer d'avis : un seul vote par membre
+    # Changing one's mind: a single vote per member
     d = ami.post(f"{VOYAGES}{v['id']}/vote/", {'proposition': p_appart['id']}, format='json').data
     assert sorted(p['votes'] for p in d['propositions']) == [1, 1]
 
@@ -109,9 +109,9 @@ def test_itineraire_et_reservations_partagees(client_for, make_user, make_heberg
                                              'lieu': 'Treichville'}, format='json')
     orga.post(f"{VOYAGES}{v['id']}/etapes/", {'date': jour, 'heure': '08:30', 'titre': 'Petit-déjeuner'}, format='json')
     etapes = orga.get(f"{VOYAGES}{v['id']}/").data['etapes']
-    assert [e['titre'] for e in etapes] == ['Petit-déjeuner', 'Marché de Treichville']  # triées par heure
+    assert [e['titre'] for e in etapes] == ['Petit-déjeuner', 'Marché de Treichville']  # sorted by time
 
-    # Partage d'une réservation : seulement les siennes
+    # Sharing a booking: only one's own
     h = make_hebergement(city='Abidjan', price_per_night=30000)
     debut = timezone.localdate() + timedelta(days=30)
     r = ami.post('/api/v1/reservations/', {'hebergement': str(h.id), 'check_in': debut.isoformat(),

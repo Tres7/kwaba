@@ -46,7 +46,7 @@ function RechercheContent() {
   const searchParams = useSearchParams();
   const { status } = useSession();
 
-  // L'URL est la source de vérité : partageable et compatible bouton retour
+  // The URL is the source of truth: shareable and works with the back button
   const params = Object.fromEntries(FILTER_KEYS.map((k) => [k, searchParams.get(k) ?? ""])) as Record<(typeof FILTER_KEYS)[number], string>;
 
   const [city, setCity] = useState(params.city);
@@ -58,7 +58,7 @@ function RechercheContent() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [carte, setCarte] = useState(false);
 
-  // Resynchronise le formulaire quand l'URL change (recherche depuis la navbar, bouton retour…)
+  // Syncs the form again when the URL changes (search from the navbar, back button…)
   useEffect(() => {
     setCity(searchParams.get("city") ?? "");
     setCheckIn(searchParams.get("check_in") ?? "");
@@ -111,7 +111,7 @@ function RechercheContent() {
     pushParams({ equipements: suivants.join(",") });
   };
   const activeCount = [params.type, params.sort, params.price_min, params.price_max, params.petit_dejeuner].filter(Boolean).length + equipements.length;
-  // Carte de la zone cherchée (les annonces n'ont pas encore de coordonnées : pas d'épingle par logement)
+  // Map of the searched area (listings have no coordinates yet: no pin per listing)
   const lieuCarte = params.city || "Lomé";
   const villeCarte = !params.city || QUARTIERS_LOME.includes(params.city) ? "Lomé, Togo" : "Togo";
 
@@ -199,7 +199,7 @@ function RechercheContent() {
             <Search size={16} className="text-muted flex-shrink-0" />
             <ChampDestination
               value={city} onChange={setCity}
-              // Ville proposée choisie : la recherche part tout de suite
+              // Suggested city chosen: the search starts right away
               onVille={(ville) => pushParams({ city: ville })}
               placeholder={t("destinationExemple")}
               ariaLabel={t("destination")}
@@ -255,7 +255,7 @@ function RechercheContent() {
               </div>
             </div>
 
-            {/* Types toujours visibles sur mobile (les autres filtres sont dans le panneau « Filtres ») */}
+            {/* Types always visible on mobile (the other filters are in the "Filters" panel) */}
             <div className="lg:hidden -mt-2 mb-5 overflow-x-auto">{typesChips}</div>
 
             {carte && (

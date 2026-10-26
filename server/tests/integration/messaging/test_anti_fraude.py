@@ -1,5 +1,5 @@
-"""Anti-contournement : coordonnées masquées dans les messages et les annonces, voyageur anonyme avant paiement,
-alertes pour le back-office."""
+"""Anti-bypass: contact details hidden in messages and listings, anonymous traveller before payment,
+alerts for the back-office."""
 import pytest
 from django.core import mail
 
@@ -52,7 +52,7 @@ def test_message_masque_et_signale(client_for, guest, listing, thread):
     assert reponse.status_code == 201
     assert reponse.data['masked'] is True
     assert '90 12 34 56' not in reponse.data['content'] and 'ama@gmail.com' not in reponse.data['content']
-    assert MessageModel.objects.get().content.count(MASQUE) == 2  # le texte d'origine n'est pas conservé
+    assert MessageModel.objects.get().content.count(MASQUE) == 2  # the original text is not kept
     recu = client_for(listing.host).get(f'{CONVERSATIONS}{thread}/messages/').data['results'][0]
     assert recu['masked'] is True and MASQUE in recu['content']
     alerte = AlerteFraudeModel.objects.get()
@@ -76,14 +76,14 @@ def test_voyageur_anonyme_jusqu_au_paiement(client_for, guest, listing, thread, 
     assert fil['other_participant']['first_name'] == 'Voyageur' and fil['other_participant']['last_name'] == ''
     assert fil['other_participant']['avatar_url'] is None
     assert hote.get(CONVERSATIONS).data['results'][0]['other_participant']['first_name'] == 'Voyageur'
-    # L'email de notification à l'hôte ne nomme pas le voyageur non plus
+    # The notification email to the host does not name the traveller either
     assert NotificationOutboxModel.objects.get().payload['sender_first_name'] == 'Un voyageur'
-    # Le voyageur voit l'hôte normalement
+    # The traveller sees the host normally
     assert client_for(guest).get(f'{CONVERSATIONS}{thread}/').data['other_participant']['first_name'] == listing.host.first_name
 
-    make_reservation(listing, guest=guest, status='pending')  # réservée mais pas payée : toujours anonyme
+    make_reservation(listing, guest=guest, status='pending')  # booked but not paid: still anonymous
     assert hote.get(f'{CONVERSATIONS}{thread}/').data['other_participant']['first_name'] == 'Voyageur'
-    make_reservation(listing, guest=guest, starts_in=40)  # payée
+    make_reservation(listing, guest=guest, starts_in=40)  # paid
     fil = hote.get(f'{CONVERSATIONS}{thread}/').data
     assert fil['booked'] is True and fil['other_participant']['first_name'] == 'Ama'
     assert fil['other_participant']['last_name'] == 'Mensah'
@@ -116,7 +116,7 @@ def test_annonce_sans_coordonnees(client_for, make_user, make_hebergement, listi
     reponse = client_for(hote).post('/api/v1/hebergements/', donnees, format='json')
     assert reponse.status_code == 400 and 'messagerie Kwa-Ba' in str(reponse.data['description'])
     assert AlerteFraudeModel.objects.get(contexte='annonce').utilisateur == hote
-    # Annonce publiée avant le filtrage : masquée pour les voyageurs, intacte pour son hôte
+    # Listing published before the filtering: hidden for travellers, intact for its host
     listing.description = 'Contact WhatsApp 90 12 34 56'
     listing.save()
     public = client_for(make_user()).get(f'/api/v1/hebergements/{listing.id}/').data

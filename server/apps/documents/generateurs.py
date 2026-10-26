@@ -1,4 +1,4 @@
-"""Contenu des documents : bons (séjour, transfert, location), reçus (paiement, don) et factures."""
+"""Content of the documents: vouchers (stay, transfer, rental), receipts (payment, donation) and invoices."""
 from zoneinfo import ZoneInfo
 
 from django.utils import timezone
@@ -86,7 +86,7 @@ def bon_location(loc) -> bytes:
         ('Déplacements', f"{loc.jours_hors_lome} jour(s) hors de Lomé, {loc.jours_hors_pays} jour(s) hors du pays"
          if loc.jours_hors_lome or loc.jours_hors_pays else ''),
     ]
-    # Le bon se télécharge sur le site : il ne donne jamais le propriétaire ni le chauffeur (coordonnées envoyées par email)
+    # The voucher is downloaded on the site: it never gives the owner nor the driver (contact details sent by email)
     if loc.statut in ('partenaire_assigne', 'terminee') and (loc.vehicule or loc.immatriculation):
         lignes.append(('Véhicule remis', ' · '.join(x for x in (loc.vehicule, loc.immatriculation) if x)))
     doc.bloc('Votre location', lignes)
@@ -100,7 +100,7 @@ def bon_location(loc) -> bytes:
     return doc.en_pdf()
 
 
-# --- Reçus ----------------------------------------------------------------------------------------
+# --- Receipts ----------------------------------------------------------------------------------------
 
 def recu_paiement(p: PaiementModel) -> bytes:
     payeur = p.payeur

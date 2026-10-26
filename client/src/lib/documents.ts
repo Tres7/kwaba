@@ -5,13 +5,13 @@ import type { FactureAdmin } from "@/types/api/admin";
 export type ObjetDocument = "reservation" | "transfert" | "location" | "don";
 export type TypeDocument = "bon" | "recu" | "facture";
 
-/** Nom proposé par le serveur (Content-Disposition), sinon un nom par défaut. */
+/** Name suggested by the server (Content-Disposition), otherwise a default name. */
 function nomFichier(entete: string | undefined, defaut: string): string {
   const nom = entete?.match(/filename="?([^";]+)"?/)?.[1];
   return nom || defaut;
 }
 
-/** Télécharge un PDF de l'API (requête authentifiée) et l'enregistre sur l'appareil. */
+/** Downloads a PDF from the API (authenticated request) and saves it on the device. */
 export async function telechargerPdf(url: string, defaut: string): Promise<void> {
   const res = await api.get<Blob>(url, { responseType: "blob" });
   const lien = document.createElement("a");
@@ -27,7 +27,7 @@ export function telechargerDocument(objet: ObjetDocument, id: string, doc: TypeD
   return telechargerPdf(`/v1/documents/${objet}/${id}/${doc}/`, `${doc}-${id}.pdf`);
 }
 
-/** Message d'erreur d'un téléchargement : la réponse d'un PDF est un Blob, le JSON est à relire. */
+/** Error message of a download: the response of a PDF is a Blob, the JSON has to be read again. */
 export async function messageErreurPdf(err: unknown, defaut?: string): Promise<string> {
   if (axios.isAxiosError(err) && err.response?.data instanceof Blob) {
     try {
@@ -43,7 +43,7 @@ export function telechargerFacture(f: Pick<FactureAdmin, "id" | "numero">) {
   return telechargerPdf(`/v1/admin/documents/factures/${f.id}/pdf/`, `facture-${f.numero}.pdf`);
 }
 
-/** Back-office : facture d'un séjour, transfert ou location payé (émise une seule fois), puis téléchargée. */
+/** Back-office: invoice of a paid stay, transfer or rental (issued only once), then downloaded. */
 export async function factureDe(objet: Exclude<ObjetDocument, "don">, id: string): Promise<FactureAdmin> {
   const { data } = await api.post<FactureAdmin>("/v1/admin/documents/factures/", { objet_type: objet, objet_id: id });
   await telechargerFacture(data);

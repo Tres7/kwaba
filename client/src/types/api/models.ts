@@ -16,7 +16,7 @@ export interface Hebergement {
   max_guests: number;
   amenities: string[];
   is_available: boolean;
-  /** Détails (null pour les annonces publiées avant leur ajout) */
+  /** Details (null for listings published before they were added) */
   surface_m2: number | null;
   chambres: number | null;
   salles_de_bain: number | null;
@@ -27,23 +27,23 @@ export interface Hebergement {
   petit_dejeuner_prix: number | null;
   arrivee_a_partir: string | null;
   depart_avant: string | null;
-  /** Politique d'annulation choisie par l'hôte (CGV, annexe 1). */
+  /** Cancellation policy chosen by the host (terms of sale, appendix 1). */
   politique_annulation: PolitiqueAnnulation;
-  /** Taux des frais de service pour ce visiteur : 0,06, ou 0,03 s'il revient chez cet hôte (Client fidèle). */
+  /** Service fee rate for this visitor: 0.06, or 0.03 if they come back to this host (loyal customer). */
   frais_voyageur: number;
-  /** Vérification par un agent de terrain : seules les annonces « verifiee » sont publiques */
+  /** Verification by a field agent: only "verifiee" listings are public */
   statut_verification: "en_attente" | "verifiee" | "refusee";
   verifiee_le: string | null;
-  /** Motif de refus de l'agent : rempli seulement pour l'hôte de l'annonce */
+  /** Agent's refusal reason: filled in only for the listing's host */
   motif_refus: string;
   /** Owner only: actually public (verified, not hidden, opening done, host agreement signed). null for others. */
   en_ligne?: boolean | null;
   host_id: string;
   host_name: string;
-  /** Pièce d'identité de l'hôte contrôlée par Kwa-Ba (badge « Hôte vérifié »). */
+  /** The host's identity document checked by Kwa-Ba ("Verified host" badge). */
   hote_verifie?: boolean;
   is_favorite: boolean;
-  /** Visite de contrôle validée par Kwa-Ba (absent tant que le backend ne l'expose pas). */
+  /** Inspection visit validated by Kwa-Ba (missing while the backend does not expose it). */
   est_verifie?: boolean;
   created_at: string;
 }
@@ -77,17 +77,17 @@ export interface Reservation {
   montants: {
     prix_nuits: number;
     frais_service: number;
-    /** Taux des frais de service en % (6, ou 3 en Client fidèle). */
+    /** Service fee rate in % (6, or 3 for loyal customers). */
     taux_frais: number;
     total: number;
     commission_hote: number;
     montant_hote: number;
   };
-  /** Dernier paiement en ligne : null si la réservation a été faite sans paiement en ligne. */
+  /** Last online payment: null if the booking was made without online payment. */
   paiement: "en_attente" | "reussi" | "echoue" | "annule" | null;
-  /** attente_numero : le voyageur doit indiquer son compte Mobile Money pour être remboursé. */
+  /** attente_numero: the traveller must give their Mobile Money account to be refunded. */
   remboursement: { montant: number; statut: "attente_numero" | "en_cours" | "envoye" } | null;
-  /** Fin du délai pour payer (réservation en attente de paiement). */
+  /** End of the payment period (booking waiting for payment). */
   expire_le: string | null;
   annule_par: "" | "voyageur" | "hote" | "plateforme" | "expiration";
 }

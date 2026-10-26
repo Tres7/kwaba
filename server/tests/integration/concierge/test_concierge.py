@@ -1,4 +1,4 @@
-"""AI Concierge : outils Kwa-Ba et boucle de conversation. L'API Gemini est simulée (aucun appel réseau)."""
+"""AI Concierge: Kwa-Ba tools and conversation loop. The Gemini API is simulated (no network call)."""
 import json
 from datetime import timedelta
 from types import SimpleNamespace as NS
@@ -31,7 +31,7 @@ def _client(user):
 # --- Faux client Gemini (API Interactions en streaming) --------------------------------------
 
 def tour(interaction_id, texte='', appels=(), statut=None):
-    """Événements SSE d'un tour : texte en deux morceaux, appels de fonction, fin."""
+    """SSE events of a turn: text in two chunks, function calls, end."""
     evts = [NS(event_type='interaction.created', interaction=NS(id=interaction_id))]
     index = 0
     if texte:
@@ -100,7 +100,7 @@ def test_entrees_invalides_renvoyees_en_erreur_au_modele():
 def test_devis_transfert_et_aeroport_non_desservi():
     jour = (timezone.localdate() + timedelta(days=10)).isoformat()
     resultat, cartes = outils.devis_transfert({'aeroport': 'lfw', 'arrivee': f'{jour}T23:30', 'passagers': 2, 'bagages': 2})
-    # Arrivée à 23 h 30 : même prix que de jour (majoration de nuit supprimée)
+    # Arrival at 11:30 pm: same price as by day (night surcharge removed)
     assert resultat['options'][0]['prix'] == 10000 and 'nuit' not in resultat['options'][0]
     assert 'nuit' in resultat['regles'] and '25' not in resultat['regles']
     assert cartes[0]['type'] == 'transfert' and cartes[0]['arrivee'] == f'{jour}T23:30'
@@ -111,7 +111,7 @@ def test_devis_transfert_et_aeroport_non_desservi():
 def test_declarations_de_fonctions_au_format_gemini():
     for d in outils.DEFINITIONS:
         assert d['type'] == 'function' and d['parameters']['type'] == 'object'
-        # Pas de types « chaîne ou null » : non pris en charge par le schéma de Gemini
+        # No "string or null" types: not supported by Gemini's schema
         assert all(isinstance(p['type'], str) for p in d['parameters']['properties'].values())
 
 
@@ -133,14 +133,14 @@ def test_conversation_avec_fonction_puis_reponse(concierge, make_user, make_hebe
     assert types[0] == 'texte' and 'outil' in types and 'cartes' in types and types[-1] == 'fin'
     assert next(d for e, d in evts if e == 'cartes')['cartes'][0]['id'] == str(h.id)
 
-    # Premier appel : modèle, réflexion, consigne système, fonctions + recherche Google, sans interaction précédente
+    # First call: model, thinking, system instruction, functions + Google search, without a previous interaction
     req = faux.requetes[0]
     assert (req['model'], req['generation_config'], req['stream']) == ('gemini-3.8-flash', {'thinking_level': 'low'}, True)
     assert 'Concierge Kwa-Ba' in req['system_instruction'] and 'Date du jour' in req['system_instruction']
     assert [t.get('name', t['type']) for t in req['tools']] == [
         'rechercher_logements', 'devis_transfert', 'proposer_voyage_de_groupe', 'google_search']
     assert 'previous_interaction_id' not in req and req['input'] == 'Un appart à Lomé pour 2'
-    # Second appel : résultat de la fonction rattaché à l'interaction précédente
+    # Second call: function result attached to the previous interaction
     req2 = faux.requetes[1]
     assert req2['previous_interaction_id'] == 'int_1'
     resultat = req2['input'][0]
@@ -152,7 +152,7 @@ def test_conversation_avec_fonction_puis_reponse(concierge, make_user, make_hebe
     assert [(m['role'], bool(m['cartes'])) for m in affichage['messages']] == [('user', False), ('assistant', False), ('assistant', True)]
     assert ConversationModel.objects.get(pk=cid).interaction_id == 'int_2'
 
-    # Message suivant : la conversation continue sur la dernière interaction
+    # Next message: the conversation goes on from the last interaction
     with mock.patch.object(services, '_client', return_value=faux):
         _evenements(client.post(f'{CONVERSATIONS}{cid}/messages/', {'texte': 'Merci'}, format='json'))
     assert faux.requetes[2]['previous_interaction_id'] == 'int_2'
@@ -186,7 +186,7 @@ def test_quota_recherche_google_continue_sans_elle(concierge, make_user):
         _evenements(client.post(f'{CONVERSATIONS}{cid}/messages/', {'texte': 'Et à Cotonou ?'}, format='json'))
     noms = [[t.get('name', t['type']) for t in r['tools']] for r in faux.requetes]
     assert 'google_search' in noms[0] and 'google_search' not in noms[1]
-    assert 'google_search' not in noms[2]  # désactivée quelques minutes, pas d'attente inutile
+    assert 'google_search' not in noms[2]  # disabled for a few minutes, no useless wait
 
 
 def test_reponse_bloquee_ecartee(concierge, make_user):
@@ -219,7 +219,7 @@ def test_quota_inactif_et_confidentialite(concierge, make_user, settings):
 
 
 def test_version_anglaise_du_site(concierge, make_user, make_hebergement):
-    """Depuis kwa-ba.com/en, le Concierge reçoit la consigne de répondre en anglais et ses messages d'étape sont traduits."""
+    """From kwa-ba.com/en, the Concierge is told to answer in English and its step messages are translated."""
     make_hebergement(name='Appart Bè', city='Lomé', price_per_night=30000)
     faux = FauxGemini(
         tour('int_1', 'Looking at places in Lomé.', [('rechercher_logements', {'ville': 'Lomé', 'voyageurs': 2})]),
@@ -233,14 +233,14 @@ def test_version_anglaise_du_site(concierge, make_user, make_hebergement):
     assert 'Réponds en anglais' in faux.requetes[0]['system_instruction']
     assert next(d for e, d in evts if e == 'outil')['libelle'] == 'Looking for places to stay'
 
-    # Sans en-tête (ou en français) : consigne habituelle, messages en français
+    # Without a header (or in French): usual instruction, messages in French
     assert services.langue_de('') == 'fr' and services.langue_de('fr-FR,fr;q=0.9') == 'fr' and services.langue_de('en-GB') == 'en'
     assert 'Réponds en anglais' not in services._systeme('fr')
     assert services._m('sollicite', 'en').startswith('The Concierge is very busy')
 
 
 def test_erreurs_en_anglais(concierge, make_user):
-    """Version anglaise : messages d'étape et d'erreur traduits (recherche web, Gemini injoignable, conversation trop longue)."""
+    """English version: step and error messages translated (web search, Gemini unreachable, conversation too long)."""
     recherche = [NS(event_type='step.start', index=0, step=NS(type='google_search_call'))]
     coupure = compat_errors.APIConnectionError(request=mock.Mock())
     faux = FauxGemini(recherche + tour('int_w', 'Here are some ideas.'), coupure)

@@ -1,4 +1,4 @@
-"""Connexion à l'administration Django : tentatives limitées par adresse IP et par email, échecs journalisés."""
+"""Sign-in to the Django administration: attempts limited per IP address and per email, failures logged."""
 from django.contrib import admin
 from django.http import HttpResponse
 

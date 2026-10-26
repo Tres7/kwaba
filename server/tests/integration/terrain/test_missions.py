@@ -1,7 +1,7 @@
-"""Espace agent de terrain : file commune (prendre, relâcher, décider) et partage des droits entre agents et admins.
+"""Field agent space: shared queue (take, release, decide) and rights shared between agents and admins.
 
-Un administrateur fait tout ce que fait un agent (et peut relâcher ou décider sur la mission d'un autre) ; un agent ne
-fait jamais ce que fait un administrateur.
+An administrator does everything an agent does (and can release or decide on another one's mission); an agent
+never does what an administrator does.
 """
 import json
 
@@ -29,7 +29,7 @@ def admin(make_user):
 
 @pytest.fixture
 def annonce(make_user, make_hebergement):
-    """Annonce prête pour une visite : identité de l'hôte vérifiée."""
+    """Listing ready for a visit: host identity verified."""
     hote = make_user(role='hote', phone='+22890000001')
     PieceIdentiteModel.objects.create(hote=hote, type_piece='cni', statut='verifiee')
     return make_hebergement(host=hote, name='Villa des cocotiers', statut_verification='en_attente', city='Lomé')
@@ -83,7 +83,7 @@ class TestFileCommune:
         assert _cibles(afi, 'a_faire') == [('piece', str(piece.hote_id))]
         assert _cibles(afi, 'equipe') == [('logement', str(annonce.id))]
         assert _cibles(kofi, 'miennes') == [('logement', str(annonce.id))]
-        # Prendre deux fois sa propre mission ne change rien
+        # Taking one's own mission twice changes nothing
         assert kofi.post(_url('logement', annonce.id, 'prendre')).status_code == 200
         assert MissionModel.objects.filter(statut='en_cours').count() == 1
 
@@ -150,7 +150,7 @@ class TestFiche:
         kofi = client_for(agents[0])
         assert kofi.get(_url('vehicule', '1')).status_code == 404
         assert kofi.get(_url('logement', 'pas-un-uuid')).status_code == 404
-        publiee = make_hebergement()  # déjà vérifiée : plus rien à faire
+        publiee = make_hebergement()  # already verified: nothing left to do
         assert kofi.get(_url('logement', publiee.id)).status_code == 404
         assert kofi.post(_url('logement', publiee.id, 'prendre')).status_code == 404
 

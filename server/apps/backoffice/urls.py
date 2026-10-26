@@ -34,7 +34,7 @@ urlpatterns = [
     path('location/locations/<uuid:pk>/attribuer/', locations.LocationAttribuerView.as_view(), name='admin-location-attribuer'),
     path('location/locations/<uuid:pk>/annuler/', locations.LocationAnnulerView.as_view(), name='admin-location-annuler'),
     path('location/locations/<uuid:pk>/caution/', locations.LocationCautionView.as_view(), name='admin-location-caution'),
-    # Transferts aéroport
+    # Airport transfers
     path('transferts/aeroports/', transferts.AeroportsView.as_view(), name='admin-aeroports'),
     path('transferts/aeroports/<str:pk>/', transferts.AeroportView.as_view(), name='admin-aeroport'),
     path('transferts/aeroports/<str:code>/tarifs/', transferts.TarifsView.as_view(), name='admin-aeroport-tarifs'),
@@ -53,7 +53,7 @@ urlpatterns = [
     path('give/reversements/preparer/', give.ReversementsPreparerView.as_view(), name='admin-give-preparer'),
     path('give/reversements/<uuid:pk>/effectuer/', give.ReversementEffectuerView.as_view(), name='admin-give-effectuer'),
     path('give/dons/', give.DonsView.as_view(), name='admin-give-dons'),
-    # Expériences (page Découvrir)
+    # Experiences (Discover page)
     path('experiences/', experiences.ExperiencesView.as_view(), name='admin-experiences'),
     path('experiences/<int:pk>/', experiences.ExperienceView.as_view(), name='admin-experience'),
 ]

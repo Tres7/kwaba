@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 import { setApiAccessToken } from "@/lib/api";
 
-// Recopie le token de la session dans le client API (connexion, déconnexion, changement de compte)
-// et déconnecte si le refresh token Django a expiré
+// Copies the session token into the API client (sign-in, sign-out, account change)
+// and signs out if the Django refresh token has expired
 function SessionTokenSync() {
   const { data: session, status } = useSession();
 
@@ -24,8 +24,8 @@ function SessionTokenSync() {
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
-    // Relit la session chaque minute tant qu'un onglet est ouvert : chaque lecture prolonge la session de 5 min
-    // (session.maxAge dans auth.ts) et renouvelle le token d'accès avant son expiration
+    // Reads the session every minute while a tab is open: each read extends the session by 5 min
+    // (session.maxAge in auth.ts) and renews the access token before it expires
     <SessionProvider refetchInterval={60} refetchOnWindowFocus>
       <SessionTokenSync />
       {children}

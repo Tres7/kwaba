@@ -1,4 +1,4 @@
-"""Back-office : transferts aéroport (aéroports et tarifs, chauffeurs partenaires, suivi des transferts)."""
+"""Back-office: airport transfers (airports and fares, partner drivers, transfer follow-up)."""
 from django.db import transaction
 from django.db.models import Q
 from rest_framework import serializers, status
@@ -15,7 +15,7 @@ from .commun import FicheAdmin, ListeAdmin
 from .views import _motif, _nom, _paginer
 
 
-# --- Aéroports et tarifs -------------------------------------------------------------------------
+# --- Airports and fares -------------------------------------------------------------------------
 
 class TarifSerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,14 +49,14 @@ class AeroportView(FicheAdmin):
     queryset = AeroportModel.objects.prefetch_related('tarifs')
 
     def get_serializer(self, *args, **kwargs):
-        # Le code IATA identifie l'aéroport : il ne se modifie pas
+        # The IATA code identifies the airport: it cannot be changed
         serializer = super().get_serializer(*args, **kwargs)
         serializer.fields['code'].read_only = True
         return serializer
 
 
 class TarifsView(APIView):
-    """PUT [{categorie, prix, actif}] : tarifs de l'aéroport par catégorie de véhicule (une ligne par catégorie)."""
+    """PUT [{categorie, prix, actif}]: airport fares by vehicle category (one row per category)."""
     permission_classes = [EstAdministrateur]
 
     def put(self, request, code):
@@ -105,7 +105,7 @@ class ChauffeurView(FicheAdmin):
     queryset = ChauffeurModel.objects.all()
 
 
-# --- Suivi des transferts ------------------------------------------------------------------------
+# --- Transfer follow-up ------------------------------------------------------------------------
 
 def _transfert(t: TransfertModel) -> dict:
     c = t.chauffeur
@@ -125,7 +125,7 @@ def _transferts():
 
 
 class TransfertsView(APIView):
-    """Transferts, les prochaines arrivées d'abord. Filtres : statut, q (référence, email, téléphone, vol)."""
+    """Transfers, next arrivals first. Filters: status, q (reference, email, phone, flight)."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -141,7 +141,7 @@ class TransfertsView(APIView):
 
 
 class TransfertChauffeursView(APIView):
-    """Chauffeurs actifs de cet aéroport dont le véhicule convient."""
+    """Active drivers of this airport whose vehicle fits."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request, pk):
@@ -173,7 +173,7 @@ class TransfertAttribuerView(APIView):
 
 
 class TransfertAnnulerView(APIView):
-    """Annulation par Kwa-Ba : remboursement intégral (aucun chauffeur disponible, vol annulé…)."""
+    """Cancellation by Kwa-Ba: full refund (no driver available, flight cancelled…)."""
     permission_classes = [EstAdministrateur]
 
     def post(self, request, pk):

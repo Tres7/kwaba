@@ -16,8 +16,8 @@ class RabbitMQConsumer:
 
     EXCHANGE = 'domain_events'
     QUEUE = 'notifications.events'
-    # DLX partagé (direct) : chaque file y publie avec sa propre routing key,
-    # ce qui permet à d'autres modules de réutiliser le même exchange.
+    # Shared DLX (direct): each queue publishes to it with its own routing key,
+    # which lets other modules reuse the same exchange.
     DEAD_LETTER_EXCHANGE = 'domain_events.dlx'
     DEAD_LETTER_QUEUE = 'notifications.events.dlq'
     ROUTING_KEYS = {
@@ -99,7 +99,7 @@ class RabbitMQConsumer:
                 raise ValueError(f"Routing key non gérée : {routing_key}")
             getattr(self, handler_name)(data)
         except Exception:
-            # Le message part en dead-letter (notifications.events.dlq) au lieu d'être perdu
+            # The message goes to the dead letter queue (notifications.events.dlq) instead of being lost
             logger.exception("Échec du traitement de '%s', message envoyé en dead-letter", routing_key)
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
             return
@@ -122,7 +122,7 @@ class RabbitMQConsumer:
         logger.info("Email de bienvenue envoyé (user_id=%s)", data.get("user_id"))
 
     def handle_new_message_email(self, data: dict) -> None:
-        # L'événement est autosuffisant : aucune lecture des données de messaging
+        # The event is self-contained: no read of the messaging data
         conversation_url = f"{settings.FRONTEND_URL.rstrip('/')}/messages/{data['conversation_id']}"
         self._service.send_new_message_email(
             to=data["recipient_email"],

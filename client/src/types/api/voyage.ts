@@ -39,7 +39,7 @@ export interface Proposition {
     review_count: number;
   };
   budget: BudgetLogement | null;
-  /** null si le voyage n'a pas encore de dates. */
+  /** null if the trip has no dates yet. */
   disponible: boolean | null;
   assez_grand: boolean;
 }

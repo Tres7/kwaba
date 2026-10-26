@@ -8,7 +8,7 @@ from apps.reservations.models import ReservationModel
 
 NOTE = [MinValueValidator(1), MaxValueValidator(5)]
 
-# Critères notés par le voyageur, dans l'ordre d'affichage
+# Criteria rated by the traveller, in display order
 CRITERES = {
     'proprete': 'Propreté',
     'conformite': 'Conforme aux photos',
@@ -19,7 +19,7 @@ CRITERES = {
 
 
 class AvisModel(models.Model):
-    """Avis vérifié : rattaché à une réservation réelle et terminée, un seul par séjour."""
+    """Verified review: attached to a real, finished booking, only one per stay."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     reservation = models.OneToOneField(ReservationModel, on_delete=models.CASCADE, related_name='avis')

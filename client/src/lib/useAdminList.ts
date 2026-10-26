@@ -5,12 +5,12 @@ import type { AdminPage } from "@/types/api/admin";
 
 export const PAGE_SIZE = 20;
 
-/** Liste paginée et filtrée du back-office. Les filtres vides ne sont pas envoyés. */
+/** Paginated and filtered back-office list. Empty filters are not sent. */
 export function useAdminList<T>(ressource: string, filtres: Record<string, string>) {
   const [page, setPage] = useState(1);
   const cle = JSON.stringify(filtres);
 
-  // Nouveau filtre : retour à la première page
+  // New filter: back to the first page
   useEffect(() => setPage(1), [cle]);
 
   const query = useQuery({
@@ -26,7 +26,7 @@ export function useAdminList<T>(ressource: string, filtres: Record<string, strin
   return { ...query, page, setPage };
 }
 
-/** Valeur retardée (recherche au fil de la frappe sans une requête par touche). */
+/** Delayed value (search while typing without one request per key). */
 export function useDebounced<T>(value: T, delay = 350): T {
   const [v, setV] = useState(value);
   useEffect(() => {

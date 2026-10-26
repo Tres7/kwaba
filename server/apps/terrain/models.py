@@ -6,11 +6,11 @@ from django.db.models import Q
 
 
 class MissionModel(models.Model):
-    """Prise en charge d'un contrôle par un agent, dans la file commune des agents de terrain.
+    """An agent taking charge of a check, in the shared queue of the field agents.
 
-    Ce qui est à contrôler vient de chaque domaine (annonces à visiter, pièces d'identité…, voir types.py) : une
-    mission naît quand un agent dit « Je m'en occupe ». Tant qu'elle est en cours, aucun autre agent ne peut la
-    prendre ni décider à sa place ; seul un administrateur peut la relâcher ou décider quand même.
+    What needs checking comes from each domain (listings to visit, identity documents…, see types.py): a
+    mission is born when an agent says "I'll handle it". While it is ongoing, no other agent can take it
+    nor decide in their place; only an administrator can release it or decide anyway.
     """
     TYPES = [
         ('logement', 'Visite de logement'),
@@ -21,13 +21,13 @@ class MissionModel(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type = models.CharField(max_length=20, choices=TYPES)
-    # Identifiant de ce qui est contrôlé, selon le type : annonce (logement), hôte (pièce d'identité)
+    # Id of what is checked, depending on the type: listing (stay), host (identity document)
     cible = models.CharField(max_length=64)
     agent = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
                               related_name='missions_terrain')
     statut = models.CharField(max_length=20, choices=STATUTS, default='en_cours')
     decision = models.CharField(max_length=20, choices=DECISIONS, blank=True)
-    # Copie au moment de la prise : l'historique reste lisible même si l'annonce change ou disparaît
+    # Copy at the time it was taken: the history stays readable even if the listing changes or disappears
     titre = models.CharField(max_length=200)
     sous_titre = models.CharField(max_length=200, blank=True)
     ville = models.CharField(max_length=100, blank=True)
@@ -39,7 +39,7 @@ class MissionModel(models.Model):
         verbose_name = 'Mission de terrain'
         verbose_name_plural = 'Missions de terrain'
         constraints = [
-            # Un seul agent à la fois sur un même contrôle
+            # A single agent at a time on the same check
             models.UniqueConstraint(fields=['type', 'cible'], condition=Q(statut='en_cours'), name='mission_une_seule_en_cours'),
         ]
         indexes = [models.Index(fields=['agent', 'statut'])]

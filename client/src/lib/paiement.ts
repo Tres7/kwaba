@@ -2,23 +2,23 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { ConfigPaiement, MoyenPaiement } from "@/types/api/paiement";
 
-/** Paramètres publics du paiement en ligne (actif ou non, taux, pays et opérateurs). */
+/** Public online payment settings (active or not, rates, countries and operators). */
 export function useConfigPaiement() {
   return useQuery({
     queryKey: ["paiements", "config"],
     queryFn: async () => (await api.get<ConfigPaiement>("/v1/paiements/config/")).data,
-    // Court : un moyen de paiement activé côté serveur doit apparaître sans recharger la page
+    // Short: a payment method enabled on the server must show without reloading the page
     staleTime: 60 * 1000,
   });
 }
 
-/** Crée la transaction FedaPay et envoie le navigateur sur la page de paiement sécurisée. */
+/** Creates the FedaPay transaction and sends the browser to the secure payment page. */
 export async function allerPayer(reservationId: string, moyen?: MoyenPaiement) {
   const res = await api.post<{ url: string }>(`/v1/paiements/reservations/${reservationId}/payer/`, moyen ? { moyen } : {});
   window.location.assign(res.data.url);
 }
 
-/** Paiement d'un transfert aéroport : même principe que pour un logement. */
+/** Payment of an airport transfer: same principle as for a listing. */
 export async function payerTransfert(transfertId: string, moyen: MoyenPaiement) {
   const res = await api.post<{ url: string }>(`/v1/transferts/${transfertId}/payer/`, { moyen });
   window.location.assign(res.data.url);
@@ -29,20 +29,20 @@ export async function payerLocation(locationId: string, moyen: MoyenPaiement) {
   window.location.assign(res.data.url);
 }
 
-/** Temps restant avant la libération des dates, en minutes (arrondi au supérieur). */
+/** Time left before the dates are released, in minutes (rounded up). */
 export function minutesRestantes(expireLe: string | null): number | null {
   if (!expireLe) return null;
   return Math.max(0, Math.ceil((new Date(expireLe).getTime() - Date.now()) / 60000));
 }
 
-/** Montant en euros débité par PayPal (parité fixe FCFA/euro). */
+/** Amount in euros charged by PayPal (fixed FCFA/euro parity). */
 export function enEuros(montantFcfa: number, fcfaParEuro: number): string {
   return (Math.round((montantFcfa / fcfaParEuro) * 100) / 100).toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
 }
 
 /**
- * Opérateurs Mobile Money proposés, tels que l'API les renvoie : au lancement Moov Money (Flooz) et Mixx by Yas
- * (T-Money) ; les autres s'ajoutent quand l'interrupteur des moyens non ouverts est allumé.
+ * Mobile Money operators offered, as returned by the API: at launch Moov Money (Flooz) and Mixx by Yas
+ * (T-Money); the others are added when the switch of the not-yet-open methods is on.
  */
 export function useOperateursMobileMoney(): string {
   const { data } = useConfigPaiement();

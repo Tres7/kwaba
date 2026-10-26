@@ -28,7 +28,7 @@ interface EnCours {
   cartes: Carte[];
 }
 
-/** Lit un flux SSE (événements « event: … / data: … ») et appelle `surEvenement` pour chacun. */
+/** Reads an SSE stream ("event: … / data: …" events) and calls `surEvenement` for each one. */
 async function lireFlux(reponse: Response, surEvenement: (nom: string, donnees: Record<string, unknown>) => void) {
   const lecteur = reponse.body!.getReader();
   const decodeur = new TextDecoder();
@@ -79,7 +79,7 @@ function ConciergeContent() {
   });
 
   useEffect(() => {
-    // Fait défiler le fil seulement : scrollIntoView ferait aussi défiler la page (jusqu'au pied de page sur téléphone)
+    // Scrolls the thread only: scrollIntoView would also scroll the page (down to the footer on phones)
     const fil = filRef.current;
     fil?.scrollTo({ top: fil.scrollHeight, behavior: "smooth" });
   }, [messages.length, enCours?.texte, enCours?.cartes.length, enAttente]);
@@ -112,7 +112,7 @@ function ConciergeContent() {
         else if (nom === "cartes") setEnCours((c) => c && { ...c, cartes: d.cartes as Carte[] });
         else if (nom === "reprise") setEnCours((c) => c && { ...c, outil: t("reprise") });
         else if (nom === "refus" || nom === "erreur") {
-          // Réponse partielle écartée : on n'affiche que le message d'explication
+          // Partial answer dropped: only the explanation message is shown
           setEnCours(null);
           toast.error(d.message as string);
         }
@@ -210,7 +210,7 @@ function ConciergeContent() {
             ) : (
               <>
                 {messages.map((m) => <Bulle key={m.id} role={m.role} texte={m.texte} cartes={m.cartes} />)}
-                {/* Premier message d'une conversation : l'historique rechargé le contient déjà, ne pas l'afficher deux fois */}
+                {/* First message of a conversation: the reloaded history already contains it, do not show it twice */}
                 {enAttente && !(messages.at(-1)?.role === "user" && messages.at(-1)?.texte === enAttente) && (
                   <Bulle role="user" texte={enAttente} cartes={[]} />
                 )}

@@ -14,7 +14,7 @@ class FavoriSerializer(serializers.ModelSerializer):
 
 
 class FavoriCreateSerializer(serializers.ModelSerializer):
-    # Seulement les annonces publiées (vérifiées par un agent, non masquées)
+    # Only published listings (verified by an agent, not hidden)
     hebergement = serializers.PrimaryKeyRelatedField(queryset=HebergementModel.objects.publiees())
 
     class Meta:

@@ -9,8 +9,8 @@ import FormulaireReclamation from "@/components/aide/FormulaireReclamation";
 import { CONTACT_EMAIL } from "@/lib/contact";
 import { SECTIONS_EN } from "./faq-en";
 
-// Réponses rédigées à partir des CGV et des CGU (audit n° 3) : chacune renvoie à son article. Les réponses marquées
-// « hors CGV/CGU » décrivent le fonctionnement du site et ne figurent dans aucun des deux textes.
+// Answers written from the terms of sale and terms of use (audit no. 3): each one refers to its article. Answers
+// marked "outside the terms" describe how the site works and appear in neither text.
 const SECTIONS = [
   {
     id: "reservations",
@@ -54,7 +54,7 @@ const SECTIONS = [
     id: "compte",
     title: "Mon compte",
     items: [
-      // Hors CGV/CGU : fonctionnement du site
+      // Outside the terms: how the site works
       { q: "Je n'ai pas reçu mon code de vérification", a: "Vérifiez vos spams, puis utilisez « Renvoyer le code » sur la page de vérification (un nouveau code toutes les 60 secondes). Le code est valable 10 minutes." },
       { q: "J'ai oublié mon mot de passe", a: "Cliquez sur « Mot de passe oublié ? » sur la page de connexion : un code vous est envoyé par email pour choisir un nouveau mot de passe. Gardez vos identifiants confidentiels et prévenez Kwa-Ba en cas d'usage frauduleux (CGU, art. 4.3)." },
       { q: "Comment devenir hôte ?", a: "Depuis « Devenir hôte », activez votre compte hôte puis préparez votre annonce dans l'Espace hôte. Seul un partenaire inscrit, qui a accepté les conditions qui le concernent, peut publier (CGU, art. 5.1). Avant publication, Kwa-Ba vérifie votre identité et vos documents, et visite le logement (art. 5.2). L'annonce doit être exacte et ne contenir aucune coordonnée personnelle (art. 5.3 et 5.4)." },
@@ -74,7 +74,7 @@ const SECTIONS = [
     title: "Confidentialité",
     items: [
       { q: "Quelles données sont collectées ?", a: "Celles de votre compte (nom, prénom, email, téléphone, pays de résidence : CGU, art. 4.2), vos réservations, paiements et messages, traités selon la loi n° 2019-014 et la politique de confidentialité (CGU, art. 13.1). Seules les données nécessaires à la prestation sont transmises au prestataire (CGV, art. 20.2). Vous pouvez y accéder, les rectifier ou les faire supprimer (art. 20.3)." },
-      // Hors CGV/CGU : fonctionnement du site
+      // Outside the terms: how the site works
       { q: "Mon mot de passe est-il protégé ?", a: "Oui : il est stocké sous forme chiffrée (hachée) et n'est jamais visible, y compris par l'équipe Kwa-Ba." },
     ],
   },

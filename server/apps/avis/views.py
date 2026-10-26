@@ -37,13 +37,13 @@ def _entier(valeur, defaut, minimum, maximum=None):
 
 
 class AvisListCreateView(APIView):
-    """GET ?hebergement=<id> : avis publics + résumé.  POST : laisser un avis sur un séjour terminé."""
+    """GET ?hebergement=<id>: public reviews + summary.  POST: leave a review on a finished stay."""
 
     def get_permissions(self):
         return [AllowAny()] if self.request.method == 'GET' else [IsAuthenticated()]
 
     def get(self, request):
-        # Identifiant absent ou mal formé : même réponse qu'un logement inconnu (et non une erreur 500)
+        # Missing or malformed id: same response as an unknown listing (and not a 500 error)
         hebergement_id = _uuid(request.query_params.get('hebergement'))
         if hebergement_id is None:
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
@@ -58,7 +58,7 @@ class AvisListCreateView(APIView):
         for ligne in qs.values('note').annotate(n=Count('id')):
             repartition[ligne['note']] = ligne['n']
 
-        # Valeur non numérique ou hors bornes : valeur par défaut (une limite négative ferait échouer le découpage)
+        # Non-numeric or out-of-range value: default value (a negative limit would make the slicing fail)
         limit = _entier(request.query_params.get('limit'), defaut=PAGE_DEFAUT, minimum=1, maximum=PAGE_MAX)
         offset = _entier(request.query_params.get('offset'), defaut=0, minimum=0)
 
@@ -95,7 +95,7 @@ class AvisListCreateView(APIView):
 
 
 class AvisALaisserView(APIView):
-    """Séjours terminés que l'utilisateur peut encore évaluer."""
+    """Finished stays the user can still review."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -112,7 +112,7 @@ class AvisALaisserView(APIView):
 
 
 class ReponseHoteView(APIView):
-    """L'hôte répond une seule fois, publiquement, à un avis sur son logement."""
+    """The host replies only once, publicly, to a review of their listing."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):

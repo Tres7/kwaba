@@ -1,4 +1,4 @@
-"""Réglages publics du site (config/site.py) : interrupteurs des modules et numéros légaux, état du lancement."""
+"""Public site settings (config/site.py): module switches and legal numbers, launch state."""
 from unittest import mock
 
 import pytest
@@ -13,7 +13,7 @@ SITE = '/api/v1/site/'
 
 @pytest.fixture
 def lancement(settings):
-    """Tous les modules masqués, comme au lancement (valeur par défaut hors tests)."""
+    """All modules hidden, as at launch (default value outside tests)."""
     settings.MODULES = {nom: False for nom in settings.MODULES}
     return settings
 
@@ -24,7 +24,7 @@ def test_reglages_du_lancement(lancement):
         'experiences': False, 'together': False, 'give': False, 'concierge': False,
         'location_sans_chauffeur': False, 'paiements_non_ouverts': False,
     }
-    # Numéros pas encore attribués : vides, le site affiche « à compléter »
+    # Numbers not assigned yet: empty, the site shows "to be completed"
     assert reglages['mentions'] == {'rccm': '', 'nif': '', 'commerce_electronique': '', 'ipdcp': ''}
     assert reglages['contact_email']
 
@@ -39,7 +39,7 @@ def test_numeros_legaux_depuis_l_environnement_puis_le_back_office(settings):
     ParametresSocieteModel.objects.create(rccm='TG-LFW-01-2026-B13-00001', nif='1000000001')
     mentions = APIClient().get(SITE).json()['mentions']
     assert mentions['ipdcp'] == 'D-2026-01'
-    # RCCM et NIF : la variable d'environnement prime ; vide, la valeur du back-office est reprise
+    # RCCM and NIF: the environment variable wins; when empty, the back-office value is used
     assert mentions['rccm'] == 'TG-LFW-01-2026-B13-00001' and mentions['nif'] == '1000000001'
     settings.MENTIONS_LEGALES = {**settings.MENTIONS_LEGALES, 'rccm': 'RCCM-ENV'}
     assert APIClient().get(SITE).json()['mentions']['rccm'] == 'RCCM-ENV'
@@ -48,7 +48,7 @@ def test_numeros_legaux_depuis_l_environnement_puis_le_back_office(settings):
 def test_un_commentaire_lu_comme_valeur_compte_comme_vide(monkeypatch):
     from config.settings import _mention
 
-    # « SOCIETE_COMMERCE_ELECTRONIQUE=     # décret n° 2018-062/PR » : le commentaire n'est jamais affiché
+    # "SOCIETE_COMMERCE_ELECTRONIQUE=     # décret n° 2018-062/PR": the comment is never displayed
     monkeypatch.setenv('SOCIETE_COMMERCE_ELECTRONIQUE', '# décret n° 2018-062/PR')
     assert _mention('SOCIETE_COMMERCE_ELECTRONIQUE') == ''
     monkeypatch.setenv('SOCIETE_COMMERCE_ELECTRONIQUE', ' CE-2026-001 ')
@@ -73,7 +73,7 @@ def test_moyens_de_paiement_non_ouverts_masques(lancement, make_user):
     lancement.FEDAPAY = {**lancement.FEDAPAY, 'SECRET_KEY': 'sk_test'}
     lancement.PAYPAL = {'CLIENT_ID': 'id', 'CLIENT_SECRET': 'secret', 'ENV': 'sandbox'}
     config = APIClient().get('/api/v1/paiements/config/').json()
-    # Ouverts : Moov Money (Flooz), Mixx by Yas (T-Money) et la carte (Visa, Mastercard) ; pas PayPal
+    # Open: Moov Money (Flooz), Mixx by Yas (T-Money) and the card (Visa, Mastercard); not PayPal
     assert config['moyens'] == ['mobile_money', 'carte'] and not paiements.paypal_actif()
     assert config['pays'] == [{'code': 'TG', 'nom': 'Togo', 'indicatif': '228', 'chiffres': 8, 'operateurs': [
         {'code': 'moov_tg', 'nom': 'Moov Money (Flooz)'}, {'code': 'togocel', 'nom': 'Mixx by Yas (T-Money)'}]}]
@@ -86,7 +86,7 @@ def test_moyens_de_paiement_non_ouverts_masques(lancement, make_user):
     accepte = hote.put(url, {'pays': 'TG', 'operateur': 'togocel', 'numero': '90000002', 'titulaire': 'Ama'}, format='json')
     assert accepte.status_code == 200
 
-    # Rallumés par l'interrupteur, sans changement de code
+    # Switched back on by the switch, without a code change
     lancement.MODULES = {**lancement.MODULES, 'paiements_non_ouverts': True}
     config = APIClient().get('/api/v1/paiements/config/').json()
     assert 'paypal' in config['moyens'] and len(config['pays']) == 5
