@@ -86,6 +86,7 @@
     "give": "Give",
     "devenirHote": "Become a host",
     "espaceHote": "Host space",
+    "espaceAgent": "Agent space",
     "rechercherVille": "Search a city…",
     "rechercherDestination": "Search a destination",
     "lancerRecherche": "Search",
@@ -143,8 +144,7 @@
       "confidentialite": "Privacy",
       "cookies": "Cookie policy"
     },
-    "contact": "Contact us",
-    "aCompleter": "to be completed"
+    "contact": "Contact us"
   },
   "cookies": {
     "gerer": "Manage cookies",
@@ -836,8 +836,7 @@
     "questionSejourTexte": "Your host is best placed to answer.",
     "mesMessages": "My messages",
     "contactTitre": "Contact us",
-    "contactTexte": "The Kwa-Ba team answers by WhatsApp or by email.",
-    "aCompleter": "to be completed",
+    "contactTexte": "The Kwa-Ba team answers by email.",
     "reclamationTitre": "Make a complaint",
     "reclamationTexte": "Your request is sent to info@kwa-ba.com. Kwa-Ba acknowledges receipt within 72 hours (terms of sale, art. 21.1)."
   },
@@ -1248,7 +1247,8 @@
     "enSavoirPlus": "Learn more",
     "ecrit": "The Concierge is typing",
     "ia": "AI",
-    "nouvelleConversation": "New conversation"
+    "nouvelleConversation": "New conversation",
+    "nouvelle": "New"
   },
   "conciergeCartes": {
     "voir": "View",
@@ -1550,6 +1550,7 @@
   },
   "calendrierHote": {
     "selectionInvalide": "The selection can't include nights that are already booked or closed.",
+    "libre": "Free",
     "reserve": "Booked",
     "ferme": "Closed",
     "fermeParVous": "Closed by you",
@@ -1562,6 +1563,7 @@
     "etendre": "Tap another night to extend the period.",
     "motif": "Reason (only visible to you)",
     "annuler": "Cancel",
+    "fermerTitre": "Close dates",
     "fermerDates": "Close these dates",
     "aVenir": "Upcoming",
     "rienAVenir": "No upcoming bookings or closures.",

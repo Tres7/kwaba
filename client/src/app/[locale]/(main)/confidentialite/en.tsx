@@ -28,7 +28,7 @@ export default function ContenuEn() {
             <ul>
               <li>Controller: <strong>KWA-BA SARL</strong>, a limited liability company with a share capital of 100,000 F CFA, Totsi Gblenkomé district, street 243, Lomé (Togo), RCCM <MentionSociete cle="rccm" libelle="RCCM" />.</li>
               <li>Declaration to the personal data protection authority (IPDCP): no. <MentionSociete cle="ipdcp" libelle="declaration number" />.</li>
-              <li>Contact about your data: <LienContact sujet="Data protection" />, or by WhatsApp on <MentionSociete cle="whatsapp" libelle="WhatsApp number" />.</li>
+              <li>Contact about your data: <LienContact sujet="Data protection" />.</li>
               <li>Data officer within KWA-BA: <AC>name or position</AC>.</li>
             </ul>
           ),

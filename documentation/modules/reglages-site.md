@@ -33,7 +33,7 @@ Contrôles faits aussi par l'API :
 
 Les expériences publiées sont limitées au Togo (`apps/experiences/views.py`), indépendamment de l'interrupteur.
 
-## Numéros légaux et contact
+## Numéros légaux
 
 | Variable | Affichée dans |
 |---|---|
@@ -41,10 +41,16 @@ Les expériences publiées sont limitées au Togo (`apps/experiences/views.py`),
 | `SOCIETE_NIF` | mentions légales, CGV |
 | `SOCIETE_COMMERCE_ELECTRONIQUE` | mentions légales, CGV (décret n° 2018-062/PR) |
 | `SOCIETE_IPDCP` | mentions légales, CGV, confidentialité |
-| `SOCIETE_WHATSAPP` | pied de page, centre d'aide, mentions légales, CGV, confidentialité |
 
 Vides, elles s'affichent « à compléter ». Pour le RCCM et le NIF, la valeur saisie dans le back-office
 (Documents → Informations société, utilisée sur les factures) est reprise tant que la variable est vide.
+
+Écrire un commentaire **sur sa propre ligne**, jamais à la suite d'une valeur vide (`SOCIETE_NIF=   # …`) : il serait
+lu comme la valeur. Une valeur qui commence par `#` compte de toute façon comme vide (`_mention` dans
+`server/config/settings.py`).
+
+Pas de numéro WhatsApp Kwa-Ba : le contact passe par la messagerie du site, le formulaire de réclamation et
+l'email `ASSISTANCE_CONTACT`.
 
 ## Réclamations
 

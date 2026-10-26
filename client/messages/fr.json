@@ -86,6 +86,7 @@
     "give": "Give",
     "devenirHote": "Devenir hôte",
     "espaceHote": "Espace hôte",
+    "espaceAgent": "Espace agent",
     "rechercherVille": "Rechercher une ville…",
     "rechercherDestination": "Rechercher une destination",
     "lancerRecherche": "Lancer la recherche",
@@ -143,8 +144,7 @@
       "confidentialite": "Confidentialité",
       "cookies": "Politique de cookies"
     },
-    "contact": "Nous contacter",
-    "aCompleter": "à compléter"
+    "contact": "Nous contacter"
   },
   "cookies": {
     "gerer": "Gérer les cookies",
@@ -836,8 +836,7 @@
     "questionSejourTexte": "Votre hôte est le mieux placé pour vous répondre.",
     "mesMessages": "Mes messages",
     "contactTitre": "Nous contacter",
-    "contactTexte": "L'équipe Kwa-Ba vous répond par WhatsApp ou par email.",
-    "aCompleter": "à compléter",
+    "contactTexte": "L'équipe Kwa-Ba vous répond par email.",
     "reclamationTitre": "Faire une réclamation",
     "reclamationTexte": "Votre demande est envoyée à info@kwa-ba.com. Kwa-Ba en accuse réception sous 72 heures (CGV, art. 21.1)."
   },
@@ -1248,7 +1247,8 @@
     "enSavoirPlus": "En savoir plus",
     "ecrit": "Le Concierge écrit",
     "ia": "IA",
-    "nouvelleConversation": "Nouvelle conversation"
+    "nouvelleConversation": "Nouvelle conversation",
+    "nouvelle": "Nouvelle"
   },
   "conciergeCartes": {
     "voir": "Voir",
@@ -1550,6 +1550,7 @@
   },
   "calendrierHote": {
     "selectionInvalide": "La sélection ne peut pas inclure de nuit déjà réservée ou fermée.",
+    "libre": "Libre",
     "reserve": "Réservé",
     "ferme": "Fermé",
     "fermeParVous": "Fermé par vous",
@@ -1562,6 +1563,7 @@
     "etendre": "Touchez une autre nuit pour étendre la période.",
     "motif": "Motif (visible par vous seul)",
     "annuler": "Annuler",
+    "fermerTitre": "Fermer des dates",
     "fermerDates": "Fermer ces dates",
     "aVenir": "À venir",
     "rienAVenir": "Aucune réservation ni fermeture à venir.",

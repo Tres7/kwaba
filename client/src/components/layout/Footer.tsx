@@ -1,14 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Mail, MessageCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import Logo from "@/components/layout/Logo";
 import SelecteurLangue from "@/components/layout/SelecteurLangue";
 import { MentionDevise, SelecteurDevise } from "@/components/layout/Devise";
 import GererCookiesBouton from "@/components/legal/GererCookiesBouton";
 import { CONTACT_EMAIL } from "@/lib/contact";
-import { filtrerLiens, lienWhatsapp, useReglagesSite } from "@/lib/site";
+import { filtrerLiens, useReglagesSite } from "@/lib/site";
 
 const COLUMNS = [
   {
@@ -51,7 +51,6 @@ const LEGAL = [
 export default function Footer() {
   const t = useTranslations("pied");
   const reglages = useReglagesSite().data;
-  const whatsapp = reglages?.mentions.whatsapp;
   return (
     <footer className="bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12">
@@ -65,12 +64,6 @@ export default function Footer() {
             </div>
             <MentionDevise className="mt-2" />
             <ul className="mt-4 space-y-1.5 text-sm text-gray-600" aria-label={t("contact")}>
-              <li className="flex items-center gap-2">
-                <MessageCircle size={15} className="text-primary flex-shrink-0" />
-                {whatsapp
-                  ? <a href={lienWhatsapp(whatsapp)} target="_blank" rel="noopener noreferrer" className="hover:text-primary">WhatsApp {whatsapp}</a>
-                  : <span>WhatsApp : {t("aCompleter")}</span>}
-              </li>
               <li className="flex items-center gap-2">
                 <Mail size={15} className="text-primary flex-shrink-0" />
                 <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-primary">{CONTACT_EMAIL}</a>

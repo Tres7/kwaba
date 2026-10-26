@@ -4,7 +4,7 @@ export type Module = "experiences" | "together" | "give" | "concierge" | "locati
 export interface ReglagesSite {
   modules: Record<Module, boolean>;
   /** Vide tant que la valeur n'est pas connue : le site affiche alors « à compléter ». */
-  mentions: { rccm: string; nif: string; commerce_electronique: string; ipdcp: string; whatsapp: string };
+  mentions: { rccm: string; nif: string; commerce_electronique: string; ipdcp: string };
   contact_email: string;
 }
 

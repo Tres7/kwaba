@@ -25,7 +25,7 @@ def test_reglages_du_lancement(lancement):
         'location_sans_chauffeur': False, 'paiements_non_ouverts': False,
     }
     # Numéros pas encore attribués : vides, le site affiche « à compléter »
-    assert reglages['mentions'] == {'rccm': '', 'nif': '', 'commerce_electronique': '', 'ipdcp': '', 'whatsapp': ''}
+    assert reglages['mentions'] == {'rccm': '', 'nif': '', 'commerce_electronique': '', 'ipdcp': ''}
     assert reglages['contact_email']
 
 
@@ -35,14 +35,24 @@ def test_un_module_se_rallume_par_l_environnement(lancement):
 
 
 def test_numeros_legaux_depuis_l_environnement_puis_le_back_office(settings):
-    settings.MENTIONS_LEGALES = {**settings.MENTIONS_LEGALES, 'whatsapp': '+228 90 00 00 00', 'ipdcp': 'D-2026-01'}
+    settings.MENTIONS_LEGALES = {**settings.MENTIONS_LEGALES, 'ipdcp': 'D-2026-01'}
     ParametresSocieteModel.objects.create(rccm='TG-LFW-01-2026-B13-00001', nif='1000000001')
     mentions = APIClient().get(SITE).json()['mentions']
-    assert mentions['whatsapp'] == '+228 90 00 00 00' and mentions['ipdcp'] == 'D-2026-01'
+    assert mentions['ipdcp'] == 'D-2026-01'
     # RCCM et NIF : la variable d'environnement prime ; vide, la valeur du back-office est reprise
     assert mentions['rccm'] == 'TG-LFW-01-2026-B13-00001' and mentions['nif'] == '1000000001'
     settings.MENTIONS_LEGALES = {**settings.MENTIONS_LEGALES, 'rccm': 'RCCM-ENV'}
     assert APIClient().get(SITE).json()['mentions']['rccm'] == 'RCCM-ENV'
+
+
+def test_un_commentaire_lu_comme_valeur_compte_comme_vide(monkeypatch):
+    from config.settings import _mention
+
+    # « SOCIETE_COMMERCE_ELECTRONIQUE=     # décret n° 2018-062/PR » : le commentaire n'est jamais affiché
+    monkeypatch.setenv('SOCIETE_COMMERCE_ELECTRONIQUE', '# décret n° 2018-062/PR')
+    assert _mention('SOCIETE_COMMERCE_ELECTRONIQUE') == ''
+    monkeypatch.setenv('SOCIETE_COMMERCE_ELECTRONIQUE', ' CE-2026-001 ')
+    assert _mention('SOCIETE_COMMERCE_ELECTRONIQUE') == 'CE-2026-001'
 
 
 def test_concierge_masque_aucune_requete_vers_gemini(lancement, make_user, monkeypatch):

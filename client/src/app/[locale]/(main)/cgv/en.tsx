@@ -24,7 +24,7 @@ export default function ContenuEn() {
             e-commerce provider under number <MentionSociete cle="commerce_electronique" libelle="registration number" />, represented by its co-managers (cogérants), Mr MENDE Fadel and Mr KPOGLO Dzidoula Godwin Trésor.
           </p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Contact: <LienContact sujet="Terms of sale" />; WhatsApp <MentionSociete cle="whatsapp" libelle="WhatsApp number" />; postal address: Totsi Gblenkomé district, street 243, Lomé, Togo.</li>
+            <li>Contact: <LienContact sujet="Terms of sale" />; postal address: Totsi Gblenkomé district, street 243, Lomé, Togo.</li>
             <li>Co-managers (cogérants): Mr MENDE Fadel and Mr KPOGLO Dzidoula Godwin Trésor — Publication director: Mr MENDE Fadel.</li>
           </ul>
           <p>
@@ -104,7 +104,7 @@ export default function ContenuEn() {
             <>
               <N n="5.1">Before paying, the customer sees a full summary: the booked service; dates and times; number of people; the itemised total price in F CFA; the cancellation policy; whether a right of withdrawal exists and how; any security deposit; the listing rules. They may correct their choices or abandon at any time.</N>
               <N n="5.2">The customer expressly accepts the Terms of Sale, the listing rules and the cancellation policy by ticking a box before paying. These documents can be viewed, downloaded and printed.</N>
-              <N n="5.3">The booking is firm once payment is confirmed. KWA-BA sends a confirmation by email or WhatsApp immediately after payment is confirmed, and within five days at the latest, containing the summary and the link to the Terms of Sale. An electronic receipt is issued for each payment.</N>
+              <N n="5.3">The booking is firm once payment is confirmed. KWA-BA sends a confirmation by email immediately after payment is confirmed, and within five days at the latest, containing the summary and the link to the Terms of Sale. An electronic receipt is issued for each payment.</N>
               <N n="5.4">Exchanges with the provider go through the Platform’s messaging, before and after payment. For a mobility mission, the driver’s name and number are given to the customer after assignment, at the latest 24 hours before the mission.</N>
               <N n="5.5"><strong>Booking request:</strong> where the listing provides for it, the provider has 24 hours to accept. Without an answer, the request is cancelled and any amount charged is fully refunded.</N>
             </>
@@ -190,7 +190,7 @@ export default function ContenuEn() {
           titre: "Consumer right of withdrawal",
           contenu: (
             <>
-              <N n="10.1">In accordance with law no. 2017-07 on electronic transactions (art. 44), the consumer may withdraw without giving reasons within <strong>ten working days</strong> of the conclusion of the contract. They give notice from their booking area, by email or WhatsApp. The sums paid are refunded within 10 days of this notice (art. 46). This withdrawal period is not the same as the refund period after a cancellation, which is seven business days (article 11.5).</N>
+              <N n="10.1">In accordance with law no. 2017-07 on electronic transactions (art. 44), the consumer may withdraw without giving reasons within <strong>ten working days</strong> of the conclusion of the contract. They give notice from their booking area or by email. The sums paid are refunded within 10 days of this notice (art. 46). This withdrawal period is not the same as the refund period after a cancellation, which is seven business days (article 11.5).</N>
               <N n="10.2">This right can no longer be exercised once performance of the service has begun with the consumer’s agreement before the end of this period (art. 47). By confirming a booking for specific dates, the consumer expressly requests that the booking service be performed immediately: the dates are blocked with the provider, who turns away other customers for those dates. The consumer acknowledges that they can then no longer exercise their right of withdrawal on those dates, and that the cancellation policy in annex 1 applies.</N>
               <N n="10.3"><strong>Free cooling-off period:</strong> even where the right of withdrawal does not apply, any short-term accommodation or mobility booking cancelled within <strong>48 hours</strong> of its confirmation, and at least <strong>7 days</strong> before arrival or vehicle pick-up, is fully refunded, service fee included.</N>
               <N n="10.4">Professional customers do not benefit from the right of withdrawal (art. 43 of the same law).</N>
@@ -340,7 +340,7 @@ export default function ContenuEn() {
           titre: "Complaints, mediation and disputes",
           contenu: (
             <>
-              <N n="21.1">Any complaint is sent to KWA-BA through the Platform, by WhatsApp or to <LienContact sujet="Complaint" />. KWA-BA acknowledges receipt within 72 hours.</N>
+              <N n="21.1">Any complaint is sent to KWA-BA through the Platform or to <LienContact sujet="Complaint" />. KWA-BA acknowledges receipt within 72 hours.</N>
               <N n="21.2">In the event of a disagreement with a provider, KWA-BA offers free mediation and gives a written opinion within 10 days, based on the documents provided by each party.</N>
               <N n="21.3">The parties seek an amicable solution for 30 days before any legal action, except in an emergency.</N>
             </>
@@ -364,7 +364,7 @@ export default function ContenuEn() {
               <N n="23.1">KWA-BA may amend the Terms of Sale. The applicable version is the one accepted at booking. Any significant change is announced at least 30 days in advance to customers with an account.</N>
               <N n="23.2">If a clause is declared void, the others remain applicable.</N>
               <N n="23.3">Failure to rely on a clause does not constitute a waiver of it.</N>
-              <N n="23.4">Communications between the parties take place through the Platform, by email or by WhatsApp, using the account details.</N>
+              <N n="23.4">Communications between the parties take place through the Platform or by email, using the account details.</N>
             </>
           ),
         },

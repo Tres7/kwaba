@@ -218,7 +218,7 @@ export default function ContenuEn() {
           contenu: (
             <>
               <N n="16.1">These terms are governed by Togolese law and the OHADA uniform acts, without depriving the consumer of the mandatory provisions of the country where they reside.</N>
-              <N n="16.2">Any complaint is sent to KWA-BA through the Platform, by WhatsApp or to <LienContact sujet="Complaint" />; KWA-BA acknowledges receipt within 72 hours. The parties seek an amicable solution for 30 days.</N>
+              <N n="16.2">Any complaint is sent to KWA-BA through the Platform or to <LienContact sujet="Complaint" />; KWA-BA acknowledges receipt within 72 hours. The parties seek an amicable solution for 30 days.</N>
               <N n="16.3">Failing that, the dispute falls within the jurisdiction of the competent courts of Lomé, in particular the Lomé commercial court for professionals.</N>
             </>
           ),

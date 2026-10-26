@@ -26,7 +26,7 @@ export default function ContenuEn() {
               <li>Registration: Lomé RCCM no. <MentionSociete cle="rccm" libelle="RCCM" />; tax number (NIF) <MentionSociete cle="nif" libelle="NIF" /></li>
               <li>E-commerce: registered as an e-commerce provider under no. <MentionSociete cle="commerce_electronique" libelle="number" /> (decree no. 2018-062/PR)</li>
               <li>Personal data: declaration to the personal data protection authority (IPDCP) no. <MentionSociete cle="ipdcp" libelle="number" /></li>
-              <li>Contact: <LienContact />; WhatsApp <MentionSociete cle="whatsapp" libelle="number" />; postal address: Totsi Gblenkomé district, street 243, Lomé, Togo</li>
+              <li>Contact: <LienContact />; postal address: Totsi Gblenkomé district, street 243, Lomé, Togo</li>
               <li>Co-managers (cogérants): Mr MENDE Fadel and Mr KPOGLO Dzidoula Godwin Trésor — Publication director: Mr MENDE Fadel.</li>
             </ul>
           ),

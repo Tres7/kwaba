@@ -7,7 +7,6 @@ import { useLocale, useTranslations } from "next-intl";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import FormulaireReclamation from "@/components/aide/FormulaireReclamation";
 import { CONTACT_EMAIL } from "@/lib/contact";
-import { lienWhatsapp, useReglagesSite } from "@/lib/site";
 import { SECTIONS_EN } from "./faq-en";
 
 // Réponses rédigées à partir des CGV et des CGU (audit n° 3) : chacune renvoie à son article. Les réponses marquées
@@ -83,7 +82,7 @@ const SECTIONS = [
     id: "reclamations",
     title: "Réclamations",
     items: [
-      { q: "Comment faire une réclamation ?", a: "Par le formulaire en bas de cette page, par WhatsApp ou par email : Kwa-Ba en accuse réception sous 72 heures (CGV, art. 21.1). En cas de désaccord avec un prestataire, Kwa-Ba propose une médiation gratuite et rend un avis écrit sous 10 jours (art. 21.2). Une solution amiable est recherchée pendant 30 jours avant toute action en justice (art. 21.3)." },
+      { q: "Comment faire une réclamation ?", a: "Par le formulaire en bas de cette page ou par email : Kwa-Ba en accuse réception sous 72 heures (CGV, art. 21.1). En cas de désaccord avec un prestataire, Kwa-Ba propose une médiation gratuite et rend un avis écrit sous 10 jours (art. 21.2). Une solution amiable est recherchée pendant 30 jours avant toute action en justice (art. 21.3)." },
     ],
   },
 ];
@@ -93,7 +92,6 @@ export default function HelpPage() {
   const sections = useLocale() === "en" ? SECTIONS_EN : SECTIONS;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
-  const whatsapp = useReglagesSite().data?.mentions.whatsapp;
 
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -151,12 +149,6 @@ export default function HelpPage() {
         <h2 className="font-heading font-bold text-lg text-dark">{t("contactTitre")}</h2>
         <p className="text-sm text-muted mt-1">{t("contactTexte")}</p>
         <ul className="mt-4 grid sm:grid-cols-2 gap-3 text-sm">
-          <li className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-            <MessageCircle size={18} className="text-primary flex-shrink-0" />
-            {whatsapp
-              ? <a href={lienWhatsapp(whatsapp)} target="_blank" rel="noopener noreferrer" className="font-semibold text-dark hover:text-primary">WhatsApp Business : {whatsapp}</a>
-              : <span className="text-dark">WhatsApp Business : <span className="text-gray-500">{t("aCompleter")}</span></span>}
-          </li>
           <li className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
             <Mail size={18} className="text-primary flex-shrink-0" />
             <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-dark hover:text-primary">{CONTACT_EMAIL}</a>

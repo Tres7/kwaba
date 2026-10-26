@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { Search, Menu, ArrowRight, LogIn, UserPlus, MessageCircle, Heart, CalendarCheck, User, LogOut, Home, ShieldCheck, Plane, Car, Users, Sparkles, HandHeart } from "lucide-react";
+import { Search, Menu, ArrowRight, LogIn, UserPlus, MessageCircle, Heart, CalendarCheck, User, LogOut, Home, ShieldCheck, Plane, Car, Users, Sparkles, HandHeart, ClipboardCheck } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import api from "@/lib/api";
@@ -111,6 +111,8 @@ export default function Navbar() {
   const roleLabel = tRoles(session?.user?.role ?? "voyageur");
   const isHost = session?.user?.role === "hote" || session?.user?.role === "admin";
   const isAdmin = session?.user?.role === "admin";
+  // Espace des agents de terrain : ouvert aux agents et aux administrateurs (servi hors des routes de langue)
+  const isAgent = session?.user?.role === "agent" || isAdmin;
   const modules = useReglagesSite().data?.modules;
   const liensBarre = filtrerLiens(NAV_LINKS, modules);
   const liensMobile = <T extends { href: string }>(liens: T[]) => filtrerLiens(liens, modules);
@@ -166,6 +168,11 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {authenticated ? (
               <>
+                {isAgent && (
+                  <Link href="/agent" className="flex items-center gap-1.5 text-xs font-bold text-white bg-primary rounded-full px-3 py-1.5 hover:bg-primary/90 whitespace-nowrap">
+                    <ClipboardCheck size={14} /> {t("espaceAgent")}
+                  </Link>
+                )}
                 {isAdmin && (
                   <Link href="/backoffice" className="flex items-center gap-1.5 text-xs font-bold text-dark border border-gray-200 rounded-full px-3 py-1.5 hover:border-primary hover:text-primary">
                     <ShieldCheck size={14} /> Back-office
@@ -237,6 +244,16 @@ export default function Navbar() {
                 <p className="text-sm font-bold text-dark truncate">{session.user?.name ?? t("monProfil")}</p>
                 <p className="text-xs text-gray-500">{roleLabel}</p>
               </div>
+            </Link>
+          </DrawerItem>
+        )}
+
+        {/* Les agents arrivent ici pour travailler : leur espace en tête du menu */}
+        {isAgent && (
+          <DrawerItem className="mt-3">
+            <Link href="/agent" onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white text-[15px] font-bold">
+              <ClipboardCheck size={18} /> {t("espaceAgent")}
             </Link>
           </DrawerItem>
         )}

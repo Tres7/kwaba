@@ -60,7 +60,7 @@ function ConciergeContent() {
   const [saisie, setSaisie] = useState("");
   const [enCours, setEnCours] = useState<EnCours | null>(null);
   const [enAttente, setEnAttente] = useState<string | null>(null);
-  const finRef = useRef<HTMLDivElement>(null);
+  const filRef = useRef<HTMLDivElement>(null);
   const zoneRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: statut } = useQuery({
@@ -79,7 +79,9 @@ function ConciergeContent() {
   });
 
   useEffect(() => {
-    finRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    // Fait défiler le fil seulement : scrollIntoView ferait aussi défiler la page (jusqu'au pied de page sur téléphone)
+    const fil = filRef.current;
+    fil?.scrollTo({ top: fil.scrollHeight, behavior: "smooth" });
   }, [messages.length, enCours?.texte, enCours?.cartes.length, enAttente]);
 
   const envoyer = useCallback(async (texte: string) => {
@@ -181,12 +183,12 @@ function ConciergeContent() {
             </div>
             {conversationId && (
               <button onClick={() => router.push("/concierge")} className="lg:hidden flex items-center gap-1.5 text-xs font-bold text-primary">
-                <MessageSquarePlus size={15} /> Nouvelle
+                <MessageSquarePlus size={15} /> {t("nouvelle")}
               </button>
             )}
           </header>
 
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-5" aria-live="polite">
+          <div ref={filRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-5" aria-live="polite">
             {statut && !statut.actif && (
               <p className="text-sm text-amber-900 bg-amber-50 rounded-xl px-4 py-3">{t("inactif")}</p>
             )}
@@ -225,7 +227,6 @@ function ConciergeContent() {
                 )}
               </>
             )}
-            <div ref={finRef} />
           </div>
 
           <form method="post" onSubmit={(e) => { e.preventDefault(); envoyer(saisie); }} className="border-t border-gray-100 p-3 sm:p-4">

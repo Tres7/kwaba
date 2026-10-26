@@ -22,8 +22,3 @@ export function useModule(nom: Module): boolean {
 export function useLiensVisibles<T extends { href: string }>(liens: T[]): T[] {
   return filtrerLiens(liens, useReglagesSite().data?.modules);
 }
-
-/** Numéro WhatsApp → lien wa.me (chiffres seulement, indicatif compris). */
-export function lienWhatsapp(numero: string): string {
-  return `https://wa.me/${numero.replace(/\D/g, "")}`;
-}
