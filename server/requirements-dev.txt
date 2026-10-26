@@ -5,5 +5,5 @@ pytest-django>=4.14.0,<5
 pytest-cov>=7.1.0,<8
 diff-cover>=9,<10
 moto[s3]>=5.2.4,<6
-ruff>=0.17.1,<1
+ruff>=0.17.2,<1
 pre-commit>=4.7.0,<5
