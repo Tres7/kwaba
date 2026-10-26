@@ -60,3 +60,185 @@ jobs:
       back: true
       front: true
       gitleaks-log-opts: --all
+
+  sast:
+    name: SAST (ruff et Semgrep)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - run: pip install "ruff>=0.17.1,<1" "semgrep==1.182.1"
+      - name: ruff (règles de sécurité)
+        working-directory: server
+        run: |
+          set -o pipefail
+          ruff check --config ruff.toml --extend-select S --output-format concise . | tee ../ruff-securite.txt
+      - name: Semgrep
+        if: ${{ !cancelled() }}
+        run: >-
+          semgrep scan --metrics=off --error --quiet
+          --config p/python --config p/django --config p/javascript --config p/typescript
+          --config p/react --config p/dockerfile --config p/nginx
+          --exclude server/tests --exclude '**/migrations'
+          --exclude-rule generic.nginx.security.request-host-used.request-host-used
+          --text-output semgrep.txt .
+      - name: Rapport
+        if: always()
+        run: |
+          {
+            echo '### ruff (règles de sécurité)'
+            echo '```'
+            cat ruff-securite.txt 2>/dev/null || echo 'Pas de rapport.'
+            echo '```'
+            echo '### Semgrep'
+            echo '```'
+            if [ -s semgrep.txt ]; then cat semgrep.txt; else echo 'Aucun constat.'; fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  configuration:
+    name: Configuration (zizmor et Trivy config)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - run: pip install "zizmor==1.31.1"
+      - name: zizmor (workflows et Dependabot)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          zizmor --format plain --min-severity medium .github/workflows .github/actions .github/dependabot.yml | tee zizmor.txt
+      - name: Trivy (Dockerfiles)
+        if: ${{ !cancelled() }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          format: table
+          output: trivy-config.txt
+          exit-code: '1'
+      - name: Rapport
+        if: always()
+        run: |
+          {
+            echo '### zizmor'
+            echo '```'
+            cat zizmor.txt 2>/dev/null || echo 'Pas de rapport.'
+            echo '```'
+            echo '### Trivy (Dockerfiles)'
+            echo '```'
+            cat trivy-config.txt 2>/dev/null || echo 'Pas de rapport.'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  production:
+    name: Production (ports, certificat, TLS, ZAP)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - id: cible
+        run: |
+          host="${SITE_URL#https://}"
+          host="${host%%/*}"
+          ip=$(getent ahostsv4 "$host" | awk 'NR == 1 { print $1 }')
+          if [ -z "$host" ] || [ -z "$ip" ]; then
+            echo "::error::Adresse du site introuvable (variable PUBLIC_SITE_URL : '${SITE_URL}')"
+            exit 1
+          fi
+          mkdir -m 777 rapports
+          cp .github/security/zap-rules.tsv rapports/
+          echo "host=$host" >> "$GITHUB_OUTPUT"
+          echo "ip=$ip" >> "$GITHUB_OUTPUT"
+      - name: Ports ouverts (TCP, tous)
+        env:
+          IP: ${{ steps.cible.outputs.ip }}
+        run: |
+          docker run --rm instrumentisto/nmap@sha256:3cca6ece8de5a571c956022ec6c2cf343da8c4416fa36e1891e8c33623cfc845 \
+            -Pn -sT -p- -T4 --min-rate 2000 --open -oG - "$IP" > rapports/nmap.txt
+          ouverts=$(grep -oE '[0-9]+/open' rapports/nmap.txt | cut -d/ -f1 | sort -n | paste -sd, -)
+          echo "Ports ouverts sur ${IP} : ${ouverts:-aucun}" | tee rapports/ports.txt
+          if [ "$ouverts" != "22,80,443" ]; then
+            echo "::error::Ports ouverts inattendus : ${ouverts:-aucun} (attendus : 22,80,443)"
+            exit 1
+          fi
+      - name: Certificat (expiration)
+        if: ${{ !cancelled() && steps.cible.outcome == 'success' }}
+        env:
+          HOST: ${{ steps.cible.outputs.host }}
+        run: |
+          echo | openssl s_client -connect "${HOST}:443" -servername "$HOST" 2>/dev/null > rapports/certificat.pem
+          openssl x509 -in rapports/certificat.pem -noout -subject -enddate | tee rapports/certificat.txt
+          if ! openssl x509 -in rapports/certificat.pem -noout -checkend 1209600; then
+            echo "::error::Le certificat de ${HOST} expire dans moins de 14 jours"
+            exit 1
+          fi
+      - name: TLS (testssl.sh)
+        if: ${{ !cancelled() && steps.cible.outcome == 'success' }}
+        env:
+          HOST: ${{ steps.cible.outputs.host }}
+        run: |
+          docker run --rm -v "$PWD/rapports:/out" drwetter/testssl.sh@sha256:6cdabca04029768095823fa9bfed98747618d87330d1a82e8637242d5e762700 \
+            --quiet --color 0 --severity HIGH --jsonfile /out/testssl.json "$HOST" > /dev/null || true
+          python3 - <<'PY'
+          import json, sys
+          constats = [f for f in json.load(open('rapports/testssl.json')) if f.get('severity') in ('HIGH', 'CRITICAL')]
+          with open('rapports/tls.txt', 'w') as rapport:
+              for f in constats:
+                  rapport.write(f"{f['severity']} {f['id']} : {f['finding']}\n")
+              if not constats:
+                  rapport.write('Aucun constat HIGH ou CRITICAL.\n')
+          print(open('rapports/tls.txt').read())
+          sys.exit(1 if constats else 0)
+          PY
+      - name: En-têtes et cookies (OWASP ZAP, passif)
+        if: ${{ !cancelled() && steps.cible.outcome == 'success' }}
+        run: |
+          docker run --rm -v "$PWD/rapports:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy@sha256:5ccfff9a411743ab2615136a2edd7416bec9ce41572fa94e935df38c14adb2b6 \
+            zap-baseline.py -t "$SITE_URL" -m 1 -c zap-rules.tsv -r zap.html > rapports/zap.txt 2>&1 || statut=$?
+          grep -E '^(FAIL-NEW|WARN-NEW):' rapports/zap.txt || true
+          tail -n 1 rapports/zap.txt
+          if [ "${statut:-0}" -ne 0 ]; then
+            echo "::error::ZAP signale un nouveau constat (code ${statut}) : l'examiner, puis le corriger ou l'ajouter à .github/security/zap-rules.tsv"
+            exit 1
+          fi
+      - name: Rapport
+        if: always()
+        run: |
+          {
+            echo '### Production'
+            for fichier in ports certificat tls; do
+              echo "#### ${fichier}"
+              echo '```'
+              cat "rapports/${fichier}.txt" 2>/dev/null || echo 'Non exécuté.'
+              echo '```'
+            done
+            echo '#### ZAP'
+            echo '```'
+            grep -E '^(FAIL-NEW|WARN-NEW):' rapports/zap.txt 2>/dev/null
+            tail -n 1 rapports/zap.txt 2>/dev/null || echo 'Non exécuté.'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: rapports-production
+          path: rapports/
+          if-no-files-found: ignore
+          retention-days: 14
