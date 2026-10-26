@@ -13,8 +13,8 @@ const OBJETS = ["reservation", "paiement", "logement", "transfert", "compte", "a
 type Objet = (typeof OBJETS)[number];
 
 /**
- * Réclamation (CGV, art. 21.1) : objet, numéro de réservation, description et pièce jointe facultative, envoyés
- * par email à l'adresse de contact. Un visiteur non connecté donne son email et coche le captcha.
+ * Complaint (terms of sale, art. 21.1): subject, booking number, description and optional attachment, sent
+ * by email to the contact address. A visitor who is not signed in gives their email and ticks the captcha.
  */
 export default function FormulaireReclamation() {
   const t = useTranslations("reclamation");

@@ -1,6 +1,6 @@
 name: Push image
 
-# Image de production d'un service (server ou client) : build, smoke test, Trivy, puis push par digest.
+# Production image of a service (server or client): build, smoke test, Trivy, then push by digest.
 on:
   workflow_call:
     inputs:
@@ -53,7 +53,7 @@ jobs:
             echo "::error::Variable de dépôt PUBLIC_SITE_URL absente : l'URL publique doit être figée dans l'image du client"
             exit 1
           fi
-          # GHCR exige un nom en minuscules (le propriétaire du dépôt est « Tres7 »)
+          # GHCR requires a lowercase name (the repository owner is "Tres7")
           echo "repository=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/kwaba-${SERVICE}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
@@ -72,7 +72,7 @@ jobs:
           cache-from: type=gha,scope=${{ inputs.service }}
           cache-to: type=gha,mode=max,scope=${{ inputs.service }}
 
-      # L'image n'est publiée que si elle démarre et que le scan passe : c'est exactement elle qui part sur GHCR
+      # The image is published only if it starts and the scan passes: exactly this image goes to GHCR
       - if: inputs.service == 'server'
         uses: ./.github/actions/smoke-test-image
         with:

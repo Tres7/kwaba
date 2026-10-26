@@ -1,11 +1,11 @@
-"""Cycle d'un don Kwa-Ba Give.
+"""Life cycle of a Kwa-Ba Give donation.
 
-    don → « en_attente » : le donateur est envoyé vers FedaPay ou PayPal (une tentative = un don)
-        → paiement reçu → « paye » : reçu envoyé au donateur
-        → paiement refusé, abandonné ou non abouti après 24 h → « echoue »
-    chaque mois, le worker regroupe les dons payés du mois précédent en un reversement par ONG
-        → l'équipe vire les fonds, joint la preuve dans l'admin et passe le reversement à « effectue »
-        → chaque donateur concerné est prévenu ; la preuve est publiée sur la page de l'ONG
+    donation → "en_attente": the donor is sent to FedaPay or PayPal (one attempt = one donation)
+        → payment received → "paye": receipt sent to the donor
+        → payment refused, abandoned or not completed after 24 h → "echoue"
+    every month, the worker groups the paid donations of the previous month into one transfer per NGO
+        → the team transfers the funds, attaches the proof in the admin and sets the transfer to "effectue"
+        → every donor concerned is notified; the proof is published on the NGO's page
 """
 import logging
 from datetime import timedelta
@@ -22,12 +22,12 @@ from .models import DonModel, OrganisationModel, ReversementModel
 
 logger = logging.getLogger('apps.give')
 
-# Au-delà, un don dont le paiement n'a pas abouti est classé « non abouti »
+# Beyond that, a donation whose payment did not go through is classed as "not completed"
 DELAI_ABANDON = timedelta(hours=24)
 
 
 class DonErreur(Exception):
-    """Erreur dont le message peut être affiché tel quel au donateur."""
+    """Error whose message can be shown as is to the donor."""
 
 
 def organisations_publiees():
@@ -36,7 +36,7 @@ def organisations_publiees():
 
 def donner(*, donateur, organisation: OrganisationModel, projet=None, montant: int, couvre_frais: bool, moyen: str,
            partage_identite: bool = False) -> tuple[DonModel, str]:
-    """Enregistre le don et crée la transaction chez le prestataire. Renvoie le don et l'adresse de paiement."""
+    """Saves the donation and creates the transaction at the provider. Returns the donation and the payment address."""
     if not organisation.publiee:
         raise DonErreur("Cette organisation ne reçoit pas de dons pour le moment.")
     if projet and (projet.organisation_id != organisation.pk or not projet.actif):
@@ -66,8 +66,8 @@ def donner(*, donateur, organisation: OrganisationModel, projet=None, montant: i
 
 
 def paiement_recu(paiement):
-    """Appelé par apps.paiements, dans sa transaction, quand le paiement d'un don réussit.
-    Un paiement arrivé après le classement « non abouti » est accepté : l'argent a bien été donné."""
+    """Called by apps.paiements, in its transaction, when the payment of a donation succeeds.
+    A payment arriving after the "not completed" classification is accepted: the money was indeed given."""
     don = DonModel.objects.select_for_update().get(pk=paiement.don_id)
     if don.statut == 'paye':
         return
@@ -77,7 +77,7 @@ def paiement_recu(paiement):
 
 
 def synchroniser(don: DonModel) -> DonModel:
-    """Relit le paiement chez le prestataire (page de retour, worker) et met le don à jour."""
+    """Reads the payment again at the provider (return page, worker) and updates the donation."""
     if don.statut != 'en_attente':
         return don
     paiement = don.paiements.order_by('-cree_le').first()
@@ -89,12 +89,12 @@ def synchroniser(don: DonModel) -> DonModel:
     return don
 
 
-# --- Reversements aux ONG ----------------------------------------------------------------
+# --- Transfers to NGOs ----------------------------------------------------------------
 
 def preparer_reversements(aujourd_hui=None) -> int:
-    """Regroupe les dons payés des mois terminés en un reversement par ONG et par mois. Renvoie le nombre de dons
-    rattachés. Un don payé tard (après la préparation) rejoint le reversement de son mois s'il n'est pas encore fait,
-    sinon celui du mois suivant."""
+    """Groups the paid donations of finished months into one transfer per NGO and per month. Returns the number of
+    donations attached. A donation paid late (after the preparation) joins the transfer of its month if it is not
+    done yet, otherwise the one of the following month."""
     aujourd_hui = aujourd_hui or timezone.localdate()
     debut_mois = montants.debut_du_mois(aujourd_hui)
     rattaches = 0
@@ -107,7 +107,7 @@ def preparer_reversements(aujourd_hui=None) -> int:
                 organisation_id=don.organisation_id, periode=periode,
             ).first()
             if reversement and reversement.statut == 'effectue':
-                # Mois déjà reversé : le don part avec le reversement du mois en cours de préparation le plus ancien
+                # Month already transferred: the donation goes with the oldest transfer still being prepared
                 periode = montants.mois_suivant(periode)
                 reversement = ReversementModel.objects.select_for_update().filter(
                     organisation_id=don.organisation_id, periode=periode, statut='a_effectuer',
@@ -136,7 +136,7 @@ def marquer_effectue(reversement: ReversementModel, *, moyen: str, reference_ope
 # --- Impact ------------------------------------------------------------------------------
 
 def impact(organisations=None) -> dict:
-    """Montants collectés (dus aux ONG), reversés et en attente de reversement, en FCFA."""
+    """Amounts collected (owed to the NGOs), transferred and waiting to be transferred, in FCFA."""
     dons = DonModel.objects.filter(statut='paye')
     reversements = ReversementModel.objects.filter(statut='effectue')
     if organisations is not None:
@@ -160,8 +160,8 @@ def impact_par_cause() -> dict:
 # --- Worker ------------------------------------------------------------------------------
 
 def abandonner() -> int:
-    """Dons dont le paiement a échoué (les paiements récents sont relus par le worker des paiements), puis
-    dons toujours en attente après 24 h : dernière vérification chez le prestataire et classement « non abouti »."""
+    """Donations whose payment failed (recent payments are read again by the payments worker), then
+    donations still pending after 24 h: last check at the provider and "not completed" classification."""
     abandonnes = DonModel.objects.filter(statut='en_attente', paiements__statut__in=('echoue', 'annule')).exclude(
         paiements__statut__in=('en_attente', 'reussi'),
     ).update(statut='echoue')
@@ -172,7 +172,7 @@ def abandonner() -> int:
 
 
 def passe() -> dict:
-    from . import notifications  # import local : notifications importe les modèles
+    from . import notifications  # local import: notifications imports the models
 
     return {
         'dons_non_aboutis': abandonner(),

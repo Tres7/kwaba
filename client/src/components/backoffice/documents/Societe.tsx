@@ -10,7 +10,7 @@ import type { SocieteAdmin } from "@/types/api/admin";
 
 type Form = Omit<SocieteAdmin, "complets" | "signature_presente">;
 type ChampTexte = Exclude<keyof Form, "assujetti_tva">;
-// Le client API envoie du JSON par défaut : en-tête nécessaire pour transmettre la signature scannée
+// The API client sends JSON by default: header needed to send the scanned signature
 const MULTIPART = { headers: { "Content-Type": "multipart/form-data" } };
 
 export function useSociete() {
@@ -20,7 +20,7 @@ export function useSociete() {
   });
 }
 
-/** Informations légales imprimées en tête des bons, reçus et factures. */
+/** Legal information printed at the top of vouchers, receipts and invoices. */
 export default function Societe() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useSociete();
@@ -48,7 +48,7 @@ export default function Societe() {
     try {
       const corps = new FormData();
       for (const [k, v] of Object.entries(form ?? {})) {
-        if (k === "complets" || k === "signature_presente") continue;  // calculés par le serveur
+        if (k === "complets" || k === "signature_presente") continue;  // computed by the server
         corps.append(k, typeof v === "boolean" ? (v ? "true" : "false") : String(v ?? ""));
       }
       if (signature) corps.append("signature_representant", signature);
@@ -92,7 +92,7 @@ export default function Societe() {
       </div>
 
       <fieldset className="border-t border-gray-100 pt-4 space-y-4">
-        {/* float : la légende se place dans le flux, sous la bordure, comme un titre de section */}
+        {/* float: the legend sits in the flow, below the border, like a section title */}
         <legend className="float-left w-full text-sm font-semibold text-dark">Signataire des contrats</legend>
         <div className="clear-both grid sm:grid-cols-2 gap-4">
           {texte("representant_nom", "Représentant légal", { placeholder: "Prénom et nom" })}
@@ -137,7 +137,7 @@ export default function Societe() {
   );
 }
 
-/** Aperçu : le fichier choisi, sinon la signature enregistrée (lue par l'API, jamais d'URL publique). */
+/** Preview: the chosen file, otherwise the saved signature (read through the API, never a public URL). */
 function useApercuSignature(presente: boolean | undefined, fichier: File | null): string | null {
   const { data: enregistree } = useQuery({
     queryKey: ["admin", "documents", "signature"],

@@ -6,7 +6,7 @@ from apps.messaging.application.ports.HebergementLookup import HebergementInfo, 
 
 
 class DjangoHebergementLookup(HebergementLookup):
-    """Seul point de contact de messaging avec le modèle du module hébergements."""
+    """Only contact point of messaging with the model of the listings module."""
 
     FIELDS = ('id', 'name', 'host_id', 'city', 'image_url')
 

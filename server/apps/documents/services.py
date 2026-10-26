@@ -1,4 +1,4 @@
-"""Émission des factures (numérotation continue) et pièces jointes des emails de confirmation."""
+"""Invoice issuing (continuous numbering) and attachments of the confirmation emails."""
 import logging
 from decimal import Decimal
 
@@ -24,7 +24,7 @@ def _client(objet):
 
 
 def lignes_de(objet) -> list[dict]:
-    """Lignes de facture d'un objet payé (montants TTC en FCFA)."""
+    """Invoice lines of a paid object (amounts including tax in FCFA)."""
     if type(objet).__name__ == 'ReservationModel':
         r, h = objet, objet.hebergement
         if r.prix_nuits is None:
@@ -57,7 +57,7 @@ def lignes_de(objet) -> list[dict]:
 
 
 def _numero() -> str:
-    """Prochain numéro, attribué sous verrou : deux émissions simultanées ne peuvent pas avoir le même."""
+    """Next number, assigned under a lock: two simultaneous issues cannot get the same one."""
     annee = timezone.localdate().year
     SequenceFactureModel.objects.get_or_create(annee=annee)
     seq = SequenceFactureModel.objects.select_for_update().get(annee=annee)
@@ -73,7 +73,7 @@ def _emettre(*, objet_type, objet_id, client_nom, client_email, client_adresse, 
         raise DocumentErreur("Renseignez la raison sociale et l'adresse de la société (Back-office → Documents) avant d'émettre une facture.")
     ttc = sum(int(lg['quantite']) * int(lg['prix_unitaire']) for lg in lignes)
     taux = societe.taux_tva if societe.assujetti_tva else Decimal('0')
-    # Prix payés TTC : la TVA est extraite du total
+    # Prices paid including tax: the VAT is extracted from the total
     ht = int((Decimal(ttc) / (1 + taux / 100)).quantize(Decimal('1'))) if taux else ttc
     f = FactureModel.objects.create(
         numero=_numero(), emise_par=par, objet_type=objet_type, objet_id=objet_id, client_nom=client_nom,
@@ -85,7 +85,7 @@ def _emettre(*, objet_type, objet_id, client_nom, client_email, client_adresse, 
 
 
 def facture_de(objet, par=None) -> FactureModel:
-    """Facture d'un séjour, transfert ou location payé : émise une seule fois, puis toujours la même."""
+    """Invoice of a paid stay, transfer or rental: issued only once, then always the same."""
     objet_type = TYPES[type(objet).__name__]
     existante = FactureModel.objects.filter(objet_type=objet_type, objet_id=objet.pk).first()
     if existante:
@@ -101,7 +101,7 @@ def facture_libre(*, client_nom, client_email, client_adresse, lignes, par) -> F
 
 
 def pieces_confirmation(objet) -> list[tuple[str, bytes, str]]:
-    """PDF joints à l'email de confirmation après paiement. Un échec de génération n'empêche jamais l'email."""
+    """PDFs attached to the confirmation email after payment. A generation failure never prevents the email."""
     pieces = []
     try:
         nom = type(objet).__name__

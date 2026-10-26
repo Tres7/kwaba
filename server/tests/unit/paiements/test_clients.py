@@ -1,4 +1,4 @@
-"""Clients FedaPay et PayPal : requêtes envoyées et lecture des réponses (HTTP simulé)."""
+"""FedaPay and PayPal clients: requests sent and responses read (simulated HTTP)."""
 import hashlib
 import hmac
 import time
@@ -117,7 +117,7 @@ def test_paypal_commande_capture_remboursement():
         assert paypal.id_capture(client.capturer('O1')) == 'CAP'
         assert client.rembourser('CAP', Decimal('10.00'), 'remb')['status'] == 'COMPLETED'
         assert client.lire_remboursement('R1')['id'] == 'R1'
-    assert post.call_count == 1  # jeton réutilisé tant qu'il est valable
+    assert post.call_count == 1  # token reused while it is valid
     entetes = req.call_args_list[0].kwargs['headers']
     assert entetes['Authorization'] == 'Bearer jeton' and entetes['PayPal-Request-Id'] == 'ref'
     assert req.call_args_list[0].kwargs['json']['purchase_units'][0]['amount'] == {'currency_code': 'EUR', 'value': '16.46'}

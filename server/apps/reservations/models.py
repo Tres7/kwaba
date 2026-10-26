@@ -45,17 +45,17 @@ class ReservationModel(models.Model):
     message = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Montants figés à la réservation, en FCFA entiers (voir apps/paiements/tarifs.py).
-    # Nuls pour les réservations créées avant le paiement en ligne.
+    # Amounts frozen at booking, as whole FCFA (see apps/paiements/tarifs.py).
+    # Zero for the bookings created before online payment.
     prix_nuits = models.PositiveIntegerField(null=True, blank=True)
     frais_service = models.PositiveIntegerField(null=True, blank=True)
     commission_hote = models.PositiveIntegerField(null=True, blank=True)
 
-    # Réservation en attente de paiement : les dates sont bloquées jusqu'à cette échéance
+    # Booking waiting for payment: the dates are held until this deadline
     expire_le = models.DateTimeField(null=True, blank=True)
     annule_par = models.CharField(max_length=20, blank=True, choices=ANNULE_PAR_CHOICES)
     annule_le = models.DateTimeField(null=True, blank=True)
-    # Emails du paiement en attente : 0 aucun, 1 « à payer avant », 2 rappel envoyé, 3 annulation notifiée
+    # Pending payment emails: 0 none, 1 "to pay before", 2 reminder sent, 3 cancellation notified
     relance_paiement = models.PositiveSmallIntegerField(default=0, editable=False)
 
     class Meta:

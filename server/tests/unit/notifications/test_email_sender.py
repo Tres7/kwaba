@@ -51,7 +51,7 @@ def test_plain_text_email_keeps_apostrophes(notifications, mailoutbox):
 
 
 def test_every_text_email_template_disables_html_escaping():
-    # Un email en texte brut n'est pas du HTML : sans autoescape off, « N'Guessan » devient « N&#x27;Guessan »
+    # A plain text email is not HTML: without autoescape off, "N'Guessan" becomes "N&#x27;Guessan"
     templates = sorted(APPS_DIR.glob('*/templates/emails/**/*.txt'))
     assert templates
     unprotected = [

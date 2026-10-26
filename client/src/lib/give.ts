@@ -19,7 +19,7 @@ function cause(code: CodeCause, icon: typeof BookOpen, couleur: string) {
   };
 }
 
-/** Causes soutenues : nom et description dans la langue courante. */
+/** Supported causes: name and description in the current language. */
 export const CAUSES: Record<CodeCause, { nom: string; description: string; icon: typeof BookOpen; couleur: string }> = {
   education: cause("education", BookOpen, "bg-amber-100 text-amber-800"),
   sante: cause("sante", HeartPulse, "bg-rose-100 text-rose-800"),
@@ -32,12 +32,12 @@ const NOMS_PAYS: Record<string, { fr: string; en: string }> = {
   NE: { fr: "Niger", en: "Niger" }, ML: { fr: "Mali", en: "Mali" },
 };
 
-/** Noms des pays, dans la langue courante (PAYS[code]). */
+/** Country names, in the current language (PAYS[code]). */
 export const PAYS: Record<string, string> = new Proxy(NOMS_PAYS as unknown as Record<string, string>, {
   get: (_, code: string) => (NOMS_PAYS[code] ? selon(NOMS_PAYS[code]) : undefined),
 });
 
-/** Paramètres publics des dons : montants suggérés, frais, calendrier des reversements. */
+/** Public donation settings: suggested amounts, fees, transfer schedule. */
 export function useConfigGive() {
   return useQuery({
     queryKey: ["give", "config"],
@@ -46,7 +46,7 @@ export function useConfigGive() {
   });
 }
 
-/** Même calcul que le serveur (apps/give/montants.py) : affiché avant le paiement. */
+/** Same calculation as the server (apps/give/montants.py): shown before payment. */
 export function calculerDon(montant: number, couvreFrais: boolean, taux: number) {
   if (couvreFrais) {
     const total = Math.ceil(montant / (1 - taux));
@@ -56,7 +56,7 @@ export function calculerDon(montant: number, couvreFrais: boolean, taux: number)
   return { frais, total: montant, montantOng: montant - frais };
 }
 
-/** Date limite du reversement à l'ONG d'un don fait aujourd'hui. */
+/** Deadline of the transfer to the NGO for a donation made today. */
 export function dateReversement(jour: number, depuis = new Date()): Date {
   return new Date(depuis.getFullYear(), depuis.getMonth() + 1, jour);
 }

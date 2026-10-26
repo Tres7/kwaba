@@ -10,7 +10,7 @@ interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
   label: string;
-  /** Contenu de l'en-tête (logo par exemple). */
+  /** Header content (the logo for example). */
   header?: React.ReactNode;
   /** Side the panel slides from: right for the site menu, left for the back-office. */
   side?: "left" | "right";
@@ -18,8 +18,8 @@ interface MobileDrawerProps {
 }
 
 /**
- * Panneau latéral mobile, rendu dans <body> : il couvre toute la hauteur de l'écran quel que soit
- * le parent (un parent avec backdrop-filter ou transform « emprisonne » sinon les éléments en position fixe).
+ * Mobile side panel, rendered in <body>: it covers the whole height of the screen whatever the parent
+ * (a parent with backdrop-filter or transform otherwise "traps" fixed-position elements).
  */
 export default function MobileDrawer({ open, onClose, label, header, side = "right", children }: MobileDrawerProps) {
   const horsEcran = side === "right" ? "100%" : "-100%";
@@ -35,7 +35,7 @@ export default function MobileDrawer({ open, onClose, label, header, side = "rig
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
-    // Focus dans le panneau pour la navigation au clavier et les lecteurs d'écran
+    // Focus inside the panel for keyboard navigation and screen readers
     const t = setTimeout(() => panneau.current?.querySelector<HTMLElement>("a, button")?.focus(), 50);
     return () => {
       document.body.style.overflow = precedent;
@@ -83,7 +83,7 @@ export default function MobileDrawer({ open, onClose, label, header, side = "rig
   );
 }
 
-/** Élément du menu qui apparaît en glissant légèrement (effet en cascade). */
+/** Menu item that appears while sliding slightly (cascade effect). */
 export function DrawerItem({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div

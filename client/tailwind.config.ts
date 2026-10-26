@@ -12,7 +12,7 @@ const config: Config = {
         foreground: "var(--foreground)",
         // Palette Kwa-Ba (charte « L'Afrique vous accueille »)
         primary: {
-          // Vert profond « Confiance » : boutons, liens, en-têtes (9,8:1 avec du blanc)
+          // Deep "Trust" green: buttons, links, headers (9.8:1 with white)
           DEFAULT: '#0E4D47',
           50: '#EEF6F5',
           100: '#D3E8E5',
@@ -26,22 +26,22 @@ const config: Config = {
           900: '#05201D',
         },
         dark: {
-          DEFAULT: '#1F2937', // « Modernité » : texte principal
+          DEFAULT: '#1F2937', // "Modernity": main text
           muted: '#475569',
         },
         light: {
-          DEFAULT: '#F8F6F2', // Crème « Simplicité » : fonds
+          DEFAULT: '#F8F6F2', // "Simplicity" cream: backgrounds
           muted: '#F0ECE4',
         },
         secondary: {
-          // Orange « Énergie » assombri pour les boutons d'action (Payer, Réserver) : 5:1 avec du blanc.
-          // L'orange vif de la charte (#F59E0B) reste en `accent` (logo, étoiles, décors).
+          // Darkened "Energy" orange for action buttons (Pay, Book): 5:1 with white.
+          // The brand's bright orange (#F59E0B) stays as `accent` (logo, stars, decorations).
           DEFAULT: '#B45309',
           600: '#92400E',
         },
         accent: '#F59E0B',
         muted: '#5F6B6C', // gris secondaire lisible (≥ 5:1)
-        // gris-400 et 500 relevés : textes d'aide et indications lisibles sur blanc et sur crème (≥ 4,5:1)
+        // gray-400 and 500 raised: help texts and hints readable on white and on cream (≥ 4.5:1)
         gray: { 400: '#667080', 500: '#667080' },
         // Semantic Colors
         success: '#10B981', // Emerald 500
@@ -49,7 +49,7 @@ const config: Config = {
         danger: '#EF4444',  // Red 500
       },
       fontFamily: {
-        // Polices auto-hébergées par next/font (app/layout.tsx) : aucun appel à Google côté visiteur
+        // Fonts self-hosted by next/font (app/layout.tsx): no call to Google from the visitor
         heading: ["var(--font-montserrat)", "Montserrat", "Inter", "sans-serif"],
         body: ["var(--font-inter)", "Inter", "Roboto", "sans-serif"],
       },

@@ -1,13 +1,13 @@
-"""Emails d'une réservation en attente de paiement (logement, transfert, location de voiture).
+"""Emails of a booking waiting for payment (listing, transfer, car rental).
 
-Le voyageur a `PAIEMENT_EXPIRATION_MINUTES` (30 par défaut) pour payer : les dates sont bloquées pendant ce temps.
+The traveller has `PAIEMENT_EXPIRATION_MINUTES` (30 by default) to pay: the dates are held during that time.
 
-1. dès la réservation : « à payer avant HH:MM », avec le lien de paiement ;
-2. à mi-délai, s'il n'a toujours pas payé : rappel ;
-3. après l'annulation automatique (worker) : « annulée faute de paiement », dates libérées.
+1. right at booking: "to pay before HH:MM", with the payment link;
+2. half way through, if they still have not paid: reminder;
+3. after the automatic cancellation (worker): "cancelled for lack of payment", dates released.
 
-L'étape atteinte est gardée dans `relance_paiement` : chaque email part une seule fois, et un envoi qui échoue
-est retenté à la passe suivante du worker. La confirmation (paiement reçu) reste envoyée par notifications.py.
+The step reached is kept in `relance_paiement`: each email is sent only once, and a failed sending
+is retried at the next pass of the worker. The confirmation (payment received) is still sent by notifications.py.
 """
 import logging
 from dataclasses import dataclass
@@ -27,7 +27,7 @@ FUSEAU = ZoneInfo('Africa/Lome')
 
 @dataclass
 class Objet:
-    """Ce que les emails disent d'une réservation, quel que soit son type."""
+    """What the emails say about a booking, whatever its type."""
     voyageur: object
     quoi: str
     montant: int
@@ -58,7 +58,7 @@ def _location(loc) -> Objet:
 
 
 def _sources():
-    """(requête, champ du statut, statut en attente, statut annulé, champ « annulé par », description)."""
+    """(query, status field, pending status, cancelled status, "cancelled by" field, description)."""
     from apps.locations.models import LocationModel
     from apps.reservations.models import ReservationModel
     from apps.transferts.models import TransfertModel
@@ -111,10 +111,10 @@ def envoyer_relances() -> int:
     for qs, statut, en_attente, annule, annule_par, decrire in _sources():
         attente = qs.filter(**{statut: en_attente}, expire_le__gt=maintenant)
         total += _avancer(attente.filter(relance_paiement=AUCUN), ATTENTE, decrire)
-        # Rappel à mi-délai ; si la passe d'avant a raté l'email d'attente, le rappel le remplace
+        # Reminder half way through; if the previous pass missed the waiting email, the reminder replaces it
         total += _avancer(attente.filter(relance_paiement__lt=RAPPEL, expire_le__lte=maintenant + mi_delai),
                           RAPPEL, decrire)
-        # Annulée faute de paiement : seulement si le voyageur avait été prévenu qu'il devait payer
+        # Cancelled for lack of payment: only if the traveller had been told they had to pay
         total += _avancer(qs.filter(**{statut: annule, annule_par: 'expiration'},
                                     relance_paiement__in=(ATTENTE, RAPPEL)), ANNULATION, decrire)
     return total

@@ -13,7 +13,7 @@ HOUR = datetime.timedelta(hours=1)
 
 @pytest.fixture
 def clock(monkeypatch):
-    """Horloge du relais, avançable par le test."""
+    """Relay clock, that the test can move forward."""
     class Clock:
         now = NOW
 

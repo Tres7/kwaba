@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import AdminShell from "@/components/backoffice/AdminShell";
 import Document, { metadataDuSite } from "@/components/layout/Document";
 
-// Le back-office reste en français
+// The back-office stays in French
 export async function generateMetadata(): Promise<Metadata> {
   return {
     ...(await metadataDuSite("fr")),

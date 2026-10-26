@@ -20,7 +20,7 @@ ME = '/api/v1/users/me/'
 NEW_PASSWORD = 'Nouveau-Mot-De-Passe-2026!'
 
 
-# Le générateur produit 100000 à 999999 : un nouveau code ne peut jamais être égal à celui-ci
+# The generator produces 100000 to 999999: a new code can never be equal to this one
 INITIAL_CODE = '012345'
 
 
@@ -34,7 +34,7 @@ def unverified(make_user):
 
 
 def _age_codes(user, seconds):
-    """Fait comme si le dernier code avait été envoyé il y a `seconds` secondes."""
+    """Pretends the last code was sent `seconds` seconds ago."""
     VerificationCode.objects.filter(user=user).update(
         expires_at=timezone.now() + timedelta(minutes=10) - timedelta(seconds=seconds),
     )
@@ -57,7 +57,7 @@ class TestVerify:
     def test_five_failures_invalidate_the_code(self, api_client, unverified):
         for _ in range(5):
             _verify(api_client, unverified, '000000')
-        # Même le bon code ne passe plus : il faut en redemander un
+        # Even the right code no longer works: a new one has to be asked for
         assert _verify(api_client, unverified, INITIAL_CODE).status_code == 400
         assert not VerificationCode.objects.filter(user=unverified).exists()
         assert JournalAuditModel.objects.filter(action='code_bloque', utilisateur_id=unverified.id).exists()
@@ -101,7 +101,7 @@ class TestResendCode:
         assert _verify(api_client, unverified, code).status_code == 200
 
     def test_resend_does_not_give_new_attempts(self, api_client, unverified, code_envoye):
-        """Redemander un code ne remet pas le compteur à zéro : 10 essais par heure et par adresse au total."""
+        """Asking for a new code does not reset the counter: 10 attempts per hour and per address in total."""
         for _ in range(5):
             _verify(api_client, unverified, '000000')
         _age_codes(unverified, seconds=61)
@@ -163,7 +163,7 @@ class TestPasswordReset:
         assert JournalAuditModel.objects.filter(action='mdp_reinitialise', utilisateur_id=user.id).exists()
 
     def test_reset_closes_every_open_session(self, api_client, make_user, password, code_envoye):
-        """Après une réinitialisation, ni les jetons d'accès ni les refresh tokens émis avant ne servent plus."""
+        """After a reset, neither the access tokens nor the refresh tokens issued before work anymore."""
         user = make_user()
         jetons = api_client.post(LOGIN, {'email': user.email, 'password': password}, format='json').data
         session = APIClient()
@@ -211,7 +211,7 @@ class TestPasswordReset:
 
 @pytest.mark.django_db(transaction=True)
 def test_simultaneous_guesses_cannot_exceed_the_limit(make_user):
-    """Des essais envoyés en parallèle (une connexion à la base chacun) ne contournent pas la limite."""
+    """Attempts sent in parallel (one database connection each) do not get around the limit."""
     user = make_user(is_verified=False)
     VerificationCode.objects.create(
         user=user, code=hacher_code(user.id, INITIAL_CODE), expires_at=timezone.now() + timedelta(minutes=10),

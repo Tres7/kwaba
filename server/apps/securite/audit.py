@@ -7,9 +7,9 @@ logger = logging.getLogger('apps.securite')
 
 
 def journaliser(action: str, request=None, utilisateur=None, email: str = '', **details) -> None:
-    """Ajoute une entrée au journal d'audit. Ne doit jamais faire échouer la requête qui l'appelle.
+    """Adds an entry to the audit log. Must never make the calling request fail.
 
-    `utilisateur` : instance ou identifiant. Ne jamais passer de mot de passe, de code ni de jeton.
+    `utilisateur`: instance or id. Never pass a password, a code nor a token.
     """
     try:
         utilisateur_id = getattr(utilisateur, 'pk', utilisateur)

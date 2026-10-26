@@ -13,14 +13,14 @@ import { useTranslations } from "next-intl";
 import { PAYS } from "@/lib/give";
 
 interface Props {
-  /** Route qui enregistre le compte (réservation ou transfert). */
+  /** Route that saves the account (booking or transfer). */
   endpoint: string;
   montant: number;
   onClose: () => void;
   onDone: () => void;
 }
 
-/** Demande au voyageur le compte Mobile Money sur lequel le rembourser (FedaPay ne communique pas le numéro débité). */
+/** Asks the traveller for the Mobile Money account to refund them on (FedaPay does not give the charged number). */
 export default function CompteRemboursementDialog({ endpoint, montant, onClose, onDone }: Props) {
   const t = useTranslations("remboursementDialog");
   const { data: config } = useConfigPaiement();

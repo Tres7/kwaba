@@ -39,7 +39,7 @@ export default function EditProfilePage() {
       })
       .catch(() => setError(t("erreurChargement")))
       .finally(() => setFetching(false));
-    // Chargement unique à l'ouverture de la page
+    // Single load when the page opens
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

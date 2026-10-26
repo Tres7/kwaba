@@ -44,7 +44,7 @@ class User:
         return self.role == UserRole.ADMIN
 
     def verify(self) -> None:
-        """Valider le compte après confirmation email"""
+        """Validates the account after email confirmation"""
         self.is_verified = True
         self.updated_at = datetime.datetime.now(datetime.timezone.utc)
 

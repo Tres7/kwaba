@@ -1,4 +1,4 @@
-"""Back-office : expériences de la page Découvrir (création, modification, photo, publication, suppression)."""
+"""Back-office: experiences of the Discover page (creation, change, photo, publication, deletion)."""
 from rest_framework import generics, serializers
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
@@ -10,7 +10,7 @@ from .commun import ChampPhoto, Journalise, ListeAdmin
 
 
 class ExperienceSerializer(serializers.ModelSerializer):
-    # Photo envoyée (vérifiée, ré-encodée en JPEG) ; « photo » donne l'adresse affichée, envoyée ou externe
+    # Uploaded photo (checked, re-encoded as JPEG); "photo" gives the displayed address, uploaded or external
     image = ChampPhoto(required=False, allow_null=True, write_only=True)
     photo = serializers.SerializerMethodField()
 
@@ -24,7 +24,7 @@ class ExperienceSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data.get('gratuit', getattr(self.instance, 'gratuit', False)):
-            data['prix'] = None  # gratuit : pas de prix
+            data['prix'] = None  # free: no price
         return data
 
 
@@ -35,7 +35,7 @@ class ExperiencesView(ListeAdmin):
 
 
 class ExperienceView(Journalise, generics.RetrieveUpdateDestroyAPIView):
-    """Lecture, modification et suppression (contenu éditorial, sans historique à préserver)."""
+    """Read, update and deletion (editorial content, no history to preserve)."""
     nom_objet = "experience"
     permission_classes = [EstAdministrateur]
     parser_classes = [JSONParser, MultiPartParser, FormParser]

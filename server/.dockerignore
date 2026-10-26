@@ -1,4 +1,4 @@
-# Secrets et environnement local : jamais dans l'image (passés à l'exécution par variables d'environnement)
+# Secrets and local environment: never in the image (passed at runtime through environment variables)
 .env
 .env.*
 !.env.example
@@ -16,7 +16,7 @@ htmlcov/
 mediafiles/
 staticfiles/
 
-# Outillage de test et de développement
+# Test and development tooling
 tests/
 requirements-dev.txt
 pytest.ini

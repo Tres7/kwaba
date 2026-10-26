@@ -32,7 +32,7 @@ function VerifyForm() {
 
   const code = digits.join("");
 
-  // sessionStorage n'existe que côté navigateur
+  // sessionStorage only exists in the browser
   useEffect(() => {
     const stored = sessionStorage.getItem("verify_email");
     if (!email && stored) {
@@ -83,11 +83,11 @@ function VerifyForm() {
 
     sessionStorage.removeItem("verify_email");
 
-    // Le backend renvoie directement les tokens : ouverture de session sans mot de passe
+    // The backend returns the tokens directly: the session opens without a password
     if (data.access && data.refresh && data.user) {
       const loginRes = await signIn("backend-session", {
         redirect: false,
-        // Identité et rôle relus par le serveur auprès de l'API (voir backend-session.ts)
+        // Identity and role read again by the server from the API (see backend-session.ts)
         accessToken: data.access,
         refreshToken: data.refresh,
       });
@@ -163,7 +163,7 @@ function VerifyForm() {
     setResending(false);
   };
 
-  // Arrivée depuis la connexion d'un compte non vérifié : on renvoie un code frais
+  // Coming from the sign-in of an unverified account: a fresh code is sent
   useEffect(() => {
     if (searchParams.get("resend") === "1" && email && !autoResent.current) {
       autoResent.current = true;

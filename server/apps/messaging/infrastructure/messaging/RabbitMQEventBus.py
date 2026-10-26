@@ -9,12 +9,12 @@ from apps.messaging.application.ports.EventPublisher import EventPublisher
 
 
 class RabbitMQEventBus(EventPublisher):
-    """Publication utilisée uniquement par le relais (jamais dans une requête HTTP).
+    """Publication used only by the relay (never in an HTTP request).
 
-    - Timeouts courts : le relais garde une ligne d'outbox verrouillée pendant l'appel.
-    - Publisher confirms + mandatory : une publication n'est considérée réussie que si le broker
-      l'a acceptée ET routée vers au moins une file. Sinon une exception est levée et la ligne
-      reste à republier (au lieu d'être marquée envoyée puis perdue).
+    - Short timeouts: the relay keeps an outbox row locked during the call.
+    - Publisher confirms + mandatory: a publication only counts as successful if the broker
+      accepted it AND routed it to at least one queue. Otherwise an exception is raised and the row
+      stays to be published again (instead of being marked sent then lost).
     """
 
     EXCHANGE = 'domain_events'
@@ -40,7 +40,7 @@ class RabbitMQEventBus(EventPublisher):
             channel = connection.channel()
             channel.exchange_declare(exchange=self.EXCHANGE, exchange_type='direct', durable=True)
             channel.confirm_delivery()
-            # Lève UnroutableError si aucune file n'est liée à cette routing key, NackError si refusé
+            # Raises UnroutableError if no queue is bound to this routing key, NackError if refused
             channel.basic_publish(
                 exchange=self.EXCHANGE,
                 routing_key=event.event,

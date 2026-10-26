@@ -21,8 +21,8 @@ const ICONES: Record<Etat, { icone: typeof Circle; classe: string }> = {
   a_faire: { icone: Circle, classe: "text-gray-300" },
 };
 
-/** Étapes pour devenir hôte : téléphone, pièce d'identité (contrôlée avant toute visite), puis logement visité.
- *  Affiché tant que l'identité n'est pas vérifiée ; ensuite, une simple mention « Identité vérifiée ». */
+/** Steps to become a host: phone, identity document (checked before any visit), then visited listing.
+ *  Shown while the identity is not verified; afterwards, a simple "Identity verified" mention. */
 export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces: number; onNouvelle: () => void }) {
   const t = useTranslations("espaceHote.candidature");
   const { data: me } = useQuery({
@@ -33,7 +33,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
     queryKey: ["verification", "identite"],
     queryFn: async () => (await api.get<{ statut: StatutPiece }>("/v1/verifications/identite/")).data,
   });
-  // null : contrat pas encore proposé (Kwa-Ba n'a pas renseigné ses informations légales), étape masquée
+  // null: agreement not offered yet (Kwa-Ba has not filled in its legal information), step hidden
   const { data: contrat } = useQuery({
     queryKey: ["contrat-hote"],
     queryFn: async () => {

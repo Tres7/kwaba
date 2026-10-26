@@ -3,7 +3,7 @@ from django.http import JsonResponse
 
 
 def health(request):
-    """Sonde de santé (Render, smoke test) : l'application répond et la base est joignable."""
+    """Health probe (Render, smoke test): the application responds and the database is reachable."""
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT 1')

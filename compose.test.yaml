@@ -1,5 +1,5 @@
-# Services des tests du serveur, démarrés à la demande par pytest (server/tests/services.py).
-# Projet séparé (kwaba-test) : n'interfère pas avec la stack de développement de compose.yaml.
+# Services of the server tests, started on demand by pytest (server/tests/services.py).
+# Separate project (kwaba-test): does not interfere with the development stack of compose.yaml.
 name: kwaba-test
 
 services:
@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: kwaba-test
     ports:
       - "127.0.0.1:55432:5432"
-    # Données en mémoire : rapide, et rien ne survit à l'arrêt du conteneur
+    # Data in memory: fast, and nothing survives the container stopping
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:

@@ -8,5 +8,5 @@ class EventPublisher(ABC):
 
     @abstractmethod
     def publish(self, event: DomainEvent, message_id: Optional[str] = None) -> None:
-        """message_id permet au consommateur de dédupliquer (livraison au moins une fois)."""
+        """message_id lets the consumer deduplicate (at-least-once delivery)."""
         pass

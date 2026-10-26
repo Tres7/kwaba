@@ -133,5 +133,5 @@ class TestGoogleAuthenticate:
         result = service.google_authenticate(*_google(email='nouveau@example.tg'))
         assert result.role == 'voyageur'
         assert result.is_verified is True
-        # Mot de passe inutilisable : connexion par Google uniquement
+        # Unusable password: Google sign-in only
         assert str(repository.find_by_id(result.id).password_hash).startswith('!')

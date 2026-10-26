@@ -5,10 +5,10 @@ import { cn, formatDate } from "@/lib/utils";
 
 const ICONES: Record<TypeMission, typeof Home> = { logement: Home, piece: IdCard };
 
-/** Une mission dans une liste : ouvre sa fiche (sauf dans l'historique, où elle est close). */
+/** A mission in a list: opens its page (except in the history, where it is closed). */
 export default function CarteMission({ mission, action, historique }: {
   mission: MissionResume;
-  /** Bouton à droite (« Je m'en occupe »). */
+  /** Button on the right ("I'll handle it"). */
   action?: React.ReactNode;
   historique?: boolean;
 }) {

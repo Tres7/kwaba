@@ -3,7 +3,7 @@ name: PR main
 on:
   pull_request:
     branches: [main]
-    # ready_for_review : une PR qui sort du brouillon relance la CI complète
+    # ready_for_review: a PR leaving draft runs the full CI again
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
@@ -13,7 +13,7 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: read # liste des fichiers modifiés (paths-filter)
+  pull-requests: read # list of the changed files (paths-filter)
 
 jobs:
   changes:
@@ -33,7 +33,7 @@ jobs:
       - id: plan
         uses: ./.github/actions/detect-ci-plan
 
-  # Niveau 1 (et 2 pour le serveur : unit puis integration dans le même job)
+  # Level 1 (and 2 for the server: unit then integration in the same job)
   app-checks:
     name: App
     needs: changes
@@ -44,7 +44,7 @@ jobs:
       front: ${{ needs.changes.outputs.front == 'true' }}
       full: ${{ !github.event.pull_request.draft }}
 
-  # Niveau 1 : workflows (actionlint) et Dockerfiles (hadolint)
+  # Level 1: workflows (actionlint) and Dockerfiles (hadolint)
   config-checks:
     name: Config
     needs: changes
@@ -53,7 +53,7 @@ jobs:
     with:
       infra: true
 
-  # Niveau 2 : seulement si le niveau 1 n'a pas échoué (un niveau 1 ignoré ne bloque pas)
+  # Level 2: only if level 1 did not fail (a skipped level 1 does not block)
   docker-checks:
     name: Docker
     needs: [changes, app-checks, config-checks]
@@ -67,7 +67,7 @@ jobs:
       front: ${{ needs.changes.outputs.front == 'true' }}
       infra: ${{ needs.changes.outputs.infra == 'true' }}
 
-  # Niveau 1, sur toute PR : secrets dans les commits de la PR, audits des dépendances touchées
+  # Level 1, on every PR: secrets in the PR's commits, audits of the changed dependencies
   security:
     name: Security
     needs: changes
@@ -80,7 +80,7 @@ jobs:
         && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha)
         || 'origin/main..HEAD' }}
 
-  # Seul contrôle à exiger dans la protection de main
+  # Only check to require in the protection of main
   pr-status:
     name: PR status
     if: always()

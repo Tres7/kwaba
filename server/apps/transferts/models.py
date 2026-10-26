@@ -26,7 +26,7 @@ class AeroportModel(models.Model):
 
 
 class TarifTransfertModel(models.Model):
-    """Prix de base d'un transfert de l'aéroport vers la ville, par catégorie de véhicule."""
+    """Base price of a transfer from the airport to the city, per vehicle category."""
     aeroport = models.ForeignKey(AeroportModel, on_delete=models.CASCADE, related_name='tarifs')
     categorie = models.CharField(max_length=20, choices=CATEGORIE_CHOICES)
     prix = models.PositiveIntegerField(help_text='En FCFA, hors majoration de nuit')
@@ -42,8 +42,8 @@ class TarifTransfertModel(models.Model):
 
 
 class ChauffeurModel(models.Model):
-    """Chauffeur partenaire (indépendant), payé par Mobile Money après chaque course ou mission (contrat chauffeur) :
-    transferts avec son véhicule, et missions à la journée (voiture d'un propriétaire, véhicule du client)."""
+    """Partner driver (self-employed), paid by Mobile Money after each ride or mission (driver contract):
+    transfers with their vehicle, and day missions (an owner's car, the customer's vehicle)."""
     prenom = models.CharField(max_length=60)
     nom = models.CharField(max_length=60)
     telephone = models.CharField(max_length=20, help_text='Avec l\'indicatif, par ex. +228 90 00 00 00')
@@ -57,7 +57,7 @@ class ChauffeurModel(models.Model):
         default=False, db_default=False,
         help_text='Statut « Chauffeur Excellence » (revu chaque trimestre) : 6 500 FCFA par jour au lieu de 6 000',
     )
-    # Compte Mobile Money pour ses versements
+    # Mobile Money account for their payouts
     pays_versement = models.CharField(max_length=2, choices=PAYS_CHOICES)
     operateur_versement = models.CharField(max_length=30, choices=OPERATEUR_CHOICES)
     numero_versement = models.CharField(max_length=15, help_text='Sans l\'indicatif')
@@ -111,12 +111,12 @@ class TransfertModel(models.Model):
 
     statut = models.CharField(max_length=20, choices=STATUTS, default='en_attente_paiement')
     expire_le = models.DateTimeField(null=True, blank=True)
-    # Emails du paiement en attente : 0 aucun, 1 « à payer avant », 2 rappel envoyé, 3 annulation notifiée
+    # Pending payment emails: 0 none, 1 "to pay before", 2 reminder sent, 3 cancellation notified
     relance_paiement = models.PositiveSmallIntegerField(default=0, editable=False)
     annule_par = models.CharField(max_length=20, choices=ANNULE_PAR, blank=True)
     annule_le = models.DateTimeField(null=True, blank=True)
     chauffeur = models.ForeignKey(ChauffeurModel, on_delete=models.PROTECT, null=True, blank=True, related_name='transferts')
-    # Emails envoyés par le worker (un drapeau par email : un envoi raté est retenté, jamais doublé)
+    # Emails sent by the worker (one flag per email: a failed sending is retried, never doubled)
     confirmation_notifiee = models.BooleanField(default=False, help_text='Paiement confirmé au voyageur')
     admins_notifies = models.BooleanField(default=False, help_text='Administrateurs prévenus : chauffeur à attribuer')
     alerte_sans_chauffeur = models.BooleanField(default=False, help_text='Alerte : arrivée dans moins de 24 h sans chauffeur')
@@ -143,7 +143,7 @@ class TransfertModel(models.Model):
 
 
 class VersementChauffeurModel(models.Model):
-    """Paiement du chauffeur après la course (mêmes règles que les versements aux hôtes)."""
+    """Payment of the driver after the ride (same rules as the payouts to hosts)."""
     STATUTS = [
         ('planifie', 'Planifié'),
         ('en_cours', 'En cours'),

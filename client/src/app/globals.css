@@ -123,8 +123,8 @@ body {
   }
 }
 
-/* ─── Accessibilité ────────────────────────────────────────── */
-/* Focus clavier toujours visible (WCAG 2.4.7), sans gêner les clics souris */
+/* ─── Accessibility ────────────────────────────────────────── */
+/* Keyboard focus always visible (WCAG 2.4.7), without getting in the way of mouse clicks */
 :focus-visible {
   outline: 3px solid #0E4D47;
   outline-offset: 2px;
@@ -137,8 +137,8 @@ body {
   box-shadow: 0 0 0 2px #fff;
 }
 
-/* Zone tactile d'au moins 44 × 44 px (WCAG 2.5.8, Apple HIG) sans changer l'apparence :
-   la zone cliquable déborde, invisible, autour des petits boutons et liens. L'élément doit être positionné
+/* Touch target of at least 44 × 44 px (WCAG 2.5.8, Apple HIG) without changing the look:
+   the clickable area overflows, invisibly, around small buttons and links. The element must be positioned
    (relative, absolute…). */
 .zone-tactile::after {
   content: "";
@@ -150,12 +150,12 @@ body {
   transform: translate(-50%, -50%);
 }
 
-/* Pas de délai de 300 ms au toucher, double-tap pour zoomer toujours possible ailleurs */
+/* No 300 ms delay on touch, double-tap to zoom still possible elsewhere */
 a, button, input, select, textarea, label, [role="button"], [role="tab"], [role="option"] {
   touch-action: manipulation;
 }
 
-/* Respect du réglage système « réduire les animations » (WCAG 2.3.3) */
+/* Honours the system "reduce motion" setting (WCAG 2.3.3) */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

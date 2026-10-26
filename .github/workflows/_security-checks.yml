@@ -1,6 +1,6 @@
 name: Security
 
-# Partagé par la PR (pr_main.yml) et la nuit (nightly.yml)
+# Shared by the PR (pr_main.yml) and the night (nightly.yml)
 on:
   workflow_call:
     inputs:
@@ -46,7 +46,7 @@ jobs:
           node-version: '24'
       - name: npm audit
         working-directory: client
-        # Lit le lockfile, sans installation. Les dépendances de dev ne partent pas en production.
+        # Reads the lockfile, without installing. Dev dependencies do not go to production.
         run: npm audit --omit=dev --audit-level=high
 
   pip-audit:

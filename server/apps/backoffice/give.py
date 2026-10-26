@@ -1,4 +1,4 @@
-"""Back-office : Kwa-Ba Give (ONG partenaires, projets, reversements avec preuve, dons)."""
+"""Back-office: Kwa-Ba Give (partner NGOs, projects, transfers with proof, donations)."""
 import uuid
 
 from django.core.files.base import ContentFile
@@ -38,14 +38,14 @@ class OrganisationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if not self.instance and not data.get('slug'):
-            # Adresse de la page déduite du nom : /give/ecoles-du-mono
+            # Page address derived from the name: /give/ecoles-du-mono
             base, n = slugify(data.get('nom', ''))[:70] or 'ong', 1
             slug = base
             while OrganisationModel.objects.filter(slug=slug).exists():
                 n += 1
                 slug = f"{base}-{n}"
             data['slug'] = slug
-        # Publiée (date de vérification) : ce qui a été vérifié est affiché sur le site, il doit être renseigné
+        # Published (verification date): what was verified is shown on the site, it must be filled in
         verifiee = data.get('verifiee_le', getattr(self.instance, 'verifiee_le', None))
         verification = data.get('verification', getattr(self.instance, 'verification', ''))
         if verifiee and not verification.strip():
@@ -89,7 +89,7 @@ class ProjetSerializer(serializers.ModelSerializer):
 
 
 class ProjetsView(ListeAdmin):
-    """Projets d'une ONG."""
+    """Projects of an NGO."""
     nom_objet = "projet"
     serializer_class = ProjetSerializer
 
@@ -122,7 +122,7 @@ def _reversement(r: ReversementModel, request) -> dict:
 
 
 class ReversementsView(APIView):
-    """Reversements, les plus anciens à effectuer d'abord. Filtre : statut."""
+    """Transfers, the oldest to make first. Filter: status."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -133,7 +133,7 @@ class ReversementsView(APIView):
 
 
 class ReversementsPreparerView(APIView):
-    """Rattache tout de suite les dons des mois terminés à leurs reversements (le worker le fait chaque jour)."""
+    """Attaches the donations of finished months to their transfers right away (the worker does it every day)."""
     permission_classes = [EstAdministrateur]
 
     def post(self, request):
@@ -152,7 +152,7 @@ class EffectuerSerializer(serializers.Serializer):
 
 
 class ReversementEffectuerView(APIView):
-    """Le virement est fait : preuve (PDF ou image, publiée sur la page de l'ONG), moyen, référence, message public."""
+    """The transfer is made: proof (PDF or image, published on the NGO's page), method, reference, public message."""
     permission_classes = [EstAdministrateur]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -168,7 +168,7 @@ class ReversementEffectuerView(APIView):
         if d.get('effectue_le') and d['effectue_le'] > timezone.localdate():
             return Response({'effectue_le': ["La date du virement ne peut pas être dans le futur."]}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            # Vérifié (vraie image ou vrai PDF), image ré-encodée sans métadonnées
+            # Checked (real image or real PDF), image re-encoded without metadata
             contenu, extension, _ = piece_identite(d['justificatif'])
         except FichierInvalide as exc:
             return Response({'justificatif': [str(exc)]}, status=status.HTTP_400_BAD_REQUEST)
@@ -195,7 +195,7 @@ def _don(d: DonModel) -> dict:
 
 
 class DonsView(APIView):
-    """Dons, les plus récents d'abord. Filtres : statut, organisation, q (email du donateur)."""
+    """Donations, most recent first. Filters: status, organisation, q (donor's email)."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):

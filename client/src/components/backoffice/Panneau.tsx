@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Formulaire d'édition du back-office : panneau à droite sur grand écran, feuille par le bas sur mobile. */
+/** Back-office edit form: panel on the right on large screens, bottom sheet on mobile. */
 export default function Panneau({ ouvert, titre, onFermer, onValider, envoi, libelle = "Enregistrer", children }: {
   ouvert: boolean;
   titre: string;
@@ -53,7 +53,7 @@ export default function Panneau({ ouvert, titre, onFermer, onValider, envoi, lib
 
 const champClasse = "w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
-/** Champ libellé avec erreur sous le champ. */
+/** Labelled field with its error below it. */
 export function Champ({ label, erreur, aide, children, className }: {
   label: string; erreur?: string; aide?: string; children: React.ReactNode; className?: string;
 }) {

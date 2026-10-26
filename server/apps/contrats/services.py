@@ -1,12 +1,12 @@
-"""Contrats : émission (texte figé, variables remplacées), lien de signature personnel, signature et preuves.
+"""Contracts: issuing (frozen text, variables replaced), personal signature link, signature and proofs.
 
-Parcours :
-1. Kwa-Ba émet le contrat (le back-office pour un loueur, un chauffeur ou une ONG ; automatiquement pour un
-   hôte, qui le signe depuis son espace). Le représentant légal de Kwa-Ba en est le signataire.
-2. La partie reçoit un lien personnel (valable 30 jours, stocké haché), lit le contrat, tape son nom,
-   dessine sa signature et accepte expressément.
-3. Le PDF signé (avec certificat de signature) est figé, son empreinte SHA-256 conservée, et envoyé aux
-   deux parties.
+Flow:
+1. Kwa-Ba issues the contract (the back-office for a rental company, a driver or an NGO; automatically for a
+   host, who signs it from their space). Kwa-Ba's legal representative is its signer.
+2. The party receives a personal link (valid 30 days, stored hashed), reads the contract, types their name,
+   draws their signature and expressly accepts.
+3. The signed PDF (with signature certificate) is frozen, its SHA-256 fingerprint kept, and sent to
+   both parties.
 """
 import base64
 import binascii
@@ -35,14 +35,14 @@ from .models import ContratModel, ModeleContratModel, hacher_jeton
 logger = logging.getLogger('apps.contrats')
 
 VALIDITE_LIEN = timedelta(days=30)
-TAILLE_MAX_SIGNATURE = 400_000  # octets, image dessinée encodée en base64 comprise
+TAILLE_MAX_SIGNATURE = 400_000  # bytes, drawn image encoded in base64 included
 
 DESIGNATIONS = {'hote': "l'Hôte", 'hotel': "l'Établissement", 'loueur': 'le Propriétaire', 'chauffeur': 'le Chauffeur',
                 'ong': "l'Association"}
-# Contrats signés par un compte hôte : particulier (B1) ou hôtel et résidence hôtelière (B2)
+# Contracts signed by a host account: individual (B1) or hotel and serviced residence (B2)
 TYPES_HOTE = ('hote', 'hotel')
 
-# Variables utilisables dans les modèles (affichées dans l'éditeur du back-office)
+# Variables usable in the templates (shown in the back-office editor)
 VARIABLES = {
     'societe.raison_sociale': 'Raison sociale de Kwa-Ba', 'societe.forme_juridique': 'Forme juridique',
     'societe.adresse': 'Adresse du siège', 'societe.pays': 'Pays', 'societe.rccm': 'RCCM', 'societe.nif': 'NIF',
@@ -93,7 +93,7 @@ def _nom(u) -> str:
 
 
 def partie(type_contrat: str, objet) -> dict:
-    """Coordonnées de la partie, copiées dans le contrat, et le lien vers elle."""
+    """Contact details of the party, copied into the contract, and the link to it."""
     if type_contrat in TYPES_HOTE:
         return {'nom': _nom(objet), 'email': objet.email, 'telephone': objet.phone or '', 'details': '',
                 'fondateur': fondateur(objet), 'lien': {'hote': objet}}
@@ -110,7 +110,7 @@ def partie(type_contrat: str, objet) -> dict:
 
 
 def fondateur(objet) -> str:
-    """Programme Fondateurs de l'hôte, tel qu'il figure au contrat (dates réglées par l'équipe)."""
+    """The host's Founders Programme, as it appears in the contract (dates set by the team)."""
     from apps.paiements.tarifs import conditions
 
     c = conditions(objet)
@@ -120,7 +120,7 @@ def fondateur(objet) -> str:
 
 
 def _coordonnees(telephone: str, email: str) -> str:
-    """« joignable au … et à l'adresse … », sans la partie manquante."""
+    """« joignable au … et à l'adresse … » (reachable at … and at the address …), without the missing part."""
     morceaux = [f"au {telephone}" if telephone else '', f"à l'adresse {email}" if email else '']
     return f"joignable {' et '.join(m for m in morceaux if m)}" if any(morceaux) else ''
 
@@ -141,19 +141,19 @@ def contexte(type_contrat: str, infos: dict) -> dict:
 
 
 def rendre(corps: str, valeurs: dict) -> str:
-    """Remplace les variables ; une valeur manquante reste visible pour être complétée (« [à compléter] »)."""
+    """Replaces the variables; a missing value stays visible to be completed ("[à compléter]")."""
     def valeur(m):
         cle = m.group(1)
         return str(valeurs.get(cle) or ('' if cle in FACULTATIVES else '[à compléter]'))
 
     texte = _VARIABLE.sub(valeur, corps)
-    # Une précision vide laisse « , , » ou un espace avant la virgule : on nettoie
+    # An empty detail leaves ", ," or a space before the comma: clean it up
     texte = re.sub(r' +([,.])', r'\1', re.sub(r',[ \t]*,', ',', texte))
     return re.sub(r'[ \t]{2,}', ' ', texte)
 
 
 def blocs(corps: str) -> list[dict]:
-    """Paragraphes du contrat : {'type': 'titre' | 'texte', 'texte': …}. « ## » en tête = titre d'article."""
+    """Paragraphs of the contract: {'type': 'titre' | 'texte', 'texte': …}. "##" at the start = article title."""
     resultat = []
     for paragraphe in re.split(r'\n\s*\n', corps.strip()):
         paragraphe = paragraphe.strip()
@@ -169,10 +169,10 @@ def blocs(corps: str) -> list[dict]:
     return resultat
 
 
-# --- Signature dessinée ----------------------------------------------------------------------------
+# --- Drawn signature ----------------------------------------------------------------------------
 
 def signature_png(contenu: bytes, fond_blanc_transparent=False) -> bytes:
-    """Image de signature vérifiée, recadrée et ré-encodée en PNG (aucune donnée d'origine conservée)."""
+    """Signature image checked, cropped and re-encoded as PNG (no original data kept)."""
     try:
         with Image.open(BytesIO(contenu)) as sonde:
             if sonde.format not in ('PNG', 'JPEG', 'WEBP'):
@@ -184,7 +184,7 @@ def signature_png(contenu: bytes, fond_blanc_transparent=False) -> bytes:
     except (UnidentifiedImageError, OSError, SyntaxError):
         raise ContratErreur("Signature illisible.") from None
     if fond_blanc_transparent:
-        # Signature scannée : le fond clair devient transparent
+        # Scanned signature: the light background becomes transparent
         image.putdata([(r, g, b, 0) if r > 225 and g > 225 and b > 225 else (r, g, b, a) for r, g, b, a in image.getdata()])
     cadre = image.getchannel('A').point(lambda a: 255 if a > 20 else 0).getbbox()
     if not cadre or (cadre[2] - cadre[0]) < 30 or (cadre[3] - cadre[1]) < 10:
@@ -243,7 +243,7 @@ def _envoyer_lien(contrat: ContratModel, jeton: str) -> None:
     contrat.save(update_fields=['envoye_le'])
 
 
-# --- Émission ---------------------------------------------------------------------------------------
+# --- Issuing ---------------------------------------------------------------------------------------
 
 def _reference() -> str:
     return f"CT-{timezone.localdate().year}-{secrets.token_hex(3).upper()}"
@@ -251,7 +251,7 @@ def _reference() -> str:
 
 @transaction.atomic
 def emettre(type_contrat: str, objet, par=None, envoyer=True) -> ContratModel:
-    """Contrat pré-rempli pour cette partie ; envoie le lien de signature par email si `envoyer`."""
+    """Contract prefilled for this party; sends the signature link by email if `envoyer`."""
     societe = ParametresSocieteModel.courants()
     if not societe.complets:
         raise ContratErreur("Renseignez la raison sociale et l'adresse de la société (Back-office → Documents) avant d'émettre un contrat.")
@@ -280,7 +280,7 @@ def emettre(type_contrat: str, objet, par=None, envoyer=True) -> ContratModel:
 
 
 def renvoyer(contrat: ContratModel) -> ContratModel:
-    """Nouveau lien (l'ancien ne fonctionne plus), valable 30 jours, envoyé par email."""
+    """New link (the old one no longer works), valid 30 days, sent by email."""
     if contrat.statut != 'a_signer':
         raise ContratErreur("Seul un contrat à signer peut être renvoyé.")
     if not contrat.partie_email:
@@ -308,10 +308,10 @@ def par_jeton(jeton: str) -> ContratModel | None:
     return ContratModel.objects.filter(jeton_hash=hacher_jeton(jeton)).exclude(statut='annule').first()
 
 
-# --- Hôtes ------------------------------------------------------------------------------------------
+# --- Hosts ------------------------------------------------------------------------------------------
 
 def type_contrat_hote(hote) -> str:
-    """Contrat que l'hôte doit signer : hôte particulier (B1) ou hôtel et résidence hôtelière (B2)."""
+    """Contract the host must sign: individual host (B1) or hotel and serviced residence (B2)."""
     from apps.paiements.tarifs import conditions
 
     c = conditions(hote)
@@ -319,7 +319,7 @@ def type_contrat_hote(hote) -> str:
 
 
 def contrat_hote(hote) -> ContratModel:
-    """Contrat de l'hôte, émis à la première demande (il le signe depuis son espace, sans email)."""
+    """The host's contract, issued on the first request (they sign it from their space, without email)."""
     contrat = ContratModel.objects.filter(hote=hote).exclude(statut='annule').first()
     return contrat or emettre(type_contrat_hote(hote), hote, envoyer=False)
 

@@ -12,12 +12,12 @@ class MessageRepository(ABC):
 
     @abstractmethod
     def add(self, message: Message) -> Message:
-        """Enregistre le message et renvoie l'entité avec son id séquentiel."""
+        """Saves the message and returns the entity with its sequential id."""
         pass
 
     @abstractmethod
     def list(self, conversation_id: uuid.UUID, after_id: Optional[int], limit: int) -> List[Message]:
-        """Messages par id croissant. Sans after_id : les `limit` plus récents."""
+        """Messages by ascending id. Without after_id: the `limit` most recent ones."""
         pass
 
     @abstractmethod

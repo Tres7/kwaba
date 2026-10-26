@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Document, { metadataDuSite } from "@/components/layout/Document";
 import AgentShell from "@/components/agent/AgentShell";
 
-// Espace des agents de terrain : en français, jamais indexé
+// Field agents' space: in French, never indexed
 export async function generateMetadata(): Promise<Metadata> {
   return {
     ...(await metadataDuSite("fr")),

@@ -15,8 +15,8 @@ def test_code_details_et_boutons():
         "Pour lire la conversation et répondre :\nhttps://kwa-ba.com/messages/1\n\n"
         "Voir la réservation : https://kwa-ba.com/r/1"
     )
-    assert 'letter-spacing:10px' in html and '482915' in html          # code mis en évidence
-    assert '>Référence</td>' in html and '>RES-1</td>' in html          # carte de détails
+    assert 'letter-spacing:10px' in html and '482915' in html          # highlighted code
+    assert '>Référence</td>' in html and '>RES-1</td>' in html          # details card
     assert 'href="https://kwa-ba.com/messages/1"' in html and '>Pour lire la conversation et répondre</a>' in html
     assert '>Voir la réservation</a>' in html
 

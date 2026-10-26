@@ -10,8 +10,8 @@ export type BackendUser = {
 };
 
 /**
- * Profil lu par l'API avec ce jeton d'accès. Source de vérité de l'identité et du rôle dans la session : rien de ce
- * que le navigateur envoie (identifiant, rôle) n'y entre sans être confirmé par l'API. null si le jeton est refusé.
+ * Profile read by the API with this access token. Source of truth for the identity and role in the session: nothing
+ * the browser sends (id, role) gets in without being confirmed by the API. null if the token is refused.
  */
 export async function fetchBackendUser(accessToken: string): Promise<BackendUser | null> {
   try {

@@ -6,9 +6,9 @@ Pair = Tuple[uuid.UUID, uuid.UUID]  # (hebergement_id, guest_id)
 
 
 class BookingLookup(ABC):
-    """Accès en lecture aux réservations : le voyageur a-t-il une réservation payée (confirmée) de ce logement ?
+    """Read access to bookings: does the traveller have a paid (confirmed) booking for this listing?
 
-    Tant que ce n'est pas le cas, il reste anonyme pour l'hôte."""
+    Until they do, they stay anonymous to the host."""
 
     @abstractmethod
     def booked(self, pairs: Iterable[Pair]) -> Set[Pair]:
@@ -16,7 +16,7 @@ class BookingLookup(ABC):
 
 
 class EveryoneBooked(BookingLookup):
-    """Toutes les identités visibles (tests du domaine)."""
+    """All identities visible (domain tests)."""
 
     def booked(self, pairs: Iterable[Pair]) -> Set[Pair]:
         return set(pairs)

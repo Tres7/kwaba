@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Ouverture d'un panneau flottant : fermeture au clic extérieur et à la touche Échap.
- * `ref` entoure le déclencheur ; `panelRef` le panneau (qui peut être rendu ailleurs dans la page via un portail).
+ * Opening of a floating panel: closes on an outside click and on the Escape key.
+ * `ref` wraps the trigger; `panelRef` the panel (which may be rendered elsewhere in the page through a portal).
  */
 export function usePopover<T extends HTMLElement = HTMLDivElement>() {
   const [open, setOpen] = useState(false);

@@ -1,4 +1,4 @@
-"""Grille tarifaire du 18 octobre 2026 : frais voyageur, Client fidèle, commission selon l'hôte, réglage dans le back-office."""
+"""Price grid of 18 October 2026: traveller fees, loyal customer, commission by host, setting in the back-office."""
 from datetime import timedelta
 
 import pytest
@@ -13,7 +13,7 @@ ADMIN_USERS = '/api/v1/admin/users/'
 
 @pytest.fixture(autouse=True)
 def sans_paiement_en_ligne(settings):
-    # Confirmation directe : les montants sont calculés à la création
+    # Direct confirmation: the amounts are computed at creation
     settings.FEDAPAY = {**settings.FEDAPAY, 'SECRET_KEY': ''}
     settings.PAYPAL = {**settings.PAYPAL, 'CLIENT_ID': '', 'CLIENT_SECRET': ''}
 
@@ -49,12 +49,12 @@ def test_client_fidele_paie_3_pour_cent(client_for, make_user, make_hebergement,
     client = client_for(guest)
     assert client.get(f'/api/v1/hebergements/{logement.id}/').data['frais_voyageur'] == 0.06
 
-    make_reservation(logement, guest=guest, starts_in=-10, nights=2)  # séjour terminé chez cet hôte
+    make_reservation(logement, guest=guest, starts_in=-10, nights=2)  # stay finished with this host
     assert client.get(f'/api/v1/hebergements/{autre_logement_du_meme_hote.id}/').data['frais_voyageur'] == 0.03
     resa = _reserver(client, autre_logement_du_meme_hote)
     assert resa.frais_service == 1500  # 3 % de 50 000
     assert client.get(f'/api/v1/reservations/{resa.id}/').data['montants']['taux_frais'] == 3
-    # Un autre hôte : tarif normal
+    # Another host: normal rate
     assert _reserver(client, make_hebergement(price_per_night=25000)).frais_service == 3000
 
 
@@ -62,7 +62,7 @@ def test_annulation_selon_la_politique_de_l_annonce(client_for, make_user, make_
     client = client_for(make_user())
     ferme = make_hebergement(price_per_night=25000, politique_annulation='ferme')
     resa = _reserver(client, ferme, dans=10)
-    # Réservée il y a 3 jours : plus de délai de réflexion ; Ferme à 10 jours : 50 % des nuits, frais conservés
+    # Booked 3 days ago: no more cooling-off period; Strict at 10 days: 50 % of the nights, fees kept
     ReservationModel.objects.filter(pk=resa.pk).update(created_at=timezone.now() - timedelta(days=3))
     resa.refresh_from_db()
     bareme = tarifs.bareme_voyageur(tarifs.montants_de(resa), resa)
@@ -83,7 +83,7 @@ def test_back_office_regle_les_conditions_de_l_hote(client_for, make_user):
 
     r = admin.patch(f'{ADMIN_USERS}{hote.id}/', {'conditions': {'categorie': 'hotel', 'fondateur_debut': jour.isoformat(),
                                                                 'fondateur_fin': (jour + timedelta(days=1)).isoformat()}}, format='json')
-    assert r.status_code == 400  # le Programme Fondateurs concerne les hôtes particuliers
+    assert r.status_code == 400  # the Founders Programme concerns individual hosts
     r = admin.patch(f'{ADMIN_USERS}{hote.id}/', {'conditions': {'categorie': 'hotel'}}, format='json')
     assert r.data['conditions']['commission_pourcent'] == 12.0
 
@@ -97,13 +97,13 @@ def test_prix_modifie_entre_le_recapitulatif_et_la_reservation(client_for, make_
     debut = timezone.localdate() + timedelta(days=20)
     demande = {'hebergement': str(logement.id), 'check_in': debut.isoformat(),
                'check_out': (debut + timedelta(days=1)).isoformat(), 'guests_count': 1, 'total_attendu': 106000}
-    # L'hôte augmente son prix après l'affichage du récapitulatif : refusé, rien n'est créé
+    # The host raises their price after the summary was displayed: refused, nothing is created
     logement.price_per_night = 120000
     logement.save(update_fields=['price_per_night'])
     r = voyageur.post('/api/v1/reservations/', demande, format='json')
     assert r.status_code == 400 and '127 200' in str(r.data['total_attendu'])
     assert not ReservationModel.objects.exists()
-    # Avec le total à jour, la réservation passe et les montants enregistrés sont ceux affichés
+    # With the up-to-date total, the booking goes through and the saved amounts are the displayed ones
     r = voyageur.post('/api/v1/reservations/', {**demande, 'total_attendu': 127200}, format='json')
     assert r.status_code == 201, r.data
     resa = ReservationModel.objects.get(pk=r.data['id'])

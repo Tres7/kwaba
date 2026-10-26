@@ -1,4 +1,4 @@
-"""Téléchargement des documents (voyageur, donateur, admin) et gestion des factures dans le back-office."""
+"""Document download (traveller, donor, admin) and invoice management in the back-office."""
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from rest_framework import serializers, status
@@ -17,7 +17,7 @@ from apps.transferts.models import TransfertModel
 from . import generateurs, services
 from .models import FactureModel, ParametresSocieteModel
 
-# type d'objet → (modèle, champ du propriétaire, documents disponibles)
+# object type → (model, owner field, available documents)
 OBJETS = {
     'reservation': (ReservationModel, 'guest', ('bon', 'recu', 'facture')),
     'transfert': (TransfertModel, 'voyageur', ('bon', 'recu', 'facture')),
@@ -36,8 +36,8 @@ def _pdf(contenu: bytes, nom: str) -> HttpResponse:
 
 
 class DocumentView(APIView):
-    """GET /documents/<type>/<id>/<bon|recu|facture>/ : réservé au voyageur (ou donateur) concerné et aux admins,
-    une fois le paiement reçu."""
+    """GET /documents/<type>/<id>/<bon|recu|facture>/: reserved for the traveller (or donor) concerned and the admins,
+    once the payment is received."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, type_objet, pk, document):
@@ -45,7 +45,7 @@ class DocumentView(APIView):
             return Response({'detail': 'Document inconnu.'}, status=status.HTTP_404_NOT_FOUND)
         modele, proprietaire, _ = OBJETS[type_objet]
         objet = modele.objects.filter(pk=pk).first()
-        # Même réponse si l'objet n'existe pas ou appartient à quelqu'un d'autre : rien ne fuit
+        # Same response if the object does not exist or belongs to someone else: nothing leaks
         if not objet or (getattr(objet, f"{proprietaire}_id") != request.user.pk and request.user.role != 'admin'):
             return Response({'detail': 'Document introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         paiement = generateurs.paiement_reussi(objet)
@@ -84,8 +84,8 @@ MAX_SIGNATURE_SCAN = 5 * 1024 * 1024
 
 
 class SocieteView(APIView):
-    """Informations légales imprimées sur les documents. PUT en JSON ou en multipart avec la signature scannée du
-    représentant (`signature_representant`, fond clair rendu transparent) ; `supprimer_signature=true` la retire."""
+    """Legal information printed on the documents. PUT as JSON or as multipart with the representative's scanned
+    signature (`signature_representant`, light background made transparent); `supprimer_signature=true` removes it."""
     permission_classes = [EstAdministrateur]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
@@ -122,7 +122,7 @@ class SocieteView(APIView):
 
 
 class SignatureRepresentantView(APIView):
-    """Aperçu de la signature enregistrée (espace privé, lu par l'API)."""
+    """Preview of the saved signature (private storage, read by the API)."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -155,12 +155,12 @@ class FactureLibreSerializer(serializers.Serializer):
 
 
 class FacturesView(APIView):
-    """GET : factures émises (q : numéro, client). POST : facture d'un séjour, transfert ou location payé
-    ({objet_type, objet_id}), ou facture libre ({client_nom, client_email, client_adresse, lignes})."""
+    """GET: issued invoices (q: number, customer). POST: invoice of a paid stay, transfer or rental
+    ({objet_type, objet_id}), or free-form invoice ({client_nom, client_email, client_adresse, lignes})."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
-        from apps.backoffice.views import _paginer  # import local : backoffice dépend d'autres apps
+        from apps.backoffice.views import _paginer  # local import: backoffice depends on other apps
 
         qs = FactureModel.objects.all()
         if q := request.query_params.get('q', '').strip():

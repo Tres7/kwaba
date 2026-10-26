@@ -1,4 +1,4 @@
-// Manifests de déploiement : un fichier par état déployable de main (deploy/manifests).
+// Deployment manifests: one file per deployable state of main (deploy/manifests).
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -19,7 +19,7 @@ export function loadValidator(schemaPath) {
   return ajv.compile(JSON.parse(readFileSync(schemaPath, 'utf8')));
 }
 
-/** Manifests du dossier, triés par numéro de version (celui du nom de fichier). */
+/** Manifests of the folder, sorted by version number (the one in the file name). */
 export function readManifests(dir) {
   return readdirSync(dir)
     .filter((file) => file.startsWith('manifest-'))
@@ -40,7 +40,7 @@ export function latestManifest(dir) {
   return readManifests(dir).at(-1) ?? null;
 }
 
-/** Dernier commit qui modifie `path` : la révision réellement déployée d'un service. */
+/** Last commit that changes `path`: the revision of a service actually deployed. */
 export function lastCommitTouching(path, cwd = '.') {
   return execFileSync('git', ['log', '-1', '--format=%H', '--', path], { cwd, encoding: 'utf8' }).trim();
 }
@@ -62,8 +62,8 @@ function needsImage(previousService, revision, repository) {
 }
 
 /**
- * Compare l'état de main au dernier manifest : une image n'est reconstruite que pour un service qui a changé ;
- * sans aucun changement, aucun manifest n'est créé.
+ * Compares the state of main with the latest manifest: an image is rebuilt only for a service that changed;
+ * without any change, no manifest is created.
  */
 export function plan({ previous, serverRevision, clientRevision, repositories = {} }) {
   const services = previous?.data.services;
@@ -72,7 +72,7 @@ export function plan({ previous, serverRevision, clientRevision, repositories = 
   return { buildServer, buildClient, changed: buildServer || buildClient };
 }
 
-/** Service du nouveau manifest : nouvelle image si elle a été construite, sinon celle du manifest précédent. */
+/** Service of the new manifest: the new image if it was built, otherwise the previous manifest's one. */
 function service(name, { image, revision, previous }) {
   if (image) return { kind: 'image', sourceRevision: revision, image };
   const reused = previous?.data.services[name];
@@ -103,7 +103,7 @@ export function toYaml(manifest) {
   return YAML.stringify(manifest, { lineWidth: 0 });
 }
 
-/** Erreurs de tout le dossier : schéma, cohérence nom/contenu, versions strictement croissantes. */
+/** Errors of the whole folder: schema, name/content consistency, strictly increasing versions. */
 export function validateAll(dir, validate) {
   const errors = [];
   let previousVersion = 0;
@@ -156,7 +156,7 @@ export function deployTarget(dir, name = '') {
 
 const IMAGE_PATTERN = /^ghcr\.io\/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$/;
 
-/** Lit un champ pointé (« services.server.image ») d'un manifest. */
+/** Reads a dotted field ("services.server.image") of a manifest. */
 export function field(manifest, path) {
   return path.split('.').reduce((value, key) => value?.[key], manifest.data);
 }

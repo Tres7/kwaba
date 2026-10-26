@@ -12,7 +12,7 @@ const VIDE = {
   caution_en_ligne: true, restitution_caution_heures: "24",
 };
 
-/** Règles de la location : tant qu'elles ne sont pas enregistrées, la location n'est pas proposée sur le site. */
+/** Rental rules: as long as they are not saved, rental is not offered on the site. */
 export default function Regles() {
   const queryClient = useQueryClient();
   const { data: regles, isLoading } = useQuery({

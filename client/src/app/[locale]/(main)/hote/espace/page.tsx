@@ -43,7 +43,7 @@ function EspaceHoteContent() {
   const [editing, setEditing] = useState<Hebergement | "new" | null>(null);
   const [contactId, setContactId] = useState<string | null>(null);
 
-  // Ouvre (ou retrouve) la conversation avec le voyageur de cette réservation
+  // Opens (or finds) the conversation with the traveller of this booking
   const contacterVoyageur = async (r: Reservation) => {
     setContactId(r.id);
     try {
@@ -136,7 +136,7 @@ function EspaceHoteContent() {
   };
 
   const upcoming = reservations.filter((r) => r.status === "confirmed" && r.check_out >= isoDate());
-  // Part de l'hôte (prix des nuits moins la commission) sur les séjours confirmés
+  // Host's share (price of the nights minus the commission) on confirmed stays
   const revenue = reservations.filter((r) => r.status === "confirmed").reduce((s, r) => s + r.montants.montant_hote, 0);
 
   if (editing) {

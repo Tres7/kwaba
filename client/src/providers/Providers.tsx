@@ -19,7 +19,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Animations framer-motion désactivées si le système demande de réduire les animations */}
+      {/* framer-motion animations disabled if the system asks to reduce motion */}
       <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </QueryClientProvider>
   );

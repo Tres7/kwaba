@@ -1,3 +1,3 @@
 class ConversationAlreadyExistsException(Exception):
-    """Levée par la persistance quand un fil (hébergement, voyageur) existe déjà (création concurrente)."""
+    """Raised by the persistence when a thread (listing, traveller) already exists (concurrent creation)."""
     pass

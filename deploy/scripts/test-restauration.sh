@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Vérifie qu'une sauvegarde se restaure vraiment : restauration dans un PostgreSQL jetable (Docker), jamais dans
-# la base de production, puis comptage des lignes.
+# Checks that a backup really restores: restore into a throwaway PostgreSQL (Docker), never into
+# the production database, then count the rows.
 #
 # Usage : deploy/scripts/test-restauration.sh <fichier.dump>
-#   Sauvegardes produites par deploy/vps/scripts/backup.sh (format personnalisé de pg_dump, /opt/kwaba/backups).
-#   PG_VERSION : version majeure du conteneur de restauration (16 par défaut, celle de la production) ; elle doit être
-#   au moins égale à celle du pg_dump qui a produit la sauvegarde.
-# À lancer au moins une fois par mois, et après chaque changement de version de PostgreSQL. Une sauvegarde
-# jamais restaurée n'est pas une sauvegarde.
+#   Backups produced by deploy/vps/scripts/backup.sh (pg_dump custom format, /opt/kwaba/backups).
+#   PG_VERSION: major version of the restore container (16 by default, the production one); it must be
+#   at least the version of the pg_dump that produced the backup.
+# To run at least once a month, and after every PostgreSQL version change. A backup
+# never restored is not a backup.
 set -euo pipefail
 
 fichier="${1:?chemin de la sauvegarde (.dump)}"
@@ -20,7 +20,7 @@ trap nettoyer EXIT
 docker run -d --name "$conteneur" -e POSTGRES_PASSWORD="$mot_de_passe" -e POSTGRES_DB=restauration \
   "postgres:${PG_VERSION:-16}-alpine" >/dev/null
 for _ in $(seq 1 60); do
-  # TCP : le serveur temporaire de l'initialisation n'écoute que sur le socket local, puis redémarre
+  # TCP: the temporary server of the initialisation only listens on the local socket, then restarts
   docker exec "$conteneur" pg_isready -h 127.0.0.1 -U postgres -d restauration >/dev/null 2>&1 && break
   sleep 1
 done

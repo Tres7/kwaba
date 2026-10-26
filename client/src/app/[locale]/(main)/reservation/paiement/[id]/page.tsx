@@ -19,7 +19,7 @@ const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = 
   { id: "paypal", label: "paypal", icon: Wallet },
 ];
 
-// Au-delà, on arrête d'interroger le serveur : le worker et le webhook prennent le relais
+// Beyond that, the server is no longer polled: the worker and the webhook take over
 const ATTENTE_MAX_MS = 3 * 60 * 1000;
 
 function PaiementContent() {

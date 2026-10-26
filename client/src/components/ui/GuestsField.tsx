@@ -12,17 +12,17 @@ interface GuestsFieldProps {
   value: number;
   onChange: (total: number) => void;
   max?: number;
-  /** Apparence du déclencheur : « field » (champ encadré) ou « bare » (dans une barre de recherche). */
+  /** Look of the trigger: "field" (framed field) or "bare" (inside a search bar). */
   variant?: "field" | "bare";
   className?: string;
 }
 
 
-/** Choix du nombre de voyageurs : panneau avec adultes et enfants, total transmis au parent. */
+/** Choice of the number of travellers: panel with adults and children, total passed to the parent. */
 export default function GuestsField({ value, onChange, max = 16, variant = "field", className }: GuestsFieldProps) {
   const t = useTranslations("voyageurs");
   const { open, setOpen, ref, panelRef } = usePopover();
-  // La réservation ne stocke qu'un total : la répartition sert au confort de saisie
+  // The booking only stores a total: the split is only for input comfort
   const [enfants, setEnfants] = useState(0);
   const adultes = Math.max(1, value - enfants);
 

@@ -1,7 +1,7 @@
-"""URL d'images fournies par les utilisateurs (avatar, photos d'annonce).
+"""Image URLs provided by users (avatar, listing photos).
 
-Une image affichée à d'autres utilisateurs ne doit venir que d'un hôte connu : sinon son auteur peut y mettre
-l'adresse de son propre serveur et recueillir l'adresse IP de chaque visiteur (pixel de suivi).
+An image shown to other users must only come from a known host: otherwise its author could put
+the address of their own server and collect the IP address of every visitor (tracking pixel).
 """
 from urllib.parse import urlsplit
 

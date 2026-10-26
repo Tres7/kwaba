@@ -1,4 +1,4 @@
-"""Anti-fraude : tentatives de contournement (coordonnées, paiement hors site) dans les messages et les annonces."""
+"""Anti-fraud: bypass attempts (contact details, off-site payment) in messages and listings."""
 from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import status
@@ -27,7 +27,7 @@ def _alerte(a: AlerteFraudeModel) -> dict:
 
 
 class AlertesView(APIView):
-    """GET : alertes (?statut=a_traiter|traitees|toutes, ?q= email ou nom)."""
+    """GET: alerts (?statut=a_traiter|traitees|toutes, ?q= email or name)."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -45,7 +45,7 @@ class AlertesView(APIView):
 
 
 class AlerteTraiteeView(APIView):
-    """POST {note} : alerte examinée (avertissement envoyé, compte suspendu… noté par l'administrateur)."""
+    """POST {note}: alert reviewed (warning sent, account suspended… noted by the administrator)."""
     permission_classes = [EstAdministrateur]
 
     def post(self, request, pk):

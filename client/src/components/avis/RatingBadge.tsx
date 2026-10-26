@@ -10,7 +10,7 @@ interface RatingBadgeProps {
   className?: string;
 }
 
-/** Note issue des avis vérifiés ; « Nouveau » tant qu'aucun voyageur n'a évalué le logement. */
+/** Rating from verified reviews; "New" while no traveller has rated the listing. */
 export default function RatingBadge({ rating, count, variant = "compact", className }: RatingBadgeProps) {
   const locale = useLocale();
   const t = useTranslations("note");

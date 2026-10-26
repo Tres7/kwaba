@@ -1,4 +1,4 @@
-"""Contrats : émission pré-remplie, signature électronique (lien personnel ou espace hôte), preuves et PDF."""
+"""Contracts: prefilled issuing, electronic signature (personal link or host space), proofs and PDF."""
 import base64
 import json
 import re
@@ -77,7 +77,7 @@ def test_hote_signe_son_contrat_depuis_son_espace(client_for, make_user, societe
     assert 'Ama Mensah' in texte and 'Kwa-Ba SARL' in texte and 'Mendé Fadel, Gérant' in texte
     assert f"joignable au {hote.phone} et à l'adresse {hote.email}, ci-après « l'Hôte »" in texte
     assert '5 %' in texte and '8 %' in texte and '{{' not in texte and '[à compléter]' not in texte
-    assert not ContratModel.objects.exists()  # rien n'est émis avant la signature
+    assert not ContratModel.objects.exists()  # nothing is issued before the signature
 
     corps = {'nom': 'Ama Mensah', 'signature': _signature(), 'accepte': True, 'version': apercu['version']}
     assert client.post(f'{C}hote/signer/', {**corps, 'version': 99}, format='json').status_code == 409
@@ -99,7 +99,7 @@ def test_hote_signe_son_contrat_depuis_son_espace(client_for, make_user, societe
     assert JournalAuditModel.objects.filter(action='contrat_signe').exists()
 
     _pdf(client.get(f'{C}hote/pdf/'))
-    assert client.post(f'{C}hote/signer/', corps, format='json').status_code == 400  # déjà signé
+    assert client.post(f'{C}hote/signer/', corps, format='json').status_code == 400  # already signed
 
 
 def test_pas_de_contrat_sans_informations_legales(client_for, make_user):
@@ -125,7 +125,7 @@ def test_admin_emet_un_contrat_et_la_partie_signe_par_lien(admin, client_for, ma
     with django_capture_on_commit_callbacks(execute=True):
         reponse = admin.post(A, {'type': 'chauffeur', 'partie_id': chauffeur.pk}, format='json')
     assert reponse.status_code == 201, reponse.data
-    assert admin.post(A, {'type': 'chauffeur', 'partie_id': chauffeur.pk}, format='json').status_code == 409  # déjà en cours
+    assert admin.post(A, {'type': 'chauffeur', 'partie_id': chauffeur.pk}, format='json').status_code == 409  # already ongoing
     jeton = _jeton(mail.outbox[-1])
     assert mail.outbox[-1].to == ['komi@exemple.tg']
 
@@ -228,6 +228,6 @@ def test_signature_scannee_du_representant(admin, societe):
     assert reponse.data['signature_presente'] is True
     png = admin.get('/api/v1/admin/documents/societe/signature/')
     assert png.status_code == 200 and png.content.startswith(b'\x89PNG')
-    # Le fond blanc est devenu transparent
+    # The white background has become transparent
     assert Image.open(BytesIO(png.content)).getpixel((0, 0))[3] == 0
     assert admin.put('/api/v1/admin/documents/societe/', {'supprimer_signature': 'true'}, format='multipart').data['signature_presente'] is False

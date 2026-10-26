@@ -1,4 +1,4 @@
-"""Cycle d'un transfert aéroport (PostgreSQL). FedaPay est simulé : aucun appel réseau."""
+"""Life cycle of an airport transfer (PostgreSQL). FedaPay is simulated: no network call."""
 from datetime import UTC, timedelta
 from unittest import mock
 
@@ -84,7 +84,7 @@ def test_aeroports_de_lancement_et_devis():
     api = APIClient()
     aeroports = api.get(f'{TRANSFERTS}aeroports/').data
     codes = {a['code'] for a in aeroports}
-    # Prix « à partir de » de chaque véhicule, affiché avant que le voyageur ne choisisse
+    # "From" price of each vehicle, shown before the traveller chooses
     assert next(a for a in aeroports if a['code'] == 'LFW')['prix'] == {'berline': 10000, 'confort': 15000, 'van': 25000}
     assert {'LFW', 'COO', 'OUA', 'NIM', 'BKO'} <= codes
 
@@ -92,7 +92,7 @@ def test_aeroports_de_lancement_et_devis():
     prix = {o['categorie']: (o['prix'], o['disponible']) for o in jour['options']}
     assert prix == {'berline': (10000, False), 'confort': (15000, True), 'van': (25000, True)}
 
-    # Même prix de nuit (majoration supprimée)
+    # Same price at night (surcharge removed)
     nuit = api.get(f'{TRANSFERTS}devis/', {'aeroport': 'LFW', 'arrivee': _arrivee(heure='23:40')}).data
     assert nuit['options'][0]['prix'] == 10000 and 'nuit' not in nuit['options'][0]
 
@@ -108,7 +108,7 @@ def test_heure_saisie_dans_le_fuseau_de_l_aeroport(client_for, make_user, faux):
 
 def test_regles_de_creation(client_for, make_user, faux):
     client = client_for(make_user())
-    dans_2h = timezone.localtime() + timedelta(hours=2)  # Lomé est à UTC+0, comme le serveur
+    dans_2h = timezone.localtime() + timedelta(hours=2)  # Lomé is at UTC+0, like the server
     trop_tot = client.post(TRANSFERTS, _payload(arrivee=dans_2h.strftime('%Y-%m-%dT%H:%M')), format='json')
     assert trop_tot.status_code == 400 and '6 heures' in trop_tot.data['detail']
     trop_grand = client.post(TRANSFERTS, _payload(passagers=5), format='json')
@@ -130,14 +130,14 @@ def test_cycle_complet_paiement_attribution_versement(client_for, make_user, fau
     client = client_for(voyageur)
     t = _reserver_et_payer(client, faux, categorie='berline')
     assert faux.transaction['montant'] == 10000
-    assert client.get(f'{TRANSFERTS}{t.id}/').data['chauffeur'] is None  # pas encore attribué
+    assert client.get(f'{TRANSFERTS}{t.id}/').data['chauffeur'] is None  # not assigned yet
 
     paiements.passe()
     sujets = {m.subject for m in mail.outbox}
     assert 'Transfert confirmé : Lomé' in sujets
     assert any(s.startswith('[Kwa-Ba] Chauffeur à attribuer') for s in sujets)
 
-    # Un SUV convient pour une berline demandée ; il est proposé dans l'admin
+    # An SUV fits when a sedan is asked for; it is offered in the admin
     assert chauffeur in services.chauffeurs_disponibles(t)
     services.assigner_chauffeur(t, chauffeur)
     detail = client.get(f'{TRANSFERTS}{t.id}/').data
@@ -151,7 +151,7 @@ def test_cycle_complet_paiement_attribution_versement(client_for, make_user, fau
     assert (v.montant, v.commission) == (8500, 1500)
     VersementChauffeurModel.objects.filter(pk=v.pk).update(date_prevue=timezone.now() - timedelta(minutes=1))
     paiements.passe()  # envoi
-    paiements.passe()  # FedaPay confirme : versé, course terminée
+    paiements.passe()  # FedaPay confirms: paid, ride finished
     assert faux.payouts[0]['mode'] == 'togocel' and faux.payouts[0]['montant'] == 8500
     t.refresh_from_db()
     assert t.statut == 'termine'
@@ -178,13 +178,13 @@ def test_annulation_moins_de_24h_pas_de_remboursement(client_for, make_user, fau
     r = client.delete(f'{TRANSFERTS}{t.id}/')
     assert r.data['rembourse'] == 0
     assert not RemboursementModel.objects.filter(transfert=t).exists()
-    assert VersementChauffeurModel.objects.get(transfert=t).statut == 'planifie'  # le chauffeur reste payé
+    assert VersementChauffeurModel.objects.get(transfert=t).statut == 'planifie'  # the driver is still paid
 
 
 def test_annulation_par_kwaba_rembourse_tout(client_for, make_user, faux):
     client = client_for(make_user())
     t = _reserver_et_payer(client, faux, arrivee=_arrivee(dans_heures=12, heure=(timezone.localtime() + timedelta(hours=12)).strftime('%H:%M')))
-    assert services.annuler(t, par='plateforme') == t.prix  # remboursement intégral
+    assert services.annuler(t, par='plateforme') == t.prix  # full refund
 
 
 def test_expiration_sans_paiement(client_for, make_user, faux):

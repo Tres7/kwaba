@@ -7,5 +7,5 @@ from .services import recalculer_note
 
 @receiver(post_delete, sender=AvisModel)
 def avis_supprime(sender, instance, **kwargs):
-    # Ex. réservation ou compte supprimé : la note affichée reste fidèle aux avis restants
+    # E.g. booking or account deleted: the displayed rating stays faithful to the remaining reviews
     recalculer_note(instance.hebergement_id)

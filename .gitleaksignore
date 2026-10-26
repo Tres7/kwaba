@@ -1,5 +1,5 @@
-# Faux positifs vérifiés, un par ligne (empreinte gitleaks : commit:fichier:règle:ligne).
-# Ne jamais ajouter un vrai secret ici : le révoquer et le retirer de l'historique.
+# Checked false positives, one per line (gitleaks fingerprint: commit:file:rule:line).
+# Never add a real secret here: revoke it and remove it from the history.
 
-# FEDAPAY_WEBHOOK_SECRET est vide dans .env.example ; generic-api-key prend la ligne suivante pour sa valeur
+# FEDAPAY_WEBHOOK_SECRET is empty in .env.example; generic-api-key takes the next line as its value
 568ae9f27b7be67dd87d7b632dcad9b3a2d9514f:server/.env.example:generic-api-key:49

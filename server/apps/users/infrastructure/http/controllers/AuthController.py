@@ -30,20 +30,20 @@ from apps.users.infrastructure.persistence.models import UserModel, Verification
 from apps.users.infrastructure.external.GoogleAPITokenVerifier import GoogleAPITokenVerifier
 
 RESEND_COOLDOWN = timedelta(seconds=60)
-# Essais de code (vérification d'email et réinitialisation) : un code est invalidé après MAX_ESSAIS_PAR_CODE échecs,
-# et une adresse a droit à MAX_ESSAIS_PAR_HEURE essais par heure, nouveaux codes compris. Soit au plus 240 essais
-# par jour sur 900 000 codes possibles.
+# Code attempts (email verification and reset): a code is invalidated after MAX_ESSAIS_PAR_CODE failures,
+# and an address is allowed MAX_ESSAIS_PAR_HEURE attempts per hour, new codes included. That is at most 240
+# attempts per day out of 900,000 possible codes.
 MAX_ESSAIS_PAR_CODE = 5
 MAX_ESSAIS_PAR_HEURE = 10
-# Connexion : 10 essais par adresse email par quart d'heure (un succès remet le compteur à zéro)
+# Sign-in: 10 attempts per email address per quarter of an hour (a success resets the counter)
 MAX_ESSAIS_CONNEXION = 10
 FENETRE_CONNEXION = 15 * 60
 
-# Empreinte calculée une fois : comparer le mot de passe même quand le compte n'existe pas égalise le temps de
-# réponse (sinon la durée révèle quelles adresses ont un compte)
+# Fingerprint computed once: checking the password even when the account does not exist evens out the response
+# time (otherwise the duration reveals which addresses have an account)
 _EMPREINTE_FACTICE = make_password('kwaba-compte-inexistant')
 
-# Routes appelées directement par le navigateur : limites par adresse IP
+# Routes called directly by the browser: limits per IP address
 LimiteInscription = limite_ip('inscription', 10, 3600)
 LimiteCodes = limite_ip('codes', 30, 3600)
 LimiteEnvoiCodes = limite_ip('envoi_codes', 10, 3600)
@@ -79,9 +79,9 @@ def _tokens_for(user_id) -> dict:
 
 
 def revoquer_jetons(user_id) -> None:
-    """Met sur liste noire tous les refresh tokens de l'utilisateur : toutes ses sessions sont fermées.
+    """Blacklists all the user's refresh tokens: all their sessions are closed.
 
-    Les jetons d'accès émis avant un changement de mot de passe sont refusés par CHECK_REVOKE_TOKEN.
+    Access tokens issued before a password change are refused by CHECK_REVOKE_TOKEN.
     """
     for jeton in OutstandingToken.objects.filter(user_id=user_id).exclude(blacklistedtoken__isnull=False):
         BlacklistedToken.objects.get_or_create(token=jeton)
@@ -102,7 +102,7 @@ def _trop_d_essais(attente: int, **extra) -> Response:
 
 
 def _echec_code(email: str, vc: VerificationCode | None) -> None:
-    """Compte l'échec sur le code en cours : au-delà de MAX_ESSAIS_PAR_CODE, il est invalidé."""
+    """Counts the failure on the current code: beyond MAX_ESSAIS_PAR_CODE, it is invalidated."""
     if vc is None:
         return
     echecs, _ = incrementer(f"code_courant:{vc.pk}", 15 * 60)
@@ -116,7 +116,7 @@ def _captcha_refuse() -> Response:
 
 
 class CaptchaView(APIView):
-    """Clé publique du captcha pour le widget (vide : captcha désactivé). Lue au chargement, sans rebuild du frontend."""
+    """Public captcha key for the widget (empty: captcha disabled). Read on load, without rebuilding the frontend."""
     authentication_classes = []
     permission_classes = [AllowAny]
 
@@ -171,7 +171,7 @@ class LoginView(APIView):
         if not captcha.valide(request.data.get('captcha')):
             return _captcha_refuse()
 
-        # Compté avant la vérification : des essais simultanés ne peuvent pas dépasser la limite
+        # Counted before the check: simultaneous attempts cannot exceed the limit
         essais = Tentatives(f"connexion:{data['email']}", MAX_ESSAIS_CONNEXION, FENETRE_CONNEXION)
         if not essais.essayer():
             journaliser('connexion_bloquee', request, email=data['email'])
@@ -244,7 +244,7 @@ class VerifyEmailView(APIView):
         try:
             user_id = _service().verify_email(email, code, FallbackEventBus())
         except UserNotFoundException:
-            # Même réponse qu'un mauvais code : on ne révèle pas quelles adresses ont un compte
+            # Same response as a wrong code: which addresses have an account is not revealed
             return Response({"detail": "Code invalide ou expiré.", "code": "invalid_code"}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError as e:
             if 'déjà' in str(e):
@@ -254,7 +254,7 @@ class VerifyEmailView(APIView):
 
         essais.reussite()
         journaliser('email_verifie', request, utilisateur=user_id, email=email)
-        # Le code prouve la possession de l'email : on ouvre directement la session
+        # The code proves ownership of the email: the session is opened directly
         user = _service().get_by_id(user_id)
         return Response({
             "detail": "Compte vérifié avec succès.",
@@ -276,7 +276,7 @@ class ResendCodeView(APIView):
         envoye = Response({'detail': 'Code renvoyé.'}, status=status.HTTP_200_OK)
         user_model = UserModel.objects.filter(email__iexact=email).first()
         if not user_model:
-            # Même réponse qu'un envoi réussi : on ne révèle pas quelles adresses ont un compte
+            # Same response as a successful sending: which addresses have an account is not revealed
             return envoye
 
         if user_model.is_verified:
@@ -292,7 +292,7 @@ class ResendCodeView(APIView):
                     status=status.HTTP_429_TOO_MANY_REQUESTS,
                 )
 
-        # Le compteur d'essais n'est PAS remis à zéro : redemander un code ne donne pas de nouveaux essais
+        # The attempt counter is NOT reset: asking for a new code does not give new attempts
         code = _new_code()
         _service().store_verification_code(user_model.id, code)
         FallbackEventBus().publish(UserRegistered(
@@ -315,7 +315,7 @@ class PasswordResetRequestView(APIView):
         if not email:
             return Response({'email': ['Email requis.']}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Réponse identique que le compte existe ou non (pas d'énumération des emails)
+        # Same response whether the account exists or not (no email enumeration)
         generic = Response(
             {'detail': 'Si un compte existe pour cette adresse, un code vient de vous être envoyé.'},
             status=status.HTTP_200_OK,
@@ -368,10 +368,10 @@ class PasswordResetConfirmView(APIView):
             return Response({'code': ['Code invalide ou expiré.']}, status=status.HTTP_400_BAD_REQUEST)
 
         user_model.set_password(data['password'])
-        user_model.is_verified = True  # le code prouve la possession de l'email
+        user_model.is_verified = True  # the code proves ownership of the email
         user_model.save(update_fields=['password', 'is_verified'])
         VerificationCode.objects.filter(user=user_model).delete()
-        # Toutes les sessions ouvertes (peut-être par la personne qui avait le mot de passe) sont fermées
+        # All open sessions (maybe by the person who had the password) are closed
         revoquer_jetons(user_model.id)
         essais.reussite()
         journaliser('mdp_reinitialise', request, utilisateur=user_model, email=email)

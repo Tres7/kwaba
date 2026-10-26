@@ -1,12 +1,12 @@
-"""Causes soutenues, montants des dons et calendrier des reversements.
+"""Supported causes, donation amounts and transfer schedule.
 
-Kwa-Ba ne prend aucune commission sur les dons. Seuls les frais du prestataire de paiement
-(FedaPay, PayPal) s'appliquent ; le donateur choisit de les ajouter à son don (l'ONG reçoit alors
-100 % du montant choisi) ou de les laisser déduire du montant reversé.
+Kwa-Ba takes no commission on donations. Only the fees of the payment provider
+(FedaPay, PayPal) apply; the donor chooses to add them to their donation (the NGO then receives
+100 % of the chosen amount) or to have them deducted from the transferred amount.
 
-Exemple pour un don de 2 000 FCFA (frais de 3 %) :
-    frais ajoutés  → le donateur paie 2 062, l'ONG reçoit 2 000
-    frais déduits  → le donateur paie 2 000, l'ONG reçoit 1 940
+Example for a donation of 2,000 FCFA (3 % fees):
+    fees added     → the donor pays 2,062, the NGO receives 2,000
+    fees deducted  → the donor pays 2,000, the NGO receives 1,940
 """
 import math
 from dataclasses import dataclass
@@ -21,32 +21,32 @@ CAUSES = {
 }
 CAUSE_CHOICES = [(code, c['nom']) for code, c in CAUSES.items()]
 
-# Frais moyens des prestataires de paiement (Mobile Money, carte, PayPal), à ajuster selon le contrat FedaPay
+# Average fees of the payment providers (Mobile Money, card, PayPal), to adjust to the FedaPay contract
 FRAIS_PAIEMENT = Decimal('0.03')
-COMMISSION_KWABA = Decimal('0')  # gratuit pour les ONG partenaires au lancement
+COMMISSION_KWABA = Decimal('0')  # free for partner NGOs at launch
 
 MONTANTS_SUGGERES = [500, 2000, 3000, 5000]
 MONTANT_MIN = 500
 MONTANT_MAX = 1_000_000
 
-# Les dons d'un mois sont reversés à l'ONG au plus tard le 10 du mois suivant
+# A month's donations are transferred to the NGO at the latest on the 10th of the following month
 JOUR_REVERSEMENT = 10
 
 
 @dataclass(frozen=True)
 class MontantsDon:
-    don: int  # montant choisi par le donateur
-    frais: int  # frais du prestataire de paiement
-    total: int  # montant débité
-    montant_ong: int  # montant reversé à l'ONG
+    don: int  # amount chosen by the donor
+    frais: int  # payment provider fees
+    total: int  # charged amount
+    montant_ong: int  # amount transferred to the NGO
 
 
 def calculer(montant: int, couvre_frais: bool) -> MontantsDon:
     if couvre_frais:
-        # Les frais s'appliquent au montant débité : on l'arrondit au franc supérieur pour que l'ONG reçoive tout
+        # Fees apply to the charged amount: it is rounded up to the franc so that the NGO receives everything
         total = math.ceil(Decimal(montant) / (1 - FRAIS_PAIEMENT))
         return MontantsDon(don=montant, frais=total - montant, total=total, montant_ong=montant)
-    frais = int((Decimal(montant) * FRAIS_PAIEMENT).to_integral_value(ROUND_HALF_UP))  # comme Math.round côté site
+    frais = int((Decimal(montant) * FRAIS_PAIEMENT).to_integral_value(ROUND_HALF_UP))  # like Math.round on the site
     return MontantsDon(don=montant, frais=frais, total=montant, montant_ong=montant - frais)
 
 
@@ -59,5 +59,5 @@ def mois_suivant(jour: date) -> date:
 
 
 def date_reversement(jour_du_don: date) -> date:
-    """Date limite du reversement à l'ONG d'un don fait ce jour-là."""
+    """Deadline of the transfer to the NGO for a donation made on that day."""
     return mois_suivant(jour_du_don).replace(day=JOUR_REVERSEMENT)

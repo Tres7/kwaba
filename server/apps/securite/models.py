@@ -3,10 +3,10 @@ from django.db import models
 
 
 class CompteurModel(models.Model):
-    """Compteur à fenêtre fixe (tentatives, limites de débit), incrémenté atomiquement par PostgreSQL.
+    """Fixed-window counter (attempts, rate limits), incremented atomically by PostgreSQL.
 
-    Le cache de Django (DatabaseCache) lit puis écrit en deux requêtes : des requêtes simultanées y lisent
-    toutes la même valeur et contournent la limite. Voir limites.incrementer.
+    Django's cache (DatabaseCache) reads then writes in two queries: simultaneous requests all read
+    the same value there and get around the limit. See limites.incrementer.
     """
     cle = models.CharField(max_length=200, primary_key=True)
     valeur = models.PositiveIntegerField(default=0)
@@ -17,9 +17,9 @@ class CompteurModel(models.Model):
 
 
 class JournalAuditModel(models.Model):
-    """Événements sensibles : connexions, mots de passe, rôles, comptes de versement, webhooks refusés.
+    """Sensitive events: sign-ins, passwords, roles, payout accounts, refused webhooks.
 
-    Jamais de mot de passe, de code ni de jeton dans `details`.
+    Never a password, a code nor a token in `details`.
     """
     ACTIONS = [
         ('connexion', 'Connexion'),
@@ -53,8 +53,8 @@ class JournalAuditModel(models.Model):
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
     action = models.CharField(max_length=40, choices=ACTIONS, db_index=True)
-    # Identifiant seul, sans clé étrangère : l'entrée survit à la suppression du compte et n'est jamais modifiée
-    # (le rôle de l'application n'a pas le droit de mettre à jour ce journal, voir deploy/postgres/roles.sql)
+    # Id only, without a foreign key: the entry survives the deletion of the account and is never changed
+    # (the application role is not allowed to update this log, see deploy/postgres/roles.sql)
     utilisateur_id = models.UUIDField(null=True, blank=True, db_index=True)
     email = models.CharField(max_length=254, blank=True)
     ip = models.GenericIPAddressField(null=True, blank=True)
@@ -71,8 +71,8 @@ class JournalAuditModel(models.Model):
 
 
 class AlerteFraudeModel(models.Model):
-    """Tentative de contournement de la plateforme : coordonnées ou paiement hors site proposés dans un message
-    ou une annonce. Examinée par un administrateur depuis le back-office (Anti-fraude)."""
+    """Attempt to bypass the platform: contact details or off-site payment offered in a message
+    or a listing. Reviewed by an administrator from the back-office (Anti-fraud)."""
     CONTEXTES = [('message', 'Message'), ('annonce', 'Annonce')]
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -80,7 +80,7 @@ class AlerteFraudeModel(models.Model):
     contexte = models.CharField(max_length=20, choices=CONTEXTES)
     objet_id = models.CharField(max_length=64, help_text='Conversation ou annonce concernée')
     types = models.JSONField(default=list, help_text='telephone, email, lien, reseau, application, hors_site')
-    # Éléments détectés (le numéro, l'adresse…) : preuve pour l'administrateur, jamais montrée à l'autre partie
+    # Detected elements (the number, the address…): proof for the administrator, never shown to the other party
     extraits = models.JSONField(default=list)
     masquee = models.BooleanField(default=False, help_text='Des coordonnées ont été masquées')
     traitee = models.BooleanField(default=False, db_index=True)

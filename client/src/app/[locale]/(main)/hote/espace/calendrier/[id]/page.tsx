@@ -20,7 +20,7 @@ export default function CalendrierHotePage() {
   const queryClient = useQueryClient();
   const today = isoDate();
   const [month, setMonth] = useState(() => new Date());
-  // Sélection en nuits (bornes incluses) : du soir de `debut` au soir de `fin`
+  // Selection in nights (bounds included): from the evening of `debut` to the evening of `fin`
   const [debut, setDebut] = useState("");
   const [fin, setFin] = useState("");
   const [motif, setMotif] = useState("");
@@ -32,7 +32,7 @@ export default function CalendrierHotePage() {
   });
   const { data: periodes = [], isLoading } = useDisponibilites(id, 540);
 
-  // Pour chaque nuit occupée : la période qui la couvre (réservation ou fermeture)
+  // For each booked night: the period covering it (booking or closure)
   const parNuit = useMemo(() => {
     const m = new Map<string, PeriodeIndispo>();
     for (const p of periodes) for (let d = p.debut; d < p.fin; d = addDays(d, 1)) m.set(d, p);

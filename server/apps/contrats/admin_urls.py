@@ -1,4 +1,4 @@
-"""Routes du back-office, montées sous /api/v1/admin/contrats/."""
+"""Back-office routes, mounted under /api/v1/admin/contrats/."""
 from django.urls import path
 
 from . import views

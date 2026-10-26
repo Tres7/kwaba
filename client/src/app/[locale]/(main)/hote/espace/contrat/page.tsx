@@ -11,7 +11,7 @@ import { telechargerPdf } from "@/lib/documents";
 import LectureSignature from "@/components/contrats/LectureSignature";
 import type { ContratPublic, SignatureContrat } from "@/types/api/contrat";
 
-/** Contrat hôte : lu et signé depuis l'espace hôte (le compte connecté authentifie le signataire). */
+/** Host agreement: read and signed from the host space (the signed-in account authenticates the signer). */
 export default function ContratHotePage() {
   const t = useTranslations("contrat");
   const queryClient = useQueryClient();
@@ -29,7 +29,7 @@ export default function ContratHotePage() {
       toast.success(t("merci"));
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      // Texte modifié entre-temps : on recharge le nouveau texte, à relire
+      // Text changed in the meantime: the new text is loaded, to be read again
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         await refetch();
         window.scrollTo({ top: 0, behavior: "smooth" });

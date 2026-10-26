@@ -78,16 +78,16 @@ function HebergementContent() {
   const isOwner = session?.user?.id === hebergement.host_id;
   const nights = calculateNights(checkIn, checkOut);
   const subtotal = hebergement.price_per_night * nights;
-  // Taux du visiteur : 6 %, ou 3 % s'il a déjà séjourné chez cet hôte (Client fidèle)
+  // Visitor's rate: 6 %, or 3 % if they already stayed with this host (loyal customer)
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
   const serviceFee = calculateServiceFee(subtotal, tauxFrais);
   const total = subtotal + serviceFee;
-  // Prix d'appel affiché : la nuit frais de service inclus, détail juste en dessous
+  // Displayed headline price: the night with service fees included, details just below
   const nuitTtc = prixNuitFraisInclus(Number(hebergement.price_per_night), tauxFrais);
   const gallery = [hebergement.image_url, ...hebergement.images.filter((i) => i !== hebergement.image_url)].filter(Boolean);
   const photos = gallery.length ? gallery : [FALLBACK_IMAGE];
   const reservationUrl = `/reservation/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${guests}`;
-  // Dates arrivées par l'URL (recherche, lien partagé) mais déjà prises entre-temps
+  // Dates coming from the URL (search, shared link) but taken in the meantime
   let datesPrises = false;
   for (let d = checkIn; nights > 0 && d < checkOut; d = addDays(d, 1)) {
     if (indisponibles.has(d) || d < today) { datesPrises = true; break; }
@@ -103,7 +103,7 @@ function HebergementContent() {
         toast.success(t("lienCopie"));
       }
     } catch {
-      /* partage annulé */
+      /* share cancelled */
     }
   };
 
@@ -114,7 +114,7 @@ function HebergementContent() {
     }
     setContacting(true);
     try {
-      // Idempotent : renvoie le fil existant si on a déjà contacté cet hôte pour ce logement
+      // Idempotent: returns the existing thread if this host was already contacted for this listing
       const res = await api.post<MessagingConversation>("/v1/messaging/conversations/", { hebergement_id: hebergement.id });
       router.push(`/messages/${res.data.id}`);
     } catch (err) {
@@ -176,7 +176,7 @@ function HebergementContent() {
           </div>
         </div>
 
-        {/* Galerie : carrousel horizontal sur mobile, mosaïque sur desktop */}
+        {/* Gallery: horizontal carousel on mobile, mosaic on desktop */}
         <div className="md:hidden -mx-4 mb-8 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide" tabIndex={0} role="region" aria-label={hebergement.name}>
           {photos.map((img, i) => (
             <div key={img + i} className="snap-center flex-shrink-0 w-full px-4">
@@ -338,7 +338,7 @@ function HebergementContent() {
         </div>
       </div>
 
-      {/* Barre de réservation mobile */}
+      {/* Mobile booking bar */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <div className="min-w-0">
           <p className="font-heading font-bold text-dark truncate">{formatPrice(nights > 0 ? total : nuitTtc.total)}</p>

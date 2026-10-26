@@ -9,7 +9,7 @@ from .models import (
 
 @admin.register(ParametresLocationModel)
 class ParametresAdmin(admin.ModelAdmin):
-    """Une seule ligne : tant qu'elle n'existe pas, la location n'est pas proposée."""
+    """A single row: while it does not exist, rental is not offered."""
     list_display = ['__str__', 'commission_pourcent', 'delai_min_jours', 'duree_max_jours', 'annulation_gratuite_heures']
 
     def has_add_permission(self, request):
@@ -21,7 +21,7 @@ class ParametresAdmin(admin.ModelAdmin):
 
 @admin.register(CategorieVehiculeModel)
 class CategorieAdmin(admin.ModelAdmin):
-    """Véhicules des propriétaires. Sans prix par jour, le véhicule n'est pas proposé."""
+    """Owners' vehicles. Without a price per day, the vehicle is not offered."""
     list_display = ['nom', 'proprietaire', 'gamme', 'places', 'prix_jour', 'caution_jours', 'caution', 'actif', 'ordre']
     list_editable = ['prix_jour', 'caution_jours', 'actif', 'ordre']
     list_filter = ['actif', 'gamme', 'boite', 'proprietaire']
@@ -45,7 +45,7 @@ class PartenaireAdmin(admin.ModelAdmin):
 
 @admin.register(LocationModel)
 class LocationAdmin(admin.ModelAdmin):
-    """Pour attribuer : ouvrir la location, choisir le propriétaire (et le chauffeur) et le véhicule remis, enregistrer."""
+    """To assign: open the rental, choose the owner (and the driver) and the handed-over vehicle, save."""
     list_display = ['reference', 'categorie', 'formule', 'lieu_prise', 'debut', 'jours', 'prix', 'statut', 'partenaire',
                     'chauffeur_partenaire']
     list_filter = ['statut', 'formule', 'lieu_prise__ville', 'categorie__gamme']
@@ -64,7 +64,7 @@ class LocationAdmin(admin.ModelAdmin):
     CHAMPS = ('partenaire', 'chauffeur_partenaire', 'vehicule', 'immatriculation')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        # Seuls les propriétaires qui peuvent fournir ce véhicule à ce lieu de remise sont proposés
+        # Only the owners who can provide this vehicle at this handover place are offered
         if db_field.name == 'partenaire':
             pk = request.resolver_match.kwargs.get('object_id')
             location = LocationModel.objects.filter(pk=pk).first() if pk else None
@@ -75,7 +75,7 @@ class LocationAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if set(self.CHAMPS) & set(form.changed_data):
             choix = {champ: getattr(obj, champ) for champ in self.CHAMPS}
-            obj.partenaire_id = form.initial.get('partenaire')  # l'attribution passe par le service
+            obj.partenaire_id = form.initial.get('partenaire')  # the assignment goes through the service
             obj.chauffeur_partenaire_id = form.initial.get('chauffeur_partenaire')
             try:
                 services.attribuer(obj, partenaire=choix['partenaire'], chauffeur=choix['chauffeur_partenaire'],

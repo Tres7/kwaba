@@ -1,9 +1,9 @@
-# Secrets et environnement local : jamais dans l'image
+# Secrets and local environment: never in the image
 .env
 .env.*
 !.env.example
 
-# Dépendances et builds locaux (réinstallés dans l'image)
+# Local dependencies and builds (installed again in the image)
 node_modules/
 .next/
 out/

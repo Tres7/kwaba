@@ -1,4 +1,4 @@
-# Point d'assemblage du module : relie les services applicatifs à leurs adapters d'infrastructure.
+# Assembly point of the module: wires the application services to their infrastructure adapters.
 from django.conf import settings
 
 from apps.messaging.application.service.MessagingService import MessagingService

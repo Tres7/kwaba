@@ -1,7 +1,7 @@
-"""Captcha Cloudflare Turnstile : connexion et inscription.
+"""Cloudflare Turnstile captcha: sign-in and sign-up.
 
-Le navigateur obtient un jeton du widget (case à cocher, souvent validée sans clic) ; le serveur le fait
-confirmer par Cloudflare. Sans TURNSTILE_SECRET_KEY (développement, tests), le captcha est désactivé.
+The browser gets a token from the widget (checkbox, often validated without a click); the server has it
+confirmed by Cloudflare. Without TURNSTILE_SECRET_KEY (development, tests), the captcha is disabled.
 """
 import logging
 
@@ -19,16 +19,16 @@ def actif() -> bool:
 
 
 def valide(jeton) -> bool:
-    """True si Cloudflare confirme le jeton (à usage unique). Captcha désactivé : toujours True.
+    """True if Cloudflare confirms the token (single use). Captcha disabled: always True.
 
-    Cloudflare injoignable : on laisse passer (journalisé) plutôt que d'empêcher toute connexion ; les limites
-    de tentatives et de débit restent appliquées.
+    Cloudflare unreachable: let it through (logged) rather than blocking every sign-in; the attempt and rate
+    limits still apply.
     """
     if not actif():
         return True
     if not jeton or not isinstance(jeton, str) or len(jeton) > 2048:
         return False
-    # Pas de remoteip : la connexion passe par le serveur Next.js, dont l'adresse n'est pas celle du visiteur
+    # No remoteip: the sign-in goes through the Next.js server, whose address is not the visitor's
     donnees = {'secret': settings.TURNSTILE_SECRET_KEY, 'response': jeton}
     try:
         reponse = requests.post(URL_VERIFICATION, data=donnees, timeout=5)

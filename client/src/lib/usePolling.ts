@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Appelle `callback` toutes les `intervalMs` millisecondes :
- * - jamais deux appels en parallèle (le suivant est planifié à la fin du précédent) ;
- * - en pause quand l'onglet est masqué ;
- * - appel immédiat au retour sur l'onglet ou quand la fenêtre reprend le focus
- *   (cas de deux fenêtres côte à côte, où l'onglet reste visible en permanence).
+ * Calls `callback` every `intervalMs` milliseconds:
+ * - never two calls in parallel (the next one is scheduled when the previous one ends);
+ * - paused when the tab is hidden;
+ * - immediate call when coming back to the tab or when the window gets the focus back
+ *   (two windows side by side, where the tab stays visible all the time).
  */
 export function usePolling(callback: () => Promise<void> | void, intervalMs: number, enabled = true) {
   const savedCallback = useRef(callback);
@@ -27,7 +27,7 @@ export function usePolling(callback: () => Promise<void> | void, intervalMs: num
       try {
         if (document.visibilityState === "visible") await savedCallback.current();
       } catch {
-        // Erreur réseau ponctuelle : on réessaie au prochain tick
+        // One-off network error: try again at the next tick
       } finally {
         running = false;
         if (!cancelled) timer = setTimeout(tick, intervalMs);

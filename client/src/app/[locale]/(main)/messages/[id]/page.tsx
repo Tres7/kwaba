@@ -34,10 +34,10 @@ export default function ChatPage() {
   const [notFound, setNotFound] = useState(false);
   const [sendError, setSendError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
-  // Plus grand id de message confirmé par le serveur : curseur du polling
+  // Highest message id confirmed by the server: polling cursor
   const lastIdRef = useRef(0);
 
-  // Ajoute des messages serveur sans doublon (un envoi peut revenir à la fois par le POST et par le polling)
+  // Adds server messages without duplicates (a sent message may come back both from the POST and from the polling)
   const mergeMessages = useCallback((incoming: MessagingMessage[]) => {
     if (incoming.length === 0) return;
     lastIdRef.current = Math.max(lastIdRef.current, ...incoming.map((m) => m.id));
@@ -52,7 +52,7 @@ export default function ChatPage() {
 
   const markAsRead = useCallback(() => {
     if (lastIdRef.current === 0) return;
-    // Jusqu'au dernier message affiché, pas au dernier message en base
+    // Up to the last displayed message, not the last message in the database
     api.post(`/v1/messaging/conversations/${conversationId}/read/`, { up_to_id: lastIdRef.current }).catch(() => {});
   }, [conversationId]);
 
@@ -90,7 +90,7 @@ export default function ChatPage() {
     if (!content) return;
     setSendError("");
 
-    // Affichage immédiat, remplacé par la version serveur à la réponse
+    // Shown immediately, replaced by the server version when the response arrives
     const tempId = -Date.now();
     setMessages((prev) => [...prev, {
       id: tempId, conversation_id: conversationId, sender_id: "", content,
@@ -171,7 +171,7 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Règles de la messagerie : coordonnées masquées, voyageur anonyme avant paiement */}
+        {/* Messaging rules: contact details hidden, traveller anonymous before payment */}
         <div className="bg-primary/5 border-b border-primary/10 px-4 md:px-6 py-2.5 text-xs text-dark space-y-1 flex-shrink-0">
           <p className="flex gap-2"><ShieldCheck size={15} className="text-primary flex-shrink-0 mt-px" aria-hidden /> {t("securite")}</p>
           {!conversation.booked && (

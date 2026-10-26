@@ -27,7 +27,7 @@ export default function RevenusHote() {
     queryKey: ["paiements", "revenus"],
     queryFn: async () => (await api.get<Revenus>("/v1/paiements/revenus/")).data,
   });
-  // Taux de cet hôte (8 %, 12 % pour un hôtel, 5 % pendant le Programme Fondateurs)
+  // This host's rate (8 %, 12 % for a hotel, 5 % during the Founders Programme)
   const commission = revenus?.commission_pourcent ?? (config ? Math.round(config.commission_hote * 100) : 8);
 
   return (

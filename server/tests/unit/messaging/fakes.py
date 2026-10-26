@@ -1,4 +1,4 @@
-"""Implémentations en mémoire des ports de la messagerie, fidèles aux adaptateurs Django."""
+"""In-memory implementations of the messaging ports, faithful to the Django adapters."""
 import contextlib
 import dataclasses
 import datetime
@@ -20,13 +20,13 @@ EMAIL_DELAY_SECONDS = 60
 
 
 class FakeConversationRepository(ConversationRepository):
-    """Renvoie des copies : une modification non sauvegardée n'est pas persistée, comme avec l'ORM."""
+    """Returns copies: an unsaved change is not persisted, as with the ORM."""
 
     def __init__(self):
         self.rows: Dict[uuid.UUID, Conversation] = {}
-        # La prochaine création viole une contrainte d'intégrité...
+        # The next creation violates an integrity constraint...
         self.next_create_conflicts = False
-        # ... parce que l'autre requête vient d'insérer ce fil (None : l'hébergement a disparu)
+        # ... because the other request has just inserted this thread (None: the listing is gone)
         self.concurrent_winner: Optional[Conversation] = None
 
     def find_by_id(self, conversation_id):

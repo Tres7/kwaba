@@ -45,7 +45,7 @@ export default function ReservationsPage() {
     queryFn: async () => (await api.get<Paginated<Reservation>>("/v1/reservations/")).data.results,
   });
 
-  // Recommandations : hébergements les mieux notés que l'on n'a pas déjà réservés
+  // Recommendations: best rated listings not already booked
   const { data: recommended = [] } = useQuery({
     queryKey: ["hebergements", "recommandes-profil"],
     queryFn: async () => (await api.get<Paginated<Hebergement>>("/v1/hebergements/", { params: { sort: "note", limit: 8 } })).data.results,

@@ -1,4 +1,4 @@
-"""Emails des transferts, envoyés par le worker (même principe que apps.paiements.notifications)."""
+"""Transfer emails, sent by the worker (same principle as apps.paiements.notifications)."""
 import logging
 from datetime import timedelta
 from zoneinfo import ZoneInfo
@@ -60,7 +60,7 @@ def chauffeur_au_voyageur(t: TransfertModel):
 def course_au_chauffeur(t: TransfertModel):
     c = t.chauffeur
     if not c.email:
-        return  # chauffeur prévenu par téléphone par l'équipe
+        return  # driver told by phone by the team
     _envoyer('emails/transferts/course_chauffeur.txt', f"Nouvelle course Kwa-Ba : {_heure(t)}", [c.email], {
         **_course(t), 'prenom': c.prenom, 'message': t.message, 'montant': _fcfa(t.montant_chauffeur),
     })

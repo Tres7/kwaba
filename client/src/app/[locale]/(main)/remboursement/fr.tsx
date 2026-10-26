@@ -3,7 +3,7 @@ import LienContact from "@/components/legal/LienContact";
 import LegalPage from "@/components/legal/LegalPage";
 import { TableauHebergement, TableauMobilite } from "../cgv/fr";
 
-/** Version française. Reprend l'annexe 1 et les articles 10 à 12 des CGV. */
+/** French version. Takes appendix 1 and articles 10 to 12 of the terms of sale. */
 export default function ContenuFr() {
   return (
     <LegalPage

@@ -1,6 +1,6 @@
 import { Children } from "react";
 
-/** Liste de missions avec ses états : chargement, accès refusé, vide. */
+/** List of missions with its states: loading, access denied, empty. */
 export default function ListeMissions({ chargement, erreur, vide, children }: {
   chargement: boolean;
   erreur: boolean;

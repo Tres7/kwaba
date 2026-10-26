@@ -5,7 +5,7 @@ from .models import PhotoVisiteModel, PieceIdentiteModel, VisiteModel
 
 @admin.register(PieceIdentiteModel)
 class PieceIdentiteAdmin(admin.ModelAdmin):
-    """Statut seulement : le document se consulte depuis l'espace agent (/agent), où chaque lecture est journalisée."""
+    """Status only: the document is viewed from the agent space (/agent), where every read is logged."""
     list_display = ('hote', 'type_piece', 'statut', 'soumise_le', 'verifiee_le', 'verifiee_par')
     list_filter = ('statut', 'type_piece')
     search_fields = ('hote__email', 'hote__last_name')

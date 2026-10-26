@@ -20,7 +20,7 @@ export interface CarteTransfert {
   type: "transfert";
   aeroport: string;
   ville: string;
-  /** Heure du billet, AAAA-MM-JJTHH:MM. */
+  /** Ticket time, YYYY-MM-DDTHH:MM. */
   arrivee: string;
   passagers: number;
   bagages: number;

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const NOMS: Record<Langue, string> = { fr: "Français", en: "English" };
 
-/** Bascule FR / EN en restant sur la même page (le choix est mémorisé dans le cookie NEXT_LOCALE). */
+/** FR / EN switch staying on the same page (the choice is remembered in the NEXT_LOCALE cookie). */
 export default function SelecteurLangue({ className, complet = false }: { className?: string; complet?: boolean }) {
   const locale = useLocale() as Langue;
   const t = useTranslations("langue");
@@ -19,8 +19,8 @@ export default function SelecteurLangue({ className, complet = false }: { classN
 
   const choisir = (langue: Langue) => {
     if (langue === locale) return;
-    // Paramètres lus au clic plutôt qu'avec useSearchParams : le sélecteur est dans la barre et le pied de page de
-    // toutes les pages, et useSearchParams empêcherait leur génération statique au build
+    // Parameters read on click rather than with useSearchParams: the selector is in the bar and the footer of
+    // every page, and useSearchParams would prevent their static generation at build time
     const requete = window.location.search.replace(/^\?/, "");
     demarrer(() => router.replace(requete ? `${pathname}?${requete}` : pathname, { locale: langue, scroll: false }));
   };

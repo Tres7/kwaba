@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-/** Pictogramme Kwa-Ba : le « A » orange (soleil levant et vagues) sur un carré vert arrondi. */
+/** Kwa-Ba pictogram: the orange "A" (rising sun and waves) on a rounded green square. */
 export default function IconeKwaba({ taille = 64, className }: { taille?: number; className?: string }) {
   const id = useId();
   return (

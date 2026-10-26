@@ -1,4 +1,4 @@
-"""Back-office : transferts aéroport (aéroports, tarifs, chauffeurs, attribution, annulation)."""
+"""Back-office: airport transfers (airports, fares, drivers, assignment, cancellation)."""
 from datetime import timedelta
 
 import pytest
@@ -47,7 +47,7 @@ def test_aeroport_et_tarifs(admin):
     assert tarifs.status_code == 200 and len(tarifs.data['tarifs']) == 2
     admin.put(f'{B}aeroports/ABJ/tarifs/', [{'categorie': 'berline', 'prix': 22000, 'actif': True}], format='json')
     assert TarifTransfertModel.objects.get(aeroport_id='ABJ', categorie='berline').prix == 22000
-    # Le code ne se modifie pas
+    # The code cannot be changed
     admin.patch(f'{B}aeroports/ABJ/', {'code': 'XXX', 'actif': False}, format='json')
     assert AeroportModel.objects.filter(code='ABJ', actif=False).exists()
     assert JournalAuditModel.objects.filter(details__objet='tarifs_transfert').exists()

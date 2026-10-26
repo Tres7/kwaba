@@ -1,4 +1,4 @@
-"""Limites de débit et compteurs de tentatives, atomiques (une seule requête PostgreSQL par incrément)."""
+"""Rate limits and attempt counters, atomic (a single PostgreSQL query per increment)."""
 import ipaddress
 import random
 from datetime import datetime
@@ -22,12 +22,12 @@ _INCREMENTER = """
 
 
 def incrementer(cle: str, fenetre_secondes: int) -> tuple[int, datetime]:
-    """Ajoute 1 au compteur `cle` (fenêtre fixe) et renvoie (nouvelle valeur, fin de la fenêtre)."""
+    """Adds 1 to the `cle` counter (fixed window) and returns (new value, end of the window)."""
     with connection.cursor() as cursor:
         cursor.execute(_INCREMENTER, [cle[:200], fenetre_secondes])
         valeur, expire_le = cursor.fetchone()
     if random.random() < 0.01:
-        # Ménage occasionnel : les compteurs échus ne servent plus
+        # Occasional cleanup: expired counters are no longer useful
         CompteurModel.objects.filter(expire_le__lte=timezone.now()).delete()
     return valeur, expire_le
 
@@ -41,8 +41,8 @@ def secondes_restantes(expire_le: datetime) -> int:
 
 
 def ip_client(request) -> str | None:
-    """Adresse du client. Derrière N proxys de confiance (DJANGO_NUM_PROXIES), l'adresse ajoutée par le dernier
-    proxy dans X-Forwarded-For ; sans proxy, REMOTE_ADDR (un X-Forwarded-For envoyé par le client est ignoré)."""
+    """Client address. Behind N trusted proxies (DJANGO_NUM_PROXIES), the address added by the last proxy in
+    X-Forwarded-For; without a proxy, REMOTE_ADDR (an X-Forwarded-For sent by the client is ignored)."""
     adresse = request.META.get('REMOTE_ADDR')
     proxys = settings.NUM_PROXIES
     transmis = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -57,7 +57,7 @@ def ip_client(request) -> str | None:
 
 
 def limite_ip(nom: str, nombre: int, secondes: int):
-    """Throttle DRF : au plus `nombre` requêtes par adresse IP et par fenêtre de `secondes`."""
+    """DRF throttle: at most `nombre` requests per IP address and per window of `secondes`."""
 
     class LimiteIP(BaseThrottle):
         def allow_request(self, request, view):
@@ -75,15 +75,15 @@ def limite_ip(nom: str, nombre: int, secondes: int):
 
 
 class Tentatives:
-    """Compteur de tentatives d'une ressource (email, code…) : chaque essai est compté AVANT d'être vérifié,
-    ce qui rend la limite exacte même avec des requêtes simultanées. Un succès remet le compteur à zéro."""
+    """Attempt counter of a resource (email, code…): every try is counted BEFORE being checked,
+    which makes the limit exact even with simultaneous requests. A success resets the counter."""
 
     def __init__(self, cle: str, maximum: int, fenetre_secondes: int):
         self.cle, self.maximum, self.fenetre = cle, maximum, fenetre_secondes
         self.attente = 0
 
     def essayer(self) -> bool:
-        """Compte une tentative. False si la limite est dépassée (self.attente : secondes avant de réessayer)."""
+        """Counts an attempt. False if the limit is exceeded (self.attente: seconds before trying again)."""
         if not settings.LIMITES_ACTIVES:
             return True
         valeur, expire_le = incrementer(self.cle, self.fenetre)

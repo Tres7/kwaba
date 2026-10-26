@@ -14,7 +14,7 @@ from tests.unit.messaging.fakes import (
 
 
 class World:
-    """Ports en mémoire, un hôte, un voyageur et un logement de l'hôte."""
+    """In-memory ports, a host, a traveller and a listing of the host."""
 
     def __init__(self):
         self.conversations = FakeConversationRepository()

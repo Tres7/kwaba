@@ -15,10 +15,10 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 
 def _interleave(monkeypatch, *targets):
-    """Fait attendre chaque requête, après sa vérification de disponibilité, que l'autre ait vérifié aussi.
+    """Makes each request wait, after its availability check, until the other one has checked too.
 
-    Sans verrou, les deux voient les dates libres puis écrivent toutes les deux. Avec le verrou du logement,
-    la seconde reste bloquée avant sa vérification : l'attente expire et la première termine seule.
+    Without a lock, both see the dates free then both write. With the listing lock,
+    the second one stays blocked before its check: the wait times out and the first one finishes alone.
     """
     barrier = threading.Barrier(2, timeout=3)
     for module, name in targets:
@@ -87,7 +87,7 @@ def test_host_closing_dates_while_guest_books_them_only_one_succeeds(make_user, 
          {'debut': check_in.isoformat(), 'fin': check_out.isoformat()}),
     )
 
-    # Selon l'ordre d'arrivée : réservation acceptée et fermeture refusée (409), ou l'inverse (400)
+    # Depending on the arrival order: booking accepted and closure refused (409), or the reverse (400)
     assert sorted(statuses) in ([201, 400], [201, 409])
     reservations = ReservationModel.objects.filter(hebergement=hebergement).count()
     blocages = BlocageModel.objects.filter(hebergement=hebergement).count()

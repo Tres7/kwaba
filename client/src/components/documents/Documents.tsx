@@ -12,7 +12,7 @@ const NOMS: Record<TypeDocument, { fr: string; en: string }> = {
   facture: { fr: "Facture", en: "Invoice" },
 };
 
-/** Boutons de téléchargement des PDF d'un élément payé (bon, reçu, facture ; reçu seul pour un don). */
+/** Download buttons for the PDFs of a paid item (voucher, receipt, invoice; receipt only for a donation). */
 export default function Documents({ objet, id, className }: { objet: ObjetDocument; id: string; className?: string }) {
   const [enCours, setEnCours] = useState<TypeDocument | null>(null);
   const types: TypeDocument[] = objet === "don" ? ["recu"] : ["bon", "recu", "facture"];

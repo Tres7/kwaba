@@ -1,4 +1,4 @@
-"""Contrôle des documents envoyés : pièce d'identité (image ou PDF) et photos de visite."""
+"""Check of the uploaded documents: identity document (image or PDF) and visit photos."""
 from io import BytesIO
 
 from django.core.files.base import ContentFile
@@ -15,9 +15,9 @@ class FichierInvalide(ValueError):
 
 
 def image_normalisee(fichier) -> ContentFile:
-    """Ré-encode l'image en JPEG sans métadonnées (position GPS, appareil), 2400 px au plus.
+    """Re-encodes the image as JPEG without metadata (GPS position, device), 2400 px at most.
 
-    Ré-encoder neutralise aussi un fichier piégé qui se ferait passer pour une image.
+    Re-encoding also neutralises a booby-trapped file posing as an image.
     """
     if fichier.size > MAX_OCTETS:
         raise FichierInvalide("Le fichier dépasse 10 Mo.")
@@ -42,7 +42,7 @@ def image_normalisee(fichier) -> ContentFile:
 
 
 def piece_identite(fichier) -> tuple[ContentFile, str, str]:
-    """Renvoie (contenu, extension, type MIME). PDF accepté tel quel s'il en est bien un, image ré-encodée."""
+    """Returns (content, extension, MIME type). PDF accepted as is if it really is one, image re-encoded."""
     if fichier.size > MAX_OCTETS:
         raise FichierInvalide("Le fichier dépasse 10 Mo.")
     debut = fichier.read(5)

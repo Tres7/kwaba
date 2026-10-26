@@ -18,7 +18,7 @@ interface PieceIdentite {
   motif_refus?: string;
 }
 
-/** Pièce d'identité de l'hôte, contrôlée par l'agent de terrain lors de la visite du logement. */
+/** The host's identity document, checked by the field agent during the visit of the listing. */
 export default function VerificationIdentite() {
   const t = useTranslations("espaceHote.verification");
   const queryClient = useQueryClient();

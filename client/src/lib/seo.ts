@@ -3,12 +3,12 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing, type Langue } from "@/i18n/routing";
 
-/** Adresse publique du site, sans « / » final : URL absolues du sitemap, des aperçus de lien et des canoniques. */
+/** Public address of the site, without a trailing "/": absolute URLs of the sitemap, link previews and canonicals. */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || process.env.AUTH_URL || "http://localhost:3000").replace(/\/+$/, "");
 
 export const IMAGE_PARTAGE = "/brand/kwaba-partage-1200x630.png";
 
-/** Pages publiques indexables (sans préfixe de langue). Les fiches de logement et d'associations s'y ajoutent. */
+/** Indexable public pages (without language prefix). Listing and organisation pages are added to them. */
 export const PAGES_PUBLIQUES = [
   "/", "/recherche", "/decouvrir", "/transfert", "/location", "/together", "/concierge", "/hote",
   "/give", "/give/impact", "/profil/aide",
@@ -16,8 +16,8 @@ export const PAGES_PUBLIQUES = [
 ] as const;
 
 /**
- * Pages privées ou sans intérêt pour un moteur de recherche (robots.txt) : elles redirigent vers la connexion ou
- * n'affichent que les données de l'utilisateur. /profil/aide (centre d'aide) reste public.
+ * Private pages or pages of no interest to a search engine (robots.txt): they redirect to sign-in or only
+ * show the user's data. /profil/aide (help centre) stays public.
  */
 export const CHEMINS_PRIVES = [
   "/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/give/don", "/together/", "/transfert/", "/location/",
@@ -28,13 +28,13 @@ export function langueDe(valeur: string): Langue {
   return hasLocale(routing.locales, valeur) ? valeur : routing.defaultLocale;
 }
 
-/** Chemin public d'une page dans une langue : /recherche (français) ou /en/recherche (anglais). */
+/** Public path of a page in a language: /recherche (French) or /en/recherche (English). */
 export function cheminLocalise(locale: Langue, chemin: string): string {
   if (locale === routing.defaultLocale) return chemin;
   return chemin === "/" ? `/${locale}` : `/${locale}${chemin}`;
 }
 
-/** Les deux versions linguistiques d'une page, et la version française par défaut (hreflang x-default). */
+/** The two language versions of a page, and the French version by default (hreflang x-default). */
 export function versionsLinguistiques(chemin: string): Record<string, string> {
   return {
     fr: cheminLocalise("fr", chemin),
@@ -45,20 +45,20 @@ export function versionsLinguistiques(chemin: string): Record<string, string> {
 
 interface PageSeo {
   locale: Langue;
-  /** Chemin sans préfixe de langue, ex. /hebergements/<id> */
+  /** Path without language prefix, e.g. /hebergements/<id> */
   chemin: string;
   titre: string;
   description?: string;
   image?: string | null;
-  /** Titre affiché tel quel, sans « · Kwa-Ba » (page d'accueil). */
+  /** Title displayed as is, without "· Kwa-Ba" (home page). */
   titreComplet?: boolean;
   indexable?: boolean;
 }
 
 /**
- * Métadonnées d'une page publique : titre, description, URL canonique, versions FR / EN et aperçu de lien.
- * Chaque page indexable doit les fournir : sans elles, Google ne sait ni quelle URL retenir ni quelle est
- * la version dans l'autre langue (Next.js remplace le bloc openGraph du parent au lieu de le fusionner).
+ * Metadata of a public page: title, description, canonical URL, FR / EN versions and link preview.
+ * Every indexable page must provide them: without them, Google knows neither which URL to keep nor which is
+ * the version in the other language (Next.js replaces the parent's openGraph block instead of merging it).
  */
 export function metadataPage({ locale, chemin, titre, description, image, titreComplet, indexable = true }: PageSeo): Metadata {
   const url = cheminLocalise(locale, chemin);
@@ -83,22 +83,22 @@ export function metadataPage({ locale, chemin, titre, description, image, titreC
 }
 
 /**
- * Page privée sous une page publique (/transfert/<id>, /together/<id>…) : garde le titre de sa section mais n'est
- * ni indexée ni rattachée à l'URL canonique de la page publique dont elle hérite.
+ * Private page under a public page (/transfert/<id>, /together/<id>…): keeps the title of its section but is
+ * neither indexed nor attached to the canonical URL of the public page it inherits from.
  */
 export const METADATA_PRIVEE: Metadata = {
   alternates: { canonical: null, languages: {} },
   robots: { index: false, follow: false },
 };
 
-/** Métadonnées d'une page dont le titre et la description sont dans messages/*.json (meta.pages.<cle>). */
+/** Metadata of a page whose title and description are in messages/*.json (meta.pages.<cle>). */
 export async function metadataTraduite(params: Promise<{ locale: string }>, cle: string, chemin: string): Promise<Metadata> {
   const locale = langueDe((await params).locale);
   const t = await getTranslations({ locale, namespace: "meta.pages" });
   return metadataPage({ locale, chemin, titre: t(`${cle}.titre`), description: t(`${cle}.description`) });
 }
 
-/** Lecture de l'API côté serveur (sitemap, métadonnées) : mise en cache, null si l'API ne répond pas. */
+/** Server-side API read (sitemap, metadata): cached, null if the API does not respond. */
 export async function lireApi<T>(chemin: string, revalidate = 600): Promise<T | null> {
   const base = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
   try {

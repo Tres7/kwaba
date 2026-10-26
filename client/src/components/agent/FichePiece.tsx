@@ -14,7 +14,7 @@ export interface Piece {
   hote: { id: string; nom: string; email: string; telephone: string | null; inscrit_le: string };
 }
 
-/** Contrôle à distance d'une pièce d'identité : lisible, valide, au nom de l'hôte. Le document est supprimé ensuite. */
+/** Remote check of an identity document: readable, valid, in the host's name. The document is deleted afterwards. */
 export default function FichePiece({ piece, peutDecider, onTerminee }: {
   piece: Piece;
   peutDecider: boolean;

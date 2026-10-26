@@ -20,7 +20,7 @@ const TABS: { id: Category | "tout"; label: string }[] = [
   { id: "sites", label: "sites" },
 ];
 
-/** Textes dans la langue du visiteur ; un texte anglais vide reprend le français. */
+/** Texts in the visitor's language; an empty English text falls back to French. */
 function localiser(e: Experience, locale: string) {
   const en = locale === "en";
   return {
@@ -38,7 +38,7 @@ export default function DecouvrirPage() {
   const [tab, setTab] = useState<Category | "tout">("tout");
   const [city, setCity] = useState("");
   const [q, setQ] = useState("");
-  // Guide géré depuis le back-office (Expériences)
+  // Guide managed from the back-office (Experiences)
   const { data: experiences, isLoading } = useQuery({
     queryKey: ["experiences"],
     queryFn: async () => (await api.get<Experience[]>("/v1/experiences/")).data,

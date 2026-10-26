@@ -18,10 +18,10 @@ import PropertyCard from "@/components/hebergement/PropertyCard";
 import ChampDestination from "@/components/hebergement/ChampDestination";
 import type { City, Hebergement, Paginated } from "@/types/api/models";
 
-// Photos du diaporama (public/accueil) : portrait 1240 × 1550 recadré sur le sujet pour les téléphones, 2560 px à partir
-// de la tablette, 3840 px sur les grands écrans (2xl). Classes écrites en entier pour que Tailwind les génère ; le
-// navigateur ne télécharge que l'image de la taille d'écran courante. ?v= : à augmenter quand une photo change de
-// contenu sous le même nom (les images sont gardées 7 jours en cache par les navigateurs).
+// Slideshow photos (public/accueil): 1240 × 1550 portrait cropped on the subject for phones, 2560 px from
+// tablets, 3840 px on large screens (2xl). Classes written in full so that Tailwind generates them; the
+// browser only downloads the image of the current screen size. ?v=: to increase when a photo changes its
+// content under the same name (images are cached 7 days by browsers).
 const heroImages = [
   "bg-[url('/accueil/hero-1-mobile.jpg?v=2')] md:bg-[url('/accueil/hero-1.jpg?v=2')] 2xl:bg-[url('/accueil/hero-1-4k.jpg?v=2')]",
   "bg-[url('/accueil/hero-2-mobile.jpg?v=2')] md:bg-[url('/accueil/hero-2.jpg?v=2')] 2xl:bg-[url('/accueil/hero-2-4k.jpg?v=2')]",
@@ -42,7 +42,7 @@ const CATEGORIES = [
 ];
 
 const FEATURES = [
-  // Couleurs de la charte Kwa-Ba : vert, ambre, orange, ardoise
+  // Kwa-Ba brand colours: green, amber, orange, slate
   { title: "paiement", icon: WalletIcon, color: "text-primary ring-primary/20" },
   { title: "instantanee", icon: LightningIcon, color: "text-secondary ring-secondary/20" },
   { title: "contact", icon: ChatsCircleIcon, color: "text-accent ring-accent/30" },
@@ -132,7 +132,7 @@ function WelcomeToast() {
 }
 
 export default function HomePage() {
-  // Photo affichée et précédente (gardée le temps du fondu) ; aucune précédente avant le premier changement
+  // Displayed and previous photo (kept during the fade); no previous one before the first change
   const [{ currentBg, previousBg }, setDiaporama] = useState({ currentBg: 0, previousBg: -1 });
   const { status } = useSession();
   const t = useTranslations("accueil");
@@ -162,8 +162,8 @@ export default function HomePage() {
 
       <section className="relative pt-16 pb-36 md:pt-28 md:pb-48 px-4 sm:px-6 text-white min-h-[560px] md:min-h-[620px] flex items-center justify-center overflow-hidden">
         {heroImages.map((img, i) => {
-          // Seules la photo affichée, la précédente (fondu de sortie) et la suivante (préchargée) sont dans la page :
-          // les autres ne sont téléchargées qu'à leur tour
+          // Only the displayed photo, the previous one (fading out) and the next one (preloaded) are in the page:
+          // the others are only downloaded when their turn comes
           const n = heroImages.length;
           if (i !== currentBg && i !== (currentBg + 1) % n && i !== previousBg) return null;
           return (
@@ -189,7 +189,7 @@ export default function HomePage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 space-y-16 md:space-y-20 -mt-16 md:-mt-20 relative z-20">
-        {/* Masquée tant qu'aucune annonce n'est publiée (pas de bloc vide) ; réapparaît dès la première */}
+        {/* Hidden while no listing is published (no empty block); shows again with the first one */}
         {(citiesLoading || cities.length > 0) && (
         <section>
           <div className="flex items-end justify-between mb-6 md:mb-8 gap-4">

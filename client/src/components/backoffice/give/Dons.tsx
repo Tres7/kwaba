@@ -9,7 +9,7 @@ import type { DonAdmin } from "@/types/api/admin";
 
 const STATUTS = [{ value: "paye", label: "Payés" }, { value: "en_attente", label: "En attente" }, { value: "echoue", label: "Non aboutis" }, { value: "", label: "Tous" }];
 
-/** Dons reçus (lecture seule) : le reversement aux ONG se fait depuis l'onglet Reversements. */
+/** Donations received (read only): transfers to the NGOs are made from the Transfers tab. */
 export default function Dons() {
   const [q, setQ] = useState("");
   const [statut, setStatut] = useState("paye");

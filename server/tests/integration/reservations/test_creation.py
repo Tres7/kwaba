@@ -25,7 +25,7 @@ def _book(client, hebergement, check_in, check_out, **extra):
 
 
 def test_total_price_includes_service_fee(client_for, make_user, make_hebergement, settings):
-    # Paiement en ligne désactivé (indépendamment des clés d'un server/.env local) : confirmation directe
+    # Online payment disabled (whatever the keys of a local server/.env): direct confirmation
     settings.FEDAPAY = {**settings.FEDAPAY, 'SECRET_KEY': ''}
     settings.PAYPAL = {**settings.PAYPAL, 'CLIENT_ID': '', 'CLIENT_SECRET': ''}
     hebergement = make_hebergement(price_per_night=25000)
@@ -35,7 +35,7 @@ def test_total_price_includes_service_fee(client_for, make_user, make_hebergemen
                      status='cancelled', total_price=1)
 
     assert response.status_code == 201
-    # 3 nuits x 25 000 + 6 % ; le statut et le prix envoyés par le client sont ignorés
+    # 3 nights x 25,000 + 6 %; the status and price sent by the client are ignored
     assert Decimal(str(response.data['total_price'])) == Decimal('79500')
     assert response.data['status'] == 'confirmed'
 

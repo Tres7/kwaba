@@ -6,14 +6,14 @@ from django.db import models
 
 
 def stockage_prive():
-    """Factures : espace privé (jamais d'URL publique), lues par l'API qui vérifie les droits."""
+    """Invoices: private storage (never a public URL), read by the API which checks the rights."""
     return storages['prive']
 
 
 class ParametresSocieteModel(models.Model):
-    """Informations légales de Kwa-Ba imprimées sur les documents (une seule ligne, modifiable dans le back-office).
+    """Kwa-Ba legal information printed on the documents (a single row, editable in the back-office).
 
-    Tant que la raison sociale et l'adresse ne sont pas renseignées, aucune facture ne peut être émise.
+    As long as the company name and the address are not filled in, no invoice can be issued.
     """
     raison_sociale = models.CharField(max_length=150, blank=True)
     nom_commercial = models.CharField(max_length=80, default='Kwa-Ba')
@@ -28,7 +28,7 @@ class ParametresSocieteModel(models.Model):
     assujetti_tva = models.BooleanField(default=False)
     taux_tva = models.DecimalField(max_digits=5, decimal_places=2, default=18, help_text='En %, si assujetti')
     mentions = models.TextField(blank=True, help_text='Pied de facture : conditions de paiement, mentions légales…')
-    # Signataire des contrats pour Kwa-Ba
+    # Signer of the contracts for Kwa-Ba
     representant_nom = models.CharField(max_length=120, blank=True, help_text='Représentant légal, signataire des contrats')
     representant_qualite = models.CharField(max_length=80, blank=True, help_text='Gérant, directeur général…')
     signature_representant = models.ImageField(upload_to='societe/', storage=stockage_prive, blank=True,
@@ -39,7 +39,7 @@ class ParametresSocieteModel(models.Model):
         verbose_name = 'Informations de la société'
 
     def save(self, *args, **kwargs):
-        self.pk = 1  # une seule ligne
+        self.pk = 1  # a single row
         super().save(*args, **kwargs)
 
     @classmethod
@@ -61,13 +61,13 @@ class ParametresSocieteModel(models.Model):
 
 
 class SequenceFactureModel(models.Model):
-    """Dernier numéro de facture émis par année : numérotation continue, sans trou (verrou à chaque émission)."""
+    """Last invoice number issued per year: continuous numbering, without gaps (lock at every issue)."""
     annee = models.PositiveSmallIntegerField(primary_key=True)
     dernier = models.PositiveIntegerField(default=0)
 
 
 class FactureModel(models.Model):
-    """Facture émise (document légal) : jamais modifiée ni supprimée ; son PDF est figé à l'émission."""
+    """Issued invoice (legal document): never changed nor deleted; its PDF is frozen when issued."""
     OBJETS = [('reservation', 'Séjour'), ('transfert', 'Transfert aéroport'), ('location', 'Location de voiture'),
               ('libre', 'Facture libre')]
 

@@ -22,7 +22,7 @@ def guest(make_user):
 
 @pytest.fixture
 def thread(client_for, guest, listing):
-    """Fil ouvert par le voyageur ; renvoie son id."""
+    """Thread opened by the traveller; returns its id."""
     response = client_for(guest).post(CONVERSATIONS, {'hebergement_id': str(listing.id)}, format='json')
     assert response.status_code == 201
     return response.data['id']
@@ -64,7 +64,7 @@ class TestStartConversation:
             for _ in range(11)
         ]
         assert statuses == [201] * 10 + [429]
-        # Les lectures (polling) ne sont pas limitées
+        # Reads (polling) are not limited
         assert client.get(CONVERSATIONS).status_code == 200
 
 

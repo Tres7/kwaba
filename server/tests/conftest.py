@@ -9,10 +9,10 @@ _MARKERS = ('unit', 'integration', 'broker')
 
 
 def pytest_collection_modifyitems(config, items):
-    """Pose le marqueur unit / integration / broker d'après le dossier du test.
+    """Sets the unit / integration / broker marker from the test's folder.
 
-    Un test de tests/unit qui toucherait la base échoue de lui-même :
-    pytest-django refuse l'accès sans le marqueur django_db.
+    A test of tests/unit that would touch the database fails by itself:
+    pytest-django refuses access without the django_db marker.
     """
     for item in items:
         layer = Path(item.fspath).relative_to(_TESTS_DIR).parts[0]
@@ -23,9 +23,9 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(scope='session')
 def django_db_modify_db_settings(django_db_modify_db_settings_parallel_suffix):
-    """Appelé par pytest-django juste avant de créer la base de test, donc seulement si un test touche la base.
+    """Called by pytest-django right before creating the test database, so only if a test touches the database.
 
-    Démarre alors le conteneur PostgreSQL de test (voir tests/services.py) et y pointe Django.
+    Then starts the test PostgreSQL container (see tests/services.py) and points Django to it.
     """
     if services.externally_provided():
         yield
@@ -34,7 +34,7 @@ def django_db_modify_db_settings(django_db_modify_db_settings_parallel_suffix):
     from django.conf import settings
 
     started = services.start(services.POSTGRES['service'])
-    # Modification en place : les connexions déjà créées partagent ce dictionnaire
+    # In-place change: connections already created share this dictionary
     settings.DATABASES['default'].update(services.POSTGRES['settings'])
     yield
     if started:
@@ -43,11 +43,11 @@ def django_db_modify_db_settings(django_db_modify_db_settings_parallel_suffix):
 
 @pytest.fixture(autouse=True)
 def _http_test_client(settings):
-    # Le client de test parle en HTTP : sans ceci, la redirection HTTPS de production renverrait des 301
+    # The test client speaks HTTP: without this, the production HTTPS redirect would return 301s
     settings.SECURE_SSL_REDIRECT = False
 
 
 @pytest.fixture(autouse=True)
 def _modules_affiches(settings):
-    # Les tests d'un module le supposent affiché ; l'état masqué du lancement a ses propres tests (tests/integration/site)
+    # A module's tests assume it is displayed; the hidden launch state has its own tests (tests/integration/site)
     settings.MODULES = {nom: True for nom in settings.MODULES}

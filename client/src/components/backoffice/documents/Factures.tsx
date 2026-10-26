@@ -18,7 +18,7 @@ type Ligne = { libelle: string; quantite: string; prix_unitaire: string };
 const LIGNE_VIDE: Ligne = { libelle: "", quantite: "1", prix_unitaire: "" };
 const CLIENT_VIDE = { client_nom: "", client_email: "", client_adresse: "" };
 
-/** Factures émises, et émission d'une facture libre (prestation hors réservation). */
+/** Issued invoices, and issuing of a free-form invoice (service outside a booking). */
 export default function Factures() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -76,7 +76,7 @@ export default function Factures() {
     { titre: "Montant", cellule: (f) => <div className="text-xs tabular-nums"><p className="text-dark font-semibold">{formatPrice(f.total_ttc)}</p>{f.tva > 0 && <p className="text-muted">dont TVA {formatPrice(f.tva)}</p>}</div> },
   ];
 
-  // DRF renvoie les erreurs de lignes sous forme de liste par ligne : un message d'ensemble suffit
+  // DRF returns line errors as a list per line: an overall message is enough
   const erreurLignes = erreurs.lignes ? "Vérifiez les lignes : désignation, quantité (au moins 1) et prix unitaire." : undefined;
 
   return (

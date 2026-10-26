@@ -35,7 +35,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         }
 
     def get_paiement(self, obj):
-        """Statut du dernier paiement : null si aucun (paiement en ligne inactif à la réservation)."""
+        """Status of the last payment: null if none (online payment inactive at booking time)."""
         dernier = max(obj.paiements.all(), key=lambda p: p.cree_le, default=None)
         return dernier.statut if dernier else None
 
@@ -65,8 +65,8 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 
 class ReservationCreateSerializer(serializers.ModelSerializer):
-    # Total affiché au voyageur dans le récapitulatif : s'il ne correspond plus au calcul du serveur (prix modifié
-    # par l'hôte entre-temps, taux différent), la réservation est refusée pour qu'il voie le nouveau total avant de payer
+    # Total shown to the traveller in the summary: if it no longer matches the server's calculation (price changed
+    # by the host in the meantime, different rate), the booking is refused so that they see the new total before paying
     total_attendu = serializers.IntegerField(required=False, write_only=True, min_value=0)
 
     class Meta:
@@ -98,8 +98,8 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         if request and hebergement.host_id == request.user.id:
             raise serializers.ValidationError({'hebergement': "Vous ne pouvez pas réserver votre propre hébergement."})
 
-        # Même règle que le calendrier affiché : réservations actives et dates fermées par l'hôte.
-        # Le verrou (tenu par la transaction de la vue jusqu'à create) empêche deux réservations simultanées.
+        # Same rule as the displayed calendar: active bookings and dates closed by the host.
+        # The lock (held by the view's transaction until create) prevents two simultaneous bookings.
         verrouiller(hebergement.id)
         motif = conflit(hebergement.id, check_in, check_out)
         if motif:
@@ -120,7 +120,7 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         nights = (validated_data['check_out'] - validated_data['check_in']).days
         montants = tarifs.devis(hebergement, nights, voyageur=validated_data.get('guest'))
         if paiements.paiement_actif():
-            # Dates bloquées le temps de payer ; confirmée par le webhook FedaPay
+            # Dates held while paying; confirmed by the FedaPay webhook
             etat = {'status': 'pending', 'expire_le': timezone.now() + paiements.delai_paiement()}
         else:
             etat = {'status': 'confirmed'}

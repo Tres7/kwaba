@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 
 interface FloatingProps {
   anchor: React.RefObject<HTMLElement | null>;
-  /** Largeur souhaitée sur grand écran (px) ; par défaut celle du déclencheur. */
+  /** Desired width on large screens (px); by default the trigger's. */
   width?: number;
-  /** Alignement sur le déclencheur. */
+  /** Alignment on the trigger. */
   align?: "start" | "end";
-  /** Sur mobile, s'affiche en panneau bas d'écran avec fond assombri. */
+  /** On mobile, shows as a bottom panel with a darkened background. */
   sheetOnMobile?: boolean;
   onClose: () => void;
   label: string;
@@ -22,8 +22,8 @@ const MD = 768;
 const MARGE = 16;
 
 /**
- * Panneau rendu dans <body> : jamais coupé par un parent en overflow-hidden ou animé,
- * positionné sous son déclencheur et recalculé au défilement et au redimensionnement.
+ * Panel rendered in <body>: never cut by an overflow-hidden or animated parent,
+ * positioned under its trigger and recomputed on scroll and resize.
  */
 const Floating = forwardRef<HTMLDivElement, FloatingProps>(function Floating(
   { anchor, width, align = "start", sheetOnMobile = false, onClose, label, className, children }, ref

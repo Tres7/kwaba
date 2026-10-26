@@ -1,4 +1,4 @@
-"""Liste d'attente de l'ouverture : tant qu'aucun logement n'est publié, les visiteurs laissent leur email."""
+"""Opening waiting list: while no listing is published, visitors leave their email."""
 import logging
 
 from django.conf import settings
@@ -18,7 +18,7 @@ from apps.securite.permissions import EstAdministrateur
 from .models import HebergementModel, InscriptionLancementModel
 
 logger = logging.getLogger('apps.hebergements')
-MAX_ENVOIS = 500  # par clic : au-delà, l'administrateur relance l'envoi
+MAX_ENVOIS = 500  # per click: beyond that, the administrator starts the sending again
 
 
 class InscriptionSerializer(serializers.Serializer):
@@ -27,8 +27,8 @@ class InscriptionSerializer(serializers.Serializer):
 
 
 class InscriptionLancementView(APIView):
-    """GET : mode pré-lancement actif ou non. POST {email, langue} : être prévenu de l'ouverture. Même réponse si
-    l'adresse est déjà inscrite."""
+    """GET: pre-launch mode on or off. POST {email, langue}: be notified of the opening. Same response if the
+    address is already signed up."""
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -48,8 +48,8 @@ class InscriptionLancementView(APIView):
 
 
 class LancementAdminView(APIView):
-    """GET : nombre d'inscrits (à prévenir / prévenus). POST : envoie l'email d'ouverture aux inscrits pas encore prévenus,
-    seulement si au moins un logement est publié."""
+    """GET: number of sign-ups (to notify / notified). POST: sends the opening email to the sign-ups not notified yet,
+    only if at least one listing is published."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):

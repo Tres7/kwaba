@@ -8,7 +8,7 @@ class ConversationModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='conversations_concierge')
     titre = models.CharField(max_length=120, blank=True)
-    # Dernière interaction Gemini : l'API garde l'historique côté Google (55 jours en offre payante)
+    # Last Gemini interaction: the API keeps the history at Google (55 days on the paid plan)
     interaction_id = models.CharField(max_length=128, blank=True)
     cree_le = models.DateTimeField(auto_now_add=True)
     mis_a_jour_le = models.DateTimeField(auto_now=True)
@@ -23,11 +23,11 @@ class ConversationModel(models.Model):
 
 
 class MessageModel(models.Model):
-    """Un tour de la conversation (message du voyageur, réponse ou appels d'outils du Concierge)."""
+    """One turn of the conversation (traveller's message, answer or tool calls of the Concierge)."""
     conversation = models.ForeignKey(ConversationModel, on_delete=models.CASCADE, related_name='messages')
     role = models.CharField(max_length=10, choices=[('user', 'Voyageur'), ('assistant', 'Concierge')])
     contenu = models.JSONField(default=dict, blank=True, help_text="Détail technique : appels d'outils et leurs arguments")
-    # Affichage : texte lisible et offres Kwa-Ba (cartes) ; les résultats d'outils restent invisibles
+    # Display: readable text and Kwa-Ba offers (cards); tool results stay invisible
     texte = models.TextField(blank=True)
     cartes = models.JSONField(default=list, blank=True)
     visible = models.BooleanField(default=True)

@@ -16,7 +16,7 @@ class ReservationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # ?as=host : réservations reçues sur mes hébergements
+        # ?as=host: bookings received on my listings
         if request.query_params.get('as') == 'host':
             qs = ReservationModel.objects.filter(hebergement__host=request.user)
         else:

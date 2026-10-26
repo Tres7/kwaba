@@ -19,7 +19,7 @@ def test_villes_commencant_par_la_saisie_en_premier(api_client, make_hebergement
 
     reponse = api_client.get(URL, {'q': 'a'})
 
-    # Les deux commencent par « a » : la plus fournie d'abord
+    # Both start with "a": the one with the most listings first
     assert [v['city'] for v in reponse.data['villes']] == ['Atakpamé', 'Aného']
 
     reponse = api_client.get(URL, {'q': 'pam'})

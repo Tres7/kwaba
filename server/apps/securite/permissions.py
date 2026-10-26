@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class EstAdministrateur(IsAuthenticated):
-    """Back-office : rôle lu en base à chaque requête (request.user), jamais dans la session du frontend."""
+    """Back-office: role read from the database at every request (request.user), never from the frontend session."""
 
     message = "Accès réservé aux administrateurs."
 

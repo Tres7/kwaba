@@ -3,14 +3,14 @@ export type Module = "experiences" | "together" | "give" | "concierge" | "locati
 
 export interface ReglagesSite {
   modules: Record<Module, boolean>;
-  /** Vide tant que la valeur n'est pas connue : le site affiche alors « à compléter ». */
+  /** Empty while the value is not known: the site then shows "to be completed". */
   mentions: { rccm: string; nif: string; commerce_electronique: string; ipdcp: string };
   contact_email: string;
 }
 
 /**
- * Pages de chaque module : un module masqué disparaît des menus, du pied de page et du plan du site, et ses
- * adresses renvoient vers l'accueil (middleware).
+ * Pages of each module: a hidden module disappears from the menus, the footer and the sitemap, and its
+ * addresses redirect to the home page (middleware).
  */
 export const PAGES_MODULES: Record<string, Module> = {
   "/decouvrir": "experiences",
@@ -24,7 +24,7 @@ export function moduleDuChemin(chemin: string): Module | null {
   return page ? PAGES_MODULES[page] : null;
 }
 
-/** Liens dont la page n'appartient pas à un module masqué (modules inconnus : tous masqués). */
+/** Links whose page does not belong to a hidden module (unknown modules: all hidden). */
 export function filtrerLiens<T extends { href: string }>(liens: T[], modules: ReglagesSite["modules"] | undefined): T[] {
   return liens.filter((l) => {
     const nom = moduleDuChemin(l.href.split("?")[0]);

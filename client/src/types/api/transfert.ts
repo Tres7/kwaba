@@ -6,7 +6,7 @@ export interface Aeroport {
   ville: string;
   pays: string;
   fuseau: string;
-  /** Prix de chaque véhicule depuis cet aéroport (même prix de jour comme de nuit). */
+  /** Price of each vehicle from this airport (same price by day and by night). */
   prix: Partial<Record<CategorieVehicule, number>>;
 }
 
@@ -41,7 +41,7 @@ export interface Transfert {
   aeroport: string;
   aeroport_detail: Aeroport;
   arrivee: string;
-  /** Heure du billet, dans le fuseau de l'aéroport (AAAA-MM-JJTHH:MM). */
+  /** Ticket time, in the airport's time zone (YYYY-MM-DDTHH:MM). */
   arrivee_locale: string;
   numero_vol: string;
   passagers: number;
