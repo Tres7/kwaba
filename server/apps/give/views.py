@@ -115,7 +115,7 @@ def _organisations():
 
 
 class ConfigView(APIView):
-    """Ce que la page de don doit afficher avant le paiement (public)."""
+    """What the donation page must show before payment (public)."""
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -157,7 +157,7 @@ class OrganisationView(APIView):
 
 
 class ImpactView(APIView):
-    """Transparence : montants collectés et reversés, par cause, et preuves des derniers reversements."""
+    """Transparency: amounts collected and transferred, per cause, and proofs of the latest transfers."""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -198,7 +198,7 @@ class DonsView(APIView):
 
 
 class DonView(APIView):
-    """Page de retour après paiement : relit le paiement chez le prestataire si besoin."""
+    """Return page after payment: reads the payment again at the provider if needed."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):

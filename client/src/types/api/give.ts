@@ -14,11 +14,11 @@ export interface ConfigGive {
   montants_suggeres: number[];
   montant_min: number;
   montant_max: number;
-  /** Frais moyens du prestataire de paiement (0.03 = 3 %). */
+  /** Average fees of the payment provider (0.03 = 3 %). */
   frais_paiement: number;
-  /** Commission de Kwa-Ba sur les dons : 0 au lancement. */
+  /** Kwa-Ba's commission on donations: 0 at launch. */
   commission_kwaba: number;
-  /** Les dons d'un mois sont reversés au plus tard ce jour du mois suivant. */
+  /** A month's donations are transferred at the latest on this day of the following month. */
   jour_reversement: number;
   fcfa_par_euro: number;
   causes: Cause[];

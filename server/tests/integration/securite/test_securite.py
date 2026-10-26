@@ -1,4 +1,4 @@
-"""Correctifs de l'audit de sécurité : limites de tentatives, journal d'audit, entrées invalides, webhook, images."""
+"""Fixes from the security audit: attempt limits, audit log, invalid input, webhook, images."""
 import json
 from datetime import timedelta
 
@@ -74,7 +74,7 @@ class TestLimitesParIP:
 
     def test_client_address_taken_from_the_trusted_proxy(self, api_client, settings):
         settings.NUM_PROXIES = 1
-        # Le proxy ajoute l'adresse réelle en dernier : ce que le client a mis avant ne compte pas
+        # The proxy adds the real address last: what the client put before does not count
         for n in range(10):
             self._inscrire(api_client, n, HTTP_X_FORWARDED_FOR=f'1.2.3.{n}, 41.207.0.1')
         assert self._inscrire(api_client, 10, HTTP_X_FORWARDED_FOR='9.9.9.9, 41.207.0.1').status_code == 429
@@ -148,7 +148,7 @@ class TestProfil:
 
 
 class TestEntreesInvalides:
-    """Un identifiant mal formé donne une erreur 400 ou 404, jamais une erreur 500."""
+    """A malformed id gives a 400 or 404 error, never a 500 error."""
 
     def test_transfers_filtered_by_malformed_reservation(self, raw_client, make_user):
         raw_client.force_authenticate(user=make_user())

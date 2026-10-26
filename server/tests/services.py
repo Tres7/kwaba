@@ -1,10 +1,10 @@
-"""Conteneurs nécessaires aux tests, démarrés uniquement quand un test en a besoin.
+"""Containers needed by the tests, started only when a test needs them.
 
-- Un test sans base (tests/unit) ne démarre rien.
-- Le premier test qui touche la base démarre `postgres-test` (compose.test.yaml), puis l'arrête en fin de session
-  s'il ne tournait pas déjà.
-- TEST_SERVICES=external : les services sont fournis par ailleurs (CI, PostgreSQL local) via POSTGRES_HOST, etc.
-- TEST_KEEP_SERVICES=1 : laisse les conteneurs démarrés pour enchaîner les exécutions plus vite.
+- A test without a database (tests/unit) starts nothing.
+- The first test that touches the database starts `postgres-test` (compose.test.yaml), then stops it at the end
+  of the session if it was not already running.
+- TEST_SERVICES=external: the services are provided elsewhere (CI, local PostgreSQL) through POSTGRES_HOST, etc.
+- TEST_KEEP_SERVICES=1: leaves the containers running to chain runs faster.
 """
 import os
 import shutil
@@ -36,7 +36,7 @@ def _is_running(service: str) -> bool:
 
 
 def start(service: str) -> bool:
-    """Démarre le service et attend son healthcheck. Renvoie True si c'est nous qui l'avons démarré."""
+    """Starts the service and waits for its healthcheck. Returns True if we started it."""
     if shutil.which('docker') is None:
         pytest.exit(
             "Docker est introuvable : impossible de démarrer les services de test. "

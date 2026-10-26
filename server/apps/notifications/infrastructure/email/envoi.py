@@ -17,12 +17,12 @@ def _logo() -> bytes:
 
 def send_mail(subject: str, message: str, from_email: str, recipient_list: list[str],
               pieces_jointes: list[tuple[str, bytes, str]] | None = None) -> int:
-    """Comme django.core.mail.send_mail, en version texte et HTML aux couleurs de Kwa-Ba.
+    """Like django.core.mail.send_mail, as text and HTML in the Kwa-Ba colours.
 
-    - adresse de réponse du site (EMAIL_REPLY_TO) : les emails partent d'une adresse « noreply »,
-      une réponse du destinataire arrive sur la boîte de contact ;
-    - version HTML avec le logo joint à l'email (Content-ID), affiché sans image distante ;
-    - `pieces_jointes` : (nom, contenu, type MIME), par exemple le bon de réservation en PDF.
+    - the site's reply-to address (EMAIL_REPLY_TO): emails leave from a "noreply" address,
+      a reply from the recipient reaches the contact mailbox;
+    - HTML version with the logo attached to the email (Content-ID), displayed without a remote image;
+    - `pieces_jointes`: (name, content, MIME type), for example the booking voucher as a PDF.
     """
     # One email per recipient: nobody sees the other recipients' addresses (staff alerts go to several admins and
     # field agents). Duplicates are dropped, and all emails share a single SMTP connection.

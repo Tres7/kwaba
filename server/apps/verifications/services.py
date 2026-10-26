@@ -1,10 +1,10 @@
-"""Vérification des hôtes et des annonces, dans cet ordre :
+"""Verification of hosts and listings, in this order:
 
-1. l'hôte envoie sa pièce d'identité, contrôlée à distance par un agent ou un admin ;
-2. une fois l'identité vérifiée seulement, ses annonces sont proposées aux agents pour une visite ;
-3. l'agent visite le logement et publie (ou refuse) l'annonce.
+1. the host sends their identity document, checked remotely by an agent or an admin;
+2. only once the identity is verified, their listings are offered to the agents for a visit;
+3. the agent visits the listing and publishes (or refuses) it.
 
-Aucun déplacement n'est donc demandé pour un hôte dont l'identité n'a pas été contrôlée.
+No travel is therefore asked for a host whose identity has not been checked.
 """
 import logging
 
@@ -23,16 +23,16 @@ logger = logging.getLogger('apps.verifications')
 
 ROLES_VERIFICATEURS = ('agent', 'admin')
 MAX_PHOTOS_VISITE = 10
-# Annonces non vérifiées qu'un hôte peut avoir tant que son identité n'est pas vérifiée (contre les abus)
+# Unverified listings a host may have while their identity is not verified (against abuse)
 MAX_ANNONCES_HOTE_NON_VERIFIE = 3
 
 
 class VerificationErreur(Exception):
-    """Message affichable à l'agent."""
+    """Message that can be shown to the agent."""
 
 
 def _envoyer(gabarit: str, sujet: str, destinataires: list[str], contexte: dict) -> None:
-    """Après la validation de la transaction ; un échec d'envoi n'annule jamais la vérification."""
+    """After the transaction is committed; a sending failure never cancels the verification."""
     def envoyer():
         try:
             send_mail(sujet, render_to_string(f'emails/verifications/{gabarit}.txt', contexte),
@@ -50,7 +50,7 @@ def _verificateurs() -> list[str]:
 
 
 def contrats_disponibles() -> bool:
-    """Le contrat hôte devient obligatoire dès que Kwa-Ba est immatriculée (RCCM et NIF renseignés)."""
+    """The host agreement becomes required as soon as Kwa-Ba is registered (RCCM and NIF filled in)."""
     from apps.documents.models import ParametresSocieteModel
 
     return ParametresSocieteModel.courants().immatriculee
@@ -88,9 +88,9 @@ def identite_verifiee(hote) -> bool:
 
 
 def verifier_limite_annonces(hote) -> None:
-    """Avant une nouvelle annonce : téléphone obligatoire (l'agent doit pouvoir joindre l'hôte), et pas plus de
-    MAX_ANNONCES_HOTE_NON_VERIFIE annonces en attente tant que l'identité n'est pas vérifiée."""
-    from apps.hebergements.models import HebergementModel  # import local : hebergements importe ce module
+    """Before a new listing: phone required (the agent must be able to reach the host), and no more than
+    MAX_ANNONCES_HOTE_NON_VERIFIE pending listings while the identity is not verified."""
+    from apps.hebergements.models import HebergementModel  # local import: hebergements imports this module
 
     if hote.role == 'admin':
         return
@@ -107,10 +107,10 @@ def verifier_limite_annonces(hote) -> None:
 
 
 def visite_a_planifier(hebergement, modification: bool = False) -> None:
-    """Prévient les agents qu'une annonce attend une visite (nouvelle, ou modifiée après vérification).
+    """Tells the agents that a listing waits for a visit (new, or changed after verification).
 
-    Seulement si l'identité de l'hôte est vérifiée et son contrat signé : sinon, ses annonces leur seront envoyées
-    à ce moment-là (decider_piece, contrat_hote_signe)."""
+    Only if the host's identity is verified and their agreement signed: otherwise, their listings will be sent to
+    them at that moment (decider_piece, contrat_hote_signe)."""
     hote = hebergement.host
     if not identite_verifiee(hote) or contrat_manquant(hote):
         return
@@ -124,7 +124,7 @@ def visite_a_planifier(hebergement, modification: bool = False) -> None:
 
 
 def contrat_hote_signe(hote) -> None:
-    """L'hôte vient de signer son contrat : ses annonces en attente sont proposées aux agents."""
+    """The host has just signed their agreement: their pending listings are offered to the agents."""
     from apps.hebergements.models import HebergementModel
 
     for annonce in HebergementModel.objects.filter(host=hote, statut_verification='en_attente').select_related('host'):
@@ -132,7 +132,7 @@ def contrat_hote_signe(hote) -> None:
 
 
 def piece_a_controler(piece) -> None:
-    """Prévient les agents qu'une pièce d'identité vient d'être envoyée (ou remplacée)."""
+    """Tells the agents that an identity document has just been sent (or replaced)."""
     hote = piece.hote
     _envoyer('piece_a_controler', f"[Kwa-Ba] Pièce d'identité à contrôler : {hote.first_name} {hote.last_name}".strip(),
              _verificateurs(), {
@@ -144,8 +144,8 @@ def piece_a_controler(piece) -> None:
 
 @transaction.atomic
 def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> PieceIdentiteModel:
-    """Contrôle à distance de la pièce d'identité. Vérifiée : le document est effacé (seul le résultat est
-    conservé) et les annonces en attente de l'hôte sont envoyées aux agents pour une visite."""
+    """Remote check of the identity document. Verified: the document is deleted (only the result is kept)
+    and the host's pending listings are sent to the agents for a visit."""
     from apps.hebergements.models import HebergementModel
 
     piece = PieceIdentiteModel.objects.select_for_update().select_related('hote').filter(hote=hote).first()
@@ -180,8 +180,8 @@ def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> Piec
 
 
 def remettre_en_verification(hebergement, avant: dict) -> bool:
-    """Après une modification par l'hôte : une annonce refusée repart en vérification, et une annonce vérifiée
-    aussi si ce que l'agent a contrôlé (adresse, ville, photos) a changé. Renvoie True si elle y est remise."""
+    """After a change by the host: a refused listing goes back into verification, and a verified listing too
+    if what the agent checked (address, city, photos) changed. Returns True if it is put back."""
     if hebergement.statut_verification == 'en_attente':
         return False
     change = any(avant[champ] != getattr(hebergement, champ) for champ in hebergement.CHAMPS_VERIFIES)
@@ -196,8 +196,8 @@ def remettre_en_verification(hebergement, avant: dict) -> bool:
 
 @transaction.atomic
 def decider(hebergement, agent, *, decision: str, controles: dict, commentaire: str, photos: list) -> VisiteModel:
-    """Enregistre la visite et publie (ou refuse) l'annonce. Valider exige que tous les contrôles soient cochés."""
-    from apps.hebergements.models import HebergementModel  # import local : hebergements n'importe pas cette app
+    """Saves the visit and publishes (or refuses) the listing. Validating requires every check to be ticked."""
+    from apps.hebergements.models import HebergementModel  # local import: hebergements does not import this app
 
     hebergement = HebergementModel.objects.select_for_update().select_related('host').get(pk=hebergement.pk)
     if hebergement.statut_verification != 'en_attente':
@@ -222,7 +222,7 @@ def decider(hebergement, agent, *, decision: str, controles: dict, commentaire: 
     else:
         raise VerificationErreur("Décision inconnue.")
 
-    contenus = [image_normalisee(photo) for photo in photos]  # avant toute écriture : une photo invalide arrête tout
+    contenus = [image_normalisee(photo) for photo in photos]  # before any write: an invalid photo stops everything
     visite = VisiteModel.objects.create(hebergement=hebergement, agent=agent, decision=decision,
                                         controles=controles, commentaire=commentaire)
     for contenu in contenus:
@@ -232,7 +232,7 @@ def decider(hebergement, agent, *, decision: str, controles: dict, commentaire: 
 
     maintenant = timezone.now()
     if piece and decision == 'refusee' and not controles['identite']:
-        # La personne rencontrée ne correspond pas à la pièce : l'hôte devra prouver à nouveau son identité
+        # The person met does not match the document: the host will have to prove their identity again
         piece.statut, piece.motif_refus = 'refusee', commentaire
         piece.save(update_fields=['statut', 'motif_refus'])
 

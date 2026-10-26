@@ -17,7 +17,7 @@ from .models import AeroportModel, TransfertModel
 
 
 class AeroportSerializer(serializers.ModelSerializer):
-    # Prix de chaque véhicule depuis cet aéroport (le même de jour comme de nuit) : affiché avant tout choix
+    # Price of each vehicle from this airport (the same by day and by night): shown before any choice
     prix = serializers.SerializerMethodField()
 
     class Meta:
@@ -51,11 +51,11 @@ class TransfertSerializer(serializers.ModelSerializer):
         return tarifs.CATEGORIES[obj.categorie]
 
     def get_arrivee_locale(self, obj):
-        """Heure d'arrivée dans le fuseau de l'aéroport, sans décalage : c'est celle du billet d'avion."""
+        """Arrival time in the airport's time zone, without offset: it is the one of the plane ticket."""
         return obj.arrivee.astimezone(services.ZoneInfo(obj.aeroport.fuseau)).strftime('%Y-%m-%dT%H:%M')
 
     def get_chauffeur(self, obj):
-        # Coordonnées visibles par le voyageur une fois le chauffeur attribué
+        # Contact details visible to the traveller once the driver is assigned
         c = obj.chauffeur
         if not c or obj.statut not in ('chauffeur_assigne', 'termine'):
             return None
@@ -105,7 +105,7 @@ class TransfertCreationSerializer(serializers.Serializer):
         return valeur
 
     def validate(self, data):
-        # L'heure saisie est celle du billet, dans le fuseau de l'aéroport
+        # The typed time is the ticket's, in the airport's time zone
         arrivee = data['arrivee']
         naive = timezone.make_naive(arrivee) if timezone.is_aware(arrivee) else arrivee
         data['arrivee'] = services.heure_locale(data['aeroport'], naive)
@@ -129,7 +129,7 @@ class AeroportsView(APIView):
 
 
 class DevisView(APIView):
-    """GET ?aeroport=LFW&arrivee=2026-11-02T23:30&passagers=2&bagages=3 → véhicules et prix."""
+    """GET ?aeroport=LFW&arrivee=2026-11-02T23:30&passagers=2&bagages=3 → vehicles and prices."""
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -191,7 +191,7 @@ class TransfertView(APIView):
         transfert = _du_voyageur(pk, request.user)
         if not transfert:
             return Response({'detail': 'Transfert introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        # Page de retour après paiement : on relit la transaction chez le prestataire
+        # Return page after payment: the transaction is read again at the provider
         dernier = transfert.paiements.order_by('-cree_le').first()
         if dernier and dernier.statut == 'en_attente':
             paiements.synchroniser_paiement(dernier)

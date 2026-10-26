@@ -6,14 +6,14 @@ import uuid
 
 @dataclass
 class Screening:
-    """Résultat du filtrage d'un message : texte à enregistrer (coordonnées masquées) et éléments détectés."""
+    """Result of filtering a message: text to save (contact details hidden) and detected elements."""
     content: str
     masked: bool = False
     findings: List[object] = field(default_factory=list)
 
 
 class ContactGuard(ABC):
-    """Anti-contournement : masque les coordonnées (téléphone, email, liens…) et signale les tentatives."""
+    """Anti-bypass: hides contact details (phone, email, links…) and reports the attempts."""
 
     @abstractmethod
     def screen(self, text: str) -> Screening:
@@ -25,7 +25,7 @@ class ContactGuard(ABC):
 
 
 class PassThroughContactGuard(ContactGuard):
-    """Sans filtrage (tests du domaine)."""
+    """Without filtering (domain tests)."""
 
     def screen(self, text: str) -> Screening:
         return Screening(content=text)

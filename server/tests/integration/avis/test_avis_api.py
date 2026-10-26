@@ -123,7 +123,7 @@ def test_rating_recomputed_when_review_deleted(listing, make_reservation):
     from apps.avis.services import recalculer_note
     recalculer_note(listing.id)
 
-    first.reservation.delete()  # cascade : l'avis disparaît avec la réservation
+    first.reservation.delete()  # cascade: the review disappears with the booking
     listing.refresh_from_db()
     assert (listing.rating, listing.review_count) == (3.0, 1)
 
@@ -134,11 +134,11 @@ def test_rating_recomputed_when_review_deleted(listing, make_reservation):
 
 def test_stays_to_review(client_for, make_user, listing, make_reservation):
     guest = make_user()
-    older = make_reservation(listing, guest=guest, starts_in=-12, nights=2)  # 14 jours pour évaluer (charte des avis)
+    older = make_reservation(listing, guest=guest, starts_in=-12, nights=2)  # 14 days to review (review charter)
     recent = make_reservation(listing, guest=guest, starts_in=-5, nights=2)
-    make_reservation(listing, guest=guest, starts_in=-100, nights=2)   # hors délai
-    make_reservation(listing, guest=guest, starts_in=5, nights=2)      # à venir
-    _make_avis(make_reservation(listing, guest=guest, starts_in=-8, nights=1), note=4)  # déjà évalué
+    make_reservation(listing, guest=guest, starts_in=-100, nights=2)   # too late
+    make_reservation(listing, guest=guest, starts_in=5, nights=2)      # upcoming
+    _make_avis(make_reservation(listing, guest=guest, starts_in=-8, nights=1), note=4)  # already reviewed
 
     rows = client_for(guest).get(f'{AVIS}a-laisser/').data['results']
     assert [r['reservation_id'] for r in rows] == [str(recent.id), str(older.id)]

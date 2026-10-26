@@ -5,7 +5,7 @@ export interface SectionLegale {
   id: string;
   titre: string;
   contenu: React.ReactNode;
-  /** Numéro affiché devant le titre (par défaut, le rang de la section) ; "" pour une annexe. */
+  /** Number shown before the title (by default, the section's rank); "" for an appendix. */
   numero?: string;
 }
 
@@ -25,7 +25,7 @@ const PAGES = [
   { href: "/remboursement", cle: "remboursement" },
 ];
 
-/** Gabarit des pages juridiques : sommaire, sections ancrées, liens entre documents. */
+/** Template of the legal pages: table of contents, anchored sections, links between documents. */
 export default function LegalPage({ titre, miseAJour, intro, sections }: LegalPageProps) {
   const t = useTranslations("legal");
   return (
@@ -68,7 +68,7 @@ export default function LegalPage({ titre, miseAJour, intro, sections }: LegalPa
   );
 }
 
-/** En anglais : rappel que la version française fait foi (à placer dans l'introduction). */
+/** In English: reminder that the French version is authoritative (to put in the introduction). */
 export function VersionFrancaiseFaitFoi() {
   return (
     <p className="text-sm bg-gray-50 rounded-xl p-3">
@@ -78,8 +78,8 @@ export function VersionFrancaiseFaitFoi() {
 }
 
 /**
- * Information à fournir par l'entreprise avant la mise en ligne (identité, contacts, hébergeur…).
- * Volontairement visible : aucune donnée légale n'est inventée.
+ * Information to be provided by the company before going live (identity, contacts, hosting provider…).
+ * Deliberately visible: no legal data is made up.
  */
 export function AC({ children }: { children: React.ReactNode }) {
   const t = useTranslations("legal");

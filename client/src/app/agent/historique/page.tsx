@@ -5,7 +5,7 @@ import { useTableauAgent, useMissions } from "@/lib/agent";
 import CarteMission from "@/components/agent/CarteMission";
 import ListeMissions from "@/components/agent/ListeMissions";
 
-/** Contrôles terminés : les miens (un administrateur voit aussi ceux de toute l'équipe). */
+/** Finished checks: mine (an administrator also sees those of the whole team). */
 export default function HistoriquePage() {
   const { data: tableau } = useTableauAgent();
   const [miennes, setMiennes] = useState(false);

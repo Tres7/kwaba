@@ -15,15 +15,15 @@ export type MoyenPaiement = "mobile_money" | "carte" | "paypal";
 
 export interface ConfigPaiement {
   actif: boolean;
-  /** Moyens proposés : mobile_money et carte passent par FedaPay, paypal est débité en euros. */
+  /** Offered methods: mobile_money and carte go through FedaPay, paypal is charged in euros. */
   moyens: MoyenPaiement[];
   fcfa_par_euro: number;
   environnement: "sandbox" | "live";
   frais_voyageur: number;
-  /** Frais réduits : Client fidèle, Pack Séjour + Chauffeur. */
+  /** Reduced fees: loyal customer, Stay Pack + Driver. */
   frais_reduits: number;
   commission_hote: number;
-  /** Commission selon le type de partenaire (grille tarifaire). */
+  /** Commission by partner type (price grid). */
   commissions: { particulier: number; hotel: number; fondateur: number };
   delai_paiement_minutes: number;
   pays: PaysPaiement[];
@@ -68,9 +68,9 @@ export interface Versement {
 export interface Revenus {
   totaux: { a_venir: number; en_cours: number; verse: number; commission: number };
   profil_complet: boolean;
-  /** Commission de cet hôte aujourd'hui, en % (8, 12 pour un hôtel, 5 pendant le Programme Fondateurs). */
+  /** This host's commission today, in % (8, 12 for a hotel, 5 during the Founders Programme). */
   commission_pourcent: number;
-  /** Type de partenaire réglé par l'équipe : particulier (8 %), hôtel (12 %), fondateur (5 % pendant 6 mois). */
+  /** Partner type set by the team: individual (8 %), hotel (12 %), founder (5 % for 6 months). */
   partenaire: "particulier" | "hotel" | "fondateur";
   frais_voyageur_pourcent: number;
   versements: Versement[];

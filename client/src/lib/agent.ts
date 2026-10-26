@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
-/** Ce que contrôlent les agents de terrain (voir server/apps/terrain/types.py). */
+/** What field agents check (see server/apps/terrain/types.py). */
 export type TypeMission = "logement" | "piece";
 
 export const TYPES_MISSION: { code: TypeMission; libelle: string; court: string }[] = [
@@ -14,13 +14,13 @@ export interface MissionEtat {
   statut: "en_cours" | "terminee" | "liberee";
   decision: "" | "validee" | "refusee";
   agent: { id: string; nom: string } | null;
-  /** La mission est à moi. */
+  /** The mission is mine. */
   moi: boolean;
   prise_le: string;
   terminee_le: string | null;
 }
 
-/** Une ligne de liste : à faire, mes missions, l'équipe ou l'historique. */
+/** A list row: to do, my missions, the team or the history. */
 export interface MissionResume {
   type: TypeMission;
   type_libelle: string;
@@ -45,7 +45,7 @@ export type VueMissions = "a_faire" | "miennes" | "equipe" | "historique";
 
 export const urlMission = (type: string, cible: string) => `/agent/mission/${type}/${cible}`;
 
-/** Accueil et pastilles du menu, rafraîchis chaque minute. */
+/** Home and menu badges, refreshed every minute. */
 export function useTableauAgent(actif = true) {
   return useQuery({
     queryKey: ["agent", "tableau"],

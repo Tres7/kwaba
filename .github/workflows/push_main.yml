@@ -1,18 +1,18 @@
 name: Main
 
-# Chaque état déployable de main est décrit par un manifest (deploy/manifests) : images du serveur
-# et du client, par digest, qui vont ensemble. Les déploiements partent d'un manifest.
+# Each deployable state of main is described by a manifest (deploy/manifests): server and client
+# images, by digest, that go together. Deployments start from a manifest.
 on:
   push:
     branches: [main]
     paths-ignore:
-      - 'deploy/manifests/manifest-*.yaml' # commits de manifest par la CD App : pas de boucle
+      - 'deploy/manifests/manifest-*.yaml' # manifest commits by the CD App: no loop
       - '**/*.md'
       - 'documentation/**'
-  workflow_dispatch: # rejouer, par exemple après la configuration de la CD App
+  workflow_dispatch: # run again, for example after configuring the CD App
 
-# Un seul run à la fois. GitHub ne garde qu'un run en attente : un run intermédiaire peut être annulé,
-# sans perte, car chaque run se compare au dernier manifest et non au push précédent.
+# A single run at a time. GitHub keeps only one pending run: an intermediate run may be cancelled
+# without loss, because every run compares itself with the latest manifest, not with the previous push.
 concurrency:
   group: main-push
   cancel-in-progress: false
@@ -68,7 +68,7 @@ jobs:
       packages: write
     with:
       service: client
-      # Valeurs publiques figées dans le code du navigateur (variables du dépôt, non secrètes)
+      # Public values baked into the browser code (repository variables, not secret)
       public-site-url: ${{ vars.PUBLIC_SITE_URL }}
       google-client-id: ${{ vars.PUBLIC_GOOGLE_CLIENT_ID }}
       contact-email: ${{ vars.PUBLIC_CONTACT_EMAIL }}
@@ -84,7 +84,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      packages: write # tags définitifs de l'image
+      packages: write # final tags of the image
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -137,7 +137,7 @@ jobs:
           git add "$FILE"
           git commit -m "chore(deploy): manifest $(printf '%04d' "$VERSION") (${GITHUB_SHA::7}) [skip ci]"
           remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          # main a pu avancer (autre fusion) : on rejoue le commit du manifest par-dessus
+          # main may have moved on (another merge): the manifest commit is replayed on top
           for attempt in 1 2 3 4 5; do
             if git push "$remote" HEAD:main; then exit 0; fi
             echo "Push refusé (tentative ${attempt}) : mise à jour depuis main"
@@ -162,7 +162,7 @@ jobs:
             image=$(node .github/scripts/manifest/latest.mjs --field "services.${service}.image")
             repository="${image%@*}"
             tags=(--tag "${repository}:main")
-            # manifest-N seulement pour un manifest réellement commité
+            # manifest-N only for a manifest actually committed
             if [ "$COMMITTED" = "true" ]; then tags+=(--tag "${repository}:manifest-$(printf '%04d' "$VERSION")"); fi
             docker buildx imagetools create "${tags[@]}" "$image"
             echo "Tags posés sur \`${image}\` : ${tags[*]}" >> "$GITHUB_STEP_SUMMARY"

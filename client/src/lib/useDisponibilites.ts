@@ -5,7 +5,7 @@ import { addDays, isoDate } from "@/lib/utils";
 export interface PeriodeIndispo {
   debut: string;
   fin: string;
-  // Détail réservé à l'hôte du logement
+  // Details reserved for the host of the listing
   type?: "reservation" | "blocage";
   id?: string;
   motif?: string;
@@ -13,7 +13,7 @@ export interface PeriodeIndispo {
   reference?: string;
 }
 
-/** Nuits indisponibles (AAAA-MM-JJ) d'une liste de périodes [debut, fin). */
+/** Unavailable nights (YYYY-MM-DD) of a list of periods [debut, fin). */
 export function nuitsIndisponibles(periodes: PeriodeIndispo[]): Set<string> {
   const nuits = new Set<string>();
   for (const p of periodes) {
@@ -22,7 +22,7 @@ export function nuitsIndisponibles(periodes: PeriodeIndispo[]): Set<string> {
   return nuits;
 }
 
-/** Calendrier d'un logement sur `jours` jours à partir d'aujourd'hui. */
+/** Calendar of a listing over `jours` days from today. */
 export function useDisponibilites(hebergementId: string | undefined, jours = 365) {
   const debut = isoDate();
   const fin = addDays(debut, jours);

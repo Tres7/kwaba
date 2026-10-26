@@ -13,11 +13,11 @@ interface DateRangeCalendarProps {
   /** Nuits indisponibles (AAAA-MM-JJ). */
   indisponibles: Set<string>;
   count?: number;
-  /** Tant que les disponibilités chargent, aucun jour n'est sélectionnable. */
+  /** While availability is loading, no day can be selected. */
   chargement?: boolean;
 }
 
-/** Première nuit prise après `depuis` : on ne peut pas partir au-delà de ce jour. */
+/** First booked night after `depuis`: departure cannot be later than this day. */
 function limiteDepart(depuis: string, indisponibles: Set<string>, max: string): string {
   for (let d = depuis; d < max; d = addDays(d, 1)) if (indisponibles.has(d)) return d;
   return max;
@@ -39,7 +39,7 @@ export default function DateRangeCalendar({ checkIn, checkOut, onChange, indispo
       onChange(checkIn, iso);
       return;
     }
-    // Nouvelle arrivée (ou correction de l'arrivée)
+    // New arrival (or arrival correction)
     if (!indisponibles.has(iso)) onChange(iso, "");
   };
 
@@ -47,7 +47,7 @@ export default function DateRangeCalendar({ checkIn, checkOut, onChange, indispo
     const passe = iso < today || iso > maxDate;
     const prise = indisponibles.has(iso);
     const departPossible = choixDepart && iso > checkIn && !!limite && iso <= limite;
-    // Un jour libre reste toujours cliquable (nouvelle arrivée) ; une nuit prise ne l'est que comme jour de départ
+    // A free day is always clickable (new arrival); a booked night only as a departure day
     const bloque = passe || (prise && !departPossible);
     const debut = iso === checkIn;
     const fin = iso === finAffichee;

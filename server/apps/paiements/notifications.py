@@ -1,7 +1,7 @@
-"""Emails liés à l'argent, envoyés par le worker (jamais pendant une requête web).
+"""Money-related emails, sent by the worker (never during a web request).
 
-Chaque ligne porte un drapeau `notifie` : un envoi qui échoue (SMTP indisponible) est retenté
-à la passe suivante, et un email n'est jamais envoyé deux fois.
+Each row carries a `notifie` flag: a failed sending (SMTP unavailable) is retried
+at the next pass, and an email is never sent twice.
 """
 import logging
 import time
@@ -28,11 +28,11 @@ def _date(valeur) -> str:
 
 
 def _envoyer(gabarit: str, sujet: str, destinataires: list[str], contexte: dict, pieces_jointes=None):
-    # Les SMTP de test (Mailtrap) et certains fournisseurs limitent le nombre d'emails par seconde
+    # Test SMTPs (Mailtrap) and some providers limit the number of emails per second
     time.sleep(settings.PAIEMENTS_PAUSE_EMAIL)
     send_mail(
         subject=sujet,
-        # `gabarit` : nom dans emails/paiements/, ou chemin complet (autres modules, par ex. les transferts)
+        # `gabarit`: name in emails/paiements/, or full path (other modules, e.g. transfers)
         message=render_to_string(gabarit if '/' in gabarit else f'emails/paiements/{gabarit}.txt', contexte),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=destinataires,
@@ -41,8 +41,8 @@ def _envoyer(gabarit: str, sujet: str, destinataires: list[str], contexte: dict,
 
 
 def _documents(objet):
-    """Bon et reçu en PDF joints à l'email de confirmation."""
-    from apps.documents.services import pieces_confirmation  # import local : documents dépend des paiements
+    """PDF voucher and receipt attached to the confirmation email."""
+    from apps.documents.services import pieces_confirmation  # local import: documents depends on paiements
     return pieces_confirmation(objet)
 
 

@@ -4,7 +4,7 @@ import { filtrerLiens, type Module, type ReglagesSite } from "@/lib/modules";
 
 export { filtrerLiens, PAGES_MODULES, moduleDuChemin, type Module, type ReglagesSite } from "@/lib/modules";
 
-/** Réglages lus dans l'API : les changer ne demande qu'un redémarrage de l'API, sans nouvelle image du site. */
+/** Settings read from the API: changing them only needs an API restart, without a new site image. */
 export function useReglagesSite() {
   return useQuery({
     queryKey: ["site", "reglages"],
@@ -13,12 +13,12 @@ export function useReglagesSite() {
   });
 }
 
-/** Module affiché ? Faux tant que les réglages ne sont pas lus : un module masqué n'apparaît jamais, même un instant. */
+/** Module displayed? False while the settings are not read: a hidden module never shows, not even for an instant. */
 export function useModule(nom: Module): boolean {
   return useReglagesSite().data?.modules[nom] === true;
 }
 
-/** Liens dont la page n'appartient pas à un module masqué. */
+/** Links whose page does not belong to a hidden module. */
 export function useLiensVisibles<T extends { href: string }>(liens: T[]): T[] {
   return filtrerLiens(liens, useReglagesSite().data?.modules);
 }

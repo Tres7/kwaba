@@ -21,7 +21,7 @@ R2_ENV = {
 
 @pytest.fixture
 def r2_bucket(settings, monkeypatch):
-    """Faux R2 (moto) à l'adresse R2, avec la configuration de stockage de production."""
+    """Fake R2 (moto) at the R2 address, with the production storage configuration."""
     monkeypatch.setenv('MOTO_S3_CUSTOM_ENDPOINTS', R2_ENV['R2_ENDPOINT_URL'])
     with mock_aws():
         client = boto3.client('s3', endpoint_url=R2_ENV['R2_ENDPOINT_URL'], region_name='us-east-1',
@@ -47,7 +47,7 @@ def test_photo_uploaded_to_r2_with_stable_public_url(r2_bucket, client_for, make
 
     assert response.status_code == 201
     key = f'hebergements/{host.id}/{response.data["id"]}.jpg'
-    # URL publique, sans signature qui expirerait : elle est enregistrée telle quelle dans l'annonce
+    # Public URL, without a signature that would expire: it is saved as is in the listing
     assert response.data['url'] == f'https://photos.kwaba.example/{key}'
     stored = r2_bucket.head_object(Bucket='kwaba-photos', Key=key)
     assert stored['ContentType'] == 'image/jpeg'

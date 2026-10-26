@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return metadataPage({ locale, chemin: "/", titre: t("titre"), description: t("description"), titreComplet: true });
 }
 
-/** Accueil : métadonnées rendues par le serveur, contenu interactif dans Accueil (composant client). */
+/** Home page: metadata rendered by the server, interactive content in Accueil (client component). */
 export default function Page() {
   return <Accueil />;
 }

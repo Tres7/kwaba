@@ -14,7 +14,7 @@ class MessageInline(admin.TabularInline):
 
 @admin.register(ConversationModel)
 class ConversationAdmin(admin.ModelAdmin):
-    """Suivi de l'usage (tokens consommés) ; le contenu reste celui du voyageur."""
+    """Usage follow-up (tokens consumed); the content stays the traveller's."""
     list_display = ['titre', 'utilisateur', 'mis_a_jour_le', 'tokens']
     search_fields = ['titre', 'utilisateur__email']
     inlines = [MessageInline]

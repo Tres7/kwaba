@@ -1,4 +1,4 @@
-"""Briques communes du back-office : accès admin, journal d'audit à chaque écriture, photos normalisées."""
+"""Shared back-office building blocks: admin access, audit log at every write, normalised photos."""
 from rest_framework import generics, serializers
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
@@ -8,7 +8,7 @@ from apps.securite.permissions import EstAdministrateur
 
 
 class ChampPhoto(serializers.ImageField):
-    """Photo envoyée depuis le back-office : vérifiée puis ré-encodée en JPEG sans métadonnées (comme les annonces)."""
+    """Photo uploaded from the back-office: checked then re-encoded as JPEG without metadata (like listings)."""
 
     def to_internal_value(self, data):
         if not hasattr(data, "size"):
@@ -28,7 +28,7 @@ class ChampPhoto(serializers.ImageField):
 
 
 class Journalise:
-    """Chaque création ou modification est inscrite au journal d'audit (objet, identifiant, champs modifiés)."""
+    """Every creation or change is written to the audit log (object, id, changed fields)."""
     nom_objet = ""
 
     def perform_create(self, serializer):
@@ -44,13 +44,13 @@ class Journalise:
 
 
 class ListeAdmin(Journalise, generics.ListCreateAPIView):
-    """Liste complète (référentiels courts : catégories, lieux, loueurs…) et création."""
+    """Full list (short reference lists: categories, places, rental companies…) and creation."""
     permission_classes = [EstAdministrateur]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     pagination_class = None
 
 
 class FicheAdmin(Journalise, generics.RetrieveUpdateAPIView):
-    """Lecture et modification d'un élément (pas de suppression : on désactive, l'historique reste cohérent)."""
+    """Read and update of an item (no deletion: it is deactivated, so the history stays consistent)."""
     permission_classes = [EstAdministrateur]
     parser_classes = [JSONParser, MultiPartParser, FormParser]

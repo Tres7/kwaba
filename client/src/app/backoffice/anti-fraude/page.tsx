@@ -15,7 +15,7 @@ import type { AlerteFraude } from "@/types/api/admin";
 
 const STATUTS = [{ value: "a_traiter", label: "À traiter" }, { value: "traitees", label: "Traitées" }, { value: "toutes", label: "Toutes" }];
 
-/** Tentatives de contournement : coordonnées ou paiement hors site proposés dans un message ou une annonce. */
+/** Bypass attempts: contact details or off-site payment offered in a message or a listing. */
 export default function AntiFraudePage() {
   const queryClient = useQueryClient();
   const [q, setQ] = useState("");

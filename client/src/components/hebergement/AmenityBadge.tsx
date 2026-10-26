@@ -12,7 +12,7 @@ const EQUIPEMENTS: [string, string, string, Icon][] = [
   ["spa", "Spa", "Spa", BathtubIcon],
 ];
 
-/** Équipements, libellés dans la langue courante. */
+/** Amenities, labelled in the current language. */
 export const AMENITIES: Record<string, { label: string; Icone: Icon }> = Object.fromEntries(
   EQUIPEMENTS.map(([id, fr, en, Icone]) => [id, { Icone, get label() { return selon({ fr, en }); } }]),
 );

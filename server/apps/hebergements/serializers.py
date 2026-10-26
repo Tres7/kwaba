@@ -36,7 +36,7 @@ class HebergementSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         donnees = super().to_representation(instance)
-        # Annonces publiées avant le filtrage : coordonnées masquées pour les voyageurs (l'hôte voit son texte)
+        # Listings published before the filtering: contact details hidden from travellers (the host sees their text)
         if not self.context.get('proprietaire'):
             for champ in ('name', 'description', 'location'):
                 if donnees.get(champ):
@@ -47,12 +47,12 @@ class HebergementSerializer(serializers.ModelSerializer):
         return f"{obj.host.first_name} {obj.host.last_name}".strip()
 
     def get_hote_verifie(self, obj):
-        # Badge « Hôte vérifié » : pièce d'identité contrôlée par Kwa-Ba
+        # "Verified host" badge: identity document checked by Kwa-Ba
         piece = getattr(obj.host, 'piece_identite', None)
         return bool(piece and piece.statut == 'verifiee')
 
     def get_motif_refus(self, obj):
-        # Message de l'agent destiné à l'hôte : jamais montré aux voyageurs
+        # The agent's message for the host: never shown to travellers
         return obj.motif_refus if self.context.get('proprietaire') else ''
 
     def get_en_ligne(self, obj):
@@ -60,7 +60,7 @@ class HebergementSerializer(serializers.ModelSerializer):
         return obj.est_publiee if self.context.get('proprietaire') else None
 
     def get_frais_voyageur(self, obj):
-        """Taux des frais de service pour le visiteur : 6 %, ou 3 % s'il a déjà séjourné chez cet hôte (Client fidèle)."""
+        """Service fee rate for the visitor: 6 %, or 3 % if they already stayed with this host (loyal customer)."""
         request = self.context.get('request')
         if '_hotes_visites' not in self.context:
             self.context['_hotes_visites'] = tarifs.hotes_deja_visites(request.user if request else None)
@@ -94,7 +94,7 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
             'petit_dejeuner_prix': {'min_value': 0, 'max_value': 1000000},
         }
 
-    # Exigés à la création ; une annonce publiée avant leur ajout peut être modifiée sans eux
+    # Required at creation; a listing published before they were added can be changed without them
     DETAILS_OBLIGATOIRES = {
         'surface_m2': "Indiquez la surface en m².",
         'chambres': "Indiquez le nombre de chambres.",
@@ -119,8 +119,8 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
                             "les voyageurs vous écrivent par la messagerie Kwa-Ba.")
 
     def _sans_coordonnees(self, value):
-        """Anti-contournement : aucun moyen de joindre l'hôte en dehors du site. Les éléments trouvés sont gardés
-        pour l'alerte du back-office (signalée par la vue)."""
+        """Anti-bypass: no way to reach the host outside the site. The elements found are kept
+        for the back-office alert (reported by the view)."""
         _, trouvailles = coordonnees.analyser(value or '')
         if coordonnees.masquees(trouvailles):
             self.trouvailles = getattr(self, 'trouvailles', []) + trouvailles
@@ -142,7 +142,7 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_max_guests(self, value):
-        # À 0, plus aucune réservation n'est possible (au moins 1 voyageur par réservation)
+        # At 0, no booking is possible anymore (at least 1 traveller per booking)
         if value < 1:
             raise serializers.ValidationError("Le logement doit accueillir au moins 1 voyageur.")
         return value
@@ -184,9 +184,9 @@ class BlocageSerializer(serializers.ModelSerializer):
 
 
 class RechercheSerializer(serializers.Serializer):
-    """Paramètres de recherche dont une valeur invalide ferait échouer la requête SQL (500 au lieu de 400).
+    """Search parameters whose invalid value would make the SQL query fail (500 instead of 400).
 
-    Un paramètre vide est ignoré, comme un paramètre absent.
+    An empty parameter is ignored, like a missing one.
     """
     price_min = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)
     price_max = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)

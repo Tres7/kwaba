@@ -16,10 +16,10 @@ export interface DayRender {
 }
 
 interface MonthGridProps {
-  /** Premier mois affiché (n'importe quel jour du mois). */
+  /** First month displayed (any day of the month). */
   month: Date;
   onMonthChange: (m: Date) => void;
-  /** Nombre de mois côte à côte (2 sur grand écran par exemple). */
+  /** Number of months side by side (2 on large screens for example). */
   count?: number;
   minMonth?: Date;
   maxMonth?: Date;
@@ -28,7 +28,7 @@ interface MonthGridProps {
   onDayHover?: (iso: string | null) => void;
 }
 
-/** Grille de mois générique (lundi en premier, libellés dans la langue de la page). */
+/** Generic month grid (Monday first, labels in the page language). */
 export default function MonthGrid({ month, onMonthChange, count = 1, minMonth, maxMonth, renderDay, onDayClick, onDayHover }: MonthGridProps) {
   const locale = useLocale();
   const dateLocale = locale === "en" ? enGB : fr;

@@ -14,7 +14,7 @@ const heure = (h: string | null) => {
 };
 export const nombreLits = (d: Details) => (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0);
 
-/** Résumé court pour les cartes : « 140 m² · 3 chambres · Petit-déj. inclus ». */
+/** Short summary for cards: "140 m² · 3 bedrooms · Breakfast included". */
 export function useResumeDetails() {
   const t = useTranslations("details");
   return (d: Details) => [
@@ -38,7 +38,7 @@ function Ligne({ Icone, titre, texte }: { Icone: Icon; titre: string; texte: str
   );
 }
 
-/** Le logement en détail (fiche) : surface, chambres, lits, salles de bain, petit-déjeuner, horaires. Rien pour une annonce sans détails. */
+/** The listing in detail (page): area, bedrooms, beds, bathrooms, breakfast, times. Nothing for a listing without details. */
 export default function DetailsLogement({ h }: { h: Details }) {
   const t = useTranslations("details");
   const lits = [

@@ -1,4 +1,4 @@
-"""Documents PDF : bons, reçus, factures (numérotation continue, TVA), pièces jointes des emails."""
+"""PDF documents: vouchers, receipts, invoices (continuous numbering, VAT), email attachments."""
 from decimal import Decimal
 
 import pytest
@@ -50,7 +50,7 @@ def _pdf(reponse):
 
 def test_bon_et_recu_reserves_au_voyageur_apres_paiement(client_for, make_user, sejour):
     url = f'{D}reservation/{sejour.id}/'
-    assert client_for(sejour.guest).get(url + 'bon/').status_code == 409  # pas encore payé
+    assert client_for(sejour.guest).get(url + 'bon/').status_code == 409  # not paid yet
     _paye(sejour, 275400, reservation=sejour)
     _pdf(client_for(sejour.guest).get(url + 'bon/'))
     _pdf(client_for(sejour.guest).get(url + 'recu/'))

@@ -13,7 +13,7 @@ interface Lancement {
   logements_publies: number;
 }
 
-/** Liste d'attente de l'ouverture : visiteurs inscrits via la fenêtre « Logements bientôt disponibles ». */
+/** Opening waiting list: visitors signed up through the "Places to stay coming soon" window. */
 export default function CarteLancement() {
   const queryClient = useQueryClient();
   const { data } = useQuery({
@@ -22,7 +22,7 @@ export default function CarteLancement() {
   });
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
 
-  // Une fois tout le monde prévenu, la carte n'a plus d'utilité
+  // Once everybody has been notified, the card is no longer useful
   if (!data || (data.inscrits > 0 && data.a_prevenir === 0) || (data.inscrits === 0 && data.logements_publies > 0)) return null;
   const pret = data.logements_publies > 0 && data.a_prevenir > 0;
 

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { factureDe, messageErreurPdf } from "@/lib/documents";
 import { ActionButton } from "@/components/backoffice/AdminTable";
 
-/** Émet (une seule fois) puis télécharge la facture d'un séjour, transfert ou location payé. */
+/** Issues (only once) then downloads the invoice of a paid stay, transfer or rental. */
 export default function BoutonFacture({ objet, id }: { objet: "reservation" | "transfert" | "location"; id: string }) {
   const queryClient = useQueryClient();
   const [envoi, setEnvoi] = useState(false);

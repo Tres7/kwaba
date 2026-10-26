@@ -1,4 +1,4 @@
-"""Vérification des annonces par un agent de terrain : publication, pièce d'identité, visite, droits."""
+"""Verification of listings by a field agent: publication, identity document, visit, rights."""
 import json
 from io import BytesIO
 
@@ -21,7 +21,7 @@ TOUT_CONFORME = {'identite': True, 'adresse': True, 'photos': True, 'equipements
 
 @pytest.fixture(autouse=True)
 def stockage_temporaire(tmp_path, monkeypatch):
-    """Documents privés dans un dossier temporaire (jamais dans le dépôt)."""
+    """Private documents in a temporary folder (never in the repository)."""
     stockage = FileSystemStorage(location=tmp_path)
     monkeypatch.setattr(PieceIdentiteModel._meta.get_field('fichier'), 'storage', stockage)
     monkeypatch.setattr(PhotoVisiteModel._meta.get_field('image'), 'storage', stockage)
@@ -184,7 +184,7 @@ class TestVisite:
     def test_only_verifiers_see_the_visits(self, client_for, agent, make_user, hote, en_attente):
         assert client_for(hote).get(VISITES).status_code == 403
         assert client_for(make_user()).get(VISITES).status_code == 403
-        # Identité pas encore vérifiée : aucun déplacement proposé
+        # Identity not verified yet: no travel offered
         assert client_for(agent).get(VISITES).data['count'] == 0
         _identite_verifiee(hote)
         data = client_for(agent).get(VISITES).data
@@ -217,9 +217,9 @@ class TestVisite:
 
     def test_cannot_validate_without_every_check_or_identity(self, client_for, agent, hote, en_attente):
         client = client_for(agent)
-        assert _decider(client, en_attente).status_code == 400  # pas de pièce d'identité
+        assert _decider(client, en_attente).status_code == 400  # no identity document
         _envoyer_piece(client_for(hote))
-        assert _decider(client, en_attente).status_code == 400  # pièce envoyée mais pas encore contrôlée
+        assert _decider(client, en_attente).status_code == 400  # document sent but not checked yet
         _identite_verifiee(hote)
         assert _decider(client, en_attente, controles={**TOUT_CONFORME, 'photos': False}).status_code == 400
         en_attente.refresh_from_db()
@@ -281,7 +281,7 @@ class TestControleIdentite:
         assert client_for(agent).get(VISITES).data['count'] == 1
         assert client_for(agent).get(IDENTITES).data['count'] == 0
         assert JournalAuditModel.objects.filter(action='identite_verifiee').exists()
-        # Déjà contrôlée : plus de décision possible
+        # Already checked: no decision possible anymore
         assert client_for(agent).post(url, {'decision': 'refusee', 'motif': 'Trop tard ici'},
                                       format='json').status_code == 400
 

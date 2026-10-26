@@ -3,7 +3,7 @@ import LienContact from "@/components/legal/LienContact";
 import LegalPage, { AC } from "@/components/legal/LegalPage";
 import MentionSociete from "@/components/legal/MentionSociete";
 
-/** Version française. */
+/** French version. */
 export default function ContenuFr() {
   return (
     <LegalPage

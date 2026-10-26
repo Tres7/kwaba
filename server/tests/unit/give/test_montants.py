@@ -1,4 +1,4 @@
-"""Kwa-Ba Give : frais choisis par le donateur et calendrier des reversements."""
+"""Kwa-Ba Give: fees chosen by the donor and transfer schedule."""
 from datetime import date
 
 import pytest
@@ -7,10 +7,10 @@ from apps.give import montants
 
 
 @pytest.mark.parametrize('montant, couvre, attendu', [
-    (2000, True, (62, 2062, 2000)),  # l'ONG reçoit tout, le donateur ajoute les frais
-    (2000, False, (60, 2000, 1940)),  # frais déduits du don
+    (2000, True, (62, 2062, 2000)),  # the NGO receives everything, the donor adds the fees
+    (2000, False, (60, 2000, 1940)),  # fees deducted from the donation
     (500, True, (16, 516, 500)),
-    (1950, False, (59, 1950, 1891)),  # 58,5 arrondi au supérieur, comme sur le site
+    (1950, False, (59, 1950, 1891)),  # 58.5 rounded up, like on the site
 ])
 def test_calculer(montant, couvre, attendu):
     m = montants.calculer(montant, couvre)

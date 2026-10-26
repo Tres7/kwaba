@@ -5,7 +5,7 @@ import { fetchBackendUser } from "@/lib/api/auth/me";
 import { credentialsProvider } from "@/lib/providers/auth/credentials";
 import { backendSessionProvider } from "@/lib/providers/auth/backend-session";
 
-// Renouvelle l'access token 30 s avant son expiration
+// Renews the access token 30 s before it expires
 const REFRESH_MARGIN_MS = 30_000;
 
 function decodeExpiry(accessToken?: string): number {
@@ -28,11 +28,11 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       body: JSON.stringify({ refresh: token.refreshToken }),
     });
   } catch {
-    // API injoignable (redémarrage, réseau) : on garde la session, le renouvellement sera retenté
+    // API unreachable (restart, network): the session is kept, the renewal will be tried again
     return token;
   }
-  // Seul un refus explicite de l'API (jeton expiré, révoqué, invalide) ferme la session ;
-  // une erreur passagère (5xx, 429) ne doit pas déconnecter l'utilisateur
+  // Only an explicit refusal from the API (expired, revoked or invalid token) closes the session;
+  // a transient error (5xx, 429) must not sign the user out
   if (res.status === 400 || res.status === 401) return { ...token, error: "RefreshAccessTokenError" };
   if (!res.ok) return token;
   try {
@@ -68,8 +68,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token = await refreshAccessToken(token);
       }
 
-      // useSession().update() (nouveau nom, devenir hôte) : on relit le profil auprès de l'API au lieu de croire
-      // les valeurs envoyées par le navigateur, qui pourrait sinon s'attribuer le rôle « admin »
+      // useSession().update() (new name, becoming a host): the profile is read again from the API instead of trusting
+      // the values sent by the browser, which could otherwise give itself the "admin" role
       if (trigger === "update" && session && token.accessToken && !token.error) {
         const me = await fetchBackendUser(token.accessToken);
         if (me) {
@@ -95,8 +95,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: {
     strategy: "jwt",
-    // 5 min après avoir quitté le site (onglet ou navigateur fermé), il faut se reconnecter : tant qu'un onglet
-    // est ouvert, AuthProvider relit la session chaque minute et chaque lecture repousse l'expiration
+    // 5 min after leaving the site (tab or browser closed), signing in again is needed: while a tab
+    // is open, AuthProvider reads the session every minute and each read pushes the expiry back
     maxAge: 5 * 60,
   },
   cookies: {

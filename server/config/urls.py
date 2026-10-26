@@ -12,7 +12,7 @@ from config.reclamation import ReclamationView
 from config.site import site
 
 urlpatterns = [
-    # Avant admin.site.urls : la page de connexion de l'administration limite les tentatives
+    # Before admin.site.urls: the administration sign-in page limits the attempts
     path(f'{settings.ADMIN_URL}login/', connexion_admin),
     path(settings.ADMIN_URL, admin.site.urls),
     path('api/health/', health, name='health'),
@@ -40,6 +40,6 @@ urlpatterns = [
     path('api/v1/messaging/', include('apps.messaging.infrastructure.http.routes.urls')),
 ]
 
-# Photos envoyées par les hôtes (en production, servies par le serveur web / un stockage objet)
+# Photos uploaded by hosts (in production, served by the web server / an object storage)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

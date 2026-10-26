@@ -1,4 +1,4 @@
-"""Back-office : location de voiture (règles, véhicules des propriétaires, lieux de remise, propriétaires, suivi)."""
+"""Back-office: car hire (rules, owners' vehicles, handover places, owners, follow-up)."""
 from django.db import transaction
 from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404
@@ -21,7 +21,7 @@ from .commun import ChampPhoto, FicheAdmin, ListeAdmin
 from .views import _motif, _nom, _paginer
 
 
-# --- Règles (une seule ligne) ------------------------------------------------------------------
+# --- Rules (a single row) ------------------------------------------------------------------
 
 class ParametresSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,7 +31,7 @@ class ParametresSerializer(serializers.ModelSerializer):
 
 
 class ParametresView(APIView):
-    """GET : règles en vigueur (null tant qu'elles n'existent pas : la location n'est alors pas proposée). PUT : les fixer."""
+    """GET: rules in force (null while they do not exist: rental is then not offered). PUT: set them."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -48,7 +48,7 @@ class ParametresView(APIView):
         return Response(serializer.data)
 
 
-# --- Référentiels --------------------------------------------------------------------------------
+# --- Reference lists --------------------------------------------------------------------------------
 
 class PhotoVehiculeSerializer(serializers.ModelSerializer):
     url = ChampPhoto(source='image', read_only=True)
@@ -59,8 +59,8 @@ class PhotoVehiculeSerializer(serializers.ModelSerializer):
 
 
 class CategorieSerializer(serializers.ModelSerializer):
-    # Photos gérées une par une (PhotosCategorieView) : plusieurs photos dans une seule requête dépasseraient
-    # la taille maximale acceptée par nginx
+    # Photos handled one by one (PhotosCategorieView): several photos in a single request would exceed
+    # the maximum size accepted by nginx
     photos = PhotoVehiculeSerializer(many=True, read_only=True)
 
     class Meta:
@@ -110,7 +110,7 @@ def _journal_photos(request, categorie, **details):
 
 
 class PhotosCategorieView(APIView):
-    """POST {image} (multipart) : ajoute une photo à la fin (MAX_PAR_CATEGORIE au plus). Renvoie toutes les photos."""
+    """POST {image} (multipart): adds a photo at the end (MAX_PAR_CATEGORIE at most). Returns all the photos."""
     permission_classes = [EstAdministrateur]
     parser_classes = [MultiPartParser, FormParser]
 
@@ -129,7 +129,7 @@ class PhotosCategorieView(APIView):
 
 
 class PhotoCategorieView(APIView):
-    """PATCH {principale: true} : la photo passe en premier. DELETE : la retire. Renvoie toutes les photos."""
+    """PATCH {principale: true}: the photo moves to the first position. DELETE: removes it. Returns all the photos."""
     permission_classes = [EstAdministrateur]
 
     def _photo(self, pk, photo_id):
@@ -215,7 +215,7 @@ class PartenaireView(FicheAdmin):
     queryset = PartenaireLocationModel.objects.all()
 
 
-# --- Suivi des locations -------------------------------------------------------------------------
+# --- Rental follow-up -------------------------------------------------------------------------
 
 def _location(loc: LocationModel) -> dict:
     return {
@@ -250,7 +250,7 @@ def _locations():
 
 
 class LocationsView(APIView):
-    """Locations, les prochaines prises d'abord. Filtres : statut, q (référence, email, téléphone, conducteur)."""
+    """Rentals, next pick-ups first. Filters: status, q (reference, email, phone, driver)."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -266,8 +266,8 @@ class LocationsView(APIView):
 
 
 class LocationPartenairesView(APIView):
-    """Propriétaires qui peuvent fournir ce véhicule à ce lieu de remise, et chauffeurs partenaires (le chauffeur
-    redemandé et les Excellence d'abord)."""
+    """Owners who can provide this vehicle at this handover place, and partner drivers (the driver asked for
+    again and the Excellence ones first)."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request, pk):
@@ -295,8 +295,8 @@ class AttributionSerializer(serializers.Serializer):
 
 
 class LocationAttribuerView(APIView):
-    """Attribue le propriétaire (et le véhicule remis) et/ou le chauffeur partenaire : le voyageur reçoit leurs
-    coordonnées, eux le détail de la location."""
+    """Assigns the owner (and the handed-over vehicle) and/or the partner driver: the traveller receives their
+    contact details, they receive the rental details."""
     permission_classes = [EstAdministrateur]
 
     def post(self, request, pk):
@@ -322,7 +322,7 @@ class RetenueSerializer(serializers.Serializer):
 
 
 class LocationCautionView(APIView):
-    """Retenue sur la caution (dommage signalé par le loueur), avant sa restitution au voyageur ; 0 l'annule."""
+    """Amount withheld from the deposit (damage reported by the owner), before it is returned to the traveller; 0 cancels it."""
     permission_classes = [EstAdministrateur]
 
     def post(self, request, pk):
@@ -341,7 +341,7 @@ class LocationCautionView(APIView):
 
 
 class LocationAnnulerView(APIView):
-    """Annulation par Kwa-Ba : remboursement intégral du voyageur (aucun loueur disponible, par exemple)."""
+    """Cancellation by Kwa-Ba: full refund of the traveller (no owner available, for example)."""
     permission_classes = [EstAdministrateur]
 
     def post(self, request, pk):

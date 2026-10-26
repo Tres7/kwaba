@@ -1,15 +1,15 @@
-"""Cycle de vie de l'argent d'une réservation.
+"""Life cycle of a booking's money.
 
-Encaissement : FedaPay (Mobile Money, carte Visa/Mastercard) ou PayPal (en euros).
-Versements aux hôtes : toujours FedaPay (Mobile Money).
+Collection: FedaPay (Mobile Money, Visa/Mastercard card) or PayPal (in euros).
+Payouts to hosts: always FedaPay (Mobile Money).
 
-    réservation « pending » (dates bloquées 30 min)
-        → paiement FedaPay réussi → réservation « confirmed » + versement planifié (arrivée + 24 h)
-        → le worker (manage.py traiter_paiements) envoie le versement à l'hôte à l'échéance
-    annulation → remboursement du voyageur selon le barème, versement réduit ou annulé
+    "pending" booking (dates held 30 min)
+        → successful FedaPay payment → "confirmed" booking + payout scheduled (arrival + 24 h)
+        → the worker (manage.py traiter_paiements) sends the payout to the host when due
+    cancellation → refund of the traveller according to the scale, payout reduced or cancelled
 
-Règle d'or : on ne croit jamais le navigateur ni le contenu d'un webhook. Le statut d'une
-transaction est toujours relu auprès de FedaPay avant d'agir.
+Golden rule: never trust the browser nor the content of a webhook. The status of a
+transaction is always read again from FedaPay before acting.
 """
 import logging
 from datetime import timedelta
@@ -28,7 +28,7 @@ from .models import PaiementModel, ProfilVersementModel, RemboursementModel, Ver
 logger = logging.getLogger('apps.paiements')
 
 MAX_TENTATIVES = 5
-# Délai avant un nouvel essai après un échec : 15 min, 30 min, 1 h, 2 h (puis traitement manuel)
+# Delay before a new try after a failure: 15 min, 30 min, 1 h, 2 h (then manual handling)
 DELAI_NOUVEL_ESSAI = timedelta(minutes=15)
 
 
@@ -40,13 +40,13 @@ def _peut_reessayer(ligne) -> bool:
 
 
 class PaiementErreur(Exception):
-    """Erreur dont le message peut être affiché tel quel à l'utilisateur."""
+    """Error whose message can be shown as is to the user."""
 
 
 INDISPONIBLE = "Le paiement en ligne est momentanément indisponible : la réservation n'est pas possible pour l'instant. Réessayez un peu plus tard."
 
 
-# Moyen choisi par le voyageur → prestataire qui encaisse
+# Method chosen by the traveller → provider that collects
 MOYENS = {
     'mobile_money': 'fedapay',
     'carte': 'fedapay',
@@ -54,7 +54,7 @@ MOYENS = {
 }
 
 
-# Modèle payé → champ de PaiementModel qui le désigne
+# Paid model → field of PaiementModel that points to it
 CIBLES = {'reservationmodel': 'reservation', 'transfertmodel': 'transfert', 'donmodel': 'don', 'locationmodel': 'location'}
 
 
@@ -63,7 +63,7 @@ def fedapay_actif() -> bool:
 
 
 def paypal_actif() -> bool:
-    # PayPal n'est pas ouvert au lancement : proposé seulement avec l'interrupteur des moyens non ouverts
+    # PayPal is not open at launch: offered only with the switch of the not-yet-open methods
     return bool(settings.PAYPAL['CLIENT_ID'] and settings.PAYPAL['CLIENT_SECRET']
                 and settings.MODULES['paiements_non_ouverts'])
 
@@ -78,7 +78,7 @@ def paiement_actif() -> bool:
 
 
 def reservation_possible() -> bool:
-    """Une réservation se paie en ligne ; sans prestataire configuré, seulement en développement (PAIEMENT_HORS_LIGNE)."""
+    """A booking is paid online; without a configured provider, only in development (PAIEMENT_HORS_LIGNE)."""
     return paiement_actif() or settings.PAIEMENT_HORS_LIGNE
 
 
@@ -93,8 +93,8 @@ def paiement_reussi(reservation) -> PaiementModel | None:
 # --- Encaissement ------------------------------------------------------------------------
 
 def creer_paiement(*, objet, montant: int, moyen: str, description: str, url_retour: str, voyageur) -> str:
-    """Crée la transaction chez le prestataire pour `objet` (réservation, transfert ou don) et renvoie
-    l'adresse de la page de paiement. `url_retour` : page du site où le voyageur revient."""
+    """Creates the transaction at the provider for `objet` (booking, transfer or donation) and returns
+    the address of the payment page. `url_retour`: page of the site the traveller comes back to."""
     # Backstop: the views already refuse in pre-launch mode, no payment may ever be created before the opening
     if prelancement.actif():
         raise PaiementErreur(prelancement.MESSAGE)
@@ -132,7 +132,7 @@ def creer_paiement(*, objet, montant: int, moyen: str, description: str, url_ret
 
 
 def demarrer_paiement(reservation, moyen: str = 'mobile_money') -> str:
-    """Paiement d'une réservation de logement."""
+    """Payment of a listing booking."""
     if moyen not in moyens_actifs():
         raise PaiementErreur("Ce moyen de paiement n'est pas disponible.")
     if reservation.status != 'pending':
@@ -151,7 +151,7 @@ def demarrer_paiement(reservation, moyen: str = 'mobile_money') -> str:
 
 
 def synchroniser_paiement(paiement: PaiementModel) -> str:
-    """Relit la transaction chez le prestataire et applique son statut. Renvoie le statut interne à jour."""
+    """Reads the transaction again at the provider and applies its status. Returns the up-to-date internal status."""
     if paiement.statut != 'en_attente' or not paiement.transaction_id:
         return paiement.statut
     if paiement.prestataire == 'paypal':
@@ -171,7 +171,7 @@ def synchroniser_paiement(paiement: PaiementModel) -> str:
 
 
 def _synchroniser_paypal(paiement: PaiementModel) -> str:
-    """Commande validée par le voyageur (APPROVED) → on l'encaisse ; COMPLETED → paiement réussi."""
+    """Order approved by the traveller (APPROVED) → it is captured; COMPLETED → successful payment."""
     try:
         api = paypal.client()
         commande = api.lire_commande(paiement.transaction_id)
@@ -191,7 +191,7 @@ def _synchroniser_paypal(paiement: PaiementModel) -> str:
 
 
 def _telephone(donnees: dict) -> tuple[str, str]:
-    """Numéro débité (sert à rembourser), quand FedaPay le fournit."""
+    """Charged number (used for refunds), when FedaPay provides it."""
     for source in (donnees.get('payment_method'), (donnees.get('customer') or {}).get('phone_number')):
         if isinstance(source, dict) and source.get('number'):
             return str(source['number']), str(source.get('country') or '')[:2].upper()
@@ -202,7 +202,7 @@ def _paiement_reussi(paiement_id, donnees: dict):
     with transaction.atomic():
         paiement = PaiementModel.objects.select_for_update().get(pk=paiement_id)
         if paiement.statut == 'reussi':
-            return  # déjà traité (webhook reçu deux fois, ou webhook + vérification du navigateur)
+            return  # already processed (webhook received twice, or webhook + browser check)
 
         paiement.statut = 'reussi'
         paiement.mode = str(donnees.get('mode') or '')[:40]
@@ -212,15 +212,15 @@ def _paiement_reussi(paiement_id, donnees: dict):
         logger.info("Paiement reçu : %s FCFA pour %s", paiement.montant, paiement.reference)
 
         if paiement.transfert_id:
-            from apps.transferts.services import paiement_recu  # import local : transferts dépend de paiements
+            from apps.transferts.services import paiement_recu  # local import: transferts depends on paiements
             paiement_recu(paiement)
             return
         if paiement.don_id:
-            from apps.give.services import paiement_recu  # import local : give dépend de paiements
+            from apps.give.services import paiement_recu  # local import: give depends on paiements
             paiement_recu(paiement)
             return
         if paiement.location_id:
-            from apps.locations.services import paiement_recu  # import local : locations dépend de paiements
+            from apps.locations.services import paiement_recu  # local import: locations depends on paiements
             paiement_recu(paiement)
             return
 
@@ -231,8 +231,8 @@ def _paiement_reussi(paiement_id, donnees: dict):
         if reservation.status == 'cancelled' and reservation.annule_par != 'expiration':
             rembourser(paiement, paiement.montant, "Réservation annulée avant la confirmation du paiement")
             return
-        # Paiement arrivé après l'expiration : on confirme si les dates sont toujours libres.
-        # Verrou du logement : une réservation simultanée ne peut pas prendre ces dates entre-temps.
+        # Payment arriving after the expiry: confirmed if the dates are still free.
+        # Listing lock: a simultaneous booking cannot take these dates in the meantime.
         verrouiller(reservation.hebergement_id)
         if conflit(reservation.hebergement_id, reservation.check_in, reservation.check_out, exclure=reservation.pk):
             rembourser(paiement, paiement.montant, "Dates plus disponibles au moment du paiement")
@@ -272,13 +272,13 @@ def _par_carte(paiement) -> bool:
 
 
 def rembourser(paiement, montant: int, motif: str):
-    """Prévoit le remboursement de `montant` sur ce paiement (envoyé ensuite par le worker)."""
+    """Schedules the refund of `montant` on this payment (then sent by the worker)."""
     if montant <= 0:
         return None
     logger.info("Remboursement de %s FCFA prévu pour %s : %s", montant, paiement.reference, motif)
     statut = 'a_envoyer'
     if paiement.prestataire == 'fedapay' and not paiement.telephone and not _par_carte(paiement):
-        # Mobile Money : FedaPay ne donne pas le numéro débité, on le demande au voyageur
+        # Mobile Money: FedaPay does not give the charged number, it is asked to the traveller
         statut = 'attente_numero'
     return RemboursementModel.objects.create(
         reservation_id=paiement.reservation_id, transfert_id=paiement.transfert_id, location_id=paiement.location_id,
@@ -287,8 +287,8 @@ def rembourser(paiement, montant: int, motif: str):
 
 
 def indiquer_numero_remboursement(objet, pays: str, operateur: str, numero: str) -> int:
-    """Enregistre le compte Mobile Money du voyageur sur les remboursements en attente de `objet`
-    (réservation, transfert ou location). Renvoie leur nombre."""
+    """Saves the traveller's Mobile Money account on the pending refunds of `objet`
+    (booking, transfer or rental). Returns their number."""
     return objet.remboursements.filter(statut='attente_numero').update(
         pays=pays, operateur=operateur, numero=numero, statut='a_envoyer', derniere_erreur='',
     )
@@ -297,7 +297,7 @@ def indiquer_numero_remboursement(objet, pays: str, operateur: str, numero: str)
 # --- Annulation --------------------------------------------------------------------------
 
 def annuler(reservation, par: str) -> int:
-    """Annule la réservation. `par` : voyageur, hote ou plateforme. Renvoie le montant remboursé au voyageur."""
+    """Cancels the booking. `par`: voyageur, hote or plateforme. Returns the amount refunded to the traveller."""
     with transaction.atomic():
         reservation = ReservationModel.objects.select_for_update().get(pk=reservation.pk)
         if reservation.status == 'cancelled':
@@ -337,7 +337,7 @@ def annuler(reservation, par: str) -> int:
         return rembourse
 
 
-# --- Versements et remboursements (worker) -----------------------------------------------
+# --- Payouts and refunds (worker) -----------------------------------------------
 
 def _client_payout(utilisateur, numero: str, pays: str, titulaire: str = '') -> dict:
     prenom, _, nom = (titulaire or '').strip().partition(' ')
@@ -350,15 +350,15 @@ def _client_payout(utilisateur, numero: str, pays: str, titulaire: str = '') -> 
 
 
 def _reserver(modele, pk, de: str) -> bool:
-    """Prend la main sur une ligne (évite un double envoi si deux workers tournent)."""
+    """Takes hold of a row (avoids a double sending if two workers run)."""
     return modele.objects.filter(pk=pk, statut=de).update(statut='en_cours') == 1
 
 
 def envoyer_payout(ligne, *, mode: str, numero: str, pays: str, email: str, titulaire: str) -> bool:
-    """Envoie un versement Mobile Money pour une ligne planifiée (versement à un hôte ou à un chauffeur).
+    """Sends a Mobile Money payout for a scheduled row (payout to a host or to a driver).
 
-    La ligne doit avoir les champs statut, tentatives, payout_id, mode, numero, derniere_erreur.
-    Renvoie True si FedaPay a accepté l'envoi.
+    The row must have the fields statut, tentatives, payout_id, mode, numero, derniere_erreur.
+    Returns True if FedaPay accepted the sending.
     """
     if not _peut_reessayer(ligne) or not _reserver(type(ligne), ligne.pk, 'planifie'):
         return False
@@ -379,7 +379,7 @@ def envoyer_payout(ligne, *, mode: str, numero: str, pays: str, email: str, titu
 
 
 def synchroniser_payout(ligne):
-    """Relit chez FedaPay le statut d'un versement en cours (hôte ou chauffeur)."""
+    """Reads again from FedaPay the status of an ongoing payout (host or driver)."""
     try:
         donnees = fedapay.client().lire_versement(ligne.payout_id)
     except fedapay.FedaPayErreur:
@@ -398,7 +398,7 @@ def synchroniser_payout(ligne):
 
 def envoyer_versements_dus() -> int:
     if not fedapay_actif():
-        return 0  # les versements aux hôtes passent par FedaPay
+        return 0  # payouts to hosts go through FedaPay
     envoyes = 0
     dus = VersementModel.objects.filter(
         statut='planifie', date_prevue__lte=timezone.now(), reservation__status='confirmed',
@@ -432,13 +432,13 @@ def envoyer_remboursements() -> int:
         if paiement.prestataire == 'paypal':
             envoyes += _rembourser_paypal(remboursement)
             continue
-        # Compte indiqué par le voyageur, sinon numéro débité s'il est connu
+        # Account given by the traveller, otherwise charged number if known
         if remboursement.numero:
             mode, numero, pays = remboursement.operateur, remboursement.numero, remboursement.pays
         else:
             mode, numero, pays = paiement.mode, paiement.telephone, paiement.pays_telephone
         if not (mode and numero) or not fedapay_actif():
-            # Carte bancaire : remboursement manuel depuis le tableau de bord FedaPay
+            # Bank card: manual refund from the FedaPay dashboard
             remboursement.statut = 'a_traiter'
             remboursement.derniere_erreur = "Paiement par carte ou compte inconnu : rembourser depuis le tableau de bord FedaPay."
             remboursement.save()
@@ -461,7 +461,7 @@ def envoyer_remboursements() -> int:
 
 
 def _rembourser_paypal(remboursement: RemboursementModel) -> int:
-    """Remboursement sur la carte ou le compte PayPal du voyageur, au prorata en euros."""
+    """Refund to the traveller's card or PayPal account, pro rata in euros."""
     paiement = remboursement.paiement
     if not paiement.capture_id or not paypal_actif():
         remboursement.statut = 'a_traiter'
@@ -517,7 +517,7 @@ def synchroniser_remboursement(remboursement: RemboursementModel):
 
 
 def expirer_reservations() -> int:
-    """Libère les dates des réservations non payées à temps (après une dernière vérification)."""
+    """Releases the dates of the bookings not paid in time (after a last check)."""
     expirees = 0
     maintenant = timezone.now()
     for reservation in ReservationModel.objects.filter(status='pending', expire_le__lte=maintenant):
@@ -530,7 +530,7 @@ def expirer_reservations() -> int:
 
 
 def passe() -> dict:
-    """Une passe du worker. Rattrape aussi les webhooks perdus (et leur absence en local)."""
+    """One pass of the worker. Also catches up on lost webhooks (and their absence locally)."""
     recents = PaiementModel.objects.filter(statut='en_attente', cree_le__gte=timezone.now() - timedelta(hours=2))[:50]
     for paiement in recents:
         synchroniser_paiement(paiement)
@@ -538,8 +538,8 @@ def passe() -> dict:
         synchroniser_versement(versement)
     for remboursement in RemboursementModel.objects.filter(statut='en_cours').exclude(payout_id='').select_related('paiement')[:50]:
         synchroniser_remboursement(remboursement)
-    from . import notifications  # import local : notifications importe les modèles et les tarifs
-    from apps.give import services as give  # imports locaux : ces modules dépendent de paiements
+    from . import notifications  # local import: notifications imports the models and the rates
+    from apps.give import services as give  # local imports: these modules depend on paiements
     from apps.locations import services as locations
     from apps.transferts import services as transferts
 
@@ -552,14 +552,14 @@ def passe() -> dict:
         **give.passe(),
     }
     from . import relances
-    # Après les expirations : l'email « annulée faute de paiement » part dans la même passe
+    # After the expiries: the "cancelled for lack of payment" email goes in the same pass
     stats['relances'] = relances.envoyer_relances()
     stats['emails'] = notifications.envoyer_notifications()
     return {k: v for k, v in stats.items() if v}
 
 
 def traiter_evenement(evenement: dict):
-    """Webhook FedaPay : on ne se sert que de l'identifiant, puis on relit l'objet chez FedaPay."""
+    """FedaPay webhook: only the id is used, then the object is read again from FedaPay."""
     nom = str(evenement.get('name', ''))
     identifiant = str((evenement.get('entity') or {}).get('id', ''))
     if not identifiant:
@@ -569,12 +569,12 @@ def traiter_evenement(evenement: dict):
         if paiement:
             synchroniser_paiement(paiement)
     elif nom.startswith('payout.'):
-        from apps.transferts.models import VersementChauffeurModel  # import local : transferts dépend de paiements
+        from apps.transferts.models import VersementChauffeurModel  # local import: transferts depends on paiements
         for versement in VersementModel.objects.filter(payout_id=identifiant, statut='en_cours'):
             synchroniser_versement(versement)
         for versement in VersementChauffeurModel.objects.filter(payout_id=identifiant, statut='en_cours'):
             synchroniser_payout(versement)
-        from apps.locations.models import VersementPartenaireModel  # import local : locations dépend de paiements
+        from apps.locations.models import VersementPartenaireModel  # local import: locations depends on paiements
         for versement in VersementPartenaireModel.objects.filter(payout_id=identifiant, statut='en_cours'):
             synchroniser_payout(versement)
         for remboursement in RemboursementModel.objects.filter(payout_id=identifiant, statut='en_cours'):

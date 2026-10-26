@@ -48,11 +48,11 @@ class HebergementSummaryDTO:
 @dataclass
 class ConversationSummaryDTO:
     id: uuid.UUID
-    my_role: str                     # 'guest' ou 'host'
+    my_role: str                     # 'guest' or 'host'
     hebergement: Optional[HebergementSummaryDTO]
     other_participant: Optional[ParticipantDTO]
     last_message: Optional[MessageDTO]
     unread_count: int
     last_message_at: datetime.datetime
-    # Le voyageur a une réservation payée de ce logement : identités visibles des deux côtés
+    # The traveller has a paid booking for this listing: identities visible on both sides
     booked: bool = True

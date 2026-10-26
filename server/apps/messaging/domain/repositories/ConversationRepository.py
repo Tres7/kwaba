@@ -15,7 +15,7 @@ class ConversationRepository(ABC):
 
     @abstractmethod
     def find_by_id_for_update(self, conversation_id: uuid.UUID) -> Optional[Conversation]:
-        """Verrouille le fil jusqu'à la fin de la transaction en cours."""
+        """Locks the thread until the end of the current transaction."""
         pass
 
     @abstractmethod
@@ -24,7 +24,7 @@ class ConversationRepository(ABC):
 
     @abstractmethod
     def create(self, conversation: Conversation) -> Conversation:
-        """Lève ConversationAlreadyExistsException si le fil existe déjà."""
+        """Raises ConversationAlreadyExistsException if the thread already exists."""
         pass
 
     @abstractmethod
@@ -33,5 +33,5 @@ class ConversationRepository(ABC):
 
     @abstractmethod
     def list_for_user(self, user_id: uuid.UUID) -> List[Conversation]:
-        """Fils du participant, du plus récemment actif au plus ancien."""
+        """Threads of the participant, from the most recently active to the oldest."""
         pass

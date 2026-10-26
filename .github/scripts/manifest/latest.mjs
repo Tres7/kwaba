@@ -1,4 +1,4 @@
-// Affiche un champ du dernier manifest (ex. --field services.server.image), ou rien s'il n'y en a pas.
+// Prints a field of the latest manifest (e.g. --field services.server.image), or nothing if there is none.
 import { parseArgs } from 'node:util';
 
 import { field, latestManifest } from './lib.mjs';

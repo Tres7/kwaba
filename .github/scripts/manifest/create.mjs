@@ -1,4 +1,4 @@
-// Écrit le manifest suivant dans le dossier et le valide. Sortie au format GITHUB_OUTPUT (file=, version=).
+// Writes the next manifest in the folder and validates it. Output in GITHUB_OUTPUT format (file=, version=).
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -11,7 +11,7 @@ const { values } = parseArgs({
     'source-revision': { type: 'string' },
     'server-revision': { type: 'string' },
     'client-revision': { type: 'string' },
-    // Vide : l'image du manifest précédent est reprise (service inchangé)
+    // Empty: the previous manifest's image is reused (unchanged service)
     'server-image': { type: 'string', default: '' },
     'client-image': { type: 'string', default: '' },
   },

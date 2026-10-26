@@ -33,7 +33,7 @@ function manifest(version, overrides = {}) {
   };
 }
 
-/** Format v1 : client déployé depuis Git (manifests déjà commités avant le passage au VPS). */
+/** v1 format: client deployed from Git (manifests committed before the move to the VPS). */
 function legacyManifest(version) {
   const m = manifest(version, { schemaVersion: 1 });
   m.services.client = { kind: 'git', sourceRevision: SHA('c') };

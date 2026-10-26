@@ -38,7 +38,7 @@ class DjangoConversationRepository(ConversationRepository):
 
     def create(self, conversation: Conversation) -> Conversation:
         try:
-            # Savepoint : une IntegrityError ne doit pas casser une éventuelle transaction englobante
+            # Savepoint: an IntegrityError must not break a possible enclosing transaction
             with transaction.atomic():
                 model = ConversationModel.objects.create(
                     id=conversation.id,

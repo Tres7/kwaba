@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 
 from .models import ExperienceModel
 
-# Les expériences proposées sont au Togo (audit n° 3) : les fiches d'autres pays (Marrakech, Dakar…) restent dans le
-# back-office mais ne sont plus affichées sur le site
+# The offered experiences are in Togo (audit no. 3): entries of other countries (Marrakech, Dakar…) stay in the
+# back-office but are no longer shown on the site
 PAYS_PROPOSE = 'Togo'
 
 
@@ -19,7 +19,7 @@ def experience_json(request, e: ExperienceModel) -> dict:
 
 
 class ExperiencesView(APIView):
-    """GET : expériences actives de la page Découvrir (textes en français et en anglais, le client choisit)."""
+    """GET: active experiences of the Discover page (texts in French and English, the client chooses)."""
     permission_classes = [AllowAny]
     authentication_classes = []
 

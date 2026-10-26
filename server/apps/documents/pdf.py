@@ -1,4 +1,4 @@
-"""Mise en page des documents Kwa-Ba (ReportLab) : logo, informations de la société, blocs, tableaux, pied de page."""
+"""Layout of the Kwa-Ba documents (ReportLab): logo, company information, blocks, tables, footer."""
 from dataclasses import dataclass, field
 from io import BytesIO
 from pathlib import Path
@@ -44,14 +44,14 @@ def date(valeur, fmt='j F Y') -> str:
 
 
 def _p(texte, style='base'):
-    # Le texte vient de la base : on échappe les caractères spéciaux de ReportLab
+    # The text comes from the database: ReportLab's special characters are escaped
     texte = str(texte).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br/>')
     return Paragraph(texte, STYLES[style])
 
 
 @dataclass
 class Document:
-    """Un document : titre, référence, puis des blocs (lignes « libellé : valeur ») et des tableaux de montants."""
+    """A document: title, reference, then blocks ("label: value" lines) and amount tables."""
     titre: str
     reference: str
     sous_titre: str = ''
@@ -68,7 +68,7 @@ class Document:
         self.elements.append(tableau)
 
     def montants(self, lignes: list[tuple[str, str, str, str]], totaux: list[tuple[str, str]]):
-        """Lignes (désignation, quantité, prix unitaire, total) puis totaux (libellé, montant), le dernier en évidence."""
+        """Lines (description, quantity, unit price, total) then totals (label, amount), the last one highlighted."""
         entete = [_p(t, 'gras') for t in ('Désignation', 'Qté', 'Prix unitaire', 'Total')]
         corps = [[_p(d), _p(q, 'droite'), _p(pu, 'droite'), _p(t, 'droite')] for d, q, pu, t in lignes]
         pied = [['', '', _p(libelle, 'total' if i == len(totaux) - 1 else 'droite'), _p(montant, 'total' if i == len(totaux) - 1 else 'droite')]
@@ -85,7 +85,7 @@ class Document:
         self.elements.append(tableau)
 
     def ajouter(self, *elements):
-        """Éléments ReportLab quelconques (tableaux, images, sauts de page…)."""
+        """Any ReportLab elements (tables, images, page breaks…)."""
         self.elements.extend(elements)
 
     def paragraphe(self, texte: str, style='base'):

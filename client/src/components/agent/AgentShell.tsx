@@ -20,9 +20,9 @@ const NAV: { href: string; label: string; court: string; icon: typeof Home; comp
 ];
 
 /**
- * Espace des agents de terrain, pensé pour le téléphone (barre d'onglets en bas) et utilisable sur ordinateur (menu
- * latéral). Ouvert aux agents et aux administrateurs : un administrateur y fait tout ce que fait un agent, et retrouve
- * son back-office par le menu. Un agent n'a jamais accès au back-office (refusé aussi par l'API).
+ * Field agents' space, designed for phones (tab bar at the bottom) and usable on computers (side menu). Open to
+ * agents and administrators: an administrator does everything an agent does there, and gets back to the
+ * back-office through the menu. An agent never has access to the back-office (also refused by the API).
  */
 export default function AgentShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -37,13 +37,13 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
     miennes: tableau?.types.reduce((n, t) => n + t.miennes, 0) ?? 0,
   };
   const actif = (href: string) => (href === "/agent" ? pathname === href : pathname.startsWith(href));
-  // La fiche d'une mission dépend de « Mes missions »
+  // The page of a mission belongs to "My missions"
   const actifOnglet = (href: string) => actif(href) || (href === "/agent/missions" && pathname.startsWith("/agent/mission/"));
   const courant = NAV.find((n) => actifOnglet(n.href));
 
   if (status === "loading") return <div className="min-h-screen bg-light" />;
 
-  // Le middleware filtre déjà ; double contrôle côté page (l'API reste seule juge : 403 sinon)
+  // The middleware already filters; second check on the page (the API remains the only judge: 403 otherwise)
   if (!autorise) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center bg-light">
@@ -104,7 +104,7 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        {/* Place pour la barre d'onglets sur téléphone */}
+        {/* Room for the tab bar on phones */}
         <main id="contenu" tabIndex={-1} className="px-4 py-5 sm:px-6 lg:p-8 pb-28 lg:pb-8 max-w-4xl outline-none">{children}</main>
 
         <nav aria-label="Espace agent" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
@@ -130,7 +130,7 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
   );
 }
 
-/** Nombre en attente (masqué à 0). */
+/** Number of pending items (hidden at 0). */
 function Pastille({ nombre, petite, className }: { nombre: number; petite?: boolean; className?: string }) {
   if (nombre <= 0) return null;
   return (

@@ -24,9 +24,9 @@ type Option =
 interface ChampDestinationProps {
   value: string;
   onChange: (valeur: string) => void;
-  /** Ville choisie dans la liste (le parent lance la recherche ou garde la ville pour la suite du formulaire). */
+  /** City chosen in the list (the parent starts the search or keeps the city for the rest of the form). */
   onVille: (ville: string) => void;
-  /** Appelé après l'ouverture d'un logement proposé. */
+  /** Called after a suggested listing is opened. */
   onLogement?: () => void;
   placeholder?: string;
   ariaLabel?: string;
@@ -34,11 +34,11 @@ interface ChampDestinationProps {
   inputRef?: React.Ref<HTMLInputElement>;
   className?: string;
   inputClassName?: string;
-  /** Position de la liste sous le champ (largeur, alignement). */
+  /** Position of the list under the field (width, alignment). */
   listeClassName?: string;
 }
 
-/** Champ « destination » avec propositions au fil de la saisie : villes (« lome » trouve « Lomé »), quartiers de Lomé, puis logements. */
+/** "Destination" field with suggestions while typing: cities ("lome" finds "Lomé"), Lomé districts, then listings. */
 export default function ChampDestination({
   value, onChange, onVille, onLogement, placeholder, ariaLabel, type = "text", inputRef, className, inputClassName, listeClassName,
 }: ChampDestinationProps) {
@@ -56,7 +56,7 @@ export default function ChampDestination({
     placeholderData: keepPreviousData,
     staleTime: 60_000,
   });
-  // Champ vide : destinations populaires (même requête que la page d'accueil, donc souvent déjà en cache)
+  // Empty field: popular destinations (same request as the home page, so often already cached)
   const { data: populaires = [] } = useQuery({
     queryKey: ["villes"],
     queryFn: async () => (await api.get<{ results: City[] }>("/v1/hebergements/villes/")).data.results,
@@ -94,13 +94,13 @@ export default function ChampDestination({
       e.preventDefault();
       setOuvert(true);
       const pas = e.key === "ArrowDown" ? 1 : -1;
-      // -1 = retour au texte saisi, puis on boucle
+      // -1 = back to the typed text, then wrap around
       setActif((i) => {
         const suivant = i + pas;
         return suivant < -1 ? options.length - 1 : suivant >= options.length ? -1 : suivant;
       });
     } else if (e.key === "Enter" && visible && actif >= 0 && actif < options.length) {
-      // Proposition surlignée au clavier : on la choisit au lieu d'envoyer le formulaire
+      // Suggestion highlighted with the keyboard: it is chosen instead of submitting the form
       e.preventDefault();
       choisir(options[actif]);
     } else if (e.key === "Escape" && visible) {
@@ -137,7 +137,7 @@ export default function ChampDestination({
           id={`${id}-liste`}
           role="listbox"
           aria-label={ariaLabel}
-          // Garde le focus dans le champ : sans ça, le blur fermerait la liste avant le clic
+          // Keeps the focus in the field: otherwise the blur would close the list before the click
           onMouseDown={(e) => e.preventDefault()}
           className={cn("absolute top-full z-50 mt-3 max-h-[70vh] overflow-y-auto rounded-2xl border border-gray-100 bg-white pb-2 text-left shadow-card", listeClassName ?? "left-0 w-full min-w-[18rem]")}
         >

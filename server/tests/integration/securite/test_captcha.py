@@ -1,4 +1,4 @@
-"""Captcha Cloudflare Turnstile à la connexion et à l'inscription."""
+"""Cloudflare Turnstile captcha at sign-in and sign-up."""
 import pytest
 import requests
 
@@ -21,7 +21,7 @@ class FausseReponse:
 
 @pytest.fixture
 def turnstile(settings, monkeypatch):
-    """Captcha actif ; Cloudflare n'accepte que le jeton « bon »."""
+    """Captcha active; Cloudflare only accepts the "good" token."""
     settings.TURNSTILE_SITE_KEY, settings.TURNSTILE_SECRET_KEY = 'site', 'secret'
     appels = []
 

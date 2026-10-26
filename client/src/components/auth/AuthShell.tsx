@@ -9,7 +9,7 @@ interface AuthShellProps {
   children: React.ReactNode;
 }
 
-/** Mise en page commune connexion / inscription / vérification : formulaire + panneau visuel (desktop). */
+/** Shared layout of sign-in / sign-up / verification: form + visual panel (desktop). */
 export default function AuthShell({ image, title, subtitle, reverse = false, children }: AuthShellProps) {
   return (
     <div className={cn("min-h-screen flex bg-white", reverse && "flex-row-reverse")}>

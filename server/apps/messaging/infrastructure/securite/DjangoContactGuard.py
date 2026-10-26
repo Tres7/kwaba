@@ -5,7 +5,7 @@ from apps.securite import coordonnees, fraude
 
 
 class DjangoContactGuard(ContactGuard):
-    """Filtrage commun aux messages et aux annonces (apps.securite.coordonnees), alertes pour le back-office."""
+    """Filtering shared by messages and listings (apps.securite.coordonnees), alerts for the back-office."""
 
     def screen(self, text: str) -> Screening:
         content, findings = coordonnees.analyser(text)

@@ -6,13 +6,13 @@ from apps.messaging.application.ports.BookingLookup import BookingLookup, Pair
 
 
 class DjangoBookingLookup(BookingLookup):
-    """Seul point de contact de messaging avec les réservations. Confirmée = payée (paiement obligatoire en production)."""
+    """Only contact point of messaging with bookings. Confirmed = paid (payment required in production)."""
 
     def booked(self, pairs: Iterable[Pair]) -> Set[Pair]:
         pairs = set(pairs)
         if not pairs:
             return set()
-        from apps.reservations.models import ReservationModel  # import local : reservations dépend d'hebergements
+        from apps.reservations.models import ReservationModel  # local import: reservations depends on hebergements
 
         condition = Q()
         for hebergement_id, guest_id in pairs:

@@ -31,12 +31,12 @@ const versFormulaire = (c: CategorieVehicule): Formulaire => ({
   annee: c.annee ? String(c.annee) : "", assurance_fin: c.assurance_fin ?? "", visite_technique_fin: c.visite_technique_fin ?? "",
 });
 
-/** Un document expiré retire le véhicule du site (contrat propriétaire, art. 1). */
+/** An expired document removes the vehicle from the site (owner contract, art. 1). */
 function expire(date: string | null) {
   return !!date && date < isoDate();
 }
 
-/** Véhicules des propriétaires partenaires : leur prix, leur caution, leurs formules et leurs papiers. */
+/** Partner owners' vehicles: their price, deposit, options and papers. */
 export default function Categories() {
   const queryClient = useQueryClient();
   const { data: categories, isLoading } = useQuery({
@@ -72,7 +72,7 @@ export default function Categories() {
     setEdition(null);
   };
 
-  // Photos ajoutées, retirées ou réordonnées : la liste des véhicules (vignettes) suit
+  // Photos added, removed or reordered: the vehicle list (thumbnails) follows
   const surPhotos = (liste: PhotoVehicule[]) => {
     setPhotos(liste);
     queryClient.invalidateQueries({ queryKey: ["admin", "location", "categories"] });
@@ -81,7 +81,7 @@ export default function Categories() {
   const enregistrer = async () => {
     setEnvoi(true);
     setErreurs({});
-    // Champs vides : null ; les photos ont leurs propres requêtes
+    // Empty fields: null; photos have their own requests
     const champs = Object.fromEntries(Object.entries(form).filter(([k]) => k !== "id" && k !== "photos"));
     const corps = {
       ...champs, prix_jour: form.prix_jour || null, proprietaire: form.proprietaire ? Number(form.proprietaire) : null,
@@ -91,7 +91,7 @@ export default function Categories() {
     try {
       if (edition === "nouvelle") {
         const creee = (await api.post<CategorieVehicule>("/v1/admin/location/categories/", corps)).data;
-        // Photos choisies avant la création : envoyées maintenant, l'une après l'autre
+        // Photos chosen before the creation: sent now, one after the other
         const echecs: string[] = [];
         for (const f of enAttente) {
           try {

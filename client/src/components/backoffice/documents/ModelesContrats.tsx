@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/utils";
 import Panneau, { Champ, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
 import type { ModeleContrat } from "@/types/api/admin";
 
-/** Textes types des contrats, versionnés : les contrats déjà émis gardent le texte de leur version. */
+/** Contract templates, versioned: contracts already issued keep the text of their version. */
 export default function ModelesContrats() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
@@ -25,7 +25,7 @@ export default function ModelesContrats() {
 
   const ouvrir = (m: ModeleContrat) => { setEdition(m); setTitre(m.titre); setCorps(m.corps); setErreurs({}); };
 
-  // Insère la variable à l'endroit du curseur
+  // Inserts the variable at the cursor position
   const inserer = (cle: string) => {
     const z = zone.current;
     const texte = `{{ ${cle} }}`;

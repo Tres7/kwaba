@@ -23,7 +23,7 @@ ROLES_HOTE = ('hote', 'admin')
 
 
 class EstVerificateur(IsAuthenticated):
-    """Agents de terrain et administrateurs : rôle lu en base à chaque requête."""
+    """Field agents and administrators: role read from the database at every request."""
     message = "Réservé aux agents de vérification."
 
     def has_permission(self, request, view):
@@ -40,7 +40,7 @@ def _piece_json(piece: PieceIdentiteModel | None) -> dict:
 
 
 class MaPieceIdentiteView(APIView):
-    """GET : statut de ma pièce d'identité. POST (multipart type_piece, fichier) : l'envoyer ou la remplacer."""
+    """GET: status of my identity document. POST (multipart type_piece, fichier): send or replace it."""
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     throttle_scope = 'verification_piece'
@@ -96,7 +96,7 @@ def _visite_json(h: HebergementModel) -> dict:
 
 
 class PiecesView(APIView):
-    """Pièces d'identité à contrôler à distance, les plus anciennes d'abord."""
+    """Identity documents to check remotely, oldest first."""
     permission_classes = [EstVerificateur]
 
     def get(self, request):
@@ -114,7 +114,7 @@ class PiecesView(APIView):
 
 
 class PieceDecisionView(APIView):
-    """POST {decision: verifiee | refusee, motif} : résultat du contrôle de la pièce d'identité d'un hôte."""
+    """POST {decision: verifiee | refusee, motif}: result of the check of a host's identity document."""
     permission_classes = [EstVerificateur]
 
     def post(self, request, user_id):
@@ -123,7 +123,7 @@ class PieceDecisionView(APIView):
             return Response({'detail': 'Hôte introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         decision = str(request.data.get('decision', ''))
         try:
-            # Dans la file commune : refusé si un autre agent a pris cette pièce ; sa mission est close sinon
+            # In the shared queue: refused if another agent took this document; their mission is closed otherwise
             with transaction.atomic():
                 terrain.verifier_peut_decider('piece', hote.pk, request.user)
                 piece = services.decider_piece(hote, request.user, decision=decision,
@@ -141,11 +141,11 @@ class PieceDecisionView(APIView):
 
 
 class VisitesView(APIView):
-    """Annonces qui attendent la visite d'un agent, les plus anciennes d'abord (?ville= pour filtrer)."""
+    """Listings waiting for an agent's visit, oldest first (?ville= to filter)."""
     permission_classes = [EstVerificateur]
 
     def get(self, request):
-        # Seulement les hôtes dont l'identité est vérifiée (et le contrat signé, une fois exigé) : services.annonces_a_visiter
+        # Only hosts whose identity is verified (and agreement signed, once required): services.annonces_a_visiter
         qs = (services.annonces_a_visiter().select_related('host', 'host__piece_identite')
               .prefetch_related(Prefetch('visites', queryset=VisiteModel.objects.only('id', 'decision', 'hebergement'))))
         ville = request.query_params.get('ville', '').strip()
@@ -176,7 +176,7 @@ class DecisionView(APIView):
         if not isinstance(controles, dict):
             return Response({'controles': ['Format invalide.']}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            # Dans la file commune : refusé si un autre agent a pris cette visite ; sa mission est close sinon
+            # In the shared queue: refused if another agent took this visit; their mission is closed otherwise
             with transaction.atomic():
                 terrain.verifier_peut_decider('logement', hebergement.pk, request.user)
                 visite = services.decider(
@@ -196,7 +196,7 @@ class DecisionView(APIView):
 
 
 class FichierPieceView(APIView):
-    """Pièce d'identité d'un hôte, lue par l'API (jamais d'URL publique). Chaque consultation est journalisée."""
+    """A host's identity document, read by the API (never a public URL). Every viewing is logged."""
     permission_classes = [EstVerificateur]
 
     def get(self, request, user_id):
@@ -209,7 +209,7 @@ class FichierPieceView(APIView):
                                as_attachment=pdf, filename=f"piece-identite.{'pdf' if pdf else 'jpg'}")
         reponse['Cache-Control'] = 'no-store'
         reponse['X-Content-Type-Options'] = 'nosniff'
-        # Le document ne peut exécuter aucun script, même ouvert directement dans le navigateur
+        # The document cannot run any script, even opened directly in the browser
         reponse['Content-Security-Policy'] = "default-src 'none'; img-src 'self'; sandbox"
         return reponse
 

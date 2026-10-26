@@ -3,12 +3,12 @@ import LienContact from "@/components/legal/LienContact";
 import MentionSociete from "@/components/legal/MentionSociete";
 import LegalPage, { AC } from "@/components/legal/LegalPage";
 
-/** Paragraphe numéroté d'un article (« 6.1. … »). */
+/** Numbered paragraph of an article ("6.1. …"). */
 function N({ n, children }: { n: string; children: React.ReactNode }) {
   return <p><strong>{n}.</strong> {children}</p>;
 }
 
-/** Version française (fait foi). Texte des CGV version 2.4 du 18 octobre 2026, adapté aux services ouverts. */
+/** French version (authoritative). Terms of sale version 2.4 of 18 October 2026, adapted to the open services. */
 export default function ContenuFr() {
   return (
     <LegalPage
@@ -419,7 +419,7 @@ export default function ContenuFr() {
   );
 }
 
-/** Barème d'annulation des logements (annexe 1), repris sur la page « Annulation et remboursement ». */
+/** Cancellation scale for stays (appendix 1), also shown on the "Cancellation and refund" page. */
 export function TableauHebergement() {
   return (
     <table>
@@ -438,7 +438,7 @@ export function TableauHebergement() {
   );
 }
 
-/** Barème d'annulation de la mobilité (annexe 1). */
+/** Cancellation scale for mobility (appendix 1). */
 export function TableauMobilite() {
   return (
     <table>

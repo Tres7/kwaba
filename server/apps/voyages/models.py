@@ -1,5 +1,5 @@
-"""Kwa-Ba Together : préparer un voyage à plusieurs (logements proposés et votés, budget par
-personne, itinéraire et réservations partagés)."""
+"""Kwa-Ba Together: planning a trip with several people (listings suggested and voted on, budget per
+person, shared itinerary and bookings)."""
 import secrets
 import uuid
 
@@ -20,7 +20,7 @@ class VoyageGroupeModel(models.Model):
     nb_voyageurs = models.PositiveSmallIntegerField(default=2, help_text='Pour le budget par personne')
     organisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='voyages_organises')
     code_invitation = models.CharField(max_length=32, unique=True, default=nouveau_code)
-    # Logement retenu par l'organisateur parmi les propositions
+    # Listing chosen by the organiser among the suggestions
     proposition_retenue = models.ForeignKey(
         'PropositionModel', on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
     )
@@ -61,7 +61,7 @@ class MembreModel(models.Model):
 
 
 class PropositionModel(models.Model):
-    """Un logement Kwa-Ba proposé au groupe."""
+    """A Kwa-Ba listing suggested to the group."""
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='propositions')
     hebergement = models.ForeignKey('hebergements.HebergementModel', on_delete=models.CASCADE, related_name='+')
     propose_par = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
@@ -75,7 +75,7 @@ class PropositionModel(models.Model):
 
 
 class VoteModel(models.Model):
-    """Chaque membre vote pour un seul logement (son préféré) ; il peut changer d'avis."""
+    """Each member votes for a single listing (their favourite); they can change their mind."""
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='votes')
     proposition = models.ForeignKey(PropositionModel, on_delete=models.CASCADE, related_name='votes')
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
@@ -86,7 +86,7 @@ class VoteModel(models.Model):
 
 
 class EtapeModel(models.Model):
-    """Une étape de l'itinéraire partagé."""
+    """A step of the shared itinerary."""
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='etapes')
     date = models.DateField()
     heure = models.TimeField(null=True, blank=True)
@@ -102,7 +102,7 @@ class EtapeModel(models.Model):
 
 
 class LienReservationModel(models.Model):
-    """Réservation Kwa-Ba d'un membre, partagée avec le groupe."""
+    """A member's Kwa-Ba booking, shared with the group."""
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='reservations')
     reservation = models.ForeignKey('reservations.ReservationModel', on_delete=models.CASCADE, related_name='+')
     ajoute_par = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')

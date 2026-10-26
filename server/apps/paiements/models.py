@@ -7,7 +7,7 @@ from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
 
 
 class ProfilVersementModel(models.Model):
-    """Où l'hôte reçoit son argent."""
+    """Where the host receives their money."""
     hote = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profil_versement')
     pays = models.CharField(max_length=2, choices=PAYS_CHOICES)
     operateur = models.CharField(max_length=30, choices=OPERATEUR_CHOICES)
@@ -25,8 +25,8 @@ class ProfilVersementModel(models.Model):
 
 
 class ConditionsHoteModel(models.Model):
-    """Commission de l'hôte, réglée par l'équipe : hôte particulier (8 %), hôtel ou résidence hôtelière (12 %), et
-    Programme Fondateurs (5 % entre deux dates, 50 premiers hôtes particuliers). Sans ligne : hôte particulier."""
+    """Host's commission, set by the team: individual host (8 %), hotel or serviced residence (12 %), and
+    Founders Programme (5 % between two dates, first 50 individual hosts). Without a row: individual host."""
     CATEGORIES = [('particulier', 'Hôte particulier'), ('hotel', 'Hôtel ou résidence hôtelière')]
 
     hote = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='conditions_hote')
@@ -50,7 +50,7 @@ class ConditionsHoteModel(models.Model):
 
 
 class ObjetPayeMixin:
-    """Ce qui est payé : une réservation de logement, un transfert aéroport, une location de voiture ou un don."""
+    """What is paid: a listing booking, an airport transfer, a car rental or a donation."""
 
     @property
     def objet(self):
@@ -84,7 +84,7 @@ class ObjetPayeMixin:
 
 
 class PaiementModel(ObjetPayeMixin, models.Model):
-    """Une tentative d'encaissement (un même objet peut en avoir plusieurs : échec puis nouvel essai)."""
+    """A collection attempt (the same object may have several: failure then new try)."""
     PRESTATAIRES = [
         ('fedapay', 'FedaPay (Mobile Money, carte)'),
         ('paypal', 'PayPal'),
@@ -110,18 +110,18 @@ class PaiementModel(ObjetPayeMixin, models.Model):
     montant = models.PositiveIntegerField()
     devise = models.CharField(max_length=3, default='XOF')
     prestataire = models.CharField(max_length=20, choices=PRESTATAIRES, default='fedapay')
-    # Identifiant chez le prestataire : transaction FedaPay ou commande PayPal
+    # Id at the provider: FedaPay transaction or PayPal order
     transaction_id = models.CharField(max_length=64, unique=True, null=True, blank=True)
-    # PayPal : montant réellement débité en euros, et identifiant de l'encaissement (sert aux remboursements)
+    # PayPal: amount actually charged in euros, and capture id (used for refunds)
     montant_eur = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     capture_id = models.CharField(max_length=64, blank=True)
     url_paiement = models.URLField(max_length=500, blank=True)
     statut = models.CharField(max_length=20, choices=STATUTS, default='en_attente')
-    # Moyen utilisé et numéro débité, renvoyés par FedaPay : servent aux remboursements
+    # Method used and number charged, returned by FedaPay: used for refunds
     mode = models.CharField(max_length=40, blank=True)
     telephone = models.CharField(max_length=20, blank=True)
     pays_telephone = models.CharField(max_length=2, blank=True)
-    # Emails de confirmation envoyés par le worker (un drapeau par destinataire : pas de doublon si l'un échoue)
+    # Confirmation emails sent by the worker (one flag per recipient: no duplicate if one fails)
     notifie = models.BooleanField(default=False)
     notifie_hote = models.BooleanField(default=False)
     cree_le = models.DateTimeField(auto_now_add=True)
@@ -131,7 +131,7 @@ class PaiementModel(ObjetPayeMixin, models.Model):
         app_label = 'paiements'
         ordering = ['-cree_le']
         verbose_name = 'Paiement'
-        # Exactement un objet payé
+        # Exactly one paid object
         constraints = [models.CheckConstraint(
             condition=models.Q(reservation__isnull=False, transfert__isnull=True, don__isnull=True, location__isnull=True)
             | models.Q(reservation__isnull=True, transfert__isnull=False, don__isnull=True, location__isnull=True)
@@ -145,7 +145,7 @@ class PaiementModel(ObjetPayeMixin, models.Model):
 
 
 class VersementModel(models.Model):
-    """Reversement de la part de l'hôte, déclenché après l'arrivée du voyageur."""
+    """Payout of the host's share, triggered after the traveller's arrival."""
     STATUTS = [
         ('planifie', 'Planifié'),
         ('en_cours', 'En cours'),
@@ -169,7 +169,7 @@ class VersementModel(models.Model):
     tentatives = models.PositiveSmallIntegerField(default=0)
     derniere_erreur = models.TextField(blank=True)
     envoye_le = models.DateTimeField(null=True, blank=True)
-    # Email envoyé pour l'état final (versé à l'hôte, ou échec signalé aux administrateurs)
+    # Email sent for the final state (paid to the host, or failure reported to the administrators)
     notifie = models.BooleanField(default=False)
     cree_le = models.DateTimeField(auto_now_add=True)
     mis_a_jour_le = models.DateTimeField(auto_now=True)
@@ -208,7 +208,7 @@ class RemboursementModel(ObjetPayeMixin, models.Model):
     devise = models.CharField(max_length=3, default='XOF')
     motif = models.CharField(max_length=255)
     statut = models.CharField(max_length=20, choices=STATUTS, default='a_envoyer')
-    # Compte Mobile Money indiqué par le voyageur (FedaPay ne communique pas le numéro débité)
+    # Mobile Money account given by the traveller (FedaPay does not give the charged number)
     pays = models.CharField(max_length=2, blank=True, choices=PAYS_CHOICES)
     operateur = models.CharField(max_length=30, blank=True, choices=OPERATEUR_CHOICES)
     numero = models.CharField(max_length=15, blank=True)
@@ -216,7 +216,7 @@ class RemboursementModel(ObjetPayeMixin, models.Model):
     tentatives = models.PositiveSmallIntegerField(default=0)
     derniere_erreur = models.TextField(blank=True)
     envoye_le = models.DateTimeField(null=True, blank=True)
-    # Email envoyé pour l'état final (remboursé, ou traitement manuel signalé aux administrateurs)
+    # Email sent for the final state (refunded, or manual handling reported to the administrators)
     notifie = models.BooleanField(default=False)
     cree_le = models.DateTimeField(auto_now_add=True)
     mis_a_jour_le = models.DateTimeField(auto_now=True)

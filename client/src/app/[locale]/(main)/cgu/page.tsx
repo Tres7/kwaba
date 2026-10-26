@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return metadataPage({ locale, chemin: "/cgu", titre: t("cgu") });
 }
 
-/** Page juridique : version française ou anglaise selon la langue (la version française fait foi). */
+/** Legal page: French or English version depending on the language (the French version is authoritative). */
 export default async function Page() {
   return (await getLocale()) === "en" ? <ContenuEn /> : <ContenuFr />;
 }

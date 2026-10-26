@@ -1,9 +1,9 @@
-"""Stockage des fichiers envoyés (photos, avatars) sur Cloudflare R2, via son API compatible S3."""
+"""Storage of uploaded files (photos, avatars) on Cloudflare R2, through its S3-compatible API."""
 from collections.abc import Mapping
 
 
 def r2_storage(env: Mapping[str, str]) -> dict | None:
-    """Backend de stockage R2 si R2_BUCKET est défini, sinon None (disque local)."""
+    """R2 storage backend if R2_BUCKET is set, otherwise None (local disk)."""
     if not env.get('R2_BUCKET'):
         return None
     return {
@@ -13,23 +13,23 @@ def r2_storage(env: Mapping[str, str]) -> dict | None:
             'endpoint_url': env['R2_ENDPOINT_URL'],          # https://<compte>.r2.cloudflarestorage.com
             'access_key': env['R2_ACCESS_KEY_ID'],
             'secret_key': env['R2_SECRET_ACCESS_KEY'],
-            # Domaine public du bucket (sans https://) : les URL des photos sont enregistrées dans les annonces,
-            # elles doivent rester valables (pas d'URL signée qui expire)
+            # Public domain of the bucket (without https://): photo URLs are saved in the listings,
+            # they must stay valid (no signed URL that expires)
             'custom_domain': env['R2_PUBLIC_DOMAIN'],
             'querystring_auth': False,
             'region_name': 'auto',
             'signature_version': 's3v4',
-            'default_acl': None,      # R2 ne gère pas les ACL
+            'default_acl': None,      # R2 does not support ACLs
             'file_overwrite': False,
         },
     }
 
 
 def r2_storage_prive(env: Mapping[str, str]) -> dict | None:
-    """Documents privés (pièces d'identité des hôtes, photos des visites) dans un bucket R2 sans domaine public.
+    """Private documents (hosts' identity documents, visit photos) in an R2 bucket without a public domain.
 
-    Jamais d'URL publique : les fichiers ne sont lus que par l'API, après contrôle du rôle (apps.verifications).
-    None si R2_PRIVE_BUCKET n'est pas défini (disque local, dossier non servi par le serveur web).
+    Never a public URL: files are only read by the API, after checking the role (apps.verifications).
+    None if R2_PRIVE_BUCKET is not set (local disk, folder not served by the web server).
     """
     if not env.get('R2_PRIVE_BUCKET'):
         return None
@@ -40,7 +40,7 @@ def r2_storage_prive(env: Mapping[str, str]) -> dict | None:
             'endpoint_url': env['R2_ENDPOINT_URL'],
             'access_key': env['R2_ACCESS_KEY_ID'],
             'secret_key': env['R2_SECRET_ACCESS_KEY'],
-            'querystring_auth': True,     # aucune URL publique
+            'querystring_auth': True,     # no public URL
             'region_name': 'auto',
             'signature_version': 's3v4',
             'default_acl': None,

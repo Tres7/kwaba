@@ -18,7 +18,7 @@ const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = 
   { id: "paypal", label: "paypal", icon: Wallet },
 ];
 
-/** Choix du montant, des frais et du moyen de paiement ; tout ce qui concerne le don est affiché avant de payer. */
+/** Choice of the amount, fees and payment method; everything about the donation is shown before paying. */
 export default function FormulaireDon({ organisation, projetId }: { organisation: OrganisationDetail; projetId: string | null }) {
   const t = useTranslations("don");
   const tRes = useTranslations("reservation");

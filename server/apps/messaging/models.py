@@ -1,6 +1,6 @@
-# Enregistre les modèles de persistance auprès de Django (même convention que apps/users/models.py).
-# Sans cet import, l'ORM ignore ces modèles au démarrage : les suppressions en cascade
-# (utilisateur, hébergement) échouent sur les clés étrangères de la messagerie.
+# Registers the persistence models with Django (same convention as apps/users/models.py).
+# Without this import, the ORM ignores these models at startup: cascading deletions
+# (user, listing) fail on the messaging foreign keys.
 from apps.messaging.infrastructure.persistence.models import (
     ConversationModel,
     MessageModel,

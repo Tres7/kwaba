@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 // Aide de chaque type de logement : messages annonce.types.<type>
-// Politiques d'annulation au choix de l'hôte (CGV, annexe 1) : messages politiqueAnnulation.<politique>
+// Cancellation policies chosen by the host (terms of sale, appendix 1): messages politiqueAnnulation.<politique>
 const POLITIQUES: PolitiqueAnnulation[] = ["souple", "moderee", "ferme"];
 
 interface HebergementFormProps {
@@ -30,7 +30,7 @@ const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb
 export default function HebergementForm({ initial, onSaved, onCancel }: HebergementFormProps) {
   const t = useTranslations("annonce");
   const tp = useTranslations("politiqueAnnulation");
-  // Type de partenaire réglé par l'équipe (particulier, hôtel, fondateur) : la commission de l'aperçu est la sienne
+  // Partner type set by the team (individual, hotel, founder): the preview's commission is theirs
   const { data: revenus } = useQuery({
     queryKey: ["paiements", "revenus"],
     queryFn: async () => (await api.get<Revenus>("/v1/paiements/revenus/")).data,
@@ -56,13 +56,13 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
     depart_avant: initial?.depart_avant?.slice(0, 5) ?? "11:00",
     politique_annulation: initial?.politique_annulation ?? "moderee",
   });
-  // Photos dans l'ordre d'affichage : la première est la couverture
+  // Photos in display order: the first one is the cover
   const [photos, setPhotos] = useState<string[]>(() => {
     const all = [initial?.image_url, ...(initial?.images ?? [])].filter((u): u is string => !!u);
     return Array.from(new Set(all));
   });
   const [uploading, setUploading] = useState(false);
-  // Droits d'auteur et droit à l'image : l'hôte atteste détenir les droits sur les photos publiées
+  // Copyright and image rights: the host certifies they own the rights to the published photos
   const [droitsPhotos, setDroitsPhotos] = useState(!!initial);
   const onPhotosChange = useCallback((urls: string[]) => setPhotos(urls), []);
   const [errors, setErrors] = useState<Record<string, string>>({});

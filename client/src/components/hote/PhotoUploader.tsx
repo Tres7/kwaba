@@ -16,7 +16,7 @@ type Item =
   | { key: string; status: "error"; preview: string; error: string };
 
 interface PhotoUploaderProps {
-  /** URLs des photos ; la première est la photo de couverture. */
+  /** Photo URLs; the first one is the cover photo. */
   value: string[];
   onChange: (urls: string[]) => void;
   onBusyChange?: (busy: boolean) => void;
@@ -39,7 +39,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error }: 
     if (!complet) inputRef.current?.click();
   };
 
-  // Le formulaire ne connaît que les photos envoyées, dans l'ordre affiché
+  // The form only knows the uploaded photos, in the displayed order
   useEffect(() => {
     onChange(items.flatMap((i) => (i.status === "done" ? [i.url] : [])));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,7 +47,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error }: 
 
   useEffect(() => onBusyChange?.(busy), [busy, onBusyChange]);
 
-  // Libère les aperçus locaux
+  // Releases the local previews
   useEffect(() => () => items.forEach((i) => i.status !== "done" && URL.revokeObjectURL(i.preview)), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (key: string, patch: Item) => setItems((prev) => prev.map((i) => (i.key === key ? patch : i)));
@@ -84,13 +84,13 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error }: 
     const queued = accepted.map((file) => ({ key: nextKey(), file, preview: URL.createObjectURL(file) }));
     setItems((prev) => [...prev, ...queued.map(({ key, preview }) => ({ key, status: "uploading" as const, preview, progress: 0 }))]);
 
-    // Envois l'un après l'autre : plus fiable sur une connexion mobile lente
+    // Uploads one after the other: more reliable on a slow mobile connection
     for (const { key, file, preview } of queued) await uploadOne(key, file, preview);
   };
 
   const remove = (item: Item) => {
     if (item.status !== "done") URL.revokeObjectURL(item.preview);
-    // Photo envoyée pendant cette édition : on supprime aussi le fichier côté serveur
+    // Photo uploaded during this edit: the file is also deleted on the server
     if (item.status === "done" && item.photoId) api.delete(`/v1/hebergements/photos/${item.photoId}/`).catch(() => {});
     setItems((prev) => prev.filter((i) => i.key !== item.key));
   };
@@ -109,7 +109,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error }: 
 
   return (
     <div>
-      {/* Toute la zone ouvre le choix des fichiers (pas seulement le mot « parcourez »), à la souris comme au clavier */}
+      {/* The whole area opens the file picker (not only the word "browse"), with the mouse as with the keyboard */}
       <div
         role="button"
         tabIndex={complet ? -1 : 0}
@@ -140,7 +140,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error }: 
           accept={ACCEPTED.join(",")}
           multiple
           className="hidden"
-          // Le clic programmatique sur ce champ ne doit pas remonter à la zone (qui le rouvrirait)
+          // The programmatic click on this field must not bubble up to the area (which would open it again)
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ""; }}
         />

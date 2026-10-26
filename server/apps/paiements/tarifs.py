@@ -1,9 +1,9 @@
-"""Calcul des montants d'une réservation et du barème d'annulation (CGV, article 6.4 et annexe 1).
+"""Computation of a booking's amounts and of the cancellation scale (terms of sale, article 6.4 and appendix 1).
 
-Tous les montants sont des entiers en FCFA (le franc CFA n'a pas de sous-unité).
-Exemple pour 2,5 nuits à 25 000 FCFA (62 500 FCFA) chez un hôte particulier :
-    frais de service voyageur 6 % = 3 750 → le voyageur paie 66 250 ;
-    commission hôte 8 % = 5 000 → l'hôte reçoit 57 500 ; Kwa-Ba garde 8 750 (avant frais FedaPay).
+All amounts are integers in FCFA (the CFA franc has no subunit).
+Example for 2.5 nights at 25,000 FCFA (62,500 FCFA) with an individual host:
+    traveller's service fees 6 % = 3,750 → the traveller pays 66,250;
+    host commission 8 % = 5,000 → the host receives 57,500; Kwa-Ba keeps 8,750 (before FedaPay fees).
 """
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
@@ -11,27 +11,27 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.utils import timezone
 
-# Frais de service payés par le voyageur
+# Service fees paid by the traveller
 FRAIS_VOYAGEUR = Decimal('0.06')
-FRAIS_REDUITS = Decimal('0.03')  # Client fidèle et Pack Séjour + Chauffeur
+FRAIS_REDUITS = Decimal('0.03')  # Loyal customer and Stay Pack + Driver
 
-# Commission payée par l'hôte (réglée par l'équipe, voir ConditionsHoteModel)
+# Commission paid by the host (set by the team, see ConditionsHoteModel)
 COMMISSION_PARTICULIER = Decimal('0.08')
 COMMISSION_HOTEL = Decimal('0.12')
 COMMISSION_FONDATEUR = Decimal('0.05')
-COMMISSION_HOTE = COMMISSION_PARTICULIER  # taux affiché par défaut
+COMMISSION_HOTE = COMMISSION_PARTICULIER  # rate displayed by default
 
-# Heure d'arrivée de référence pour les délais (barème d'annulation, versement à l'hôte)
+# Reference arrival time for the deadlines (cancellation scale, payout to the host)
 HEURE_ARRIVEE = time(14, 0)
 DELAI_VERSEMENT = timedelta(hours=24)
 
-# Politiques d'annulation au choix de l'hôte (CGV, annexe 1)
+# Cancellation policies chosen by the host (terms of sale, appendix 1)
 POLITIQUES = [('souple', 'Souple'), ('moderee', 'Modérée'), ('ferme', 'Ferme')]
 POLITIQUE_PAR_DEFAUT = 'moderee'
-# Délai de réflexion offert (CGV, art. 10.3) : annulation dans les 48 h, au moins 7 jours avant l'arrivée
+# Cooling-off period offered (terms of sale, art. 10.3): cancellation within 48 h, at least 7 days before arrival
 REFLEXION = timedelta(hours=48)
 REFLEXION_AVANT_ARRIVEE = timedelta(days=7)
-# Séjours d'au moins 28 nuits : le premier mois (30 nuits) n'est pas remboursable à moins de 30 jours de l'arrivée
+# Stays of at least 28 nights: the first month (30 nights) is not refundable less than 30 days before arrival
 LONG_SEJOUR_NUITS = 28
 PREMIER_MOIS_NUITS = 30
 
@@ -56,18 +56,18 @@ class Montants:
 
     @property
     def revenu_kwaba(self) -> int:
-        """Revenu brut de Kwa-Ba : frais du voyageur + commission de l'hôte (avant frais du prestataire de paiement)."""
+        """Kwa-Ba's gross revenue: traveller's fees + host's commission (before payment provider fees)."""
         return self.frais_service + self.commission_hote
 
     @property
     def taux_frais(self) -> int:
-        """Taux des frais de service en %, pour l'affichage (« Frais de service (6 %) »)."""
+        """Service fee rate in %, for display ("Service fees (6 %)")."""
         return round(self.frais_service * 100 / self.prix_nuits) if self.prix_nuits else 0
 
 
 def calculer(prix_par_nuit, nuits: int, frais=FRAIS_VOYAGEUR, commission=COMMISSION_PARTICULIER) -> Montants:
-    """Frais du voyageur et commission de l'hôte : deux prélèvements distincts sur le prix des nuits, arrondis au franc
-    (au plus proche, la moitié vers le haut, comme formatFcfa côté site)."""
+    """Traveller's fees and host's commission: two separate deductions on the price of the nights, rounded to the
+    franc (to the nearest, half up, like formatFcfa on the site)."""
     if Decimal(prix_par_nuit) <= 0:
         raise ValueError('Le prix par nuit doit être positif.')
     if int(nuits) != nuits or nuits < 1:
@@ -80,7 +80,7 @@ def calculer(prix_par_nuit, nuits: int, frais=FRAIS_VOYAGEUR, commission=COMMISS
     )
 
 
-# --- Taux selon l'hôte et le voyageur -------------------------------------------------------------
+# --- Rates by host and traveller -------------------------------------------------------------
 
 def conditions(hote):
     from .models import ConditionsHoteModel
@@ -89,7 +89,7 @@ def conditions(hote):
 
 
 def taux_commission(hote, jour=None) -> Decimal:
-    """8 % (particulier), 12 % (hôtel), 5 % pendant le Programme Fondateurs."""
+    """8 % (individual), 12 % (hotel), 5 % during the Founders Programme."""
     c = conditions(hote)
     if not c:
         return COMMISSION_PARTICULIER
@@ -99,7 +99,7 @@ def taux_commission(hote, jour=None) -> Decimal:
 
 
 def hotes_deja_visites(voyageur) -> set:
-    """Hôtes chez qui le voyageur a déjà séjourné par Kwa-Ba (séjour payé et terminé) : tarif Client fidèle."""
+    """Hosts the traveller has already stayed with through Kwa-Ba (paid and finished stay): loyal customer rate."""
     from apps.reservations.models import ReservationModel
 
     if not voyageur or not voyageur.is_authenticated:
@@ -109,18 +109,18 @@ def hotes_deja_visites(voyageur) -> set:
 
 
 def taux_frais(voyageur, hebergement) -> Decimal:
-    """6 % ; 3 % pour un Client fidèle (nouveau séjour chez le même hôte par Kwa-Ba)."""
+    """6 %; 3 % for a loyal customer (new stay with the same host through Kwa-Ba)."""
     return FRAIS_REDUITS if hebergement.host_id in hotes_deja_visites(voyageur) else FRAIS_VOYAGEUR
 
 
 def devis(hebergement, nuits: int, voyageur=None, jour=None) -> Montants:
-    """Montants d'un séjour avec les taux de cet hôte et de ce voyageur."""
+    """Amounts of a stay with the rates of this host and this traveller."""
     return calculer(hebergement.price_per_night, nuits, frais=taux_frais(voyageur, hebergement),
                     commission=taux_commission(hebergement.host, jour))
 
 
 def montants_de(reservation) -> Montants:
-    """Montants figés d'une réservation (recalculés pour les réservations antérieures au paiement en ligne)."""
+    """Frozen amounts of a booking (computed again for bookings older than online payment)."""
     if reservation.prix_nuits is not None:
         return Montants(reservation.prix_nuits, reservation.frais_service, reservation.commission_hote)
     return calculer(reservation.hebergement.price_per_night, reservation.nights)
@@ -134,13 +134,13 @@ def date_versement(reservation) -> datetime:
     return arrivee(reservation) + DELAI_VERSEMENT
 
 
-# --- Annulation par le voyageur ------------------------------------------------------------------
+# --- Cancellation by the traveller ------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class Annulation:
-    rembourse_voyageur: int  # montant rendu au voyageur
-    nuits_retenues: int      # part du prix des nuits conservée (revient à l'hôte, moins la commission)
-    commission_hote: int = 0  # commission sur les nuits retenues, au taux de la réservation
+    rembourse_voyageur: int  # amount given back to the traveller
+    nuits_retenues: int      # share of the price of the nights kept (goes to the host, minus the commission)
+    commission_hote: int = 0  # commission on the kept nights, at the booking's rate
 
     @property
     def montant_hote(self) -> int:
@@ -148,7 +148,7 @@ class Annulation:
 
 
 def _retenue(montants: Montants, nuits_retenues: int, frais_rendus: bool = False) -> Annulation:
-    """Le voyageur perd `nuits_retenues` (et les frais de service, sauf `frais_rendus`)."""
+    """The traveller loses `nuits_retenues` (and the service fees, unless `frais_rendus`)."""
     nuits_retenues = max(0, min(nuits_retenues, montants.prix_nuits))
     commission = arrondi(Decimal(nuits_retenues) * montants.commission_hote / montants.prix_nuits) if montants.prix_nuits else 0
     rendu = montants.prix_nuits - nuits_retenues + (montants.frais_service if frais_rendus else 0)
@@ -169,7 +169,7 @@ REGLES_POLITIQUES = {
 
 
 def texte_politique(reservation) -> str:
-    """Conditions d'annulation de la réservation, en une phrase (bon de réservation, email de confirmation)."""
+    """Cancellation conditions of the booking, in one sentence (booking voucher, confirmation email)."""
     code = politique(reservation)
     return (f"Politique {dict(POLITIQUES)[code]} : {REGLES_POLITIQUES[code]}. Les frais de service ne sont rendus qu'avec un "
             "remboursement intégral. Annulation gratuite dans les 48 heures suivant la réservation si l'arrivée est dans "
@@ -177,16 +177,16 @@ def texte_politique(reservation) -> str:
 
 
 def bareme_voyageur(montants: Montants, reservation, maintenant: datetime | None = None) -> Annulation:
-    """Annulation par le voyageur (CGV, article 10.3 et annexe 1) :
-    - délai de réflexion : annulée dans les 48 h suivant la réservation et au moins 7 jours avant l'arrivée,
-      tout est remboursé ;
-    - séjour de 28 nuits ou plus : tout est remboursé au moins 30 jours avant l'arrivée ; ensuite, le premier mois
-      est retenu et les frais de service conservés ;
-    - sinon, la politique choisie par l'hôte :
-      Souple : intégral jusqu'à 24 h avant ; ensuite, la première nuit est retenue ;
-      Modérée : intégral jusqu'à 5 jours avant ; 50 % des nuits jusqu'à 24 h avant ; rien ensuite ;
-      Ferme : intégral jusqu'à 30 jours avant ; 50 % des nuits jusqu'à 7 jours avant ; rien ensuite.
-    Les frais de service ne sont rendus qu'avec un remboursement intégral.
+    """Cancellation by the traveller (terms of sale, article 10.3 and appendix 1):
+    - cooling-off period: cancelled within 48 h of the booking and at least 7 days before arrival,
+      everything is refunded;
+    - stay of 28 nights or more: everything is refunded at least 30 days before arrival; afterwards, the first
+      month is kept and the service fees retained;
+    - otherwise, the policy chosen by the host:
+      Flexible: full refund until 24 h before; afterwards, the first night is kept;
+      Moderate: full refund until 5 days before; 50 % of the nights until 24 h before; nothing afterwards;
+      Strict: full refund until 30 days before; 50 % of the nights until 7 days before; nothing afterwards.
+    Service fees are only given back with a full refund.
     """
     maintenant = maintenant or timezone.now()
     delai = arrivee(reservation) - maintenant
@@ -212,7 +212,7 @@ def bareme_voyageur(montants: Montants, reservation, maintenant: datetime | None
             if delai >= timedelta(days=7):
                 return _retenue(montants, moitie)
             return _retenue(montants, montants.prix_nuits)
-        case _:  # modérée
+        case _:  # moderate
             if delai >= timedelta(days=5):
                 return integral
             if delai >= timedelta(hours=24):

@@ -30,7 +30,7 @@ class Command(BaseCommand):
         logger.info("Relais démarré (intervalle %ss)", interval)
 
         while True:
-            # Processus longue durée : on ferme les connexions DB devenues invalides
+            # Long-running process: close the database connections that became invalid
             close_old_connections()
             try:
                 stats = relay.process_due()
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     if purged:
                         logger.info("Rétention : %s ligne(s) d'outbox supprimée(s)", purged)
             except Exception:
-                # Base indisponible par exemple : on journalise et on réessaie à la passe suivante
+                # Database unavailable for example: log it and try again at the next pass
                 logger.exception("Erreur pendant la passe du relais")
 
             if options['once']:

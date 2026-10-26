@@ -1,7 +1,7 @@
-"""Client minimal de l'API FedaPay (https://docs.fedapay.com).
+"""Minimal client of the FedaPay API (https://docs.fedapay.com).
 
-Seul ce module parle à FedaPay : changer de prestataire (Ghana, pays anglophones…) revient à
-écrire un autre client exposant les mêmes méthodes.
+Only this module talks to FedaPay: changing provider (Ghana, English-speaking countries…) means
+writing another client exposing the same methods.
 """
 import hashlib
 import hmac
@@ -39,7 +39,7 @@ class FedaPayErreur(Exception):
 
 
 def _objet(corps: dict, nom: str) -> dict:
-    """Les réponses FedaPay encapsulent l'objet : {"v1/transaction": {...}}."""
+    """FedaPay responses wrap the object: {"v1/transaction": {...}}."""
     for cle in (f'v1/{nom}', nom):
         if isinstance(corps.get(cle), dict):
             return corps[cle]
@@ -76,7 +76,7 @@ class FedaPay:
     # --- Encaissement ---------------------------------------------------------------
 
     def creer_transaction(self, *, montant: int, description: str, callback_url: str, client: dict) -> tuple[str, str]:
-        """Crée la transaction et son lien de paiement. Renvoie (identifiant, url de la page de paiement)."""
+        """Creates the transaction and its payment link. Returns (id, url of the payment page)."""
         transaction = _objet(self._appel('POST', '/transactions', {
             'description': description[:255],
             'amount': montant,
@@ -94,7 +94,7 @@ class FedaPay:
     # --- Versements (payouts) -------------------------------------------------------
 
     def creer_versement(self, *, montant: int, mode: str, client: dict) -> str:
-        """Crée puis déclenche un versement Mobile Money. Renvoie l'identifiant du payout."""
+        """Creates then starts a Mobile Money payout. Returns the payout id."""
         payout = _objet(self._appel('POST', '/payouts', {
             'amount': montant,
             'currency': {'iso': 'XOF'},
@@ -114,7 +114,7 @@ def client() -> FedaPay:
 
 
 def signature_valide(corps: bytes, entete: str, secret: str, tolerance: int = 300) -> bool:
-    """Vérifie l'en-tête X-FEDAPAY-SIGNATURE (« t=<horodatage>,s=<hmac sha256> »)."""
+    """Checks the X-FEDAPAY-SIGNATURE header ("t=<timestamp>,s=<hmac sha256>")."""
     elements = dict(
         morceau.split('=', 1) for morceau in (entete or '').split(',') if '=' in morceau
     )

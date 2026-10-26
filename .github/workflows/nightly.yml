@@ -2,14 +2,14 @@ name: Nightly
 
 on:
   schedule:
-    - cron: '0 1 * * *' # 1 h UTC (3 h à Paris en été, 2 h en hiver)
+    - cron: '0 1 * * *' # 1 am UTC (3 am in Paris in summer, 2 am in winter)
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  # Les CVE publiées depuis la construction des images : celles du dernier manifest sont rescannées chaque nuit.
+  # CVEs published since the images were built: those of the latest manifest are scanned again every night.
   trivy-manifest-images:
     name: Trivy (image ${{ matrix.service }} du dernier manifest)
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
       - id: name
         env:
           SERVICE: ${{ matrix.service }}
-        # Image du dernier manifest (absente pour le client d'un manifest v1, déployé depuis Git)
+        # Image of the latest manifest (missing for the client of a v1 manifest, deployed from Git)
         run: echo "image=$(node .github/scripts/manifest/latest.mjs --field "services.${SERVICE}.image")" >> "$GITHUB_OUTPUT"
 
       - if: steps.name.outputs.image == ''
@@ -52,7 +52,7 @@ jobs:
         with:
           image-ref: ${{ steps.name.outputs.image }}
 
-  # Nouvelles CVE dans les dépendances, et secrets sur tout l'historique (toutes branches)
+  # New CVEs in the dependencies, and secrets in the whole history (all branches)
   security:
     name: Security
     uses: ./.github/workflows/_security-checks.yml

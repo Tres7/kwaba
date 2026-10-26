@@ -136,7 +136,7 @@ def test_two_relays_never_claim_the_same_row(schedule):
         with transaction.atomic():
             entry = DjangoNotificationOutbox().claim_next_due(timezone.now())
             claimed.append(entry.id if entry else None)
-            both_claimed.wait()  # garde le verrou tant que l'autre relais n'a pas réclamé sa ligne
+            both_claimed.wait()  # keeps the lock as long as the other relay has not claimed its row
 
     _run_in_threads(claim, 2)
     assert sorted(claimed) == sorted(r.id for r in rows)
@@ -161,9 +161,9 @@ def test_concurrent_sends_are_serialized_and_schedule_one_email(make_user, make_
     assert statuses == [201] * 20
     last_id = MessageModel.objects.filter(conversation_id=thread_id).order_by('-id').values_list('id', flat=True)[0]
     assert MessageModel.objects.filter(conversation_id=thread_id).count() == 20
-    # Le curseur de l'expéditeur n'a jamais reculé malgré les envois parallèles
+    # The sender's cursor never went back despite the parallel sendings
     assert ConversationModel.objects.get(pk=thread_id).guest_last_read_id == last_id
-    # Décision 0→1 prise une seule fois sous le verrou du fil
+    # 0→1 decision taken only once under the thread lock
     assert NotificationOutboxModel.objects.count() == 1
 
 

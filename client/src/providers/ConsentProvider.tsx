@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface ContexteConsentement {
   consentement: Consentement | null;
-  /** true une fois le stockage lu (évite d'afficher le bandeau puis de le retirer) */
+  /** true once the storage is read (avoids showing the banner then removing it) */
   pret: boolean;
   definir: (contenusTiers: boolean) => void;
   ouvrirPreferences: () => void;
@@ -100,7 +100,7 @@ export default function ConsentProvider({ children }: { children: React.ReactNod
   useEffect(() => {
     setConsentement(lireConsentement());
     setPret(true);
-    // Synchronise les composants (et les autres onglets) quand le choix change
+    // Syncs the components (and the other tabs) when the choice changes
     const maj = () => setConsentement(lireConsentement());
     window.addEventListener(EVENEMENT, maj);
     window.addEventListener("storage", maj);
@@ -136,7 +136,7 @@ export default function ConsentProvider({ children }: { children: React.ReactNod
               </p>
             </div>
           </div>
-          {/* Refuser est aussi simple qu'accepter : même taille, même niveau de lecture (CNIL) */}
+          {/* Refusing is as easy as accepting: same size, same reading level (CNIL) */}
           <div className="grid grid-cols-2 gap-2 mt-4">
             <button type="button" onClick={() => definir(false)} className="py-3 rounded-xl border-2 border-dark text-dark text-sm font-bold hover:bg-gray-50">{t("toutRefuser")}</button>
             <button type="button" onClick={() => definir(true)} className="py-3 rounded-xl border-2 border-dark bg-dark text-white text-sm font-bold hover:bg-black">{t("toutAccepter")}</button>

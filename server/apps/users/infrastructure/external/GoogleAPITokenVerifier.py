@@ -29,8 +29,8 @@ class GoogleAPITokenVerifier(GoogleTokenVerifier):
             raise ValueError(INVALID_TOKEN)
 
         data = response.json()
-        # Le jeton doit avoir été émis pour Kwa-Ba : sinon, un site tiers qui propose « Se connecter avec Google »
-        # pourrait rejouer ici le jeton de ses visiteurs et ouvrir leur compte Kwa-Ba. Même message, volontairement.
+        # The token must have been issued for Kwa-Ba: otherwise, a third-party site offering "Sign in with Google"
+        # could replay its visitors' token here and open their Kwa-Ba account. Same message, on purpose.
         if data.get("aud") not in self._client_ids or data.get("iss") not in self._ISSUERS:
             raise ValueError(INVALID_TOKEN)
 

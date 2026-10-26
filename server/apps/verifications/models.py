@@ -6,7 +6,7 @@ from django.db import models
 
 
 def stockage_prive():
-    """Bucket R2 privé ou dossier local non servi (settings.STORAGES['prive']) : jamais d'URL publique."""
+    """Private R2 bucket or local folder not served (settings.STORAGES['prive']): never a public URL."""
     return storages['prive']
 
 
@@ -20,9 +20,9 @@ def _chemin_photo_visite(instance, filename):
 
 
 class PieceIdentiteModel(models.Model):
-    """Pièce d'identité d'un hôte, contrôlée par l'agent lors de la visite.
+    """A host's identity document, checked by the agent during the visit.
 
-    Le fichier est effacé dès que l'identité est validée : seul le résultat du contrôle est conservé.
+    The file is deleted as soon as the identity is validated: only the result of the check is kept.
     """
     TYPES = [
         ('cni', "Carte nationale d'identité"),
@@ -53,9 +53,9 @@ class PieceIdentiteModel(models.Model):
 
 
 class VisiteModel(models.Model):
-    """Compte rendu de la visite d'un logement par un agent de terrain."""
+    """Report of a field agent's visit of a listing."""
     DECISIONS = [('validee', 'Validée'), ('refusee', 'Refusée')]
-    # Grille de contrôle : toutes les cases doivent être cochées pour valider
+    # Checklist: every box must be ticked to validate
     CONTROLES = {
         'identite': "La pièce d'identité correspond à la personne rencontrée",
         'adresse': "Le logement est à l'adresse indiquée",
@@ -81,7 +81,7 @@ class VisiteModel(models.Model):
 
 
 class PhotoVisiteModel(models.Model):
-    """Photo prise par l'agent pendant la visite (preuve en cas de litige), stockage privé."""
+    """Photo taken by the agent during the visit (proof in case of dispute), private storage."""
     visite = models.ForeignKey(VisiteModel, on_delete=models.CASCADE, related_name='photos')
     image = models.ImageField(upload_to=_chemin_photo_visite, storage=stockage_prive)
     cree_le = models.DateTimeField(auto_now_add=True)

@@ -1,23 +1,23 @@
 /**
- * Consentement aux cookies et contenus tiers (RGPD / recommandations CNIL).
+ * Consent to cookies and third-party content (GDPR / CNIL recommendations).
  *
- * Seuls les traceurs non indispensables demandent un accord. Aujourd'hui, une seule catégorie :
- * les contenus tiers (carte Google Maps), qui peuvent déposer leurs propres cookies.
- * Les cookies de connexion et de sécurité (NextAuth) sont strictement nécessaires : pas de consentement.
+ * Only non-essential trackers require consent. Today, a single category:
+ * third-party content (Google Maps map), which may set its own cookies.
+ * Sign-in and security cookies (NextAuth) are strictly necessary: no consent.
  */
 export interface Consentement {
   version: number;
-  /** Date ISO du choix (preuve et durée de validité). */
+  /** ISO date of the choice (proof and validity period). */
   date: string;
   contenusTiers: boolean;
 }
 
-// À incrémenter quand une nouvelle catégorie ou un nouveau service tiers est ajouté : le choix est redemandé
+// To increase when a new category or a new third-party service is added: the choice is asked again
 export const VERSION_CONSENTEMENT = 1;
 const CLE = "kwaba_consentement";
 // Key used before the AfriStay → Kwa-Ba rename: its choice is carried over once (original date kept), then removed
 const ANCIENNE_CLE = "afristay_consentement";
-// La CNIL recommande de redemander le choix au bout de 6 mois
+// The CNIL recommends asking for the choice again after 6 months
 const DUREE_MS = 182 * 24 * 60 * 60 * 1000;
 export const EVENEMENT = "kwaba:consentement";
 
@@ -51,7 +51,7 @@ export function enregistrerConsentement(contenusTiers: boolean): Consentement {
     window.localStorage.setItem(CLE, JSON.stringify(c));
     window.localStorage.removeItem(ANCIENNE_CLE);
   } catch {
-    // Stockage indisponible (navigation privée stricte) : le choix vaut pour la page en cours
+    // Storage unavailable (strict private browsing): the choice applies to the current page
   }
   window.dispatchEvent(new CustomEvent(EVENEMENT, { detail: c }));
   return c;

@@ -1,8 +1,8 @@
-"""Ce que contrôlent les agents de terrain, type par type.
+"""What field agents check, type by type.
 
-Chaque type dit où trouver ce qui attend un agent (la file « à faire »), comment le résumer dans une liste et le
-détailler dans sa fiche. Les décisions restent dans l'application du domaine (verifications pour les logements et
-les pièces d'identité) : la mission n'en garde que l'issue.
+Each type says where to find what waits for an agent (the "to do" queue), how to summarise it in a list and
+detail it in its page. Decisions stay in the domain's application (verifications for listings and identity
+documents): the mission only keeps their outcome.
 """
 from dataclasses import dataclass
 from typing import Callable
@@ -18,27 +18,27 @@ from apps.verifications.models import PieceIdentiteModel, VisiteModel
 @dataclass(frozen=True)
 class TypeMission:
     code: str
-    libelle: str            # « Logements à visiter »
+    libelle: str            # "Listings to visit"
     a_faire: Callable[[], QuerySet]
-    champ_cle: str          # champ qui identifie l'objet contrôlé (la cible de la mission)
+    champ_cle: str          # field that identifies the checked object (the target of the mission)
     resume: Callable[[object], dict]
     detail: Callable[[object], dict]
 
 
 def nom(utilisateur) -> str:
-    """Prénom et nom, ou l'email à défaut."""
+    """First name and last name, or the email otherwise."""
     if utilisateur is None:
         return 'Un agent'
     return f"{utilisateur.first_name} {utilisateur.last_name}".strip() or utilisateur.email
 
 
 def _piece_json(piece: PieceIdentiteModel | None) -> dict:
-    from apps.verifications.views import _piece_json as piece_json  # même format que l'espace hôte
+    from apps.verifications.views import _piece_json as piece_json  # same format as the host space
 
     return piece_json(piece)
 
 
-# --- Logements à visiter ------------------------------------------------------------------------------------------
+# --- Listings to visit ------------------------------------------------------------------------------------------
 
 def _logements():
     return (verifications.annonces_a_visiter().select_related('host', 'host__piece_identite')
@@ -63,7 +63,7 @@ def _logement_detail(h: HebergementModel) -> dict:
     }
 
 
-# --- Pièces d'identité à contrôler à distance ---------------------------------------------------------------------
+# --- Identity documents to check remotely ---------------------------------------------------------------------
 
 def _pieces():
     return verifications.pieces_a_controler().select_related('hote').annotate(nb_annonces=Count('hote__hebergements'))
@@ -99,8 +99,8 @@ def cle(type_mission: TypeMission, objet) -> str:
 
 
 def a_faire(type_mission: TypeMission, cible: str):
-    """L'objet s'il attend encore un agent, sinon None (déjà contrôlé, retiré, ou identifiant invalide)."""
+    """The object if it still waits for an agent, otherwise None (already checked, removed, or invalid id)."""
     try:
         return type_mission.a_faire().filter(**{type_mission.champ_cle: cible}).first()
-    except (ValueError, ValidationError):  # identifiant mal formé (UUID invalide)
+    except (ValueError, ValidationError):  # malformed id (invalid UUID)
         return None

@@ -6,7 +6,7 @@ export interface BlocContrat {
   texte: string;
 }
 
-/** Contrat vu par le signataire (lien personnel ou espace hôte). */
+/** Contract as seen by the signer (personal link or host space). */
 export interface ContratPublic {
   reference: string | null;
   titre: string;

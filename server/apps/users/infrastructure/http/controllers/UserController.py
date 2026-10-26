@@ -80,7 +80,7 @@ class MeView(APIView):
     def delete(self, request):
         try:
             _service().deactivate(request.user.id)
-            # Plus aucune session ne doit pouvoir renouveler ses jetons
+            # No session must be able to renew its tokens anymore
             from apps.users.infrastructure.http.controllers.AuthController import revoquer_jetons
             revoquer_jetons(request.user.id)
             journaliser('compte_desactive', request, utilisateur=request.user)

@@ -6,8 +6,8 @@ import IconeKwaba from "@/components/layout/IconeKwaba";
 import { Logotype } from "@/components/layout/Logo";
 import { useTranslations } from "next-intl";
 
-// Durée d'affichage : juste le temps de voir la marque (retour des utilisateurs : 4,5 s était trop long).
-// Un clic, une touche ou un toucher la passe.
+// Display time: just enough to see the brand (user feedback: 4.5 s was too long).
+// A click, a key or a touch skips it.
 const DUREE_MS = 2000;
 
 export default function SplashScreen() {
@@ -40,7 +40,7 @@ export default function SplashScreen() {
           onClick={() => setVisible(false)}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-[#0f172a] cursor-pointer"
         >
-          {/* Logo animé */}
+          {/* Animated logo */}
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

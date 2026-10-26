@@ -13,7 +13,7 @@ import { useModule } from "@/lib/site";
 import type { VoyageResume } from "@/types/api/voyage";
 import { useTranslations } from "next-intl";
 
-/** Bouton de la fiche logement : proposer ce logement à l'un de ses voyages de groupe. */
+/** Button of the listing page: suggest this listing to one of your group trips. */
 export default function ProposerAuGroupe({ hebergementId }: { hebergementId: string }) {
   const t = useTranslations("proposerGroupe");
   const router = useRouter();

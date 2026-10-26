@@ -1,4 +1,4 @@
-"""PDF d'un contrat : texte, bloc des signatures, puis certificat de signature électronique."""
+"""PDF of a contract: text, signature block, then electronic signature certificate."""
 from datetime import UTC
 from io import BytesIO
 
@@ -23,7 +23,7 @@ def _image(fichier) -> Image | None:
     with fichier.open('rb') as f:
         contenu = f.read()
     image = Image(BytesIO(contenu))
-    # Proportions conservées dans le cadre de signature
+    # Proportions kept in the signature frame
     echelle = min(LARGEUR_SIGNATURE / image.imageWidth, HAUTEUR_SIGNATURE / image.imageHeight)
     image.drawWidth, image.drawHeight = image.imageWidth * echelle, image.imageHeight * echelle
     image.hAlign = 'LEFT'
@@ -46,7 +46,7 @@ def contrat_pdf(c: ContratModel) -> bytes:
         else:
             doc.ajouter(_p(bloc['texte'], 'justifie'))
 
-    # Signatures : Kwa-Ba (représentant légal, à l'émission) et la partie
+    # Signatures: Kwa-Ba (legal representative, when issued) and the party
     kwaba = _colonne('Pour Kwa-Ba', _image(societe.signature_representant), [
         societe.raison_sociale or societe.nom_commercial,
         ', '.join(x for x in (societe.representant_nom, societe.representant_qualite) if x),

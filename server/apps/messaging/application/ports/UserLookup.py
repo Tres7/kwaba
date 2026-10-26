@@ -14,7 +14,7 @@ class UserInfo:
 
 
 class UserLookup(ABC):
-    """Accès en lecture au contexte users, sans dépendre de ses modèles."""
+    """Read access to the users context, without depending on its models."""
 
     @abstractmethod
     def get(self, user_id: uuid.UUID) -> Optional[UserInfo]:

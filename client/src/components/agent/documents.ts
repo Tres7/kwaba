@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 
-/** Ouvre la pièce d'identité : lue avec le jeton de l'agent (jamais d'URL publique), affichée dans un nouvel onglet. */
+/** Opens the identity document: read with the agent's token (never a public URL), shown in a new tab. */
 export async function ouvrirPiece(hoteId: string) {
   const onglet = window.open("", "_blank");
   try {

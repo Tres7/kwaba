@@ -12,14 +12,14 @@ interface DateRangeFieldProps {
   checkIn: string;
   checkOut: string;
   onChange: (checkIn: string, checkOut: string) => void;
-  /** « hero » : deux colonnes intégrées à la barre de recherche ; « field » : deux champs encadrés. */
+  /** "hero": two columns built into the search bar; "field": two framed fields. */
   variant?: "hero" | "field";
   className?: string;
 }
 
 const AUCUNE = new Set<string>();
 
-/** Choix arrivée / départ avec notre calendrier (identique sur tous les navigateurs et téléphones). */
+/** Arrival / departure choice with our calendar (identical on all browsers and phones). */
 export default function DateRangeField({ checkIn, checkOut, onChange, variant = "field", className }: DateRangeFieldProps) {
   const t = useTranslations("dates");
   const { open, setOpen, ref, panelRef } = usePopover();

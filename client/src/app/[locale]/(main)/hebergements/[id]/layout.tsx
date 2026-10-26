@@ -13,8 +13,8 @@ function resume(texte: string): string {
 }
 
 /**
- * Fiche logement : titre, description et photo du logement, rendus par le serveur pour Google et les aperçus de
- * lien (WhatsApp, Facebook). La page elle-même reste un composant client.
+ * Listing page: title, description and photo of the listing, rendered by the server for Google and link previews
+ * (WhatsApp, Facebook). The page itself stays a client component.
  */
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }): Promise<Metadata> {
   const { locale: brut, id } = await params;
@@ -33,10 +33,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     locale,
     chemin,
     titre: `${h.name} · ${libelleType(h.type, locale)} ${locale === "en" ? "in" : "à"} ${h.city}`,
-    // Texte de l'hôte quand il est assez long (contenu unique pour Google), sinon une phrase générée
+    // The host's text when it is long enough (unique content for Google), otherwise a generated sentence
     description: (h.description ?? "").trim().length >= 60 ? resume(h.description) : accroche,
     image: h.image_url || null,
-    // Annonce masquée par l'hôte : la page reste consultable mais ne doit pas apparaître dans Google
+    // Listing hidden by the host: the page can still be viewed but must not appear in Google
     indexable: h.is_available,
   });
 }

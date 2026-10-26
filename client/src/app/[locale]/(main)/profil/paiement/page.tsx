@@ -15,7 +15,7 @@ const METHODS = [
 export default function PaymentMethodsPage() {
   const t = useTranslations("moyensPaiement");
   const operateurs = useOperateursMobileMoney();
-  // PayPal n'apparaît que s'il est proposé par l'API (moyens non ouverts au lancement)
+  // PayPal only shows if the API offers it (payment methods not open at launch)
   const paypal = useConfigPaiement().data?.moyens.includes("paypal") ?? false;
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">

@@ -6,9 +6,9 @@ import IconeKwaba from "@/components/layout/IconeKwaba";
 import { useModule } from "@/lib/site";
 
 /**
- * Accès au Concierge depuis toutes les pages du site (sauf la conversation elle-même et les paiements) : le logo
- * Kwa-Ba flotte contre le bord droit de l'écran, à mi-hauteur, et s'ouvre en onglet au survol.
- * Rien n'est affiché (ni aucune requête envoyée au Concierge) tant que le module est masqué.
+ * Access to the Concierge from every page of the site (except the conversation itself and the payments): the Kwa-Ba
+ * logo floats against the right edge of the screen, half way up, and opens as a tab on hover.
+ * Nothing is shown (and no request is sent to the Concierge) while the module is hidden.
  */
 export default function BoutonConcierge() {
   const t = useTranslations("concierge");

@@ -11,13 +11,13 @@ interface MapEmbedProps {
 }
 
 /**
- * Carte Google Maps chargée uniquement avec l'accord du visiteur :
- * sans consentement, aucune requête n'est envoyée à Google (ni adresse IP, ni cookie).
+ * Google Maps map loaded only with the visitor's consent:
+ * without consent, no request is sent to Google (neither IP address nor cookie).
  */
 export default function MapEmbed({ lieu, ville }: MapEmbedProps) {
   const t = useTranslations("carte");
   const { consentement, definir } = useConsentement();
-  // « Afficher une fois » : ne modifie pas le choix global
+  // "Show once": does not change the global choice
   const [unique, setUnique] = useState(false);
   const autorise = consentement?.contenusTiers || unique;
   const requete = encodeURIComponent(`${lieu} ${ville}`.trim());

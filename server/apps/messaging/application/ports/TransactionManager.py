@@ -3,7 +3,7 @@ from typing import ContextManager
 
 
 class TransactionManager(ABC):
-    """Délimite une transaction : verrous et écritures (message, curseurs, outbox) sont validés ensemble."""
+    """Delimits a transaction: locks and writes (message, cursors, outbox) are committed together."""
 
     @abstractmethod
     def atomic(self) -> ContextManager:

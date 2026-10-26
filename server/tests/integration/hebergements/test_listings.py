@@ -25,7 +25,7 @@ class TestCreate:
         assert response.status_code == 201
         listing = HebergementModel.objects.get(pk=response.data['id'])
         assert listing.host_id == host.id
-        # La note et le nombre d'avis ne viennent jamais du client
+        # The rating and the number of reviews never come from the client
         assert (listing.rating, listing.review_count) == (0.0, 0)
 
     def test_guest_forbidden(self, client_for, make_user):
@@ -50,8 +50,8 @@ class TestCreate:
         assert len(HebergementModel.objects.get(pk=response.data['id']).images) == 10
 
     @pytest.mark.parametrize('url', [
-        'https://pixel-espion.example/a.jpg',     # serveur de l'hôte : recueillerait l'adresse IP des visiteurs
-        'http://images.unsplash.com/a.jpg',       # pas de HTTPS en production
+        'https://pixel-espion.example/a.jpg',     # host's server: would collect the visitors' IP address
+        'http://images.unsplash.com/a.jpg',       # no HTTPS in production
         'javascript:alert(1)',
         'https://images.unsplash.com.attaquant.example/a.jpg',
     ])

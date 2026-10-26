@@ -25,7 +25,7 @@ def _nom(u) -> str:
 
 
 def _voyage(pk, user):
-    """Voyage dont l'utilisateur est membre, ou None (404 : on ne révèle pas son existence)."""
+    """Trip the user is a member of, or None (404: its existence is not revealed)."""
     return VoyageGroupeModel.objects.filter(pk=pk, membres__utilisateur=user).select_related('organisateur').first()
 
 
@@ -52,7 +52,7 @@ def _reserve_a_l_organisateur():
 
 
 def budget(hebergement, voyage) -> dict | None:
-    """Coût du logement pour les dates du voyage, frais de service compris, et part de chacun."""
+    """Cost of the listing for the trip dates, service fees included, and everyone's share."""
     if not voyage.nuits:
         return None
     m = tarifs.devis(hebergement, voyage.nuits)
@@ -165,7 +165,7 @@ class VoyageView(APIView):
         voyage = _voyage(pk, request.user)
         if not voyage:
             return _introuvable()
-        # Tout membre peut compléter les notes partagées ; le reste est réservé à l'organisateur
+        # Any member can add to the shared notes; the rest is reserved for the organiser
         if set(request.data) - {'notes'} and voyage.organisateur_id != request.user.id:
             return _reserve_a_l_organisateur()
         serializer = VoyageSerializer(voyage, data=request.data, partial=True)
@@ -184,7 +184,7 @@ class VoyageView(APIView):
 
 
 class InvitationView(APIView):
-    """GET : aperçu avant de rejoindre ; POST : rejoindre le voyage."""
+    """GET: preview before joining; POST: join the trip."""
     permission_classes = [IsAuthenticated]
 
     def _par_code(self, code):
@@ -212,7 +212,7 @@ class InvitationView(APIView):
 
 
 class NouveauLienView(APIView):
-    """L'organisateur invalide l'ancien lien d'invitation (lien partagé par erreur…)."""
+    """The organiser invalidates the old invitation link (link shared by mistake…)."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -230,7 +230,7 @@ class MembreView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk, user_id):
-        """Quitter le voyage (soi-même) ou retirer un membre (organisateur)."""
+        """Leave the trip (oneself) or remove a member (organiser)."""
         voyage = _voyage(pk, request.user)
         if not voyage:
             return _introuvable()
@@ -256,7 +256,7 @@ class PropositionsView(APIView):
         if not hebergement:
             return Response({'hebergement': ['Logement introuvable.']}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            with transaction.atomic():  # le doublon ne doit pas casser la transaction de la requête
+            with transaction.atomic():  # the duplicate must not break the request's transaction
                 PropositionModel.objects.create(
                     voyage=voyage, hebergement=hebergement, propose_par=request.user,
                     commentaire=str(request.data.get('commentaire', ''))[:280],
@@ -309,7 +309,7 @@ class VoteView(APIView):
 
 
 class RetenirView(APIView):
-    """L'organisateur arrête le choix du logement (ou l'annule avec `proposition: null`)."""
+    """The organiser settles the choice of the listing (or cancels it with `proposition: null`)."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -372,7 +372,7 @@ class ReservationsPartageesView(APIView):
         voyage = _voyage(pk, request.user)
         if not voyage:
             return _introuvable()
-        # On ne partage que ses propres réservations
+        # Only one's own bookings can be shared
         reservation = ReservationModel.objects.filter(pk=_uuid(request.data.get('reservation')), guest=request.user).first()
         if not reservation:
             return Response({'reservation': ['Réservation introuvable.']}, status=status.HTTP_400_BAD_REQUEST)

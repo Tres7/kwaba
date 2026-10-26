@@ -1,4 +1,4 @@
-"""Détails du logement : surface, chambres, lits, petit-déjeuner, horaires."""
+"""Listing details: area, bedrooms, beds, breakfast, times."""
 HEBERGEMENTS = '/api/v1/hebergements/'
 
 

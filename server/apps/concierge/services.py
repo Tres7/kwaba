@@ -1,7 +1,7 @@
-"""Kwa-Ba AI Concierge : conversation avec Gemini (API Interactions), outils Kwa-Ba et recherche Google.
+"""Kwa-Ba AI Concierge: conversation with Gemini (Interactions API), Kwa-Ba tools and Google search.
 
-Les tours successifs s'enchaînent avec `previous_interaction_id` : Google conserve l'historique de
-l'interaction (et les signatures de réflexion du modèle), notre base garde ce qui s'affiche.
+Successive turns are chained with `previous_interaction_id`: Google keeps the history of the
+interaction (and the model's thought signatures), our database keeps what is displayed.
 """
 import json
 import logging
@@ -11,7 +11,7 @@ from django.core.cache import cache
 from django.utils import formats, timezone
 from google import genai
 from google.genai import types
-# Erreurs de l'API Interactions : non réexportées publiquement par le SDK (version épinglée dans requirements.txt)
+# Errors of the Interactions API: not re-exported publicly by the SDK (version pinned in requirements.txt)
 from google.genai._gaos.lib import compat_errors as erreurs_gemini
 
 from apps.securite.limites import incrementer
@@ -24,7 +24,7 @@ logger = logging.getLogger('apps.concierge')
 
 MAX_TOURS_OUTILS = 6
 MAX_MESSAGES_PAR_CONVERSATION = 60
-# Si l'interaction précédente a expiré chez Google, on repart avec un résumé de ces derniers échanges
+# If the previous interaction expired at Google, we start again with a summary of these last exchanges
 MESSAGES_RESUME = 10
 
 SYSTEME = """Tu es le Concierge Kwa-Ba, l'assistant de voyage de la plateforme Kwa-Ba (réservation de logements en Afrique de l'Ouest, transferts aéroport avec chauffeur, voyages de groupe « Kwa-Ba Together »).
@@ -69,17 +69,17 @@ Sécurité :
 
 
 class ConciergeErreur(Exception):
-    """Message affichable au voyageur."""
+    """Message that can be shown to the traveller."""
 
 
 def actif() -> bool:
-    """Clé Gemini configurée et module affiché (interrupteur MODULE_CONCIERGE) : sinon aucun appel à Gemini."""
+    """Gemini key configured and module displayed (MODULE_CONCIERGE switch): otherwise no call to Gemini."""
     return bool(settings.CONCIERGE['API_KEY']) and module_actif('concierge')
 
 
 def _client() -> genai.Client:
-    # Nouvel essai sur les erreurs serveur seulement : un quota dépassé (429) doit échouer tout de suite,
-    # sinon le SDK réessaie pendant plus d'une minute et le voyageur attend devant un écran figé
+    # Retry on server errors only: an exceeded quota (429) must fail right away,
+    # otherwise the SDK retries for more than a minute and the traveller waits in front of a frozen screen
     return genai.Client(
         api_key=settings.CONCIERGE['API_KEY'],
         http_options=types.HttpOptions(retry_options=types.HttpRetryOptions(attempts=2, http_status_codes=[500, 502, 503, 504])),
@@ -87,10 +87,10 @@ def _client() -> genai.Client:
 
 
 def verifier_quota(utilisateur):
-    """Limite le nombre de messages par utilisateur (coût de l'API)."""
+    """Limits the number of messages per user (API cost)."""
     for periode, secondes, maximum in (('heure', 3600, settings.CONCIERGE['MAX_PAR_HEURE']),
                                        ('jour', 86400, settings.CONCIERGE['MAX_PAR_JOUR'])):
-        # Compteur atomique : des messages envoyés en parallèle ne peuvent pas dépasser le quota (coût de l'API)
+        # Atomic counter: messages sent in parallel cannot exceed the quota (API cost)
         valeur, _ = incrementer(f"concierge:{utilisateur.pk}:{periode}", secondes)
         if valeur > maximum:
             raise ConciergeErreur(
@@ -112,7 +112,7 @@ def _outils(recherche_web: bool) -> list:
     return liste
 
 
-# Messages affichés au voyageur, en français et en anglais
+# Messages shown to the traveller, in French and English
 MESSAGES = {
     'longue': ("Cette conversation est longue : ouvrez-en une nouvelle pour continuer.", "This conversation is long: start a new one to continue."),
     'erreur': ("Le Concierge a rencontré une erreur. Réessayez.", "The Concierge ran into an error. Please try again."),
@@ -130,7 +130,7 @@ def _m(cle: str, langue: str) -> str:
 
 
 def langue_de(entete: str) -> str:
-    """Langue du site d'après l'en-tête Accept-Language (« en » pour /en, sinon français)."""
+    """Site language from the Accept-Language header ("en" for /en, otherwise French)."""
     return 'en' if (entete or '').strip().lower().startswith('en') else 'fr'
 
 
@@ -147,14 +147,14 @@ def _sse(evenement: str, donnees: dict) -> str:
 
 
 def _resume(conversation) -> str:
-    """Derniers échanges visibles, pour reprendre une conversation dont l'interaction a expiré."""
+    """Last visible exchanges, to resume a conversation whose interaction expired."""
     lignes = [f"{'Voyageur' if m.role == 'user' else 'Concierge'} : {m.texte}"
               for m in conversation.messages.filter(visible=True).exclude(texte='').order_by('-cree_le')[:MESSAGES_RESUME]]
     return '\n'.join(reversed(lignes))
 
 
 class _Tour:
-    """Ce qu'un tour du modèle a produit, reconstitué à partir du flux."""
+    """What a model turn produced, rebuilt from the stream."""
 
     def __init__(self):
         self.interaction_id = ''
@@ -166,8 +166,8 @@ class _Tour:
 
 
 def _lire_flux(flux, tour: _Tour, langue: str = 'fr'):
-    """Parcourt les événements SSE de Gemini ; produit nos propres événements pour le navigateur."""
-    appels_partiels = {}  # index de l'étape → appel en cours (arguments reçus par morceaux)
+    """Goes through Gemini's SSE events; produces our own events for the browser."""
+    appels_partiels = {}  # step index → ongoing call (arguments received in chunks)
     for ev in flux:
         t = getattr(ev, 'event_type', '')
         if t in ('interaction.created', 'interaction.completed'):
@@ -202,18 +202,18 @@ def _lire_flux(flux, tour: _Tour, langue: str = 'fr'):
         elif t == 'error':
             tour.erreur = getattr(ev.error, 'message', None) or 'erreur'
 
-    # Appels reconstitués depuis le flux si l'événement final ne les détaillait pas
+    # Calls rebuilt from the stream if the final event did not detail them
     if not tour.appels and appels_partiels:
         for a in appels_partiels.values():
             try:
                 arguments = json.loads(a['arguments']) if a['arguments'] else (a['initiaux'] or {})
             except ValueError:
-                arguments = None  # JSON illisible : renvoyé au modèle comme erreur
+                arguments = None  # unreadable JSON: sent back to the model as an error
             tour.appels.append({'id': a['id'], 'name': a['name'], 'arguments': arguments})
 
 
 def repondre(conversation: ConversationModel, texte_voyageur: str, langue: str = 'fr'):
-    """Générateur d'événements SSE : texte (deltas), outil (progression), cartes, fin, erreur."""
+    """SSE event generator: text (deltas), tool (progress), cards, end, error."""
     if conversation.messages.count() >= MAX_MESSAGES_PAR_CONVERSATION:
         yield _sse('erreur', {'message': _m('longue', langue)})
         return
@@ -247,7 +247,7 @@ def repondre(conversation: ConversationModel, texte_voyageur: str, langue: str =
             yield from _lire_flux(client.interactions.create(**parametres), tour, langue)
         except (erreurs_gemini.NotFoundError, erreurs_gemini.BadRequestError) as exc:
             if precedent and isinstance(entree, str):
-                # Interaction précédente expirée chez Google : on repart avec un résumé de la conversation
+                # Previous interaction expired at Google: we start again with a summary of the conversation
                 logger.info("Interaction %s refusée (%s), reprise avec un résumé", precedent, exc.status_code)
                 precedent = None
                 entree = f"Résumé de notre conversation précédente :\n{resume}\n\nNouveau message : {texte_voyageur}"
@@ -257,7 +257,7 @@ def repondre(conversation: ConversationModel, texte_voyageur: str, langue: str =
             return
         except erreurs_gemini.RateLimitError:
             if recherche_web and not tour.texte:
-                # Quota de la recherche Google dépassé : on continue sans elle (10 min) plutôt que d'échouer
+                # Google search quota exceeded: we go on without it (10 min) rather than failing
                 logger.warning("Recherche Google refusée (quota) : Concierge sans recherche web pendant 10 min")
                 cache.set(CLE_RECHERCHE_INDISPONIBLE, True, 600)
                 recherche_web = False
@@ -273,7 +273,7 @@ def repondre(conversation: ConversationModel, texte_voyageur: str, langue: str =
             return
 
         if tour.erreur or tour.statut == 'failed':
-            # Réponse bloquée (filtres de sécurité) ou échec : la réponse partielle est écartée
+            # Answer blocked (safety filters) or failure: the partial answer is dropped
             logger.info("Tour Gemini en échec (%s) : %s", tour.statut, tour.erreur)
             yield _sse('refus', {'message': _m('refus', langue)})
             return
@@ -305,7 +305,7 @@ def repondre(conversation: ConversationModel, texte_voyageur: str, langue: str =
         yield _sse('erreur', {'message': _m('inacheve', langue)})
         return
 
-    # Les offres trouvées pendant le tour s'affichent sous la réponse finale
+    # Offers found during the turn are shown under the final answer
     if dernier and cartes_du_tour:
         dernier.cartes = cartes_du_tour
         dernier.visible = True

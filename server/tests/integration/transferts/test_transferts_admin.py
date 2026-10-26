@@ -1,4 +1,4 @@
-"""Transferts : attribution du chauffeur depuis l'admin Django et cas d'erreur de l'API."""
+"""Transfers: driver assignment from the Django admin and API error cases."""
 from datetime import timedelta
 
 import pytest
@@ -49,14 +49,14 @@ def test_admin_attribue_le_chauffeur(sans_paiement, make_user):
     navigateur.force_login(admin)
     url = f'/admin/transferts/transfertmodel/{t.id}/change/'
     page = navigateur.get(url)
-    assert page.status_code == 200 and 'Komi' in page.content.decode()  # chauffeur de cet aéroport proposé
+    assert page.status_code == 200 and 'Komi' in page.content.decode()  # driver of this airport offered
     r = navigateur.post(url, {'chauffeur': chauffeur.pk, '_save': 'Enregistrer'}, follow=True)
     assert r.status_code == 200
     t.refresh_from_db()
     assert (t.statut, t.chauffeur_id) == ('chauffeur_assigne', chauffeur.pk)
     assert t.versement.montant == t.montant_chauffeur
 
-    # Action de masse : annuler et rembourser
+    # Bulk action: cancel and refund
     r = navigateur.post('/admin/transferts/transfertmodel/', {'action': 'annuler_et_rembourser', '_selected_action': [t.pk]}, follow=True)
     t.refresh_from_db()
     assert t.statut == 'annule' and t.annule_par == 'plateforme'
@@ -72,18 +72,18 @@ def test_api_cas_d_erreur(sans_paiement, make_user):
     assert anonyme.get(f'{TRANSFERTS}devis/', {'aeroport': 'LFW', 'arrivee': f'{jour}T10:00', 'passagers': 'deux'}).status_code == 400
 
     t = _transfert(client)
-    assert t.statut == 'confirme'  # sans paiement en ligne : confirmé directement
+    assert t.statut == 'confirme'  # without online payment: confirmed directly
     assert client.get(f'{TRANSFERTS}?reservation=00000000-0000-0000-0000-000000000000').data['count'] == 0
     inconnu = '00000000-0000-0000-0000-000000000000'
     for methode, chemin in (('get', ''), ('delete', ''), ('post', 'payer/'), ('put', 'compte-remboursement/')):
         assert getattr(client, methode)(f'{TRANSFERTS}{inconnu}/{chemin}', {}, format='json').status_code == 404
     assert client.post(f'{TRANSFERTS}{t.id}/payer/', {'moyen': 'mobile_money'}, format='json').status_code == 400
     assert client.put(f'{TRANSFERTS}{t.id}/compte-remboursement/', {'pays': 'TG', 'operateur': 'togocel', 'numero': '90000001'},
-                      format='json').status_code == 400  # aucun remboursement en attente
+                      format='json').status_code == 400  # no pending refund
     assert client.delete(f'{TRANSFERTS}{t.id}/').status_code == 200
-    assert client.delete(f'{TRANSFERTS}{t.id}/').status_code == 400  # déjà annulé
+    assert client.delete(f'{TRANSFERTS}{t.id}/').status_code == 400  # already cancelled
 
-    # Réservation d'un autre voyageur refusée, catégorie inconnue dans l'aéroport
+    # Another traveller's booking refused, unknown category at the airport
     autre = make_user()
     debut = timezone.localdate() + timedelta(days=30)
     from apps.reservations.models import ReservationModel

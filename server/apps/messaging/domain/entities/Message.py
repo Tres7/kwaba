@@ -8,10 +8,10 @@ from apps.messaging.domain.exceptions import InvalidMessageException
 
 @dataclass
 class Message:
-    """Message d'une conversation.
+    """Message of a conversation.
 
-    L'id est un entier séquentiel attribué par la persistance (et non un UUID) :
-    il sert de curseur monotone pour les lectures et le polling.
+    The id is a sequential integer assigned by the persistence (and not a UUID):
+    it is used as a monotonic cursor for reads and polling.
     """
     MAX_LENGTH = 2000
     PREVIEW_LENGTH = 120
@@ -20,7 +20,7 @@ class Message:
     sender_id: uuid.UUID
     content: str
     id: Optional[int] = None
-    # Des coordonnées (téléphone, email, lien…) ont été masquées à l'envoi
+    # Contact details (phone, email, link…) were hidden when sending
     masked: bool = False
     created_at: datetime.datetime = field(
         default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
@@ -38,7 +38,7 @@ class Message:
         return Message(conversation_id=conversation_id, sender_id=sender_id, content=content)
 
     def preview(self) -> str:
-        """Extrait court pour les notifications : jamais le corps complet."""
+        """Short excerpt for notifications: never the full body."""
         if len(self.content) <= self.PREVIEW_LENGTH:
             return self.content
         return self.content[: self.PREVIEW_LENGTH - 1].rstrip() + '…'

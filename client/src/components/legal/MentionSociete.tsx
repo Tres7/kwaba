@@ -4,8 +4,8 @@ import { AC } from "@/components/legal/LegalPage";
 import { useReglagesSite, type ReglagesSite } from "@/lib/site";
 
 /**
- * Numéro légal lu dans les réglages de l'API (variables SOCIETE_… de server/.env) : il suffit de
- * remplir la variable le jour venu, sans toucher au code. Affiche « à compléter » tant qu'elle est vide.
+ * Legal number read from the API settings (SOCIETE_… variables of server/.env): filling the variable in when
+ * the time comes is enough, without touching the code. Shows "to be completed" while it is empty.
  */
 export default function MentionSociete({ cle, libelle }: { cle: keyof ReglagesSite["mentions"]; libelle: string }) {
   const valeur = useReglagesSite().data?.mentions[cle];

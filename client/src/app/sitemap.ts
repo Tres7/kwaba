@@ -4,15 +4,15 @@ import type { Hebergement } from "@/types/api/models";
 import type { Organisation } from "@/types/api/give";
 import { filtrerLiens, type ReglagesSite } from "@/lib/modules";
 
-// Calculé à la demande (jamais au build, où l'API n'est pas joignable) ; les lectures de l'API sont mises en
-// cache une heure (lireApi)
+// Computed on demand (never at build time, when the API cannot be reached); API reads are cached
+// for an hour (lireApi)
 export const dynamic = "force-dynamic";
 
 const PRIORITES: Record<string, number> = { "/": 1, "/recherche": 0.9 };
 
 type Entree = MetadataRoute.Sitemap[number];
 
-/** Une URL par langue, chacune annonçant ses deux versions (hreflang) : Google relie /x et /en/x. */
+/** One URL per language, each announcing its two versions (hreflang): Google links /x and /en/x. */
 function entrees(chemin: string, extra: Partial<Entree> = {}): MetadataRoute.Sitemap {
   const absolues = Object.fromEntries(
     Object.entries(versionsLinguistiques(chemin)).filter(([langue]) => langue !== "x-default")
@@ -26,8 +26,8 @@ function entrees(chemin: string, extra: Partial<Entree> = {}): MetadataRoute.Sit
 }
 
 /**
- * sitemap.xml : pages publiques, logements disponibles et associations Give, en français et en anglais. Les pages
- * des modules masqués n'y figurent pas (réglages relus toutes les 5 minutes ; API injoignable : modules masqués).
+ * sitemap.xml: public pages, available listings and Give organisations, in French and English. Pages of hidden
+ * modules are left out (settings read again every 5 minutes; API unreachable: modules hidden).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [logements, reglages] = await Promise.all([

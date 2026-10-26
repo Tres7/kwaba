@@ -1,7 +1,7 @@
-"""Outils que le Concierge appelle pour proposer de vraies offres Kwa-Ba.
+"""Tools the Concierge calls to offer real Kwa-Ba offers.
 
-Chaque outil renvoie (résultat pour le modèle, cartes pour l'interface). Les arguments viennent du
-modèle : ils sont validés ici avant toute requête.
+Each tool returns (result for the model, cards for the interface). The arguments come from the
+model: they are validated here before any query.
 """
 import json
 from datetime import date, datetime
@@ -19,7 +19,7 @@ TYPES = ['hotel', 'villa', 'appartement', 'auberge']
 
 
 def _outil(name: str, description: str, proprietes: dict, requis: list[str]) -> dict:
-    """Déclaration de fonction au format de l'API Interactions de Gemini."""
+    """Function declaration in the format of the Gemini Interactions API."""
     return {
         'type': 'function',
         'name': name,
@@ -146,7 +146,7 @@ def rechercher_logements(entree: dict):
             'id': str(h.id), 'nom': h.name, 'type': h.type, 'ville': h.city, 'quartier': h.location,
             'prix_nuit_fcfa': int(h.price_per_night), 'note': round(h.rating, 1), 'nb_avis': h.review_count,
             'capacite': h.max_guests, 'equipements': (h.amenities or [])[:8],
-            # Texte libre de l'hôte : donnée à résumer, jamais une instruction (voir SYSTEME)
+            # The host's free text: data to summarise, never an instruction (see SYSTEME)
             'description_hote': (h.description or '')[:280],
             **({'nuits': nuits, 'cout_total_sejour_fcfa': cout.total} if cout else {}),
         })
@@ -222,7 +222,7 @@ EXECUTEURS = {
 
 
 def executer(nom: str, entree) -> tuple[str, list, bool]:
-    """Exécute un outil. Renvoie (contenu du tool_result, cartes, est_une_erreur)."""
+    """Runs a tool. Returns (content of the tool_result, cards, is_an_error)."""
     fonction = EXECUTEURS.get(nom)
     if not fonction:
         return f"Outil inconnu : {nom}", [], True

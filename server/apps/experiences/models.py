@@ -1,4 +1,4 @@
-"""Expériences de la page Découvrir : activités, restaurants, loisirs et sites, gérés depuis le back-office."""
+"""Experiences of the Discover page: activities, restaurants, leisure and sites, managed from the back-office."""
 from django.db import models
 
 
@@ -23,7 +23,7 @@ class ExperienceModel(models.Model):
     prix = models.PositiveIntegerField(null=True, blank=True, help_text='FCFA, indicatif. Vide : pas de prix affiché')
     gratuit = models.BooleanField(default=False)
     image = models.ImageField(upload_to='experiences/', blank=True)
-    # Photo externe des expériences reprises de l'ancien guide ; une photo envoyée depuis le back-office la remplace
+    # External photo of the experiences taken from the old guide; a photo uploaded from the back-office replaces it
     image_url = models.URLField(max_length=500, blank=True)
     actif = models.BooleanField(default=True, help_text='Affichée sur la page Découvrir')
     ordre = models.PositiveSmallIntegerField(default=0)

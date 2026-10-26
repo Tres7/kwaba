@@ -1,8 +1,8 @@
-"""Textes types des contrats, installés à la migration puis modifiables dans le back-office.
+"""Contract templates, installed by the migration then editable in the back-office.
 
-Projets de rédaction (contrats B1, B2, B4, B5 et B6, charte du Réseau Kwa-Ba Partenaires B14, version 1 du
-18 octobre 2026) : à faire relire par un juriste avant la première signature.
-Variables disponibles : voir services.VARIABLES.
+Drafts (contracts B1, B2, B4, B5 and B6, charter of the Kwa-Ba Partners Network B14, version 1 of
+18 October 2026): to be reviewed by a lawyer before the first signature.
+Available variables: see services.VARIABLES.
 """
 
 PREAMBULE = """Entre les soussignés :

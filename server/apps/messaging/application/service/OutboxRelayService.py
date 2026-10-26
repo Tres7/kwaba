@@ -16,12 +16,12 @@ def _now() -> datetime.datetime:
 
 
 class OutboxRelayService:
-    """Publie les notifications échues de l'outbox.
+    """Publishes the due notifications of the outbox.
 
-    - Une ligne par transaction, verrouillée en skip locked : deux relais ne traitent jamais la même ligne.
-    - Livraison au moins une fois : si le relais plante entre la publication et le marquage,
-      la ligne sera republiée. L'outbox_id voyage dans l'événement pour permettre la déduplication.
-    - Aucun abandon sur échec de publication : la ligne est reportée avec un délai croissant (plafonné).
+    - One row per transaction, locked with skip locked: two relays never process the same row.
+    - At-least-once delivery: if the relay crashes between the publication and the marking,
+      the row will be published again. The outbox_id travels in the event to allow deduplication.
+    - Never gives up on a publication failure: the row is postponed with a growing (capped) delay.
     """
 
     WARN_AFTER_ATTEMPTS = 5
@@ -57,9 +57,9 @@ class OutboxRelayService:
                 result = self._process(entry, now)
             stats[result] += 1
             if result == 'failed':
-                # Coupe-circuit : si le broker est indisponible, inutile d'essayer les lignes suivantes
-                # (chaque essai peut prendre plusieurs secondes et consommerait une tentative pour rien).
-                # Elles restent dues et seront tentées à la passe suivante.
+                # Circuit breaker: if the broker is unavailable, no point trying the next rows
+                # (each try may take several seconds and would use an attempt for nothing).
+                # They stay due and will be tried at the next pass.
                 break
         return stats
 
@@ -72,15 +72,15 @@ class OutboxRelayService:
             self._outbox.mark_skipped(entry.id, now, "conversation introuvable")
             return 'skipped'
 
-        # Revérification par ids : le destinataire a-t-il lu ce message (ou un plus récent) entre-temps ?
+        # Check again by ids: has the recipient read this message (or a more recent one) in the meantime?
         if conversation.last_read_id_for(entry.recipient_id) >= entry.message_id:
             self._outbox.mark_skipped(entry.id, now, "déjà lu par le destinataire")
             return 'skipped'
 
-        # Plafond par destinataire sur une heure glissante : on reporte, on ne perd pas
+        # Cap per recipient over a sliding hour: postpone, never lose
         sent = self._outbox.sent_since(entry.recipient_id, now - datetime.timedelta(hours=1))
         if len(sent) >= self._hourly_cap:
-            # Une place se libère quand assez d'envois sortent de la fenêtre pour repasser sous le plafond
+            # A slot frees up when enough sendings leave the window to get back under the cap
             free_at = sent[len(sent) - self._hourly_cap] + datetime.timedelta(hours=1)
             self._outbox.postpone(entry.id, free_at)
             return 'postponed'

@@ -1,5 +1,5 @@
-# Développement uniquement. La base, pgAdmin et RabbitMQ n'écoutent que sur 127.0.0.1 (invisibles du réseau local) ;
-# pgAdmin et la console RabbitMQ ne doivent jamais être déployés en production.
+# Development only. The database, pgAdmin and RabbitMQ only listen on 127.0.0.1 (invisible from the local network);
+# pgAdmin and the RabbitMQ console must never be deployed in production.
 name: kwaba
 
 services:
@@ -46,7 +46,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     container_name: kwaba-backend
-    # Pas root : __pycache__ et mediafiles sont écrits dans le dossier monté avec ton uid
+    # Not root: __pycache__ and mediafiles are written in the mounted folder with your uid
     user: "${UID:-1000}:${GID:-1000}"
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -66,9 +66,9 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
-      target: dev # l'image de production (cible par défaut) sert au VPS
+      target: dev # the production image (default target) is used on the VPS
     container_name: kwaba-frontend
-    # Pas root : .next est écrit dans le dossier monté avec ton uid (sinon tsc et le hook pre-push échouent)
+    # Not root: .next is written in the mounted folder with your uid (otherwise tsc and the pre-push hook fail)
     user: node
     command: npm run dev
     volumes:
@@ -80,7 +80,7 @@ services:
       - client/.env
     environment:
       - INTERNAL_API_URL=http://backend:8000/api
-      # Docker Desktop (Windows/macOS) ne propage pas les événements fichiers : polling
+      # Docker Desktop (Windows/macOS) does not forward file events: polling
       - WATCHPACK_POLLING=true
     depends_on:
       - backend
@@ -112,7 +112,7 @@ services:
       - db
     restart: on-failure
 
-  # Relais de l'outbox de messagerie : publie les notifications échues (une seule instance, voir ADR-016)
+  # Messaging outbox relay: publishes the due notifications (a single instance, see ADR-016)
   messaging-relay:
     build:
       context: ./server
@@ -129,7 +129,7 @@ services:
         condition: service_started
     restart: on-failure
 
-  # Worker des paiements : expiration des réservations non payées, versements aux hôtes, remboursements
+  # Payments worker: expiry of unpaid bookings, payouts to hosts, refunds
   paiements-worker:
     build:
       context: ./server

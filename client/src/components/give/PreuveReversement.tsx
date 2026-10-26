@@ -4,7 +4,7 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import type { Reversement } from "@/types/api/give";
 import { useTranslations } from "next-intl";
 
-/** Une ligne de reversement : montant, date et preuve du virement (publique). */
+/** One transfer line: amount, date and proof of the transfer (public). */
 export default function PreuveReversement({ r, avecOrganisation = false }: { r: Reversement; avecOrganisation?: boolean }) {
   const t = useTranslations("give");
   const fait = r.statut === "effectue";

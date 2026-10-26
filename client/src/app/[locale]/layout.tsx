@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return metadataDuSite(hasLocale(routing.locales, locale) ? locale : routing.defaultLocale);
 }
 
-/** Pages traduites : /… en français, /en/… en anglais. */
+/** Translated pages: /… in French, /en/… in English. */
 export default async function LocaleLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();

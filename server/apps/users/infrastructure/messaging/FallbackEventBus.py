@@ -12,15 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class FallbackEventBus(EventPublisher):
-    """Publie sur RabbitMQ ; si le broker est indisponible, traite l'événement
-    directement pour que les emails (code de vérification, bienvenue) partent quand même."""
+    """Publishes on RabbitMQ; if the broker is unavailable, processes the event
+    directly so that the emails (verification code, welcome) still go out."""
 
     def __init__(self, primary: EventPublisher | None = None):
         self._primary = primary or RabbitMQEventBus()
         self._notifications = NotificationService(DjangoEmailSender())
 
     def publish(self, event: DomainEvent) -> None:
-        # En développement, le code reste récupérable dans les logs même si l'email n'arrive pas
+        # In development, the code can still be found in the logs even if the email does not arrive
         code = getattr(event, 'code', None)
         if settings.DEBUG and code:
             logger.warning("[DEV] Code %s pour %s : %s", event.event, getattr(event, 'email', '?'), code)
@@ -40,6 +40,6 @@ class FallbackEventBus(EventPublisher):
             elif event.event == 'users.welcome_email_requested':
                 self._notifications.send_welcome_email(data['email'], data['first_name'])
         except Exception as e:
-            # Jamais le contenu de l'événement : il contient le code (en développement, il est déjà dans les logs
-            # ci-dessus). Pas d'email non plus, l'identifiant suffit pour retrouver le compte.
+            # Never the content of the event: it contains the code (in development, it is already in the logs
+            # above). No email either, the id is enough to find the account.
             logger.warning("Email %s non envoyé (user_id=%s) : %s", event.event, data.get('user_id'), type(e).__name__)

@@ -6,11 +6,11 @@ import type { AdminStats } from "@/types/api/admin";
 
 type Jour = AdminStats["reservations_par_jour"][number];
 
-// primary-600 : contraste ≥ 3:1 sur fond clair (validé), contrairement à l'orange de base
+// primary-600: contrast ≥ 3:1 on a light background (validated), unlike the base orange
 const BARRE = "#CC6C1B";
 const HAUTEUR = 160;
 
-/** Réservations confirmées par jour sur 30 jours : barres fines, info-bulle au survol / focus, vue tableau. */
+/** Confirmed bookings per day over 30 days: thin bars, tooltip on hover / focus, table view. */
 export default function ReservationsChart({ jours }: { jours: Jour[] }) {
   const [survol, setSurvol] = useState<number | null>(null);
   const [tableau, setTableau] = useState(false);
@@ -45,7 +45,7 @@ export default function ReservationsChart({ jours }: { jours: Jour[] }) {
         </div>
       ) : (
         <div className="relative">
-          {/* Info-bulle : valeur d'abord, libellé ensuite */}
+          {/* Tooltip: value first, label next */}
           <div className={cn("absolute -top-1 right-0 text-right transition-opacity pointer-events-none", courant ? "opacity-100" : "opacity-0")} aria-live="polite">
             {courant && (
               <>

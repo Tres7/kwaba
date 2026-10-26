@@ -45,7 +45,7 @@ interface GoogleButtonProps {
   onError: (message: string) => void;
 }
 
-/** Bouton Google Identity Services. Masqué si NEXT_PUBLIC_GOOGLE_CLIENT_ID n'est pas configuré. */
+/** Google Identity Services button. Hidden if NEXT_PUBLIC_GOOGLE_CLIENT_ID is not configured. */
 export default function GoogleButton({ label, callbackUrl, onError }: GoogleButtonProps) {
   const router = useRouter();
   const t = useTranslations("auth");
@@ -54,7 +54,7 @@ export default function GoogleButton({ label, callbackUrl, onError }: GoogleButt
 
   const handleClick = async () => {
     onError("");
-    // Le script Google n'est chargé qu'au clic : aucune requête vers Google pour les visiteurs qui ne l'utilisent pas
+    // The Google script is only loaded on click: no request to Google for visitors who do not use it
     try {
       await chargerScriptGoogle();
     } catch {
@@ -77,7 +77,7 @@ export default function GoogleButton({ label, callbackUrl, onError }: GoogleButt
           const data = await authenticateWithGoogle(response.credential);
           const res = await signIn("backend-session", {
             redirect: false,
-            // Identité et rôle relus par le serveur auprès de l'API (voir backend-session.ts)
+            // Identity and role read again by the server from the API (see backend-session.ts)
             accessToken: data.access,
             refreshToken: data.refresh,
           });

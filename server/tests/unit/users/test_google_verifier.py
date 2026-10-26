@@ -29,7 +29,7 @@ def _tokeninfo(**overrides):
 
 @pytest.fixture
 def google(monkeypatch):
-    """Remplace l'appel à Google : `google.reply(...)` fixe la réponse, `google.calls` garde les appels."""
+    """Replaces the call to Google: `google.reply(...)` sets the response, `google.calls` keeps the calls."""
     class Google:
         calls = []
         response = FakeResponse(200, _tokeninfo())
@@ -61,7 +61,7 @@ def test_token_issued_for_kwaba_is_accepted(google):
 
 
 def test_token_issued_for_another_application_is_rejected(google):
-    # Un site tiers rejoue le jeton qu'un visiteur lui a donné en se connectant avec Google
+    # A third-party site replays the token a visitor gave it when signing in with Google
     google.reply(aud='site-tiers.apps.googleusercontent.com')
     with pytest.raises(ValueError, match='invalide'):
         verifier().verify('jeton')

@@ -1,4 +1,4 @@
-"""Kwa-Ba Give : don, paiement, reversement mensuel aux ONG, emails, API publique et admin."""
+"""Kwa-Ba Give: donation, payment, monthly transfer to NGOs, emails, public API and admin."""
 from datetime import date, datetime, timedelta
 from unittest import mock
 
@@ -21,7 +21,7 @@ GIVE = '/api/v1/give/'
 
 
 class Faux:
-    """FedaPay simulé."""
+    """Simulated FedaPay."""
 
     def __init__(self):
         self.statut = 'approved'
@@ -74,23 +74,23 @@ def _donner(client, ong, **champs):
     return DonModel.objects.get(pk=r.data['id'])
 
 
-# --- Don et paiement ---------------------------------------------------------------------
+# --- Donation and payment ---------------------------------------------------------------------
 
 def test_don_paye_frais_ajoutes(faux, make_user, ong):
     donateur = _client(make_user(email='ama@test.kwaba'))
     don = _donner(donateur, ong)
     assert (don.frais, don.total, don.montant_ong, don.statut) == (62, 2062, 2000, 'en_attente')
     assert faux.dernier['montant'] == 2062
-    assert 'puits-pour-tous' not in faux.dernier['description']  # nom lisible, pas le slug
+    assert 'puits-pour-tous' not in faux.dernier['description']  # readable name, not the slug
 
-    # Retour du donateur : le paiement est relu chez FedaPay
+    # The donor comes back: the payment is read again from FedaPay
     r = donateur.get(f'{GIVE}dons/{don.id}/')
     assert r.data['statut'] == 'paye' and r.data['date_reversement']
     paiement = PaiementModel.objects.get(don=don)
     assert paiement.payeur.email == 'ama@test.kwaba' and paiement.libelle == 'Don à Puits pour tous'
     assert paiement.objet == don and paiement.reference == don.reference
 
-    # Le worker envoie la confirmation, une seule fois
+    # The worker sends the confirmation, only once
     services.passe()
     services.passe()
     recus = [m for m in mail.outbox if m.subject == 'Merci pour votre don à Puits pour tous']
@@ -112,9 +112,9 @@ def test_paiement_refuse_puis_abandon(faux, make_user, ong):
     faux.statut = 'declined'
     don = _donner(client, ong)
     assert client.get(f'{GIVE}dons/{don.id}/').data['statut'] == 'echoue'
-    assert client.get(f'{GIVE}dons/').data['count'] == 0  # dons non aboutis masqués
+    assert client.get(f'{GIVE}dons/').data['count'] == 0  # uncompleted donations hidden
 
-    # Paiement jamais confirmé : non abouti après 24 h
+    # Payment never confirmed: not completed after 24 h
     faux.statut = 'pending'
     reste = _donner(client, ong)
     DonModel.objects.filter(pk=reste.pk).update(cree_le=timezone.now() - timedelta(hours=25))
@@ -138,7 +138,7 @@ def test_paiement_tardif_accepte(faux, make_user, ong):
     paiements.synchroniser_paiement(PaiementModel.objects.get(don=don))
     don.refresh_from_db()
     assert don.statut == 'paye' and don.paye_le
-    services.paiement_recu(PaiementModel.objects.get(don=don))  # deuxième notification : sans effet
+    services.paiement_recu(PaiementModel.objects.get(don=don))  # second notification: no effect
 
 
 def test_refus(faux, make_user, ong, settings):
@@ -148,7 +148,7 @@ def test_refus(faux, make_user, ong, settings):
     assert APIClient().post(f'{GIVE}dons/', {}, format='json').status_code == 401
     assert client.get(f'{GIVE}dons/00000000-0000-0000-0000-000000000000/').status_code == 404
 
-    # Projet d'une autre ONG
+    # Project of another NGO
     autre = OrganisationModel.objects.create(nom='Autre', slug='autre', cause='sante', pays='TG', ville='Lomé', resume='r',
                                              description='d', numero_enregistrement='1', verifiee_le=date(2026, 1, 1))
     projet_autre = ProjetModel.objects.create(organisation=autre, titre='P', cause='sante', resume='r')
@@ -156,11 +156,11 @@ def test_refus(faux, make_user, ong, settings):
                     format='json')
     assert r.status_code == 400 and 'projet' in r.data['detail']
 
-    # Prestataire en panne : aucun don enregistré
+    # Provider down: no donation saved
     faux.erreur = True
     r = client.post(f'{GIVE}dons/', {'organisation': ong.slug, 'montant': 1000, 'moyen': 'mobile_money'}, format='json')
     assert r.status_code == 400 and not DonModel.objects.exists()
-    # Moyen non activé, puis paiement en ligne désactivé
+    # Method not enabled, then online payment disabled
     r = client.post(f'{GIVE}dons/', {'organisation': ong.slug, 'montant': 1000, 'moyen': 'paypal'}, format='json')
     assert r.status_code == 400
     settings.FEDAPAY = {**settings.FEDAPAY, 'SECRET_KEY': ''}
@@ -192,7 +192,7 @@ def test_reversement_mensuel(faux, make_user, ong):
     septembre = timezone.make_aware(datetime(2026, 9, 15, 12))
     d1 = _don_paye(make_user, ong, septembre)
     _don_paye(make_user, ong, septembre + timedelta(days=3), montant=3000)
-    _don_paye(make_user, ong, timezone.make_aware(datetime(2026, 10, 2, 12)))  # mois en cours : pas encore
+    _don_paye(make_user, ong, timezone.make_aware(datetime(2026, 10, 2, 12)))  # current month: not yet
 
     assert services.preparer_reversements(date(2026, 10, 5)) == 2
     r = ReversementModel.objects.get()
@@ -203,11 +203,11 @@ def test_reversement_mensuel(faux, make_user, ong):
     notifications.envoyer_notifications()
     assert any('Reversement à effectuer' in m.subject for m in mail.outbox)
 
-    # Effectué : les donateurs sont prévenus et la preuve est publique
+    # Done: the donors are notified and the proof is public
     r.justificatif = SimpleUploadedFile('preuve.pdf', b'%PDF-1.4', content_type='application/pdf')
     r.save()
     services.marquer_effectue(r, moyen='virement', reference_operation='VIR-001')
-    services.marquer_effectue(r, moyen='virement', reference_operation='autre')  # déjà fait : sans effet
+    services.marquer_effectue(r, moyen='virement', reference_operation='autre')  # already done: no effect
     assert ReversementModel.objects.get().reference_operation == 'VIR-001'
     mail.outbox.clear()
     notifications.envoyer_notifications()
@@ -221,7 +221,7 @@ def test_reversement_mensuel(faux, make_user, ong):
     assert page['reversements'][0]['reference_operation'] == 'VIR-001'
     assert 'coordonnees_reversement' not in page and 'SECRET' not in str(page)
 
-    # Don de septembre confirmé après le reversement : il part avec le mois suivant
+    # September donation confirmed after the transfer: it goes with the following month
     _don_paye(make_user, ong, septembre + timedelta(days=10))
     services.preparer_reversements(date(2026, 11, 3))
     octobre = ReversementModel.objects.get(periode=date(2026, 10, 1))
@@ -246,7 +246,7 @@ def test_catalogue_public(faux, make_user, ong):
     assert config['moyens'] == ['mobile_money', 'carte']
 
     liste = anonyme.get(f'{GIVE}organisations/').data
-    assert [o['slug'] for o in liste['results']] == [ong.slug]  # non vérifiée : invisible
+    assert [o['slug'] for o in liste['results']] == [ong.slug]  # not verified: invisible
     assert anonyme.get(f'{GIVE}organisations/', {'cause': 'sante'}).data['count'] == 0
     assert anonyme.get(f'{GIVE}organisations/{cachee.slug}/').status_code == 404
     detail = anonyme.get(f'{GIVE}organisations/{ong.slug}/').data
@@ -261,7 +261,7 @@ def test_slug_reserve():
     assert not o.publiee and str(o) == 'X'
 
 
-# --- Admin et démonstration --------------------------------------------------------------
+# --- Admin and demo --------------------------------------------------------------
 
 def test_admin(faux, make_user, ong):
     admin = make_user(role='admin', is_staff=True, is_superuser=True)
@@ -275,10 +275,10 @@ def test_admin(faux, make_user, ong):
     navigateur.post('/admin/give/donmodel/', {'action': 'preparer_reversements', '_selected_action': [don.pk]})
     r = ReversementModel.objects.get()
     page = navigateur.get(f'/admin/give/reversementmodel/{r.pk}/change/').content.decode()
-    assert 'IBAN BJ00 SECRET' in page and 'Anonyme' in page  # coordonnées visibles par l'équipe, donateur anonyme
+    assert 'IBAN BJ00 SECRET' in page and 'Anonyme' in page  # contact details visible to the team, anonymous donor
 
     url = f'/admin/give/reversementmodel/{r.pk}/change/'
-    # Sans preuve : refusé
+    # Without proof: refused
     navigateur.post(url, {'statut': 'effectue', 'moyen': 'virement', 'reference_operation': '', 'note': '',
                           'dons-TOTAL_FORMS': 1, 'dons-INITIAL_FORMS': 1, 'dons-0-id': don.pk, 'dons-0-reversement': r.pk})
     assert ReversementModel.objects.get().statut == 'a_effectuer'

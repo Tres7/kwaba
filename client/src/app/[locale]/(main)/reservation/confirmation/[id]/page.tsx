@@ -30,7 +30,7 @@ export default function ConfirmationPage() {
     retry: false,
   });
 
-  // Réservation pas encore payée : on renvoie vers la page de paiement
+  // Booking not paid yet: back to the payment page
   useEffect(() => {
     if (reservation?.status === "pending" && reservation.expire_le) router.replace(`/reservation/paiement/${reservation.id}`);
   }, [reservation, router]);

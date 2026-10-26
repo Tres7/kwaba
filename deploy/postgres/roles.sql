@@ -1,15 +1,15 @@
--- Rôle PostgreSQL à droits minimaux pour l'application (API, workers, relais, consumer).
+-- PostgreSQL role with minimal rights for the application (API, workers, relay, consumer).
 --
--- Le rôle propriétaire (celui qui a créé la base) ne sert plus qu'aux migrations. L'application tourne avec
--- kwaba_app : lire et écrire des lignes, rien d'autre (ni créer, ni modifier, ni supprimer une table, ni créer de
--- rôle). Si l'API est compromise, l'attaquant ne peut ni détruire le schéma ni s'octroyer d'autres droits.
+-- The owner role (the one that created the database) is only used for migrations. The application runs as
+-- kwaba_app: read and write rows, nothing else (no creating, altering or dropping a table, no creating a role).
+-- If the API is compromised, the attacker can neither destroy the schema nor grant themselves other rights.
 --
--- À exécuter une fois, connecté avec le rôle propriétaire de la base :
---   psql "$DATABASE_URL_PROPRIETAIRE" -v mot_de_passe="'<mot de passe long et aléatoire>'" -f deploy/postgres/roles.sql
--- Puis :
---   - services web / workers : POSTGRES_USER=kwaba_app et ce mot de passe ;
---   - job de migration (manage.py migrate) : identifiants du rôle propriétaire, qui crée les nouvelles tables
---     (les droits par défaut ci-dessous les ouvrent automatiquement à kwaba_app).
+-- To run once, connected with the database owner role:
+--   psql "$DATABASE_URL_PROPRIETAIRE" -v mot_de_passe="'<long random password>'" -f deploy/postgres/roles.sql
+-- Then:
+--   - web services / workers: POSTGRES_USER=kwaba_app and this password;
+--   - migration job (manage.py migrate): credentials of the owner role, which creates the new tables
+--     (the default privileges below open them automatically to kwaba_app).
 
 \set ON_ERROR_STOP on
 
@@ -21,24 +21,24 @@ BEGIN
 END $$;
 
 ALTER ROLE kwaba_app WITH PASSWORD :mot_de_passe;
--- Une requête bloquée ne doit pas tenir des verrous indéfiniment
+-- A blocked query must not hold locks forever
 ALTER ROLE kwaba_app SET statement_timeout = '30s';
 ALTER ROLE kwaba_app SET idle_in_transaction_session_timeout = '60s';
 
--- Personne d'autre que le propriétaire ne crée d'objet dans le schéma public
+-- Nobody but the owner creates objects in the public schema
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 GRANT USAGE ON SCHEMA public TO kwaba_app;
 SELECT format('GRANT CONNECT ON DATABASE %I TO kwaba_app', current_database()) \gexec
 
--- Tables et séquences existantes
+-- Existing tables and sequences
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO kwaba_app;
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO kwaba_app;
 
--- Tables et séquences créées plus tard par les migrations (lancées avec le rôle propriétaire)
+-- Tables and sequences created later by the migrations (run with the owner role)
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO kwaba_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO kwaba_app;
 
--- Journal d'audit : l'application ajoute des lignes mais ne peut ni les modifier ni les effacer
+-- Audit log: the application adds rows but can neither change nor delete them
 REVOKE UPDATE, DELETE ON securite_journal_audit FROM kwaba_app;
 
 -- Hosts' pre-registration proofs (contrats_preinscription): same rule as the audit log.

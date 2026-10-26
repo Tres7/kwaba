@@ -43,7 +43,7 @@ export default function Aeroports() {
     try {
       const code = edition === "nouveau" ? (await api.post<AeroportAdmin>("/v1/admin/transferts/aeroports/", form)).data.code : (edition as AeroportAdmin).code;
       if (edition !== "nouveau") await api.patch(`/v1/admin/transferts/aeroports/${code}/`, form);
-      // Seules les catégories avec un prix ont un tarif
+      // Only categories with a price have a fare
       const lignes = CATEGORIES_TRANSFERT.filter(({ code: c }) => tarifs[c].prix).map(({ code: c }) => ({ categorie: c, prix: Number(tarifs[c].prix), actif: tarifs[c].actif }));
       await api.put(`/v1/admin/transferts/aeroports/${code}/tarifs/`, lignes);
       toast.success("Aéroport enregistré");

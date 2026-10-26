@@ -1,7 +1,7 @@
 export type Formule = "sans_chauffeur" | "avec_chauffeur" | "chauffeur_seul";
 export type StatutLocation = "en_attente_paiement" | "confirmee" | "partenaire_assigne" | "terminee" | "annulee";
 
-/** Véhicule d'un propriétaire partenaire (jamais nommé sur le site). */
+/** Vehicle of a partner owner (never named on the site). */
 export interface CategorieVehicule {
   id: number;
   nom: string;
@@ -15,13 +15,13 @@ export interface CategorieVehicule {
   carburant: string;
   climatisation: boolean;
   annee: number | null;
-  /** Photo principale (première de `photos`). */
+  /** Main photo (first of `photos`). */
   image: string | null;
   photos: string[];
-  /** Prix du véhicule par jour, fixé par le propriétaire ; le chauffeur est facturé en plus. */
+  /** Vehicle price per day, set by the owner; the driver is charged on top. */
   prix_jour: number;
   formules: { sans_chauffeur: boolean; avec_chauffeur: boolean };
-  /** Caution (voiture seule) : 0, une ou deux journées, 100 000 FCFA au plus. */
+  /** Deposit (car only): 0, one or two days, 100,000 FCFA at most. */
   caution: number;
   caution_jours: 0 | 1 | 2;
 }
@@ -59,15 +59,15 @@ export interface DevisLocation {
   prix_jour: number;
   prix_vehicule: number;
   frais_lieux: number;
-  /** 7 000 FCFA par jour pour les formules avec chauffeur. */
+  /** 7,000 FCFA per day for the options with a driver. */
   prix_chauffeur: number;
-  /** Primes de déplacement du chauffeur (hors de Lomé, hors du pays). */
+  /** Driver's travel allowances (outside Lomé, outside the country). */
   primes: number;
   prix: number;
   caution: number;
-  /** Caution payée avec la location et gardée par Kwa-Ba (sinon réglée au propriétaire à la remise). */
+  /** Deposit paid with the rental and kept by Kwa-Ba (otherwise paid to the owner at handover). */
   caution_en_ligne: boolean;
-  /** Montant payé en ligne : la location et, le cas échéant, la caution. */
+  /** Amount paid online: the rental and, where applicable, the deposit. */
   a_payer: number;
 }
 
@@ -76,7 +76,7 @@ export interface Location {
   reference: string;
   libelle: string;
   categorie: number | null;
-  /** null pour un chauffeur seul (véhicule du client). */
+  /** null for a driver alone (customer's vehicle). */
   categorie_detail: CategorieVehicule | null;
   formule: Formule;
   lieu_prise_detail: LieuRemise;
@@ -101,22 +101,22 @@ export interface Location {
   caution: number;
   caution_en_ligne: boolean;
   a_payer: number;
-  /** Caution gardée par Kwa-Ba : remboursée `restitution_heures` après le retour, moins la retenue. */
+  /** Deposit kept by Kwa-Ba: refunded `restitution_heures` after the return, minus the withheld amount. */
   caution_etat: { restituee: boolean; retenue: number; motif: string; restitution_heures: number } | null;
   statut: StatutLocation;
   expire_le: string | null;
   annulee_par: string;
-  /** Véhicule attribué ; le propriétaire et le chauffeur ne sont jamais affichés (coordonnées envoyées par email). */
+  /** Assigned vehicle; the owner and the driver are never shown (contact details sent by email). */
   vehicule_attribue: { vehicule: string; immatriculation: string } | null;
   paiement: "en_attente" | "reussi" | "echoue" | "annule" | null;
   remboursement: { montant: number; statut: "attente_numero" | "en_cours" | "envoye" } | null;
   annulation_gratuite: boolean;
-  /** Montant rendu si le voyageur annule maintenant (null si l'annulation n'est plus possible). */
+  /** Amount given back if the traveller cancels now (null if cancelling is no longer possible). */
   rembourse_si_annulation: number | null;
   cree_le: string;
 }
 
-/** « Mon chauffeur » : chauffeur qui a déjà conduit le voyageur. */
+/** "My driver": a driver who has already driven the traveller. */
 export interface MonChauffeur {
   id: number;
   nom: string;

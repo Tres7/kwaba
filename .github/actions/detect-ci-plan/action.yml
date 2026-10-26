@@ -21,7 +21,7 @@ outputs:
 runs:
   using: composite
   steps:
-    # Lancement manuel (workflow_dispatch) : pas de diff de référence, on lance tout
+    # Manual run (workflow_dispatch): no reference diff, run everything
     - id: all
       if: github.event_name != 'pull_request'
       shell: bash

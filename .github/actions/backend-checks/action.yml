@@ -27,11 +27,11 @@ runs:
     - name: Réglages de production (check --deploy)
       shell: bash
       working-directory: server
-      # Bloquant : tout avertissement de sécurité doit être corrigé ou mis en sourdine avec justification (settings.py)
+      # Blocking: every security warning must be fixed or silenced with a justification (settings.py)
       run: python manage.py check --deploy --fail-level WARNING
 
-    # --cov-fail-under=0 : pytest-cov appliquerait sinon le seuil de .coveragerc à chaque étape,
-    # dont les tests unitaires seuls. Le seuil est vérifié une fois, sur la couverture combinée.
+    # --cov-fail-under=0: otherwise pytest-cov would apply the .coveragerc threshold at every step,
+    # including the unit tests alone. The threshold is checked once, on the combined coverage.
     - name: Tests unitaires
       shell: bash
       working-directory: server
@@ -53,7 +53,7 @@ runs:
           coverage report --format=markdown --skip-covered --sort=cover --fail-under=0
         } >> "$GITHUB_STEP_SUMMARY"
 
-    # Les seuils ne s'appliquent qu'à la couverture combinée : une PR en brouillon ne lance que les tests unitaires
+    # Thresholds only apply to the combined coverage: a draft PR runs the unit tests only
     - name: Cliquet de couverture globale (.coveragerc)
       if: inputs.run-integration == 'true'
       shell: bash

@@ -25,7 +25,7 @@ class ChauffeurAdmin(admin.ModelAdmin):
 
 @admin.register(TransfertModel)
 class TransfertAdmin(admin.ModelAdmin):
-    """Pour attribuer un chauffeur : ouvrir le transfert, choisir le chauffeur, enregistrer."""
+    """To assign a driver: open the transfer, choose the driver, save."""
     list_display = ['reference', 'aeroport', 'arrivee', 'numero_vol', 'categorie', 'prix', 'statut', 'chauffeur']
     list_filter = ['statut', 'aeroport', 'categorie']
     search_fields = ['numero_vol', 'voyageur__email', 'telephone']
@@ -40,7 +40,7 @@ class TransfertAdmin(admin.ModelAdmin):
     actions = ['annuler_et_rembourser']
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        # Seuls les chauffeurs de cet aéroport avec un véhicule assez grand sont proposés
+        # Only drivers of this airport with a large enough vehicle are offered
         if db_field.name == 'chauffeur':
             pk = request.resolver_match.kwargs.get('object_id')
             transfert = TransfertModel.objects.filter(pk=pk).first() if pk else None
@@ -51,7 +51,7 @@ class TransfertAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if 'chauffeur' in form.changed_data and obj.chauffeur_id:
             chauffeur = obj.chauffeur
-            obj.chauffeur_id = form.initial.get('chauffeur')  # l'attribution passe par le service
+            obj.chauffeur_id = form.initial.get('chauffeur')  # the assignment goes through the service
             try:
                 services.assigner_chauffeur(obj, chauffeur)
                 self.message_user(request, f"{chauffeur} attribué : le voyageur va recevoir ses coordonnées.")

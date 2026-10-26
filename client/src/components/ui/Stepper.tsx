@@ -10,12 +10,12 @@ interface StepperProps {
   min?: number;
   max?: number;
   label: string;
-  /** Texte sous le libellé, ex. « 13 ans et plus ». */
+  /** Text under the label, e.g. "13 years and over". */
   hint?: string;
   className?: string;
 }
 
-/** Compteur − / + (voyageurs, chambres…), utilisable au clavier et au toucher. */
+/** − / + counter (travellers, bedrooms…), usable with the keyboard and by touch. */
 export default function Stepper({ value, onChange, min = 0, max = 99, label, hint, className }: StepperProps) {
   const t = useTranslations("voyageurs");
   const bouton = "relative zone-tactile w-9 h-9 rounded-full border flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed";

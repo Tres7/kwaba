@@ -11,7 +11,7 @@ import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
 import FormField from "@/components/ui/FormField";
 import { useTranslations } from "next-intl";
 
-/** N'autorise que les redirections internes (évite les open redirects). */
+/** Only allows internal redirects (prevents open redirects). */
 function safeCallback(url: string | null): string {
   return url && url.startsWith("/") && !url.startsWith("//") ? url : "/";
 }
@@ -29,7 +29,7 @@ function LoginForm() {
   const [unverified, setUnverified] = useState(false);
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [captchaRequis, setCaptchaRequis] = useState(false);
-  // Bouton actif une fois la page prête (JavaScript chargé) : un clic plus tôt enverrait le formulaire sans lui
+  // Button enabled once the page is ready (JavaScript loaded): an earlier click would send the form without it
   const [pret, setPret] = useState(false);
   useEffect(() => setPret(true), []);
   const captchaRef = useRef<CaptchaHandle>(null);
@@ -45,7 +45,7 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Bouton toujours actif : on explique plutôt que de griser sans raison visible
+    // Button always enabled: we explain rather than greying it out with no visible reason
     if (captchaRequis && !captcha) {
       setError(t("captchaRequis"));
       return;
@@ -62,7 +62,7 @@ function LoginForm() {
     });
 
     if (res?.error) {
-      // Le jeton du captcha ne sert qu'une fois
+      // The captcha token can only be used once
       captchaRef.current?.reset();
       if (res.code === "captcha") {
         setError(t("captchaRequis"));

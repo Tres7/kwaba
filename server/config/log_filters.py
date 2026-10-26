@@ -2,8 +2,8 @@ import logging
 
 
 class SansSondeDeSante(logging.Filter):
-    """Pas d'email d'alerte pour la sonde de santé : interrogée toutes les quelques secondes, elle enverrait un
-    email par appel pendant une panne de la base (déjà signalée par la plateforme d'hébergement)."""
+    """No alert email for the health probe: polled every few seconds, it would send one email per
+    call during a database outage (already reported by the hosting platform)."""
 
     def filter(self, record):
         requete = getattr(record, 'request', None)

@@ -1,12 +1,12 @@
 name: Push branch
 
-# Retour rapide sur chaque branche de travail, PR ouverte ou non : les mêmes contrôles que le hook pre-push.
-# La PR rejoue ensuite la chaîne complète.
+# Fast feedback on every work branch, PR open or not: the same checks as the pre-push hook.
+# The PR then runs the full pipeline again.
 on:
   push:
     branches-ignore:
       - main
-      - 'dependabot/**' # leurs PR lancent déjà la chaîne complète
+      - 'dependabot/**' # their PRs already run the full pipeline
 
 concurrency:
   group: push-branch-${{ github.ref }}
@@ -23,7 +23,7 @@ jobs:
     env:
       DJANGO_SECRET_KEY: ci-only-secret-key-never-used-outside-github-actions-0123456789
       DJANGO_DEBUG: 'False'
-      # Obligatoire hors DEBUG ; les tests unitaires ne se connectent pas à la base
+      # Required outside DEBUG; unit tests do not connect to the database
       POSTGRES_PASSWORD: ci
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -58,8 +58,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - id: range
-        # Nouvelle branche (before = 000…) ou push --force (before absent de l'historique) :
-        # tous les commits de la branche absents de main
+        # New branch (before = 000…) or push --force (before missing from the history):
+        # all commits of the branch missing from main
         env:
           BEFORE: ${{ github.event.before }}
         run: |

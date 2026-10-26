@@ -12,7 +12,7 @@ SLUGS_RESERVES = {'don', 'impact'}
 
 
 class OrganisationModel(models.Model):
-    """ONG ou association partenaire. Visible sur le site une fois vérifiée par l'équipe Kwa-Ba."""
+    """Partner NGO or association. Visible on the site once verified by the Kwa-Ba team."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nom = models.CharField(max_length=150)
     slug = models.SlugField(max_length=80, unique=True, help_text="Adresse de la page : /give/<slug>")
@@ -27,12 +27,12 @@ class OrganisationModel(models.Model):
     numero_enregistrement = models.CharField(
         max_length=80, help_text="Numéro de récépissé ou d'enregistrement officiel (affiché publiquement)",
     )
-    # Vérification : l'ONG n'apparaît sur le site qu'une fois vérifiée
+    # Verification: the NGO only appears on the site once verified
     verifiee_le = models.DateField(null=True, blank=True, help_text='Date de la vérification ; vide = non publiée')
     verification = models.TextField(
         blank=True, help_text="Ce qui a été vérifié (affiché publiquement) : récépissé, statuts, compte bancaire, visite…",
     )
-    # Réservé à l'équipe : où et à qui reverser les dons
+    # Team only: where and to whom the donations are transferred
     contact_nom = models.CharField(max_length=120, blank=True)
     contact_email = models.EmailField(blank=True)
     contact_telephone = models.CharField(max_length=20, blank=True)
@@ -52,7 +52,7 @@ class OrganisationModel(models.Model):
         return self.nom
 
     def clean(self):
-        # Ces adresses sont déjà prises par des pages du site (/give/don/…, /give/impact)
+        # These addresses are already taken by pages of the site (/give/don/…, /give/impact)
         if self.slug in SLUGS_RESERVES:
             raise ValidationError({'slug': "Cette adresse est réservée, choisissez-en une autre."})
 
@@ -62,7 +62,7 @@ class OrganisationModel(models.Model):
 
 
 class ProjetModel(models.Model):
-    """Projet précis d'une ONG (un forage, une rentrée scolaire…) auquel on peut destiner son don."""
+    """Specific project of an NGO (a borehole, a school year start…) a donation can be given to."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organisation = models.ForeignKey(OrganisationModel, on_delete=models.CASCADE, related_name='projets')
     titre = models.CharField(max_length=150)
@@ -85,7 +85,7 @@ class ProjetModel(models.Model):
 
 
 class ReversementModel(models.Model):
-    """Reversement à une ONG des dons d'un mois, avec la preuve du virement."""
+    """Transfer to an NGO of a month's donations, with the proof of the transfer."""
     STATUTS = [
         ('a_effectuer', 'À effectuer'),
         ('effectue', 'Effectué'),
@@ -110,7 +110,7 @@ class ReversementModel(models.Model):
     )
     note = models.TextField(blank=True, help_text="Message public (ce que l'ONG a fait des fonds, par exemple)")
     effectue_le = models.DateField(null=True, blank=True)
-    # Emails envoyés par le worker
+    # Emails sent by the worker
     admins_notifies = models.BooleanField(default=False, help_text='Équipe prévenue : reversement à effectuer')
     cree_le = models.DateTimeField(auto_now_add=True)
 

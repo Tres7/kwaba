@@ -26,7 +26,7 @@ def _env_list(name: str, default: str) -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(',') if item.strip()]
 
 
-# Production par défaut : le développement active DEBUG explicitement (server/.env)
+# Production by default: development enables DEBUG explicitly (server/.env)
 DEBUG = _env_bool('DJANGO_DEBUG', 'False')
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '')
@@ -36,7 +36,7 @@ if not SECRET_KEY:
     SECRET_KEY = 'django-insecure-dev-only'
 
 ALLOWED_HOSTS = _env_list('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,backend')
-# Render fournit le nom d'hôte public du service
+# Render provides the public host name of the service
 if os.getenv('RENDER_EXTERNAL_HOSTNAME'):
     ALLOWED_HOSTS.append(os.environ['RENDER_EXTERNAL_HOSTNAME'])
 
@@ -79,7 +79,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # Fichiers statiques (admin) servis par l'application, sans serveur web devant Gunicorn
+    # Static files (admin) served by the application, without a web server in front of Gunicorn
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -113,7 +113,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database - PostgreSQL via Docker
 
-# Pas de mot de passe par défaut hors développement : une variable oubliée ne doit pas ouvrir la base
+# No default password outside development: a forgotten variable must not open the database
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', '')
 if not POSTGRES_PASSWORD:
     if not DEBUG:
@@ -158,8 +158,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
-# Photos et avatars : disque local en développement, stockage objet Cloudflare R2 (API S3) dès que R2_BUCKET
-# est défini. Le disque des conteneurs Render est éphémère : sans R2, les photos disparaissent au redéploiement.
+# Photos and avatars: local disk in development, Cloudflare R2 object storage (S3 API) as soon as R2_BUCKET
+# is set. The disk of Render containers is ephemeral: without R2, photos disappear at redeploy.
 STORAGES = {
     'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
     'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
@@ -167,8 +167,8 @@ STORAGES = {
 if (_r2 := r2_storage(os.environ)) is not None:
     STORAGES['default'] = _r2
 
-# Documents privés (pièces d'identité des hôtes, photos des visites de vérification) : jamais servis directement,
-# lus seulement par l'API après contrôle du rôle. Bucket R2 privé en production, sinon un dossier hors MEDIA_ROOT.
+# Private documents (hosts' identity documents, photos of verification visits): never served directly,
+# only read by the API after checking the role. Private R2 bucket in production, otherwise a folder outside MEDIA_ROOT.
 PRIVE_ROOT = Path(os.getenv('PRIVE_ROOT', BASE_DIR / 'prive'))
 STORAGES['prive'] = r2_storage_prive(os.environ) or {
     'BACKEND': 'django.core.files.storage.FileSystemStorage',
@@ -191,8 +191,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'COERCE_DECIMAL_TO_STRING': False,
-    # Throttles par scope (appliqués uniquement aux vues qui les déclarent)
-    # Adresse du client derrière les proxys de confiance (voir NUM_PROXIES) : utilisée par les throttles DRF
+    # Throttles per scope (applied only to the views that declare them)
+    # Client address behind the trusted proxies (see NUM_PROXIES): used by the DRF throttles
     'NUM_PROXIES': None,
     'DEFAULT_THROTTLE_RATES': {
         'messaging_conversation_create': '10/hour',
@@ -204,19 +204,19 @@ REST_FRAMEWORK = {
     },
 }
 
-# Nombre de proxys de confiance devant l'API (Render, nginx…) : l'adresse du client est celle ajoutée par le
-# dernier d'entre eux dans X-Forwarded-For. 0 : adresse de la connexion (un X-Forwarded-For envoyé par le client
-# est ignoré, il ne peut donc pas contourner les limites de débit).
+# Number of trusted proxies in front of the API (Render, nginx…): the client address is the one added by the
+# last of them in X-Forwarded-For. 0: address of the connection (an X-Forwarded-For sent by the client is
+# ignored, so it cannot get around the rate limits).
 NUM_PROXIES = int(os.getenv('DJANGO_NUM_PROXIES', '0'))
 REST_FRAMEWORK['NUM_PROXIES'] = NUM_PROXIES
 
-# Limites de débit et de tentatives (connexion, inscription, codes, administration…). Désactivables pour un test
-# de charge uniquement ; toujours actives en production.
+# Rate and attempt limits (sign-in, sign-up, codes, administration…). Can be disabled for a load test
+# only; always active in production.
 LIMITES_ACTIVES = _env_bool('LIMITES_ACTIVES', 'True')
 
 
-# Cache partagé entre processus (compteurs des throttles), stocké dans PostgreSQL.
-# La table est créée par la migration messaging 0002 (createcachetable).
+# Cache shared between processes (throttle counters), stored in PostgreSQL.
+# The table is created by the messaging 0002 migration (createcachetable).
 
 CACHES = {
     'default': {
@@ -235,63 +235,63 @@ MESSAGING = {
     'RELAY_INTERVAL_SECONDS': int(os.getenv('MESSAGING_RELAY_INTERVAL_SECONDS', '10')),
 }
 
-# Paiement en ligne (FedaPay). Sans clé FedaPay ni PayPal, le paiement en ligne est désactivé :
-# les réservations sont alors confirmées immédiatement, sans encaissement.
+# Online payment (FedaPay). Without a FedaPay or PayPal key, online payment is disabled:
+# bookings are then confirmed immediately, without collecting money.
 FEDAPAY = {
     'SECRET_KEY': os.getenv('FEDAPAY_SECRET_KEY', ''),
     'ENV': os.getenv('FEDAPAY_ENV', 'sandbox'),  # sandbox | live
-    # Obligatoire hors développement : sans elle, les webhooks sont refusés (voir paiements.views)
+    # Required outside development: without it, webhooks are refused (see paiements.views)
     'WEBHOOK_SECRET': os.getenv('FEDAPAY_WEBHOOK_SECRET', ''),
-    # Durée pendant laquelle les dates restent bloquées en attendant le paiement
+    # Time during which the dates stay held while waiting for the payment
     'EXPIRATION_MINUTES': int(os.getenv('PAIEMENT_EXPIRATION_MINUTES', '30')),
 }
 
-# Sans FedaPay ni PayPal configuré, une réservation ne peut être confirmée sans paiement qu'en développement :
-# en production, elle est refusée (« paiement momentanément indisponible ») au lieu d'être confirmée gratuitement.
+# Without FedaPay or PayPal configured, a booking can only be confirmed without payment in development:
+# in production, it is refused ("payment temporarily unavailable") instead of being confirmed for free.
 PAIEMENT_HORS_LIGNE = _env_bool('PAIEMENT_HORS_LIGNE', str(DEBUG))
 
 # Pre-launch mode: listings hidden from the public, no booking or payment until the opening (config/prelancement.py)
 PRELANCEMENT = _env_bool('PRELANCEMENT', 'False')
 
-# PayPal (paiement en euros). Sans identifiants, PayPal n'est pas proposé.
-# Les versements aux hôtes passent toujours par FedaPay.
+# PayPal (payment in euros). Without credentials, PayPal is not offered.
+# Payouts to hosts always go through FedaPay.
 PAYPAL = {
     'CLIENT_ID': os.getenv('PAYPAL_CLIENT_ID', ''),
     'CLIENT_SECRET': os.getenv('PAYPAL_CLIENT_SECRET', ''),
     'ENV': os.getenv('PAYPAL_ENV', 'sandbox'),  # sandbox | live
 }
 
-# URL du frontend, utilisée dans les liens des emails
+# Frontend URL, used in the email links
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-# Pause entre deux emails envoyés par le worker des paiements (limite des SMTP de test comme Mailtrap)
+# Pause between two emails sent by the payments worker (limit of test SMTPs like Mailtrap)
 PAIEMENTS_PAUSE_EMAIL = float(os.getenv('PAIEMENTS_PAUSE_EMAIL', '1'))
 
-# AI Concierge (Gemini, API Interactions de Google). Sans clé, le Concierge est désactivé.
+# AI Concierge (Gemini, Google's Interactions API). Without a key, the Concierge is disabled.
 CONCIERGE = {
     'API_KEY': os.getenv('GEMINI_API_KEY', ''),
     'MODELE': os.getenv('CONCIERGE_MODELE', 'gemini-3.8-flash'),
-    # Profondeur de réflexion du modèle : minimal | low | medium | high (low = réponses rapides)
+    # Model thinking depth: minimal | low | medium | high (low = fast answers)
     'REFLEXION': os.getenv('CONCIERGE_REFLEXION', 'low'),
     'RECHERCHE_WEB': os.getenv('CONCIERGE_RECHERCHE_WEB', 'True').lower() in ('true', '1', 'yes'),
-    # Limites par utilisateur (coût de l'API)
+    # Limits per user (API cost)
     'MAX_PAR_HEURE': int(os.getenv('CONCIERGE_MAX_PAR_HEURE', '20')),
     'MAX_PAR_JOUR': int(os.getenv('CONCIERGE_MAX_PAR_JOUR', '60')),
 }
 
-# Contact d'assistance donné aux voyageurs (transferts aéroport…)
+# Support contact given to travellers (airport transfers…)
 ASSISTANCE_CONTACT = os.getenv('ASSISTANCE_CONTACT', 'info@kwa-ba.com')
 
-# Interrupteurs des modules (config/site.py) : masqués au lancement. Pour en rallumer un, passer sa variable
-# MODULE_… à True dans l'environnement de l'API et redémarrer l'API : aucun déploiement de code n'est nécessaire.
+# Module switches (config/site.py): hidden at launch. To switch one back on, set its MODULE_… variable
+# to True in the API environment and restart the API: no code deployment is needed.
 MODULES = {nom: _env_bool(f'MODULE_{nom.upper()}', 'False') for nom in (
     'experiences', 'together', 'give', 'concierge', 'location_sans_chauffeur', 'paiements_non_ouverts',
 )}
 
-# Mentions légales attendues après l'immatriculation (vides : « à compléter » sur le site). Le RCCM et le NIF
-# saisis dans le back-office (Documents → Informations société) servent tant que ces variables sont vides.
+# Legal notices expected after registration (empty: "to be completed" on the site). The RCCM and NIF
+# entered in the back-office (Documents → Company information) are used while these variables are empty.
 def _mention(nom: str) -> str:
-    # Un commentaire laissé sur la ligne d'une variable vide (« SOCIETE_NIF=   # … ») peut être lu comme sa valeur :
-    # il compte alors comme vide (« à compléter »), jamais affiché tel quel
+    # A comment left on the line of an empty variable ("SOCIETE_NIF=   # …") may be read as its value:
+    # it then counts as empty ("to be completed"), never displayed as is
     valeur = os.getenv(nom, '').strip()
     return '' if valeur.startswith('#') else valeur
 
@@ -299,19 +299,19 @@ def _mention(nom: str) -> str:
 MENTIONS_LEGALES = {
     'rccm': _mention('SOCIETE_RCCM'),
     'nif': _mention('SOCIETE_NIF'),
-    'commerce_electronique': _mention('SOCIETE_COMMERCE_ELECTRONIQUE'),  # décret n° 2018-062/PR
-    'ipdcp': _mention('SOCIETE_IPDCP'),  # déclaration auprès de l'IPDCP
+    'commerce_electronique': _mention('SOCIETE_COMMERCE_ELECTRONIQUE'),  # decree no. 2018-062/PR
+    'ipdcp': _mention('SOCIETE_IPDCP'),  # declaration to the IPDCP
 }
 
-# Adresse de réponse des emails envoyés (les réponses des utilisateurs arrivent dans cette boîte)
+# Reply-to address of the sent emails (users' replies arrive in this mailbox)
 EMAIL_REPLY_TO = os.getenv('EMAIL_REPLY_TO', '')
 
-# URL publique de l'API (liens vers l'administration dans les alertes)
+# Public URL of the API (links to the administration in the alerts)
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
 
-# Hôtes d'où peuvent venir les images affichées (avatars, photos d'annonces) : l'API elle-même (photos envoyées),
-# le domaine public R2, les avatars Google et les photos de démonstration. Un hôte commençant par un point
-# couvre ses sous-domaines. IMAGES_HOTES ajoute des hôtes (séparés par des virgules).
+# Hosts displayed images may come from (avatars, listing photos): the API itself (uploaded photos),
+# the R2 public domain, Google avatars and the demo photos. A host starting with a dot
+# covers its subdomains. IMAGES_HOTES adds hosts (separated by commas).
 IMAGES_HOTES_AUTORISES = [
     h for h in {
         urlsplit(BACKEND_URL).hostname,
@@ -325,8 +325,8 @@ IMAGES_HOTES_AUTORISES = [
 ]
 
 
-# HTTPS en production : Render termine TLS et transmet X-Forwarded-Proto
-SECURE_REDIRECT_EXEMPT = [r'^api/health/$']   # sonde de santé interne, en HTTP
+# HTTPS in production: Render terminates TLS and passes X-Forwarded-Proto
+SECURE_REDIRECT_EXEMPT = [r'^api/health/$']   # internal health probe, over HTTP
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
@@ -341,54 +341,54 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = int(os.getenv('DJANGO_SECURE_HSTS_SECONDS', str(60 * 60 * 24 * 365)))
 
-# L'API est servie sur un sous-domaine (onrender.com, puis un domaine de l'équipe) : HSTS ne doit ni couvrir
-# les autres sous-domaines ni être préchargé dans les navigateurs, décisions à prendre au niveau du domaine.
+# The API is served on a subdomain (onrender.com, then a team domain): HSTS must neither cover
+# the other subdomains nor be preloaded in browsers, decisions to make at the domain level.
 SILENCED_SYSTEM_CHECKS = ['security.W005', 'security.W021']
 
 
 # CORS
 
 CORS_ALLOWED_ORIGINS = _env_list('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000')
-# Nom des PDF téléchargés (bons, reçus, factures), lu par le site
+# Name of the downloaded PDFs (vouchers, receipts, invoices), read by the site
 CORS_EXPOSE_HEADERS = ['Content-Disposition']
 
 
-# Clé de signature des JWT distincte de SECRET_KEY (sessions de l'administration, signatures Django) :
-# JWT_SIGNING_KEY si elle est fournie, sinon une clé dérivée de SECRET_KEY, propre à cet usage.
+# JWT signing key separate from SECRET_KEY (administration sessions, Django signatures):
+# JWT_SIGNING_KEY if provided, otherwise a key derived from SECRET_KEY, specific to this use.
 JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY') or hmac.new(
     SECRET_KEY.encode(), b'kwaba-jwt-signing-key', hashlib.sha256,
 ).hexdigest()
 
 SIMPLE_JWT = {
     'SIGNING_KEY': JWT_SIGNING_KEY,
-    # Courte durée : NextAuth renouvelle le jeton d'accès automatiquement ; un jeton volé sert peu de temps
+    # Short lifetime: NextAuth renews the access token automatically; a stolen token is useful for a short time
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    # Chaque renouvellement (rotation) repart pour cette durée. La session du site, elle, se ferme 5 min après
-    # avoir quitté le site (session.maxAge de NextAuth, client/src/auth.ts) : le refresh token n'est plus
-    # utilisable ensuite, cette durée ne fait que borner un jeton qui aurait fuité
+    # Each renewal (rotation) starts again for this duration. The site session itself closes 5 min after
+    # leaving the site (NextAuth session.maxAge, client/src/auth.ts): the refresh token is no longer
+    # usable afterwards, this duration only bounds a token that would have leaked
     'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('JWT_REFRESH_DAYS', '1'))),
     'ROTATE_REFRESH_TOKENS': True,
-    # L'ancien refresh token est mis sur liste noire à chaque rotation (purge : manage.py flushexpiredtokens)
+    # The old refresh token is blacklisted at every rotation (cleanup: manage.py flushexpiredtokens)
     'BLACKLIST_AFTER_ROTATION': True,
-    # Les jetons portent une empreinte du mot de passe : en changer invalide tous les jetons d'accès émis avant
+    # Tokens carry a fingerprint of the password: changing it invalidates every access token issued before
     'CHECK_REVOKE_TOKEN': True,
 }
 
-# Connexion Google : identifiant(s) OAuth de Kwa-Ba (séparés par des virgules). Un jeton Google émis pour une autre
-# application est refusé ; sans identifiant configuré, la connexion Google est désactivée.
+# Google sign-in: Kwa-Ba's OAuth client ID(s) (separated by commas). A Google token issued for another
+# application is refused; without a configured ID, Google sign-in is disabled.
 GOOGLE_CLIENT_IDS = _env_list('GOOGLE_CLIENT_ID', '')
 
-# Captcha Cloudflare Turnstile à la connexion et à l'inscription (case « Je suis humain »). Clés créées dans le
-# tableau de bord Cloudflare (Turnstile), sans héberger le domaine chez Cloudflare. Sans clé secrète : désactivé.
+# Cloudflare Turnstile captcha at sign-in and sign-up ("I am human" box). Keys created in the
+# Cloudflare dashboard (Turnstile), without hosting the domain at Cloudflare. Without a secret key: disabled.
 TURNSTILE_SITE_KEY = os.getenv('TURNSTILE_SITE_KEY', '')
 TURNSTILE_SECRET_KEY = os.getenv('TURNSTILE_SECRET_KEY', '')
 
-# Délai pendant lequel un refresh token qui vient d'être renouvelé renvoie encore la même nouvelle paire.
-# NextAuth renouvelle le même jeton en parallèle au chargement d'une page : sans ce délai, seul le premier
-# appel réussirait et les autres déconnecteraient l'utilisateur.
+# Delay during which a refresh token that was just renewed still returns the same new pair.
+# NextAuth renews the same token in parallel when a page loads: without this delay, only the first
+# call would succeed and the others would sign the user out.
 JWT_REFRESH_GRACE_SECONDS = int(os.getenv('JWT_REFRESH_GRACE_SECONDS', '60'))
 
-# Email (permet donc de changer de provider quand on veut)
+# Email (so the provider can be changed at any time)
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
     "django.core.mail.backends.smtp.EmailBackend",
@@ -406,13 +406,13 @@ SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "20"))
 
 
-# Destinataires des alertes d'erreur (ADMINS=« Nom <email>, ... » ou emails séparés par des virgules)
+# Recipients of the error alerts (ADMINS="Name <email>, ..." or emails separated by commas)
 ADMINS = [('', email) for email in _env_list('ADMINS', '')]
 
-# Administration Django : chemin configurable (évite les robots qui visent /admin/)
+# Django administration: configurable path (avoids the bots targeting /admin/)
 ADMIN_URL = os.getenv('DJANGO_ADMIN_URL', 'admin/').strip('/') + '/'
 
-# Logging : affiche les logs INFO des modules métier (apps.*) dans la sortie des conteneurs
+# Logging: shows the INFO logs of the business modules (apps.*) in the container output
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -425,7 +425,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'},
-        # Erreurs 500 envoyées par email aux ADMINS (production uniquement), sans les variables locales
+        # 500 errors emailed to the ADMINS (production only), without the local variables
         'mail_admins': {
             'class': 'django.utils.log.AdminEmailHandler',
             'filters': ['require_debug_false', 'sans_sonde_de_sante'],

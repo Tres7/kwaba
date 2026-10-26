@@ -11,12 +11,12 @@ export interface Confirmation {
   message: React.ReactNode;
   libelle: string;
   danger?: boolean;
-  /** Demande un motif (obligatoire, 5 caractères minimum), transmis à `action`. */
+  /** Asks for a reason (required, at least 5 characters), passed to `action`. */
   motif?: boolean;
   action: (motif: string) => Promise<void>;
 }
 
-/** Fenêtre de confirmation des actions d'administration (remplace window.confirm). */
+/** Confirmation window for administration actions (replaces window.confirm). */
 export default function ConfirmDialog({ confirmation, onClose }: { confirmation: Confirmation | null; onClose: () => void }) {
   const [motif, setMotif] = useState("");
   const [envoi, setEnvoi] = useState(false);
@@ -43,7 +43,7 @@ export default function ConfirmDialog({ confirmation, onClose }: { confirmation:
       await confirmation.action(motif.trim());
       onClose();
     } catch {
-      // L'action affiche elle-même l'erreur (toast) ; on laisse la fenêtre ouverte
+      // The action shows the error itself (toast); the window stays open
       setEnvoi(false);
     }
   };

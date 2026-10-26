@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 
-/** Mise en forme légère des réponses du Concierge (titres, listes, **gras**, séparateurs), sans HTML injecté. */
+/** Light formatting of the Concierge's answers (titles, lists, **bold**, separators), without injected HTML. */
 function enLigne(texte: string) {
   return texte.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/g).map((morceau, i) => {
     if (morceau.startsWith("**") && morceau.endsWith("**") && morceau.length > 4) {

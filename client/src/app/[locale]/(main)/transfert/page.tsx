@@ -25,7 +25,7 @@ const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = 
 ];
 
 const CATEGORIES: CategorieVehicule[] = ["berline", "confort", "van"];
-// Saisie gardée le temps de se connecter (stockage de session, effacé à la fermeture de l'onglet)
+// Input kept while signing in (session storage, cleared when the tab is closed)
 const BROUILLON = "kwaba_transfert_brouillon";
 
 const champ = "w-full py-3 px-4 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
@@ -41,7 +41,7 @@ function TransfertContent() {
   const connecte = status === "authenticated" && !!session && !session.error;
   const { data: config } = useConfigPaiement();
 
-  // Préremplissage depuis un lien (Concierge : ?aeroport=LFW&date=…&heure=…&passagers=…&bagages=…)
+  // Prefilled from a link (Concierge: ?aeroport=LFW&date=…&heure=…&passagers=…&bagages=…)
   const nombre = (cle: string, defaut: number, max: number) => Math.min(max, Math.max(0, Number(searchParams.get(cle)) || defaut));
   const [aeroport, setAeroport] = useState(searchParams.get("aeroport")?.toUpperCase() ?? "");
   const [date, setDate] = useState(searchParams.get("date") ?? "");
@@ -57,7 +57,7 @@ function TransfertContent() {
   const [erreurs, setErreurs] = useState<Record<string, string>>({});
   const [envoi, setEnvoi] = useState(false);
 
-  // Retour de la page de connexion : on reprend la demande là où le voyageur l'avait laissée
+  // Back from the sign-in page: the request resumes where the traveller left it
   useEffect(() => {
     try {
       const brouillon = sessionStorage.getItem(BROUILLON);
@@ -67,7 +67,7 @@ function TransfertContent() {
       setAeroport(b.aeroport ?? ""); setDate(b.date ?? ""); setHeure(b.heure ?? ""); setVol(b.vol ?? "");
       setPassagers(b.passagers ?? 1); setBagages(b.bagages ?? 1); setCategorie(b.categorie ?? null);
       setDestination(b.destination ?? ""); setTelephone(b.telephone ?? ""); setMessage(b.message ?? "");
-    } catch { /* stockage indisponible ou brouillon illisible : formulaire vide */ }
+    } catch { /* storage unavailable or unreadable draft: empty form */ }
   }, []);
 
   const { data: aeroports = [] } = useQuery({
@@ -76,7 +76,7 @@ function TransfertContent() {
     staleTime: 60 * 60 * 1000,
   });
 
-  // Séjour Kwa-Ba associé : on préremplit l'aéroport, la date, les voyageurs et l'adresse
+  // Related Kwa-Ba stay: the airport, date, travellers and address are prefilled
   const { data: reservation } = useQuery({
     queryKey: ["reservation", reservationId],
     queryFn: async () => (await api.get<Reservation>(`/v1/reservations/${reservationId}/`)).data,
@@ -104,12 +104,12 @@ function TransfertContent() {
   });
 
   const options = useMemo(() => devis?.options ?? [], [devis]);
-  // Véhicule choisi, sinon le moins cher qui convient
+  // Chosen vehicle, otherwise the cheapest suitable one
   const choix = options.find((o) => o.categorie === categorie && o.disponible) ?? options.find((o) => o.disponible);
   const moyensDispo = MOYENS.filter((m) => config?.moyens.includes(m.id));
   const moyenChoisi = moyen && moyensDispo.some((m) => m.id === moyen) ? moyen : moyensDispo[0]?.id;
   const enLigne = !!config?.actif;
-  // Prix « à partir de » de chaque véhicule, affichés avant tout choix : ceux de l'aéroport choisi, sinon les plus bas
+  // "From" price of each vehicle, shown before any choice: those of the chosen airport, otherwise the lowest ones
   const prixAPartir = (c: CategorieVehicule) => {
     const liste = (aeroport ? aeroports.filter((a) => a.code === aeroport) : aeroports).map((a) => a.prix?.[c]).filter((p): p is number => !!p);
     return liste.length ? Math.min(...liste) : null;
@@ -119,10 +119,10 @@ function TransfertContent() {
   const reserver = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!connecte) {
-      // Toute la demande se remplit sans compte ; la connexion n'est demandée qu'ici, juste avant le paiement
+      // The whole request is filled in without an account; sign-in is only asked here, just before payment
       try {
         sessionStorage.setItem(BROUILLON, JSON.stringify({ aeroport, date, heure, vol, passagers, bagages, categorie: choix?.categorie ?? categorie, destination, telephone, message }));
-      } catch { /* sans stockage, le voyageur ressaisit après la connexion */ }
+      } catch { /* without storage, the traveller types it again after signing in */ }
       router.push(`/login?callbackUrl=${encodeURIComponent(`${pathname}?${searchParams.toString()}`)}`);
       return;
     }
@@ -139,7 +139,7 @@ function TransfertContent() {
           await payerTransfert(res.data.id, moyenChoisi);
           return;
         } catch {
-          // Le paiement n'a pas démarré : la page du transfert permet de réessayer
+          // The payment did not start: the transfer page allows trying again
         }
       }
       router.push(`/transfert/${res.data.id}`);

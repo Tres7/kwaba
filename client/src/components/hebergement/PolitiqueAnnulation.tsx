@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { PolitiqueAnnulation as Politique } from "@/types/api/models";
 
-/** Politique d'annulation choisie par l'hôte (CGV, annexe 1), avec le délai de réflexion de 48 heures. */
+/** Cancellation policy chosen by the host (terms of sale, appendix 1), with the 48-hour cooling-off period. */
 export default function PolitiqueAnnulation({ politique, compact = false }: { politique: Politique; compact?: boolean }) {
   const t = useTranslations("politiqueAnnulation");
   const contenu = (

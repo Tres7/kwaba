@@ -17,13 +17,13 @@ class ConversationModel(models.Model):
         on_delete=models.CASCADE,
         related_name='guest_conversations',
     )
-    # Copie de l'hôte au moment de la création du fil
+    # Copy of the host when the thread was created
     host = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='host_conversations',
     )
-    # Curseurs de lecture : id du dernier message lu par chaque participant
+    # Read cursors: id of the last message read by each participant
     guest_last_read_id = models.BigIntegerField(default=0)
     host_last_read_id = models.BigIntegerField(default=0)
     created_at = models.DateTimeField()
@@ -45,7 +45,7 @@ class ConversationModel(models.Model):
 
 
 class MessageModel(models.Model):
-    # Id séquentiel (et non UUID) : curseur monotone pour les lectures et le polling
+    # Sequential id (and not UUID): monotonic cursor for reads and polling
     id = models.BigAutoField(primary_key=True)
     conversation = models.ForeignKey(
         ConversationModel,
@@ -58,7 +58,7 @@ class MessageModel(models.Model):
         related_name='sent_messages',
     )
     content = models.TextField()
-    # Coordonnées masquées à l'envoi (anti-contournement) ; le texte d'origine n'est pas conservé
+    # Contact details hidden when sending (anti-bypass); the original text is not kept
     masque = models.BooleanField(default=False)
     created_at = models.DateTimeField()
 
@@ -82,7 +82,7 @@ class NotificationOutboxModel(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     event_type = models.CharField(max_length=100)
-    # Pas de clés étrangères : l'outbox reste lisible même si le fil est supprimé
+    # No foreign keys: the outbox stays readable even if the thread is deleted
     conversation_id = models.UUIDField()
     message_id = models.BigIntegerField()
     recipient_id = models.UUIDField()

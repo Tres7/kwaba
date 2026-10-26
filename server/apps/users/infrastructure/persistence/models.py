@@ -59,13 +59,13 @@ class UserModel(AbstractUser):
 
 
 def hacher_code(user_id, code: str) -> str:
-    """Empreinte HMAC du code : une fuite de la table ne révèle aucun code utilisable (clé = SECRET_KEY)."""
+    """HMAC fingerprint of the code: a leak of the table reveals no usable code (key = SECRET_KEY)."""
     return hmac.new(settings.SECRET_KEY.encode(), f"{user_id}:{code}".encode(), hashlib.sha256).hexdigest()
 
 
 class VerificationCode(models.Model):
     user       = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='verification_codes')
-    # Empreinte du code à 6 chiffres (hacher_code), jamais le code lui-même
+    # Fingerprint of the 6-digit code (hacher_code), never the code itself
     code       = models.CharField(max_length=64)
     expires_at = models.DateTimeField()
 

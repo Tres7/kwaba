@@ -31,9 +31,9 @@ def test_register_verify_then_login(api_client, register, password, code_envoye)
     assert response.data['phone'] == '+22890000000'
     assert response.data['is_verified'] is False
 
-    # Broker indisponible : le code part quand même par email (repli)
+    # Broker unavailable: the code is still sent by email (fallback)
     code = code_envoye('ama.kossi@example.tg')
-    # La base ne garde que l'empreinte du code, jamais le code lui-même
+    # The database only keeps the fingerprint of the code, never the code itself
     stocke = VerificationCode.objects.get(user__email='ama.kossi@example.tg').code
     assert code not in stocke and len(stocke) == 64
 

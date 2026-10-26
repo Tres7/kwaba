@@ -2,12 +2,12 @@ import { Link } from "@/i18n/navigation";
 import LienContact from "@/components/legal/LienContact";
 import LegalPage from "@/components/legal/LegalPage";
 
-/** Paragraphe numéroté d'un article (« 4.1. … »). */
+/** Numbered paragraph of an article ("4.1. …"). */
 function N({ n, children }: { n: string; children: React.ReactNode }) {
   return <p><strong>{n}.</strong> {children}</p>;
 }
 
-/** Version française (fait foi). CGU et charte des avis, version 1 du 18 octobre 2026. */
+/** French version (authoritative). Terms of use and review charter, version 1 of 18 October 2026. */
 export default function ContenuFr() {
   return (
     <LegalPage

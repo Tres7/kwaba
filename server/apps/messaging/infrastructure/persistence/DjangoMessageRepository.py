@@ -54,7 +54,7 @@ class DjangoMessageRepository(MessageRepository):
         )
 
     def last_messages(self, conversation_ids: List[uuid.UUID]) -> Dict[uuid.UUID, Message]:
-        # DISTINCT ON (PostgreSQL) : le message le plus récent de chaque fil, en une requête
+        # DISTINCT ON (PostgreSQL): the most recent message of each thread, in one query
         qs = (
             MessageModel.objects.filter(conversation_id__in=conversation_ids)
             .order_by('conversation_id', '-id')
@@ -65,7 +65,7 @@ class DjangoMessageRepository(MessageRepository):
     def unread_counts(self, user_id: uuid.UUID, conversations: List[Conversation]) -> Dict[uuid.UUID, int]:
         if not conversations:
             return {}
-        # Chaque fil a son propre curseur : une condition par fil, regroupées en une seule requête
+        # Each thread has its own cursor: one condition per thread, grouped into a single query
         condition = Q()
         for c in conversations:
             condition |= Q(conversation_id=c.id, id__gt=c.last_read_id_for(user_id))

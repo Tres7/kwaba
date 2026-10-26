@@ -16,7 +16,7 @@ export const CAUSES: { value: CauseGive; label: string }[] = [
 ];
 const PAYS = [{ value: "TG", label: "Togo" }, { value: "BJ", label: "Bénin" }, { value: "BF", label: "Burkina Faso" },
   { value: "NE", label: "Niger" }, { value: "ML", label: "Mali" }];
-// Le client API envoie du JSON par défaut : en-tête nécessaire pour transmettre les photos
+// The API client sends JSON by default: header needed to send the photos
 const MULTIPART = { headers: { "Content-Type": "multipart/form-data" } };
 
 type FormOng = Omit<OngAdmin, "id" | "logo" | "image" | "collecte" | "nb_dons" | "nb_projets" | "verifiee_le"> & { verifiee_le: string };
@@ -26,7 +26,7 @@ const ONG_VIDE: FormOng = { nom: "", slug: "", cause: "education", pays: "TG", v
 type FormProjet = { titre: string; cause: CauseGive; resume: string; description: string; lieu: string; objectif: string; actif: boolean };
 const PROJET_VIDE: FormProjet = { titre: "", cause: "education", resume: "", description: "", lieu: "", objectif: "", actif: true };
 
-/** FormData à partir d'un objet ; les photos ne sont jointes que si une nouvelle est choisie. */
+/** FormData from an object; photos are only attached if a new one is chosen. */
 function formulaire(valeurs: Record<string, unknown>, photos: Record<string, File | null>) {
   const corps = new FormData();
   for (const [k, v] of Object.entries(valeurs)) {
@@ -78,7 +78,7 @@ export default function Organisations() {
       if (edition === "nouvelle") await api.post("/v1/admin/give/organisations/", formulaire(valeurs, photos), MULTIPART);
       else if (edition) {
         await api.patch(`/v1/admin/give/organisations/${edition.id}/`, formulaire(valeurs, photos), MULTIPART);
-        // Dépublier : date vide, que le multipart ne sait pas transmettre
+        // Unpublish: empty date, which multipart cannot send
         if (!form.verifiee_le && edition.verifiee_le) await api.patch(`/v1/admin/give/organisations/${edition.id}/`, { verifiee_le: null });
       }
       toast.success("ONG enregistrée");

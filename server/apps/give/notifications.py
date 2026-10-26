@@ -1,4 +1,4 @@
-"""Emails de Kwa-Ba Give, envoyés par le worker (même principe que apps.paiements.notifications)."""
+"""Kwa-Ba Give emails, sent by the worker (same principle as apps.paiements.notifications)."""
 import logging
 
 from django.conf import settings

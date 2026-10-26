@@ -2,7 +2,7 @@ import { formatPrice } from "@/lib/utils";
 import type { Impact } from "@/types/api/give";
 import { useLocale, useTranslations } from "next-intl";
 
-/** Collecté / reversé / en attente : la transparence en trois chiffres. */
+/** Collected / transferred / pending: transparency in three figures. */
 export default function ChiffresImpact({ impact, clair = false }: { impact: Impact; clair?: boolean }) {
   const t = useTranslations("give");
   const locale = useLocale();

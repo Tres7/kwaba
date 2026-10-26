@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: docker compose config
-        # compose.yaml lit server/.env et client/.env, absents du dépôt
+        # compose.yaml reads server/.env and client/.env, missing from the repository
         run: |
           cp server/.env.example server/.env
           cp client/.env.example client/.env
@@ -50,7 +50,7 @@ jobs:
         with:
           context: server
           push: false
-          load: true # image disponible localement pour Trivy
+          load: true # image available locally for Trivy
           tags: ${{ env.IMAGE }}
           cache-from: type=gha,scope=server
           cache-to: type=gha,mode=max,scope=server
@@ -78,7 +78,7 @@ jobs:
           context: client
           target: production
           push: false
-          load: true # image disponible localement pour le smoke test et Trivy (jamais publiée depuis une PR)
+          load: true # image available locally for the smoke test and Trivy (never published from a PR)
           tags: ${{ env.IMAGE }}
           cache-from: type=gha,scope=client
           cache-to: type=gha,mode=max,scope=client
