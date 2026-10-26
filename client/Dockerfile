@@ -10,6 +10,7 @@ RUN npm ci --no-audit --no-fund
 # Développement (compose.yaml, target: dev) : code monté en volume, rechargement à chaud
 FROM deps AS dev
 COPY . .
+USER node
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
