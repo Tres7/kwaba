@@ -289,12 +289,18 @@ MODULES = {nom: _env_bool(f'MODULE_{nom.upper()}', 'False') for nom in (
 
 # Mentions légales attendues après l'immatriculation (vides : « à compléter » sur le site). Le RCCM et le NIF
 # saisis dans le back-office (Documents → Informations société) servent tant que ces variables sont vides.
+def _mention(nom: str) -> str:
+    # Un commentaire laissé sur la ligne d'une variable vide (« SOCIETE_NIF=   # … ») peut être lu comme sa valeur :
+    # il compte alors comme vide (« à compléter »), jamais affiché tel quel
+    valeur = os.getenv(nom, '').strip()
+    return '' if valeur.startswith('#') else valeur
+
+
 MENTIONS_LEGALES = {
-    'rccm': os.getenv('SOCIETE_RCCM', ''),
-    'nif': os.getenv('SOCIETE_NIF', ''),
-    'commerce_electronique': os.getenv('SOCIETE_COMMERCE_ELECTRONIQUE', ''),  # décret n° 2018-062/PR
-    'ipdcp': os.getenv('SOCIETE_IPDCP', ''),  # déclaration auprès de l'IPDCP
-    'whatsapp': os.getenv('SOCIETE_WHATSAPP', ''),  # numéro WhatsApp Business, avec l'indicatif (+228 …)
+    'rccm': _mention('SOCIETE_RCCM'),
+    'nif': _mention('SOCIETE_NIF'),
+    'commerce_electronique': _mention('SOCIETE_COMMERCE_ELECTRONIQUE'),  # décret n° 2018-062/PR
+    'ipdcp': _mention('SOCIETE_IPDCP'),  # déclaration auprès de l'IPDCP
 }
 
 # Adresse de réponse des emails envoyés (les réponses des utilisateurs arrivent dans cette boîte)

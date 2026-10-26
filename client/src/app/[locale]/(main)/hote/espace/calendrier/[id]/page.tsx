@@ -116,7 +116,7 @@ export default function CalendrierHotePage() {
             <MonthGrid month={month} onMonthChange={setMonth} count={2} minMonth={new Date()} renderDay={renderDay} onDayClick={clic} />
           )}
           <div className="flex flex-wrap gap-4 mt-5 text-xs text-gray-600">
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-white border border-gray-200" /> Libre</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-white border border-gray-200" /> {t("libre")}</span>
             <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-blue-100" /> {t("reserve")}</span>
             <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-[repeating-linear-gradient(135deg,#f3f4f6,#f3f4f6_3px,#e5e7eb_3px,#e5e7eb_6px)]" /> {t("fermeParVous")}</span>
           </div>
@@ -124,7 +124,7 @@ export default function CalendrierHotePage() {
 
         <div className="space-y-6">
           <div className="bg-white rounded-3xl shadow-card p-5">
-            <h2 className="font-heading font-bold text-dark mb-2 flex items-center gap-2"><Lock size={16} className="text-primary" /> Fermer des dates</h2>
+            <h2 className="font-heading font-bold text-dark mb-2 flex items-center gap-2"><Lock size={16} className="text-primary" /> {t("fermerTitre")}</h2>
             {!debut ? (
               <p className="text-sm text-muted">{t("aide")}</p>
             ) : (

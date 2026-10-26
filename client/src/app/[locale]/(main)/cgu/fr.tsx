@@ -215,7 +215,7 @@ export default function ContenuFr() {
           contenu: (
             <>
               <N n="16.1">Les présentes conditions sont soumises au droit togolais et aux actes uniformes de l’OHADA, sans priver le consommateur des dispositions impératives du pays où il réside.</N>
-              <N n="16.2">Toute réclamation est adressée à KWA-BA par la Plateforme, par WhatsApp ou à <LienContact sujet="Réclamation" /> ; KWA-BA en accuse réception sous 72 heures. Les parties recherchent une solution amiable pendant 30 jours.</N>
+              <N n="16.2">Toute réclamation est adressée à KWA-BA par la Plateforme ou à <LienContact sujet="Réclamation" /> ; KWA-BA en accuse réception sous 72 heures. Les parties recherchent une solution amiable pendant 30 jours.</N>
               <N n="16.3">À défaut, le litige relève des juridictions compétentes de Lomé, notamment du tribunal de commerce de Lomé pour les professionnels.</N>
             </>
           ),

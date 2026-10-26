@@ -21,7 +21,7 @@ export default function ContenuFr() {
               <li>Immatriculation : RCCM de Lomé n° <MentionSociete cle="rccm" libelle="RCCM" /> ; NIF <MentionSociete cle="nif" libelle="NIF" /></li>
               <li>Commerce électronique : enregistrée comme prestataire de commerce électronique sous le n° <MentionSociete cle="commerce_electronique" libelle="numéro" /> (décret n° 2018-062/PR)</li>
               <li>Données personnelles : déclaration auprès de l&apos;Instance de protection des données à caractère personnel (IPDCP) n° <MentionSociete cle="ipdcp" libelle="numéro" /></li>
-              <li>Contact : <LienContact /> ; WhatsApp <MentionSociete cle="whatsapp" libelle="numéro" /> ; adresse postale : quartier Totsi Gblenkomé, rue 243, Lomé, Togo</li>
+              <li>Contact : <LienContact /> ; adresse postale : quartier Totsi Gblenkomé, rue 243, Lomé, Togo</li>
               <li>Cogérants : M. MENDE Fadel et M. KPOGLO Dzidoula Godwin Trésor — Directeur de la publication : M. MENDE Fadel.</li>
             </ul>
           ),

@@ -27,7 +27,7 @@ export default function ContenuFr() {
             <ul>
               <li>Responsable : <strong>KWA-BA SARL</strong>, société à responsabilité limitée au capital de 100 000 F CFA, quartier Totsi Gblenkomé, rue 243, Lomé (Togo), RCCM <MentionSociete cle="rccm" libelle="RCCM" />.</li>
               <li>Déclaration auprès de l&apos;Instance de protection des données à caractère personnel (IPDCP) : n° <MentionSociete cle="ipdcp" libelle="numéro de déclaration" />.</li>
-              <li>Contact pour vos données : <LienContact sujet="Protection des données" />, ou par WhatsApp au <MentionSociete cle="whatsapp" libelle="numéro WhatsApp" />.</li>
+              <li>Contact pour vos données : <LienContact sujet="Protection des données" />.</li>
               <li>Référent chargé des données au sein de KWA-BA : <AC>nom ou fonction</AC>.</li>
             </ul>
           ),

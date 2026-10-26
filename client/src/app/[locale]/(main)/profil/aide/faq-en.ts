@@ -70,7 +70,7 @@ export const SECTIONS_EN = [
     id: "reclamations",
     title: "Complaints",
     items: [
-      { q: "How do I make a complaint?", a: "With the form at the bottom of this page, by WhatsApp or by email: Kwa-Ba acknowledges receipt within 72 hours (terms of sale, art. 21.1). In a disagreement with a provider, Kwa-Ba offers free mediation and gives a written opinion within 10 days (art. 21.2). An amicable solution is sought for 30 days before any legal action (art. 21.3)." },
+      { q: "How do I make a complaint?", a: "With the form at the bottom of this page or by email: Kwa-Ba acknowledges receipt within 72 hours (terms of sale, art. 21.1). In a disagreement with a provider, Kwa-Ba offers free mediation and gives a written opinion within 10 days (art. 21.2). An amicable solution is sought for 30 days before any legal action (art. 21.3)." },
     ],
   },
 ];

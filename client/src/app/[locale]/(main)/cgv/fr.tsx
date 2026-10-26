@@ -23,7 +23,7 @@ export default function ContenuFr() {
             électronique sous le numéro <MentionSociete cle="commerce_electronique" libelle="numéro d&apos;enregistrement" />, représentée par ses cogérants, M. MENDE Fadel et M. KPOGLO Dzidoula Godwin Trésor.
           </p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Contact : <LienContact sujet="Conditions générales de vente" /> ; WhatsApp <MentionSociete cle="whatsapp" libelle="numéro WhatsApp" /> ; adresse postale : quartier Totsi Gblenkomé, rue 243, Lomé, Togo.</li>
+            <li>Contact : <LienContact sujet="Conditions générales de vente" /> ; adresse postale : quartier Totsi Gblenkomé, rue 243, Lomé, Togo.</li>
             <li>Cogérants : M. MENDE Fadel et M. KPOGLO Dzidoula Godwin Trésor — Directeur de la publication : M. MENDE Fadel.</li>
           </ul>
           <p>
@@ -103,7 +103,7 @@ export default function ContenuFr() {
             <>
               <N n="5.1">Avant de payer, le client voit un récapitulatif complet : le service réservé ; les dates et horaires ; le nombre de personnes ; le prix total en F CFA, détaillé ; la politique d’annulation ; l’existence ou non d’un droit de rétractation et ses modalités ; le dépôt de garantie éventuel ; les règles de l’annonce. Il peut corriger ses choix ou abandonner à tout moment.</N>
               <N n="5.2">Le client accepte expressément les CGV, les règles de l’annonce et la politique d’annulation en cochant une case avant de payer. Ces documents sont consultables, téléchargeables et imprimables.</N>
-              <N n="5.3">La réservation est ferme dès la confirmation du paiement. KWA-BA envoie une confirmation par courriel ou par WhatsApp aussitôt après la confirmation du paiement, et au plus tard sous cinq jours. Elle contient le récapitulatif et le lien vers les CGV. Un reçu électronique est délivré pour chaque paiement.</N>
+              <N n="5.3">La réservation est ferme dès la confirmation du paiement. KWA-BA envoie une confirmation par courriel aussitôt après la confirmation du paiement, et au plus tard sous cinq jours. Elle contient le récapitulatif et le lien vers les CGV. Un reçu électronique est délivré pour chaque paiement.</N>
               <N n="5.4">Les échanges avec le prestataire passent par la messagerie de la Plateforme, avant comme après le paiement. Pour une mission de mobilité, le nom et le numéro du chauffeur sont communiqués au client après l’attribution, au plus tard 24 heures avant la mission.</N>
               <N n="5.5"><strong>Demande de réservation :</strong> lorsque l’annonce le prévoit, le prestataire dispose de 24 heures pour accepter. Sans réponse, la demande est annulée et le montant éventuellement prélevé est remboursé intégralement.</N>
             </>
@@ -189,7 +189,7 @@ export default function ContenuFr() {
           titre: "Droit de rétractation du consommateur",
           contenu: (
             <>
-              <N n="10.1">Conformément à la loi n° 2017-07 relative aux transactions électroniques (art. 44), le consommateur peut se rétracter sans motif dans un délai de <strong>dix jours ouvrables</strong> à compter de la conclusion du contrat. Il notifie sa rétractation depuis son espace de réservation, par courriel ou par WhatsApp. Les sommes versées lui sont remboursées dans les 10 jours suivant cette notification (art. 46). Ce délai de rétractation ne se confond pas avec le délai de remboursement après une annulation, qui est de sept jours ouvrés (article 11.5).</N>
+              <N n="10.1">Conformément à la loi n° 2017-07 relative aux transactions électroniques (art. 44), le consommateur peut se rétracter sans motif dans un délai de <strong>dix jours ouvrables</strong> à compter de la conclusion du contrat. Il notifie sa rétractation depuis son espace de réservation ou par courriel. Les sommes versées lui sont remboursées dans les 10 jours suivant cette notification (art. 46). Ce délai de rétractation ne se confond pas avec le délai de remboursement après une annulation, qui est de sept jours ouvrés (article 11.5).</N>
               <N n="10.2">Ce droit ne peut plus être exercé lorsque l’exécution du service a commencé avec l’accord du consommateur avant la fin de ce délai (art. 47). En confirmant une réservation pour des dates déterminées, le consommateur demande expressément que le service de réservation soit exécuté immédiatement : les dates sont bloquées chez le prestataire, qui refuse d’autres clients pour ces dates. Il reconnaît qu’il ne pourra plus alors exercer son droit de rétractation sur ces dates, et que la politique d’annulation de l’annexe 1 s’applique.</N>
               <N n="10.3"><strong>Délai de réflexion offert :</strong> même lorsque le droit de rétractation ne s’applique pas, toute réservation de courte durée ou de mobilité annulée dans les <strong>48 heures</strong> suivant sa confirmation, et au moins <strong>7 jours</strong> avant l’arrivée ou la prise du véhicule, est remboursée intégralement, frais de service compris.</N>
               <N n="10.4">Les clients professionnels ne bénéficient pas du droit de rétractation (art. 43 de la même loi).</N>
@@ -339,7 +339,7 @@ export default function ContenuFr() {
           titre: "Réclamations, médiation et litiges",
           contenu: (
             <>
-              <N n="21.1">Toute réclamation est adressée à KWA-BA par la Plateforme, par WhatsApp ou à <LienContact sujet="Réclamation" />. KWA-BA en accuse réception sous 72 heures.</N>
+              <N n="21.1">Toute réclamation est adressée à KWA-BA par la Plateforme ou à <LienContact sujet="Réclamation" />. KWA-BA en accuse réception sous 72 heures.</N>
               <N n="21.2">En cas de désaccord avec un prestataire, KWA-BA propose une médiation gratuite et donne un avis écrit sous 10 jours, au vu des pièces fournies par chacun.</N>
               <N n="21.3">Les parties recherchent une solution amiable pendant 30 jours avant toute action en justice, sauf urgence.</N>
             </>
@@ -363,7 +363,7 @@ export default function ContenuFr() {
               <N n="23.1">KWA-BA peut modifier les CGV. La version applicable est celle acceptée lors de la réservation. Toute modification importante est annoncée au moins 30 jours à l’avance aux clients disposant d’un compte.</N>
               <N n="23.2">Si une clause est déclarée nulle, les autres restent applicables.</N>
               <N n="23.3">Le fait de ne pas se prévaloir d’une clause ne vaut pas renonciation à celle-ci.</N>
-              <N n="23.4">Les communications entre les parties se font par la Plateforme, par courriel ou par WhatsApp, aux coordonnées du compte.</N>
+              <N n="23.4">Les communications entre les parties se font par la Plateforme ou par courriel, aux coordonnées du compte.</N>
             </>
           ),
         },
