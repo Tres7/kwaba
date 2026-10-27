@@ -18,10 +18,14 @@ export const PAGES_PUBLIQUES = [
 /**
  * Private pages or pages of no interest to a search engine (robots.txt): they redirect to sign-in or only
  * show the user's data. /profil/aide (help centre) stays public.
+ *
+ * The sign-in pages (/login, /register, /verify, /mot-de-passe-oublie) are not listed: they carry "noindex"
+ * (app/[locale]/(auth)/layout.tsx), which Google could not read if crawling them were forbidden. Without it, every
+ * /login?callbackUrl=… was reported as a duplicate page without a canonical URL.
  */
 export const CHEMINS_PRIVES = [
   "/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/give/don", "/together/", "/transfert/", "/location/",
-  "/login", "/register", "/verify", "/mot-de-passe-oublie", "/backoffice", "/api/",
+  "/backoffice", "/agent", "/api/",
 ] as const;
 
 export function langueDe(valeur: string): Langue {
