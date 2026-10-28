@@ -213,3 +213,55 @@ class InscriptionLancementModel(models.Model):
 
     def __str__(self):
         return self.email
+
+
+def _jeton_alerte() -> str:
+    import secrets
+    return secrets.token_urlsafe(32)
+
+
+class AlerteDisponibiliteModel(models.Model):
+    """A traveller to notify by email when the dates of a full listing can be booked again.
+
+    Signed-in traveller: active at once. Visitor without an account: active once the address is confirmed through the
+    emailed link (double opt-in). Expires when the arrival date has passed; one email at most per alert.
+    """
+    STATUTS = [
+        ('a_confirmer', 'Adresse à confirmer'),
+        ('active', 'Active'),
+        ('notifiee', 'Prévenu'),
+        ('expiree', 'Expirée'),
+        ('annulee', 'Désinscrit'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    hebergement = models.ForeignKey(HebergementModel, on_delete=models.CASCADE, related_name='alertes')
+    # None: any unit type of the establishment
+    type_logement = models.ForeignKey(TypeLogementModel, on_delete=models.CASCADE, null=True, blank=True, related_name='alertes')
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
+                                    related_name='alertes_disponibilite')
+    email = models.EmailField()
+    langue = models.CharField(max_length=2, default='fr')
+    date_debut = models.DateField()
+    date_fin = models.DateField()
+    nb_unites = models.PositiveSmallIntegerField(default=1)
+    statut = models.CharField(max_length=12, choices=STATUTS, default='a_confirmer')
+    # Confirmation and unsubscribe links
+    jeton = models.CharField(max_length=64, unique=True, default=_jeton_alerte, editable=False)
+    # Set when dates of the listing may have become free: checked by the worker at its next pass
+    a_verifier = models.BooleanField(default=False)
+    confirmation_envoyee = models.BooleanField(default=False)
+    cree_le = models.DateTimeField(auto_now_add=True)
+    notifiee_le = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        app_label = 'hebergements'
+        ordering = ['-cree_le']
+        verbose_name = 'Alerte de disponibilité'
+        indexes = [models.Index(fields=['hebergement', 'statut'])]
+        constraints = [
+            models.CheckConstraint(check=models.Q(date_fin__gt=models.F('date_debut')), name='alerte_fin_apres_debut'),
+        ]
+
+    def __str__(self):
+        return f"Alerte {self.email} {self.hebergement_id} {self.date_debut} → {self.date_fin}"

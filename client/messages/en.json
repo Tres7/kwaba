@@ -1934,5 +1934,24 @@
     "photosAide": "Photos specific to this type. Without any, the listing’s photos are used.",
     "annuler": "Cancel",
     "enregistrer": "Save"
+  },
+  "alerte": {
+    "bouton": "Notify me if these dates become free",
+    "emailLibelle": "Your email address",
+    "emailAide": "We will send you a link to confirm the alert, then a single email if a place becomes free. Nothing is held for you.",
+    "valider": "Create the alert",
+    "active": "Done: we will write to {email} if a place becomes free on these dates.",
+    "aConfirmer": "Almost done: confirm the alert with the link sent to {email}.",
+    "confirmerTitre": "Confirm your alert",
+    "confirmerTexte": "Confirm your address to be notified by email if dates become free.",
+    "confirmerBouton": "Confirm the alert",
+    "desinscrireTitre": "Stop the alert",
+    "desinscrireTexte": "You will no longer receive emails for this alert.",
+    "desinscrireBouton": "Stop the alert",
+    "confirmee": "Alert on: we will write to you if {hebergement} becomes free from {debut} to {fin}.",
+    "arretee": "Alert stopped for {hebergement}, from {debut} to {fin}.",
+    "terminee": "This alert for {hebergement} ({debut} to {fin}) is already over.",
+    "voirLogement": "See the place",
+    "lienInvalide": "This link is no longer valid."
   }
 }

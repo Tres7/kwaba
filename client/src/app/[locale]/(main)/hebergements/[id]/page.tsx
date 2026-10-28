@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, BadgeCheck, MapPin, ChevronDown, ChevronUp, Share2, Calendar, MessageCircle, Pencil, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import AlerteDisponibilite from "@/components/hebergement/AlerteDisponibilite";
 import AmenityBadge from "@/components/hebergement/AmenityBadge";
 import DetailsLogement from "@/components/hebergement/DetailsLogement";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
@@ -92,7 +93,8 @@ function HebergementContent() {
   const serviceFee = calculateServiceFee(subtotal, tauxFrais);
   const total = subtotal + serviceFee;
   // Displayed headline price: the night with service fees included, details just below
-  const nuitTtc = prixNuitFraisInclus(Number(hebergement.price_per_night), tauxFrais);
+  // Price of one unit of the chosen type (the establishment's "from" price otherwise)
+  const nuitTtc = prixNuitFraisInclus(prixUnite, tauxFrais);
   const gallery = [hebergement.image_url, ...hebergement.images.filter((i) => i !== hebergement.image_url)].filter(Boolean);
   const photos = gallery.length ? gallery : [FALLBACK_IMAGE];
   const reservationUrl = `/reservation/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${Math.min(guests, capacite)}`
@@ -281,7 +283,7 @@ function HebergementContent() {
                   <span className="text-muted text-sm font-medium">{t("parNuitFraisInclus")}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {t("detailNuit", { prix: formatPrice(hebergement.price_per_night), frais: formatPrice(nuitTtc.frais), taux: Math.round(tauxFrais * 100) })}
+                  {t("detailNuit", { prix: formatPrice(prixUnite), frais: formatPrice(nuitTtc.frais), taux: Math.round(tauxFrais * 100) })}
                 </p>
               </div>
 
@@ -343,6 +345,10 @@ function HebergementContent() {
                   {t("datesPrises")}{" "}
                   <button type="button" onClick={() => { choisirDates("", ""); setCalendrierOuvert(true); }} className="font-bold underline">{t("autresDates")}</button>
                 </p>
+              )}
+              {datesPrises && checkIn >= today && !isOwner && (
+                <AlerteDisponibilite key={`${checkIn}-${checkOut}-${typeLogement?.id ?? ""}`} hebergementId={hebergement.id}
+                  checkIn={checkIn} checkOut={checkOut} typeLogement={typeLogement?.id} nbUnites={nbUnites} />
               )}
 
               {nights > 0 && !datesPrises && (

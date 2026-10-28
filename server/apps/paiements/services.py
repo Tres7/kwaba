@@ -20,6 +20,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from config import prelancement
+from apps.hebergements.alertes import signaler_liberation
 from apps.hebergements.disponibilites import conflit, delai_paiement, verrouiller, verrouiller_types
 from apps.reservations.models import ReservationModel
 
@@ -335,6 +336,7 @@ def annuler(reservation, par: str) -> int:
         reservation.annule_par = par
         reservation.annule_le = timezone.now()
         reservation.save(update_fields=['status', 'annule_par', 'annule_le'])
+        signaler_liberation(reservation.hebergement_id, reservation.check_in, reservation.check_out)
         return rembourse
 
 
@@ -525,9 +527,11 @@ def expirer_reservations() -> int:
     for reservation in ReservationModel.objects.filter(a_expirer, status='pending'):
         for paiement in reservation.paiements.filter(statut='en_attente'):
             synchroniser_paiement(paiement)
-        expirees += ReservationModel.objects.filter(pk=reservation.pk, status='pending').update(
+        if ReservationModel.objects.filter(pk=reservation.pk, status='pending').update(
             status='cancelled', annule_par='expiration', annule_le=maintenant,
-        )
+        ):
+            expirees += 1
+            signaler_liberation(reservation.hebergement_id, reservation.check_in, reservation.check_out)
     return expirees
 
 
@@ -542,6 +546,7 @@ def passe() -> dict:
         synchroniser_remboursement(remboursement)
     from . import notifications  # local import: notifications imports the models and the rates
     from apps.give import services as give  # local imports: these modules depend on paiements
+    from apps.hebergements import alertes
     from apps.locations import services as locations
     from apps.transferts import services as transferts
 
@@ -553,6 +558,8 @@ def passe() -> dict:
         **locations.passe(),
         **give.passe(),
     }
+    # After the expiries of this pass: the dates they freed are checked at once
+    stats.update(alertes.passe())
     from . import relances
     # After the expiries: the "cancelled for lack of payment" email goes in the same pass
     stats['relances'] = relances.envoyer_relances()

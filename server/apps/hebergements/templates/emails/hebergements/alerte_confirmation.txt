@@ -1,0 +1,20 @@
+{% autoescape off %}{% if langue == 'en' %}Hello,
+
+You asked to be notified if dates become available at {{ hebergement }} ({{ ville }}){% if type_logement %}, {{ type_logement }}{% endif %}, from {{ arrivee }} to {{ depart }}.
+
+Confirm your email address to turn the alert on:
+{{ url_confirmation }}
+
+If you did not ask for it, ignore this email: nothing will be sent to you.
+
+The Kwa-Ba team{% else %}Bonjour,
+
+Vous avez demandé à être prévenu si des dates se libèrent à {{ hebergement }} ({{ ville }}){% if type_logement %}, {{ type_logement }}{% endif %}, du {{ arrivee }} au {{ depart }}.
+
+Confirmez votre adresse email pour activer l'alerte :
+{{ url_confirmation }}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : rien ne vous sera envoyé.
+
+L'équipe Kwa-Ba{% endif %}
+{% endautoescape %}

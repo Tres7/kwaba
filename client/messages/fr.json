@@ -1934,5 +1934,24 @@
     "photosAide": "Les photos propres à ce type. Sans photo, celles de l’annonce sont utilisées.",
     "annuler": "Annuler",
     "enregistrer": "Enregistrer"
+  },
+  "alerte": {
+    "bouton": "M’alerter si ces dates se libèrent",
+    "emailLibelle": "Votre adresse email",
+    "emailAide": "Nous vous enverrons un lien pour confirmer l’alerte, puis un seul email si une place se libère. Rien n’est réservé pour vous.",
+    "valider": "Créer l’alerte",
+    "active": "C’est noté : nous écrirons à {email} si une place se libère à ces dates.",
+    "aConfirmer": "Presque fini : confirmez l’alerte avec le lien envoyé à {email}.",
+    "confirmerTitre": "Confirmer votre alerte",
+    "confirmerTexte": "Confirmez votre adresse pour être prévenu par email si des dates se libèrent.",
+    "confirmerBouton": "Confirmer l’alerte",
+    "desinscrireTitre": "Arrêter l’alerte",
+    "desinscrireTexte": "Vous ne recevrez plus d’email pour cette alerte.",
+    "desinscrireBouton": "Arrêter l’alerte",
+    "confirmee": "Alerte activée : nous vous écrirons si {hebergement} se libère du {debut} au {fin}.",
+    "arretee": "Alerte arrêtée pour {hebergement}, du {debut} au {fin}.",
+    "terminee": "Cette alerte pour {hebergement} (du {debut} au {fin}) est déjà terminée.",
+    "voirLogement": "Voir le logement",
+    "lienInvalide": "Ce lien n’est plus valable."
   }
 }
