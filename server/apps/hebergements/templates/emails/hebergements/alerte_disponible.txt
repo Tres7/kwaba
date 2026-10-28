@@ -1,0 +1,22 @@
+{% autoescape off %}{% if langue == 'en' %}Hello,
+
+Good news: {{ hebergement }} ({{ ville }}){% if type_logement %}, {{ type_logement }}{% endif %} can be booked again from {{ arrivee }} to {{ depart }}.
+
+Places go fast, and the dates are not held for you: book now if they suit you.
+{{ url }}
+
+This alert is now over: we will not write to you again about these dates.
+To stop the alerts of this address: {{ url_desinscription }}
+
+The Kwa-Ba team{% else %}Bonjour,
+
+Bonne nouvelle : {{ hebergement }} ({{ ville }}){% if type_logement %}, {{ type_logement }}{% endif %} est de nouveau réservable du {{ arrivee }} au {{ depart }}.
+
+Les places partent vite et ces dates ne vous sont pas réservées : réservez dès maintenant si elles vous conviennent.
+{{ url }}
+
+Cette alerte est terminée : nous ne vous écrirons plus pour ces dates.
+Pour arrêter les alertes : {{ url_desinscription }}
+
+L'équipe Kwa-Ba{% endif %}
+{% endautoescape %}

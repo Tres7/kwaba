@@ -12,6 +12,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
 
+from .alertes import signaler_liberation
 from . import stock
 from .disponibilites import a_des_reservations, periodes_indisponibles, verrouiller, verrouiller_types
 from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
@@ -430,6 +431,7 @@ class BlocageDetailView(APIView):
         if not blocage:
             return Response({'detail': 'Blocage introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         blocage.delete()
+        signaler_liberation(blocage.hebergement_id, blocage.debut, blocage.fin)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -464,6 +466,7 @@ class TypesLogementView(APIView):
         with transaction.atomic():
             type_logement = serializer.save(hebergement=hebergement)
             types_logement.recalculer_etablissement(hebergement)
+            signaler_liberation(hebergement.id)
         return Response(TypeLogementSerializer(type_logement).data, status=status.HTTP_201_CREATED)
 
 
@@ -495,6 +498,8 @@ class TypeLogementDetailView(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
             types_logement.recalculer_etablissement(hebergement)
+            # More units, or a type offered again
+            signaler_liberation(hebergement.id)
         return Response(TypeLogementSerializer(type_logement).data)
 
     def delete(self, request, pk):
