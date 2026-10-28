@@ -37,11 +37,11 @@ function HebergementContent() {
   const [checkIn, setCheckIn] = useState(searchParams.get("check_in") || "");
   const [checkOut, setCheckOut] = useState(searchParams.get("check_out") || "");
   const [guests, setGuests] = useState(Number(searchParams.get("guests") || 1));
+  // Unit type (a hotel's room type) and number of units: from the URL, otherwise the first type, 1 unit
+  const [typeChoisi, setTypeChoisi] = useState(searchParams.get("type") || "");
+  const [unites, setUnites] = useState(Math.max(1, Number(searchParams.get("unites") || 1)));
   const [contacting, setContacting] = useState(false);
   const [calendrierOuvert, setCalendrierOuvert] = useState(false);
-
-  const { data: periodes = [], isLoading: dispoChargement } = useDisponibilites(params.id);
-  const indisponibles = useMemo(() => nuitsIndisponibles(periodes), [periodes]);
 
   const choisirDates = (arrivee: string, depart: string) => {
     setCheckIn(arrivee);
@@ -55,6 +55,11 @@ function HebergementContent() {
     enabled: status !== "loading",
     retry: false,
   });
+
+  const types = hebergement?.types ?? [];
+  const typeLogement = types.find((u) => u.id === typeChoisi) ?? types[0];
+  const { data: periodes = [], isLoading: dispoChargement } = useDisponibilites(params.id, 365, typeLogement?.id);
+  const indisponibles = useMemo(() => nuitsIndisponibles(periodes), [periodes]);
 
   if (isLoading || status === "loading") {
     return (
@@ -77,7 +82,11 @@ function HebergementContent() {
 
   const isOwner = session?.user?.id === hebergement.host_id;
   const nights = calculateNights(checkIn, checkOut);
-  const subtotal = hebergement.price_per_night * nights;
+  const prixUnite = Number(typeLogement?.prix_nuit ?? hebergement.price_per_night);
+  const unitesMax = Math.min(typeLogement?.quantite ?? 1, 20);
+  const nbUnites = Math.min(unites, unitesMax);
+  const capacite = (typeLogement?.capacite ?? hebergement.max_guests) * nbUnites;
+  const subtotal = prixUnite * nbUnites * nights;
   // Visitor's rate: 6 %, or 3 % if they already stayed with this host (loyal customer)
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
   const serviceFee = calculateServiceFee(subtotal, tauxFrais);
@@ -86,7 +95,8 @@ function HebergementContent() {
   const nuitTtc = prixNuitFraisInclus(Number(hebergement.price_per_night), tauxFrais);
   const gallery = [hebergement.image_url, ...hebergement.images.filter((i) => i !== hebergement.image_url)].filter(Boolean);
   const photos = gallery.length ? gallery : [FALLBACK_IMAGE];
-  const reservationUrl = `/reservation/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${guests}`;
+  const reservationUrl = `/reservation/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${Math.min(guests, capacite)}`
+    + (typeLogement ? `&type=${typeLogement.id}&unites=${nbUnites}` : "");
   // Dates coming from the URL (search, shared link) but taken in the meantime
   let datesPrises = false;
   for (let d = checkIn; nights > 0 && d < checkOut; d = addDays(d, 1)) {
@@ -275,6 +285,26 @@ function HebergementContent() {
                 </p>
               </div>
 
+              {types.length > 1 && (
+                <fieldset className="mb-4 space-y-2">
+                  <legend className="text-[10px] text-dark font-bold uppercase tracking-widest mb-2">{t("typeLogement")}</legend>
+                  {types.map((u) => (
+                    <label key={u.id} className={cn("flex items-center justify-between gap-3 border rounded-xl px-3 py-2.5 cursor-pointer",
+                      u.id === typeLogement?.id ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/40")}>
+                      <span className="flex items-center gap-2 min-w-0">
+                        <input type="radio" name="type-logement" checked={u.id === typeLogement?.id} className="accent-primary"
+                          onChange={() => { setTypeChoisi(u.id); setUnites(1); }} />
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold text-dark truncate">{u.nom}</span>
+                          <span className="block text-xs text-gray-500">{t("capaciteUnite", { nombre: u.capacite })}</span>
+                        </span>
+                      </span>
+                      <span className="text-sm font-semibold text-dark whitespace-nowrap">{formatPrice(u.prix_nuit)}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              )}
+
               <div className="border border-gray-200 rounded-2xl overflow-hidden mb-4">
                 <div className="grid grid-cols-2 divide-x divide-gray-200">
                   {([[t("arrivee"), checkIn], [t("depart"), checkOut]] as const).map(([libelle, valeur]) => (
@@ -294,10 +324,17 @@ function HebergementContent() {
                     <DateRangeCalendar checkIn={checkIn} checkOut={checkOut} onChange={choisirDates} indisponibles={indisponibles} chargement={dispoChargement} />
                   </div>
                 )}
+                {unitesMax > 1 && (
+                  <Stepper
+                    className="border-t border-gray-200 px-4 py-3"
+                    label={t("unites")} hint={t("maximum", { nombre: unitesMax })}
+                    value={nbUnites} min={1} max={unitesMax} onChange={setUnites}
+                  />
+                )}
                 <Stepper
                   className="border-t border-gray-200 px-4 py-3"
-                  label={t("voyageurs")} hint={t("maximum", { nombre: hebergement.max_guests })}
-                  value={guests} min={1} max={hebergement.max_guests} onChange={setGuests}
+                  label={t("voyageurs")} hint={t("maximum", { nombre: capacite })}
+                  value={Math.min(guests, capacite)} min={1} max={capacite} onChange={setGuests}
                 />
               </div>
 
@@ -311,7 +348,9 @@ function HebergementContent() {
               {nights > 0 && !datesPrises && (
                 <div className="space-y-3 py-4 border-t border-gray-100 text-sm">
                   <div className="flex justify-between gap-2">
-                    <span className="text-gray-600">{formatPrice(hebergement.price_per_night)} × {t("nuits", { nombre: nights })}</span>
+                    <span className="text-gray-600">
+                      {formatPrice(prixUnite)} × {nbUnites > 1 && <>{t("unitesNombre", { nombre: nbUnites })} × </>}{t("nuits", { nombre: nights })}
+                    </span>
                     <span className="text-dark">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between gap-2">

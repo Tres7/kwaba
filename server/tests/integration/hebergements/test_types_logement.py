@@ -92,3 +92,12 @@ class TestDataMigration:
         make_hebergement()
         importlib.import_module('apps.hebergements.migrations.0010_types_par_defaut').creer_types_par_defaut(registre, None)
         assert TypeLogementModel.objects.count() == 1
+
+
+def test_the_listing_page_shows_its_unit_types_and_lists_do_not(api_client, make_hebergement):
+    annonce = make_hebergement(type='hotel', price_per_night=30000, max_guests=2)
+    TypeLogementModel.objects.create(hebergement=annonce, nom='Suite', capacite=4, prix_nuit=80000, quantite=2, ordre=1)
+    TypeLogementModel.objects.create(hebergement=annonce, nom='Fermée', capacite=2, prix_nuit=9000, quantite=1, actif=False)
+    types = api_client.get(f'{HEBERGEMENTS}{annonce.id}/').data['types']
+    assert [(t['nom'], t['quantite'], t['prix_nuit']) for t in types] == [('Chambre', 1, 30000.0), ('Suite', 2, 80000.0)]
+    assert {h['types'] for h in api_client.get(HEBERGEMENTS).data['results']} == {None}

@@ -12,7 +12,8 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
 
-from .disponibilites import a_des_reservations, filtre_actives, periodes_indisponibles, verrouiller, verrouiller_types
+from . import stock
+from .disponibilites import a_des_reservations, periodes_indisponibles, verrouiller, verrouiller_types
 from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
 from .photos import InvalidPhoto, normalize_photo
 from apps.securite import fraude
@@ -24,6 +25,8 @@ from apps.verifications import services as verifications
 HOST_ROLES = ('hote', 'admin')
 MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
 MAX_RESULTATS = 200
+# Search with dates: listings whose availability is computed before sorting (available ones first)
+MAX_CANDIDATS = 600
 
 
 def _context(request, proprietaire=False):
@@ -83,17 +86,6 @@ class HebergementListView(APIView):
         if search:
             qs = qs.filter(Q(name__icontains=search) | Q(city__icontains=search) | Q(location__icontains=search))
 
-        # Excludes the listings already booked over the requested period
-        check_in, check_out = filtres.get('check_in'), filtres.get('check_out')
-        if check_in and check_out:
-            busy = HebergementModel.objects.filter(
-                filtre_actives('reservations__'),
-                reservations__check_in__lt=check_out,
-                reservations__check_out__gt=check_in,
-            ).values('id')
-            fermes = BlocageModel.objects.filter(debut__lt=check_out, fin__gt=check_in).values('hebergement_id')
-            qs = qs.exclude(id__in=busy).exclude(id__in=fermes)
-
         sort = request.query_params.get('sort')
         if sort == 'prix_asc':
             qs = qs.order_by('price_per_night')
@@ -109,10 +101,26 @@ class HebergementListView(APIView):
         # load (and serialise) the whole database
         limit = request.query_params.get('limit')
         limite = min(int(limit), MAX_RESULTATS) if limit and limit.isdigit() else MAX_RESULTATS
-        qs = qs[:limite]
 
-        serializer = HebergementSerializer(qs, many=True, context=_context(request))
-        return Response({'results': serializer.data, 'count': len(serializer.data)})
+        # With dates, a full listing stays in the results (badge "full on these dates", next available date), after
+        # the available ones; ?disponibles=1 keeps only the available ones
+        check_in, check_out = filtres.get('check_in'), filtres.get('check_out')
+        disponibilites = {}
+        if check_in and check_out:
+            candidats = list(qs[:MAX_CANDIDATS])
+            disponibilites = stock.disponibilites_etablissements([h.id for h in candidats], check_in, check_out)
+            libre = lambda h: disponibilites.get(h.id, {}).get('disponible', False)  # noqa: E731
+            if filtres.get('disponibles'):
+                candidats = [h for h in candidats if libre(h)]
+            candidats.sort(key=lambda h: not libre(h))  # stable: the chosen sort is kept within each group
+            resultats = candidats[:limite]
+        else:
+            resultats = qs[:limite]
+
+        donnees = HebergementSerializer(resultats, many=True, context=_context(request)).data
+        for ligne in donnees:
+            ligne['disponibilite'] = disponibilites.get(uuid.UUID(ligne['id'])) if disponibilites else None
+        return Response({'results': donnees, 'count': len(donnees)})
 
     def post(self, request):
         if request.user.role not in HOST_ROLES:
@@ -236,7 +244,9 @@ class HebergementDetailView(APIView):
         # Listing not verified yet (or hidden): visible only to its host and the agents
         if not obj or not (obj.est_publiee or proprietaire or verificateur):
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(HebergementSerializer(obj, context=_context(request, proprietaire=proprietaire)).data)
+        # The page shows the unit types (a hotel's rooms) to choose from
+        contexte = {**_context(request, proprietaire=proprietaire), 'avec_types': True}
+        return Response(HebergementSerializer(obj, context=contexte).data)
 
     def patch(self, request, pk):
         obj = self._get_object(pk)

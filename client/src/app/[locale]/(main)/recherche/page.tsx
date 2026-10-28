@@ -34,9 +34,11 @@ const TYPES = [
   { id: "villa", label: "villas" },
   { id: "appartement", label: "appartements" },
   { id: "auberge", label: "auberges" },
+  { id: "maison", label: "maisons" },
+  { id: "residence", label: "residences" },
 ];
 
-const FILTER_KEYS = ["city", "check_in", "check_out", "guests", "type", "sort", "price_min", "price_max", "petit_dejeuner", "equipements"] as const;
+const FILTER_KEYS = ["city", "check_in", "check_out", "guests", "type", "sort", "price_min", "price_max", "petit_dejeuner", "equipements", "disponibles"] as const;
 
 function RechercheContent() {
   const t = useTranslations("recherche");
@@ -102,6 +104,8 @@ function RechercheContent() {
   });
 
   const results = data?.results ?? [];
+  const avecDates = Boolean(params.check_in && params.check_out);
+  const nbDisponibles = results.filter((h) => h.disponibilite?.disponible).length;
   const stayQuery = params.check_in && params.check_out
     ? `?check_in=${params.check_in}&check_out=${params.check_out}&guests=${params.guests || 1}`
     : "";
@@ -242,10 +246,17 @@ function RechercheContent() {
                   <span className="font-heading font-bold text-2xl">{results.length}</span>{" "}
                   {t("hebergements", { nombre: results.length })}
                   {params.city && <span className="text-muted font-normal"> {t("aVille", { ville: params.city })}</span>}
-                  {params.check_in && params.check_out && <span className="text-muted font-normal text-sm"> · {t("disponiblesDu", { debut: formatDate(params.check_in, { day: "numeric", month: "numeric", year: "numeric" }), fin: formatDate(params.check_out, { day: "numeric", month: "numeric", year: "numeric" }) })}</span>}
+                  {avecDates && <span className="text-muted font-normal text-sm"> · {t("disponiblesSurPeriode", { nombre: nbDisponibles, debut: formatDate(params.check_in, { day: "numeric", month: "numeric", year: "numeric" }), fin: formatDate(params.check_out, { day: "numeric", month: "numeric", year: "numeric" }) })}</span>}
                 </h1>
               )}
               <div className="flex items-center gap-2 flex-shrink-0">
+                {avecDates && (
+                  <button onClick={() => pushParams({ disponibles: params.disponibles ? "" : "true" })} aria-pressed={Boolean(params.disponibles)}
+                    className={cn("flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border",
+                      params.disponibles ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200")}>
+                    {t("disponiblesUniquement")}
+                  </button>
+                )}
                 <button onClick={() => setCarte((c) => !c)} aria-pressed={carte} className="flex items-center gap-2 border border-gray-200 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark">
                   {carte ? <List size={15} /> : <IconeCarte size={15} />} {carte ? t("masquerCarte") : t("afficherCarte")}
                 </button>

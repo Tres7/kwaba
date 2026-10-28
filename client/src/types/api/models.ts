@@ -1,5 +1,28 @@
-export type HebergementType = "hotel" | "villa" | "appartement" | "auberge";
+export type HebergementType = "hotel" | "villa" | "maison" | "appartement" | "residence" | "auberge";
 export type PolitiqueAnnulation = "souple" | "moderee" | "ferme";
+
+/** What a traveller books in an establishment: a unit type and its stock (a hotel's "Double standard", a house). */
+export interface TypeLogement {
+  id: string;
+  nom: string;
+  description: string;
+  /** Guests per unit. */
+  capacite: number;
+  prix_nuit: number;
+  /** Number of identical units. */
+  quantite: number;
+  photos: string[];
+}
+
+/** Availability over the searched dates (search with dates only). */
+export interface DisponibiliteRecherche {
+  disponible: boolean;
+  /** Units still bookable over the whole stay, all types together. */
+  unites_restantes: number;
+  unites_total: number;
+  /** Full: first arrival date for a stay of the same length (null if none within 60 days). */
+  prochaine_date: string | null;
+}
 
 export interface Hebergement {
   id: string;
@@ -46,6 +69,10 @@ export interface Hebergement {
   /** Inspection visit validated by Kwa-Ba (missing while the backend does not expose it). */
   est_verifie?: boolean;
   created_at: string;
+  /** Unit types to choose from: listing page only (null in lists). */
+  types?: TypeLogement[] | null;
+  /** Search with dates only (null otherwise). */
+  disponibilite?: DisponibiliteRecherche | null;
 }
 
 export interface City {
@@ -61,6 +88,9 @@ export interface Reservation {
   id: string;
   hebergement: string;
   hebergement_detail: Hebergement;
+  type_logement: string | null;
+  type_logement_nom: string | null;
+  nb_unites: number;
   check_in: string;
   check_out: string;
   guests_count: number;

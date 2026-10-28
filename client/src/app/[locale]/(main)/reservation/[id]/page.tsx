@@ -34,6 +34,9 @@ function ReservationContent() {
   const checkIn = searchParams.get("check_in") || "";
   const checkOut = searchParams.get("check_out") || "";
   const guestsCount = Math.max(1, parseInt(searchParams.get("guests") || "1", 10) || 1);
+  // Unit type and number of units chosen on the listing page (the establishment's first type, 1 unit otherwise)
+  const typeDemande = searchParams.get("type") || "";
+  const unitesDemandees = Math.max(1, parseInt(searchParams.get("unites") || "1", 10) || 1);
 
   const [paymentMethod, setPaymentMethod] = useState<(typeof PAYMENT_METHODS)[number]["id"]>("mobile_money");
   const [message, setMessage] = useState("");
@@ -68,12 +71,16 @@ function ReservationContent() {
 
   const nights = calculateNights(checkIn, checkOut);
   const datesInvalid = !checkIn || !checkOut || nights <= 0 || checkIn < isoDate();
-  const subtotal = hebergement.price_per_night * nights;
+  const typeLogement = hebergement.types?.find((u) => u.id === typeDemande) ?? hebergement.types?.[0];
+  const nbUnites = Math.min(unitesDemandees, typeLogement?.quantite ?? 1);
+  const prixUnite = Number(typeLogement?.prix_nuit ?? hebergement.price_per_night);
+  const subtotal = prixUnite * nbUnites * nights;
   // Visitor's rate: 6 %, or 3 % if they already stayed with this host (the server applies the same calculation)
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
   const serviceFee = calculateServiceFee(subtotal, tauxFrais);
   const total = subtotal + serviceFee;
-  const backToListing = `/hebergements/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${guestsCount}`;
+  const backToListing = `/hebergements/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${guestsCount}`
+    + (typeLogement ? `&type=${typeLogement.id}&unites=${nbUnites}` : "");
 
   const handleConfirm = async () => {
     if (datesInvalid || submitting) return;
@@ -82,6 +89,7 @@ function ReservationContent() {
     try {
       const res = await api.post<Reservation>("/v1/reservations/", {
         hebergement: hebergement.id,
+        ...(typeLogement ? { type_logement: typeLogement.id, nb_unites: nbUnites } : {}),
         check_in: checkIn,
         check_out: checkOut,
         guests_count: guestsCount,
@@ -142,6 +150,8 @@ function ReservationContent() {
                   <div>
                     <p className="font-bold text-dark">{t("voyageurs")}</p>
                     <p className="text-gray-500 mt-0.5">{tVoy("voyageurs", { nombre: guestsCount })}</p>
+                    {typeLogement && (hebergement.types?.length ?? 0) > 1 && <p className="text-gray-500">{typeLogement.nom}</p>}
+                    {nbUnites > 1 && <p className="text-gray-500">{tFiche("unitesNombre", { nombre: nbUnites })}</p>}
                   </div>
                 </div>
               )}
@@ -224,7 +234,9 @@ function ReservationContent() {
               <div className="py-5 space-y-3 border-b border-gray-100 text-sm">
                 <h3 className="font-heading font-bold text-dark text-base mb-2">{t("detailsPrix")}</h3>
                 <div className="flex justify-between gap-2">
-                  <span className="text-gray-600">{formatPrice(hebergement.price_per_night)} × {tFiche("nuits", { nombre: nights })}</span>
+                  <span className="text-gray-600">
+                    {formatPrice(prixUnite)} × {nbUnites > 1 && <>{tFiche("unitesNombre", { nombre: nbUnites })} × </>}{tFiche("nuits", { nombre: nights })}
+                  </span>
                   <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between gap-2">
