@@ -5,7 +5,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Calendar, CalendarDays, Users, MapPin, MessageCircle, ShieldCheck, Clock, AlertTriangle, Hourglass } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, BedDouble, Calendar, CalendarDays, Users, MapPin, MessageCircle, ShieldCheck, Clock, AlertTriangle, Hourglass } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate, TYPE_LABELS } from "@/lib/utils";
@@ -264,6 +264,7 @@ function EspaceHoteContent() {
                   <div className="flex flex-wrap gap-2 mt-auto pt-4">
                     <button onClick={() => setEditing(h)} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gray-100 text-dark text-sm font-medium hover:bg-gray-200"><Pencil size={14} /> {t("modifierCourt")}</button>
                     <Link href={`/hote/espace/calendrier/${h.id}`} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gray-100 text-dark text-sm font-medium hover:bg-gray-200"><CalendarDays size={14} /> {t("calendrier")}</Link>
+                    <Link href={`/hote/espace/types/${h.id}`} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gray-100 text-dark text-sm font-medium hover:bg-gray-200"><BedDouble size={14} /> {t("typesLogement")}</Link>
                     <button onClick={() => toggleAvailability(h)} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gray-100 text-dark text-sm font-medium hover:bg-gray-200">
                       {h.is_available ? <><EyeOff size={14} /> {t("masquer")}</> : <><Eye size={14} /> {t("publier")}</>}
                     </button>

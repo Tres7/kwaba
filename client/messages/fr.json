@@ -1474,7 +1474,8 @@
       "contratSigne": "Signé.",
       "contratTelecharger": "Voir le contrat",
       "annonceContrat": "Annonce prête. Un agent vous appellera pour la visite dès que votre identité sera vérifiée et votre contrat signé."
-    }
+    },
+    "typesLogement": "Chambres et types"
   },
   "annonce": {
     "types": {
@@ -1580,7 +1581,12 @@
     "aVenir": "À venir",
     "rienAVenir": "Aucune réservation ni fermeture à venir.",
     "rouvrir": "Rouvrir",
-    "voirToutes": "Voir toutes les réservations"
+    "voirToutes": "Voir toutes les réservations",
+    "typeAffiche": "Type de logement",
+    "toutEtablissement": "Tout l’établissement",
+    "aideType": "Seul le type « {nom} » sera fermé.",
+    "aideEtablissement": "Tous les types de logement seront fermés.",
+    "unitesNombre": "{nombre, plural, one {# logement} other {# logements}}"
   },
   "location": {
     "titre": "Voitures et chauffeurs",
@@ -1897,5 +1903,36 @@
     "revenuEstime": "Votre revenu estimé",
     "voyageur": "Le voyageur paie {total}, dont {frais} de frais de service Kwa-Ba ({taux}) : ces frais s'ajoutent à votre prix et ne réduisent pas votre revenu.",
     "note": "Estimation indicative. Le montant définitif est calculé par Kwa-Ba à la réservation et versé par Mobile Money 24 heures après l'arrivée du voyageur."
+  },
+  "typesHote": {
+    "titre": "Chambres et types de logement",
+    "aide": "Un hôtel ou une résidence propose plusieurs types de logement (chambre double, suite…). Chaque type a son prix, sa capacité et un nombre de logements identiques : Kwa-Ba ne vend jamais plus de logements que ce nombre. La recherche affiche le prix le plus bas.",
+    "inactif": "Désactivé",
+    "quantiteNombre": "{nombre, plural, one {# logement} other {# logements}}",
+    "capaciteNombre": "{nombre, plural, one {# voyageur} other {jusqu’à # voyageurs}}",
+    "parNuit": "/ nuit",
+    "modifier": "Modifier",
+    "modifierTitre": "Modifier ce type",
+    "desactiver": "Désactiver",
+    "reactiver": "Réactiver",
+    "supprimer": "Supprimer",
+    "supprimerQuestion": "Supprimer le type « {nom} » ?",
+    "supprime": "Type supprimé",
+    "desactive": "Type désactivé : il n’est plus proposé",
+    "reactive": "Type réactivé",
+    "ajouter": "Ajouter un type de logement",
+    "ajoute": "Type ajouté",
+    "enregistre": "Modifications enregistrées",
+    "nom": "Nom",
+    "nomExemple": "Par ex. Chambre double, Suite, Studio",
+    "prix": "Prix par nuit (FCFA)",
+    "quantite": "Nombre de logements",
+    "quantiteAide": "Nombre de logements identiques de ce type. Vous ne pouvez pas descendre sous le nombre déjà réservé sur une même nuit.",
+    "capacite": "Voyageurs par logement",
+    "description": "Description (facultatif)",
+    "photos": "Photos (facultatif)",
+    "photosAide": "Les photos propres à ce type. Sans photo, celles de l’annonce sont utilisées.",
+    "annuler": "Annuler",
+    "enregistrer": "Enregistrer"
   }
 }

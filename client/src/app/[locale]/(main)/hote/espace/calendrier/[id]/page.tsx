@@ -25,12 +25,24 @@ export default function CalendrierHotePage() {
   const [fin, setFin] = useState("");
   const [motif, setMotif] = useState("");
   const [envoi, setEnvoi] = useState(false);
+  // Unit type shown and closed ("": the whole establishment)
+  const [typeChoisi, setTypeChoisi] = useState("");
 
   const { data: hebergement } = useQuery({
     queryKey: ["hebergement", id, "hote"],
     queryFn: async () => (await api.get<Hebergement>(`/v1/hebergements/${id}/`)).data,
   });
-  const { data: periodes = [], isLoading } = useDisponibilites(id, 540);
+  const types = hebergement?.types ?? [];
+  const { data: periodes = [], isLoading } = useDisponibilites(id, 540, typeChoisi || undefined);
+  const nomType = types.find((u) => u.id === typeChoisi)?.nom;
+
+  const choisirType = (valeur: string) => {
+    setTypeChoisi(valeur);
+    setDebut(""); setFin("");
+  };
+  // "Closed · Suite", "Booked · Awa K. · 2 rooms"
+  const precision = (p: PeriodeIndispo) => [p.type_logement ?? (p.type === "blocage" && types.length > 1 ? t("toutEtablissement") : null),
+    p.nb_unites && p.nb_unites > 1 ? t("unitesNombre", { nombre: p.nb_unites }) : null].filter(Boolean).join(" · ");
 
   // For each booked night: the period covering it (booking or closure)
   const parNuit = useMemo(() => {
@@ -64,7 +76,8 @@ export default function CalendrierHotePage() {
     const selectionne = !!debut && iso >= debut && iso <= finSel;
     return {
       disabled: passe || !!p,
-      title: p ? (p.type === "reservation" ? `${t("reserve")} · ${p.voyageur}` : `${t("ferme")}${p.motif ? ` · ${p.motif}` : ""}`) : undefined,
+      title: p ? [p.type === "reservation" ? `${t("reserve")} · ${p.voyageur}` : `${t("ferme")}${p.motif ? ` · ${p.motif}` : ""}`, precision(p)]
+        .filter(Boolean).join(" · ") : undefined,
       className: cn(
         "rounded-lg mx-0.5",
         passe && "text-gray-300",
@@ -82,7 +95,7 @@ export default function CalendrierHotePage() {
     if (!debut) return;
     setEnvoi(true);
     try {
-      await api.post(`/v1/hebergements/${id}/blocages/`, { debut, fin: addDays(finSel, 1), motif: motif.trim() });
+      await api.post(`/v1/hebergements/${id}/blocages/`, { debut, fin: addDays(finSel, 1), motif: motif.trim(), ...(typeChoisi ? { type_logement: typeChoisi } : {}) });
       toast.success(t("datesFermees"));
       setDebut(""); setFin(""); setMotif("");
       rafraichir();
@@ -112,6 +125,16 @@ export default function CalendrierHotePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-3xl shadow-card p-4 sm:p-6">
+          {types.length > 1 && (
+            <label className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+              <span className="text-sm font-medium text-dark">{t("typeAffiche")}</span>
+              <select value={typeChoisi} onChange={(e) => choisirType(e.target.value)}
+                className="border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-none focus:border-primary bg-white">
+                <option value="">{t("toutEtablissement")}</option>
+                {types.map((u) => <option key={u.id} value={u.id}>{u.nom}</option>)}
+              </select>
+            </label>
+          )}
           {isLoading ? <div className="h-80 skeleton rounded-2xl" /> : (
             <MonthGrid month={month} onMonthChange={setMonth} count={2} minMonth={new Date()} renderDay={renderDay} onDayClick={clic} />
           )}
@@ -126,13 +149,14 @@ export default function CalendrierHotePage() {
           <div className="bg-white rounded-3xl shadow-card p-5">
             <h2 className="font-heading font-bold text-dark mb-2 flex items-center gap-2"><Lock size={16} className="text-primary" /> {t("fermerTitre")}</h2>
             {!debut ? (
-              <p className="text-sm text-muted">{t("aide")}</p>
+              <p className="text-sm text-muted">{t("aide")}{types.length > 1 && <> {nomType ? t("aideType", { nom: nomType }) : t("aideEtablissement")}</>}</p>
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-dark">
                   {t.rich("nuitsDu", { debut: formatDate(debut, { day: "numeric", month: "long" }), fin: formatDate(finSel, { day: "numeric", month: "long" }), strong: (x) => <strong>{x}</strong> })}
                   <span className="text-muted"> ({nbNuits} nuit{nbNuits > 1 ? "s" : ""})</span>
                 </p>
+                {types.length > 1 && <p className="text-xs font-semibold text-dark">{nomType ?? t("toutEtablissement")}</p>}
                 {!fin && <p className="text-xs text-muted">{t("etendre")}</p>}
                 <input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={120} placeholder={t("motif")}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-none focus:border-primary" />
@@ -162,6 +186,7 @@ export default function CalendrierHotePage() {
                       </p>
                       <p className="text-xs text-gray-600 flex items-center gap-1 truncate">
                         {p.type === "reservation" ? <><User size={12} /> {p.voyageur} · {p.reference}</> : <><Lock size={12} /> {p.motif || t("ferme")}</>}
+                        {precision(p) && <> · {precision(p)}</>}
                       </p>
                     </div>
                     {p.type === "blocage" && (

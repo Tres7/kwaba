@@ -12,6 +12,9 @@ export interface TypeLogement {
   /** Number of identical units. */
   quantite: number;
   photos: string[];
+  /** Host view only: an inactive type is no longer offered. */
+  actif?: boolean;
+  ordre?: number;
 }
 
 /** Availability over the searched dates (search with dates only). */

@@ -1474,7 +1474,8 @@
       "contratSigne": "Signed.",
       "contratTelecharger": "View the contract",
       "annonceContrat": "Listing ready. An agent will call you for the visit once your identity is verified and your contract signed."
-    }
+    },
+    "typesLogement": "Rooms and types"
   },
   "annonce": {
     "types": {
@@ -1580,7 +1581,12 @@
     "aVenir": "Upcoming",
     "rienAVenir": "No upcoming bookings or closures.",
     "rouvrir": "Reopen",
-    "voirToutes": "See all bookings"
+    "voirToutes": "See all bookings",
+    "typeAffiche": "Room type",
+    "toutEtablissement": "Whole property",
+    "aideType": "Only the “{nom}” type will be closed.",
+    "aideEtablissement": "All room types will be closed.",
+    "unitesNombre": "{nombre, plural, one {# unit} other {# units}}"
   },
   "location": {
     "titre": "Cars and drivers",
@@ -1897,5 +1903,36 @@
     "revenuEstime": "Your estimated earnings",
     "voyageur": "The guest pays {total}, including {frais} of Kwa-Ba service fee ({taux}): this fee is added to your price and does not reduce your earnings.",
     "note": "Indicative estimate. The final amount is calculated by Kwa-Ba at booking and paid by Mobile Money 24 hours after the guest arrives."
+  },
+  "typesHote": {
+    "titre": "Rooms and unit types",
+    "aide": "A hotel or serviced residence offers several unit types (double room, suite…). Each type has its own price, capacity and number of identical units: Kwa-Ba never sells more units than that number. Search shows the lowest price.",
+    "inactif": "Deactivated",
+    "quantiteNombre": "{nombre, plural, one {# unit} other {# units}}",
+    "capaciteNombre": "{nombre, plural, one {# guest} other {up to # guests}}",
+    "parNuit": "/ night",
+    "modifier": "Edit",
+    "modifierTitre": "Edit this type",
+    "desactiver": "Deactivate",
+    "reactiver": "Reactivate",
+    "supprimer": "Delete",
+    "supprimerQuestion": "Delete the “{nom}” type?",
+    "supprime": "Type deleted",
+    "desactive": "Type deactivated: it is no longer offered",
+    "reactive": "Type reactivated",
+    "ajouter": "Add a unit type",
+    "ajoute": "Type added",
+    "enregistre": "Changes saved",
+    "nom": "Name",
+    "nomExemple": "E.g. Double room, Suite, Studio",
+    "prix": "Price per night (FCFA)",
+    "quantite": "Number of units",
+    "quantiteAide": "Number of identical units of this type. It cannot go below the number already booked on a single night.",
+    "capacite": "Guests per unit",
+    "description": "Description (optional)",
+    "photos": "Photos (optional)",
+    "photosAide": "Photos specific to this type. Without any, the listing’s photos are used.",
+    "annuler": "Cancel",
+    "enregistrer": "Save"
   }
 }

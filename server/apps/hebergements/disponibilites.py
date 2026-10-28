@@ -67,8 +67,12 @@ def _blocages(hebergement_id, debut: date, fin: date):
     return BlocageModel.objects.filter(hebergement_id=hebergement_id, debut__lt=fin, fin__gt=debut)
 
 
-def a_des_reservations(hebergement_id, debut: date, fin: date) -> bool:
-    return _reservations(hebergement_id, debut, fin).exists()
+def a_des_reservations(hebergement_id, debut: date, fin: date, type_logement=None) -> bool:
+    """Active bookings over the period: of the whole establishment, or of one unit type (and those without a type)."""
+    qs = _reservations(hebergement_id, debut, fin)
+    if type_logement is not None:
+        qs = qs.filter(Q(type_logement=type_logement) | Q(type_logement__isnull=True))
+    return qs.exists()
 
 
 def _types(hebergement_id, type_logement=None) -> list:
@@ -114,17 +118,22 @@ def conflit(hebergement_id, debut: date, fin: date, exclure=None, type_logement=
 def periodes_indisponibles(hebergement_id, debut: date, fin: date, detail: bool = False, type_logement=None) -> list[dict]:
     """Taken periods over [debut, fin).
 
-    Host view (detail): every booking and closure. Public view: the nights when nothing can be booked (no unit left
-    of the given type, or of any type of the establishment), merged into periods, without any information on why.
+    Host view (detail): every booking and closure (of the given type, and those of the whole establishment).
+    Public view: the nights when nothing can be booked (no unit left of the given type, or of any type of the
+    establishment), merged into periods, without any information on why.
     """
     if detail:
+        reservations, blocages = _reservations(hebergement_id, debut, fin), _blocages(hebergement_id, debut, fin)
+        if type_logement is not None:
+            du_type = Q(type_logement=type_logement) | Q(type_logement__isnull=True)
+            reservations, blocages = reservations.filter(du_type), blocages.filter(du_type)
         periodes = []
-        for r in _reservations(hebergement_id, debut, fin).select_related('guest', 'type_logement'):
+        for r in reservations.select_related('guest', 'type_logement'):
             periodes.append({'debut': r.check_in, 'fin': r.check_out, 'type': 'reservation', 'id': str(r.id),
                              'reference': r.reference, 'voyageur': f"{r.guest.first_name} {r.guest.last_name}".strip(),
                              'statut': r.status, 'nb_unites': r.nb_unites,
                              'type_logement': r.type_logement.nom if r.type_logement else None})
-        for b in _blocages(hebergement_id, debut, fin).select_related('type_logement'):
+        for b in blocages.select_related('type_logement'):
             periodes.append({'debut': b.debut, 'fin': b.fin, 'type': 'blocage', 'id': str(b.id), 'motif': b.motif,
                              'type_logement': b.type_logement.nom if b.type_logement else None})
         periodes.sort(key=lambda p: p['debut'])
