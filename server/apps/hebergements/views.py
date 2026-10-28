@@ -1,4 +1,5 @@
 import unicodedata
+import uuid
 from datetime import date, timedelta
 
 from django.db import transaction
@@ -12,7 +13,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAu
 from rest_framework.throttling import ScopedRateThrottle
 
 from .disponibilites import a_des_reservations, filtre_actives, periodes_indisponibles, verrouiller
-from .models import BlocageModel, HebergementModel, HebergementPhotoModel
+from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
 from .photos import InvalidPhoto, normalize_photo
 from apps.securite import fraude
 
@@ -321,6 +322,13 @@ def _photo_json(request, photo):
     }
 
 
+def _uuid(valeur):
+    try:
+        return uuid.UUID(str(valeur))
+    except ValueError:
+        return None
+
+
 def _parse_date(value, defaut):
     if not value:
         return defaut
@@ -351,10 +359,17 @@ class DisponibiliteView(APIView):
         if (fin - debut).days > MAX_FENETRE_JOURS:
             return Response({'detail': f'Période limitée à {MAX_FENETRE_JOURS} jours.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # ?type_logement=: the full nights of that unit type (otherwise: nights when no type has a unit left)
+        type_logement = None
+        if request.query_params.get('type_logement'):
+            type_logement = TypeLogementModel.objects.filter(
+                pk=_uuid(request.query_params['type_logement']), hebergement_id=hebergement.id, actif=True).first()
+            if type_logement is None:
+                return Response({'detail': 'Type de logement inconnu.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({
             'debut': debut,
             'fin': fin,
-            'periodes': periodes_indisponibles(hebergement.id, debut, fin, detail=est_hote),
+            'periodes': periodes_indisponibles(hebergement.id, debut, fin, detail=est_hote, type_logement=type_logement),
         })
 
 

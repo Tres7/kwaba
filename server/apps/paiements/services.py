@@ -231,7 +231,8 @@ def _paiement_reussi(paiement_id, donnees: dict):
         # Payment arriving after the expiry: confirmed if the dates are still free.
         # Listing lock: a simultaneous booking cannot take these dates in the meantime.
         verrouiller(reservation.hebergement_id)
-        if conflit(reservation.hebergement_id, reservation.check_in, reservation.check_out, exclure=reservation.pk):
+        if conflit(reservation.hebergement_id, reservation.check_in, reservation.check_out, exclure=reservation.pk,
+                   type_logement=reservation.type_logement, nb=reservation.nb_unites or 1):
             rembourser(paiement, paiement.montant, "Dates plus disponibles au moment du paiement")
             reservation.status, reservation.annule_par = 'cancelled', 'plateforme'
             reservation.annule_le = timezone.now()
