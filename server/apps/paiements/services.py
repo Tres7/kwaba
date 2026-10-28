@@ -20,7 +20,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from config import prelancement
-from apps.hebergements.disponibilites import conflit, delai_paiement, verrouiller
+from apps.hebergements.disponibilites import conflit, delai_paiement, verrouiller, verrouiller_types
 from apps.reservations.models import ReservationModel
 
 from . import fedapay, paypal, tarifs
@@ -228,9 +228,12 @@ def _paiement_reussi(paiement_id, donnees: dict):
         if reservation.status == 'cancelled' and reservation.annule_par != 'expiration':
             rembourser(paiement, paiement.montant, "Réservation annulée avant la confirmation du paiement")
             return
-        # Payment arriving after the expiry: confirmed if the dates are still free.
-        # Listing lock: a simultaneous booking cannot take these dates in the meantime.
-        verrouiller(reservation.hebergement_id)
+        # Payment arriving after the expiry: confirmed if the units are still free.
+        # Unit-type lock: a simultaneous booking cannot take them in the meantime.
+        if reservation.type_logement_id:
+            verrouiller_types([reservation.type_logement_id])
+        else:
+            verrouiller(reservation.hebergement_id)
         if conflit(reservation.hebergement_id, reservation.check_in, reservation.check_out, exclure=reservation.pk,
                    type_logement=reservation.type_logement, nb=reservation.nb_unites or 1):
             rembourser(paiement, paiement.montant, "Dates plus disponibles au moment du paiement")

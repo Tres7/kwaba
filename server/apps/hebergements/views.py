@@ -12,12 +12,11 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
 
-from .disponibilites import a_des_reservations, filtre_actives, periodes_indisponibles, verrouiller
+from .disponibilites import a_des_reservations, filtre_actives, periodes_indisponibles, verrouiller, verrouiller_types
 from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
 from .photos import InvalidPhoto, normalize_photo
 from apps.securite import fraude
 
-from . import types_logement
 from .serializers import BlocageSerializer, HebergementSerializer, HebergementCreateSerializer, RechercheSerializer
 from apps.contrats import preinscription
 from apps.verifications import services as verifications
@@ -138,9 +137,7 @@ class HebergementListView(APIView):
             _signaler_coordonnees(request, serializer, 'nouvelle')
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        with transaction.atomic():
-            hebergement = serializer.save(host=request.user)
-            types_logement.assurer_type_par_defaut(hebergement)
+        hebergement = serializer.save(host=request.user)  # its default unit type: signals.type_par_defaut
         # Visible to travellers only after an agent's visit (offered once the host's identity is verified)
         verifications.visite_a_planifier(hebergement)
         return Response(
@@ -253,9 +250,7 @@ class HebergementDetailView(APIView):
             _signaler_coordonnees(request, serializer, obj.pk)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         avant = {champ: getattr(obj, champ) for champ in HebergementModel.CHAMPS_VERIFIES}
-        with transaction.atomic():
-            serializer.save()
-            types_logement.assurer_type_par_defaut(obj)
+        serializer.save()
         verifications.remettre_en_verification(obj, avant)
         return Response(HebergementSerializer(obj, context=_context(request, proprietaire=True)).data)
 
@@ -389,7 +384,9 @@ class BlocageCreateView(APIView):
         debut, fin = serializer.validated_data['debut'], serializer.validated_data['fin']
 
         with transaction.atomic():
-            # Listing lock: a simultaneous booking cannot take these nights during the closure
+            # Unit types first, then the establishment: the same order as a booking (its type, then the insert that
+            # reads the establishment), so the two never deadlock. A simultaneous booking cannot take these nights.
+            verrouiller_types(hebergement.types.values_list('pk', flat=True))
             verrouiller(hebergement.id)
             # Nights already booked are not closed: the host must first handle the booking
             if a_des_reservations(hebergement.id, debut, fin):
