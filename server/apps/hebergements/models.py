@@ -49,7 +49,9 @@ class HebergementModel(models.Model):
     TYPE_CHOICES = [
         ('hotel', 'Hôtel'),
         ('villa', 'Villa'),
+        ('maison', 'Maison'),
         ('appartement', 'Appartement'),
+        ('residence', 'Résidence hôtelière'),
         ('auberge', 'Auberge'),
     ]
 
@@ -137,11 +139,51 @@ class HebergementPhotoModel(models.Model):
         return f"Photo {self.id} ({self.owner_id})"
 
 
+class TypeLogementModel(models.Model):
+    """What a traveller books in an establishment: a unit type with its stock (Booking model).
+
+    A house is an establishment with a single type of quantity 1; a 200-room hotel has a few types ("Double
+    standard", "Suite"…) whose quantity is the number of identical units. The establishment (HebergementModel)
+    keeps the address, general photos and amenities.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    hebergement = models.ForeignKey(HebergementModel, on_delete=models.CASCADE, related_name='types')
+    nom = models.CharField(max_length=120, help_text='Par ex. « Double standard », « Suite », « Logement entier »')
+    description = models.TextField(blank=True)
+    capacite = models.PositiveSmallIntegerField(default=2, help_text='Voyageurs par unité')
+    prix_nuit = models.DecimalField(max_digits=10, decimal_places=2, help_text='Prix par nuit et par unité (FCFA)')
+    quantite = models.PositiveSmallIntegerField(default=1, help_text="Nombre d'unités identiques")
+    photos = models.JSONField(default=list, blank=True, help_text="Photos propres au type ; vides : celles de l'établissement")
+    actif = models.BooleanField(default=True)
+    ordre = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = 'hebergements'
+        ordering = ['ordre', 'prix_nuit']
+        verbose_name = 'Type de logement'
+        verbose_name_plural = 'Types de logement'
+        constraints = [
+            models.CheckConstraint(condition=models.Q(quantite__gte=1), name='type_logement_quantite_positive'),
+            models.CheckConstraint(condition=models.Q(capacite__gte=1), name='type_logement_capacite_positive'),
+        ]
+
+    def __str__(self):
+        return f"{self.nom} × {self.quantite} ({self.hebergement})"
+
+
 class BlocageModel(models.Model):
-    """Period closed to booking by the host. Like a booking, `fin` is exclusive (departure day)."""
+    """Period closed to booking by the host. Like a booking, `fin` is exclusive (departure day).
+
+    Without a unit type, the whole establishment is closed; with one, only that type.
+    """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hebergement = models.ForeignKey(HebergementModel, on_delete=models.CASCADE, related_name='blocages')
+    type_logement = models.ForeignKey(TypeLogementModel, on_delete=models.CASCADE, null=True, blank=True,
+                                      related_name='blocages')
     debut = models.DateField()
     fin = models.DateField()
     motif = models.CharField(max_length=120, blank=True)

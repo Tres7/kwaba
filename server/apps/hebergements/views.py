@@ -16,6 +16,7 @@ from .models import BlocageModel, HebergementModel, HebergementPhotoModel
 from .photos import InvalidPhoto, normalize_photo
 from apps.securite import fraude
 
+from . import types_logement
 from .serializers import BlocageSerializer, HebergementSerializer, HebergementCreateSerializer, RechercheSerializer
 from apps.contrats import preinscription
 from apps.verifications import services as verifications
@@ -136,7 +137,9 @@ class HebergementListView(APIView):
             _signaler_coordonnees(request, serializer, 'nouvelle')
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        hebergement = serializer.save(host=request.user)
+        with transaction.atomic():
+            hebergement = serializer.save(host=request.user)
+            types_logement.assurer_type_par_defaut(hebergement)
         # Visible to travellers only after an agent's visit (offered once the host's identity is verified)
         verifications.visite_a_planifier(hebergement)
         return Response(
@@ -249,7 +252,9 @@ class HebergementDetailView(APIView):
             _signaler_coordonnees(request, serializer, obj.pk)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         avant = {champ: getattr(obj, champ) for champ in HebergementModel.CHAMPS_VERIFIES}
-        serializer.save()
+        with transaction.atomic():
+            serializer.save()
+            types_logement.assurer_type_par_defaut(obj)
         verifications.remettre_en_verification(obj, avant)
         return Response(HebergementSerializer(obj, context=_context(request, proprietaire=True)).data)
 
