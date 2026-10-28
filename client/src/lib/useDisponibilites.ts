@@ -11,6 +11,9 @@ export interface PeriodeIndispo {
   motif?: string;
   voyageur?: string;
   reference?: string;
+  /** Units booked, and the unit type concerned (null: the whole establishment) */
+  nb_unites?: number;
+  type_logement?: string | null;
 }
 
 /** Unavailable nights (YYYY-MM-DD) of a list of periods [debut, fin). */

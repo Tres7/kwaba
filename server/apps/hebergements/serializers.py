@@ -7,7 +7,7 @@ from apps.paiements import tarifs
 from apps.securite import coordonnees
 from apps.securite.images import MESSAGE as IMAGE_REFUSEE, url_image_autorisee
 
-from .models import BlocageModel, HebergementModel
+from .models import BlocageModel, HebergementModel, TypeLogementModel
 
 AMENITIES = ['piscine', 'wifi', 'clim', 'parking', 'cuisine', 'jardin', 'gym', 'spa']
 
@@ -176,10 +176,51 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         return value[:10]
 
 
+class TypeLogementSerializer(serializers.ModelSerializer):
+    """A unit type managed by its host: a hotel room type and how many identical units it has."""
+    COORDONNEES_REFUSEES = HebergementCreateSerializer.COORDONNEES_REFUSEES
+    _sans_coordonnees = HebergementCreateSerializer._sans_coordonnees
+
+    class Meta:
+        model = TypeLogementModel
+        fields = ['id', 'nom', 'description', 'capacite', 'prix_nuit', 'quantite', 'photos', 'actif', 'ordre']
+        read_only_fields = ['id']
+
+    def validate_nom(self, value):
+        return self._sans_coordonnees(value)
+
+    def validate_description(self, value):
+        return self._sans_coordonnees(value)
+
+    def validate_capacite(self, value):
+        if not 1 <= value <= 50:
+            raise serializers.ValidationError("De 1 à 50 voyageurs par logement.")
+        return value
+
+    def validate_prix_nuit(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Le prix doit être supérieur à 0.")
+        return value
+
+    def validate_quantite(self, value):
+        if not 1 <= value <= 500:
+            raise serializers.ValidationError("De 1 à 500 logements identiques.")
+        return value
+
+    def validate_photos(self, value):
+        if not isinstance(value, list) or not all(isinstance(u, str) for u in value):
+            raise serializers.ValidationError("Liste d'URL attendue.")
+        if not all(url_image_autorisee(u) for u in value):
+            raise serializers.ValidationError(IMAGE_REFUSEE)
+        return value[:10]
+
+
 class BlocageSerializer(serializers.ModelSerializer):
+    type_logement_nom = serializers.CharField(source='type_logement.nom', read_only=True, default=None)
+
     class Meta:
         model = BlocageModel
-        fields = ['id', 'debut', 'fin', 'motif', 'created_at']
+        fields = ['id', 'debut', 'fin', 'motif', 'type_logement', 'type_logement_nom', 'created_at']
         read_only_fields = ['id', 'created_at']
 
     def validate(self, data):

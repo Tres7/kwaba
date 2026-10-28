@@ -3,7 +3,7 @@ import uuid
 from datetime import date, timedelta
 
 from django.db import transaction
-from django.db.models import Count, Min, ProtectedError, Q
+from django.db.models import Count, Min, ProtectedError, Q, RestrictedError
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,7 +18,10 @@ from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeL
 from .photos import InvalidPhoto, normalize_photo
 from apps.securite import fraude
 
-from .serializers import BlocageSerializer, HebergementSerializer, HebergementCreateSerializer, RechercheSerializer
+from . import types_logement
+from .serializers import (
+    BlocageSerializer, HebergementSerializer, HebergementCreateSerializer, RechercheSerializer, TypeLogementSerializer,
+)
 from apps.contrats import preinscription
 from apps.verifications import services as verifications
 
@@ -27,6 +30,8 @@ MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
 MAX_RESULTATS = 200
 # Search with dates: listings whose availability is computed before sorting (available ones first)
 MAX_CANDIDATS = 600
+# Unit types of one establishment (a hotel's room types)
+MAX_TYPES = 30
 
 
 def _context(request, proprietaire=False):
@@ -392,6 +397,10 @@ class BlocageCreateView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         debut, fin = serializer.validated_data['debut'], serializer.validated_data['fin']
+        # Without a unit type, the whole establishment is closed; with one, only that type
+        type_logement = serializer.validated_data.get('type_logement')
+        if type_logement is not None and type_logement.hebergement_id != hebergement.id:
+            return Response({'type_logement': ["Ce type n'appartient pas à cet établissement."]}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
             # Unit types first, then the establishment: the same order as a booking (its type, then the insert that
@@ -399,12 +408,15 @@ class BlocageCreateView(APIView):
             verrouiller_types(hebergement.types.values_list('pk', flat=True))
             verrouiller(hebergement.id)
             # Nights already booked are not closed: the host must first handle the booking
-            if a_des_reservations(hebergement.id, debut, fin):
+            if a_des_reservations(hebergement.id, debut, fin, type_logement=type_logement):
                 return Response(
                     {'detail': 'Cette période contient une réservation. Contactez le voyageur avant de fermer ces dates.'},
                     status=status.HTTP_409_CONFLICT,
                 )
-            if BlocageModel.objects.filter(hebergement=hebergement, debut__lt=fin, fin__gt=debut).exists():
+            deja = BlocageModel.objects.filter(hebergement=hebergement, debut__lt=fin, fin__gt=debut)
+            if type_logement is not None:
+                deja = deja.filter(Q(type_logement=type_logement) | Q(type_logement__isnull=True))
+            if deja.exists():
                 return Response({'detail': 'Une partie de ces dates est déjà fermée.'}, status=status.HTTP_409_CONFLICT)
             blocage = serializer.save(hebergement=hebergement)
         return Response(BlocageSerializer(blocage).data, status=status.HTTP_201_CREATED)
@@ -418,4 +430,85 @@ class BlocageDetailView(APIView):
         if not blocage:
             return Response({'detail': 'Blocage introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         blocage.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def _type_du_proprietaire(request, pk):
+    return TypeLogementModel.objects.select_related('hebergement').filter(pk=pk, hebergement__host=request.user).first()
+
+
+class TypesLogementView(APIView):
+    """GET: the unit types of one of my establishments (inactive ones included). POST: add one."""
+    permission_classes = [IsAuthenticated]
+
+    def _etablissement(self, request, pk):
+        return HebergementModel.objects.filter(pk=pk, host=request.user).first()
+
+    def get(self, request, pk):
+        hebergement = self._etablissement(request, pk)
+        if not hebergement:
+            return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        types = hebergement.types.all()
+        return Response({'results': TypeLogementSerializer(types, many=True).data})
+
+    def post(self, request, pk):
+        hebergement = self._etablissement(request, pk)
+        if not hebergement:
+            return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = TypeLogementSerializer(data=request.data)
+        if not serializer.is_valid():
+            _signaler_coordonnees(request, serializer, hebergement.pk)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if hebergement.types.count() >= MAX_TYPES:
+            return Response({'detail': f'{MAX_TYPES} types de logement au plus par établissement.'}, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            type_logement = serializer.save(hebergement=hebergement)
+            types_logement.recalculer_etablissement(hebergement)
+        return Response(TypeLogementSerializer(type_logement).data, status=status.HTTP_201_CREATED)
+
+
+class TypeLogementDetailView(APIView):
+    """PATCH: change a unit type (a lower quantity never overbooks a future night). DELETE: remove it, if it was
+    never booked (otherwise deactivate it). An establishment always keeps an active type."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        type_logement = _type_du_proprietaire(request, pk)
+        if not type_logement:
+            return Response({'detail': 'Type de logement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = TypeLogementSerializer(type_logement, data=request.data, partial=True)
+        if not serializer.is_valid():
+            _signaler_coordonnees(request, serializer, type_logement.hebergement_id)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        hebergement = type_logement.hebergement
+        with transaction.atomic():
+            # Same lock as a booking of this type: the units counted below cannot change meanwhile
+            verrouiller_types([type_logement.pk])
+            quantite = serializer.validated_data.get('quantite', type_logement.quantite)
+            reservees = types_logement.unites_reservees_max(type_logement)
+            if quantite < reservees:
+                return Response({'quantite': [
+                    f"{reservees} logements de ce type sont déjà réservés certaines nuits : la quantité ne peut pas être inférieure."]},
+                    status=status.HTTP_409_CONFLICT)
+            if serializer.validated_data.get('actif') is False and not hebergement.types.filter(actif=True).exclude(pk=pk).exists():
+                return Response({'actif': ["L'établissement doit garder au moins un type de logement proposé."]},
+                                status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            types_logement.recalculer_etablissement(hebergement)
+        return Response(TypeLogementSerializer(type_logement).data)
+
+    def delete(self, request, pk):
+        type_logement = _type_du_proprietaire(request, pk)
+        if not type_logement:
+            return Response({'detail': 'Type de logement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        hebergement = type_logement.hebergement
+        if not hebergement.types.filter(actif=True).exclude(pk=pk).exists():
+            return Response({'detail': "L'établissement doit garder au moins un type de logement proposé."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            with transaction.atomic():
+                type_logement.delete()
+        except RestrictedError:
+            return Response({'detail': "Ce type a déjà des réservations : désactivez-le plutôt."}, status=status.HTTP_409_CONFLICT)
+        types_logement.recalculer_etablissement(hebergement)
         return Response(status=status.HTTP_204_NO_CONTENT)
