@@ -16,10 +16,11 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from config import prelancement
-from apps.hebergements.disponibilites import conflit, verrouiller
+from apps.hebergements.disponibilites import conflit, delai_paiement, verrouiller
 from apps.reservations.models import ReservationModel
 
 from . import fedapay, paypal, tarifs
@@ -80,10 +81,6 @@ def paiement_actif() -> bool:
 def reservation_possible() -> bool:
     """A booking is paid online; without a configured provider, only in development (PAIEMENT_HORS_LIGNE)."""
     return paiement_actif() or settings.PAIEMENT_HORS_LIGNE
-
-
-def delai_paiement() -> timedelta:
-    return timedelta(minutes=settings.FEDAPAY['EXPIRATION_MINUTES'])
 
 
 def paiement_reussi(reservation) -> PaiementModel | None:
@@ -520,7 +517,8 @@ def expirer_reservations() -> int:
     """Releases the dates of the bookings not paid in time (after a last check)."""
     expirees = 0
     maintenant = timezone.now()
-    for reservation in ReservationModel.objects.filter(status='pending', expire_le__lte=maintenant):
+    a_expirer = Q(expire_le__lte=maintenant) | Q(expire_le__isnull=True, created_at__lte=maintenant - delai_paiement())
+    for reservation in ReservationModel.objects.filter(a_expirer, status='pending'):
         for paiement in reservation.paiements.filter(statut='en_attente'):
             synchroniser_paiement(paiement)
         expirees += ReservationModel.objects.filter(pk=reservation.pk, status='pending').update(

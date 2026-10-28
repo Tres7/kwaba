@@ -331,7 +331,11 @@ class DisponibiliteView(APIView):
 
     def get(self, request, pk):
         hebergement = HebergementModel.objects.filter(pk=pk).only('id', 'host_id').first()
-        if not hebergement:
+        utilisateur = request.user
+        est_hote = utilisateur.is_authenticated and utilisateur.id == getattr(hebergement, 'host_id', None)
+        # A listing not published yet (in verification, hidden) shows its calendar only to its host and to the team
+        equipe = utilisateur.is_authenticated and utilisateur.role in ('agent', 'admin')
+        if not hebergement or not (est_hote or equipe or HebergementModel.objects.publiees().filter(pk=pk).exists()):
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
         today = timezone.localdate()
@@ -342,7 +346,6 @@ class DisponibiliteView(APIView):
         if (fin - debut).days > MAX_FENETRE_JOURS:
             return Response({'detail': f'Période limitée à {MAX_FENETRE_JOURS} jours.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        est_hote = request.user.is_authenticated and request.user.id == hebergement.host_id
         return Response({
             'debut': debut,
             'fin': fin,

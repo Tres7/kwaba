@@ -21,7 +21,9 @@ class ReservationListCreateView(APIView):
             qs = ReservationModel.objects.filter(hebergement__host=request.user)
         else:
             qs = ReservationModel.objects.filter(guest=request.user)
-        qs = qs.select_related('hebergement', 'hebergement__host', 'guest', 'avis').prefetch_related('paiements', 'remboursements')
+        # hebergement__host__piece_identite: "verified host" badge of the nested listing (one query per booking otherwise)
+        qs = (qs.select_related('hebergement', 'hebergement__host', 'hebergement__host__piece_identite', 'guest', 'avis')
+              .prefetch_related('paiements', 'remboursements'))
         serializer = ReservationSerializer(qs, many=True, context={'request': request})
         return Response({'results': serializer.data, 'count': len(serializer.data)})
 
