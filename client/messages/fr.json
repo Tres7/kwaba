@@ -321,7 +321,11 @@
   "logement": {
     "verifie": "Logement vérifié",
     "parNuitFraisInclus": "/ nuit, frais de service inclus",
-    "detailPrix": "Hébergement {prix} + frais de service {frais}"
+    "detailPrix": "Hébergement {prix} + frais de service {frais}",
+    "completDates": "Complet à ces dates",
+    "plusQue": "{nombre, plural, one {Plus qu’# disponible} other {Plus que # disponibles}}",
+    "disponibleDes": "Disponible dès le {date}",
+    "aucuneDateProche": "Pas de disponibilité dans les 60 prochains jours"
   },
   "favoris": {
     "ajoute": "Ajouté à vos favoris",
@@ -397,7 +401,9 @@
       "hotels": "Hôtels",
       "villas": "Villas",
       "appartements": "Appartements",
-      "auberges": "Auberges"
+      "auberges": "Auberges",
+      "maisons": "Maisons",
+      "residences": "Résidences"
     },
     "trierPar": "Trier par",
     "tris": {
@@ -429,7 +435,9 @@
     "petitDejInclus": "Petit-déjeuner inclus",
     "equipements": "Équipements",
     "afficherCarte": "Carte",
-    "masquerCarte": "Liste"
+    "masquerCarte": "Liste",
+    "disponiblesSurPeriode": "{nombre, plural, =0 {aucun disponible} one {# disponible} other {# disponibles}} du {debut} au {fin}",
+    "disponiblesUniquement": "Disponibles uniquement"
   },
   "fiche": {
     "introuvable": "Hébergement introuvable",
@@ -482,7 +490,11 @@
     "hoteVerifieAide": "Kwa-Ba a contrôlé la pièce d'identité de cet hôte.",
     "clientFidele": "Tarif Client fidèle : vous avez déjà séjourné chez cet hôte",
     "parNuitFraisInclus": "/ nuit, frais de service inclus",
-    "detailNuit": "Hébergement {prix} + frais de service Kwa-Ba {frais} ({taux} %)"
+    "detailNuit": "Hébergement {prix} + frais de service Kwa-Ba {frais} ({taux} %)",
+    "typeLogement": "Type de logement",
+    "capaciteUnite": "{nombre, plural, one {# voyageur} other {jusqu’à # voyageurs}}",
+    "unites": "Chambres",
+    "unitesNombre": "{nombre, plural, one {# chambre} other {# chambres}}"
   },
   "avis": {
     "repondre": "Répondre publiquement",

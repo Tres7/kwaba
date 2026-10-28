@@ -58,14 +58,54 @@ def test_limit(api_client, listings):
     assert len(api_client.get(HEBERGEMENTS, {'limit': 2}).data['results']) == 2
 
 
-def test_dates_exclude_booked_and_closed_listings(api_client, listings, make_reservation):
+def _dates(check_in, nuits=2):
+    return {'check_in': check_in.isoformat(), 'check_out': (check_in + timedelta(days=nuits)).isoformat()}
+
+
+def test_full_listings_stay_after_the_available_ones(api_client, listings, make_reservation):
     check_in = timezone.localdate() + timedelta(days=10)
     make_reservation(listings['villa'], starts_in=10, nights=3)
     BlocageModel.objects.create(hebergement=listings['appart'], debut=check_in, fin=check_in + timedelta(days=1))
     make_reservation(listings['hotel'], starts_in=10, nights=3, status='cancelled')
 
-    params = {'check_in': check_in.isoformat(), 'check_out': (check_in + timedelta(days=2)).isoformat()}
-    assert _names(api_client.get(HEBERGEMENTS, params)) == {'Hôtel du Golfe'}
+    resultats = api_client.get(HEBERGEMENTS, {**_dates(check_in), 'sort': 'prix_asc'}).data['results']
+    assert [(h['name'], h['disponibilite']['disponible']) for h in resultats] == [
+        ('Hôtel du Golfe', True), ('Appart Kpalimé', False), ('Villa Lomé', False)]
+    # The full ones keep their photos and description, with the next arrival for the same stay
+    appart = resultats[1]
+    assert appart['image_url'] == listings['appart'].image_url
+    assert appart['disponibilite']['prochaine_date'] == check_in + timedelta(days=1)
+    assert resultats[2]['disponibilite']['prochaine_date'] == check_in + timedelta(days=3)
+
+
+def test_available_only(api_client, listings, make_reservation):
+    make_reservation(listings['villa'], starts_in=10, nights=3)
+    check_in = timezone.localdate() + timedelta(days=10)
+    noms = _names(api_client.get(HEBERGEMENTS, {**_dates(check_in), 'disponibles': 'true'}))
+    assert noms == {'Hôtel du Golfe', 'Appart Kpalimé'}
+
+
+def test_units_left_for_a_hotel(api_client, listings, make_user):
+    from apps.reservations.models import ReservationModel
+    hotel = listings['hotel']
+    hotel.types.update(quantite=5)
+    check_in = timezone.localdate() + timedelta(days=10)
+    ReservationModel.objects.create(hebergement=hotel, type_logement=hotel.types.get(), nb_unites=3, guest=make_user(),
+                                    check_in=check_in, check_out=check_in + timedelta(days=2), total_price=0,
+                                    status='confirmed')
+    (ligne,) = [h for h in api_client.get(HEBERGEMENTS, _dates(check_in)).data['results'] if h['name'] == 'Hôtel du Golfe']
+    assert ligne['disponibilite'] == {'disponible': True, 'unites_restantes': 2, 'unites_total': 5, 'prochaine_date': None}
+
+
+def test_without_dates_no_availability_is_computed(api_client, listings):
+    assert {h['disponibilite'] for h in api_client.get(HEBERGEMENTS).data['results']} == {None}
+
+
+@pytest.mark.parametrize('nuits', [0, -2])
+def test_departure_not_after_arrival_ignores_the_dates(api_client, listings, nuits):
+    check_in = timezone.localdate() + timedelta(days=10)
+    reponse = api_client.get(HEBERGEMENTS, _dates(check_in, nuits))
+    assert reponse.status_code == 200 and len(reponse.data['results']) == 3
 
 
 def test_check_in_on_check_out_day_keeps_listing(api_client, listings, make_reservation):

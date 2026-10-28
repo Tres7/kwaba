@@ -20,6 +20,7 @@ class HebergementSerializer(serializers.ModelSerializer):
     motif_refus = serializers.SerializerMethodField()
     en_ligne = serializers.SerializerMethodField()
     frais_voyageur = serializers.SerializerMethodField()
+    types = serializers.SerializerMethodField()
 
     class Meta:
         model = HebergementModel
@@ -30,7 +31,7 @@ class HebergementSerializer(serializers.ModelSerializer):
             'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne',
             'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant',
-            'politique_annulation', 'frais_voyageur',
+            'politique_annulation', 'frais_voyageur', 'types',
         ]
         read_only_fields = ['id', 'rating', 'review_count', 'host_id', 'created_at', 'statut_verification', 'verifiee_le']
 
@@ -66,6 +67,15 @@ class HebergementSerializer(serializers.ModelSerializer):
             self.context['_hotes_visites'] = tarifs.hotes_deja_visites(request.user if request else None)
         reduit = obj.host_id in self.context['_hotes_visites']
         return float(tarifs.FRAIS_REDUITS if reduit else tarifs.FRAIS_VOYAGEUR)
+
+    def get_types(self, obj):
+        """Unit types to choose from (listing page only: one query, never per row of a list)."""
+        if not self.context.get('avec_types'):
+            return None
+        return [{
+            'id': str(t.id), 'nom': t.nom, 'description': t.description, 'capacite': t.capacite,
+            'prix_nuit': float(t.prix_nuit), 'quantite': t.quantite, 'photos': t.photos,
+        } for t in obj.types.filter(actif=True)]
 
     def get_is_favorite(self, obj):
         favorite_ids = self.context.get('favorite_ids')
@@ -192,6 +202,14 @@ class RechercheSerializer(serializers.Serializer):
     price_max = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)
     check_in = serializers.DateField(required=False)
     check_out = serializers.DateField(required=False)
+    disponibles = serializers.BooleanField(required=False)
+
+    def validate(self, data):
+        # Dates are used only as a pair, departure after arrival
+        if not (data.get('check_in') and data.get('check_out') and data['check_out'] > data['check_in']):
+            data.pop('check_in', None)
+            data.pop('check_out', None)
+        return data
 
     @classmethod
     def depuis(cls, query_params):

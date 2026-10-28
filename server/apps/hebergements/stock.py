@@ -98,3 +98,40 @@ def prochaine_date(type_logement: TypeLogementModel, debut: date, duree: int, nb
         if occupation.restantes(type_logement.id, arrivee, arrivee + timedelta(days=duree)) >= nb:
             return arrivee
     return None
+
+
+# Search: how far the next possible arrival is looked for, in days
+HORIZON_PROCHAINE_DATE = 60
+
+
+def disponibilites_etablissements(hebergement_ids, debut: date, fin: date, horizon: int = HORIZON_PROCHAINE_DATE) -> dict:
+    """For a search with dates, per establishment: can it be booked over [debut, fin), how many units are left
+    (all its types together), and if it is full, the next arrival date for a stay of the same length.
+
+    Read in two queries for all the establishments (bookings and closures over the period plus the horizon).
+    """
+    types = list(TypeLogementModel.objects.filter(hebergement_id__in=list(hebergement_ids), actif=True))
+    duree = (fin - debut).days
+    occupation = Occupation(types, debut, debut + timedelta(days=horizon + duree))
+    par_etablissement = defaultdict(list)
+    for t in types:
+        par_etablissement[t.hebergement_id].append(t)
+
+    resultat = {}
+    for hebergement_id, siens in par_etablissement.items():
+        restantes = {t.id: occupation.restantes(t.id, debut, fin) for t in siens}
+        disponible = any(n >= 1 for n in restantes.values())
+        prochaine = None
+        if not disponible:
+            for i in range(1, horizon + 1):
+                arrivee = debut + timedelta(days=i)
+                if any(occupation.restantes(t.id, arrivee, arrivee + timedelta(days=duree)) >= 1 for t in siens):
+                    prochaine = arrivee
+                    break
+        resultat[hebergement_id] = {
+            'disponible': disponible,
+            'unites_restantes': sum(restantes.values()),
+            'unites_total': sum(t.quantite for t in siens),
+            'prochaine_date': prochaine,
+        }
+    return resultat

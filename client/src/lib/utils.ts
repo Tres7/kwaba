@@ -31,7 +31,9 @@ export function selon<T>(textes: { fr: T; en: T }): T {
 const TYPES: Record<string, { fr: string; en: string }> = {
   hotel: { fr: "Hôtel", en: "Hotel" },
   villa: { fr: "Villa", en: "Villa" },
+  maison: { fr: "Maison", en: "House" },
   appartement: { fr: "Appartement", en: "Apartment" },
+  residence: { fr: "Résidence hôtelière", en: "Aparthotel" },
   auberge: { fr: "Auberge", en: "Guesthouse" },
 };
 

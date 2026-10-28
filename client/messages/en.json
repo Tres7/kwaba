@@ -321,7 +321,11 @@
   "logement": {
     "verifie": "Verified place",
     "parNuitFraisInclus": "/ night, service fee included",
-    "detailPrix": "Accommodation {prix} + service fee {frais}"
+    "detailPrix": "Accommodation {prix} + service fee {frais}",
+    "completDates": "Full on these dates",
+    "plusQue": "{nombre, plural, one {Only # left} other {Only # left}}",
+    "disponibleDes": "Available from {date}",
+    "aucuneDateProche": "No availability in the next 60 days"
   },
   "favoris": {
     "ajoute": "Added to your favourites",
@@ -397,7 +401,9 @@
       "hotels": "Hotels",
       "villas": "Villas",
       "appartements": "Apartments",
-      "auberges": "Guesthouses"
+      "auberges": "Guesthouses",
+      "maisons": "Houses",
+      "residences": "Aparthotels"
     },
     "trierPar": "Sort by",
     "tris": {
@@ -429,7 +435,9 @@
     "petitDejInclus": "Breakfast included",
     "equipements": "Amenities",
     "afficherCarte": "Map",
-    "masquerCarte": "List"
+    "masquerCarte": "List",
+    "disponiblesSurPeriode": "{nombre, plural, =0 {none available} one {# available} other {# available}} from {debut} to {fin}",
+    "disponiblesUniquement": "Available only"
   },
   "fiche": {
     "introuvable": "Place not found",
@@ -482,7 +490,11 @@
     "hoteVerifieAide": "Kwa-Ba has checked this host's ID document.",
     "clientFidele": "Loyal customer rate: you have already stayed with this host",
     "parNuitFraisInclus": "/ night, service fee included",
-    "detailNuit": "Accommodation {prix} + Kwa-Ba service fee {frais} ({taux}%)"
+    "detailNuit": "Accommodation {prix} + Kwa-Ba service fee {frais} ({taux}%)",
+    "typeLogement": "Room type",
+    "capaciteUnite": "{nombre, plural, one {# guest} other {up to # guests}}",
+    "unites": "Rooms",
+    "unitesNombre": "{nombre, plural, one {# room} other {# rooms}}"
   },
   "avis": {
     "repondre": "Reply publicly",
