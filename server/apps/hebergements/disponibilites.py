@@ -3,8 +3,9 @@
 Shared convention: a period [debut, fin) covers the nights from debut to fin - 1;
 the `fin` day (departure) stays free for a new arrival.
 """
-from datetime import date
+from datetime import date, timedelta
 
+from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
@@ -22,13 +23,23 @@ def verrouiller(hebergement_id) -> None:
 
 
 def filtre_actives(prefixe: str = ''):
-    """Bookings that hold their dates: confirmed, or waiting for a non-expired payment."""
+    """Bookings that hold their dates: confirmed, or waiting for a non-expired payment.
+
+    A pending booking without a deadline (created before online payment, or by hand) holds its dates for the
+    payment delay after its creation, never forever.
+    """
     p = prefixe
+    maintenant = timezone.now()
     return (
         Q(**{f'{p}status': 'confirmed'})
-        | Q(**{f'{p}status': 'pending', f'{p}expire_le__isnull': True})
-        | Q(**{f'{p}status': 'pending', f'{p}expire_le__gt': timezone.now()})
+        | Q(**{f'{p}status': 'pending', f'{p}expire_le__isnull': True, f'{p}created_at__gt': maintenant - delai_paiement()})
+        | Q(**{f'{p}status': 'pending', f'{p}expire_le__gt': maintenant})
     )
+
+
+def delai_paiement() -> timedelta:
+    """Time given to pay a booking (same setting as apps.paiements.services.delai_paiement)."""
+    return timedelta(minutes=settings.FEDAPAY['EXPIRATION_MINUTES'])
 
 
 def _reservations(hebergement_id, debut: date, fin: date, exclure=None):
