@@ -42,3 +42,9 @@ def assurer_type_par_defaut(hebergement: HebergementModel) -> TypeLogementModel:
 def type_par_defaut(hebergement: HebergementModel) -> TypeLogementModel:
     """The type booked when none is chosen: the establishment's first active type (created if missing)."""
     return hebergement.types.filter(actif=True).first() or assurer_type_par_defaut(hebergement)
+
+
+def type_par_defaut_id(hebergement_id):
+    """Id of the type booked when none is chosen, from the establishment's id."""
+    trouve = TypeLogementModel.objects.filter(hebergement_id=hebergement_id, actif=True).values_list('id', flat=True).first()
+    return trouve or type_par_defaut(HebergementModel.objects.get(pk=hebergement_id)).id
