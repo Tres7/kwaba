@@ -113,9 +113,11 @@ def taux_frais(voyageur, hebergement) -> Decimal:
     return FRAIS_REDUITS if hebergement.host_id in hotes_deja_visites(voyageur) else FRAIS_VOYAGEUR
 
 
-def devis(hebergement, nuits: int, voyageur=None, jour=None) -> Montants:
-    """Amounts of a stay with the rates of this host and this traveller."""
-    return calculer(hebergement.price_per_night, nuits, frais=taux_frais(voyageur, hebergement),
+def devis(hebergement, nuits: int, voyageur=None, jour=None, type_logement=None, nb_unites: int = 1) -> Montants:
+    """Amounts of a stay with the rates of this host and this traveller: `nb_unites` units of the unit type
+    (the establishment's price when no type is given)."""
+    prix = type_logement.prix_nuit if type_logement is not None else hebergement.price_per_night
+    return calculer(prix * nb_unites, nuits, frais=taux_frais(voyageur, hebergement),
                     commission=taux_commission(hebergement.host, jour))
 
 

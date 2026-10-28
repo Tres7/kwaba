@@ -22,6 +22,16 @@ def verrouiller(hebergement_id) -> None:
     list(HebergementModel.objects.select_for_update().filter(pk=hebergement_id).values_list('pk', flat=True))
 
 
+def verrouiller_types(type_ids) -> None:
+    """Locks unit types until the end of the current transaction (booking, payment confirmation, closure).
+
+    A booking locks only its type: the other types of the same hotel stay bookable at the same time. A closure
+    locks every type of the establishment. Always in the same order (by id), so that two locks never deadlock.
+    """
+    from .models import TypeLogementModel
+    list(TypeLogementModel.objects.select_for_update().filter(pk__in=list(type_ids)).order_by('pk').values_list('pk', flat=True))
+
+
 def filtre_actives(prefixe: str = ''):
     """Bookings that hold their dates: confirmed, or waiting for a non-expired payment.
 
