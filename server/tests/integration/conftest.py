@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.hebergements.models import HebergementModel
+from apps.hebergements.types_logement import assurer_type_par_defaut
 from apps.reservations.models import ReservationModel
 from apps.users.infrastructure.messaging.RabbitMQEventBus import RabbitMQEventBus
 from apps.users.infrastructure.persistence.models import UserModel
@@ -93,7 +94,10 @@ def make_hebergement(make_user):
         fields.setdefault('price_per_night', 25000)
         # Listing already verified by an agent (published); the verification tests pass statut_verification
         fields.setdefault('statut_verification', 'verifiee')
-        return HebergementModel.objects.create(host=host or make_user(role='hote'), **fields)
+        hebergement = HebergementModel.objects.create(host=host or make_user(role='hote'), **fields)
+        # Like every establishment in production: one default unit type (quantity 1)
+        assurer_type_par_defaut(hebergement)
+        return hebergement
 
     return _make
 

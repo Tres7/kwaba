@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 from .models import ReservationModel
+from apps.hebergements import types_logement
 from apps.hebergements.disponibilites import conflit, verrouiller
 from apps.hebergements.serializers import HebergementSerializer
 from apps.paiements import services as paiements, tarifs
@@ -125,6 +126,8 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         else:
             etat = {'status': 'confirmed'}
         return ReservationModel.objects.create(
+            # Unit type booked: the establishment's default type until the traveller chooses one
+            type_logement=types_logement.type_par_defaut(hebergement),
             total_price=montants.total,
             prix_nuits=montants.prix_nuits,
             frais_service=montants.frais_service,

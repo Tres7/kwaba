@@ -2,7 +2,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 
-from apps.hebergements.models import HebergementModel
+from apps.hebergements.models import HebergementModel, TypeLogementModel
 
 
 class ReservationModel(models.Model):
@@ -31,6 +31,17 @@ class ReservationModel(models.Model):
         on_delete=models.CASCADE,
         related_name='reservations',
     )
+    # Unit type booked and number of identical units (a hotel room type, or the single type of a house).
+    # Filled for every booking (data migration); nullable until all the code uses it.
+    type_logement = models.ForeignKey(
+        TypeLogementModel,
+        # A type with bookings cannot be deleted alone; deleting the whole establishment stays possible
+        on_delete=models.RESTRICT,
+        null=True,
+        blank=True,
+        related_name='reservations',
+    )
+    nb_unites = models.PositiveSmallIntegerField(default=1, db_default=1)
     guest = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
