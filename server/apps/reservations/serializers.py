@@ -63,20 +63,10 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     def get_paiement(self, obj):
         """Status of the last payment: null if none (online payment inactive at booking time)."""
-        dernier = max(obj.paiements.all(), key=lambda p: p.cree_le, default=None)
-        return dernier.statut if dernier else None
+        return paiements.etats_pour_serializer(self, 'reservation')[obj.pk]['paiement']
 
     def get_remboursement(self, obj):
-        lignes = list(obj.remboursements.all())
-        if not lignes:
-            return None
-        if any(r.statut == 'attente_numero' for r in lignes):
-            statut = 'attente_numero'
-        elif all(r.statut == 'envoye' for r in lignes):
-            statut = 'envoye'
-        else:
-            statut = 'en_cours'
-        return {'montant': sum(r.montant for r in lignes), 'statut': statut}
+        return paiements.etats_pour_serializer(self, 'reservation')[obj.pk]['remboursement']
 
     def _avis(self) -> dict:
         """Reviews of the serialized bookings, read once for the whole list."""

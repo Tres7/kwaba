@@ -22,7 +22,7 @@ class ReservationListCreateView(APIView):
             qs = ReservationModel.objects.filter(hebergement_id__in=hebergements.ids_annonces_de(request.user.id))
         else:
             qs = ReservationModel.objects.filter(guest=request.user)
-        qs = qs.select_related('guest').prefetch_related('paiements', 'remboursements')
+        qs = qs.select_related('guest')
         serializer = ReservationSerializer(qs, many=True, context={'request': request})
         return Response({'results': serializer.data, 'count': len(serializer.data)})
 
@@ -68,5 +68,5 @@ class ReservationDetailView(APIView):
             rembourse = paiements.annuler_reservation(obj, par='voyageur')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        numero_requis = obj.remboursements.filter(statut='attente_numero').exists()
+        numero_requis = paiements.numero_remboursement_requis('reservation', obj.pk)
         return Response({'detail': 'Réservation annulée.', 'rembourse': rembourse, 'numero_requis': numero_requis})

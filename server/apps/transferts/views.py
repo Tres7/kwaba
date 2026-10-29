@@ -63,18 +63,11 @@ class TransfertSerializer(serializers.ModelSerializer):
                 'immatriculation': c.immatriculation}
 
     def get_paiement(self, obj):
-        dernier = max(obj.paiements.all(), key=lambda p: p.cree_le, default=None)
-        return dernier.statut if dernier else None
+        """Status of the last payment: null if none (online payment inactive at booking time)."""
+        return paiements.etats_pour_serializer(self, 'transfert')[obj.pk]['paiement']
 
     def get_remboursement(self, obj):
-        lignes = list(obj.remboursements.all())
-        if not lignes:
-            return None
-        if any(r.statut == 'attente_numero' for r in lignes):
-            statut = 'attente_numero'
-        else:
-            statut = 'envoye' if all(r.statut == 'envoye' for r in lignes) else 'en_cours'
-        return {'montant': sum(r.montant for r in lignes), 'statut': statut}
+        return paiements.etats_pour_serializer(self, 'transfert')[obj.pk]['remboursement']
 
     def get_annulation_gratuite(self, obj):
         return obj.arrivee - timezone.now() > tarifs.DELAI_ANNULATION_GRATUITE
@@ -155,7 +148,7 @@ class DevisView(APIView):
 
 def _du_voyageur(pk, user):
     return (TransfertModel.objects.select_related('aeroport', 'chauffeur')
-            .prefetch_related('paiements', 'remboursements').filter(pk=pk, voyageur=user).first())
+            .filter(pk=pk, voyageur=user).first())
 
 
 class TransfertsView(APIView):
@@ -163,7 +156,7 @@ class TransfertsView(APIView):
 
     def get(self, request):
         qs = (TransfertModel.objects.filter(voyageur=request.user).select_related('aeroport', 'chauffeur')
-              .prefetch_related('paiements', 'remboursements'))
+              )
         reservation = request.query_params.get('reservation')
         if reservation:
             try:
@@ -192,9 +185,7 @@ class TransfertView(APIView):
         if not transfert:
             return Response({'detail': 'Transfert introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         # Return page after payment: the transaction is read again at the provider
-        dernier = transfert.paiements.order_by('-cree_le').first()
-        if dernier and dernier.statut == 'en_attente':
-            paiements.synchroniser_paiement(dernier)
+        if paiements.synchroniser_dernier_paiement('transfert', transfert.pk):
             transfert = _du_voyageur(pk, request.user)
         return Response(TransfertSerializer(transfert).data)
 
@@ -206,7 +197,7 @@ class TransfertView(APIView):
             rembourse = services.annuler(transfert, par='voyageur')
         except services.TransfertErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        numero_requis = transfert.remboursements.filter(statut='attente_numero').exists()
+        numero_requis = paiements.numero_remboursement_requis('transfert', transfert.pk)
         return Response({'detail': 'Transfert annulé.', 'rembourse': rembourse, 'numero_requis': numero_requis})
 
 

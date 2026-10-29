@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from . import notifications, tarifs
 from .documents import recu_paiement
-from .models import ConditionsHoteModel, PaiementModel
+from .models import ConditionsHoteModel, PaiementModel, RemboursementModel
 from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
 from .paypal import FCFA_PAR_EURO
 from .registre import ProduitPaye, Relance, enregistrer as enregistrer_produit
@@ -14,7 +14,9 @@ from .services import (
 from .views import CompteRemboursementSerializer
 
 __all__ = [
-    'ProduitPaye', 'Relance', 'enregistrer_produit', 'CompteRemboursementSerializer', 'annuler_reservation', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
+    'ProduitPaye', 'Relance', 'enregistrer_produit', 'autre_paiement_reussi', 'etats_paiement', 'etats_pour_serializer',
+    'ids_paiements_echoues', 'numero_remboursement_requis', 'synchroniser_dernier_paiement',
+    'synchroniser_paiements_en_attente', 'CompteRemboursementSerializer', 'annuler_reservation', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
     'PaiementErreur', 'alerte_admin', 'date_fr', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
     'documents_joints', 'emails_admins', 'envoyer_email', 'envoyer_payout', 'fcfa', 'fedapay_actif', 'frais_voyageur',
     'indiquer_numero_remboursement', 'moyens_actifs', 'paiement_actif', 'paiement_reussi', 'recu_pdf', 'rembourser',
@@ -100,3 +102,75 @@ def devis_sejour(prix_par_nuit, hote_id, nuits: int, voyageur=None, nb_unites: i
 def montants_de(reservation, prix_par_nuit=None) -> tarifs.Montants:
     """Frozen amounts of a booking."""
     return tarifs.montants_de(reservation, prix_par_nuit)
+
+
+def _par_objet(type_objet: str, objet_ids) -> dict:
+    return {f'{type_objet}_id__in': list(objet_ids)}
+
+
+def etats_paiement(type_objet: str, objet_ids) -> dict:
+    """Per object: status of its last payment (None if none) and its refunds ({'montant', 'statut'} or None)."""
+    objet_ids = list(objet_ids)
+    champ = f'{type_objet}_id'
+    etats = {i: {'paiement': None, 'remboursement': None} for i in objet_ids}
+    for p in PaiementModel.objects.filter(**_par_objet(type_objet, objet_ids)).order_by('cree_le').values(champ, 'statut'):
+        etats[p[champ]]['paiement'] = p['statut']
+    if type_objet == 'don':
+        return etats
+    lignes = {}
+    for r in RemboursementModel.objects.filter(**_par_objet(type_objet, objet_ids)).values(champ, 'statut', 'montant'):
+        lignes.setdefault(r[champ], []).append(r)
+    for objet_id, siennes in lignes.items():
+        if any(r['statut'] == 'attente_numero' for r in siennes):
+            statut = 'attente_numero'
+        else:
+            statut = 'envoye' if all(r['statut'] == 'envoye' for r in siennes) else 'en_cours'
+        etats[objet_id]['remboursement'] = {'montant': sum(r['montant'] for r in siennes), 'statut': statut}
+    return etats
+
+
+def etats_pour_serializer(serializer, type_objet: str) -> dict:
+    """etats_paiement of the objects being serialized (one or a list), read once for the whole list."""
+    cle = f'_etats_paiement_{type_objet}'
+    if cle not in serializer.context:
+        instance = serializer.parent.instance if serializer.parent is not None else serializer.instance
+        objets = list(instance) if isinstance(instance, (list, tuple)) or hasattr(instance, 'model') else [instance]
+        serializer.context[cle] = etats_paiement(type_objet, [o.pk for o in objets])
+    return serializer.context[cle]
+
+
+def numero_remboursement_requis(type_objet: str, objet_id) -> bool:
+    """A refund waits for the Mobile Money account the traveller must give."""
+    return RemboursementModel.objects.filter(**{f'{type_objet}_id': objet_id}, statut='attente_numero').exists()
+
+
+def synchroniser_dernier_paiement(type_objet: str, objet_id) -> bool:
+    """Return page after payment: the last payment is read again at the provider if it is pending.
+    Returns True if it was."""
+    dernier = PaiementModel.objects.filter(**{f'{type_objet}_id': objet_id}).order_by('-cree_le').first()
+    if dernier and dernier.statut == 'en_attente':
+        synchroniser_paiement(dernier)
+        return True
+    return False
+
+
+def synchroniser_paiements_en_attente(type_objet: str, objet_id) -> None:
+    """Last check at the provider before an expiry."""
+    for paiement in PaiementModel.objects.filter(**{f'{type_objet}_id': objet_id}, statut='en_attente'):
+        synchroniser_paiement(paiement)
+
+
+def autre_paiement_reussi(type_objet: str, objet_id, paiement) -> bool:
+    """Another successful payment than `paiement` exists for the object (paid twice)."""
+    return (PaiementModel.objects.filter(**{f'{type_objet}_id': objet_id}, statut='reussi')
+            .exclude(pk=paiement.pk).exists())
+
+
+def ids_paiements_echoues(type_objet: str) -> set:
+    """Objects whose payments all failed or were cancelled (none pending nor successful)."""
+    champ = f'{type_objet}_id'
+    echoues = set(PaiementModel.objects.filter(**{f'{champ}__isnull': False}, statut__in=('echoue', 'annule'))
+                  .values_list(champ, flat=True))
+    actifs = set(PaiementModel.objects.filter(**{f'{champ}__in': echoues}, statut__in=('en_attente', 'reussi'))
+                 .values_list(champ, flat=True))
+    return echoues - actifs

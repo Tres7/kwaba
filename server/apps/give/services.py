@@ -80,11 +80,9 @@ def synchroniser(don: DonModel) -> DonModel:
     """Reads the payment again at the provider (return page, worker) and updates the donation."""
     if don.statut != 'en_attente':
         return don
-    paiement = don.paiements.order_by('-cree_le').first()
-    if paiement:
-        statut = paiements.synchroniser_paiement(paiement)
-        if statut in ('echoue', 'annule'):
-            DonModel.objects.filter(pk=don.pk, statut='en_attente').update(statut='echoue')
+    paiements.synchroniser_dernier_paiement('don', don.pk)
+    if paiements.etats_paiement('don', [don.pk])[don.pk]['paiement'] in ('echoue', 'annule'):
+        DonModel.objects.filter(pk=don.pk, statut='en_attente').update(statut='echoue')
     don.refresh_from_db()
     return don
 
@@ -162,9 +160,9 @@ def impact_par_cause() -> dict:
 def abandonner() -> int:
     """Donations whose payment failed (recent payments are read again by the payments worker), then
     donations still pending after 24 h: last check at the provider and "not completed" classification."""
-    abandonnes = DonModel.objects.filter(statut='en_attente', paiements__statut__in=('echoue', 'annule')).exclude(
-        paiements__statut__in=('en_attente', 'reussi'),
-    ).update(statut='echoue')
+    abandonnes = DonModel.objects.filter(statut='en_attente', pk__in=paiements.ids_paiements_echoues('don')).update(
+        statut='echoue',
+    )
     for don in DonModel.objects.filter(statut='en_attente', cree_le__lt=timezone.now() - DELAI_ABANDON)[:50]:
         if synchroniser(don).statut == 'en_attente':
             abandonnes += DonModel.objects.filter(pk=don.pk, statut='en_attente').update(statut='echoue')

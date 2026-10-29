@@ -91,7 +91,7 @@ def demarrer_paiement(transfert: TransfertModel, moyen: str) -> str:
 def paiement_recu(paiement):
     """Called by apps.paiements, in its transaction, when a transfer payment succeeds."""
     transfert = TransfertModel.objects.select_for_update().get(pk=paiement.transfert_id)
-    if transfert.paiements.filter(statut='reussi').exclude(pk=paiement.pk).exists():
+    if paiements.autre_paiement_reussi('transfert', transfert.pk, paiement):
         paiements.rembourser(paiement, paiement.montant, "Paiement reçu en double")
         return
     if transfert.statut == 'annule' and transfert.annule_par != 'expiration':
@@ -143,8 +143,7 @@ def annuler(transfert: TransfertModel, par: str) -> int:
             raise TransfertErreur("L'heure d'arrivée est passée : ce transfert ne peut plus être annulé.")
 
         rembourse = 0
-        paiement = transfert.paiements.filter(statut='reussi').order_by('cree_le').first()
-        if paiement:
+        if paiements.paiement_reussi('transfert', transfert.pk):
             gratuit = transfert.arrivee - timezone.now() > tarifs.DELAI_ANNULATION_GRATUITE
             if par != 'voyageur' or gratuit:
                 rembourse = transfert.prix
@@ -153,7 +152,7 @@ def annuler(transfert: TransfertModel, par: str) -> int:
                 )
             # Less than 24 h before arrival: the driver is already on the way, they are still paid
             motif = "Annulation par le voyageur" if par == 'voyageur' else "Annulation par Kwa-Ba"
-            paiements.rembourser(paiement, rembourse, motif)
+            paiements.rembourser_en_partie('transfert', transfert.pk, rembourse, motif)
 
         transfert.statut, transfert.annule_par, transfert.annule_le = 'annule', par, timezone.now()
         transfert.save(update_fields=['statut', 'annule_par', 'annule_le'])
@@ -166,8 +165,7 @@ def expirer() -> int:
     expires = 0
     maintenant = timezone.now()
     for transfert in TransfertModel.objects.filter(statut='en_attente_paiement', expire_le__lte=maintenant):
-        for paiement in transfert.paiements.filter(statut='en_attente'):
-            paiements.synchroniser_paiement(paiement)
+        paiements.synchroniser_paiements_en_attente('transfert', transfert.pk)
         expires += TransfertModel.objects.filter(pk=transfert.pk, statut='en_attente_paiement').update(
             statut='annule', annule_par='expiration', annule_le=maintenant,
         )
