@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from apps.hebergements.models import HebergementModel
 from apps.securite.audit import journaliser
-from apps.terrain import services as terrain
+from apps.terrain import api as terrain
 
 from . import services
 from .fichiers import FichierInvalide, piece_identite

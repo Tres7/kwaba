@@ -124,10 +124,6 @@ ignore_imports =
     apps.reservations.serializers -> apps.paiements.services
     apps.reservations.serializers -> apps.paiements.tarifs
     apps.reservations.views -> apps.paiements.services
-    apps.terrain.types -> apps.hebergements.models
-    apps.terrain.types -> apps.verifications.models
-    apps.terrain.types -> apps.verifications.services
-    apps.terrain.types -> apps.verifications.views
     apps.transferts.models -> apps.paiements.operateurs
     apps.transferts.notifications -> apps.paiements.notifications
     apps.transferts.services -> apps.paiements.services
@@ -138,7 +134,6 @@ ignore_imports =
     apps.verifications.services -> apps.documents.models
     apps.verifications.services -> apps.hebergements.models
     apps.verifications.views -> apps.hebergements.models
-    apps.verifications.views -> apps.terrain.services
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier
