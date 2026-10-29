@@ -1,9 +1,9 @@
 import os
 
-from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
 from apps.hebergements.models import HebergementModel
+from apps.users import api as users
 
 U = "https://images.unsplash.com/"
 Q = "?q=80&w=1200&auto=format&fit=crop"
@@ -74,13 +74,9 @@ class Command(BaseCommand):
         email = os.getenv('DEMO_HOST_EMAIL', 'hote.demo@kwa-ba.com')
         password = os.getenv('DEMO_HOST_PASSWORD', 'Kwa-Ba2026!')
 
-        host, created = get_user_model().objects.get_or_create(
-            email=email,
-            defaults={'first_name': 'Kossi', 'last_name': 'Mensah', 'role': 'hote', 'is_verified': True},
-        )
+        host, created = users.compte_demo(email, password, first_name='Kossi', last_name='Mensah', role='hote',
+                                          is_verified=True)
         if created:
-            host.set_password(password)
-            host.save()
             self.stdout.write(f"Hôte démo créé : {email} / {password}")
 
         added = 0

@@ -9,8 +9,8 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 from .infrastructure.persistence.models import UserModel
 
 __all__ = [
-    'Compte', 'ROLES', 'attacher', 'compte', 'comptes', 'comptes_actifs', 'emails_actifs', 'ids_actifs', 'ids_par_recherche',
-    'revoquer_jetons', 'statistiques',
+    'Compte', 'ROLES', 'attacher', 'compte', 'comptes', 'comptes_actifs', 'compte_demo', 'emails_actifs', 'ids_actifs',
+    'ids_par_recherche', 'revoquer_jetons', 'statistiques',
 ]
 
 ROLES = [code for code, _ in UserModel.ROLE_CHOICES]
@@ -69,6 +69,15 @@ def attacher(objets: Iterable, *champs: str) -> list:
         for c in champs:
             o.__dict__[c] = trouves.get(getattr(o, f'{c}_id'))
     return objets
+
+
+def compte_demo(email: str, mot_de_passe: str, **champs) -> tuple[Compte, bool]:
+    """Demo account (seed_demo command): created once with this password, then left as it is."""
+    u, cree = UserModel.objects.get_or_create(email=email, defaults=champs)
+    if cree:
+        u.set_password(mot_de_passe)
+        u.save()
+    return _compte(u), cree
 
 
 def ids_par_recherche(texte: str) -> list[uuid.UUID]:
