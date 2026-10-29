@@ -51,7 +51,7 @@ def donner(*, donateur, organisation: OrganisationModel, projet=None, montant: i
     try:
         with transaction.atomic():
             don = DonModel.objects.create(
-                donateur=donateur, organisation=organisation, projet=projet, montant=montant, couvre_frais=couvre_frais,
+                donateur_id=donateur.pk, organisation=organisation, projet=projet, montant=montant, couvre_frais=couvre_frais,
                 frais=calcul.frais, total=calcul.total, montant_ong=calcul.montant_ong, moyen=moyen,
                 partage_identite=partage_identite,
             )
@@ -140,7 +140,7 @@ def impact(organisations=None) -> dict:
     if organisations is not None:
         dons = dons.filter(organisation__in=organisations)
         reversements = reversements.filter(organisation__in=organisations)
-    d = dons.aggregate(collecte=Sum('montant_ong'), nb=Count('id'), donateurs=Count('donateur', distinct=True))
+    d = dons.aggregate(collecte=Sum('montant_ong'), nb=Count('id'), donateurs=Count('donateur_id', distinct=True))
     reverse = reversements.aggregate(total=Sum('montant'))['total'] or 0
     collecte = d['collecte'] or 0
     return {

@@ -24,6 +24,6 @@ def preinscription_requise(utilisateur) -> bool:
     return preinscription.requise(utilisateur)
 
 
-def condition_contrat_signe(champ_hote: str = 'host') -> Exists:
+def condition_contrat_signe(champ_hote: str = 'host_id') -> Exists:
     """SQL condition: the host (field `champ_hote` of the outer query) signed their agreement."""
-    return Exists(ContratModel.objects.filter(hote=OuterRef(champ_hote), statut='signe'))
+    return Exists(ContratModel.objects.filter(hote_id=OuterRef(champ_hote), statut='signe'))

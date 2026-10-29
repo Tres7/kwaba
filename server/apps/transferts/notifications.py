@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils import formats, timezone
 
 from apps.paiements import api as paiements
+from apps.users import api as users
 
 from . import tarifs
 from .models import TransfertModel, VersementChauffeurModel
@@ -78,7 +79,10 @@ def versement_au_chauffeur(v: VersementChauffeurModel):
 
 def _traiter(qs, fonction, drapeau):
     envoyes = 0
-    for ligne in qs[:50]:
+    lignes = list(qs[:50])
+    if qs.model is TransfertModel:
+        users.attacher(lignes, 'voyageur')
+    for ligne in lignes:
         try:
             fonction(ligne)
         except Exception:
@@ -90,7 +94,7 @@ def _traiter(qs, fonction, drapeau):
 
 
 def envoyer_notifications() -> int:
-    qs = TransfertModel.objects.select_related('voyageur', 'aeroport', 'chauffeur')
+    qs = TransfertModel.objects.select_related('aeroport', 'chauffeur')
     payes = qs.filter(statut__in=('confirme', 'chauffeur_assigne'))
     total = _traiter(payes.filter(confirmation_notifiee=False), confirme, 'confirmation_notifiee')
     total += _traiter(payes.filter(admins_notifies=False), a_attribuer, 'admins_notifies')

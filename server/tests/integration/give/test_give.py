@@ -182,7 +182,7 @@ def test_services_refusent_une_ong_non_publiee(faux, make_user, ong):
 # --- Reversements ------------------------------------------------------------------------
 
 def _don_paye(make_user, ong, quand, montant=2000):
-    don = DonModel.objects.create(donateur=make_user(), organisation=ong, montant=montant, frais=0, total=montant,
+    don = DonModel.objects.create(donateur_id=make_user().pk, organisation=ong, montant=montant, frais=0, total=montant,
                                   montant_ong=montant, statut='paye', paye_le=quand)
     return don
 

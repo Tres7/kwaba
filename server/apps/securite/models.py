@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 
 
@@ -77,7 +76,7 @@ class AlerteFraudeModel(models.Model):
     CONTEXTES = [('message', 'Message'), ('annonce', 'Annonce')]
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='alertes_fraude')
+    utilisateur_id = models.UUIDField(db_index=True)
     contexte = models.CharField(max_length=20, choices=CONTEXTES)
     objet_id = models.CharField(max_length=64, help_text='Conversation ou annonce concernée')
     types = models.JSONField(default=list, help_text='telephone, email, lien, reseau, application, hors_site')
@@ -86,14 +85,14 @@ class AlerteFraudeModel(models.Model):
     masquee = models.BooleanField(default=False, help_text='Des coordonnées ont été masquées')
     traitee = models.BooleanField(default=False, db_index=True)
     traitee_le = models.DateTimeField(null=True, blank=True)
-    traitee_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    traitee_par_id = models.UUIDField(null=True, blank=True, db_index=True)
     note = models.TextField(blank=True)
 
     class Meta:
         db_table = 'securite_alerte_fraude'
         ordering = ['-cree_le']
         verbose_name = 'Alerte anti-fraude'
-        indexes = [models.Index(fields=['utilisateur', '-cree_le'], name='alerte_fraude_user_idx')]
+        indexes = [models.Index(fields=['utilisateur_id', '-cree_le'], name='alerte_fraude_user_idx')]
 
     def __str__(self):
         return f"{self.cree_le:%Y-%m-%d} {self.utilisateur_id} {', '.join(self.types)}"

@@ -12,6 +12,7 @@ from apps.transferts import api as transferts
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
+from apps.users import api as users
 
 from apps.securite.backoffice import motif as _motif, nom as _nom, paginer as _paginer
 
@@ -249,7 +250,7 @@ def _location(loc: LocationModel) -> dict:
 
 
 def _locations():
-    return LocationModel.objects.select_related('voyageur', 'categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
+    return LocationModel.objects.select_related('categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
 
 
 class LocationsView(APIView):
@@ -261,11 +262,11 @@ class LocationsView(APIView):
         if (statut := request.query_params.get('statut')) in dict(LocationModel.STATUTS):
             qs = qs.filter(statut=statut)
         if q := request.query_params.get('q', '').strip():
-            filtre = Q(voyageur__email__icontains=q) | Q(telephone__icontains=q) | Q(conducteur__icontains=q)
+            filtre = Q(voyageur_id__in=users.ids_par_recherche(q)) | Q(telephone__icontains=q) | Q(conducteur__icontains=q)
             if len(q.split('-')[-1]) >= 4:
                 filtre |= Q(id__istartswith=q.split('-')[-1])
             qs = qs.filter(filtre)
-        return _paginer(request, qs, _location)
+        return _paginer(request, qs, lambda page: [_location(x) for x in users.attacher(page, 'voyageur')], en_lot=True)
 
 
 class LocationPartenairesView(APIView):

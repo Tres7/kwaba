@@ -1,6 +1,5 @@
 import uuid
 
-from django.conf import settings
 from django.core.files.storage import storages
 from django.db import models
 
@@ -32,7 +31,7 @@ class PieceIdentiteModel(models.Model):
     ]
     STATUTS = [('soumise', 'À contrôler'), ('verifiee', 'Vérifiée'), ('refusee', 'Refusée')]
 
-    hote = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='piece_identite')
+    hote_id = models.UUIDField(unique=True)
     type_piece = models.CharField(max_length=20, choices=TYPES)
     fichier = models.FileField(upload_to=_chemin_piece, storage=stockage_prive, blank=True)
     type_contenu = models.CharField(max_length=40, blank=True)
@@ -40,16 +39,14 @@ class PieceIdentiteModel(models.Model):
     motif_refus = models.TextField(blank=True)
     soumise_le = models.DateTimeField(auto_now_add=True)
     verifiee_le = models.DateTimeField(null=True, blank=True)
-    verifiee_par = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+',
-    )
+    verifiee_par_id = models.UUIDField(null=True, blank=True, db_index=True)
 
     class Meta:
         verbose_name = "Pièce d'identité"
         verbose_name_plural = "Pièces d'identité"
 
     def __str__(self):
-        return f"{self.get_type_piece_display()} de {self.hote}"
+        return f"{self.get_type_piece_display()} de {self.hote_id}"
 
 
 class VisiteModel(models.Model):
@@ -65,7 +62,7 @@ class VisiteModel(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hebergement_id = models.UUIDField(db_index=True)
-    agent = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='visites_faites')
+    agent_id = models.UUIDField(null=True, db_index=True)
     decision = models.CharField(max_length=20, choices=DECISIONS)
     controles = models.JSONField(default=dict)
     commentaire = models.TextField(blank=True)

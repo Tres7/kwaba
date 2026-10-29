@@ -1,5 +1,6 @@
 import uuid
-from django.conf import settings
+from functools import cached_property
+
 from django.db import models
 
 from config import prelancement
@@ -24,7 +25,7 @@ class HebergementQuerySet(models.QuerySet):
         from apps.documents.api import condition_societe_immatriculee
 
         return (self.filter(is_available=True, statut_verification='verifiee')
-                .filter(~condition_societe_immatriculee() | condition_contrat_signe('host')))
+                .filter(~condition_societe_immatriculee() | condition_contrat_signe('host_id')))
 
 
 class HebergementManager(models.Manager.from_queryset(HebergementQuerySet)):
@@ -83,11 +84,7 @@ class HebergementModel(models.Model):
     statut_verification = models.CharField(max_length=20, choices=STATUTS_VERIFICATION, default='en_attente', db_index=True)
     verifiee_le = models.DateTimeField(null=True, blank=True)
     motif_refus = models.TextField(blank=True)
-    host = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='hebergements',
-    )
+    host_id = models.UUIDField(db_index=True)
     archivee_le = models.DateTimeField(null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -101,6 +98,11 @@ class HebergementModel(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.city})"
+
+    @cached_property
+    def host(self):
+        from apps.users.api import compte
+        return compte(self.host_id)
 
     @property
     def est_publiee(self) -> bool:
@@ -120,11 +122,7 @@ class HebergementPhotoModel(models.Model):
     """Photo uploaded by a host. Its URL is then referenced in a listing's image_url / images."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='hebergement_photos',
-    )
+    owner_id = models.UUIDField(db_index=True)
     image = models.ImageField(upload_to=_photo_upload_path)
     width = models.PositiveIntegerField()
     height = models.PositiveIntegerField()
@@ -237,8 +235,7 @@ class AlerteDisponibiliteModel(models.Model):
     hebergement = models.ForeignKey(HebergementModel, on_delete=models.CASCADE, related_name='alertes')
     # None: any unit type of the establishment
     type_logement = models.ForeignKey(TypeLogementModel, on_delete=models.CASCADE, null=True, blank=True, related_name='alertes')
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
-                                    related_name='alertes_disponibilite')
+    utilisateur_id = models.UUIDField(null=True, blank=True, db_index=True)
     email = models.EmailField()
     langue = models.CharField(max_length=2, default='fr')
     date_debut = models.DateField()

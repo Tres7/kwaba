@@ -16,6 +16,7 @@ from apps.securite.backoffice import paginer
 from apps.securite.limites import ip_client, limite_ip
 from apps.securite.permissions import EstAdministrateur
 from apps.transferts import api as transferts
+from apps.users import api as users
 
 from . import preinscription, services
 from .models import TYPES, ContratModel, ModeleContratModel
@@ -102,7 +103,7 @@ class SignerPubliqueView(APIView):
 
 def _apercu_hote(user) -> dict | None:
     """Contract the host is going to sign: theirs if it exists, otherwise the text that will be issued at signature."""
-    contrat = ContratModel.objects.filter(hote=user).exclude(statut='annule').first()
+    contrat = ContratModel.objects.filter(hote_id=user.pk).exclude(statut='annule').first()
     if contrat:
         return _public(contrat)
     type_contrat = services.type_contrat_hote(user)
@@ -166,7 +167,7 @@ class ContratHotePdfView(APIView):
     permission_classes = [EstHote]
 
     def get(self, request):
-        contrat = ContratModel.objects.filter(hote=request.user).exclude(statut='annule').first()
+        contrat = ContratModel.objects.filter(hote_id=request.user.pk).exclude(statut='annule').first()
         if not contrat:
             return Response({'detail': 'Aucun contrat.'}, status=status.HTTP_404_NOT_FOUND)
         return _pdf(contrat)
@@ -192,13 +193,12 @@ PARTIES = {'chauffeur': (transferts.chauffeur, transferts.chauffeurs), 'loueur':
 
 def _cible(type_contrat: str, pk):
     """The host account, or the party given by its module."""
-    from django.contrib.auth import get_user_model
     from django.core.exceptions import ValidationError
 
     if type_contrat in PARTIES:
         return PARTIES[type_contrat][0](pk)
     try:
-        return get_user_model().objects.filter(pk=pk).first()
+        return users.compte(pk)
     except (ValueError, TypeError, ValidationError):
         return None
 
@@ -237,15 +237,10 @@ class PartiesAdminView(APIView):
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
-        from django.contrib.auth import get_user_model
-
         type_contrat = request.query_params.get('type')
         q = request.query_params.get('q', '').strip()
         if type_contrat in services.TYPES_HOTE:
-            qs = get_user_model().objects.filter(role='hote', is_active=True)
-            if q:
-                qs = qs.filter(Q(email__icontains=q) | Q(first_name__icontains=q) | Q(last_name__icontains=q))
-            lignes = [(u.pk, services._nom(u), u.email) for u in qs.order_by('first_name')[:30]]
+            lignes = [(u.pk, services._nom(u), u.email) for u in users.comptes_actifs(['hote'], texte=q, limite=30)]
         elif type_contrat in PARTIES:
             lignes = [(p['id'], p['nom'], p['email']) for p in PARTIES[type_contrat][1](q)]
         else:
@@ -321,7 +316,7 @@ class ModeleAdminView(APIView):
         if erreurs:
             return Response(erreurs, status=status.HTTP_400_BAD_REQUEST)
         if (titre, corps) != (modele.titre, modele.corps):
-            modele.titre, modele.corps, modele.version, modele.modifie_par = titre, corps, modele.version + 1, request.user
+            modele.titre, modele.corps, modele.version, modele.modifie_par_id = titre, corps, modele.version + 1, request.user.pk
             modele.save()
             journaliser('backoffice_modification', request, utilisateur=request.user, objet='modele_contrat', id=modele.type,
                         champs=['titre', 'corps'], version=modele.version)

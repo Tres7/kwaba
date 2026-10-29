@@ -1,5 +1,4 @@
 import uuid
-from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -22,7 +21,7 @@ class AvisModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     reservation_id = models.UUIDField(unique=True)
     hebergement_id = models.UUIDField(db_index=True)
-    auteur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='avis_donnes')
+    auteur_id = models.UUIDField(db_index=True)
 
     note = models.PositiveSmallIntegerField(validators=NOTE)
     proprete = models.PositiveSmallIntegerField(validators=NOTE)

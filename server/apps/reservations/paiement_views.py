@@ -14,7 +14,7 @@ from .models import ReservationModel
 
 
 def _reservation_du_voyageur(pk, user):
-    return ReservationModel.objects.select_related('guest').filter(pk=pk, guest=user).first()
+    return ReservationModel.objects.filter(pk=pk, guest_id=user.pk).first()
 
 
 class PayerView(APIView):

@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
+from apps.users import api as users
 from apps.verifications.api import FichierInvalide, piece_identite
 
 from apps.securite.backoffice import nom as _nom, paginer as _paginer
@@ -185,10 +186,14 @@ class ReversementEffectuerView(APIView):
 
 # --- Dons (lecture seule) ------------------------------------------------------------------------
 
+def _dons(dons: list[DonModel]) -> list[dict]:
+    return [_don(d) for d in users.attacher(dons, 'donateur')]
+
+
 def _don(d: DonModel) -> dict:
     return {
         'id': str(d.id), 'reference': d.reference,
-        'donateur': {'nom': _nom(d.donateur), 'email': d.donateur.email},
+        'donateur': {'nom': _nom(d.donateur), 'email': d.donateur.email} if d.donateur else None,
         'organisation': d.organisation.nom, 'projet': d.projet.titre if d.projet_id else None,
         'montant': d.montant, 'total': d.total, 'montant_ong': d.montant_ong, 'moyen': d.moyen,
         'statut': d.statut, 'statut_libelle': d.get_statut_display(), 'paye_le': d.paye_le, 'cree_le': d.cree_le,
@@ -200,7 +205,7 @@ class DonsView(APIView):
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
-        qs = DonModel.objects.select_related('donateur', 'organisation', 'projet').order_by('-cree_le')
+        qs = DonModel.objects.select_related('organisation', 'projet').order_by('-cree_le')
         params = request.query_params
         if (statut := params.get('statut')) in dict(DonModel.STATUTS):
             qs = qs.filter(statut=statut)
@@ -210,5 +215,5 @@ class DonsView(APIView):
             except ValueError:
                 return Response({'organisation': ['Identifiant invalide.']}, status=status.HTTP_400_BAD_REQUEST)
         if q := params.get('q', '').strip():
-            qs = qs.filter(donateur__email__icontains=q)
-        return _paginer(request, qs, _don)
+            qs = qs.filter(donateur_id__in=users.ids_par_recherche(q))
+        return _paginer(request, qs, _dons, en_lot=True)

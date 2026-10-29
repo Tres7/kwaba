@@ -33,13 +33,13 @@ def immatriculee(societe):
 def _contrat_signe(hote):
     return ContratModel.objects.create(
         reference=f'CT-T-{uuid.uuid4().hex[:6]}', type='hote', titre='Contrat hôte', corps='Texte', version_modele=1,
-        statut='signe', hote=hote, partie_nom=hote.get_full_name(), partie_email=hote.email, kwaba_signataire='Kwaba SAS',
+        statut='signe', hote_id=hote.pk, partie_nom=hote.get_full_name(), partie_email=hote.email, kwaba_signataire='Kwaba SAS',
         jeton_hash=uuid.uuid4().hex, expire_le=timezone.now() + timedelta(days=30), signe_le=timezone.now(),
     )
 
 
 def _preinscrire(hote, langue='fr'):
-    return PreinscriptionModel.objects.create(hote=hote, version=preinscription.VERSION, langue=langue,
+    return PreinscriptionModel.objects.create(hote_id=hote.pk, version=preinscription.VERSION, langue=langue,
                                               empreinte_texte=preinscription.empreinte(langue))
 
 

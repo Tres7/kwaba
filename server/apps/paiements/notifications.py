@@ -7,9 +7,9 @@ import logging
 import time
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db.models import Q
-from apps.notifications.infrastructure.email.envoi import send_mail
+from apps.notifications.api import send_mail
+from apps.users import api as users
 from django.template.loader import render_to_string
 from django.utils import formats
 
@@ -56,7 +56,7 @@ def _documents(objet):
 
 
 def _admins() -> list[str]:
-    return list(get_user_model().objects.filter(role='admin', is_active=True).values_list('email', flat=True))
+    return users.emails_actifs(['admin'])
 
 
 def _sejour(r) -> dict:
@@ -88,13 +88,13 @@ def reservation_payee_voyageur(paiement: PaiementModel):
 def reservation_payee_hote(paiement: PaiementModel):
     r = _reservation(paiement.reservation_id)
     annonce = tarifs._annonce(r)
-    voyageur, hote = r.guest, get_user_model().objects.get(pk=annonce['host_id'])
+    voyageur, hote = r.guest, users.compte(annonce['host_id'])
     montants = tarifs.montants_de(r)
     _envoyer('reservation_payee_hote', f"Nouvelle réservation payée : {annonce['name']}", [hote.email], {
         **_sejour(r), 'prenom': hote.first_name, 'voyageur': f"{voyageur.first_name} {voyageur.last_name}".strip(),
         'message': r.message, 'montant_hote': _fcfa(montants.montant_hote),
         'date_versement': _date(tarifs.date_versement(r)),
-        'profil_complet': ProfilVersementModel.objects.filter(hote=hote).exists(),
+        'profil_complet': ProfilVersementModel.objects.filter(hote_id=hote.pk).exists(),
         'url_revenus': f"{settings.FRONTEND_URL}/hote/espace?onglet=revenus",
         'url_reservations': f"{settings.FRONTEND_URL}/hote/espace?onglet=reservations",
     })
@@ -139,7 +139,10 @@ def alerte_admin(type_: str, ligne, beneficiaire: str, *, reference: str, libell
 
 def _traiter(qs, fonction, drapeau='notifie'):
     envoyes = 0
-    for ligne in qs[:50]:
+    lignes = list(qs[:50])
+    if getattr(qs, 'model', None) is VersementModel:
+        users.attacher(lignes, 'hote')
+    for ligne in lignes:
         try:
             fonction(ligne)
         except Exception:
@@ -159,11 +162,11 @@ def envoyer_notifications() -> int:
     total = _traiter(payes.filter(notifie=False), reservation_payee_voyageur)
     total += _traiter(payes.filter(notifie_hote=False), reservation_payee_hote, drapeau='notifie_hote')
     total += _traiter(
-        VersementModel.objects.filter(statut='envoye', notifie=False).select_related('hote'),
+        VersementModel.objects.filter(statut='envoye', notifie=False),
         versement_envoye,
     )
     total += _traiter(
-        VersementModel.objects.filter(statut='echoue', notifie=False).select_related('hote'),
+        VersementModel.objects.filter(statut='echoue', notifie=False),
         lambda v: alerte_admin('Versement à un hôte', v, f"{v.hote.email} ({nom_operateur(v.mode)} {v.numero})",
                                reference=_reservation(v.reservation_id).reference,
                                libelle=tarifs._annonce(_reservation(v.reservation_id))['name']),

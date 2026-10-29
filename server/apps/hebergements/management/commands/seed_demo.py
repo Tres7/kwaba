@@ -88,7 +88,7 @@ class Command(BaseCommand):
             cover = f"{U}{photo}{Q}"
             _, was_created = HebergementModel.objects.get_or_create(
                 name=name,
-                host=host,
+                host_id=host.pk,
                 defaults={
                     'type': type_, 'city': city, 'location': location,
                     'price_per_night': price,

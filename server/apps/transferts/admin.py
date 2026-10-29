@@ -28,10 +28,10 @@ class TransfertAdmin(admin.ModelAdmin):
     """To assign a driver: open the transfer, choose the driver, save."""
     list_display = ['reference', 'aeroport', 'arrivee', 'numero_vol', 'categorie', 'prix', 'statut', 'chauffeur']
     list_filter = ['statut', 'aeroport', 'categorie']
-    search_fields = ['numero_vol', 'voyageur__email', 'telephone']
+    search_fields = ['numero_vol', 'voyageur_id', 'telephone']
     ordering = ['arrivee']
     readonly_fields = [
-        'voyageur', 'reservation_id', 'aeroport', 'arrivee', 'numero_vol', 'passagers', 'bagages', 'categorie',
+        'voyageur_id', 'reservation_id', 'aeroport', 'arrivee', 'numero_vol', 'passagers', 'bagages', 'categorie',
         'destination', 'telephone', 'message', 'prix', 'commission', 'majoration_nuit', 'moyen', 'statut',
         'expire_le', 'annule_par', 'annule_le', 'cree_le',
     ]

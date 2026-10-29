@@ -38,7 +38,9 @@ class DonInline(admin.TabularInline):
     @admin.display(description='Donateur')
     def donateur_affiche(self, don):
         # Identity passed on to the NGO only with the donor's consent
-        return f"{don.donateur.get_full_name()} <{don.donateur.email}>" if don.partage_identite else 'Anonyme'
+        if not don.partage_identite or don.donateur is None:
+            return 'Anonyme'
+        return f"{don.donateur.get_full_name()} <{don.donateur.email}>"
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -76,7 +78,7 @@ class ReversementAdmin(admin.ModelAdmin):
 class DonAdmin(admin.ModelAdmin):
     list_display = ['reference', 'organisation', 'montant', 'total', 'montant_ong', 'statut', 'paye_le', 'reversement']
     list_filter = ['statut', 'organisation', 'couvre_frais']
-    search_fields = ['donateur__email']
+    search_fields = ['donateur_id']
     readonly_fields = [f.name for f in DonModel._meta.fields]
     actions = ['preparer_reversements']
 

@@ -8,6 +8,7 @@ from apps.securite.audit import journaliser
 from apps.securite.backoffice import (
     VueAdmin, booleen as _booleen, introuvable as _introuvable, motif as _motif, nom as _nom, paginer as _paginer,
 )
+from apps.users import api as users
 from apps.verifications import api as verifications
 
 from .archivage import ArchivageImpossible, archiver, restaurer
@@ -15,13 +16,14 @@ from .models import HebergementModel
 
 
 def _hebergements_json(liste) -> list[dict]:
+    liste = users.attacher(liste, 'host')
     nb_reservations = reservations_api.nb_par_annonce(h.id for h in liste)
     return [{
         'id': str(h.id), 'name': h.name, 'type': h.type, 'city': h.city, 'location': h.location,
         'price_per_night': h.price_per_night, 'image_url': h.image_url, 'is_available': h.is_available,
         'est_verifie': h.statut_verification == 'verifiee', 'statut_verification': h.statut_verification,
         'rating': h.rating, 'review_count': h.review_count, 'nb_reservations': nb_reservations.get(h.id, 0),
-        'host': {'id': str(h.host_id), 'nom': _nom(h.host), 'email': h.host.email},
+        'host': {'id': str(h.host_id), 'nom': _nom(h.host) if h.host else '', 'email': h.host.email if h.host else ''},
         'created_at': h.created_at, 'archivee_le': h.archivee_le,
     } for h in liste]
 
@@ -32,7 +34,7 @@ def _hebergement(h) -> dict:
 
 def _hebergements(archivees=False):
     qs = HebergementModel.tous.filter(archivee_le__isnull=False) if archivees else HebergementModel.objects.all()
-    return qs.select_related('host').order_by('-created_at')
+    return qs.order_by('-created_at')
 
 
 class HebergementListView(VueAdmin):
@@ -40,7 +42,7 @@ class HebergementListView(VueAdmin):
         params = request.query_params
         qs = _hebergements(archivees=_booleen(params.get('archivees')) is True)
         if q := params.get('q', '').strip():
-            qs = qs.filter(Q(name__icontains=q) | Q(city__icontains=q) | Q(location__icontains=q) | Q(host__email__icontains=q))
+            qs = qs.filter(Q(name__icontains=q) | Q(city__icontains=q) | Q(location__icontains=q) | Q(host_id__in=users.ids_par_recherche(q)))
         if ville := params.get('ville', '').strip():
             qs = qs.filter(city__iexact=ville)
         if (visible := _booleen(params.get('visible'))) is not None:
@@ -54,7 +56,7 @@ class HebergementListView(VueAdmin):
 
 class HebergementDetailView(VueAdmin):
     def patch(self, request, pk):
-        annonce = HebergementModel.objects.select_related('host').filter(pk=pk).first()
+        annonce = HebergementModel.objects.filter(pk=pk).first()
         if not annonce:
             return _introuvable('Annonce')
 
@@ -88,7 +90,7 @@ class HebergementDetailView(VueAdmin):
         motif, erreur = _motif(request.query_params.get('motif'))
         if erreur:
             return erreur
-        annonce = HebergementModel.objects.select_related('host').filter(pk=pk).first()
+        annonce = HebergementModel.objects.filter(pk=pk).first()
         if not annonce:
             return _introuvable('Annonce')
         trace = {'annonce_id': str(annonce.pk), 'annonce': annonce.name, 'hote': annonce.host.email, 'motif': motif}
@@ -102,7 +104,7 @@ class HebergementDetailView(VueAdmin):
 
 class HebergementRestaurerView(VueAdmin):
     def post(self, request, pk):
-        annonce = HebergementModel.tous.select_related('host').filter(pk=pk, archivee_le__isnull=False).first()
+        annonce = HebergementModel.tous.filter(pk=pk, archivee_le__isnull=False).first()
         if not annonce:
             return _introuvable('Annonce archivée')
         restaurer(annonce)

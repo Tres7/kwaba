@@ -4,6 +4,7 @@ from .models import ReservationModel
 from apps.avis import api as avis
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
+from apps.users import api as users
 
 
 def _liste(serializer) -> list:
@@ -86,7 +87,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         return avis.motif_refus(sejour, request.user.id, obj.pk in self._avis()) is None
 
     def get_guest_name(self, obj):
-        return f"{obj.guest.first_name} {obj.guest.last_name}".strip()
+        return obj.guest.get_full_name() if obj.guest else ''
 
 
 # Units of one type in a single booking (a group); beyond that, several bookings
@@ -166,7 +167,7 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         hebergement = hebergements.fiche(validated_data['hebergement_id'])
         type_logement = hebergements.fiche_type(validated_data['type_logement_id'])
         nights = (validated_data['check_out'] - validated_data['check_in']).days
-        montants = paiements.devis_sejour(type_logement['prix_nuit'], hebergement['host_id'], nights, voyageur=validated_data.get('guest'),
+        montants = paiements.devis_sejour(type_logement['prix_nuit'], hebergement['host_id'], nights, voyageur=users.compte(validated_data.get('guest_id')),
                                 nb_unites=validated_data['nb_unites'])
         if paiements.paiement_actif():
             # Dates held while paying; confirmed by the FedaPay webhook

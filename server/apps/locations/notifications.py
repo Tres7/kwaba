@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils import formats, timezone
 
 from apps.paiements import api as paiements
+from apps.users import api as users
 from apps.securite import coordonnees
 from apps.transferts import api as transferts
 
@@ -130,7 +131,10 @@ def caution_au_voyageur(loc: LocationModel):
 
 def _traiter(qs, fonction, drapeau):
     envoyes = 0
-    for ligne in qs[:50]:
+    lignes = list(qs[:50])
+    if qs.model is LocationModel:
+        users.attacher(lignes, 'voyageur')
+    for ligne in lignes:
         try:
             fonction(ligne)
         except Exception:
@@ -147,7 +151,7 @@ def _nom_chauffeur(chauffeur_id) -> str:
 
 
 def envoyer_notifications() -> int:
-    qs = LocationModel.objects.select_related('voyageur', 'categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
+    qs = LocationModel.objects.select_related('categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
     payees = qs.filter(statut__in=('confirmee', 'partenaire_assigne'))
     total = _traiter(payees.filter(confirmation_notifiee=False), confirmee, 'confirmation_notifiee')
     total += _traiter(payees.filter(admins_notifies=False), a_attribuer, 'admins_notifies')

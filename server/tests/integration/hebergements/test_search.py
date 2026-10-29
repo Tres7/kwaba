@@ -90,7 +90,7 @@ def test_units_left_for_a_hotel(api_client, listings, make_user):
     hotel = listings['hotel']
     hotel.types.update(quantite=5)
     check_in = timezone.localdate() + timedelta(days=10)
-    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=hotel.types.get().id, nb_unites=3, guest=make_user(),
+    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=hotel.types.get().id, nb_unites=3, guest_id=make_user().pk,
                                     check_in=check_in, check_out=check_in + timedelta(days=2), total_price=0,
                                     status='confirmed')
     (ligne,) = [h for h in api_client.get(HEBERGEMENTS, _dates(check_in)).data['results'] if h['name'] == 'Hôtel du Golfe']
@@ -120,7 +120,7 @@ def test_check_in_on_check_out_day_keeps_listing(api_client, listings, make_rese
 def test_is_favorite_for_current_user(client_for, make_user, listings):
     from apps.favoris.models import FavoriModel
     user = make_user()
-    FavoriModel.objects.create(user=user, hebergement_id=listings['villa'].id)
+    FavoriModel.objects.create(user_id=user.id, hebergement_id=listings['villa'].id)
 
     results = client_for(user).get(HEBERGEMENTS).data['results']
     assert {h['name']: h['is_favorite'] for h in results} == {

@@ -6,6 +6,7 @@ from django.utils import timezone
 from apps.paiements import api as paiements
 from apps.securite import coordonnees
 from apps.securite.images import MESSAGE as IMAGE_REFUSEE, url_image_autorisee
+from apps.users import api as users
 
 from .models import BlocageModel, HebergementModel, TypeLogementModel
 
@@ -13,7 +14,7 @@ AMENITIES = ['piscine', 'wifi', 'clim', 'parking', 'cuisine', 'jardin', 'gym', '
 
 
 class HebergementSerializer(serializers.ModelSerializer):
-    host_id = serializers.UUIDField(source='host.id', read_only=True)
+    host_id = serializers.UUIDField(read_only=True)
     host_name = serializers.SerializerMethodField()
     hote_verifie = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
@@ -44,13 +45,28 @@ class HebergementSerializer(serializers.ModelSerializer):
                     donnees[champ] = coordonnees.analyser(donnees[champ])[0]
         return donnees
 
+    def _par_hote(self, cle: str, obj, charger):
+        """Read once for the listings being serialised (a list: the whole page)."""
+        cache = self.context.setdefault(cle, {})
+        if obj.host_id not in cache:
+            parent = self.parent
+            annonces = list(parent.instance) if isinstance(parent, serializers.ListSerializer) and parent.instance is not None else []
+            ids = {h.host_id for h in annonces} | {obj.host_id}
+            cache.update(charger(ids - cache.keys()))
+        return cache.get(obj.host_id)
+
     def get_host_name(self, obj):
-        return f"{obj.host.first_name} {obj.host.last_name}".strip()
+        hote = self._par_hote('_hotes', obj, lambda ids: {i: None for i in ids} | users.comptes(ids))
+        return hote.get_full_name() if hote else ''
 
     def get_hote_verifie(self, obj):
         # "Verified host" badge: identity document checked by Kwa-Ba
-        piece = getattr(obj.host, 'piece_identite', None)
-        return bool(piece and piece.statut == 'verifiee')
+        from apps.verifications.api import hotes_verifies  # local import: verifications reads the listings
+
+        def charger(ids):
+            verifies = hotes_verifies(ids)
+            return {i: i in verifies for i in ids}
+        return self._par_hote('_hotes_verifies', obj, charger)
 
     def get_motif_refus(self, obj):
         # The agent's message for the host: never shown to travellers

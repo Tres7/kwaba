@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.securite.audit import journaliser
+from apps.users import api as users
 
 from . import services
 from .models import MissionModel
@@ -28,17 +29,18 @@ def _personne(utilisateur) -> dict | None:
     return {'id': str(utilisateur.pk), 'nom': services.nom(utilisateur)}
 
 
-def _mission_json(mission: MissionModel | None, moi) -> dict | None:
+def _mission_json(mission: MissionModel | None, moi, agents: dict | None = None) -> dict | None:
     if mission is None:
         return None
+    agent = agents.get(mission.agent_id) if agents is not None else users.compte(mission.agent_id)
     return {
-        'id': str(mission.id), 'statut': mission.statut, 'decision': mission.decision, 'agent': _personne(mission.agent),
+        'id': str(mission.id), 'statut': mission.statut, 'decision': mission.decision, 'agent': _personne(agent),
         'moi': mission.agent_id == moi.pk, 'prise_le': mission.prise_le, 'terminee_le': mission.terminee_le,
     }
 
 
 def _en_cours_par_type(codes) -> dict[str, dict[str, MissionModel]]:
-    missions = MissionModel.objects.filter(type__in=codes, statut='en_cours').select_related('agent')
+    missions = MissionModel.objects.filter(type__in=codes, statut='en_cours')
     par_type: dict[str, dict[str, MissionModel]] = {code: {} for code in codes}
     for m in missions:
         par_type[m.type][m.cible] = m
@@ -66,7 +68,7 @@ class TableauView(APIView):
             types.append({'type': code, 'libelle': tm.libelle, 'libres': len(cibles) - len(prises),
                           'miennes': miennes, 'equipe': len(prises) - miennes})
         debut_mois = timezone.localdate().replace(day=1)
-        faites = MissionModel.objects.filter(agent=request.user, statut='terminee', terminee_le__date__gte=debut_mois)
+        faites = MissionModel.objects.filter(agent_id=request.user.pk, statut='terminee', terminee_le__date__gte=debut_mois)
         return Response({
             'types': types,
             'faites_ce_mois': faites.count(),
@@ -89,6 +91,7 @@ class MissionsView(APIView):
 
         codes = _codes(request)
         en_cours = _en_cours_par_type(codes)
+        agents = users.comptes(m.agent_id for par_cible in en_cours.values() for m in par_cible.values())
         resultats = []
         for code in codes:
             tm = TYPES[code]
@@ -105,23 +108,25 @@ class MissionsView(APIView):
                 if q and q not in f"{resume['titre']} {resume.get('ville', '')} {resume.get('adresse', '')}".lower():
                     continue
                 resultats.append({'type': code, 'type_libelle': tm.libelle, 'cible': cible, **resume,
-                                  'mission': _mission_json(mission, request.user)})
+                                  'mission': _mission_json(mission, request.user, agents)})
         resultats.sort(key=lambda r: r['date'])
         return Response({'results': resultats, 'count': len(resultats)})
 
     def _historique(self, request, q: str) -> dict:
-        qs = MissionModel.objects.filter(statut='terminee').select_related('agent').order_by('-terminee_le')
+        qs = MissionModel.objects.filter(statut='terminee').order_by('-terminee_le')
         if not services.est_admin(request.user) or request.query_params.get('agent') == 'moi':
-            qs = qs.filter(agent=request.user)
+            qs = qs.filter(agent_id=request.user.pk)
         codes = _codes(request)
         qs = qs.filter(type__in=codes)
         if q:
             qs = qs.filter(titre__icontains=q) | qs.filter(ville__icontains=q)
+        missions = list(qs[:LIMITE])
+        agents = users.comptes(m.agent_id for m in missions)
         resultats = [{
             'type': m.type, 'type_libelle': TYPES[m.type].libelle if m.type in TYPES else m.get_type_display(),
             'cible': m.cible, 'titre': m.titre, 'sous_titre': m.sous_titre, 'ville': m.ville,
-            'date': m.terminee_le, 'mission': _mission_json(m, request.user),
-        } for m in qs[:LIMITE]]
+            'date': m.terminee_le, 'mission': _mission_json(m, request.user, agents),
+        } for m in missions]
         return {'results': resultats, 'count': len(resultats)}
 
 

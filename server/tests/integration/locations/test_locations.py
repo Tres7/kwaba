@@ -293,7 +293,7 @@ def test_founding_owner_and_loyal_customer(client_for, make_user, faux, catalogu
     voyageur = make_user()
     for _ in range(3):  # three rentals finished without incident
         LocationModel.objects.create(
-            voyageur=voyageur, categorie=catalogue['berline'], formule='sans_chauffeur', lieu_prise=catalogue['aeroport'],
+            voyageur_id=voyageur.pk, categorie=catalogue['berline'], formule='sans_chauffeur', lieu_prise=catalogue['aeroport'],
             lieu_retour=catalogue['aeroport'], debut=timezone.now() - timedelta(days=10), fin=timezone.now() - timedelta(days=8),
             passagers=1, telephone='+22890000000', precisions='-', jours=2, prix_jour=30000, frais_lieux=0, prix=60000,
             commission=9000, statut='terminee',

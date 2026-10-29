@@ -15,7 +15,7 @@ RESERVATIONS = '/api/v1/reservations/'
 
 def test_a_booking_created_without_a_status_is_not_confirmed(make_user, make_hebergement):
     debut = timezone.localdate() + timedelta(days=5)
-    reservation = ReservationModel.objects.create(hebergement_id=make_hebergement().id, guest=make_user(), check_in=debut,
+    reservation = ReservationModel.objects.create(hebergement_id=make_hebergement().id, guest_id=make_user().pk, check_in=debut,
                                                   check_out=debut + timedelta(days=2), total_price=0)
     assert reservation.status == 'pending'
 
@@ -25,7 +25,7 @@ class TestPendingWithoutDeadline:
 
     def _pending(self, make_user, hebergement, cree_il_y_a: timedelta):
         debut = timezone.localdate() + timedelta(days=10)
-        reservation = ReservationModel.objects.create(hebergement_id=hebergement.id, guest=make_user(), check_in=debut,
+        reservation = ReservationModel.objects.create(hebergement_id=hebergement.id, guest_id=make_user().pk, check_in=debut,
                                                       check_out=debut + timedelta(days=3), total_price=0,
                                                       status='pending', expire_le=None)
         ReservationModel.objects.filter(pk=reservation.pk).update(created_at=timezone.now() - cree_il_y_a)

@@ -1,5 +1,4 @@
 """Back-office: bookings (list, cancellation by Kwa-Ba)."""
-from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 from rest_framework import status
@@ -8,25 +7,24 @@ from rest_framework.response import Response
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 from apps.securite.audit import journaliser
+from apps.users import api as users
 from apps.securite.backoffice import VueAdmin, introuvable as _introuvable, motif as _motif, nom as _nom, paginer as _paginer
 
 from . import paiement
 from .models import ReservationModel
 
-User = get_user_model()
-
 
 def _reservations_json(liste) -> list[dict]:
     annonces = hebergements.resumes({r.hebergement_id for r in liste})
-    hotes = {u.pk: u for u in User.objects.filter(pk__in={a['host_id'] for a in annonces.values()})}
+    personnes = users.comptes({a['host_id'] for a in annonces.values()} | {r.guest_id for r in liste})
     resultats = []
     for r in liste:
         h = annonces.get(r.hebergement_id, {})
-        hote = hotes.get(h.get('host_id'))
+        hote, voyageur = personnes.get(h.get('host_id')), personnes.get(r.guest_id)
         resultats.append({
             'id': str(r.id), 'reference': r.reference,
             'hebergement': {'id': str(r.hebergement_id), 'name': h.get('name', ''), 'city': h.get('city', '')},
-            'voyageur': {'id': str(r.guest_id), 'nom': _nom(r.guest), 'email': r.guest.email},
+            'voyageur': {'id': str(r.guest_id), 'nom': _nom(voyageur) if voyageur else '', 'email': voyageur.email if voyageur else ''},
             'hote': {'id': str(h['host_id']) if h else '', 'nom': _nom(hote) if hote else ''},
             'check_in': r.check_in, 'check_out': r.check_out, 'nights': r.nights, 'guests_count': r.guests_count,
             'total_price': int(r.total_price), 'status': r.status, 'payment_method': r.payment_method,
@@ -40,7 +38,7 @@ def _reservation(r) -> dict:
 
 
 def _reservations():
-    return ReservationModel.objects.select_related('guest').order_by('-created_at')
+    return ReservationModel.objects.order_by('-created_at')
 
 
 class ReservationListView(VueAdmin):
@@ -48,7 +46,7 @@ class ReservationListView(VueAdmin):
         qs = _reservations()
         params = request.query_params
         if q := params.get('q', '').strip():
-            filtre = Q(hebergement_id__in=hebergements.ids_par_nom(q)) | Q(guest__email__icontains=q)
+            filtre = Q(hebergement_id__in=hebergements.ids_par_nom(q)) | Q(guest_id__in=users.ids_par_recherche(q))
             # Reference RES-AF2026-3A43: the last 4 characters are the start of the id
             if q.upper().startswith('RES-'):
                 fin = q.rsplit('-', 1)[-1]

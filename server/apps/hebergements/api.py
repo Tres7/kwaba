@@ -23,7 +23,7 @@ def existe(hebergement_id: uuid.UUID) -> bool:
 
 def cartes(hebergement_ids: Iterable[uuid.UUID], request=None, publiees_seulement: bool = True) -> dict[uuid.UUID, dict]:
     qs = HebergementModel.objects.publiees() if publiees_seulement else HebergementModel.tous.all()
-    annonces = qs.filter(pk__in=list(hebergement_ids)).select_related('host', 'host__piece_identite')
+    annonces = qs.filter(pk__in=list(hebergement_ids))
     donnees = HebergementSerializer(annonces, many=True, context={'request': request}).data
     return {uuid.UUID(carte['id']): carte for carte in donnees}
 
@@ -122,6 +122,10 @@ def enregistrer_reservations(fournisseur: FournisseurReservations) -> None:
 def ids_annonces_de(hote_id) -> set[uuid.UUID]:
     """The host's listings, archived ones included (their bookings stay in the history)."""
     return set(HebergementModel.tous.filter(host_id=hote_id).values_list('pk', flat=True))
+
+
+def ids_hotes_avec_annonce() -> set[uuid.UUID]:
+    return set(HebergementModel.tous.values_list('host_id', flat=True).distinct())
 
 
 def hotes_des_annonces(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, uuid.UUID]:

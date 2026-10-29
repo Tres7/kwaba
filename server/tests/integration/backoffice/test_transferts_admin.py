@@ -26,7 +26,7 @@ def _chauffeur(categorie='berline', **extra):
 @pytest.fixture
 def transfert(make_user):
     return TransfertModel.objects.create(
-        voyageur=make_user(), aeroport_id='LFW', arrivee=timezone.now() + timedelta(days=4), numero_vol='AF520',
+        voyageur_id=make_user().pk, aeroport_id='LFW', arrivee=timezone.now() + timedelta(days=4), numero_vol='AF520',
         passagers=2, bagages=2, categorie='berline', destination='Villa Océane, Baguida', telephone='+33612345678',
         prix=15000, commission=3000, statut='confirme',
     )

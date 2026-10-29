@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config import prelancement
-from apps.notifications.infrastructure.email.envoi import send_mail
+from apps.notifications.api import send_mail
 from apps.securite.audit import journaliser
 from apps.securite.limites import limite_ip
 from apps.securite.permissions import EstAdministrateur

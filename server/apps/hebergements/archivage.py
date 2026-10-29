@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 
-from apps.notifications.infrastructure.messaging.EmailRequestBus import EmailRequestBus
+from apps.notifications.api import demander_email
 
 from .models import HebergementModel
 from .occupations import reservations
@@ -32,7 +32,7 @@ def restaurer(hebergement: HebergementModel) -> None:
 
 
 def _prevenir_voyageur(hebergement: HebergementModel, reservation: dict) -> None:
-    EmailRequestBus().request('hebergements.booking_cancelled_listing_removed', {
+    demander_email('hebergements.booking_cancelled_listing_removed', {
         'reservation_id': str(reservation['id']),
         'email': reservation['email'],
         'first_name': reservation['prenom'],

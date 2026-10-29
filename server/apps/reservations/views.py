@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from config.prelancement import verifier_ouverture
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
+from apps.users import api as users
 
 from . import paiement
 from .models import ReservationModel
@@ -22,9 +23,9 @@ class ReservationListCreateView(APIView):
         if request.query_params.get('as') == 'host':
             qs = ReservationModel.objects.filter(hebergement_id__in=hebergements.ids_annonces_de(request.user.id))
         else:
-            qs = ReservationModel.objects.filter(guest=request.user)
-        qs = qs.select_related('guest')
-        serializer = ReservationSerializer(qs, many=True, context={'request': request})
+            qs = ReservationModel.objects.filter(guest_id=request.user.pk)
+        qs = qs
+        serializer = ReservationSerializer(users.attacher(qs, 'guest'), many=True, context={'request': request})
         return Response({'results': serializer.data, 'count': len(serializer.data)})
 
     def post(self, request):
@@ -35,7 +36,7 @@ class ReservationListCreateView(APIView):
         with transaction.atomic():
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            reservation = serializer.save(guest=request.user)
+            reservation = serializer.save(guest_id=request.user.pk)
         return Response(ReservationSerializer(reservation, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
 
@@ -44,7 +45,7 @@ class ReservationDetailView(APIView):
 
     def _get_object(self, pk, user):
         try:
-            return ReservationModel.objects.select_related('guest').get(pk=pk, guest=user)
+            return ReservationModel.objects.get(pk=pk, guest_id=user.pk)
         except ReservationModel.DoesNotExist:
             return None
 

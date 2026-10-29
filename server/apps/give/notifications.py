@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import formats, timezone
 
 from apps.paiements import api as paiements
+from apps.users import api as users
 
 from . import montants
 from .models import DonModel, ReversementModel
@@ -53,7 +54,10 @@ def don_reverse(don: DonModel):
 
 def _traiter(qs, fonction, drapeau):
     envoyes = 0
-    for ligne in qs[:50]:
+    lignes = list(qs[:50])
+    if qs.model is DonModel:
+        users.attacher(lignes, 'donateur')
+    for ligne in lignes:
         try:
             fonction(ligne)
         except Exception:
@@ -65,7 +69,7 @@ def _traiter(qs, fonction, drapeau):
 
 
 def envoyer_notifications() -> int:
-    relations = ('donateur', 'organisation', 'projet')
+    relations = ('organisation', 'projet')
     total = _traiter(DonModel.objects.filter(statut='paye', recu_envoye=False).select_related(*relations), recu, 'recu_envoye')
     total += _traiter(
         ReversementModel.objects.filter(statut='a_effectuer', admins_notifies=False, nb_dons__gt=0).select_related('organisation'),
@@ -73,7 +77,7 @@ def envoyer_notifications() -> int:
     )
     total += _traiter(
         DonModel.objects.filter(reversement__statut='effectue', reversement_notifie=False)
-        .select_related('donateur', 'reversement__organisation'),
+        .select_related('reversement__organisation'),
         don_reverse, 'reversement_notifie',
     )
     return total

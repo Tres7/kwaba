@@ -1,7 +1,6 @@
 import hashlib
 import uuid
 
-from django.conf import settings
 from django.db import models
 
 from apps.documents.api import stockage_prive
@@ -32,7 +31,7 @@ class ModeleContratModel(models.Model):
     corps = models.TextField()
     version = models.PositiveIntegerField(default=1)
     modifie_le = models.DateTimeField(auto_now=True)
-    modifie_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    modifie_par_id = models.UUIDField(null=True, blank=True, db_index=True)
 
     class Meta:
         verbose_name = 'Modèle de contrat'
@@ -60,7 +59,7 @@ class ContratModel(models.Model):
     statut = models.CharField(max_length=20, choices=STATUTS, default='a_signer')
 
     # Party: only one of these links depending on the type (host and hotel: the host account); its contact details are copied when issued
-    hote = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='contrats')
+    hote_id = models.UUIDField(null=True, blank=True, db_index=True)
     chauffeur_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     loueur_id = models.BigIntegerField(null=True, blank=True, db_index=True)
     organisation_id = models.UUIDField(null=True, blank=True, db_index=True)
@@ -70,7 +69,7 @@ class ContratModel(models.Model):
 
     # Issuing (Kwa-Ba's signature: its legal representative, when issued)
     cree_le = models.DateTimeField(auto_now_add=True)
-    cree_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    cree_par_id = models.UUIDField(null=True, blank=True, db_index=True)
     kwaba_signataire = models.CharField(max_length=200)
     jeton_hash = models.CharField(max_length=64, unique=True)
     envoye_le = models.DateTimeField(null=True, blank=True)
@@ -95,7 +94,7 @@ class ContratModel(models.Model):
         verbose_name = 'Contrat'
         constraints = [
             # A single ongoing contract (to sign or signed) per party
-            models.UniqueConstraint(fields=['hote'], condition=~models.Q(statut='annule') & models.Q(hote__isnull=False), name='un_contrat_par_hote'),
+            models.UniqueConstraint(fields=['hote_id'], condition=~models.Q(statut='annule') & models.Q(hote_id__isnull=False), name='un_contrat_par_hote'),
             models.UniqueConstraint(fields=['chauffeur_id'], condition=~models.Q(statut='annule') & models.Q(chauffeur_id__isnull=False), name='un_contrat_par_chauffeur'),
             models.UniqueConstraint(fields=['loueur_id'], condition=~models.Q(statut='annule') & models.Q(loueur_id__isnull=False), name='un_contrat_par_loueur'),
             models.UniqueConstraint(fields=['organisation_id'], condition=~models.Q(statut='annule') & models.Q(organisation_id__isnull=False), name='un_contrat_par_ong'),
@@ -110,7 +109,7 @@ class PreinscriptionModel(models.Model):
 
     One row per host and text version, never modified: proof of what was accepted, when and from where.
     """
-    hote = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='preinscriptions')
+    hote_id = models.UUIDField(db_index=True)
     version = models.PositiveIntegerField()
     langue = models.CharField(max_length=2)
     empreinte_texte = models.CharField(max_length=64, help_text='SHA-256 du texte accepté, dans la langue affichée')
@@ -123,4 +122,4 @@ class PreinscriptionModel(models.Model):
         ordering = ['-accepte_le']
         verbose_name = 'Pré-inscription hôte'
         verbose_name_plural = 'Pré-inscriptions hôtes'
-        constraints = [models.UniqueConstraint(fields=['hote', 'version'], name='une_preinscription_par_version')]
+        constraints = [models.UniqueConstraint(fields=['hote_id', 'version'], name='une_preinscription_par_version')]
