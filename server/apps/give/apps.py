@@ -6,3 +6,10 @@ class GiveConfig(AppConfig):
     name = 'apps.give'
     label = 'give'
     verbose_name = 'Kwa-Ba Give (dons)'
+
+    def ready(self):
+        from apps.documents.api import enregistrer
+
+        from .documents import PRODUIT
+
+        enregistrer(PRODUIT)

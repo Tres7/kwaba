@@ -2,6 +2,9 @@ import uuid
 from collections.abc import Iterable
 
 from .models import ContratModel
+from .services import ContratErreur, inviter_hotes_a_signer, signature_png
+
+__all__ = ['ContratErreur', 'hote_a_signe', 'hotes_ayant_signe', 'inviter_hotes_a_signer', 'signature_png']
 
 
 def hote_a_signe(hote_id: uuid.UUID) -> bool:
