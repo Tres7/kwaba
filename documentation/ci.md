@@ -146,7 +146,7 @@ Avant chaque push : gitleaks sur les commits poussés, `ruff check`, `lint-impor
 
 - Serveur : `server/ruff.toml`. Seules les règles qui révèlent des bugs sont actives (`E4`, `E7`, `E9`, `F`). Le tri des imports et `ruff format` viendront dans une PR dédiée.
 - Dépendances entre modules : `server/.importlinter`, vérifié par `lint-imports` (constat A2 de `AUDIT-ARCHITECTURE.md`). Trois contrats :
-  - les modules métier ne s'importent pas entre eux ; les imports existants à l'introduction de la règle sont listés dans `ignore_imports` et tolérés ;
+  - les modules métier ne s'importent pas entre eux, sauf leur interface publique `apps.<module>.api` (ADR-019) ; les imports existants à l'introduction de la règle sont listés dans `ignore_imports` et tolérés, et chaque module migré retire les siens (voir `documentation/frontieres-modules.md`) ;
   - `securite` et `notifications` (noyau partagé, que tous les modules peuvent importer) n'importent aucun module métier ;
   - aucun module métier n'importe `apps.notifications.infrastructure.email` : un email passe par `EmailRequestBus`.
 
