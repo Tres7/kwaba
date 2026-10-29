@@ -28,6 +28,13 @@ class TestCreate:
         # The rating and the number of reviews never come from the client
         assert (listing.rating, listing.review_count) == (0.0, 0)
 
+    def test_amenities_and_house_rules(self, client_for, make_user):
+        equipements = ['ventilateur', 'groupe_electrogene', 'moustiquaire', 'non_fumeur', 'animaux_acceptes']
+        response = client_for(make_user(role='hote')).post(HEBERGEMENTS, _listing(amenities=equipements), format='json')
+
+        assert response.status_code == 201
+        assert HebergementModel.objects.get(pk=response.data['id']).amenities == equipements
+
     def test_guest_forbidden(self, client_for, make_user):
         assert client_for(make_user()).post(HEBERGEMENTS, _listing(), format='json').status_code == 403
 
@@ -37,6 +44,8 @@ class TestCreate:
     @pytest.mark.parametrize('overrides, field', [
         ({'price_per_night': 0}, 'price_per_night'),
         ({'amenities': ['teleporteur']}, 'amenities'),
+        # A house rule cannot be both allowed and forbidden
+        ({'amenities': ['fumeur_autorise', 'non_fumeur']}, 'amenities'),
         ({'images': 'https://cdn.example/a.jpg'}, 'images'),
     ])
     def test_invalid_fields(self, client_for, make_user, overrides, field):

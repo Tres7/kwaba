@@ -9,7 +9,29 @@ from apps.securite.images import MESSAGE as IMAGE_REFUSEE, url_image_autorisee
 
 from .models import BlocageModel, HebergementModel, TypeLogementModel
 
-AMENITIES = ['piscine', 'wifi', 'clim', 'parking', 'cuisine', 'jardin', 'gym', 'spa']
+# Amenities a host can tick, by category (labels and icons: client/src/components/hebergement/AmenityBadge.tsx).
+# Stored in the `amenities` JSON list: adding one needs no migration.
+AMENITIES = [
+    # Essentials
+    'wifi', 'clim', 'ventilateur', 'eau_chaude', 'moustiquaire', 'tv', 'fer_repasser', 'lave_linge', 'espace_travail',
+    # Power and water
+    'groupe_electrogene', 'solaire', 'reserve_eau',
+    # Kitchen
+    'cuisine', 'refrigerateur', 'barbecue',
+    # Outdoors and leisure
+    'piscine', 'jardin', 'terrasse', 'acces_plage', 'gym', 'spa',
+    # Safety
+    'gardien', 'videosurveillance', 'parking', 'coffre_fort', 'extincteur',
+    # Services
+    'menage', 'linge', 'cuisinier', 'lit_bebe', 'plain_pied',
+]
+# House rules, stored in the same list: one value of each pair at most, none when the host did not say
+REGLES = [
+    ('fumeur_autorise', 'non_fumeur'),
+    ('animaux_acceptes', 'animaux_interdits'),
+    ('fetes_autorisees', 'fetes_interdites'),
+]
+AMENITIES += [valeur for paire in REGLES for valeur in paire]
 
 
 class HebergementSerializer(serializers.ModelSerializer):
@@ -161,6 +183,8 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         unknown = [a for a in value if a not in AMENITIES]
         if unknown:
             raise serializers.ValidationError(f"Équipements inconnus : {', '.join(unknown)}")
+        if any(oui in value and non in value for oui, non in REGLES):
+            raise serializers.ValidationError("Une règle de la maison ne peut pas être à la fois autorisée et interdite.")
         return value
 
     def validate_image_url(self, value):
