@@ -8,10 +8,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config import prelancement
-from apps.documents.models import ParametresSocieteModel
+from apps.documents.api import societe_immatriculee
+from apps.give import api as give
+from apps.locations import api as locations
 from apps.securite.audit import journaliser
+from apps.securite.backoffice import paginer
 from apps.securite.limites import ip_client, limite_ip
 from apps.securite.permissions import EstAdministrateur
+from apps.transferts import api as transferts
 
 from . import preinscription, services
 from .models import TYPES, ContratModel, ModeleContratModel
@@ -104,7 +108,7 @@ def _apercu_hote(user) -> dict | None:
     type_contrat = services.type_contrat_hote(user)
     modele = ModeleContratModel.objects.filter(type=type_contrat).first()
     # The host agreement is offered once the company is registered (RCCM and NIF), as the pre-registration says
-    if not modele or not ParametresSocieteModel.courants().immatriculee:
+    if not modele or not societe_immatriculee():
         return None
     infos = services.partie(type_contrat, user)
     return {
@@ -182,17 +186,19 @@ def _admin(c: ContratModel) -> dict:
     }
 
 
+PARTIES = {'chauffeur': (transferts.chauffeur, transferts.chauffeurs), 'loueur': (locations.loueur, locations.loueurs),
+           'ong': (give.organisation, give.organisations)}
+
+
 def _cible(type_contrat: str, pk):
+    """The host account, or the party given by its module."""
     from django.contrib.auth import get_user_model
     from django.core.exceptions import ValidationError
 
-    from apps.give.models import OrganisationModel
-    from apps.locations.models import PartenaireLocationModel
-    from apps.transferts.models import ChauffeurModel
-
-    modeles = {'hote': get_user_model(), 'hotel': get_user_model(), 'chauffeur': ChauffeurModel, 'loueur': PartenaireLocationModel, 'ong': OrganisationModel}
+    if type_contrat in PARTIES:
+        return PARTIES[type_contrat][0](pk)
     try:
-        return modeles[type_contrat].objects.filter(pk=pk).first()
+        return get_user_model().objects.filter(pk=pk).first()
     except (ValueError, TypeError, ValidationError):
         return None
 
@@ -202,8 +208,6 @@ class ContratsAdminView(APIView):
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
-        from apps.backoffice.views import _paginer
-
         qs = ContratModel.objects.all()
         if q := request.query_params.get('q', '').strip():
             qs = qs.filter(Q(reference__icontains=q) | Q(partie_nom__icontains=q) | Q(partie_email__icontains=q))
@@ -211,7 +215,7 @@ class ContratsAdminView(APIView):
             qs = qs.filter(type=type_contrat)
         if (statut := request.query_params.get('statut')) in dict(ContratModel.STATUTS):
             qs = qs.filter(statut=statut)
-        return _paginer(request, qs.order_by('-cree_le'), _admin)
+        return paginer(request, qs.order_by('-cree_le'), _admin)
 
     def post(self, request):
         type_contrat = request.data.get('type')
@@ -235,10 +239,6 @@ class PartiesAdminView(APIView):
     def get(self, request):
         from django.contrib.auth import get_user_model
 
-        from apps.give.models import OrganisationModel
-        from apps.locations.models import PartenaireLocationModel
-        from apps.transferts.models import ChauffeurModel
-
         type_contrat = request.query_params.get('type')
         q = request.query_params.get('q', '').strip()
         if type_contrat in services.TYPES_HOTE:
@@ -246,24 +246,11 @@ class PartiesAdminView(APIView):
             if q:
                 qs = qs.filter(Q(email__icontains=q) | Q(first_name__icontains=q) | Q(last_name__icontains=q))
             lignes = [(u.pk, services._nom(u), u.email) for u in qs.order_by('first_name')[:30]]
-        elif type_contrat == 'chauffeur':
-            qs = ChauffeurModel.objects.filter(actif=True)
-            if q:
-                qs = qs.filter(Q(nom__icontains=q) | Q(prenom__icontains=q))
-            lignes = [(c.pk, f"{c.prenom} {c.nom}", c.email) for c in qs.order_by('prenom')[:30]]
-        elif type_contrat == 'loueur':
-            qs = PartenaireLocationModel.objects.filter(actif=True)
-            if q:
-                qs = qs.filter(nom__icontains=q)
-            lignes = [(p.pk, p.nom, p.email) for p in qs.order_by('nom')[:30]]
-        elif type_contrat == 'ong':
-            qs = OrganisationModel.objects.all()
-            if q:
-                qs = qs.filter(nom__icontains=q)
-            lignes = [(o.pk, o.nom, o.contact_email) for o in qs.order_by('nom')[:30]]
+        elif type_contrat in PARTIES:
+            lignes = [(p['id'], p['nom'], p['email']) for p in PARTIES[type_contrat][1](q)]
         else:
             return Response({'type': ['Type de contrat inconnu.']}, status=status.HTTP_400_BAD_REQUEST)
-        champ = {'hote': 'hote_id', 'hotel': 'hote_id', 'chauffeur': 'chauffeur_id', 'loueur': 'loueur_id', 'ong': 'organisation_id'}[type_contrat]
+        champ = services.CHAMPS_PARTIE[type_contrat]
         statuts = dict(ContratModel.objects.filter(**{f"{champ}__in": [pk for pk, _, _ in lignes]}).exclude(statut='annule')
                        .values_list(champ, 'statut'))
         return Response([{'id': str(pk), 'nom': nom, 'email': email or '', 'contrat': statuts.get(pk)} for pk, nom, email in lignes])

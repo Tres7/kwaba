@@ -24,7 +24,7 @@ from . import types_logement
 from .serializers import (
     BlocageSerializer, HebergementSerializer, HebergementCreateSerializer, RechercheSerializer, TypeLogementSerializer,
 )
-from apps.contrats import preinscription
+from apps.contrats import api as contrats
 from apps.favoris import api as favoris
 from apps.verifications import api as verifications
 
@@ -151,7 +151,7 @@ class HebergementListView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        if preinscription.requise(request.user):
+        if contrats.preinscription_requise(request.user):
             return Response(
                 {'detail': "Acceptez d'abord la pré-inscription pour créer votre annonce.", 'code': 'preinscription_requise'},
                 status=status.HTTP_403_FORBIDDEN,

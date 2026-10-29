@@ -26,8 +26,11 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from PIL import Image, UnidentifiedImageError
 
-from apps.documents.models import ParametresSocieteModel
-from apps.documents.pdf import date
+from apps.documents.api import date, societe as _societe
+from apps.give import api as give
+from apps.locations import api as locations
+from apps.paiements import api as paiements
+from apps.transferts import api as transferts
 from apps.notifications.infrastructure.email.envoi import send_mail
 
 from .models import ContratModel, ModeleContratModel, hacher_jeton
@@ -60,6 +63,10 @@ _VARIABLE = re.compile(r'\{\{\s*([\w.]+)\s*\}\}')
 FACULTATIVES = {'partie.details', 'partie.coordonnees'}
 
 
+CHAMPS_PARTIE = {'hote': 'hote_id', 'hotel': 'hote_id', 'chauffeur': 'chauffeur_id', 'loueur': 'loueur_id',
+                 'ong': 'organisation_id'}
+
+
 class ContratErreur(Exception):
     """Message affichable."""
 
@@ -72,19 +79,15 @@ def _pourcent(valeur) -> str:
 
 
 def _tarifs() -> dict:
-    from apps.give.montants import JOUR_REVERSEMENT
-    from apps.locations.models import ParametresLocationModel
-    from apps.paiements.tarifs import COMMISSION_HOTE, FRAIS_VOYAGEUR
-    from apps.transferts.tarifs import COMMISSION_CHAUFFEUR
-
-    location = ParametresLocationModel.objects.first()
+    location = locations.parametres_contrat()
     return {
-        'tarifs.frais_voyageur': _pourcent(FRAIS_VOYAGEUR * 100), 'tarifs.commission_hote': _pourcent(COMMISSION_HOTE * 100),
-        'tarifs.commission_chauffeur': _pourcent(COMMISSION_CHAUFFEUR * 100),
-        'tarifs.commission_loueur': _pourcent(location.commission_pourcent) if location else '',
-        'tarifs.delai_location': str(location.delai_min_jours) if location else '2',
-        'tarifs.restitution_caution': str(location.restitution_caution_heures) if location else '24',
-        'give.jour_reversement': str(JOUR_REVERSEMENT),
+        'tarifs.frais_voyageur': _pourcent(paiements.frais_voyageur() * 100),
+        'tarifs.commission_hote': _pourcent(paiements.commission_hote() * 100),
+        'tarifs.commission_chauffeur': _pourcent(transferts.commission_chauffeur() * 100),
+        'tarifs.commission_loueur': _pourcent(location['commission_pourcent']) if location else '',
+        'tarifs.delai_location': str(location['delai_min_jours']) if location else '2',
+        'tarifs.restitution_caution': str(location['restitution_caution_heures']) if location else '24',
+        'give.jour_reversement': str(give.jour_reversement()),
     }
 
 
@@ -93,29 +96,21 @@ def _nom(u) -> str:
 
 
 def partie(type_contrat: str, objet) -> dict:
-    """Contact details of the party, copied into the contract, and the link to it."""
+    """Contact details of the party, copied into the contract, and the link to it.
+
+    `objet`: the host account, or the party given by its module (transferts, locations or give public API)."""
     if type_contrat in TYPES_HOTE:
         return {'nom': _nom(objet), 'email': objet.email, 'telephone': objet.phone or '', 'details': '',
                 'fondateur': fondateur(objet), 'lien': {'hote': objet}}
-    if type_contrat == 'chauffeur':
-        return {'nom': f"{objet.prenom} {objet.nom}", 'email': objet.email, 'telephone': objet.telephone,
-                'details': f"chauffeur, véhicule {objet.vehicule} immatriculé {objet.immatriculation},", 'lien': {'chauffeur': objet}}
-    if type_contrat == 'loueur':
-        return {'nom': objet.nom, 'email': objet.email, 'telephone': objet.telephone,
-                'details': f"représenté par {objet.contact}," if objet.contact else '', 'lien': {'loueur': objet}}
-    precisions = [f"association enregistrée sous le n° {objet.numero_enregistrement}" if objet.numero_enregistrement else '',
-                  f"représentée par {objet.contact_nom}" if objet.contact_nom else '']
-    return {'nom': objet.nom, 'email': objet.contact_email, 'telephone': objet.contact_telephone,
-            'details': ''.join(f"{x}, " for x in precisions if x).strip(), 'lien': {'organisation': objet}}
+    return {'nom': objet['nom'], 'email': objet['email'], 'telephone': objet['telephone'], 'details': objet['details'],
+            'lien': {CHAMPS_PARTIE[type_contrat]: objet['id']}}
 
 
 def fondateur(objet) -> str:
     """The host's Founders Programme, as it appears in the contract (dates set by the team)."""
-    from apps.paiements.tarifs import conditions
-
-    c = conditions(objet)
-    if c and c.categorie == 'particulier' and c.fondateur_debut and c.fondateur_fin:
-        return f"applicable du {date(c.fondateur_debut)} au {date(c.fondateur_fin)}"
+    c = paiements.conditions_hote(objet.pk)
+    if c and c['categorie'] == 'particulier' and c['fondateur_debut'] and c['fondateur_fin']:
+        return f"applicable du {date(c['fondateur_debut'])} au {date(c['fondateur_fin'])}"
     return 'non applicable'
 
 
@@ -126,7 +121,7 @@ def _coordonnees(telephone: str, email: str) -> str:
 
 
 def contexte(type_contrat: str, infos: dict) -> dict:
-    s = ParametresSocieteModel.courants()
+    s = _societe()
     representant = ', '.join(x for x in (s.representant_nom, s.representant_qualite) if x) or 'son représentant légal'
     return {
         'societe.raison_sociale': s.raison_sociale or s.nom_commercial, 'societe.forme_juridique': s.forme_juridique,
@@ -224,7 +219,7 @@ def _envoyer(gabarit: str, sujet: str, destinataires: list[str], contexte_email:
 
 
 def _destinataires_kwaba() -> list[str]:
-    societe = ParametresSocieteModel.courants()
+    societe = _societe()
     if societe.email:
         return [societe.email]
     return list(get_user_model().objects.filter(role='admin', is_active=True).values_list('email', flat=True)[:5])
@@ -252,7 +247,7 @@ def _reference() -> str:
 @transaction.atomic
 def emettre(type_contrat: str, objet, par=None, envoyer=True) -> ContratModel:
     """Contract prefilled for this party; sends the signature link by email if `envoyer`."""
-    societe = ParametresSocieteModel.courants()
+    societe = _societe()
     if not societe.complets:
         raise ContratErreur("Renseignez la raison sociale et l'adresse de la société (Back-office → Documents) avant d'émettre un contrat.")
     modele = ModeleContratModel.objects.filter(type=type_contrat).first()
@@ -312,10 +307,8 @@ def par_jeton(jeton: str) -> ContratModel | None:
 
 def type_contrat_hote(hote) -> str:
     """Contract the host must sign: individual host (B1) or hotel and serviced residence (B2)."""
-    from apps.paiements.tarifs import conditions
-
-    c = conditions(hote)
-    return 'hotel' if c and c.categorie == 'hotel' else 'hote'
+    c = paiements.conditions_hote(hote.pk)
+    return 'hotel' if c and c['categorie'] == 'hotel' else 'hote'
 
 
 def contrat_hote(hote) -> ContratModel:

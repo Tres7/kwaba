@@ -32,7 +32,7 @@ Une PR par module. L'API vue par le client ne change pas.
 | 7 | avis | Migré : l'avis garde les identifiants de la réservation et de l'annonce ; `reservations.api` (`sejours_termines`), `hebergements.api` (`existe`, `ids_par_nom`, `mettre_a_jour_note`) ; `avis.api` (`avis_des_reservations`, `motif_refus`), utilisé par `reservations` à la place de la relation inverse |
 | 8 | verifications | Migré : le statut de vérification de l'annonce est écrit par `hebergements.api` (`enregistrer_verification`) ; la file des visites part des hôtes éligibles (identité vérifiée, `contrats.api.hotes_ayant_signe`) ; `documents.api.societe_immatriculee` ; `verifications.api` pour les autres modules ; la visite garde l'identifiant de l'annonce ; les missions de `terrain` travaillent sur des listes |
 | 9 | documents | Migré : `documents` rend, numérote et sert les documents ; chaque produit (`reservations`, `transferts`, `locations`, `give`) y déclare au démarrage son bon, son reçu et ses lignes de facture (`documents.api.enregistrer`) ; le reçu de paiement passe dans `paiements` (`paiements.api.recu_pdf`) ; pagination du back-office partagée dans `securite.backoffice` |
-| 9 bis | contrats | À faire |
+| 9 bis | contrats | Migré : parties au contrat lues via `transferts.api`, `locations.api` et `give.api` ; taux via `paiements.api` ; société via `documents.api.societe` ; le contrat garde l'identifiant du chauffeur, du loueur ou de l'association ; `contrats.api` pour les autres modules |
 | 10 | give | À faire |
 | 11 | transferts | À faire |
 | 12 | locations | À faire |
