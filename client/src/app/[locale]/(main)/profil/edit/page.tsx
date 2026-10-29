@@ -94,7 +94,7 @@ export default function EditProfilePage() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-card p-5 sm:p-8 md:p-10">
-        <form method="post" onSubmit={handleSubmit} className="space-y-6 max-w-lg">
+        <form method="post" onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
               {error}
@@ -118,7 +118,7 @@ export default function EditProfilePage() {
                   name="first_name"
                   value={form.first_name}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-light-muted border border-transparent rounded-xl text-base sm:text-sm text-dark focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function EditProfilePage() {
                   name="last_name"
                   value={form.last_name}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-light-muted border border-transparent rounded-xl text-base sm:text-sm text-dark focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function EditProfilePage() {
                 type="email"
                 value={form.email}
                 disabled
-                className="w-full pl-11 pr-4 py-3 bg-light-muted border border-transparent rounded-xl text-muted cursor-not-allowed shadow-sm"
+                className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-muted cursor-not-allowed"
               />
             </div>
             <p className="text-xs text-muted ml-1 mt-1">{t("emailFixe")}</p>
@@ -167,7 +167,7 @@ export default function EditProfilePage() {
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="+228 90 00 00 00"
-                className="w-full pl-11 pr-4 py-3 bg-light-muted border border-transparent rounded-xl text-base sm:text-sm text-dark focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
               />
             </div>
           </div>

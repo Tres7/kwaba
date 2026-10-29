@@ -53,9 +53,11 @@ export default function DevenirHotePage() {
   return (
     <div className="bg-light">
       <section className="relative overflow-hidden bg-primary text-white">
-        <div className="absolute inset-0 bg-cover bg-center opacity-25" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2000&auto=format&fit=crop')" }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2000&auto=format&fit=crop')" }} />
+        {/* The photo stays visible; the gradient keeps the text readable */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary-900/95 via-primary-900/70 to-primary-900/40" />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-center">
-          <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl mb-4">{t("titre")}</h1>
+          <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl mb-4 drop-shadow-sm">{t("titre")}</h1>
           <p className="text-white/90 text-base md:text-lg max-w-2xl mx-auto mb-8">
             {t("sousTitre")}
           </p>

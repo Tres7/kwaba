@@ -70,7 +70,9 @@
     "memorise": "Votre choix est mémorisé sur cet appareil.",
     "devise": "Devise",
     "fcfa": "Franc CFA (FCFA)",
-    "fcfaTexte": "Tous les prix sont affichés en FCFA"
+    "fcfaTexte": "Tous les prix sont affichés en FCFA",
+    "euro": "Euro (€)",
+    "euroTexte": "Prix affichés en euros à titre indicatif ; le paiement reste en FCFA"
   },
   "roles": {
     "voyageur": "Voyageur",

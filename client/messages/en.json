@@ -70,7 +70,9 @@
     "memorise": "Your choice is remembered on this device.",
     "devise": "Currency",
     "fcfa": "CFA franc (FCFA)",
-    "fcfaTexte": "All prices are shown in FCFA"
+    "fcfaTexte": "All prices are shown in FCFA",
+    "euro": "Euro (€)",
+    "euroTexte": "Prices shown in euros as a guide; payment stays in FCFA"
   },
   "roles": {
     "voyageur": "Traveller",

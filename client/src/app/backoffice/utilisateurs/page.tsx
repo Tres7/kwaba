@@ -88,7 +88,7 @@ function Utilisateurs() {
     return (
       <>
         <Select
-          label={`Rôle de ${nom(u)}`} value={u.role} className="w-36" buttonClassName="py-1.5 px-3 rounded-lg"
+          label={`Rôle de ${nom(u)}`} value={u.role} className="w-44" buttonClassName="py-1.5 px-3 rounded-lg"
           options={(["voyageur", "hote", "agent", "admin"] as Role[]).map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
           onChange={(r) => {
             if (r === u.role) return;

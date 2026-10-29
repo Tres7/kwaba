@@ -17,6 +17,7 @@ import type { Reservation } from "@/types/api/models";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import type { Aeroport, CategorieVehicule, Devis, Transfert } from "@/types/api/transfert";
 import { useTranslations } from "next-intl";
+import PageHero from "@/components/layout/PageHero";
 
 const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = [
   { id: "mobile_money", label: "mobileMoney", icon: Smartphone },
@@ -158,20 +159,13 @@ function TransfertContent() {
 
   return (
     <div className="bg-light pb-12">
-      <section className="bg-dark text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <p className="flex items-center gap-2 text-sm font-semibold text-orange-200"><Plane size={16} /> {t("surtitre")}</p>
-          <h1 className="font-heading font-bold text-3xl sm:text-4xl mt-2 max-w-2xl">{t("titre")}</h1>
-          <p className="text-white/80 mt-3 max-w-xl">
-            {t("sousTitre")}
-          </p>
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-white/90">
-            <li className="flex items-center gap-2"><Clock size={15} /> {t("attenteIncluse", { minutes: devis?.attente_incluse_minutes ?? 60 })}</li>
-            <li className="flex items-center gap-2"><ShieldCheck size={15} /> {t("annulationGratuite")}</li>
-            <li className="flex items-center gap-2"><Lock size={15} /> {t("aucunPrixNegocie")}</li>
-          </ul>
-        </div>
-      </section>
+      <PageHero surtitre={<><Plane size={16} /> {t("surtitre")}</>} titre={t("titre")} sousTitre={t("sousTitre")}>
+        <ul className="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-white/90">
+          <li className="flex items-center gap-2"><Clock size={15} /> {t("attenteIncluse", { minutes: devis?.attente_incluse_minutes ?? 60 })}</li>
+          <li className="flex items-center gap-2"><ShieldCheck size={15} /> {t("annulationGratuite")}</li>
+          <li className="flex items-center gap-2"><Lock size={15} /> {t("aucunPrixNegocie")}</li>
+        </ul>
+      </PageHero>
 
       <form method="post" onSubmit={reserver} noValidate className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10">
         <div className="lg:col-span-3 space-y-6">

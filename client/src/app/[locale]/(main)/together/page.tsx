@@ -11,6 +11,7 @@ import FormField from "@/components/ui/FormField";
 import Stepper from "@/components/ui/Stepper";
 import type { Voyage, VoyageResume } from "@/types/api/voyage";
 import { useTranslations } from "next-intl";
+import PageHero from "@/components/layout/PageHero";
 
 const ATOUTS = [
   { icon: Link2, id: "lien" },
@@ -57,11 +58,7 @@ export default function TogetherPage() {
 
   return (
     <div className="bg-light pb-12">
-      <section className="bg-gradient-to-br from-primary-700 to-primary-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <p className="flex items-center gap-2 text-sm font-semibold text-orange-100"><Users size={16} /> Kwa-Ba Together</p>
-          <h1 className="font-heading font-bold text-3xl sm:text-4xl mt-2 max-w-2xl">{t("titre")}</h1>
-          <p className="text-white/85 mt-3 max-w-xl">{t("sousTitre")}</p>
+      <PageHero surtitre={<><Users size={16} /> Kwa-Ba Together</>} titre={t("titre")} sousTitre={t("sousTitre")}>
           {connecte ? (
             <button onClick={() => setCreation(true)} className="mt-6 inline-flex items-center gap-2 bg-white text-primary-700 font-bold px-6 py-3 rounded-xl hover:bg-orange-50">
               <Plus size={18} /> {t("creer")}
@@ -71,8 +68,7 @@ export default function TogetherPage() {
               {t("seConnecter")}
             </Link>
           )}
-        </div>
-      </section>
+      </PageHero>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {creation && (

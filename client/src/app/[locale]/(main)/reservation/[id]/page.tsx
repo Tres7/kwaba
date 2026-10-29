@@ -231,27 +231,36 @@ function ReservationContent() {
                 </div>
               </div>
 
-              <div className="py-5 space-y-3 border-b border-gray-100 text-sm">
-                <h3 className="font-heading font-bold text-dark text-base mb-2">{t("detailsPrix")}</h3>
-                <div className="flex justify-between gap-2">
-                  <span className="text-gray-600">
-                    {formatPrice(prixUnite)} × {nbUnites > 1 && <>{tFiche("unitesNombre", { nombre: nbUnites })} × </>}{tFiche("nuits", { nombre: nights })}
-                  </span>
-                  <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <span className="text-gray-600">
-                    {tFiche("fraisService", { taux: Math.round(tauxFrais * 100) })}
-                    {tauxFrais < SERVICE_FEE_RATE && <span className="block text-xs text-secondary font-semibold">{tFiche("clientFidele")}</span>}
-                  </span>
-                  <span className="font-medium text-dark">{formatPrice(serviceFee)}</span>
-                </div>
-              </div>
+              {/* Without valid dates, no "× 0 night = 0 FCFA" summary: the nightly price only */}
+              {datesInvalid ? (
+                <p className="py-5 mb-5 border-b border-gray-100 text-sm text-gray-600">
+                  <span className="font-heading font-bold text-dark text-lg">{formatPrice(prixUnite)}</span> {tFiche("parNuitCourt")}
+                </p>
+              ) : (
+                <>
+                  <div className="py-5 space-y-3 border-b border-gray-100 text-sm">
+                    <h3 className="font-heading font-bold text-dark text-base mb-2">{t("detailsPrix")}</h3>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-gray-600">
+                        {formatPrice(prixUnite)} × {nbUnites > 1 && <>{tFiche("unitesNombre", { nombre: nbUnites })} × </>}{tFiche("nuits", { nombre: nights })}
+                      </span>
+                      <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-gray-600">
+                        {tFiche("fraisService", { taux: Math.round(tauxFrais * 100) })}
+                        {tauxFrais < SERVICE_FEE_RATE && <span className="block text-xs text-secondary font-semibold">{tFiche("clientFidele")}</span>}
+                      </span>
+                      <span className="font-medium text-dark">{formatPrice(serviceFee)}</span>
+                    </div>
+                  </div>
 
-              <div className="pt-5 flex justify-between items-center mb-5">
-                <span className="font-heading font-bold text-dark text-lg">{tFiche("total")}</span>
-                <span className="text-right"><span className="block font-heading font-bold text-primary text-2xl">{formatPrice(total)}</span><MontantDebite montant={total} /></span>
-              </div>
+                  <div className="pt-5 flex justify-between items-center mb-5">
+                    <span className="font-heading font-bold text-dark text-lg">{tFiche("total")}</span>
+                    <span className="text-right"><span className="block font-heading font-bold text-primary text-2xl">{formatPrice(total)}</span><MontantDebite montant={total} /></span>
+                  </div>
+                </>
+              )}
 
               {error && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl p-3 mb-4">{error}</p>}
 
@@ -278,7 +287,7 @@ function ReservationContent() {
               </label>
 
               <button onClick={handleConfirm} disabled={submitting || datesInvalid || !accepte} className="w-full bg-secondary hover:bg-secondary-600 text-white font-bold py-4 rounded-2xl shadow-md transition-all text-base disabled:opacity-60">
-                {submitting
+                {datesInvalid ? tFiche("selectionnezDates") : submitting
                   ? enLigne ? t("redirection") : t("traitement")
                   : enLigne ? t("payer", { montant: moyenChoisi === "paypal" && config ? enEuros(total, config.fcfa_par_euro) : formatFcfa(total) }) : t("confirmerReservation")}
               </button>

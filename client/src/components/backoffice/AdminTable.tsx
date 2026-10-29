@@ -57,7 +57,7 @@ export default function AdminTable<T>({ colonnes, lignes, cle, titreMobile, acti
             {lignes.map((l) => (
               <tr key={cle(l)} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 align-middle">
                 {colonnes.map((c) => <td key={c.titre} className={cn("px-4 py-3", c.className)}>{c.cellule(l)}</td>)}
-                {actions && <td className="px-4 py-3"><div className="flex justify-end gap-1.5 flex-wrap w-[14rem] ml-auto">{actions(l)}</div></td>}
+                {actions && <td className="px-4 py-3"><div className="flex justify-end gap-1.5 flex-wrap max-w-[14rem] ml-auto">{actions(l)}</div></td>}
               </tr>
             ))}
           </tbody>
