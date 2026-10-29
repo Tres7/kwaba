@@ -64,7 +64,7 @@ class TestStockChanges:
         chambre = hotel.types.get()
         chambre.quantite = 5
         chambre.save()
-        ReservationModel.objects.create(hebergement=hotel, type_logement=chambre, nb_unites=3, guest=make_user(),
+        ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=chambre.id, nb_unites=3, guest_id=make_user().pk,
                                         check_in=_jour(10), check_out=_jour(12), total_price=0, status='confirmed')
         client = client_for(hotel.host)
         refus = client.patch(_type_url(chambre), {'quantite': 2}, format='json')
@@ -83,7 +83,7 @@ class TestStockChanges:
         client = client_for(hotel.host)
         client.post(_types_url(hotel), _suite(), format='json')
         suite = hotel.types.get(nom='Suite')
-        ReservationModel.objects.create(hebergement=hotel, type_logement=suite, guest=make_user(), check_in=_jour(10),
+        ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=suite.id, guest_id=make_user().pk, check_in=_jour(10),
                                         check_out=_jour(12), total_price=0, status='cancelled')
         assert client.delete(_type_url(suite)).status_code == 409
         assert client.patch(_type_url(suite), {'actif': False}, format='json').status_code == 200
@@ -119,7 +119,7 @@ class TestClosuresPerType:
         client = client_for(hotel.host)
         client.post(_types_url(hotel), _suite(), format='json')
         suite, chambre = hotel.types.get(nom='Suite'), hotel.types.get(nom='Chambre')
-        ReservationModel.objects.create(hebergement=hotel, type_logement=chambre, guest=make_user(), check_in=_jour(10),
+        ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=chambre.id, guest_id=make_user().pk, check_in=_jour(10),
                                         check_out=_jour(12), total_price=0, status='confirmed')
         dates = {'debut': _jour(10).isoformat(), 'fin': _jour(12).isoformat()}
         assert client.post(self.url(hotel), {**dates, 'type_logement': str(chambre.id)}, format='json').status_code == 409
@@ -146,7 +146,7 @@ def test_host_calendar_of_one_type(client_for, make_user, hotel):
     client = client_for(hotel.host)
     client.post(_types_url(hotel), _suite(), format='json')
     suite, chambre = hotel.types.get(nom='Suite'), hotel.types.get(nom='Chambre')
-    ReservationModel.objects.create(hebergement=hotel, type_logement=chambre, guest=make_user(), check_in=_jour(10),
+    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=chambre.id, guest_id=make_user().pk, check_in=_jour(10),
                                     check_out=_jour(12), total_price=0, status='confirmed')
     BlocageModel.objects.create(hebergement=hotel, type_logement=suite, debut=_jour(20), fin=_jour(22))
     BlocageModel.objects.create(hebergement=hotel, debut=_jour(30), fin=_jour(31))

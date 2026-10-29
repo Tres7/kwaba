@@ -5,9 +5,9 @@ from .models import PreinscriptionModel
 
 @admin.register(PreinscriptionModel)
 class PreinscriptionAdmin(admin.ModelAdmin):
-    list_display = ('accepte_le', 'hote', 'version', 'langue', 'ip')
+    list_display = ('accepte_le', 'hote_id', 'version', 'langue', 'ip')
     list_filter = ('version', 'langue')
-    search_fields = ('hote__email',)
+    search_fields = ('hote_id',)
     date_hierarchy = 'accepte_le'
 
     # Proof of acceptance: read-only, never edited nor deleted from the administration

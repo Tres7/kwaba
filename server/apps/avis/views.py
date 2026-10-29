@@ -48,7 +48,7 @@ class AvisListCreateView(APIView):
         hebergement_id = _uuid(request.query_params.get('hebergement'))
         if hebergement_id is None or not hebergements.existe(hebergement_id):
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        qs = AvisModel.objects.filter(hebergement_id=hebergement_id).select_related('auteur')
+        qs = AvisModel.objects.filter(hebergement_id=hebergement_id)
 
         agregats = qs.aggregate(
             moyenne=Avg('note'), total=Count('id'),
@@ -88,7 +88,7 @@ class AvisListCreateView(APIView):
 
         try:
             with transaction.atomic():
-                avis = serializer.save(auteur=request.user, hebergement_id=sejour['hebergement_id'])
+                avis = serializer.save(auteur_id=request.user.id, hebergement_id=sejour['hebergement_id'])
                 recalculer_note(sejour['hebergement_id'])
         except IntegrityError:
             return Response({'detail': "Vous avez déjà laissé un avis pour ce séjour."}, status=status.HTTP_409_CONFLICT)

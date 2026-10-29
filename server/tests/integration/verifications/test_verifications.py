@@ -60,7 +60,7 @@ def en_attente(make_hebergement, hote):
 
 
 def _identite_verifiee(hote):
-    return PieceIdentiteModel.objects.update_or_create(hote=hote, defaults={'type_piece': 'cni', 'statut': 'verifiee'})[0]
+    return PieceIdentiteModel.objects.update_or_create(hote_id=hote.pk, defaults={'type_piece': 'cni', 'statut': 'verifiee'})[0]
 
 
 def _envoyer_piece(client, fichier=None, type_piece='cni'):
@@ -143,13 +143,13 @@ class TestPieceIdentite:
         response = _envoyer_piece(client_for(hote))
         assert response.status_code == 201
         assert response.data['statut'] == 'soumise'
-        piece = PieceIdentiteModel.objects.get(hote=hote)
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
         assert piece.type_contenu == 'image/jpeg' and piece.fichier.name.endswith('.jpg')
 
     def test_pdf_accepted(self, client_for, hote):
         pdf = SimpleUploadedFile('piece.pdf', b'%PDF-1.7\n%test\n', content_type='application/pdf')
         assert _envoyer_piece(client_for(hote), pdf).status_code == 201
-        assert PieceIdentiteModel.objects.get(hote=hote).type_contenu == 'application/pdf'
+        assert PieceIdentiteModel.objects.get(hote_id=hote.pk).type_contenu == 'application/pdf'
 
     @pytest.mark.parametrize('contenu', [b'<script>alert(1)</script>', b'MZ\x90\x00 executable'])
     def test_other_files_rejected(self, client_for, hote, contenu):
@@ -162,9 +162,9 @@ class TestPieceIdentite:
     def test_replacing_deletes_the_previous_file(self, client_for, hote, stockage_temporaire):
         client = client_for(hote)
         _envoyer_piece(client)
-        ancien = PieceIdentiteModel.objects.get(hote=hote).fichier.name
+        ancien = PieceIdentiteModel.objects.get(hote_id=hote.pk).fichier.name
         _envoyer_piece(client, type_piece='passeport')
-        piece = PieceIdentiteModel.objects.get(hote=hote)
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
         assert piece.type_piece == 'passeport'
         assert not (stockage_temporaire / ancien).exists()
 
@@ -213,7 +213,7 @@ class TestVisite:
                             commentaire="La personne rencontrée n'est pas celle de la pièce.",
                             controles={**TOUT_CONFORME, 'identite': False})
         assert response.status_code == 201
-        assert PieceIdentiteModel.objects.get(hote=hote).statut == 'refusee'
+        assert PieceIdentiteModel.objects.get(hote_id=hote.pk).statut == 'refusee'
 
     def test_cannot_validate_without_every_check_or_identity(self, client_for, agent, hote, en_attente):
         client = client_for(agent)
@@ -267,13 +267,13 @@ class TestControleIdentite:
     def test_verified_identity_deletes_the_document_and_requests_the_visits(
             self, client_for, hote, agent, en_attente, stockage_temporaire, django_capture_on_commit_callbacks):
         _envoyer_piece(client_for(hote))
-        fichier = PieceIdentiteModel.objects.get(hote=hote).fichier.name
+        fichier = PieceIdentiteModel.objects.get(hote_id=hote.pk).fichier.name
         url = f'{IDENTITES}{hote.id}/decision/'
         with django_capture_on_commit_callbacks(execute=True):
             response = client_for(agent).post(url, {'decision': 'verifiee'}, format='json')
         assert response.status_code == 200 and response.data['statut'] == 'verifiee'
-        piece = PieceIdentiteModel.objects.get(hote=hote)
-        assert piece.verifiee_par == agent and not piece.fichier
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
+        assert piece.verifiee_par_id == agent.id and not piece.fichier
         assert not (stockage_temporaire / fichier).exists()
         sujets = [m.subject for m in mail.outbox]
         assert any('Visite à planifier' in sujet for sujet in sujets)
@@ -295,7 +295,7 @@ class TestControleIdentite:
                                               format='json')
         assert response.status_code == 200 and response.data['statut'] == 'refusee'
         assert 'Photo floue' in mail.outbox[-1].body and mail.outbox[-1].to == [hote.email]
-        assert not PieceIdentiteModel.objects.get(hote=hote).fichier
+        assert not PieceIdentiteModel.objects.get(hote_id=hote.pk).fichier
         assert _envoyer_piece(client_for(hote)).data['statut'] == 'soumise'
 
 

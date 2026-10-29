@@ -1,6 +1,5 @@
 import json
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.http import FileResponse, Http404
 from rest_framework import status
@@ -13,6 +12,7 @@ from rest_framework.views import APIView
 from apps.hebergements import api as hebergements
 from apps.securite.audit import journaliser
 from apps.terrain import api as terrain
+from apps.users import api as users
 
 from . import services
 from .fichiers import FichierInvalide, piece_identite
@@ -48,7 +48,7 @@ class MaPieceIdentiteView(APIView):
         return [ScopedRateThrottle()] if self.request.method == 'POST' else []
 
     def get(self, request):
-        return Response(_piece_json(PieceIdentiteModel.objects.filter(hote=request.user).first()))
+        return Response(_piece_json(PieceIdentiteModel.objects.filter(hote_id=request.user.pk).first()))
 
     def post(self, request):
         if request.user.role not in ROLES_HOTE:
@@ -60,7 +60,7 @@ class MaPieceIdentiteView(APIView):
         if not fichier:
             return Response({'fichier': ['Aucun fichier reçu.']}, status=status.HTTP_400_BAD_REQUEST)
 
-        piece = PieceIdentiteModel.objects.filter(hote=request.user).first()
+        piece = PieceIdentiteModel.objects.filter(hote_id=request.user.pk).first()
         if piece and piece.statut == 'verifiee':
             return Response({'detail': 'Votre identité est déjà vérifiée.'}, status=status.HTTP_409_CONFLICT)
         try:
@@ -68,7 +68,7 @@ class MaPieceIdentiteView(APIView):
         except FichierInvalide as exc:
             return Response({'fichier': [str(exc)]}, status=status.HTTP_400_BAD_REQUEST)
 
-        piece = piece or PieceIdentiteModel(hote=request.user)
+        piece = piece or PieceIdentiteModel(hote_id=request.user.pk)
         if piece.fichier:
             piece.fichier.delete(save=False)
         piece.type_piece, piece.type_contenu, piece.statut, piece.motif_refus = type_piece, type_contenu, 'soumise', ''
@@ -81,7 +81,7 @@ class MaPieceIdentiteView(APIView):
 def visites_json(annonces: list[dict]) -> list[dict]:
     """Listings to visit with their host and whether they were already validated once, read in a few queries."""
     hote_ids = {a['host_id'] for a in annonces}
-    hotes = {u.pk: u for u in get_user_model().objects.filter(pk__in=hote_ids)}
+    hotes = users.comptes(hote_ids)
     pieces = {p.hote_id: p for p in PieceIdentiteModel.objects.filter(hote_id__in=hote_ids)}
     deja_validees = set(VisiteModel.objects.filter(hebergement_id__in=[a['id'] for a in annonces], decision='validee')
                         .values_list('hebergement_id', flat=True))
@@ -106,8 +106,10 @@ def visites_json(annonces: list[dict]) -> list[dict]:
 def pieces_avec_nb_annonces(pieces) -> list[PieceIdentiteModel]:
     pieces = list(pieces)
     nombres = hebergements.nb_annonces_par_hote(p.hote_id for p in pieces)
+    hotes = users.comptes(p.hote_id for p in pieces)
     for p in pieces:
         p.nb_annonces = nombres.get(p.hote_id, 0)
+        p.compte_hote = hotes.get(p.hote_id)
     return pieces
 
 
@@ -116,11 +118,11 @@ class PiecesView(APIView):
     permission_classes = [EstVerificateur]
 
     def get(self, request):
-        pieces = pieces_avec_nb_annonces(services.pieces_a_controler().select_related('hote')[:100])
+        pieces = pieces_avec_nb_annonces(services.pieces_a_controler()[:100])
         resultats = [{
             'hote': {
-                'id': str(p.hote_id), 'nom': f"{p.hote.first_name} {p.hote.last_name}".strip(),
-                'email': p.hote.email, 'telephone': p.hote.phone, 'inscrit_le': p.hote.date_joined,
+                'id': str(p.hote_id), 'nom': p.compte_hote.get_full_name(),
+                'email': p.compte_hote.email, 'telephone': p.compte_hote.phone, 'inscrit_le': p.compte_hote.date_joined,
             },
             'type_piece': p.type_piece, 'type_libelle': p.get_type_piece_display(),
             'soumise_le': p.soumise_le, 'nb_annonces': p.nb_annonces,
@@ -133,7 +135,7 @@ class PieceDecisionView(APIView):
     permission_classes = [EstVerificateur]
 
     def post(self, request, user_id):
-        hote = get_user_model().objects.filter(pk=user_id).first()
+        hote = users.compte(user_id)
         if not hote:
             return Response({'detail': 'Hôte introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         decision = str(request.data.get('decision', ''))
@@ -211,7 +213,7 @@ class FichierPieceView(APIView):
     permission_classes = [EstVerificateur]
 
     def get(self, request, user_id):
-        piece = PieceIdentiteModel.objects.filter(hote_id=user_id).select_related('hote').first()
+        piece = PieceIdentiteModel.objects.filter(hote_id=user_id).first()
         if not piece or not piece.fichier:
             raise Http404
         journaliser('piece_consultee', request, utilisateur=request.user, hote=str(piece.hote_id))

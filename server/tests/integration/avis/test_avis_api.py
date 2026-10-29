@@ -17,7 +17,7 @@ def _review(reservation, note=4, **overrides):
 
 def _make_avis(reservation, note):
     return AvisModel.objects.create(
-        reservation_id=reservation.id, hebergement_id=reservation.hebergement_id, auteur=reservation.guest,
+        reservation_id=reservation.id, hebergement_id=reservation.hebergement_id, auteur_id=reservation.guest.id,
         note=note, **{critere: note for critere in CRITERES}, commentaire='Commentaire de test assez long.',
     )
 

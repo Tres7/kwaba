@@ -7,6 +7,7 @@ from django.utils import timezone
 from apps.hebergements.disponibilites import est_disponible
 from apps.paiements import services as paiements
 from apps.reservations.models import ReservationModel
+from apps.reservations import paiement as reservations_paiement
 
 HEBERGEMENTS = '/api/v1/hebergements/'
 RESERVATIONS = '/api/v1/reservations/'
@@ -14,7 +15,7 @@ RESERVATIONS = '/api/v1/reservations/'
 
 def test_a_booking_created_without_a_status_is_not_confirmed(make_user, make_hebergement):
     debut = timezone.localdate() + timedelta(days=5)
-    reservation = ReservationModel.objects.create(hebergement=make_hebergement(), guest=make_user(), check_in=debut,
+    reservation = ReservationModel.objects.create(hebergement_id=make_hebergement().id, guest_id=make_user().pk, check_in=debut,
                                                   check_out=debut + timedelta(days=2), total_price=0)
     assert reservation.status == 'pending'
 
@@ -24,7 +25,7 @@ class TestPendingWithoutDeadline:
 
     def _pending(self, make_user, hebergement, cree_il_y_a: timedelta):
         debut = timezone.localdate() + timedelta(days=10)
-        reservation = ReservationModel.objects.create(hebergement=hebergement, guest=make_user(), check_in=debut,
+        reservation = ReservationModel.objects.create(hebergement_id=hebergement.id, guest_id=make_user().pk, check_in=debut,
                                                       check_out=debut + timedelta(days=3), total_price=0,
                                                       status='pending', expire_le=None)
         ReservationModel.objects.filter(pk=reservation.pk).update(created_at=timezone.now() - cree_il_y_a)
@@ -40,7 +41,7 @@ class TestPendingWithoutDeadline:
         r = self._pending(make_user, hebergement, paiements.delai_paiement() + timedelta(minutes=1))
         assert est_disponible(hebergement.id, r.check_in, r.check_out)
 
-        assert paiements.expirer_reservations() == 1
+        assert reservations_paiement.expirer() == 1
         r.refresh_from_db()
         assert (r.status, r.annule_par) == ('cancelled', 'expiration')
 

@@ -33,12 +33,12 @@ def test_particulier_hotel_et_fondateur(client_for, make_user, make_hebergement)
     assert (resa.prix_nuits, resa.frais_service, resa.commission_hote) == (50000, 3000, 4000)
 
     hotel = make_hebergement(price_per_night=25000)
-    ConditionsHoteModel.objects.create(hote=hotel.host, categorie='hotel')
+    ConditionsHoteModel.objects.create(hote_id=hotel.host.pk, categorie='hotel')
     assert _reserver(voyageur, hotel).commission_hote == 6000
 
     fondateur = make_hebergement(price_per_night=25000)
     jour = timezone.localdate()
-    ConditionsHoteModel.objects.create(hote=fondateur.host, fondateur_debut=jour, fondateur_fin=jour + timedelta(days=180))
+    ConditionsHoteModel.objects.create(hote_id=fondateur.host.pk, fondateur_debut=jour, fondateur_fin=jour + timedelta(days=180))
     assert _reserver(voyageur, fondateur).commission_hote == 2500
 
 
@@ -121,7 +121,7 @@ def test_type_de_partenaire_et_taux_affiches_a_l_hote(client_for, make_user, api
     assert (revenus['partenaire'], revenus['commission_pourcent'], revenus['frais_voyageur_pourcent']) == ('particulier', 8.0, 6.0)
 
     jour = timezone.localdate()
-    conditions = ConditionsHoteModel.objects.create(hote=hote, fondateur_debut=jour, fondateur_fin=jour + timedelta(days=180))
+    conditions = ConditionsHoteModel.objects.create(hote_id=hote.pk, fondateur_debut=jour, fondateur_fin=jour + timedelta(days=180))
     assert client_for(hote).get('/api/v1/paiements/revenus/').data['partenaire'] == 'fondateur'
     conditions.categorie = 'hotel'
     conditions.save()

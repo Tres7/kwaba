@@ -60,13 +60,13 @@ def test_a_booking_points_to_the_unit_type(client_for, make_user, make_hebergeme
         'check_out': (arrivee + timedelta(days=2)).isoformat(), 'guests_count': 2}, format='json')
     assert reponse.status_code == 201
     reservation = ReservationModel.objects.get(pk=reponse.data['id'])
-    assert (reservation.type_logement, reservation.nb_unites) == (annonce.types.get(), 1)
+    assert (reservation.type_logement_id, reservation.nb_unites) == (annonce.types.get().id, 1)
 
 
 def test_deleting_an_establishment_with_bookings_keeps_its_types(client_for, make_hebergement, make_reservation):
     annonce = make_hebergement()
     make_reservation(annonce, status='cancelled')
-    ReservationModel.objects.update(type_logement=annonce.types.get())
+    ReservationModel.objects.update(type_logement_id=annonce.types.get().id)
     assert client_for(annonce.host).delete(f'{HEBERGEMENTS}{annonce.id}/').status_code == 204
     assert TypeLogementModel.objects.filter(hebergement=annonce).exists()
 
@@ -86,7 +86,7 @@ class TestDataMigration:
         seul = annonce.types.get()
         assert (seul.nom, seul.quantite, seul.capacite, seul.prix_nuit) == ('Chambre', 1, 6, Decimal('40000'))
         reservation.refresh_from_db()
-        assert reservation.type_logement == seul
+        assert reservation.type_logement_id == seul.id
 
     def test_running_it_twice_creates_nothing_more(self, make_hebergement):
         make_hebergement()

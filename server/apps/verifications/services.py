@@ -9,7 +9,6 @@ No travel is therefore asked for a host whose identity has not been checked.
 import logging
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -17,7 +16,8 @@ from django.utils import timezone
 from apps.contrats import api as contrats
 from apps.documents import api as documents
 from apps.hebergements import api as hebergements
-from apps.notifications.infrastructure.email.envoi import send_mail
+from apps.notifications.api import send_mail
+from apps.users import api as users
 
 from .fichiers import image_normalisee
 from .models import PhotoVisiteModel, PieceIdentiteModel, VisiteModel
@@ -48,8 +48,7 @@ def _envoyer(gabarit: str, sujet: str, destinataires: list[str], contexte: dict)
 
 
 def _verificateurs() -> list[str]:
-    return list(get_user_model().objects.filter(role__in=ROLES_VERIFICATEURS, is_active=True)
-                .values_list('email', flat=True))
+    return users.emails_actifs(ROLES_VERIFICATEURS)
 
 
 def contrats_disponibles() -> bool:
@@ -76,12 +75,16 @@ def annonces_a_visiter(ville: str = '') -> list[dict]:
 
 
 def statut_piece(hote) -> str:
-    piece = PieceIdentiteModel.objects.filter(hote=hote).first()
+    piece = PieceIdentiteModel.objects.filter(hote_id=hote.pk).first()
     return piece.statut if piece else 'absente'
 
 
+def hotes_verifies(hote_ids) -> set:
+    return set(PieceIdentiteModel.objects.filter(hote_id__in=list(hote_ids), statut='verifiee').values_list('hote_id', flat=True))
+
+
 def identite_verifiee(hote) -> bool:
-    return PieceIdentiteModel.objects.filter(hote=hote, statut='verifiee').exists()
+    return PieceIdentiteModel.objects.filter(hote_id=hote.pk, statut='verifiee').exists()
 
 
 def verifier_limite_annonces(hote) -> None:
@@ -108,7 +111,7 @@ def visite_a_planifier(hebergement_id, modification: bool = False) -> None:
     them at that moment (decider_piece, contrat_hote_signe)."""
     annonce = hebergements.fiche(hebergement_id)
     if annonce:
-        _visite_a_planifier(annonce, get_user_model().objects.get(pk=annonce['host_id']), modification)
+        _visite_a_planifier(annonce, users.compte(annonce['host_id']), modification)
 
 
 def _visite_a_planifier(annonce: dict, hote, modification: bool = False) -> None:
@@ -131,7 +134,7 @@ def contrat_hote_signe(hote) -> None:
 
 def piece_a_controler(piece) -> None:
     """Tells the agents that an identity document has just been sent (or replaced)."""
-    hote = piece.hote
+    hote = users.compte(piece.hote_id)
     _envoyer('piece_a_controler', f"[Kwa-Ba] Pièce d'identité à contrôler : {hote.first_name} {hote.last_name}".strip(),
              _verificateurs(), {
                  'hote': f"{hote.first_name} {hote.last_name}".strip(), 'email': hote.email,
@@ -144,15 +147,15 @@ def piece_a_controler(piece) -> None:
 def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> PieceIdentiteModel:
     """Remote check of the identity document. Verified: the document is deleted (only the result is kept)
     and the host's pending listings are sent to the agents for a visit."""
-    piece = PieceIdentiteModel.objects.select_for_update().select_related('hote').filter(hote=hote).first()
+    piece = PieceIdentiteModel.objects.select_for_update().filter(hote_id=hote.pk).first()
     if not piece or piece.statut != 'soumise':
         raise VerificationErreur("Aucune pièce d'identité à contrôler pour cet hôte.")
     motif = motif.strip()
     contexte = {'prenom': hote.first_name, 'url_espace': f"{settings.FRONTEND_URL}/hote/espace"}
 
     if decision == 'verifiee':
-        piece.statut, piece.verifiee_le, piece.verifiee_par, piece.motif_refus = (
-            'verifiee', timezone.now(), verificateur, '')
+        piece.statut, piece.verifiee_le, piece.verifiee_par_id, piece.motif_refus = (
+            'verifiee', timezone.now(), verificateur.pk, '')
         if piece.fichier:
             piece.fichier.delete(save=False)
         piece.save()
@@ -186,8 +189,8 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
     if len(photos) > MAX_PHOTOS_VISITE:
         raise VerificationErreur(f"{MAX_PHOTOS_VISITE} photos au plus.")
 
-    hote = get_user_model().objects.get(pk=annonce['host_id'])
-    piece = PieceIdentiteModel.objects.select_for_update().filter(hote=hote).first()
+    hote = users.compte(annonce['host_id'])
+    piece = PieceIdentiteModel.objects.select_for_update().filter(hote_id=hote.pk).first()
     if decision == 'validee':
         if not all(controles.values()):
             raise VerificationErreur("Pour valider, tous les points de contrôle doivent être vérifiés.")
@@ -202,7 +205,7 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
         raise VerificationErreur("Décision inconnue.")
 
     contenus = [image_normalisee(photo) for photo in photos]  # before any write: an invalid photo stops everything
-    visite = VisiteModel.objects.create(hebergement_id=hebergement_id, agent=agent, decision=decision,
+    visite = VisiteModel.objects.create(hebergement_id=hebergement_id, agent_id=agent.pk, decision=decision,
                                         controles=controles, commentaire=commentaire)
     for contenu in contenus:
         photo = PhotoVisiteModel(visite=visite)

@@ -44,7 +44,7 @@ def berline():
 def location(make_user, berline, lieu):
     debut = timezone.now() + timedelta(days=5)
     return LocationModel.objects.create(
-        voyageur=make_user(), categorie=berline, formule='avec_chauffeur', lieu_prise=lieu, lieu_retour=lieu,
+        voyageur_id=make_user().pk, categorie=berline, formule='avec_chauffeur', lieu_prise=lieu, lieu_retour=lieu,
         debut=debut, fin=debut + timedelta(days=3), passagers=2, telephone='+22890000000', precisions='Lomé - Kpalimé',
         jours=3, prix_jour=38000, frais_lieux=0, prix_chauffeur=21000, prix=135000, commission=17100,
         part_kwaba_chauffeur=3000, statut='confirmee',

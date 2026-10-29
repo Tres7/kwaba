@@ -7,8 +7,8 @@ their deposit (none, one or two days, 100,000 FCFA at most); they stay invisible
 until the administration has filled in the settings, at least one vehicle with a price and a place.
 """
 import uuid
+from functools import cached_property
 
-from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -210,7 +210,7 @@ class LocationModel(models.Model):
     MOYENS = [('mobile_money', 'Mobile Money'), ('carte', 'Carte bancaire'), ('paypal', 'PayPal')]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    voyageur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='locations')
+    voyageur_id = models.UUIDField(db_index=True)
     reservation_id = models.UUIDField(
         null=True, blank=True, db_index=True,
         help_text='Séjour Kwa-Ba associé (facultatif) : avec un chauffeur, Pack Séjour (frais du logement à 3 %)',
@@ -289,6 +289,11 @@ class LocationModel(models.Model):
 
     def __str__(self):
         return f"{self.reference} · {self.libelle}, {self.lieu_prise.ville}"
+
+    @cached_property
+    def voyageur(self):
+        from apps.users.api import compte
+        return compte(self.voyageur_id)
 
     @property
     def reference(self):

@@ -18,22 +18,22 @@ from datetime import timedelta
 from io import BytesIO
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
-from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils import timezone
 from PIL import Image, UnidentifiedImageError
 
 from apps.documents.api import date, societe as _societe
 from apps.give import api as give
+from apps.hebergements import api as hebergements
 from apps.locations import api as locations
 from apps.paiements import api as paiements
 from apps.transferts import api as transferts
-from apps.notifications.infrastructure.email.envoi import send_mail
+from apps.notifications.api import send_mail
+from apps.users import api as users
 
-from .models import ContratModel, ModeleContratModel, hacher_jeton
+from .models import ContratModel, ModeleContratModel, PreinscriptionModel, hacher_jeton
 
 logger = logging.getLogger('apps.contrats')
 
@@ -101,7 +101,7 @@ def partie(type_contrat: str, objet) -> dict:
     `objet`: the host account, or the party given by its module (transferts, locations or give public API)."""
     if type_contrat in TYPES_HOTE:
         return {'nom': _nom(objet), 'email': objet.email, 'telephone': objet.phone or '', 'details': '',
-                'fondateur': fondateur(objet), 'lien': {'hote': objet}}
+                'fondateur': fondateur(objet), 'lien': {'hote_id': objet.pk}}
     return {'nom': objet['nom'], 'email': objet['email'], 'telephone': objet['telephone'], 'details': objet['details'],
             'lien': {CHAMPS_PARTIE[type_contrat]: objet['id']}}
 
@@ -222,7 +222,7 @@ def _destinataires_kwaba() -> list[str]:
     societe = _societe()
     if societe.email:
         return [societe.email]
-    return list(get_user_model().objects.filter(role='admin', is_active=True).values_list('email', flat=True)[:5])
+    return users.emails_actifs(['admin'], limite=5)
 
 
 def lien(jeton: str) -> str:
@@ -264,7 +264,7 @@ def emettre(type_contrat: str, objet, par=None, envoyer=True) -> ContratModel:
                 reference=_reference(), type=type_contrat, titre=modele.titre, version_modele=modele.version,
                 corps=rendre(modele.corps, contexte(type_contrat, infos)),
                 partie_nom=infos['nom'], partie_email=infos['email'] or '', partie_telephone=infos['telephone'] or '',
-                cree_par=par, kwaba_signataire=f"{societe.raison_sociale}" + (f", représentée par {representant}" if representant else ''),
+                cree_par_id=getattr(par, 'pk', None), kwaba_signataire=f"{societe.raison_sociale}" + (f", représentée par {representant}" if representant else ''),
                 jeton_hash=hacher_jeton(jeton), expire_le=timezone.now() + VALIDITE_LIEN, **infos['lien'],
             )
     except IntegrityError:
@@ -313,19 +313,19 @@ def type_contrat_hote(hote) -> str:
 
 def contrat_hote(hote) -> ContratModel:
     """The host's contract, issued on the first request (they sign it from their space, without email)."""
-    contrat = ContratModel.objects.filter(hote=hote).exclude(statut='annule').first()
+    contrat = ContratModel.objects.filter(hote_id=hote.pk).exclude(statut='annule').first()
     return contrat or emettre(type_contrat_hote(hote), hote, envoyer=False)
 
 
 def hote_a_signe(hote) -> bool:
-    return ContratModel.objects.filter(hote=hote, statut='signe').exists()
+    return ContratModel.objects.filter(hote_id=hote.pk, statut='signe').exists()
 
 
 def hotes_a_inviter():
     """Active hosts who pre-registered or created a listing and have not signed their agreement yet."""
-    return (get_user_model().objects.filter(role='hote', is_active=True)
-            .filter(Q(preinscriptions__isnull=False) | Q(hebergements__isnull=False))
-            .exclude(contrats__statut='signe').distinct())
+    candidats = set(PreinscriptionModel.objects.values_list('hote_id', flat=True)) | hebergements.ids_hotes_avec_annonce()
+    signes = set(ContratModel.objects.filter(statut='signe', hote_id__in=candidats).values_list('hote_id', flat=True))
+    return users.comptes_actifs(['hote'], ids=candidats - signes)
 
 
 def inviter_hotes_a_signer() -> int:
@@ -333,9 +333,12 @@ def inviter_hotes_a_signer() -> int:
     of their pre-registration, pointing to the agreement in their host space. Returns the number of emails sent."""
     site = settings.FRONTEND_URL.rstrip('/')
     envoyes = 0
-    for hote in hotes_a_inviter():
-        derniere = hote.preinscriptions.first()  # most recent first (Meta.ordering)
-        langue = derniere.langue if derniere else 'fr'
+    hotes = hotes_a_inviter()
+    langues = {}
+    for p in PreinscriptionModel.objects.filter(hote_id__in=[h.pk for h in hotes]).order_by('accepte_le'):
+        langues[p.hote_id] = p.langue
+    for hote in hotes:
+        langue = langues.get(hote.pk, 'fr')
         sujet = 'Your Kwa-Ba host agreement is ready to sign' if langue == 'en' else 'Votre contrat hôte Kwa-Ba est prêt à signer'
         corps = render_to_string('emails/contrats/contrat_disponible.txt', {
             'langue': langue, 'prenom': hote.first_name,
@@ -380,7 +383,7 @@ def signer(contrat: ContratModel, *, nom: str, signature: str, accepte: bool, ip
     if contrat.type in TYPES_HOTE and contrat.hote_id:
         from apps.verifications.api import contrat_hote_signe
 
-        contrat_hote_signe(contrat.hote)
+        contrat_hote_signe(users.compte(contrat.hote_id))
     piece = [(f"contrat-{contrat.reference}.pdf", pdf, 'application/pdf')]
     contexte_email = {'nom': contrat.partie_nom, 'titre': contrat.titre, 'reference': contrat.reference,
                       'signe_le': date(contrat.signe_le, 'j F Y à H:i'), 'empreinte': contrat.empreinte_pdf,

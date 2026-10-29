@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from apps.paiements import relances, services
 from apps.reservations.models import ReservationModel
+from apps.reservations import paiement as reservations_paiement
 
 FEDAPAY_ACTIF = {'SECRET_KEY': 'sk_sandbox_test', 'ENV': 'sandbox', 'WEBHOOK_SECRET': 'whsec', 'EXPIRATION_MINUTES': 30}
 
@@ -84,7 +85,7 @@ class TestRelances:
     def test_annulation_faute_de_paiement_notifiee_une_fois(self, en_attente):
         relances.envoyer_relances()
         _decaler(en_attente, -1)
-        assert services.expirer_reservations() == 1
+        assert reservations_paiement.expirer() == 1
         assert relances.envoyer_relances() == 1
         assert 'annulée' in mail.outbox[-1].subject
         assert 'dates sont de nouveau disponibles' in mail.outbox[-1].body

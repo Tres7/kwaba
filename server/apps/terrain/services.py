@@ -8,6 +8,8 @@ reserved for administrators).
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
+from apps.users import api as users
+
 from .models import MissionModel
 from .types import TYPES, TypeMission, a_faire, nom
 
@@ -28,12 +30,17 @@ def type_mission(code: str) -> TypeMission:
     return TYPES[code]
 
 
+def nom_agent(mission: MissionModel) -> str:
+    agent = users.compte(mission.agent_id)
+    return nom(agent) if agent else 'Un agent'
+
+
 def est_admin(utilisateur) -> bool:
     return utilisateur.role == 'admin'
 
 
 def en_cours(code: str, cible: str) -> MissionModel | None:
-    return MissionModel.objects.filter(type=code, cible=str(cible), statut='en_cours').select_related('agent').first()
+    return MissionModel.objects.filter(type=code, cible=str(cible), statut='en_cours').first()
 
 
 def prendre(code: str, cible: str, agent) -> MissionModel:
@@ -46,12 +53,12 @@ def prendre(code: str, cible: str, agent) -> MissionModel:
     if actuelle:
         if actuelle.agent_id == agent.pk:
             return actuelle
-        raise MissionErreur(f"{nom(actuelle.agent)} s'en occupe déjà.", 409)
+        raise MissionErreur(f"{nom_agent(actuelle)} s'en occupe déjà.", 409)
     resume = tm.resume(objet)
     try:
         with transaction.atomic():
             return MissionModel.objects.create(
-                type=code, cible=str(cible), agent=agent, titre=resume['titre'][:200],
+                type=code, cible=str(cible), agent_id=agent.pk, titre=resume['titre'][:200],
                 sous_titre=(resume.get('sous_titre') or '')[:200], ville=(resume.get('ville') or '')[:100])
     except IntegrityError:
         # Another agent took it at the same moment (uniqueness constraint of ongoing missions)
@@ -65,7 +72,7 @@ def liberer(code: str, cible: str, utilisateur) -> MissionModel:
     if not mission:
         raise MissionErreur("Aucune mission en cours.", 404)
     if mission.agent_id != utilisateur.pk and not est_admin(utilisateur):
-        raise MissionErreur(f"Seul {nom(mission.agent)} ou un administrateur peut relâcher cette mission.", 403)
+        raise MissionErreur(f"Seul {nom_agent(mission)} ou un administrateur peut relâcher cette mission.", 403)
     mission.statut, mission.terminee_le = 'liberee', timezone.now()
     mission.save(update_fields=['statut', 'terminee_le'])
     return mission
@@ -75,16 +82,16 @@ def verifier_peut_decider(code: str, cible: str, utilisateur) -> None:
     """Before a decision: refused if another agent took the mission (an administrator can always decide)."""
     mission = en_cours(code, cible)
     if mission and mission.agent_id != utilisateur.pk and not est_admin(utilisateur):
-        raise MissionErreur(f"{nom(mission.agent)} s'occupe de cette mission : lui seul peut décider.", 409)
+        raise MissionErreur(f"{nom_agent(mission)} s'occupe de cette mission : lui seul peut décider.", 409)
 
 
 def terminer(code: str, cible: str, utilisateur, *, decision: str, titre: str, sous_titre: str = '', ville: str = ''):
     """After the decision (in the same transaction): the ongoing mission is closed, or created closed if nobody
     had taken it, so that the agent's history is complete."""
-    mission = en_cours(code, cible) or MissionModel(type=code, cible=str(cible), agent=utilisateur, titre=titre[:200],
+    mission = en_cours(code, cible) or MissionModel(type=code, cible=str(cible), agent_id=utilisateur.pk, titre=titre[:200],
                                                      sous_titre=sous_titre[:200], ville=ville[:100])
     # The one who decides (an administrator can decide on an agent's mission)
-    mission.agent = utilisateur
+    mission.agent_id = utilisateur.pk
     mission.statut, mission.decision, mission.terminee_le = 'terminee', decision, timezone.now()
     mission.save()
     return mission

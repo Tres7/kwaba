@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.reservations import api as reservations
+from apps.users import api as users
 
 from .models import AvisModel, CRITERES
 
@@ -16,11 +17,17 @@ class AvisSerializer(serializers.ModelSerializer):
 
     def get_auteur(self, obj):
         # First name + initial of the last name: credible identity without exposing the full name
-        u = obj.auteur
+        if '_auteurs' not in self.context:
+            instance = self.parent.instance if self.parent is not None else self.instance
+            avis = [instance] if isinstance(instance, AvisModel) else list(instance)
+            self.context['_auteurs'] = users.comptes(a.auteur_id for a in avis)
+        u = self.context['_auteurs'].get(obj.auteur_id)
+        if u is None:
+            return {'prenom': '', 'initiale': '', 'avatar_url': None}
         return {
             'prenom': u.first_name,
             'initiale': (u.last_name[:1] + '.') if u.last_name else '',
-            'avatar_url': u.avatar.url if u.avatar else None,
+            'avatar_url': u.avatar_url,
         }
 
     def get_sejour(self, obj):

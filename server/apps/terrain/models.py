@@ -1,6 +1,5 @@
 import uuid
 
-from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
@@ -23,8 +22,7 @@ class MissionModel(models.Model):
     type = models.CharField(max_length=20, choices=TYPES)
     # Id of what is checked, depending on the type: listing (stay), host (identity document)
     cible = models.CharField(max_length=64)
-    agent = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-                              related_name='missions_terrain')
+    agent_id = models.UUIDField(null=True, db_index=True)
     statut = models.CharField(max_length=20, choices=STATUTS, default='en_cours')
     decision = models.CharField(max_length=20, choices=DECISIONS, blank=True)
     # Copy at the time it was taken: the history stays readable even if the listing changes or disappears
@@ -42,7 +40,7 @@ class MissionModel(models.Model):
             # A single agent at a time on the same check
             models.UniqueConstraint(fields=['type', 'cible'], condition=Q(statut='en_cours'), name='mission_une_seule_en_cours'),
         ]
-        indexes = [models.Index(fields=['agent', 'statut'])]
+        indexes = [models.Index(fields=['agent_id', 'statut'])]
 
     def __str__(self):
         return f"{self.get_type_display()} · {self.titre} ({self.get_statut_display().lower()})"

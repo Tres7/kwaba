@@ -181,18 +181,11 @@ class LocationSerializer(serializers.ModelSerializer):
                 'motif': obj.caution_motif, 'restitution_heures': params.restitution_caution_heures if params else 24}
 
     def get_paiement(self, obj):
-        dernier = max(obj.paiements.all(), key=lambda p: p.cree_le, default=None)
-        return dernier.statut if dernier else None
+        """Status of the last payment: null if none (online payment inactive at booking time)."""
+        return paiements.etats_pour_serializer(self, 'location')[obj.pk]['paiement']
 
     def get_remboursement(self, obj):
-        lignes = list(obj.remboursements.all())
-        if not lignes:
-            return None
-        if any(r.statut == 'attente_numero' for r in lignes):
-            statut = 'attente_numero'
-        else:
-            statut = 'envoye' if all(r.statut == 'envoye' for r in lignes) else 'en_cours'
-        return {'montant': sum(r.montant for r in lignes), 'statut': statut}
+        return paiements.etats_pour_serializer(self, 'location')[obj.pk]['remboursement']
 
     def get_annulation_gratuite(self, obj):
         return services.annulation_gratuite(obj)
@@ -254,16 +247,16 @@ class MesChauffeursView(APIView):
 
 def _de_l_utilisateur(pk, user):
     return (LocationModel.objects.select_related('categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
-            .prefetch_related('paiements', 'remboursements', 'categorie__photos').filter(pk=pk, voyageur=user).first())
+            .prefetch_related('categorie__photos').filter(pk=pk, voyageur_id=user.pk).first())
 
 
 class LocationsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = (LocationModel.objects.filter(voyageur=request.user)
+        qs = (LocationModel.objects.filter(voyageur_id=request.user.pk)
               .select_related('categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
-              .prefetch_related('paiements', 'remboursements', 'categorie__photos'))
+              .prefetch_related('categorie__photos'))
         data = LocationSerializer(qs, many=True, context={'request': request}).data
         return Response({'results': data, 'count': len(data)})
 
@@ -286,9 +279,7 @@ class LocationView(APIView):
         if not location:
             return Response({'detail': 'Location introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         # Return page after payment: the transaction is read again at the provider
-        dernier = location.paiements.order_by('-cree_le').first()
-        if dernier and dernier.statut == 'en_attente':
-            paiements.synchroniser_paiement(dernier)
+        if paiements.synchroniser_dernier_paiement('location', location.pk):
             location = _de_l_utilisateur(pk, request.user)
         return Response(LocationSerializer(location, context={'request': request}).data)
 
@@ -300,7 +291,7 @@ class LocationView(APIView):
             rembourse = services.annuler(location, par='voyageur')
         except services.LocationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        numero_requis = location.remboursements.filter(statut='attente_numero').exists()
+        numero_requis = paiements.numero_remboursement_requis('location', location.pk)
         return Response({'detail': 'Location annulée.', 'rembourse': rembourse, 'numero_requis': numero_requis})
 
 
@@ -328,6 +319,6 @@ class CompteRemboursementLocationView(APIView):
             return Response({'detail': 'Location introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = paiements.CompteRemboursementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if not paiements.indiquer_numero_remboursement(location, **serializer.validated_data):
+        if not paiements.indiquer_numero_remboursement('location', location.pk, **serializer.validated_data):
             return Response({'detail': "Aucun remboursement n'attend de numéro pour cette location."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'detail': 'Numéro enregistré : le remboursement va être envoyé.'})

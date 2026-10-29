@@ -173,7 +173,7 @@ def test_conversation_avec_fonction_puis_reponse(concierge, make_user, make_hebe
 
 def test_interaction_expiree_reprise_avec_resume(concierge, make_user):
     user = make_user()
-    conv = ConversationModel.objects.create(utilisateur=user, titre='Lomé', interaction_id='int_ancienne')
+    conv = ConversationModel.objects.create(utilisateur_id=user.id, titre='Lomé', interaction_id='int_ancienne')
     MessageModel.objects.create(conversation=conv, role='user', texte='Je pars à Lomé en mai')
     MessageModel.objects.create(conversation=conv, role='assistant', texte='Belle idée, mai est chaud.')
     expiree = compat_errors.NotFoundError('interaction introuvable', response=mock.Mock(status_code=404), body=None)

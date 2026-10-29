@@ -35,8 +35,8 @@ def _suite(h):
 
 def _reserver(make_user, type_logement, debut, fin, nb=1, **extra):
     extra.setdefault('status', 'confirmed')
-    return ReservationModel.objects.create(hebergement=type_logement.hebergement, type_logement=type_logement, nb_unites=nb,
-                                           guest=make_user(), check_in=_jour(debut), check_out=_jour(fin), total_price=0, **extra)
+    return ReservationModel.objects.create(hebergement_id=type_logement.hebergement_id, type_logement_id=type_logement.id, nb_unites=nb,
+                                           guest_id=make_user().pk, check_in=_jour(debut), check_out=_jour(fin), total_price=0, **extra)
 
 
 class TestDateBoundaries:
@@ -101,7 +101,7 @@ class TestUnits:
         assert stock.restantes(double, _jour(10), _jour(12)) == (0 if compte else 3)
 
     def test_a_booking_without_type_counts_against_every_type(self, make_user, hotel):
-        ReservationModel.objects.create(hebergement=hotel, guest=make_user(), check_in=_jour(10), check_out=_jour(12),
+        ReservationModel.objects.create(hebergement_id=hotel.id, guest_id=make_user().pk, check_in=_jour(10), check_out=_jour(12),
                                         total_price=0, status='confirmed')
         assert stock.restantes(_double(hotel), _jour(10), _jour(12)) == 2
         assert stock.restantes(_suite(hotel), _jour(10), _jour(12)) == 0

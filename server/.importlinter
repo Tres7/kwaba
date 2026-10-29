@@ -25,50 +25,6 @@ modules =
     apps.voyages
 ignore_imports =
     apps.** -> apps.*.api
-    apps.backoffice.give -> apps.give.models
-    apps.backoffice.give -> apps.give.services
-    apps.backoffice.locations -> apps.locations.models
-    apps.backoffice.locations -> apps.locations.services
-    apps.backoffice.locations -> apps.paiements.operateurs
-    apps.backoffice.transferts -> apps.paiements.operateurs
-    apps.backoffice.transferts -> apps.transferts.models
-    apps.backoffice.transferts -> apps.transferts.services
-    apps.backoffice.urls -> apps.hebergements.lancement
-    apps.backoffice.views -> apps.avis.models
-    apps.backoffice.views -> apps.hebergements.archivage
-    apps.backoffice.views -> apps.hebergements.models
-    apps.backoffice.views -> apps.paiements.models
-    apps.backoffice.views -> apps.paiements.services
-    apps.backoffice.views -> apps.paiements.tarifs
-    apps.backoffice.views -> apps.reservations.models
-    apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
-    apps.hebergements.alertes -> apps.paiements.notifications
-    apps.hebergements.disponibilites -> apps.reservations.models
-    apps.hebergements.management.commands.seed_demo -> apps.users.infrastructure.persistence.models
-    apps.hebergements.models -> apps.contrats.models
-    apps.hebergements.models -> apps.documents.models
-    apps.hebergements.serializers -> apps.paiements.tarifs
-    apps.hebergements.stock -> apps.reservations.models
-    apps.paiements.relances -> apps.locations.models
-    apps.paiements.relances -> apps.reservations.models
-    apps.paiements.relances -> apps.transferts.models
-    apps.paiements.services -> apps.give.services
-    apps.paiements.services -> apps.hebergements.alertes
-    apps.paiements.services -> apps.hebergements.disponibilites
-    apps.paiements.services -> apps.locations.models
-    apps.paiements.services -> apps.locations.services
-    apps.paiements.services -> apps.reservations.models
-    apps.paiements.services -> apps.transferts.models
-    apps.paiements.services -> apps.transferts.services
-    apps.paiements.tarifs -> apps.reservations.models
-    apps.paiements.views -> apps.reservations.models
-    apps.reservations.models -> apps.hebergements.models
-    apps.reservations.serializers -> apps.hebergements.disponibilites
-    apps.reservations.serializers -> apps.hebergements.serializers
-    apps.reservations.serializers -> apps.hebergements.types_logement
-    apps.reservations.serializers -> apps.paiements.services
-    apps.reservations.serializers -> apps.paiements.tarifs
-    apps.reservations.views -> apps.paiements.services
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier
@@ -97,7 +53,7 @@ forbidden_modules =
     apps.voyages
 
 [importlinter:contract:emails]
-name = Les emails passent par EmailRequestBus, pas par send_mail
+name = Les emails passent par apps.notifications.api
 type = forbidden
 source_modules =
     apps.avis
@@ -119,11 +75,7 @@ source_modules =
     apps.verifications
     apps.voyages
 forbidden_modules =
-    apps.notifications.infrastructure.email
+    apps.notifications.application
+    apps.notifications.infrastructure
+    apps.notifications.management
 allow_indirect_imports = True
-ignore_imports =
-    apps.contrats.services -> apps.notifications.infrastructure.email.envoi
-    apps.hebergements.lancement -> apps.notifications.infrastructure.email.envoi
-    apps.paiements.notifications -> apps.notifications.infrastructure.email.envoi
-    apps.users.infrastructure.messaging.FallbackEventBus -> apps.notifications.infrastructure.email.DjangoEmailSender
-    apps.verifications.services -> apps.notifications.infrastructure.email.envoi

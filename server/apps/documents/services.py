@@ -37,7 +37,7 @@ def _emettre(*, objet_type, objet_id, client_nom, client_email, client_adresse, 
     # Prices paid including tax: the VAT is extracted from the total
     ht = int((Decimal(ttc) / (1 + taux / 100)).quantize(Decimal('1'))) if taux else ttc
     f = FactureModel.objects.create(
-        numero=_numero(), emise_par=par, objet_type=objet_type, objet_id=objet_id, client_nom=client_nom,
+        numero=_numero(), emise_par_id=getattr(par, 'pk', None), objet_type=objet_type, objet_id=objet_id, client_nom=client_nom,
         client_email=client_email, client_adresse=client_adresse, lignes=lignes, total_ht=ht, tva=ttc - ht,
         total_ttc=ttc, taux_tva=taux,
     )

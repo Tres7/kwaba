@@ -3,7 +3,6 @@ person, shared itinerary and bookings)."""
 import secrets
 import uuid
 
-from django.conf import settings
 from django.db import models
 
 
@@ -18,7 +17,7 @@ class VoyageGroupeModel(models.Model):
     date_debut = models.DateField(null=True, blank=True)
     date_fin = models.DateField(null=True, blank=True)
     nb_voyageurs = models.PositiveSmallIntegerField(default=2, help_text='Pour le budget par personne')
-    organisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='voyages_organises')
+    organisateur_id = models.UUIDField(db_index=True)
     code_invitation = models.CharField(max_length=32, unique=True, default=nouveau_code)
     # Listing chosen by the organiser among the suggestions
     proposition_retenue = models.ForeignKey(
@@ -51,20 +50,20 @@ class VoyageGroupeModel(models.Model):
 
 class MembreModel(models.Model):
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='membres')
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='voyages_groupe')
+    utilisateur_id = models.UUIDField(db_index=True)
     rejoint_le = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         app_label = 'voyages'
         ordering = ['rejoint_le']
-        constraints = [models.UniqueConstraint(fields=['voyage', 'utilisateur'], name='membre_unique')]
+        constraints = [models.UniqueConstraint(fields=['voyage', 'utilisateur_id'], name='membre_unique')]
 
 
 class PropositionModel(models.Model):
     """A Kwa-Ba listing suggested to the group."""
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='propositions')
     hebergement_id = models.UUIDField(db_index=True)
-    propose_par = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    propose_par_id = models.UUIDField(db_index=True)
     commentaire = models.CharField(max_length=280, blank=True)
     cree_le = models.DateTimeField(auto_now_add=True)
 
@@ -78,11 +77,11 @@ class VoteModel(models.Model):
     """Each member votes for a single listing (their favourite); they can change their mind."""
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='votes')
     proposition = models.ForeignKey(PropositionModel, on_delete=models.CASCADE, related_name='votes')
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    utilisateur_id = models.UUIDField(db_index=True)
 
     class Meta:
         app_label = 'voyages'
-        constraints = [models.UniqueConstraint(fields=['voyage', 'utilisateur'], name='un_vote_par_membre')]
+        constraints = [models.UniqueConstraint(fields=['voyage', 'utilisateur_id'], name='un_vote_par_membre')]
 
 
 class EtapeModel(models.Model):
@@ -93,7 +92,7 @@ class EtapeModel(models.Model):
     titre = models.CharField(max_length=120)
     lieu = models.CharField(max_length=160, blank=True)
     details = models.CharField(max_length=500, blank=True)
-    ajoute_par = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    ajoute_par_id = models.UUIDField(db_index=True)
     cree_le = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -105,7 +104,7 @@ class LienReservationModel(models.Model):
     """A member's Kwa-Ba booking, shared with the group."""
     voyage = models.ForeignKey(VoyageGroupeModel, on_delete=models.CASCADE, related_name='reservations')
     reservation_id = models.UUIDField(db_index=True)
-    ajoute_par = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='+')
+    ajoute_par_id = models.UUIDField(db_index=True)
     cree_le = models.DateTimeField(auto_now_add=True)
 
     class Meta:

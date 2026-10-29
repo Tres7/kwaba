@@ -31,18 +31,18 @@ def _logement_detail(v: dict) -> dict:
 # --- Identity documents to check remotely ---------------------------------------------------------------------
 
 def _pieces() -> list[PieceIdentiteModel]:
-    return pieces_avec_nb_annonces(verifications.pieces_a_controler().select_related('hote'))
+    return pieces_avec_nb_annonces(verifications.pieces_a_controler())
 
 
 def _piece_resume(p: PieceIdentiteModel) -> dict:
     return {
-        'titre': nom(p.hote), 'sous_titre': p.get_type_piece_display(), 'ville': '', 'adresse': '',
+        'titre': nom(p.compte_hote), 'sous_titre': p.get_type_piece_display(), 'ville': '', 'adresse': '',
         'date': p.soumise_le, 'photo': None, 'etiquette': 'À distance',
     }
 
 
 def _piece_detail(p: PieceIdentiteModel) -> dict:
-    hote = p.hote
+    hote = p.compte_hote
     return {
         'piece': {
             **_piece_json(p),

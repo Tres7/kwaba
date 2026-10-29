@@ -1,6 +1,6 @@
 import uuid
+from functools import cached_property
 
-from django.conf import settings
 from django.db import models
 
 from apps.paiements.api import OPERATEUR_CHOICES, PAYS_CHOICES
@@ -89,7 +89,7 @@ class TransfertModel(models.Model):
     MOYENS = [('mobile_money', 'Mobile Money'), ('carte', 'Carte bancaire'), ('paypal', 'PayPal')]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    voyageur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='transferts')
+    voyageur_id = models.UUIDField(db_index=True)
     reservation_id = models.UUIDField(null=True, blank=True, db_index=True, help_text='Séjour Kwa-Ba associé (facultatif)')
     aeroport = models.ForeignKey(AeroportModel, on_delete=models.PROTECT, related_name='transferts')
     arrivee = models.DateTimeField(help_text="Heure d'atterrissage prévue")
@@ -129,6 +129,11 @@ class TransfertModel(models.Model):
 
     def __str__(self):
         return f"{self.reference} · {self.aeroport_id} → {self.destination[:40]}"
+
+    @cached_property
+    def voyageur(self):
+        from apps.users.api import compte
+        return compte(self.voyageur_id)
 
     @property
     def reference(self):

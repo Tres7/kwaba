@@ -14,6 +14,7 @@ from rest_framework.test import APIClient
 from apps.hebergements.disponibilites import conflit
 from apps.hebergements.models import HebergementModel
 from apps.reservations.models import ReservationModel
+from apps.reservations import paiement as reservations_paiement
 
 from apps.paiements import fedapay, paypal, services, tarifs
 from apps.paiements.models import PaiementModel, RemboursementModel, VersementModel
@@ -74,7 +75,7 @@ class CycleTests(TestCase):
         self.voyageur = User.objects.create_user('voy@test.tg', 'x', first_name='Kofi', last_name='Voy', role='voyageur')
         self.logement = HebergementModel.objects.create(
             statut_verification='verifiee',
-            name='Villa test', city='Lomé', price_per_night=20000, host=self.hote, amenities=[],
+            name='Villa test', city='Lomé', price_per_night=20000, host_id=self.hote.pk, amenities=[],
         )
         self.faux = FauxFedaPay()
         self.faux_paypal = FauxPayPal()
@@ -111,10 +112,10 @@ class CycleTests(TestCase):
         r = self.payer(resa)
         self.assertEqual(r.data['reservation'], 'confirmed')
         self.assertEqual(r.data['paiement'], 'reussi')
-        versement = resa.versement
+        versement = VersementModel.objects.get(reservation_id=resa.id)
         self.assertEqual((versement.montant, versement.commission, versement.statut), (55200, 4800, 'planifie'))
         self.assertEqual(versement.date_prevue, tarifs.date_versement(resa))
-        self.assertEqual(PaiementModel.objects.get(reservation=resa).telephone, '90000001')
+        self.assertEqual(PaiementModel.objects.get(reservation_id=resa.id).telephone, '90000001')
 
     @override_settings(FEDAPAY={**FEDAPAY_TEST, 'SECRET_KEY': ''}, PAYPAL={**PAYPAL_TEST, 'CLIENT_ID': ''})
     def test_sans_paiement_en_ligne_confirmation_directe(self):
@@ -123,7 +124,7 @@ class CycleTests(TestCase):
     def test_webhook_en_double_idempotent(self):
         resa = self.reserver()
         self.payer(resa)
-        paiement = PaiementModel.objects.get(reservation=resa)
+        paiement = PaiementModel.objects.get(reservation_id=resa.id)
         services.traiter_evenement({'name': 'transaction.approved', 'entity': {'id': paiement.transaction_id}})
         services._paiement_reussi(paiement.pk, {})
         self.assertEqual(VersementModel.objects.count(), 1)
@@ -134,7 +135,7 @@ class CycleTests(TestCase):
         self.assertTrue(conflit(self.logement.id, resa.check_in, resa.check_out))
         ReservationModel.objects.filter(pk=resa.pk).update(expire_le=timezone.now() - timedelta(minutes=1))
         self.assertIsNone(conflit(self.logement.id, resa.check_in, resa.check_out))
-        self.assertEqual(services.expirer_reservations(), 1)
+        self.assertEqual(reservations_paiement.expirer(), 1)
         resa.refresh_from_db()
         self.assertEqual((resa.status, resa.annule_par), ('cancelled', 'expiration'))
 
@@ -142,15 +143,15 @@ class CycleTests(TestCase):
         resa = self.reserver()
         self.api.post(f'/api/v1/paiements/reservations/{resa.id}/payer/')
         ReservationModel.objects.filter(pk=resa.pk).update(expire_le=timezone.now() - timedelta(minutes=1))
-        services.expirer_reservations()
+        reservations_paiement.expirer()
         autre = self.reserver()  # someone else takes the released dates
         self.assertNotEqual(autre.pk, resa.pk)
 
         self.faux.statut_transaction = 'approved'
-        services.synchroniser_paiement(PaiementModel.objects.get(reservation=resa))
+        services.synchroniser_paiement(PaiementModel.objects.get(reservation_id=resa.id))
         resa.refresh_from_db()
         self.assertEqual(resa.status, 'cancelled')
-        self.assertEqual(RemboursementModel.objects.get(reservation=resa).montant, 63600)
+        self.assertEqual(RemboursementModel.objects.get(reservation_id=resa.id).montant, 63600)
 
     def test_annulation_voyageur_moderee_50(self):
         resa = self.reserver(dans_jours=4)
@@ -158,23 +159,22 @@ class CycleTests(TestCase):
         r = self.api.delete(f'/api/v1/reservations/{resa.id}/')
         self.assertEqual(r.status_code, 200, r.content)
         self.assertEqual(r.data['rembourse'], 30000)
-        resa.versement.refresh_from_db()
-        self.assertEqual((resa.versement.montant, resa.versement.statut), (27600, 'planifie'))
+        versement = VersementModel.objects.get(reservation_id=resa.id)
+        self.assertEqual((versement.montant, versement.statut), (27600, 'planifie'))
 
     def test_annulation_plus_7_jours_tout_rembourse(self):
         resa = self.reserver(dans_jours=10)
         self.payer(resa)
         self.assertEqual(self.api.delete(f'/api/v1/reservations/{resa.id}/').data['rembourse'], 63600)
-        resa.versement.refresh_from_db()
-        self.assertEqual(resa.versement.statut, 'annule')
+        self.assertEqual(VersementModel.objects.get(reservation_id=resa.id).statut, 'annule')
 
     def test_versement_attend_le_profil_puis_part(self):
         resa = self.reserver(dans_jours=10)
         self.payer(resa)
-        VersementModel.objects.filter(reservation=resa).update(date_prevue=timezone.now() - timedelta(minutes=1))
+        VersementModel.objects.filter(reservation_id=resa.id).update(date_prevue=timezone.now() - timedelta(minutes=1))
 
         services.envoyer_versements_dus()
-        v = VersementModel.objects.get(reservation=resa)
+        v = VersementModel.objects.get(reservation_id=resa.id)
         self.assertEqual(v.statut, 'planifie')
         self.assertIn("où recevoir", v.derniere_erreur)
 
@@ -241,34 +241,34 @@ class CycleTests(TestCase):
         self.faux_paypal.statut = 'APPROVED'  # the traveller approved at PayPal
         statut = self.api.get(f'/api/v1/paiements/reservations/{resa.id}/statut/').data
         self.assertEqual(statut['reservation'], 'confirmed')
-        paiement = PaiementModel.objects.get(reservation=resa)
+        paiement = PaiementModel.objects.get(reservation_id=resa.id)
         self.assertEqual((paiement.prestataire, paiement.capture_id), ('paypal', 'CAP1'))
         resa.refresh_from_db()
         self.assertEqual(resa.payment_method, 'paypal')
-        self.assertEqual(resa.versement.montant, 55200)  # the host is paid in FCFA like the others
+        self.assertEqual(VersementModel.objects.get(reservation_id=resa.id).montant, 55200)  # the host is paid in FCFA like the others
 
         self.api.delete(f'/api/v1/reservations/{resa.id}/')
         services.envoyer_remboursements()
         self.assertEqual(self.faux_paypal.remboursements, [('CAP1', paypal.en_euros(63600))])
-        self.assertEqual(RemboursementModel.objects.get(reservation=resa).statut, 'envoye')
+        self.assertEqual(RemboursementModel.objects.get(reservation_id=resa.id).statut, 'envoye')
 
     def test_carte_remboursement_manuel(self):
         resa = self.reserver(dans_jours=10)
         self.api.post(f'/api/v1/paiements/reservations/{resa.id}/payer/', {'moyen': 'carte'}, format='json')
         self.faux.lire_transaction = lambda i: {'id': i, 'status': 'approved', 'mode': 'card'}
-        services.synchroniser_paiement(PaiementModel.objects.get(reservation=resa))
+        services.synchroniser_paiement(PaiementModel.objects.get(reservation_id=resa.id))
         resa.refresh_from_db()
         self.assertEqual((resa.status, resa.payment_method), ('confirmed', 'carte'))
         self.api.delete(f'/api/v1/reservations/{resa.id}/')
         services.envoyer_remboursements()
-        self.assertEqual(RemboursementModel.objects.get(reservation=resa).statut, 'a_traiter')
+        self.assertEqual(RemboursementModel.objects.get(reservation_id=resa.id).statut, 'a_traiter')
         self.assertEqual(self.faux.payouts, [])
 
     def test_remboursement_mobile_money_demande_le_numero(self):
         resa = self.reserver(dans_jours=10)
         self.api.post(f'/api/v1/paiements/reservations/{resa.id}/payer/')
         self.faux.lire_transaction = lambda i: {'id': i, 'status': 'approved', 'mode': 'momo_test'}  # without a number, like FedaPay
-        services.synchroniser_paiement(PaiementModel.objects.get(reservation=resa))
+        services.synchroniser_paiement(PaiementModel.objects.get(reservation_id=resa.id))
 
         r = self.api.delete(f'/api/v1/reservations/{resa.id}/')
         self.assertTrue(r.data['numero_requis'])
@@ -289,7 +289,7 @@ class CycleTests(TestCase):
         resa = self.reserver(dans_jours=10)
         self.payer(resa)
         self.api.delete(f'/api/v1/reservations/{resa.id}/')
-        remboursement = RemboursementModel.objects.get(reservation=resa)
+        remboursement = RemboursementModel.objects.get(reservation_id=resa.id)
 
         def refus(**kwargs):
             raise fedapay.FedaPayErreur('Opération non autorisée')
@@ -318,7 +318,7 @@ class CycleTests(TestCase):
         services.passe()
         self.assertEqual(len(mail.outbox), 2)  # no duplicate
 
-        VersementModel.objects.filter(reservation=resa).update(statut='echoue', derniere_erreur='Numéro invalide')
+        VersementModel.objects.filter(reservation_id=resa.id).update(statut='echoue', derniere_erreur='Numéro invalide')
         services.passe()
         self.assertEqual(mail.outbox[-1].to, ['admin@test.tg'])
         self.assertIn('Numéro invalide', mail.outbox[-1].body)

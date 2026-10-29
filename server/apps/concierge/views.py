@@ -38,14 +38,14 @@ class ConversationsView(APIView):
         return [ScopedRateThrottle()] if self.request.method == 'POST' else []
 
     def get(self, request):
-        conversations = ConversationModel.objects.filter(utilisateur=request.user)[:50]
+        conversations = ConversationModel.objects.filter(utilisateur_id=request.user.id)[:50]
         return Response({'results': [
             {'id': c.id, 'titre': c.titre or 'Nouvelle conversation', 'mis_a_jour_le': c.mis_a_jour_le}
             for c in conversations
         ]})
 
     def post(self, request):
-        conversation = ConversationModel.objects.create(utilisateur=request.user)
+        conversation = ConversationModel.objects.create(utilisateur_id=request.user.id)
         return Response({'id': conversation.id, 'titre': '', 'messages': []}, status=status.HTTP_201_CREATED)
 
 
@@ -53,7 +53,7 @@ class ConversationView(APIView):
     permission_classes = [ModuleOuvert, IsAuthenticated]
 
     def get(self, request, pk):
-        conversation = ConversationModel.objects.filter(pk=pk, utilisateur=request.user).first()
+        conversation = ConversationModel.objects.filter(pk=pk, utilisateur_id=request.user.id).first()
         if not conversation:
             return Response({'detail': 'Conversation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         return Response({
@@ -63,7 +63,7 @@ class ConversationView(APIView):
         })
 
     def delete(self, request, pk):
-        deleted, _ = ConversationModel.objects.filter(pk=pk, utilisateur=request.user).delete()
+        deleted, _ = ConversationModel.objects.filter(pk=pk, utilisateur_id=request.user.id).delete()
         if not deleted:
             return Response({'detail': 'Conversation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -76,7 +76,7 @@ class MessagesView(APIView):
     def post(self, request, pk):
         if not services.actif():
             return Response({'detail': "Le Concierge n'est pas encore activé."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        conversation = ConversationModel.objects.filter(pk=pk, utilisateur=request.user).first()
+        conversation = ConversationModel.objects.filter(pk=pk, utilisateur_id=request.user.id).first()
         if not conversation:
             return Response({'detail': 'Conversation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         texte = str(request.data.get('texte', '')).strip()

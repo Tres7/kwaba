@@ -118,12 +118,12 @@ def client_sans_incident(voyageur) -> bool:
     """At least 3 finished rentals without any amount withheld from the deposit: deposit halved."""
     if not voyageur or not getattr(voyageur, 'is_authenticated', False):
         return False
-    return LocationModel.objects.filter(voyageur=voyageur, statut='terminee', caution_retenue=0).count() >= LOCATIONS_CLIENT_FIDELE
+    return LocationModel.objects.filter(voyageur_id=voyageur.pk, statut='terminee', caution_retenue=0).count() >= LOCATIONS_CLIENT_FIDELE
 
 
 def mes_chauffeurs(voyageur) -> list[dict]:
     """Active drivers who have already driven this traveller (finished rental or transfer): "My driver"."""
-    ids = set(LocationModel.objects.filter(voyageur=voyageur, statut='terminee', chauffeur_partenaire_id__isnull=False)
+    ids = set(LocationModel.objects.filter(voyageur_id=voyageur.pk, statut='terminee', chauffeur_partenaire_id__isnull=False)
               .values_list('chauffeur_partenaire_id', flat=True))
     ids |= transferts.chauffeurs_des_transferts_termines(voyageur.pk)
     fiches = transferts.fiches_chauffeurs(ids)
@@ -223,7 +223,7 @@ def creer(*, voyageur, categorie: CategorieVehiculeModel | None, formule: str, l
                      jours_hors_lome=jours_hors_lome, jours_hors_pays=jours_hors_pays)
     en_ligne = paiements.paiement_actif()
     return LocationModel.objects.create(
-        voyageur=voyageur, categorie=categorie, formule=formule, lieu_prise=lieu_prise, lieu_retour=lieu_retour,
+        voyageur_id=voyageur.pk, categorie=categorie, formule=formule, lieu_prise=lieu_prise, lieu_retour=lieu_retour,
         debut=debut, fin=fin, passagers=passagers, jours=devis.jours, prix_jour=devis.prix_jour,
         frais_lieux=devis.frais_lieux, prix_chauffeur=devis.prix_chauffeur, primes=devis.primes, prix=devis.prix,
         commission=devis.commission, part_kwaba_chauffeur=devis.part_kwaba_chauffeur, caution=devis.caution,
@@ -245,7 +245,7 @@ def demarrer_paiement(location: LocationModel, moyen: str) -> str:
         location.moyen = moyen
         location.save(update_fields=['moyen'])
     return paiements.creer_paiement(
-        objet=location, montant=location.montant_a_payer, moyen=moyen, voyageur=location.voyageur,
+        type_objet='location', objet_id=location.id, montant=location.montant_a_payer, moyen=moyen, voyageur=location.voyageur,
         description=f"Kwa-Ba {location.reference}, {location.libelle}, {location.lieu_prise.ville}",
         url_retour=f"{settings.FRONTEND_URL}/location/{location.id}",
     )
@@ -268,7 +268,7 @@ def appliquer_pack_sejour(location: LocationModel) -> int:
 def paiement_recu(paiement):
     """Called by apps.paiements, in its transaction, when a rental payment succeeds."""
     location = LocationModel.objects.select_for_update().get(pk=paiement.location_id)
-    if location.paiements.filter(statut='reussi').exclude(pk=paiement.pk).exists():
+    if paiements.autre_paiement_reussi('location', location.pk, paiement):
         paiements.rembourser(paiement, paiement.montant, "Paiement reçu en double")
         return
     if location.statut == 'annulee' and location.annulee_par != 'expiration':
@@ -413,8 +413,7 @@ def annuler(location: LocationModel, par: str) -> int:
             raise LocationErreur("La location a commencé : elle ne peut plus être annulée.")
 
         rembourse = 0
-        paiement = location.paiements.filter(statut='reussi').order_by('cree_le').first()
-        if paiement:
+        if paiements.paiement_reussi('location', location.pk):
             retenu = retenue_si_annulation(location) if par == 'voyageur' else 0
             rembourse = location.prix - retenu
             part = Decimal(retenu) / location.prix if location.prix else Decimal(0)
@@ -432,7 +431,7 @@ def annuler(location: LocationModel, par: str) -> int:
                 rembourse += location.caution_gardee
                 location.caution_retenue, location.caution_restituee_le = 0, timezone.now()
             motif = "Annulation par le voyageur" if par == 'voyageur' else "Annulation par Kwa-Ba"
-            paiements.rembourser(paiement, rembourse, motif)
+            paiements.rembourser_en_partie('location', location.pk, rembourse, motif)
 
         location.statut, location.annulee_par, location.annulee_le = 'annulee', par, timezone.now()
         location.save(update_fields=['statut', 'annulee_par', 'annulee_le', 'caution_retenue', 'caution_restituee_le'])
@@ -469,8 +468,7 @@ def expirer() -> int:
     expirees = 0
     maintenant = timezone.now()
     for location in LocationModel.objects.filter(statut='en_attente_paiement', expire_le__lte=maintenant):
-        for paiement in location.paiements.filter(statut='en_attente'):
-            paiements.synchroniser_paiement(paiement)
+        paiements.synchroniser_paiements_en_attente('location', location.pk)
         expirees += LocationModel.objects.filter(pk=location.pk, statut='en_attente_paiement').update(
             statut='annulee', annulee_par='expiration', annulee_le=maintenant,
         )
@@ -491,9 +489,7 @@ def restituer_cautions() -> int:
             loc = LocationModel.objects.select_for_update().get(pk=pk)
             if loc.caution_restituee_le:
                 continue
-            paiement = loc.paiements.filter(statut='reussi').order_by('cree_le').first()
-            if paiement:
-                paiements.rembourser(paiement, loc.caution - loc.caution_retenue, "Restitution de la caution")
+            paiements.rembourser_en_partie('location', loc.pk, loc.caution - loc.caution_retenue, "Restitution de la caution")
             loc.caution_restituee_le = timezone.now()
             loc.save(update_fields=['caution_restituee_le'])
             restituees += 1

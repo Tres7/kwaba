@@ -1,8 +1,8 @@
 import uuid
-from django.conf import settings
+from functools import cached_property
+
 from django.db import models
 
-from apps.hebergements.models import HebergementModel, TypeLogementModel
 
 
 class ReservationModel(models.Model):
@@ -26,27 +26,12 @@ class ReservationModel(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    hebergement = models.ForeignKey(
-        HebergementModel,
-        on_delete=models.CASCADE,
-        related_name='reservations',
-    )
+    hebergement_id = models.UUIDField(db_index=True)
     # Unit type booked and number of identical units (a hotel room type, or the single type of a house).
-    # Filled for every booking (data migration); nullable until all the code uses it.
-    type_logement = models.ForeignKey(
-        TypeLogementModel,
-        # A type with bookings cannot be deleted alone; deleting the whole establishment stays possible
-        on_delete=models.RESTRICT,
-        null=True,
-        blank=True,
-        related_name='reservations',
-    )
+    # Filled for every booking (data migration); a type with bookings is deactivated, never deleted.
+    type_logement_id = models.UUIDField(null=True, blank=True, db_index=True)
     nb_unites = models.PositiveSmallIntegerField(default=1, db_default=1)
-    guest = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='reservations',
-    )
+    guest_id = models.UUIDField(db_index=True)
     check_in = models.DateField()
     check_out = models.DateField()
     guests_count = models.PositiveIntegerField(default=1)
@@ -75,7 +60,12 @@ class ReservationModel(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"RES-{str(self.id)[:8].upper()} · {self.hebergement.name}"
+        return f"RES-{str(self.id)[:8].upper()} · {self.hebergement_id}"
+
+    @cached_property
+    def guest(self):
+        from apps.users.api import compte
+        return compte(self.guest_id)
 
     @property
     def nights(self):

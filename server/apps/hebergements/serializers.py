@@ -3,9 +3,10 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from apps.paiements import tarifs
+from apps.paiements import api as paiements
 from apps.securite import coordonnees
 from apps.securite.images import MESSAGE as IMAGE_REFUSEE, url_image_autorisee
+from apps.users import api as users
 
 from .models import BlocageModel, HebergementModel, TypeLogementModel
 
@@ -35,7 +36,7 @@ AMENITIES += [valeur for paire in REGLES for valeur in paire]
 
 
 class HebergementSerializer(serializers.ModelSerializer):
-    host_id = serializers.UUIDField(source='host.id', read_only=True)
+    host_id = serializers.UUIDField(read_only=True)
     host_name = serializers.SerializerMethodField()
     hote_verifie = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
@@ -66,13 +67,28 @@ class HebergementSerializer(serializers.ModelSerializer):
                     donnees[champ] = coordonnees.analyser(donnees[champ])[0]
         return donnees
 
+    def _par_hote(self, cle: str, obj, charger):
+        """Read once for the listings being serialised (a list: the whole page)."""
+        cache = self.context.setdefault(cle, {})
+        if obj.host_id not in cache:
+            parent = self.parent
+            annonces = list(parent.instance) if isinstance(parent, serializers.ListSerializer) and parent.instance is not None else []
+            ids = {h.host_id for h in annonces} | {obj.host_id}
+            cache.update(charger(ids - cache.keys()))
+        return cache.get(obj.host_id)
+
     def get_host_name(self, obj):
-        return f"{obj.host.first_name} {obj.host.last_name}".strip()
+        hote = self._par_hote('_hotes', obj, lambda ids: {i: None for i in ids} | users.comptes(ids))
+        return hote.get_full_name() if hote else ''
 
     def get_hote_verifie(self, obj):
         # "Verified host" badge: identity document checked by Kwa-Ba
-        piece = getattr(obj.host, 'piece_identite', None)
-        return bool(piece and piece.statut == 'verifiee')
+        from apps.verifications.api import hotes_verifies  # local import: verifications reads the listings
+
+        def charger(ids):
+            verifies = hotes_verifies(ids)
+            return {i: i in verifies for i in ids}
+        return self._par_hote('_hotes_verifies', obj, charger)
 
     def get_motif_refus(self, obj):
         # The agent's message for the host: never shown to travellers
@@ -86,9 +102,9 @@ class HebergementSerializer(serializers.ModelSerializer):
         """Service fee rate for the visitor: 6 %, or 3 % if they already stayed with this host (loyal customer)."""
         request = self.context.get('request')
         if '_hotes_visites' not in self.context:
-            self.context['_hotes_visites'] = tarifs.hotes_deja_visites(request.user if request else None)
+            self.context['_hotes_visites'] = paiements.hotes_deja_visites(request.user if request else None)
         reduit = obj.host_id in self.context['_hotes_visites']
-        return float(tarifs.FRAIS_REDUITS if reduit else tarifs.FRAIS_VOYAGEUR)
+        return float(paiements.frais_reduits() if reduit else paiements.frais_voyageur())
 
     def get_types(self, obj):
         """Unit types to choose from (listing page only: one query, never per row of a list)."""

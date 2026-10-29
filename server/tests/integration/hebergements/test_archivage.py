@@ -27,7 +27,7 @@ def _supprimer(client_for, annonce):
 def test_deleting_archives_and_keeps_the_history(client_for, make_user, annonce, make_reservation):
     passee = make_reservation(annonce, starts_in=-10, nights=3)
     maintenant = timezone.now()
-    conversation = ConversationModel.objects.create(hebergement_id=annonce.id, guest=make_user(), host=annonce.host,
+    conversation = ConversationModel.objects.create(hebergement_id=annonce.id, guest_id=make_user().id, host_id=annonce.host.id,
                                                     created_at=maintenant, last_message_at=maintenant)
     visite = VisiteModel.objects.create(hebergement_id=annonce.id, decision='validee')
 
@@ -65,7 +65,7 @@ def test_no_email_when_the_archiving_is_refused(client_for, annonce, make_reserv
         assert _supprimer(client_for, annonce).status_code == 409
 
     assert mailoutbox == []
-    assert annonce.reservations.filter(status='pending').exists()
+    assert ReservationModel.objects.filter(hebergement_id=annonce.id, status='pending').exists()
 
 
 @pytest.mark.parametrize('starts_in, nights', [(10, 3), (-1, 3), (-3, 3)])
@@ -103,7 +103,7 @@ def test_archived_listing_cannot_be_booked(client_for, make_user, annonce):
 def test_conversations_about_an_archived_listing_stay_readable(client_for, make_user, annonce):
     voyageur = make_user()
     maintenant = timezone.now()
-    ConversationModel.objects.create(hebergement_id=annonce.id, guest=voyageur, host=annonce.host,
+    ConversationModel.objects.create(hebergement_id=annonce.id, guest_id=voyageur.id, host_id=annonce.host.id,
                                      created_at=maintenant, last_message_at=maintenant)
     _supprimer(client_for, annonce)
 
@@ -120,7 +120,7 @@ def test_back_office_deletion_archives_too(client_for, make_user, annonce, make_
     assert admin.delete(f'{ADMIN}{annonce.id}/?motif=Annonce frauduleuse').status_code == 204
 
     assert HebergementModel.tous.get(pk=annonce.pk).archivee_le is not None
-    assert annonce.reservations.count() == 1
+    assert ReservationModel.objects.filter(hebergement_id=annonce.id).count() == 1
 
 
 class TestRestauration:

@@ -1,6 +1,6 @@
 import uuid
+from functools import cached_property
 
-from django.conf import settings
 from django.db import models
 
 from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
@@ -8,7 +8,7 @@ from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
 
 class ProfilVersementModel(models.Model):
     """Where the host receives their money."""
-    hote = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profil_versement')
+    hote_id = models.UUIDField(unique=True)
     pays = models.CharField(max_length=2, choices=PAYS_CHOICES)
     operateur = models.CharField(max_length=30, choices=OPERATEUR_CHOICES)
     numero = models.CharField(max_length=15, help_text="Numéro local, sans l'indicatif du pays")
@@ -21,7 +21,7 @@ class ProfilVersementModel(models.Model):
         verbose_name_plural = 'Profils de versement'
 
     def __str__(self):
-        return f"{self.hote.email} · {self.get_operateur_display()} {self.numero}"
+        return f"{self.hote_id} · {self.get_operateur_display()} {self.numero}"
 
 
 class ConditionsHoteModel(models.Model):
@@ -29,12 +29,12 @@ class ConditionsHoteModel(models.Model):
     Founders Programme (5 % between two dates, first 50 individual hosts). Without a row: individual host."""
     CATEGORIES = [('particulier', 'Hôte particulier'), ('hotel', 'Hôtel ou résidence hôtelière')]
 
-    hote = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='conditions_hote')
+    hote_id = models.UUIDField(unique=True)
     categorie = models.CharField(max_length=20, choices=CATEGORIES, default='particulier')
     fondateur_debut = models.DateField(null=True, blank=True, help_text='Programme Fondateurs : premier jour à 5 %')
     fondateur_fin = models.DateField(null=True, blank=True, help_text='Programme Fondateurs : dernier jour à 5 % (6 mois)')
     mis_a_jour_le = models.DateTimeField(auto_now=True)
-    mis_a_jour_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    mis_a_jour_par_id = models.UUIDField(null=True, blank=True, db_index=True)
 
     class Meta:
         app_label = 'paiements'
@@ -42,7 +42,7 @@ class ConditionsHoteModel(models.Model):
         verbose_name_plural = 'Conditions des hôtes'
 
     def __str__(self):
-        return f"{self.hote.email} · {self.get_categorie_display()}"
+        return f"{self.hote_id} · {self.get_categorie_display()}"
 
     def fondateur_le(self, jour) -> bool:
         return bool(self.categorie == 'particulier' and self.fondateur_debut and self.fondateur_fin
@@ -50,37 +50,37 @@ class ConditionsHoteModel(models.Model):
 
 
 class ObjetPayeMixin:
-    """What is paid: a listing booking, an airport transfer, a car rental or a donation."""
+    """What is paid: a listing booking, an airport transfer, a car rental or a donation, described by its module
+    (paiements.registre)."""
+    TYPES_OBJETS = ('reservation', 'transfert', 'location', 'don')
 
     @property
-    def objet(self):
-        if self.reservation_id:
-            return self.reservation
-        if self.transfert_id:
-            return self.transfert
-        return self.location if getattr(self, 'location_id', None) else self.don
+    def type_objet(self) -> str:
+        return next(t for t in self.TYPES_OBJETS if getattr(self, f'{t}_id', None))
+
+    @property
+    def objet_id(self):
+        return getattr(self, f'{self.type_objet}_id')
+
+    @property
+    def description(self) -> dict:
+        from .registre import PRODUITS
+
+        if not hasattr(self, '_description'):
+            self._description = PRODUITS[self.type_objet].decrire(self.objet_id)
+        return self._description
 
     @property
     def payeur(self):
-        if self.reservation_id:
-            return self.reservation.guest
-        if self.transfert_id:
-            return self.transfert.voyageur
-        return self.location.voyageur if getattr(self, 'location_id', None) else self.don.donateur
+        return self.description['payeur']
 
     @property
     def reference(self):
-        return self.objet.reference
+        return self.description['reference']
 
     @property
     def libelle(self):
-        if self.reservation_id:
-            return self.reservation.hebergement.name
-        if self.transfert_id:
-            return f"Transfert depuis l'aéroport {self.transfert.aeroport.ville}"
-        if getattr(self, 'location_id', None):
-            return f"Location {self.location.libelle}, {self.location.lieu_prise.ville}"
-        return f"Don à {self.don.organisation.nom}"
+        return self.description['libelle']
 
 
 class PaiementModel(ObjetPayeMixin, models.Model):
@@ -97,16 +97,11 @@ class PaiementModel(ObjetPayeMixin, models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    reservation = models.ForeignKey(
-        'reservations.ReservationModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True,
-    )
-    transfert = models.ForeignKey(
-        'transferts.TransfertModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True,
-    )
-    don = models.ForeignKey('give.DonModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True)
-    location = models.ForeignKey(
-        'locations.LocationModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True,
-    )
+    # The paid object, by id (the modules of the products keep their objects): exactly one is filled
+    reservation_id = models.UUIDField(null=True, blank=True, db_index=True)
+    transfert_id = models.UUIDField(null=True, blank=True, db_index=True)
+    don_id = models.UUIDField(null=True, blank=True, db_index=True)
+    location_id = models.UUIDField(null=True, blank=True, db_index=True)
     montant = models.PositiveIntegerField()
     devise = models.CharField(max_length=3, default='XOF')
     prestataire = models.CharField(max_length=20, choices=PRESTATAIRES, default='fedapay')
@@ -133,10 +128,10 @@ class PaiementModel(ObjetPayeMixin, models.Model):
         verbose_name = 'Paiement'
         # Exactly one paid object
         constraints = [models.CheckConstraint(
-            condition=models.Q(reservation__isnull=False, transfert__isnull=True, don__isnull=True, location__isnull=True)
-            | models.Q(reservation__isnull=True, transfert__isnull=False, don__isnull=True, location__isnull=True)
-            | models.Q(reservation__isnull=True, transfert__isnull=True, don__isnull=False, location__isnull=True)
-            | models.Q(reservation__isnull=True, transfert__isnull=True, don__isnull=True, location__isnull=False),
+            condition=models.Q(reservation_id__isnull=False, transfert_id__isnull=True, don_id__isnull=True, location_id__isnull=True)
+            | models.Q(reservation_id__isnull=True, transfert_id__isnull=False, don_id__isnull=True, location_id__isnull=True)
+            | models.Q(reservation_id__isnull=True, transfert_id__isnull=True, don_id__isnull=False, location_id__isnull=True)
+            | models.Q(reservation_id__isnull=True, transfert_id__isnull=True, don_id__isnull=True, location_id__isnull=False),
             name='paiement_un_seul_objet',
         )]
 
@@ -155,8 +150,8 @@ class VersementModel(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    reservation = models.OneToOneField('reservations.ReservationModel', on_delete=models.PROTECT, related_name='versement')
-    hote = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='versements')
+    reservation_id = models.UUIDField(unique=True)
+    hote_id = models.UUIDField(db_index=True)
     montant_brut = models.PositiveIntegerField(help_text='Prix des nuits revenant à l\'hôte, avant commission')
     commission = models.PositiveIntegerField()
     montant = models.PositiveIntegerField(help_text='Montant versé à l\'hôte')
@@ -181,7 +176,12 @@ class VersementModel(models.Model):
         verbose_name_plural = 'Versements aux hôtes'
 
     def __str__(self):
-        return f"{self.montant} FCFA → {self.hote.email} ({self.get_statut_display()})"
+        return f"{self.montant} FCFA → {self.hote.email if self.hote else self.hote_id} ({self.get_statut_display()})"
+
+    @cached_property
+    def hote(self):
+        from apps.users.api import compte
+        return compte(self.hote_id)
 
 
 class RemboursementModel(ObjetPayeMixin, models.Model):
@@ -194,15 +194,9 @@ class RemboursementModel(ObjetPayeMixin, models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    reservation = models.ForeignKey(
-        'reservations.ReservationModel', on_delete=models.PROTECT, related_name='remboursements', null=True, blank=True,
-    )
-    transfert = models.ForeignKey(
-        'transferts.TransfertModel', on_delete=models.PROTECT, related_name='remboursements', null=True, blank=True,
-    )
-    location = models.ForeignKey(
-        'locations.LocationModel', on_delete=models.PROTECT, related_name='remboursements', null=True, blank=True,
-    )
+    reservation_id = models.UUIDField(null=True, blank=True, db_index=True)
+    transfert_id = models.UUIDField(null=True, blank=True, db_index=True)
+    location_id = models.UUIDField(null=True, blank=True, db_index=True)
     paiement = models.ForeignKey(PaiementModel, on_delete=models.PROTECT, related_name='remboursements')
     montant = models.PositiveIntegerField()
     devise = models.CharField(max_length=3, default='XOF')
