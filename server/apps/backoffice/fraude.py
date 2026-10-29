@@ -9,7 +9,7 @@ from apps.securite.audit import journaliser
 from apps.securite.models import AlerteFraudeModel
 from apps.securite.permissions import EstAdministrateur
 
-from .views import _nom, _paginer
+from apps.securite.backoffice import nom as _nom, paginer as _paginer
 
 LIBELLES = {'telephone': 'Téléphone', 'email': 'Email', 'lien': 'Lien', 'reseau': 'Réseau social',
             'application': 'Application de messagerie', 'hors_site': 'Paiement hors site'}

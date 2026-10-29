@@ -5,14 +5,15 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.paiements.operateurs import operateurs_du_pays
+from apps.paiements.api import operateurs_du_pays
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
-from apps.transferts import services
-from apps.transferts.models import AeroportModel, ChauffeurModel, TarifTransfertModel, TransfertModel
 
-from .views import _motif, _nom, _paginer
+from apps.securite.backoffice import motif as _motif, nom as _nom, paginer as _paginer
+
+from . import services
+from .models import AeroportModel, ChauffeurModel, TarifTransfertModel, TransfertModel
 
 
 # --- Airports and fares -------------------------------------------------------------------------

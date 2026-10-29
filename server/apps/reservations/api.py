@@ -3,7 +3,8 @@ from collections.abc import Iterable
 from datetime import date
 from types import SimpleNamespace
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.hebergements import api as hebergements
@@ -106,3 +107,26 @@ def annuler(reservation, par: str) -> int:
     from .paiement import annuler as annuler_reservation
 
     return annuler_reservation(reservation, par)
+
+
+def statistiques(depuis) -> dict:
+    """Bookings made since `depuis` (datetime): confirmed, cancelled, and confirmed volume in FCFA."""
+    resultat = ReservationModel.objects.filter(created_at__gte=depuis).aggregate(
+        confirmees_30j=Count('id', filter=Q(status='confirmed')),
+        annulees_30j=Count('id', filter=Q(status='cancelled')),
+        volume_30j=Sum('total_price', filter=Q(status='confirmed')),
+    )
+    resultat['volume_30j'] = int(resultat['volume_30j'] or 0)
+    return resultat
+
+
+def confirmees_par_jour(premier_jour: date) -> dict:
+    """Per day since `premier_jour`: number and volume of the confirmed bookings made that day."""
+    return {
+        ligne['jour']: ligne
+        for ligne in ReservationModel.objects
+        .filter(status='confirmed', created_at__date__gte=premier_jour)
+        .annotate(jour=TruncDate('created_at'))
+        .values('jour')
+        .annotate(nombre=Count('id'), volume=Sum('total_price'))
+    }

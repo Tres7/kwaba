@@ -10,14 +10,15 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.give import services
-from apps.give.models import DonModel, OrganisationModel, ProjetModel, ReversementModel
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 from apps.verifications.api import FichierInvalide, piece_identite
 
-from .views import _nom, _paginer
+from apps.securite.backoffice import nom as _nom, paginer as _paginer
+
+from . import services
+from .models import DonModel, OrganisationModel, ProjetModel, ReversementModel
 
 
 # --- ONG -----------------------------------------------------------------------------------------
