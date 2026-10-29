@@ -1,6 +1,6 @@
 # Frontières entre modules
 
-Règles : [ADR-019](ADR/ADR-019-monolithe-modulaire-strict.md). Vérification : `server/.importlinter`, lancé par `lint-imports` en CI, au pre-push et par `make lint`.
+Règles : [ADR-019](ADR/ADR-019-monolithe-modulaire-strict.md). Vérification : `server/.importlinter`, lancé par `lint-imports` en CI, au pre-push et par `make lint`. Les clés étrangères entre modules, invisibles pour import-linter, sont refusées par `server/tests/unit/architecture/test_cles_etrangeres.py`.
 
 ## Migrer un module
 
