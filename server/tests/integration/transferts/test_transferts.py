@@ -221,3 +221,16 @@ def test_a_transfer_can_only_be_linked_to_one_s_own_stay(client_for, make_user, 
     assert refuse.status_code == 400 and 'reservation' in refuse.data
     assert accepte.status_code == 201 and accepte.data['reservation'] == str(mon_sejour.id)
     assert client.get(f'{TRANSFERTS}?reservation={mon_sejour.id}').data['count'] == 1
+
+
+def test_driver_payout_confirmed_by_the_fedapay_webhook(client_for, make_user, faux, chauffeur):
+    t = _reserver_et_payer(client_for(make_user()), faux, categorie='berline')
+    paiements.passe()
+    services.assigner_chauffeur(t, chauffeur)
+    v = VersementChauffeurModel.objects.get(transfert=t)
+    VersementChauffeurModel.objects.filter(pk=v.pk).update(statut='en_cours', payout_id='P-CHAUFFEUR', tentatives=1)
+
+    paiements.traiter_evenement({'name': 'payout.sent', 'entity': {'id': 'P-CHAUFFEUR'}})
+
+    v.refresh_from_db()
+    assert v.statut == 'envoye' and v.envoye_le is not None

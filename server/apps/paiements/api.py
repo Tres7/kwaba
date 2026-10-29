@@ -5,6 +5,7 @@ from .documents import recu_paiement
 from .models import ConditionsHoteModel, PaiementModel
 from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
 from .paypal import FCFA_PAR_EURO
+from .registre import ProduitPaye, Relance, enregistrer as enregistrer_produit
 from .services import (
     INDISPONIBLE, PaiementErreur, annuler as annuler_reservation, creer_paiement, delai_paiement, envoyer_payout, fedapay_actif,
     indiquer_numero_remboursement, moyens_actifs, paiement_actif, rembourser, reservation_possible,
@@ -13,7 +14,7 @@ from .services import (
 from .views import CompteRemboursementSerializer
 
 __all__ = [
-    'CompteRemboursementSerializer', 'annuler_reservation', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
+    'ProduitPaye', 'Relance', 'enregistrer_produit', 'CompteRemboursementSerializer', 'annuler_reservation', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
     'PaiementErreur', 'alerte_admin', 'date_fr', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
     'documents_joints', 'emails_admins', 'envoyer_email', 'envoyer_payout', 'fcfa', 'fedapay_actif', 'frais_voyageur',
     'indiquer_numero_remboursement', 'moyens_actifs', 'paiement_actif', 'paiement_reussi', 'recu_pdf', 'rembourser',

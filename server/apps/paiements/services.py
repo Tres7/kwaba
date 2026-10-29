@@ -27,6 +27,7 @@ from apps.reservations.models import ReservationModel
 
 from . import fedapay, paypal, tarifs
 from .models import PaiementModel, ProfilVersementModel, RemboursementModel, VersementModel
+from .registre import PRODUITS
 
 logger = logging.getLogger('apps.paiements')
 
@@ -210,18 +211,10 @@ def _paiement_reussi(paiement_id, donnees: dict):
         paiement.save()
         logger.info("Paiement reçu : %s FCFA pour %s", paiement.montant, paiement.reference)
 
-        if paiement.transfert_id:
-            from apps.transferts.services import paiement_recu  # local import: transferts depends on paiements
-            paiement_recu(paiement)
-            return
-        if paiement.don_id:
-            from apps.give.services import paiement_recu  # local import: give depends on paiements
-            paiement_recu(paiement)
-            return
-        if paiement.location_id:
-            from apps.locations.services import paiement_recu  # local import: locations depends on paiements
-            paiement_recu(paiement)
-            return
+        for type_objet in ('transfert', 'don', 'location'):
+            if getattr(paiement, f'{type_objet}_id'):
+                PRODUITS[type_objet].paiement_recu(paiement)
+                return
 
         reservation = ReservationModel.objects.select_for_update().get(pk=paiement.reservation_id)
         if reservation.paiements.filter(statut='reussi').exclude(pk=paiement.pk).exists():
@@ -546,19 +539,16 @@ def passe() -> dict:
     for remboursement in RemboursementModel.objects.filter(statut='en_cours').exclude(payout_id='').select_related('paiement')[:50]:
         synchroniser_remboursement(remboursement)
     from . import notifications  # local import: notifications imports the models and the rates
-    from apps.give import services as give  # local imports: these modules depend on paiements
     from apps.hebergements import alertes
-    from apps.locations import services as locations
-    from apps.transferts import services as transferts
 
     stats = {
         'reservations_expirees': expirer_reservations(),
         'versements_envoyes': envoyer_versements_dus(),
         'remboursements_envoyes': envoyer_remboursements(),
-        **transferts.passe(),
-        **locations.passe(),
-        **give.passe(),
     }
+    for produit in PRODUITS.values():
+        if produit.passe:
+            stats.update(produit.passe())
     # After the expiries of this pass: the dates they freed are checked at once
     stats.update(alertes.passe())
     from . import relances
@@ -579,13 +569,10 @@ def traiter_evenement(evenement: dict):
         if paiement:
             synchroniser_paiement(paiement)
     elif nom.startswith('payout.'):
-        from apps.transferts.models import VersementChauffeurModel  # local import: transferts depends on paiements
         for versement in VersementModel.objects.filter(payout_id=identifiant, statut='en_cours'):
             synchroniser_versement(versement)
-        for versement in VersementChauffeurModel.objects.filter(payout_id=identifiant, statut='en_cours'):
-            synchroniser_payout(versement)
-        from apps.locations.models import VersementPartenaireModel  # local import: locations depends on paiements
-        for versement in VersementPartenaireModel.objects.filter(payout_id=identifiant, statut='en_cours'):
-            synchroniser_payout(versement)
+        for produit in PRODUITS.values():
+            for versement in (produit.versements(identifiant) if produit.versements else []):
+                synchroniser_payout(versement)
         for remboursement in RemboursementModel.objects.filter(payout_id=identifiant, statut='en_cours'):
             synchroniser_remboursement(remboursement)
