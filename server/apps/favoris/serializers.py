@@ -1,22 +1,20 @@
 from rest_framework import serializers
-from .models import FavoriModel
-from apps.hebergements.models import HebergementModel
-from apps.hebergements.serializers import HebergementSerializer
+
+from apps.hebergements import api as hebergements
 
 
-class FavoriSerializer(serializers.ModelSerializer):
-    hebergement_detail = HebergementSerializer(source='hebergement', read_only=True)
+def favoris_json(favoris, request) -> list[dict]:
+    cartes = hebergements.cartes([f.hebergement_id for f in favoris], request)
+    return [{
+        'id': str(f.id), 'hebergement': f.hebergement_id, 'hebergement_detail': cartes[f.hebergement_id],
+        'created_at': serializers.DateTimeField().to_representation(f.created_at),
+    } for f in favoris if f.hebergement_id in cartes]
 
-    class Meta:
-        model = FavoriModel
-        fields = ['id', 'hebergement', 'hebergement_detail', 'created_at']
-        read_only_fields = ['id', 'created_at']
 
+class FavoriCreateSerializer(serializers.Serializer):
+    hebergement = serializers.UUIDField()
 
-class FavoriCreateSerializer(serializers.ModelSerializer):
-    # Only published listings (verified by an agent, not hidden)
-    hebergement = serializers.PrimaryKeyRelatedField(queryset=HebergementModel.objects.publiees())
-
-    class Meta:
-        model = FavoriModel
-        fields = ['hebergement']
+    def validate_hebergement(self, valeur):
+        if not hebergements.est_publiee(valeur):
+            raise serializers.ValidationError('Hébergement introuvable.')
+        return valeur

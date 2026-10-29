@@ -24,6 +24,7 @@ modules =
     apps.verifications
     apps.voyages
 ignore_imports =
+    apps.** -> apps.*.api
     apps.avis.models -> apps.hebergements.models
     apps.avis.models -> apps.reservations.models
     apps.avis.serializers -> apps.reservations.models
@@ -84,9 +85,6 @@ ignore_imports =
     apps.documents.views -> apps.locations.models
     apps.documents.views -> apps.reservations.models
     apps.documents.views -> apps.transferts.models
-    apps.favoris.models -> apps.hebergements.models
-    apps.favoris.serializers -> apps.hebergements.models
-    apps.favoris.serializers -> apps.hebergements.serializers
     apps.give.models -> apps.paiements.operateurs
     apps.give.notifications -> apps.paiements.notifications
     apps.give.services -> apps.paiements.services
@@ -100,7 +98,6 @@ ignore_imports =
     apps.hebergements.serializers -> apps.paiements.tarifs
     apps.hebergements.stock -> apps.reservations.models
     apps.hebergements.views -> apps.contrats.preinscription
-    apps.hebergements.views -> apps.favoris.models
     apps.hebergements.views -> apps.verifications.services
     apps.locations.models -> apps.paiements.operateurs
     apps.locations.notifications -> apps.paiements.notifications

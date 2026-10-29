@@ -2,8 +2,6 @@ import uuid
 from django.conf import settings
 from django.db import models
 
-from apps.hebergements.models import HebergementModel
-
 
 class FavoriModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -12,18 +10,14 @@ class FavoriModel(models.Model):
         on_delete=models.CASCADE,
         related_name='favoris',
     )
-    hebergement = models.ForeignKey(
-        HebergementModel,
-        on_delete=models.CASCADE,
-        related_name='favorited_by',
-    )
+    hebergement_id = models.UUIDField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         app_label = 'favoris'
         ordering = ['-created_at']
         constraints = [
-            models.UniqueConstraint(fields=['user', 'hebergement'], name='unique_user_hebergement_favori'),
+            models.UniqueConstraint(fields=['user', 'hebergement_id'], name='unique_user_hebergement_favori'),
         ]
 
     def __str__(self):
