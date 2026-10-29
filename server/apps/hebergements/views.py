@@ -25,6 +25,7 @@ from .serializers import (
     BlocageSerializer, HebergementSerializer, HebergementCreateSerializer, RechercheSerializer, TypeLogementSerializer,
 )
 from apps.contrats import preinscription
+from apps.favoris import api as favoris
 from apps.verifications import services as verifications
 
 HOST_ROLES = ('hote', 'admin')
@@ -43,8 +44,7 @@ def _context(request, proprietaire=False):
     """
     contexte = {'request': request, 'proprietaire': proprietaire}
     if request.user and request.user.is_authenticated:
-        from apps.favoris.models import FavoriModel
-        contexte['favorite_ids'] = set(FavoriModel.objects.filter(user=request.user).values_list('hebergement_id', flat=True))
+        contexte['favorite_ids'] = favoris.ids_favoris(request.user.id)
     return contexte
 
 
