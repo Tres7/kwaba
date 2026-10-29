@@ -1,7 +1,6 @@
 import math
 import uuid
 
-from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.db.models import Count
 from rest_framework import serializers, status
@@ -12,6 +11,7 @@ from rest_framework.views import APIView
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 from apps.reservations import api as reservations_api
+from apps.users import api as users
 
 from .models import (
     EtapeModel, LienReservationModel, MembreModel, PropositionModel, VoteModel, VoyageGroupeModel, nouveau_code,
@@ -21,12 +21,14 @@ MAX_MEMBRES = 20
 
 
 def _nom(u) -> str:
+    if u is None:
+        return ''
     return f"{u.first_name} {u.last_name[:1]}.".strip() if u.last_name else u.first_name
 
 
 def _voyage(pk, user):
     """Trip the user is a member of, or None (404: its existence is not revealed)."""
-    return VoyageGroupeModel.objects.filter(pk=pk, membres__utilisateur=user).select_related('organisateur').first()
+    return VoyageGroupeModel.objects.filter(pk=pk, membres__utilisateur_id=user.id).first()
 
 
 def _uuid(valeur) -> uuid.UUID | None:
@@ -61,14 +63,20 @@ def budget(hebergement, voyage) -> dict | None:
 
 
 def detail(voyage, user, request) -> dict:
-    membres = list(voyage.membres.select_related('utilisateur'))
+    membres = list(voyage.membres.all())
     votes = list(voyage.votes.all())
     mon_vote = next((v.proposition_id for v in votes if v.utilisateur_id == user.id), None)
-    liste_propositions = list(voyage.propositions.select_related('propose_par'))
-    liens = list(voyage.reservations.select_related('ajoute_par'))
+    liste_propositions = list(voyage.propositions.all())
+    liens = list(voyage.reservations.all())
+    etapes = list(voyage.etapes.all())
     resas = reservations_api.resumes(lien.reservation_id for lien in liens)
     annonces = hebergements.resumes({p.hebergement_id for p in liste_propositions} | {r['hebergement_id'] for r in resas.values()})
-    voyageurs = {u.id: u for u in get_user_model().objects.filter(id__in={r['voyageur_id'] for r in resas.values()})}
+    personnes = users.comptes({voyage.organisateur_id} | {m.utilisateur_id for m in membres}
+                              | {p.propose_par_id for p in liste_propositions} | {e.ajoute_par_id for e in etapes}
+                              | {r['voyageur_id'] for r in resas.values()})
+
+    def nom(user_id) -> str:
+        return _nom(personnes.get(user_id))
     propositions = []
     for p in liste_propositions:
         h = annonces.get(p.hebergement_id)
@@ -78,10 +86,10 @@ def detail(voyage, user, request) -> dict:
         if voyage.date_debut and voyage.date_fin:
             disponible = h['publiee'] and hebergements.est_disponible(h['id'], voyage.date_debut, voyage.date_fin)
         propositions.append({
-            'id': p.id, 'commentaire': p.commentaire, 'propose_par': _nom(p.propose_par),
+            'id': p.id, 'commentaire': p.commentaire, 'propose_par': nom(p.propose_par_id),
             'peut_supprimer': user.id in (p.propose_par_id, voyage.organisateur_id),
             'votes': sum(1 for v in votes if v.proposition_id == p.id),
-            'votants': [_nom(m.utilisateur) for m in membres if any(v.utilisateur_id == m.utilisateur_id and v.proposition_id == p.id for v in votes)],
+            'votants': [nom(m.utilisateur_id) for m in membres if any(v.utilisateur_id == m.utilisateur_id and v.proposition_id == p.id for v in votes)],
             'hebergement': {
                 'id': str(h['id']), 'name': h['name'], 'city': h['city'], 'location': h['location'], 'type': h['type'],
                 'image_url': h['image_url'], 'price_per_night': float(h['price_per_night']), 'max_guests': h['max_guests'],
@@ -98,30 +106,29 @@ def detail(voyage, user, request) -> dict:
         h = annonces.get(r['hebergement_id']) if r else None
         if not h:
             continue
-        voyageur = voyageurs.get(r['voyageur_id'])
         reservations.append({
             'id': lien.id, 'reservation_id': str(r['id']), 'reference': r['reference'], 'hebergement': h['name'],
             'hebergement_id': str(h['id']), 'ville': h['city'], 'adresse': h['location'],
             'check_in': r['check_in'], 'check_out': r['check_out'], 'voyageurs': r['voyageurs'], 'statut': r['statut'],
-            'total': float(r['total']), 'reserve_par': _nom(voyageur) if voyageur else '',
+            'total': float(r['total']), 'reserve_par': nom(r['voyageur_id']),
             'peut_retirer': user.id in (lien.ajoute_par_id, voyage.organisateur_id),
         })
     return {
         'id': voyage.id, 'nom': voyage.nom, 'destination': voyage.destination,
         'date_debut': voyage.date_debut, 'date_fin': voyage.date_fin, 'nuits': voyage.nuits,
         'nb_voyageurs': voyage.nb_voyageurs, 'notes': voyage.notes,
-        'organisateur': _nom(voyage.organisateur), 'est_organisateur': voyage.organisateur_id == user.id,
+        'organisateur': nom(voyage.organisateur_id), 'est_organisateur': voyage.organisateur_id == user.id,
         'code_invitation': voyage.code_invitation,
-        'membres': [{'id': m.utilisateur_id, 'nom': _nom(m.utilisateur), 'organisateur': m.utilisateur_id == voyage.organisateur_id,
+        'membres': [{'id': m.utilisateur_id, 'nom': nom(m.utilisateur_id), 'organisateur': m.utilisateur_id == voyage.organisateur_id,
                      'moi': m.utilisateur_id == user.id} for m in membres],
         'propositions': propositions,
         'mon_vote': mon_vote,
         'proposition_retenue': voyage.proposition_retenue_id,
         'etapes': [{
             'id': e.id, 'date': e.date, 'heure': e.heure.strftime('%H:%M') if e.heure else None, 'titre': e.titre,
-            'lieu': e.lieu, 'details': e.details, 'ajoute_par': _nom(e.ajoute_par),
+            'lieu': e.lieu, 'details': e.details, 'ajoute_par': nom(e.ajoute_par_id),
             'peut_supprimer': user.id in (e.ajoute_par_id, voyage.organisateur_id),
-        } for e in voyage.etapes.select_related('ajoute_par')],
+        } for e in etapes],
         'reservations': reservations,
         'mis_a_jour_le': voyage.mis_a_jour_le,
     }
@@ -147,12 +154,14 @@ class VoyagesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        voyages = (VoyageGroupeModel.objects.filter(membres__utilisateur=request.user)
-                   .select_related('organisateur').annotate(nb_membres=Count('membres', distinct=True),
+        voyages = list(VoyageGroupeModel.objects.filter(membres__utilisateur_id=request.user.id)
+                   .annotate(nb_membres=Count('membres', distinct=True),
                                                             nb_propositions=Count('propositions', distinct=True)))
+        organisateurs = users.comptes(v.organisateur_id for v in voyages)
         return Response({'results': [{
             'id': v.id, 'nom': v.nom, 'destination': v.destination, 'date_debut': v.date_debut, 'date_fin': v.date_fin,
-            'nb_membres': v.nb_membres, 'nb_propositions': v.nb_propositions, 'organisateur': _nom(v.organisateur),
+            'nb_membres': v.nb_membres, 'nb_propositions': v.nb_propositions,
+            'organisateur': _nom(organisateurs.get(v.organisateur_id)),
             'est_organisateur': v.organisateur_id == request.user.id,
         } for v in voyages]})
 
@@ -160,8 +169,8 @@ class VoyagesView(APIView):
         serializer = VoyageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
-            voyage = serializer.save(organisateur=request.user)
-            MembreModel.objects.create(voyage=voyage, utilisateur=request.user)
+            voyage = serializer.save(organisateur_id=request.user.id)
+            MembreModel.objects.create(voyage=voyage, utilisateur_id=request.user.id)
         return Response(detail(voyage, request.user, request), status=status.HTTP_201_CREATED)
 
 
@@ -199,7 +208,7 @@ class InvitationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def _par_code(self, code):
-        return VoyageGroupeModel.objects.filter(code_invitation=code).select_related('organisateur').first()
+        return VoyageGroupeModel.objects.filter(code_invitation=code).first()
 
     def get(self, request, code):
         voyage = self._par_code(code)
@@ -207,18 +216,18 @@ class InvitationView(APIView):
             return Response({'detail': "Ce lien d'invitation n'est plus valable."}, status=status.HTTP_404_NOT_FOUND)
         return Response({
             'id': voyage.id, 'nom': voyage.nom, 'destination': voyage.destination, 'date_debut': voyage.date_debut,
-            'date_fin': voyage.date_fin, 'organisateur': _nom(voyage.organisateur), 'nb_membres': voyage.membres.count(),
-            'deja_membre': voyage.membres.filter(utilisateur=request.user).exists(),
+            'date_fin': voyage.date_fin, 'organisateur': _nom(users.compte(voyage.organisateur_id)), 'nb_membres': voyage.membres.count(),
+            'deja_membre': voyage.membres.filter(utilisateur_id=request.user.id).exists(),
         })
 
     def post(self, request, code):
         voyage = self._par_code(code)
         if not voyage:
             return Response({'detail': "Ce lien d'invitation n'est plus valable."}, status=status.HTTP_404_NOT_FOUND)
-        if not voyage.membres.filter(utilisateur=request.user).exists():
+        if not voyage.membres.filter(utilisateur_id=request.user.id).exists():
             if voyage.membres.count() >= MAX_MEMBRES:
                 return Response({'detail': f"Ce voyage a atteint {MAX_MEMBRES} membres."}, status=status.HTTP_400_BAD_REQUEST)
-            MembreModel.objects.get_or_create(voyage=voyage, utilisateur=request.user)
+            MembreModel.objects.get_or_create(voyage=voyage, utilisateur_id=request.user.id)
         return Response({'id': voyage.id})
 
 
@@ -269,7 +278,7 @@ class PropositionsView(APIView):
         try:
             with transaction.atomic():  # the duplicate must not break the request's transaction
                 PropositionModel.objects.create(
-                    voyage=voyage, hebergement_id=hebergement_id, propose_par=request.user,
+                    voyage=voyage, hebergement_id=hebergement_id, propose_par_id=request.user.id,
                     commentaire=str(request.data.get('commentaire', ''))[:280],
                 )
         except IntegrityError:
@@ -306,7 +315,7 @@ class VoteView(APIView):
         proposition = voyage.propositions.filter(pk=_entier(request.data.get('proposition'))).first()
         if not proposition:
             return Response({'proposition': ['Proposition introuvable.']}, status=status.HTTP_400_BAD_REQUEST)
-        VoteModel.objects.update_or_create(voyage=voyage, utilisateur=request.user, defaults={'proposition': proposition})
+        VoteModel.objects.update_or_create(voyage=voyage, utilisateur_id=request.user.id, defaults={'proposition': proposition})
         voyage.save(update_fields=['mis_a_jour_le'])
         return Response(detail(voyage, request.user, request))
 
@@ -314,7 +323,7 @@ class VoteView(APIView):
         voyage = _voyage(pk, request.user)
         if not voyage:
             return _introuvable()
-        VoteModel.objects.filter(voyage=voyage, utilisateur=request.user).delete()
+        VoteModel.objects.filter(voyage=voyage, utilisateur_id=request.user.id).delete()
         voyage.save(update_fields=['mis_a_jour_le'])
         return Response(detail(voyage, request.user, request))
 
@@ -353,7 +362,7 @@ class EtapesView(APIView):
             return _introuvable()
         serializer = EtapeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(voyage=voyage, ajoute_par=request.user)
+        serializer.save(voyage=voyage, ajoute_par_id=request.user.id)
         voyage.save(update_fields=['mis_a_jour_le'])
         return Response(detail(voyage, request.user, request), status=status.HTTP_201_CREATED)
 
@@ -388,7 +397,7 @@ class ReservationsPartageesView(APIView):
         if not reservation_id or not reservations_api.appartient_au_voyageur(reservation_id, request.user.id):
             return Response({'reservation': ['Réservation introuvable.']}, status=status.HTTP_400_BAD_REQUEST)
         LienReservationModel.objects.get_or_create(voyage=voyage, reservation_id=reservation_id,
-                                                   defaults={'ajoute_par': request.user})
+                                                   defaults={'ajoute_par_id': request.user.id})
         voyage.save(update_fields=['mis_a_jour_le'])
         return Response(detail(voyage, request.user, request), status=status.HTTP_201_CREATED)
 

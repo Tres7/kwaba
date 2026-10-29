@@ -9,13 +9,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.securite import captcha
 from apps.securite.audit import journaliser
 from apps.securite.limites import Tentatives, incrementer, limite_ip
+from apps.users.api import revoquer_jetons
 from apps.users.application.dto.dto import GoogleAuthDTO, RegisterDTO, UserRole
 from apps.users.application.service.UserService import UserService
 from apps.users.application.events.UserRegistered import UserRegistered
@@ -76,15 +76,6 @@ def _user_payload(user) -> dict:
 def _tokens_for(user_id) -> dict:
     refresh = RefreshToken.for_user(UserModel.objects.get(id=user_id))
     return {'access': str(refresh.access_token), 'refresh': str(refresh)}
-
-
-def revoquer_jetons(user_id) -> None:
-    """Blacklists all the user's refresh tokens: all their sessions are closed.
-
-    Access tokens issued before a password change are refused by CHECK_REVOKE_TOKEN.
-    """
-    for jeton in OutstandingToken.objects.filter(user_id=user_id).exclude(blacklistedtoken__isnull=False):
-        BlacklistedToken.objects.get_or_create(token=jeton)
 
 
 def _essais_code(email: str) -> Tentatives:

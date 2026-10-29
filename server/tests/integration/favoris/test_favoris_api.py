@@ -11,7 +11,7 @@ def test_add_is_idempotent(client_for, make_user, make_hebergement):
 
     assert client.post(FAVORIS, {'hebergement': str(listing.id)}, format='json').status_code == 201
     assert client.post(FAVORIS, {'hebergement': str(listing.id)}, format='json').status_code == 200
-    assert FavoriModel.objects.filter(user=user, hebergement_id=listing.id).count() == 1
+    assert FavoriModel.objects.filter(user_id=user.id, hebergement_id=listing.id).count() == 1
 
 
 def test_unknown_listing(client_for, make_user):
@@ -22,7 +22,7 @@ def test_unknown_listing(client_for, make_user):
 
 def test_remove(client_for, make_user, make_hebergement):
     user, listing = make_user(), make_hebergement()
-    FavoriModel.objects.create(user=user, hebergement_id=listing.id)
+    FavoriModel.objects.create(user_id=user.id, hebergement_id=listing.id)
     client = client_for(user)
 
     assert client.delete(f'{FAVORIS}{listing.id}/').status_code == 204
@@ -32,8 +32,8 @@ def test_remove(client_for, make_user, make_hebergement):
 def test_list_only_own_favorites(client_for, make_user, make_hebergement):
     user = make_user()
     mine = make_hebergement(name='Le mien')
-    FavoriModel.objects.create(user=user, hebergement_id=mine.id)
-    FavoriModel.objects.create(user=make_user(), hebergement_id=make_hebergement(name='Pas le mien').id)
+    FavoriModel.objects.create(user_id=user.id, hebergement_id=mine.id)
+    FavoriModel.objects.create(user_id=make_user().id, hebergement_id=make_hebergement(name='Pas le mien').id)
 
     results = client_for(user).get(FAVORIS).data['results']
     assert [f['hebergement'] for f in results] == [mine.id]
@@ -56,17 +56,17 @@ def test_unpublished_listing_cannot_be_added(client_for, make_user, make_heberge
 def test_listing_no_longer_public_leaves_the_list_but_the_favourite_is_kept(client_for, make_user, make_hebergement,
                                                                              retrait):
     user, annonce = make_user(), make_hebergement()
-    FavoriModel.objects.create(user=user, hebergement_id=annonce.id)
+    FavoriModel.objects.create(user_id=user.id, hebergement_id=annonce.id)
 
     retrait(client_for, annonce)
 
     assert client_for(user).get(FAVORIS).data == {'results': [], 'count': 0}
-    assert FavoriModel.objects.filter(user=user, hebergement_id=annonce.id).exists()
+    assert FavoriModel.objects.filter(user_id=user.id, hebergement_id=annonce.id).exists()
 
 
 def test_list_card_is_the_listing_card(client_for, make_user, make_hebergement):
     user, annonce = make_user(), make_hebergement(name='Villa Océane')
-    FavoriModel.objects.create(user=user, hebergement_id=annonce.id)
+    FavoriModel.objects.create(user_id=user.id, hebergement_id=annonce.id)
 
     carte = client_for(user).get(FAVORIS).data['results'][0]['hebergement_detail']
 
@@ -78,7 +78,7 @@ def test_query_count_does_not_grow_with_favourites(client_for, make_user, make_h
     user = make_user()
     client = client_for(user)
     for i in range(8):
-        FavoriModel.objects.create(user=user, hebergement_id=make_hebergement(name=f'Annonce {i}').id)
+        FavoriModel.objects.create(user_id=user.id, hebergement_id=make_hebergement(name=f'Annonce {i}').id)
 
     with django_assert_max_num_queries(8):
         assert client.get(FAVORIS).data['count'] == 8

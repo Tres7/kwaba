@@ -37,7 +37,7 @@ def _prevenir_admins(alerte: AlerteFraudeModel, nombre: int) -> None:
     from apps.notifications.api import send_mail
 
     try:
-        u = alerte.utilisateur
+        u = get_user_model().objects.get(pk=alerte.utilisateur_id)
         admins = list(get_user_model().objects.filter(role='admin', is_active=True).values_list('email', flat=True)[:10])
         if not admins:
             return

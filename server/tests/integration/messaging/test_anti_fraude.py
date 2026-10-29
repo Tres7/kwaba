@@ -56,7 +56,7 @@ def test_message_masque_et_signale(client_for, guest, listing, thread):
     recu = client_for(listing.host).get(f'{CONVERSATIONS}{thread}/messages/').data['results'][0]
     assert recu['masked'] is True and MASQUE in recu['content']
     alerte = AlerteFraudeModel.objects.get()
-    assert alerte.utilisateur == guest and alerte.contexte == 'message' and alerte.masquee
+    assert alerte.utilisateur_id == guest.id and alerte.contexte == 'message' and alerte.masquee
     assert set(alerte.types) == {'telephone', 'email', 'hors_site'} and '90 12 34 56' in alerte.extraits
     # Message ordinaire : ni masque ni alerte
     assert _envoyer(client_for(guest), thread, 'Le logement est-il libre du 12/10/2026 au 15/10/2026 ?').data['masked'] is False
@@ -115,7 +115,7 @@ def test_annonce_sans_coordonnees(client_for, make_user, make_hebergement, listi
                'lits_doubles': 2, 'petit_dejeuner': 'non'}
     reponse = client_for(hote).post('/api/v1/hebergements/', donnees, format='json')
     assert reponse.status_code == 400 and 'messagerie Kwa-Ba' in str(reponse.data['description'])
-    assert AlerteFraudeModel.objects.get(contexte='annonce').utilisateur == hote
+    assert AlerteFraudeModel.objects.get(contexte='annonce').utilisateur_id == hote.id
     # Listing published before the filtering: hidden for travellers, intact for its host
     listing.description = 'Contact WhatsApp 90 12 34 56'
     listing.save()

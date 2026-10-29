@@ -1,12 +1,11 @@
 import uuid
 
-from django.conf import settings
 from django.db import models
 
 
 class ConversationModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='conversations_concierge')
+    utilisateur_id = models.UUIDField(db_index=True)
     titre = models.CharField(max_length=120, blank=True)
     # Last Gemini interaction: the API keeps the history at Google (55 days on the paid plan)
     interaction_id = models.CharField(max_length=128, blank=True)

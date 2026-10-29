@@ -1,22 +1,13 @@
 import uuid
-from django.conf import settings
 from django.db import models
 
 
 class ConversationModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hebergement_id = models.UUIDField(db_index=True)
-    guest = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='guest_conversations',
-    )
+    guest_id = models.UUIDField(db_index=True)
     # Copy of the host when the thread was created
-    host = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='host_conversations',
-    )
+    host_id = models.UUIDField(db_index=True)
     # Read cursors: id of the last message read by each participant
     guest_last_read_id = models.BigIntegerField(default=0)
     host_last_read_id = models.BigIntegerField(default=0)
@@ -27,11 +18,11 @@ class ConversationModel(models.Model):
         app_label = 'messaging'
         db_table = 'messaging_conversation'
         constraints = [
-            models.UniqueConstraint(fields=['hebergement_id', 'guest'], name='messaging_unique_hebergement_guest'),
+            models.UniqueConstraint(fields=['hebergement_id', 'guest_id'], name='messaging_unique_hebergement_guest'),
         ]
         indexes = [
-            models.Index(fields=['guest', '-last_message_at'], name='messaging_conv_guest_idx'),
-            models.Index(fields=['host', '-last_message_at'], name='messaging_conv_host_idx'),
+            models.Index(fields=['guest_id', '-last_message_at'], name='messaging_conv_guest_idx'),
+            models.Index(fields=['host_id', '-last_message_at'], name='messaging_conv_host_idx'),
         ]
 
     def __str__(self):
@@ -46,11 +37,7 @@ class MessageModel(models.Model):
         on_delete=models.CASCADE,
         related_name='messages',
     )
-    sender = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='sent_messages',
-    )
+    sender_id = models.UUIDField(db_index=True)
     content = models.TextField()
     # Contact details hidden when sending (anti-bypass); the original text is not kept
     masque = models.BooleanField(default=False)

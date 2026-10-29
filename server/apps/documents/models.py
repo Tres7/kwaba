@@ -1,6 +1,5 @@
 import uuid
 
-from django.conf import settings
 from django.core.files.storage import storages
 from django.db import models
 
@@ -74,7 +73,7 @@ class FactureModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     numero = models.CharField(max_length=20, unique=True)
     emise_le = models.DateTimeField(auto_now_add=True)
-    emise_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    emise_par_id = models.UUIDField(null=True, blank=True, db_index=True)
     objet_type = models.CharField(max_length=20, choices=OBJETS)
     objet_id = models.UUIDField(null=True, blank=True, db_index=True)
     client_nom = models.CharField(max_length=150)

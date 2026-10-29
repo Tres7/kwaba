@@ -99,7 +99,7 @@ class TestFileCommune:
 
         assert _valider(kofi, annonce).status_code == 201
         mission = MissionModel.objects.get()
-        assert (mission.statut, mission.decision, mission.agent) == ('terminee', 'validee', agents[0])
+        assert (mission.statut, mission.decision, mission.agent_id) == ('terminee', 'validee', agents[0].id)
         assert _cibles(kofi, 'historique') == [('logement', str(annonce.id))]
         assert _cibles(afi, 'historique') == []
 
@@ -118,7 +118,7 @@ class TestFileCommune:
     def test_an_admin_can_decide_on_an_agent_mission(self, client_for, agents, admin, annonce):
         client_for(agents[0]).post(_url('logement', annonce.id, 'prendre'))
         assert _valider(client_for(admin), annonce).status_code == 201
-        assert MissionModel.objects.get().agent == admin
+        assert MissionModel.objects.get().agent_id == admin.id
 
     def test_deciding_without_taking_the_mission_still_fills_the_history(self, client_for, agents, piece):
         kofi = client_for(agents[0])

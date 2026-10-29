@@ -120,7 +120,7 @@ def test_check_in_on_check_out_day_keeps_listing(api_client, listings, make_rese
 def test_is_favorite_for_current_user(client_for, make_user, listings):
     from apps.favoris.models import FavoriModel
     user = make_user()
-    FavoriModel.objects.create(user=user, hebergement_id=listings['villa'].id)
+    FavoriModel.objects.create(user_id=user.id, hebergement_id=listings['villa'].id)
 
     results = client_for(user).get(HEBERGEMENTS).data['results']
     assert {h['name']: h['is_favorite'] for h in results} == {
