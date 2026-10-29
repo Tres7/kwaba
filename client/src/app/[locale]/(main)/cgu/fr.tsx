@@ -27,9 +27,9 @@ export default function ContenuFr() {
           titre: "Objet",
           contenu: (
             <>
-              <N n="1.1">Les présentes conditions générales d’utilisation (les « CGU ») fixent les règles d’accès et d’utilisation du site kwa-ba.com et des applications Kwa-Ba (la « Plateforme »), éditées par KWA-BA.</N>
+              <N n="1.1">Les présentes conditions générales d’utilisation (les « CGU ») fixent les règles d’accès et d’utilisation du site kwa-ba.com et des applications Kwa-Ba (la « Plateforme »), éditées par KWA-BA.</N>
               <N n="1.2">Toute personne qui utilise la Plateforme accepte les CGU. La création d’un compte suppose de les accepter expressément, en cochant la case prévue.</N>
-              <N n="1.3">La réservation d’un service est en outre régie par les <Link href="/cgv">conditions générales de vente</Link> (les « CGV »). La publication d’une offre par un partenaire est régie par les conditions communes aux partenaires, la charte du Réseau Kwa-Ba Partenaires et le contrat propre à son activité. En cas de contradiction, les conditions particulières de l’annonce priment, puis les CGV, puis les CGU.</N>
+              <N n="1.3">La réservation d’un service est en outre régie par les <Link href="/cgv">conditions générales de vente</Link> (les « CGV »). La publication d’une offre par un partenaire est régie par les conditions communes aux partenaires, la charte du Réseau Kwa-Ba Partenaires et le contrat propre à son activité. En cas de contradiction, les conditions particulières de l’annonce priment, puis les CGV, puis les CGU.</N>
             </>
           ),
         },
@@ -67,10 +67,10 @@ export default function ContenuFr() {
           contenu: (
             <>
               <N n="4.1">La consultation des annonces est libre et gratuite. La réservation, la publication d’une annonce et le dépôt d’un avis supposent un compte.</N>
-              <N n="4.2">Pour ouvrir un compte, l’utilisateur doit être une personne physique majeure (18 ans) et capable, ou agir pour une personne morale qu’il est autorisé à représenter. Il fournit des informations exactes et à jour : nom, prénom, adresse électronique, numéro de téléphone, pays de résidence.</N>
+              <N n="4.2">Pour ouvrir un compte, l’utilisateur doit être une personne physique majeure (18 ans) et capable, ou agir pour une personne morale qu’il est autorisé à représenter. Il fournit des informations exactes et à jour : nom, prénom, adresse électronique, numéro de téléphone, pays de résidence.</N>
               <N n="4.3">Un utilisateur ne peut avoir qu’un seul compte. Il garde ses identifiants confidentiels et répond de leur utilisation. Il prévient KWA-BA sans délai en cas d’usage frauduleux.</N>
               <N n="4.4">KWA-BA peut demander une pièce d’identité avant une réservation ou une publication, notamment pour un partenaire, une location de véhicule sans chauffeur ou un montant élevé. Elle peut refuser l’ouverture d’un compte en cas de fausse déclaration ou de risque pour la sécurité.</N>
-              <N n="4.5">L’utilisateur peut fermer son compte à tout moment depuis son espace ou par message. Les réservations en cours restent régies par les CGV ; les données sont conservées selon la politique de confidentialité.</N>
+              <N n="4.5">L’utilisateur peut fermer son compte à tout moment depuis son espace ou par message. Les réservations en cours restent régies par les CGV ; les données sont conservées selon la politique de confidentialité.</N>
             </>
           ),
         },
@@ -80,10 +80,10 @@ export default function ContenuFr() {
           contenu: (
             <>
               <N n="5.1">Seul un partenaire inscrit, qui a accepté les conditions qui le concernent, peut publier une annonce. Il garantit qu’il a le droit d’offrir la prestation (propriété, mandat, autorisation d’exploiter) et qu’il détient les autorisations et assurances exigées par la loi.</N>
-              <N n="5.2">Avant publication, KWA-BA vérifie l’offre : identité du partenaire, documents, visite sur place par un relais ou un associé. Elle peut refuser, suspendre ou retirer une annonce inexacte, non conforme ou présentant un risque. La vérification porte sur la conformité de l’annonce ; elle n’emporte ni reprise ni garantie de la prestation du partenaire.</N>
-              <N n="5.3">L’annonce décrit l’offre de façon exacte et complète : photos récentes et non trompeuses, dont le partenaire détient les droits, équipements, règles, prix toutes taxes comprises en F CFA, conditions d’annulation choisies, dépôt de garantie éventuel dans les limites des CGV.</N>
-              <N n="5.4">Sont interdits dans une annonce : les coordonnées permettant de traiter hors de la Plateforme (téléphone, courriel, lien vers un autre site), les offres illicites ou discriminatoires, les prix différents de ceux pratiqués pour la même prestation hors de la Plateforme.</N>
-              <N n="5.5">Le classement des annonces dépend de critères affichés sur la Plateforme : pertinence par rapport à la recherche, disponibilité, note moyenne, ancienneté et taux d’annulation du partenaire, et, le cas échéant, mise en avant payante, toujours signalée comme telle.</N>
+              <N n="5.2">Avant publication, KWA-BA vérifie l’offre : identité du partenaire, documents, visite sur place par un relais ou un associé. Elle peut refuser, suspendre ou retirer une annonce inexacte, non conforme ou présentant un risque. La vérification porte sur la conformité de l’annonce ; elle n’emporte ni reprise ni garantie de la prestation du partenaire.</N>
+              <N n="5.3">L’annonce décrit l’offre de façon exacte et complète : photos récentes et non trompeuses, dont le partenaire détient les droits, équipements, règles, prix toutes taxes comprises en F CFA, conditions d’annulation choisies, dépôt de garantie éventuel dans les limites des CGV.</N>
+              <N n="5.4">Sont interdits dans une annonce : les coordonnées permettant de traiter hors de la Plateforme (téléphone, courriel, lien vers un autre site), les offres illicites ou discriminatoires, les prix différents de ceux pratiqués pour la même prestation hors de la Plateforme.</N>
+              <N n="5.5">Le classement des annonces dépend de critères affichés sur la Plateforme : pertinence par rapport à la recherche, disponibilité, note moyenne, ancienneté et taux d’annulation du partenaire, et, le cas échéant, mise en avant payante, toujours signalée comme telle.</N>
             </>
           ),
         },
@@ -115,12 +115,12 @@ export default function ContenuFr() {
             <>
               <N n="8.1"><strong>Qui peut publier.</strong> Seul un client qui a effectivement bénéficié d’une prestation réservée et payée sur la Plateforme peut publier un avis sur celle-ci, dans les <strong>14 jours</strong> suivant sa fin. Le partenaire peut publier une évaluation du client dans le même délai.</N>
               <N n="8.2"><strong>Ce que contient un avis.</strong> Une note de 1 à 5 et un commentaire facultatif. L’avis porte sur une expérience personnelle et vécue. Il est honnête, précis et respectueux.</N>
-              <N n="8.3"><strong>Ce qui est interdit :</strong></N>
+              <N n="8.3"><strong>Ce qui est interdit :</strong></N>
               <ul>
-                <li>les propos injurieux, diffamatoires, discriminatoires, menaçants ou obscènes ;</li>
-                <li>les données personnelles de tiers (nom complet, téléphone, adresse) ;</li>
-                <li>les avis rédigés par le partenaire, par ses proches, ou contre rémunération ou avantage ;</li>
-                <li>les avis sans lien avec la prestation, ou publicitaires ;</li>
+                <li>les propos injurieux, diffamatoires, discriminatoires, menaçants ou obscènes ;</li>
+                <li>les données personnelles de tiers (nom complet, téléphone, adresse) ;</li>
+                <li>les avis rédigés par le partenaire, par ses proches, ou contre rémunération ou avantage ;</li>
+                <li>les avis sans lien avec la prestation, ou publicitaires ;</li>
                 <li>les avis destinés à nuire à un concurrent.</li>
               </ul>
               <N n="8.4"><strong>Modération.</strong> KWA-BA vérifie chaque avis avant publication, dans un délai de 72 heures, au regard des seules règles ci-dessus. Elle ne supprime pas un avis parce qu’il est négatif. Un avis refusé l’est pour un motif communiqué à son auteur, qui peut le modifier.</N>
@@ -148,13 +148,13 @@ export default function ContenuFr() {
           titre: "Comportements interdits",
           contenu: (
             <>
-              <p>Il est interdit, notamment :</p>
+              <p>Il est interdit, notamment :</p>
               <ul>
-                <li>de fournir des informations fausses ou d’usurper l’identité d’un tiers ;</li>
-                <li>d’utiliser la Plateforme à des fins illicites, frauduleuses ou contraires à l’ordre public ;</li>
-                <li>de collecter les données d’autres utilisateurs, ou d’utiliser des robots ou des programmes d’extraction ;</li>
-                <li>de perturber le fonctionnement de la Plateforme ou de tenter d’en contourner la sécurité ;</li>
-                <li>de harceler, menacer ou discriminer un autre utilisateur ;</li>
+                <li>de fournir des informations fausses ou d’usurper l’identité d’un tiers ;</li>
+                <li>d’utiliser la Plateforme à des fins illicites, frauduleuses ou contraires à l’ordre public ;</li>
+                <li>de collecter les données d’autres utilisateurs, ou d’utiliser des robots ou des programmes d’extraction ;</li>
+                <li>de perturber le fonctionnement de la Plateforme ou de tenter d’en contourner la sécurité ;</li>
+                <li>de harceler, menacer ou discriminer un autre utilisateur ;</li>
                 <li>de reproduire tout ou partie de la Plateforme sans autorisation écrite de KWA-BA.</li>
               </ul>
             </>
@@ -165,9 +165,9 @@ export default function ContenuFr() {
           titre: "Suspension et fermeture d'un compte",
           contenu: (
             <>
-              <N n="11.1">KWA-BA peut suspendre ou fermer un compte en cas de manquement grave aux CGU, aux CGV ou aux conditions des partenaires : fraude, faux avis, paiement hors de la Plateforme, violence, activité illicite, annonces trompeuses répétées.</N>
+              <N n="11.1">KWA-BA peut suspendre ou fermer un compte en cas de manquement grave aux CGU, aux CGV ou aux conditions des partenaires : fraude, faux avis, paiement hors de la Plateforme, violence, activité illicite, annonces trompeuses répétées.</N>
               <N n="11.2">Sauf urgence liée à la sécurité ou à une fraude, l’utilisateur est d’abord informé par écrit des faits reprochés et dispose de <strong>7 jours</strong> pour s’expliquer, en écrivant à <LienContact sujet="Contestation d'une décision" />. La décision est motivée.</N>
-              <N n="11.3">La suspension ne remet pas en cause les réservations déjà payées, sauf fraude ou risque pour la sécurité : elles sont alors annulées et remboursées selon les CGV (art. 18.3).</N>
+              <N n="11.3">La suspension ne remet pas en cause les réservations déjà payées, sauf fraude ou risque pour la sécurité : elles sont alors annulées et remboursées selon les CGV (art. 18.3).</N>
             </>
           ),
         },
@@ -189,7 +189,7 @@ export default function ContenuFr() {
           contenu: (
             <>
               <N n="13.1">KWA-BA traite les données des utilisateurs conformément à la loi n° 2019-014 du 29 octobre 2019 relative à la protection des données à caractère personnel et à sa <Link href="/confidentialite">politique de confidentialité</Link>, accessible à tout moment sur la Plateforme.</N>
-              <N n="13.2">La Plateforme utilise des cookies et traceurs nécessaires à son fonctionnement et, avec l’accord de l’utilisateur, les cookies des services tiers décrits dans la <Link href="/cookies">politique de cookies</Link>. L’utilisateur peut à tout moment modifier ses choix depuis le lien « Gérer les cookies » en bas de page.</N>
+              <N n="13.2">La Plateforme utilise des cookies et traceurs nécessaires à son fonctionnement et, avec l’accord de l’utilisateur, les cookies des services tiers décrits dans la <Link href="/cookies">politique de cookies</Link>. L’utilisateur peut à tout moment modifier ses choix depuis le lien « Gérer les cookies » en bas de page.</N>
               <N n="13.3">L’utilisateur peut s’opposer à tout moment, sans frais, à recevoir des messages commerciaux, par le lien prévu dans chaque message ou depuis son compte (loi n° 2017-07, art. 37).</N>
             </>
           ),
@@ -207,7 +207,7 @@ export default function ContenuFr() {
         {
           id: "preuve",
           titre: "Preuve",
-          contenu: <p>Les données enregistrées par la Plateforme font foi entre les parties, sauf preuve contraire : acceptation des CGU, messages, réservations, avis, photos horodatées. Conformément à la loi n° 2017-07, l’écrit électronique a la même force probante que l’écrit papier.</p>,
+          contenu: <p>Les données enregistrées par la Plateforme font foi entre les parties, sauf preuve contraire : acceptation des CGU, messages, réservations, avis, photos horodatées. Conformément à la loi n° 2017-07, l’écrit électronique a la même force probante que l’écrit papier.</p>,
         },
         {
           id: "droit",
@@ -226,7 +226,7 @@ export default function ContenuFr() {
           contenu: (
             <ul>
               <li>Le Concierge est un assistant fondé sur l’intelligence artificielle (Gemini, de Google). Vous dialoguez avec une machine, pas avec une personne.</li>
-              <li>Ses réponses peuvent contenir des erreurs. Les prix et disponibilités des logements et des services de mobilité proviennent de KWA-BA et font foi au moment de la réservation ; les autres informations (restaurants, horaires, démarches) sont à vérifier.</li>
+              <li>Ses réponses peuvent contenir des erreurs. Les prix et disponibilités des logements et des services de mobilité proviennent de KWA-BA et font foi au moment de la réservation ; les autres informations (restaurants, horaires, démarches) sont à vérifier.</li>
               <li>Le Concierge ne réserve et ne paie rien à votre place. N’y communiquez ni coordonnées bancaires, ni code Mobile Money, ni données sensibles.</li>
               <li>Son usage est limité en nombre de messages par heure et par jour.</li>
             </ul>

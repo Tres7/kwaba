@@ -199,7 +199,7 @@ function RechercheContent() {
     <div className="min-h-screen bg-light">
       <div className="bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 py-4">
         <form method="post" onSubmit={submitSearch} className="max-w-7xl mx-auto grid grid-cols-2 lg:flex gap-2 sm:gap-3 items-stretch">
-          <label className="col-span-2 lg:flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-light-muted">
+          <label className="col-span-2 lg:flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white focus-within:border-primary transition-colors">
             <Search size={16} className="text-muted flex-shrink-0" />
             <ChampDestination
               value={city} onChange={setCity}

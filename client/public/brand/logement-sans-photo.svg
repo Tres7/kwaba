@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Kwa-Ba">
+  <rect width="800" height="600" fill="#F0ECE4"/>
+  <g transform="translate(400 300)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M-92 -6 L0 -84 L92 -6" stroke="#A7D0CA" stroke-width="14"/>
+    <path d="M-66 -24 V70 H66 V-24" stroke="#A7D0CA" stroke-width="14"/>
+    <path d="M-20 70 V22 Q0 4 20 22 V70" stroke="#F59E0B" stroke-width="10"/>
+  </g>
+</svg>

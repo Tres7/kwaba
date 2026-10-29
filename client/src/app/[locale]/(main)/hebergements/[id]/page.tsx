@@ -26,6 +26,20 @@ import type { Hebergement } from "@/types/api/models";
 import type { MessagingConversation } from "@/types/api/messaging";
 import { useTranslations } from "next-intl";
 
+/**
+ * Place of photo i in the 4 × 2 desktop mosaic, so that it is always full whatever the number of photos:
+ * the first one takes the left half, the others share the right half.
+ */
+function celluleMosaique(i: number, nombre: number) {
+  if (nombre === 1) return "col-span-4 row-span-2";
+  if (i === 0) return "col-span-2 row-span-2";
+  if (nombre === 2) return "col-span-2 row-span-2";
+  if (nombre === 3) return "col-span-2";
+  // 4 photos: two small ones on top, a wide one under them
+  if (nombre === 4 && i === 3) return "col-span-2";
+  return "";
+}
+
 function HebergementContent() {
   const t = useTranslations("fiche");
   const params = useParams<{ id: string }>();
@@ -201,7 +215,7 @@ function HebergementContent() {
         </div>
         <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 h-[420px] lg:h-[480px] rounded-3xl overflow-hidden mb-12 shadow-card">
           {photos.slice(0, 5).map((img, i) => (
-            <div key={img + i} className={i === 0 ? "col-span-2 row-span-2 overflow-hidden" : "overflow-hidden"} style={photos.length === 1 ? { gridColumn: "1 / -1", gridRow: "1 / -1" } : undefined}>
+            <div key={img + i} className={cn("overflow-hidden", celluleMosaique(i, Math.min(photos.length, 5)))}>
               <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
             </div>
           ))}

@@ -16,13 +16,13 @@ export default function ContenuFr() {
           titre: "Éditeur du site",
           contenu: (
             <ul>
-              <li>Dénomination : <strong>KWA-BA SARL</strong>, société à responsabilité limitée au capital de 100 000 F CFA</li>
-              <li>Siège social : quartier Totsi Gblenkomé, rue 243, Lomé (Togo)</li>
-              <li>Immatriculation : RCCM de Lomé n° <MentionSociete cle="rccm" libelle="RCCM" /> ; NIF <MentionSociete cle="nif" libelle="NIF" /></li>
-              <li>Commerce électronique : enregistrée comme prestataire de commerce électronique sous le n° <MentionSociete cle="commerce_electronique" libelle="numéro" /> (décret n° 2018-062/PR)</li>
-              <li>Données personnelles : déclaration auprès de l&apos;Instance de protection des données à caractère personnel (IPDCP) n° <MentionSociete cle="ipdcp" libelle="numéro" /></li>
-              <li>Contact : <LienContact /> ; adresse postale : quartier Totsi Gblenkomé, rue 243, Lomé, Togo</li>
-              <li>Cogérants : M. MENDE Fadel et M. KPOGLO Dzidoula Godwin Trésor — Directeur de la publication : M. MENDE Fadel.</li>
+              <li>Dénomination : <strong>KWA-BA SARL</strong>, société à responsabilité limitée au capital de 100 000 F CFA</li>
+              <li>Siège social : quartier Totsi Gblenkomé, rue 243, Lomé (Togo)</li>
+              <li>Immatriculation : RCCM de Lomé n° <MentionSociete cle="rccm" libelle="RCCM" /> ; NIF <MentionSociete cle="nif" libelle="NIF" /></li>
+              <li>Commerce électronique : enregistrée comme prestataire de commerce électronique sous le n° <MentionSociete cle="commerce_electronique" libelle="numéro" /> (décret n° 2018-062/PR)</li>
+              <li>Données personnelles : déclaration auprès de l&apos;Instance de protection des données à caractère personnel (IPDCP) n° <MentionSociete cle="ipdcp" libelle="numéro" /></li>
+              <li>Contact : <LienContact /> ; adresse postale : quartier Totsi Gblenkomé, rue 243, Lomé, Togo</li>
+              <li>Cogérants : M. MENDE Fadel et M. KPOGLO Dzidoula Godwin Trésor — Directeur de la publication : M. MENDE Fadel.</li>
             </ul>
           ),
         },
@@ -31,9 +31,9 @@ export default function ContenuFr() {
           titre: "Hébergeur",
           contenu: (
             <ul>
-              <li>Nom : <strong>IONOS SE</strong> (serveur privé virtuel du site et de ses données)</li>
-              <li>Adresse : Elgendorfer Straße 57, 56410 Montabaur, Allemagne</li>
-              <li>Téléphone : +49 721 170 5522</li>
+              <li>Nom : <strong>IONOS SE</strong> (serveur privé virtuel du site et de ses données)</li>
+              <li>Adresse : Elgendorfer Straße 57, 56410 Montabaur, Allemagne</li>
+              <li>Téléphone : +49 721 170 5522</li>
               <li>Le nom de domaine kwa-ba.com et la messagerie info@kwa-ba.com sont gérés chez Hostinger.</li>
             </ul>
           ),
@@ -41,7 +41,7 @@ export default function ContenuFr() {
         {
           id: "paiement",
           titre: "Prestataire de paiement",
-          contenu: <p>FedaPay, établissement de paiement agréé par la BCEAO ; en cas de besoin, un autre prestataire agréé (<Link href="/cgv#paiement">CGV, art. 7</Link>).</p>,
+          contenu: <p>FedaPay, établissement de paiement agréé par la BCEAO ; en cas de besoin, un autre prestataire agréé (<Link href="/cgv#paiement">CGV, art. 7</Link>).</p>,
         },
         {
           id: "propriete",
@@ -59,8 +59,8 @@ export default function ContenuFr() {
           titre: "Crédits",
           contenu: (
             <ul>
-              <li>Photos d&apos;illustration des logements de démonstration et des pages de connexion : <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a>, sous la <a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer">licence Unsplash</a>.</li>
-              <li>Photos de la page d&apos;accueil : <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer">Pexels</a>, sous la <a href="https://www.pexels.com/license/" target="_blank" rel="noopener noreferrer">licence Pexels</a> (usage libre, y compris commercial, sans attribution obligatoire) :
+              <li>Photos d&apos;illustration des logements de démonstration et des pages de connexion : <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a>, sous la <a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer">licence Unsplash</a>.</li>
+              <li>Photos de la page d&apos;accueil : <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer">Pexels</a>, sous la <a href="https://www.pexels.com/license/" target="_blank" rel="noopener noreferrer">licence Pexels</a> (usage libre, y compris commercial, sans attribution obligatoire) :
                 <ul>
                   <li>Cascade et falaise verdoyante</li>
                   <li>Véhicule de safari dans la savane</li>
@@ -73,9 +73,9 @@ export default function ContenuFr() {
                   <li>Éléphants devant le Kilimandjaro</li>
                 </ul>
               </li>
-              <li>Polices Montserrat et Inter : licence SIL Open Font License.</li>
-              <li>Icônes : Lucide (licence ISC) et Phosphor (licence MIT).</li>
-              <li>Photos des annonces : publiées par les hôtes, qui garantissent en détenir les droits.</li>
+              <li>Polices Montserrat et Inter : licence SIL Open Font License.</li>
+              <li>Icônes : Lucide (licence ISC) et Phosphor (licence MIT).</li>
+              <li>Photos des annonces : publiées par les hôtes, qui garantissent en détenir les droits.</li>
             </ul>
           ),
         },

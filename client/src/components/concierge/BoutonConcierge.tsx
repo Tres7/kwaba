@@ -4,10 +4,12 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import IconeKwaba from "@/components/layout/IconeKwaba";
 import { useModule } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 /**
- * Access to the Concierge from every page of the site (except the conversation itself and the payments): the Kwa-Ba
- * logo floats against the right edge of the screen, half way up, and opens as a tab on hover.
+ * Access to the Concierge from every page of the site (except the conversation itself and the payments): a button
+ * in the bottom right corner, like a chat, so that it never covers a form or a photo. Named on large screens,
+ * the logo with an "AI" badge on phones. Raised above the booking bar of the listing pages on phones.
  * Nothing is shown (and no request is sent to the Concierge) while the module is hidden.
  */
 export default function BoutonConcierge() {
@@ -15,16 +17,24 @@ export default function BoutonConcierge() {
   const pathname = usePathname();
   const affiche = useModule("concierge");
   if (!affiche || pathname.startsWith("/concierge") || pathname.startsWith("/reservation")) return null;
+  const barreReservation = pathname.startsWith("/hebergements/");
   return (
     <aside aria-label="Concierge">
       <Link
         href="/concierge"
-        title={`Concierge ${t("ia")}`}
         aria-label={`Concierge ${t("ia")}`}
-        className="group fixed z-40 right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 pl-2 pr-2 py-2 rounded-l-2xl bg-white border border-r-0 border-gray-200 shadow-xl hover:pr-3 transition-all"
+        className={cn(
+          "fixed z-40 right-4 sm:right-6 flex items-center gap-2.5 rounded-full bg-white border border-gray-200 p-1.5 sm:pr-5 shadow-card-hover hover:border-primary/40 hover:-translate-y-0.5 transition-all",
+          barreReservation ? "bottom-24 lg:bottom-6" : "bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-6",
+        )}
       >
-        <IconeKwaba taille={40} className="flex-shrink-0" />
-        <span className="hidden group-hover:inline group-focus-visible:inline text-sm font-bold text-dark whitespace-nowrap">Concierge {t("ia")}</span>
+        <span className="relative flex-shrink-0">
+          <IconeKwaba taille={44} className="rounded-full" />
+          <span aria-hidden className="sm:hidden absolute -top-1 -right-1 rounded-full bg-accent text-dark text-[10px] font-bold leading-none px-1.5 py-1 ring-2 ring-white">
+            {t("ia")}
+          </span>
+        </span>
+        <span className="hidden sm:inline text-sm font-bold text-dark whitespace-nowrap">Concierge {t("ia")}</span>
       </Link>
     </aside>
   );
