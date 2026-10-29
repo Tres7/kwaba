@@ -9,7 +9,7 @@ import time
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from apps.notifications.infrastructure.email.envoi import send_mail
+from apps.notifications.api import send_mail
 from django.template.loader import render_to_string
 from django.utils import formats
 

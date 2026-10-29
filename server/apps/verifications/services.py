@@ -17,7 +17,7 @@ from django.utils import timezone
 from apps.contrats import api as contrats
 from apps.documents import api as documents
 from apps.hebergements import api as hebergements
-from apps.notifications.infrastructure.email.envoi import send_mail
+from apps.notifications.api import send_mail
 
 from .fichiers import image_normalisee
 from .models import PhotoVisiteModel, PieceIdentiteModel, VisiteModel

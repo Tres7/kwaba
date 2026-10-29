@@ -34,7 +34,7 @@ def signaler(utilisateur_id, contexte: str, objet_id, trouvailles: list[Trouvail
 
 
 def _prevenir_admins(alerte: AlerteFraudeModel, nombre: int) -> None:
-    from apps.notifications.infrastructure.email.envoi import send_mail
+    from apps.notifications.api import send_mail
 
     try:
         u = alerte.utilisateur

@@ -31,7 +31,7 @@ from apps.give import api as give
 from apps.locations import api as locations
 from apps.paiements import api as paiements
 from apps.transferts import api as transferts
-from apps.notifications.infrastructure.email.envoi import send_mail
+from apps.notifications.api import send_mail
 
 from .models import ContratModel, ModeleContratModel, hacher_jeton
 

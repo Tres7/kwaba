@@ -54,7 +54,7 @@ forbidden_modules =
     apps.voyages
 
 [importlinter:contract:emails]
-name = Les emails passent par EmailRequestBus, pas par send_mail
+name = Les emails passent par apps.notifications.api
 type = forbidden
 source_modules =
     apps.avis
@@ -76,11 +76,7 @@ source_modules =
     apps.verifications
     apps.voyages
 forbidden_modules =
-    apps.notifications.infrastructure.email
+    apps.notifications.application
+    apps.notifications.infrastructure
+    apps.notifications.management
 allow_indirect_imports = True
-ignore_imports =
-    apps.contrats.services -> apps.notifications.infrastructure.email.envoi
-    apps.hebergements.lancement -> apps.notifications.infrastructure.email.envoi
-    apps.paiements.notifications -> apps.notifications.infrastructure.email.envoi
-    apps.users.infrastructure.messaging.FallbackEventBus -> apps.notifications.infrastructure.email.DjangoEmailSender
-    apps.verifications.services -> apps.notifications.infrastructure.email.envoi

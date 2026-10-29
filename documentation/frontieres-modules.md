@@ -15,9 +15,10 @@ Une PR par module. L'API vue par le client ne change pas.
    Vérifier ensuite que `makemigrations --check` ne détecte rien. Contrôler aussi le SQL sur une base migrée : `sqlmigrate` doit afficher uniquement le `DROP CONSTRAINT`.
 4. **Filtres qui traversent les modules** (`x__hebergement__host`, `select_related`). Les remplacer par des listes d'identifiants obtenues via l'interface.
 5. **Suppressions.** Remplacer les `on_delete` entre modules : soit l'objet disparaît de l'affichage parce que l'interface ne le renvoie plus, soit le module réagit à un événement.
-6. **`.importlinter`.** Retirer les lignes du module dans `ignore_imports` et vérifier que `lint-imports` passe.
-7. **Écrans d'administration.** Ils appartiennent au module : `admin_views.py` et `admin_urls.py`, branchés sur `api/v1/admin/<module>/` dans `config/urls.py`, avant `apps.backoffice.urls`. Les briques communes (`ListeAdmin`, `FicheAdmin`, `Journalise`, `ChampPhoto`) sont dans `apps.securite.backoffice`.
-8. **Tests.** Comportement inchangé, plus un test qui vérifie que le nombre de requêtes d'une liste ne dépend pas du nombre d'éléments.
+6. **Emails.** Passer par `apps.notifications.api` : `demander_email` pour un email décrit par un événement (envoyé par le worker, ou directement si RabbitMQ est indisponible), `send_mail` pour un email rédigé par le module (pièces jointes comprises). Les autres paquets de `notifications` sont interdits aux modules métier.
+7. **`.importlinter`.** Retirer les lignes du module dans `ignore_imports` et vérifier que `lint-imports` passe.
+8. **Écrans d'administration.** Ils appartiennent au module : `admin_views.py` et `admin_urls.py`, branchés sur `api/v1/admin/<module>/` dans `config/urls.py`, avant `apps.backoffice.urls`. Les briques communes (`ListeAdmin`, `FicheAdmin`, `Journalise`, `ChampPhoto`) sont dans `apps.securite.backoffice`.
+9. **Tests.** Comportement inchangé, plus un test qui vérifie que le nombre de requêtes d'une liste ne dépend pas du nombre d'éléments.
 
 ## Avancement
 
@@ -40,4 +41,5 @@ Une PR par module. L'API vue par le client ne change pas.
 | 13 bis | reservations | Migré : la réservation garde les identifiants de l'annonce et du type ; création via `hebergements.api` (`fiche`, `fiche_type`, `type_par_defaut`, `verrouiller_types`, `conflit`) et `paiements.api` (`devis_sejour`, `montants_de`, `annuler_reservation`) ; carte de l'annonce lue une fois par liste (`cartes`) ; `paiements` et `backoffice` lisent l'annonce d'une réservation via `hebergements.api` |
 | 14 | paiements | Migré : `paiements` garde l'argent (encaissements, remboursements, versements) et ne connaît plus les produits ; chaque produit déclare au démarrage son traitement « paiement reçu », sa tâche périodique, ses versements suivis par webhook, ses relances et la description de ses paiements (`paiements/registre.py`, `<produit>/paiement.py`) ; les produits lisent l'état de leurs paiements par liste (`etats_paiement`) ; paiements, remboursements et versements gardent l'identifiant de l'objet payé ; la logique d'un séjour (démarrer le paiement, confirmer, annuler, expirer) est dans `reservations/paiement.py`, aux mêmes adresses de l'API |
 | 15 | backoffice | Migré : les écrans d'administration des annonces, réservations, avis, transferts, locations et Give sont dans leur module (`admin_views.py`, `admin_urls.py`), aux mêmes adresses ; `backoffice` garde le tableau de bord (statistiques via `hebergements.api`, `reservations.api`, `avis.api`), les utilisateurs (conditions de commission via `paiements.api`) et l'anti-fraude ; outils communs dans `securite.backoffice` |
-| 16 | users (clés étrangères vers les comptes) | À faire |
+| 16 | emails | Migré : les modules métier passent par `notifications.api` (`send_mail`, `demander_email`, `traiter` pour le repli de `users` sans RabbitMQ) ; le contrat `emails` n'a plus d'exception |
+| 17 | users (clés étrangères vers les comptes) | À faire |
