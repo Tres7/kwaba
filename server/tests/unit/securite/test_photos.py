@@ -4,7 +4,7 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 
-from apps.hebergements.photos import MAX_UPLOAD_BYTES, InvalidPhoto, normalize_photo
+from apps.securite.photos import MAX_UPLOAD_BYTES, InvalidPhoto, normalize_photo
 
 EXIF_ORIENTATION = 0x0112
 ROTATED_90 = 6

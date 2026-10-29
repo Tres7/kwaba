@@ -15,9 +15,9 @@ from apps.locations.models import (
 from apps.paiements.operateurs import operateurs_du_pays
 from apps.transferts.models import ChauffeurModel
 from apps.securite.audit import journaliser
+from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 
-from .commun import ChampPhoto, FicheAdmin, ListeAdmin
 from .views import _motif, _nom, _paginer
 
 

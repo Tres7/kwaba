@@ -7,11 +7,11 @@ from rest_framework.views import APIView
 
 from apps.paiements.operateurs import operateurs_du_pays
 from apps.securite.audit import journaliser
+from apps.securite.backoffice import FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 from apps.transferts import services
 from apps.transferts.models import AeroportModel, ChauffeurModel, TarifTransfertModel, TransfertModel
 
-from .commun import FicheAdmin, ListeAdmin
 from .views import _motif, _nom, _paginer
 
 

@@ -1,4 +1,4 @@
-"""Validation and normalisation of the listing photos uploaded by hosts."""
+"""Validation and normalisation of the uploaded photos (listings, back-office)."""
 from io import BytesIO
 
 from django.core.files.base import ContentFile

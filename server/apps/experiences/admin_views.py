@@ -2,11 +2,11 @@
 from rest_framework import generics, serializers
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
-from apps.experiences.models import ExperienceModel
 from apps.securite.audit import journaliser
+from apps.securite.backoffice import ChampPhoto, Journalise, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 
-from .commun import ChampPhoto, Journalise, ListeAdmin
+from .models import ExperienceModel
 
 
 class ExperienceSerializer(serializers.ModelSerializer):
@@ -28,13 +28,13 @@ class ExperienceSerializer(serializers.ModelSerializer):
         return data
 
 
-class ExperiencesView(ListeAdmin):
+class ExperiencesAdminView(ListeAdmin):
     nom_objet = "experience"
     serializer_class = ExperienceSerializer
     queryset = ExperienceModel.objects.all()
 
 
-class ExperienceView(Journalise, generics.RetrieveUpdateDestroyAPIView):
+class ExperienceAdminView(Journalise, generics.RetrieveUpdateDestroyAPIView):
     """Read, update and deletion (editorial content, no history to preserve)."""
     nom_objet = "experience"
     permission_classes = [EstAdministrateur]

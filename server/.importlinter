@@ -32,8 +32,6 @@ ignore_imports =
     apps.avis.services -> apps.reservations.models
     apps.avis.views -> apps.hebergements.models
     apps.avis.views -> apps.hebergements.serializers
-    apps.backoffice.commun -> apps.hebergements.photos
-    apps.backoffice.experiences -> apps.experiences.models
     apps.backoffice.give -> apps.give.models
     apps.backoffice.give -> apps.give.services
     apps.backoffice.give -> apps.verifications.fichiers

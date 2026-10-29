@@ -2,9 +2,9 @@
 from rest_framework import generics, serializers
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
-from apps.hebergements.photos import InvalidPhoto, normalize_photo
-from apps.securite.audit import journaliser
-from apps.securite.permissions import EstAdministrateur
+from .audit import journaliser
+from .permissions import EstAdministrateur
+from .photos import InvalidPhoto, normalize_photo
 
 
 class ChampPhoto(serializers.ImageField):

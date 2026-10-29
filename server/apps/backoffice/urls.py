@@ -2,7 +2,7 @@ from django.urls import path
 
 from apps.hebergements.lancement import LancementAdminView
 
-from . import experiences, fraude, give, locations, transferts, views
+from . import fraude, give, locations, transferts, views
 
 urlpatterns = [
     path('stats/', views.StatsView.as_view(), name='admin-stats'),
@@ -54,7 +54,4 @@ urlpatterns = [
     path('give/reversements/preparer/', give.ReversementsPreparerView.as_view(), name='admin-give-preparer'),
     path('give/reversements/<uuid:pk>/effectuer/', give.ReversementEffectuerView.as_view(), name='admin-give-effectuer'),
     path('give/dons/', give.DonsView.as_view(), name='admin-give-dons'),
-    # Experiences (Discover page)
-    path('experiences/', experiences.ExperiencesView.as_view(), name='admin-experiences'),
-    path('experiences/<int:pk>/', experiences.ExperienceView.as_view(), name='admin-experience'),
 ]
