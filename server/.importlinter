@@ -43,11 +43,6 @@ ignore_imports =
     apps.backoffice.views -> apps.paiements.tarifs
     apps.backoffice.views -> apps.reservations.models
     apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
-    apps.give.models -> apps.paiements.operateurs
-    apps.give.notifications -> apps.paiements.notifications
-    apps.give.services -> apps.paiements.services
-    apps.give.views -> apps.paiements.paypal
-    apps.give.views -> apps.paiements.services
     apps.hebergements.alertes -> apps.paiements.notifications
     apps.hebergements.disponibilites -> apps.reservations.models
     apps.hebergements.management.commands.seed_demo -> apps.users.infrastructure.persistence.models

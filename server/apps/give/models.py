@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.paiements.operateurs import PAYS_CHOICES
+from apps.paiements.api import PAYS_CHOICES
 
 from .montants import CAUSE_CHOICES
 
