@@ -385,7 +385,7 @@ def signer(contrat: ContratModel, *, nom: str, signature: str, accepte: bool, ip
         contrat.save()
 
     if contrat.type in TYPES_HOTE and contrat.hote_id:
-        from apps.verifications.services import contrat_hote_signe
+        from apps.verifications.api import contrat_hote_signe
 
         contrat_hote_signe(contrat.hote)
     piece = [(f"contrat-{contrat.reference}.pdf", pdf, 'application/pdf')]

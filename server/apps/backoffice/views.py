@@ -24,7 +24,7 @@ from apps.reservations.models import ReservationModel
 from apps.securite.audit import journaliser
 from apps.securite.permissions import EstAdministrateur
 from apps.users.infrastructure.http.controllers.AuthController import revoquer_jetons
-from apps.verifications import services as verifications
+from apps.verifications import api as verifications
 
 User = get_user_model()
 
@@ -313,7 +313,7 @@ class HebergementDetailView(VueAdmin):
             journaliser('annonce_modifiee', request, utilisateur=request.user,
                         annonce_id=str(annonce.pk), annonce=annonce.name, **changements)
             if a_verifier:
-                verifications.visite_a_planifier(annonce)
+                verifications.visite_a_planifier(annonce.id)
         return Response(_hebergement(_hebergements().get(pk=annonce.pk)))
 
     def delete(self, request, pk):

@@ -60,7 +60,7 @@ class TableauView(APIView):
         types = []
         for code in codes:
             tm = TYPES[code]
-            cibles = {str(c) for c in tm.a_faire().values_list(tm.champ_cle, flat=True)}
+            cibles = {cle(tm, objet) for objet in tm.a_faire()}
             prises = {cible: m for cible, m in en_cours[code].items() if cible in cibles}
             miennes = sum(1 for m in prises.values() if m.agent_id == request.user.pk)
             types.append({'type': code, 'libelle': tm.libelle, 'libres': len(cibles) - len(prises),

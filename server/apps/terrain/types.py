@@ -7,16 +7,13 @@ listings and identity documents). Decisions stay in those modules: the mission o
 from dataclasses import dataclass
 from typing import Callable
 
-from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
-
 
 @dataclass(frozen=True)
 class TypeMission:
     code: str
     libelle: str            # "Listings to visit"
-    a_faire: Callable[[], QuerySet]
-    champ_cle: str          # field that identifies the checked object (the target of the mission)
+    a_faire: Callable[[], list]
+    identifiant: Callable[[object], object]  # identifies the checked object (the target of the mission)
     resume: Callable[[object], dict]
     detail: Callable[[object], dict]
 
@@ -36,12 +33,9 @@ def nom(utilisateur) -> str:
 
 
 def cle(type_mission: TypeMission, objet) -> str:
-    return str(getattr(objet, type_mission.champ_cle))
+    return str(type_mission.identifiant(objet))
 
 
 def a_faire(type_mission: TypeMission, cible: str):
     """The object if it still waits for an agent, otherwise None (already checked, removed, or invalid id)."""
-    try:
-        return type_mission.a_faire().filter(**{type_mission.champ_cle: cible}).first()
-    except (ValueError, ValidationError):  # malformed id (invalid UUID)
-        return None
+    return next((objet for objet in type_mission.a_faire() if cle(type_mission, objet) == str(cible)), None)

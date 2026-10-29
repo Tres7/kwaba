@@ -64,7 +64,7 @@ class VisiteModel(models.Model):
     }
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    hebergement = models.ForeignKey('hebergements.HebergementModel', on_delete=models.CASCADE, related_name='visites')
+    hebergement_id = models.UUIDField(db_index=True)
     agent = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='visites_faites')
     decision = models.CharField(max_length=20, choices=DECISIONS)
     controles = models.JSONField(default=dict)
@@ -77,7 +77,7 @@ class VisiteModel(models.Model):
         verbose_name_plural = 'Visites de vérification'
 
     def __str__(self):
-        return f"Visite {self.get_decision_display().lower()} · {self.hebergement}"
+        return f"Visite {self.get_decision_display().lower()} · {self.hebergement_id}"
 
 
 class PhotoVisiteModel(models.Model):

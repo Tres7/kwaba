@@ -2,7 +2,8 @@ import uuid
 from collections.abc import Iterable
 from datetime import date
 
-from django.db.models import Q
+from django.db.models import Count, Q
+from django.utils import timezone
 
 from . import disponibilites
 from .models import HebergementModel
@@ -60,3 +61,48 @@ def ids_par_nom(texte: str) -> set[uuid.UUID]:
 
 def mettre_a_jour_note(hebergement_id: uuid.UUID, note: float, nombre_avis: int) -> None:
     HebergementModel.tous.filter(pk=hebergement_id).update(rating=round(note, 2), review_count=nombre_avis)
+
+
+def _fiche(h: HebergementModel) -> dict:
+    return {
+        'id': h.id, 'name': h.name, 'type': h.type, 'type_libelle': h.get_type_display(), 'city': h.city,
+        'location': h.location, 'description': h.description, 'price_per_night': h.price_per_night,
+        'max_guests': h.max_guests, 'amenities': h.amenities, 'image_url': h.image_url, 'images': h.images,
+        'created_at': h.created_at, 'host_id': h.host_id, 'statut_verification': h.statut_verification,
+    }
+
+
+def fiche(hebergement_id: uuid.UUID) -> dict | None:
+    h = HebergementModel.objects.filter(pk=hebergement_id).first()
+    return _fiche(h) if h else None
+
+
+def annonces_en_attente(hote_ids: Iterable[uuid.UUID], ville: str = '') -> list[dict]:
+    qs = HebergementModel.objects.filter(statut_verification='en_attente', host_id__in=list(hote_ids))
+    if ville:
+        qs = qs.filter(city__icontains=ville)
+    return [_fiche(h) for h in qs.order_by('created_at')]
+
+
+def nb_annonces_non_verifiees(hote_id: uuid.UUID) -> int:
+    return HebergementModel.objects.filter(host_id=hote_id).exclude(statut_verification='verifiee').count()
+
+
+def nb_annonces_par_hote(hote_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, int]:
+    return dict(HebergementModel.objects.filter(host_id__in=list(hote_ids)).values('host_id')
+                .annotate(n=Count('id')).values_list('host_id', 'n'))
+
+
+def verrouiller_fiche(hebergement_id: uuid.UUID) -> dict | None:
+    h = HebergementModel.objects.select_for_update().filter(pk=hebergement_id).first()
+    return _fiche(h) if h else None
+
+
+def enregistrer_verification(hebergement_id: uuid.UUID, verifiee: bool, motif: str = '') -> None:
+    maintenant = timezone.now()
+    if verifiee:
+        HebergementModel.objects.filter(pk=hebergement_id).update(
+            statut_verification='verifiee', verifiee_le=maintenant, motif_refus='', updated_at=maintenant)
+    else:
+        HebergementModel.objects.filter(pk=hebergement_id).update(
+            statut_verification='refusee', motif_refus=motif, updated_at=maintenant)

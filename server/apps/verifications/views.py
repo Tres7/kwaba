@@ -2,7 +2,6 @@ import json
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Count, Prefetch
 from django.http import FileResponse, Http404
 from rest_framework import status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -11,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
-from apps.hebergements.models import HebergementModel
+from apps.hebergements import api as hebergements
 from apps.securite.audit import journaliser
 from apps.terrain import api as terrain
 
@@ -79,20 +78,37 @@ class MaPieceIdentiteView(APIView):
         return Response(_piece_json(piece), status=status.HTTP_201_CREATED)
 
 
-def _visite_json(h: HebergementModel) -> dict:
-    hote = h.host
-    piece = getattr(hote, 'piece_identite', None)
-    return {
-        'id': str(h.id), 'name': h.name, 'type': h.type, 'city': h.city, 'location': h.location,
-        'description': h.description, 'price_per_night': float(h.price_per_night), 'max_guests': h.max_guests,
-        'amenities': h.amenities, 'photos': [u for u in [h.image_url, *h.images] if u],
-        'modifiee_apres_verification': any(v.decision == 'validee' for v in h.visites.all()),
-        'cree_le': h.created_at,
-        'hote': {
-            'id': str(hote.id), 'nom': f"{hote.first_name} {hote.last_name}".strip(), 'email': hote.email,
-            'telephone': hote.phone, 'piece': _piece_json(piece),
-        },
-    }
+def visites_json(annonces: list[dict]) -> list[dict]:
+    """Listings to visit with their host and whether they were already validated once, read in a few queries."""
+    hote_ids = {a['host_id'] for a in annonces}
+    hotes = {u.pk: u for u in get_user_model().objects.filter(pk__in=hote_ids)}
+    pieces = {p.hote_id: p for p in PieceIdentiteModel.objects.filter(hote_id__in=hote_ids)}
+    deja_validees = set(VisiteModel.objects.filter(hebergement_id__in=[a['id'] for a in annonces], decision='validee')
+                        .values_list('hebergement_id', flat=True))
+    resultats = []
+    for a in annonces:
+        hote = hotes[a['host_id']]
+        resultats.append({
+            'id': str(a['id']), 'name': a['name'], 'type': a['type'], 'type_libelle': a['type_libelle'],
+            'city': a['city'], 'location': a['location'], 'description': a['description'],
+            'price_per_night': float(a['price_per_night']), 'max_guests': a['max_guests'], 'amenities': a['amenities'],
+            'photos': [u for u in [a['image_url'], *a['images']] if u],
+            'modifiee_apres_verification': a['id'] in deja_validees,
+            'cree_le': a['created_at'],
+            'hote': {
+                'id': str(hote.id), 'nom': f"{hote.first_name} {hote.last_name}".strip(), 'email': hote.email,
+                'telephone': hote.phone, 'piece': _piece_json(pieces.get(hote.pk)),
+            },
+        })
+    return resultats
+
+
+def pieces_avec_nb_annonces(pieces) -> list[PieceIdentiteModel]:
+    pieces = list(pieces)
+    nombres = hebergements.nb_annonces_par_hote(p.hote_id for p in pieces)
+    for p in pieces:
+        p.nb_annonces = nombres.get(p.hote_id, 0)
+    return pieces
 
 
 class PiecesView(APIView):
@@ -100,8 +116,7 @@ class PiecesView(APIView):
     permission_classes = [EstVerificateur]
 
     def get(self, request):
-        pieces = (services.pieces_a_controler().select_related('hote')
-                  .annotate(nb_annonces=Count('hote__hebergements'))[:100])
+        pieces = pieces_avec_nb_annonces(services.pieces_a_controler().select_related('hote')[:100])
         resultats = [{
             'hote': {
                 'id': str(p.hote_id), 'nom': f"{p.hote.first_name} {p.hote.last_name}".strip(),
@@ -146,12 +161,8 @@ class VisitesView(APIView):
 
     def get(self, request):
         # Only hosts whose identity is verified (and agreement signed, once required): services.annonces_a_visiter
-        qs = (services.annonces_a_visiter().select_related('host', 'host__piece_identite')
-              .prefetch_related(Prefetch('visites', queryset=VisiteModel.objects.only('id', 'decision', 'hebergement'))))
-        ville = request.query_params.get('ville', '').strip()
-        if ville:
-            qs = qs.filter(city__icontains=ville)
-        resultats = [_visite_json(h) for h in qs[:100]]
+        annonces = services.annonces_a_visiter(request.query_params.get('ville', '').strip())
+        resultats = visites_json(annonces[:100])
         return Response({
             'results': resultats, 'count': len(resultats),
             'controles': VisiteModel.CONTROLES, 'max_photos': services.MAX_PHOTOS_VISITE,
@@ -164,7 +175,7 @@ class DecisionView(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request, pk):
-        hebergement = HebergementModel.objects.filter(pk=pk).first()
+        hebergement = hebergements.fiche(pk)
         if not hebergement:
             return Response({'detail': 'Annonce introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         controles = request.data.get('controles') or {}
@@ -178,19 +189,19 @@ class DecisionView(APIView):
         try:
             # In the shared queue: refused if another agent took this visit; their mission is closed otherwise
             with transaction.atomic():
-                terrain.verifier_peut_decider('logement', hebergement.pk, request.user)
+                terrain.verifier_peut_decider('logement', pk, request.user)
                 visite = services.decider(
-                    hebergement, request.user, decision=str(request.data.get('decision', '')), controles=controles,
+                    pk, request.user, decision=str(request.data.get('decision', '')), controles=controles,
                     commentaire=str(request.data.get('commentaire', '')), photos=request.FILES.getlist('photos'),
                 )
-                terrain.terminer('logement', hebergement.pk, request.user, decision=visite.decision,
-                                 titre=hebergement.name, sous_titre=hebergement.get_type_display(), ville=hebergement.city)
+                terrain.terminer('logement', pk, request.user, decision=visite.decision,
+                                 titre=hebergement['name'], sous_titre=hebergement['type_libelle'], ville=hebergement['city'])
         except terrain.MissionErreur as exc:
             return Response({'detail': str(exc)}, status=exc.code)
         except (services.VerificationErreur, FichierInvalide) as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser('annonce_verifiee' if visite.decision == 'validee' else 'annonce_refusee', request,
-                    utilisateur=request.user, hebergement=str(hebergement.id))
+                    utilisateur=request.user, hebergement=str(pk))
         return Response({'decision': visite.decision, 'statut': 'verifiee' if visite.decision == 'validee' else 'refusee'},
                         status=status.HTTP_201_CREATED)
 
@@ -220,5 +231,5 @@ class CompteursView(APIView):
 
     def get(self, request):
         pieces = services.pieces_a_controler().count()
-        visites = services.annonces_a_visiter().count()
+        visites = len(services.annonces_a_visiter())
         return Response({'pieces': pieces, 'visites': visites, 'total': pieces + visites})

@@ -26,7 +26,7 @@ from .serializers import (
 )
 from apps.contrats import preinscription
 from apps.favoris import api as favoris
-from apps.verifications import services as verifications
+from apps.verifications import api as verifications
 
 HOST_ROLES = ('hote', 'admin')
 MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
@@ -47,6 +47,21 @@ def _context(request, proprietaire=False):
         contexte['favorite_ids'] = favoris.ids_favoris(request.user.id)
     return contexte
 
+
+
+def _remettre_en_verification(hebergement, avant: dict) -> bool:
+    """After a change by the host: a refused listing goes back into verification, and a verified listing too
+    if what the agent checked (address, city, photos) changed. Returns True if it is put back."""
+    if hebergement.statut_verification == 'en_attente':
+        return False
+    change = any(avant[champ] != getattr(hebergement, champ) for champ in hebergement.CHAMPS_VERIFIES)
+    if hebergement.statut_verification == 'verifiee' and not change:
+        return False
+    deja_verifiee = hebergement.statut_verification == 'verifiee'
+    hebergement.statut_verification, hebergement.motif_refus = 'en_attente', ''
+    hebergement.save(update_fields=['statut_verification', 'motif_refus', 'updated_at'])
+    verifications.visite_a_planifier(hebergement.id, modification=deja_verifiee)
+    return True
 
 
 def _signaler_coordonnees(request, serializer, objet_id) -> None:
@@ -154,7 +169,7 @@ class HebergementListView(APIView):
 
         hebergement = serializer.save(host=request.user)  # its default unit type: signals.type_par_defaut
         # Visible to travellers only after an agent's visit (offered once the host's identity is verified)
-        verifications.visite_a_planifier(hebergement)
+        verifications.visite_a_planifier(hebergement.id)
         return Response(
             HebergementSerializer(hebergement, context=_context(request, proprietaire=True)).data,
             status=status.HTTP_201_CREATED,
@@ -268,7 +283,7 @@ class HebergementDetailView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         avant = {champ: getattr(obj, champ) for champ in HebergementModel.CHAMPS_VERIFIES}
         serializer.save()
-        verifications.remettre_en_verification(obj, avant)
+        _remettre_en_verification(obj, avant)
         return Response(HebergementSerializer(obj, context=_context(request, proprietaire=True)).data)
 
     def delete(self, request, pk):
