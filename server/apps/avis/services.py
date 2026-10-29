@@ -3,51 +3,45 @@ from datetime import timedelta
 from django.db.models import Avg, Count
 from django.utils import timezone
 
-from apps.hebergements.models import HebergementModel
-from apps.reservations.models import ReservationModel
+from apps.hebergements import api as hebergements
+from apps.reservations import api as reservations
+
+from .models import AvisModel
 
 # Time allowed to leave a review after departure (beyond it, memories are no longer reliable)
 DELAI_AVIS_JOURS = 14
 
 
-def motif_refus(reservation: ReservationModel, user) -> str | None:
-    """Returns the reason why the user cannot review this stay, or None if they can."""
+def motif_refus(sejour: dict, user_id, deja_evalue: bool) -> str | None:
+    """Returns the reason why the user cannot review this stay, or None if they can.
+
+    `sejour`: summary of the booking (reservations.api.resumes)."""
     today = timezone.localdate()
-    if reservation.guest_id != user.id:
+    if sejour['voyageur_id'] != user_id:
         return "Seul le voyageur qui a séjourné peut laisser un avis."
-    if reservation.status != 'confirmed':
+    if sejour['statut'] != 'confirmed':
         return "Seuls les séjours confirmés peuvent être évalués."
-    if reservation.check_out > today:
+    if sejour['check_out'] > today:
         return "Vous pourrez laisser un avis après votre départ."
-    if reservation.check_out < today - timedelta(days=DELAI_AVIS_JOURS):
+    if sejour['check_out'] < today - timedelta(days=DELAI_AVIS_JOURS):
         return f"Le délai de {DELAI_AVIS_JOURS} jours pour évaluer ce séjour est dépassé."
-    if hasattr(reservation, 'avis'):
+    if deja_evalue:
         return "Vous avez déjà laissé un avis pour ce séjour."
     return None
 
 
-def sejours_a_evaluer(user):
+def avis_des_reservations(reservation_ids) -> dict:
+    return dict(AvisModel.objects.filter(reservation_id__in=list(reservation_ids)).values_list('reservation_id', 'id'))
+
+
+def sejours_a_evaluer(user) -> list[dict]:
     today = timezone.localdate()
-    return (
-        ReservationModel.objects
-        .filter(
-            guest=user,
-            status='confirmed',
-            check_out__lte=today,
-            check_out__gte=today - timedelta(days=DELAI_AVIS_JOURS),
-            avis__isnull=True,
-        )
-        .select_related('hebergement')
-        .order_by('-check_out')
-    )
+    sejours = reservations.sejours_termines(user.id, today - timedelta(days=DELAI_AVIS_JOURS), today)
+    evalues = avis_des_reservations(s['id'] for s in sejours)
+    return [s for s in sejours if s['id'] not in evalues]
 
 
 def recalculer_note(hebergement_id) -> None:
     """The displayed rating and the number of reviews only come from verified reviews."""
-    stats = HebergementModel.objects.filter(pk=hebergement_id).aggregate(
-        moyenne=Avg('avis__note'), total=Count('avis'),
-    )
-    HebergementModel.objects.filter(pk=hebergement_id).update(
-        rating=round(stats['moyenne'] or 0, 2),
-        review_count=stats['total'],
-    )
+    stats = AvisModel.objects.filter(hebergement_id=hebergement_id).aggregate(moyenne=Avg('note'), total=Count('id'))
+    hebergements.mettre_a_jour_note(hebergement_id, stats['moyenne'] or 0, stats['total'])

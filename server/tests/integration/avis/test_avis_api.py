@@ -17,7 +17,7 @@ def _review(reservation, note=4, **overrides):
 
 def _make_avis(reservation, note):
     return AvisModel.objects.create(
-        reservation=reservation, hebergement=reservation.hebergement, auteur=reservation.guest,
+        reservation_id=reservation.id, hebergement_id=reservation.hebergement_id, auteur=reservation.guest,
         note=note, **{critere: note for critere in CRITERES}, commentaire='Commentaire de test assez long.',
     )
 
@@ -123,7 +123,7 @@ def test_rating_recomputed_when_review_deleted(listing, make_reservation):
     from apps.avis.services import recalculer_note
     recalculer_note(listing.id)
 
-    first.reservation.delete()  # cascade: the review disappears with the booking
+    first.delete()
     listing.refresh_from_db()
     assert (listing.rating, listing.review_count) == (3.0, 1)
 
@@ -142,3 +142,20 @@ def test_stays_to_review(client_for, make_user, listing, make_reservation):
 
     rows = client_for(guest).get(f'{AVIS}a-laisser/').data['results']
     assert [r['reservation_id'] for r in rows] == [str(recent.id), str(older.id)]
+
+
+def test_booking_list_reads_reviews_once_whatever_their_number(client_for, make_user, listing, make_reservation,
+                                                               django_assert_max_num_queries):
+    voyageur = make_user()
+    client = client_for(voyageur)
+    _make_avis(make_reservation(listing, guest=voyageur, starts_in=-10, nights=2), note=5)
+    client.get('/api/v1/reservations/')
+    with django_assert_max_num_queries(50) as une:
+        client.get('/api/v1/reservations/')
+
+    for jours in (-20, -30, -40):
+        _make_avis(make_reservation(listing, guest=voyageur, starts_in=jours, nights=2), note=4)
+    with django_assert_max_num_queries(len(une.captured_queries)):
+        lignes = client.get('/api/v1/reservations/').data['results']
+
+    assert sum(1 for ligne in lignes if ligne['avis_id']) == 4

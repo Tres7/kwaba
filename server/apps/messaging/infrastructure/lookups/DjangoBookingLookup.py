@@ -1,21 +1,15 @@
-from typing import Iterable, Set
-
-from django.db.models import Q
+import uuid
+from typing import Iterable, Optional, Set
 
 from apps.messaging.application.ports.BookingLookup import BookingLookup, Pair
+from apps.reservations import api as reservations
 
 
 class DjangoBookingLookup(BookingLookup):
     """Only contact point of messaging with bookings. Confirmed = paid (payment required in production)."""
 
     def booked(self, pairs: Iterable[Pair]) -> Set[Pair]:
-        pairs = set(pairs)
-        if not pairs:
-            return set()
-        from apps.reservations.models import ReservationModel  # local import: reservations depends on hebergements
+        return reservations.paires_confirmees(pairs)
 
-        condition = Q()
-        for hebergement_id, guest_id in pairs:
-            condition |= Q(hebergement_id=hebergement_id, guest_id=guest_id)
-        rows = ReservationModel.objects.filter(condition, status='confirmed').values_list('hebergement_id', 'guest_id')
-        return set(rows) & pairs
+    def confirmed_for_host(self, reservation_id: uuid.UUID, host_id: uuid.UUID) -> Optional[Pair]:
+        return reservations.confirmee_pour_hote(reservation_id, host_id)

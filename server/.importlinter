@@ -25,13 +25,6 @@ modules =
     apps.voyages
 ignore_imports =
     apps.** -> apps.*.api
-    apps.avis.models -> apps.hebergements.models
-    apps.avis.models -> apps.reservations.models
-    apps.avis.serializers -> apps.reservations.models
-    apps.avis.services -> apps.hebergements.models
-    apps.avis.services -> apps.reservations.models
-    apps.avis.views -> apps.hebergements.models
-    apps.avis.views -> apps.hebergements.serializers
     apps.backoffice.give -> apps.give.models
     apps.backoffice.give -> apps.give.services
     apps.backoffice.give -> apps.verifications.fichiers
@@ -102,11 +95,6 @@ ignore_imports =
     apps.locations.views -> apps.paiements.views
     apps.locations.views -> apps.reservations.models
     apps.locations.views -> apps.transferts.models
-    apps.messaging.infrastructure.http.controllers.ConversationController -> apps.hebergements.models
-    apps.messaging.infrastructure.http.controllers.ConversationController -> apps.reservations.models
-    apps.messaging.infrastructure.lookups.DjangoBookingLookup -> apps.reservations.models
-    apps.messaging.infrastructure.lookups.DjangoHebergementLookup -> apps.hebergements.models
-    apps.messaging.infrastructure.persistence.models -> apps.hebergements.models
     apps.paiements.notifications -> apps.documents.services
     apps.paiements.relances -> apps.locations.models
     apps.paiements.relances -> apps.reservations.models
@@ -122,17 +110,12 @@ ignore_imports =
     apps.paiements.tarifs -> apps.reservations.models
     apps.paiements.views -> apps.reservations.models
     apps.reservations.models -> apps.hebergements.models
-    apps.reservations.serializers -> apps.avis.services
     apps.reservations.serializers -> apps.hebergements.disponibilites
     apps.reservations.serializers -> apps.hebergements.serializers
     apps.reservations.serializers -> apps.hebergements.types_logement
     apps.reservations.serializers -> apps.paiements.services
     apps.reservations.serializers -> apps.paiements.tarifs
     apps.reservations.views -> apps.paiements.services
-    apps.terrain.types -> apps.hebergements.models
-    apps.terrain.types -> apps.verifications.models
-    apps.terrain.types -> apps.verifications.services
-    apps.terrain.types -> apps.verifications.views
     apps.transferts.models -> apps.paiements.operateurs
     apps.transferts.notifications -> apps.paiements.notifications
     apps.transferts.services -> apps.paiements.services
@@ -143,7 +126,6 @@ ignore_imports =
     apps.verifications.services -> apps.documents.models
     apps.verifications.services -> apps.hebergements.models
     apps.verifications.views -> apps.hebergements.models
-    apps.verifications.views -> apps.terrain.services
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier

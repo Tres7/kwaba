@@ -24,7 +24,7 @@ CONVERSATIONS = '/api/v1/messaging/conversations/'
 def conversation(make_user, make_hebergement):
     listing = make_hebergement()
     now = timezone.now()
-    return ConversationModel.objects.create(hebergement=listing, guest=make_user(), host=listing.host,
+    return ConversationModel.objects.create(hebergement_id=listing.id, guest=make_user(), host=listing.host,
                                             created_at=now, last_message_at=now)
 
 
