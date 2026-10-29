@@ -55,13 +55,6 @@ ignore_imports =
     apps.paiements.services -> apps.transferts.services
     apps.paiements.tarifs -> apps.reservations.models
     apps.paiements.views -> apps.reservations.models
-    apps.reservations.models -> apps.hebergements.models
-    apps.reservations.serializers -> apps.hebergements.disponibilites
-    apps.reservations.serializers -> apps.hebergements.serializers
-    apps.reservations.serializers -> apps.hebergements.types_logement
-    apps.reservations.serializers -> apps.paiements.services
-    apps.reservations.serializers -> apps.paiements.tarifs
-    apps.reservations.views -> apps.paiements.services
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier

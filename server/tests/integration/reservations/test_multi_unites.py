@@ -38,7 +38,7 @@ def test_booking_two_rooms_prices_both(client_for, make_user, hotel):
     reponse = _reserver(client_for(make_user()), hotel, nb_unites=2, guests_count=4)
     assert reponse.status_code == 201, reponse.data
     r = ReservationModel.objects.get(pk=reponse.data['id'])
-    assert (r.type_logement.nom, r.nb_unites, r.prix_nuits) == ('Double standard', 2, 2 * 2 * 30000)
+    assert (TypeLogementModel.objects.get(pk=r.type_logement_id).nom, r.nb_unites, r.prix_nuits) == ('Double standard', 2, 2 * 2 * 30000)
     assert (reponse.data['type_logement_nom'], reponse.data['nb_unites']) == ('Double standard', 2)
 
 
@@ -89,9 +89,9 @@ def test_payment_after_expiry_refunded_when_the_units_are_gone(make_user, hotel,
     double = hotel.types.get()
     arrivee, depart = _sejour()
     en_retard = ReservationModel.objects.create(
-        hebergement=hotel, type_logement=double, nb_unites=2, guest=make_user(), check_in=arrivee, check_out=depart,
+        hebergement_id=hotel.id, type_logement_id=double.id, nb_unites=2, guest=make_user(), check_in=arrivee, check_out=depart,
         total_price=0, status='cancelled', annule_par='expiration')
-    ReservationModel.objects.create(hebergement=hotel, type_logement=double, nb_unites=2, guest=make_user(),
+    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=double.id, nb_unites=2, guest=make_user(),
                                     check_in=arrivee, check_out=depart, total_price=0, status='confirmed')
     paiement = PaiementModel.objects.create(reservation=en_retard, montant=1000, statut='en_attente')
     rembourses = []

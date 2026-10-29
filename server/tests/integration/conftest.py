@@ -126,7 +126,7 @@ def make_reservation(make_user):
     def _make(hebergement, guest=None, starts_in=10, nights=3, status='confirmed'):
         check_in = timezone.localdate() + timedelta(days=starts_in)
         return ReservationModel.objects.create(
-            hebergement=hebergement, guest=guest or make_user(), check_in=check_in,
+            hebergement_id=hebergement.id, guest=guest or make_user(), check_in=check_in,
             check_out=check_in + timedelta(days=nights), total_price=0, status=status,
         )
 

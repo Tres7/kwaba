@@ -75,7 +75,9 @@ class ObjetPayeMixin:
     @property
     def libelle(self):
         if self.reservation_id:
-            return self.reservation.hebergement.name
+            from .tarifs import _annonce
+
+            return _annonce(self.reservation)['name']
         if self.transfert_id:
             return f"Transfert depuis l'aéroport {self.transfert.aeroport.ville}"
         if getattr(self, 'location_id', None):

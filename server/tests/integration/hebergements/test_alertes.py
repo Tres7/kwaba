@@ -27,7 +27,7 @@ def _sans_pause(settings):
 def complet(make_hebergement, make_user):
     """A one-unit listing booked from day 10 to day 12."""
     h = make_hebergement(name='Villa Soleil')
-    r = ReservationModel.objects.create(hebergement=h, type_logement=h.types.get(), guest=make_user(), check_in=_jour(10),
+    r = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest=make_user(), check_in=_jour(10),
                                         check_out=_jour(12), total_price=0, status='confirmed')
     return h, r
 
@@ -168,7 +168,7 @@ class TestTriggers:
 
     def test_other_dates_freed(self, active, make_user, django_capture_on_commit_callbacks):
         h, _, alerte = active
-        ailleurs = ReservationModel.objects.create(hebergement=h, type_logement=h.types.get(), guest=make_user(),
+        ailleurs = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest=make_user(),
                                                    check_in=_jour(20), check_out=_jour(22), total_price=0, status='confirmed')
         with django_capture_on_commit_callbacks(execute=True):
             paiements.annuler(ailleurs, par='voyageur')
@@ -191,10 +191,10 @@ class TestTriggers:
                                 format='json')
         suite = h.types.get(nom='Suite')
         for t in (chambre, suite):
-            ReservationModel.objects.create(hebergement=h, type_logement=t, guest=make_user(), check_in=_jour(10),
+            ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=t.id, guest=make_user(), check_in=_jour(10),
                                             check_out=_jour(12), total_price=0, status='confirmed')
         _alerte(client_for(make_user()), h, type_logement=str(suite.id))
-        ReservationModel.objects.filter(type_logement=chambre).update(status='cancelled')
+        ReservationModel.objects.filter(type_logement_id=chambre.id).update(status='cancelled')
         AlerteDisponibiliteModel.objects.update(a_verifier=True)
         assert _passe()['alertes_envoyees'] == 0
         # The same freed room satisfies an alert on any type of the hotel

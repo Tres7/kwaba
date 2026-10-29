@@ -20,8 +20,9 @@ from django.db.models import Q
 from django.utils import timezone
 
 from config import prelancement
+from apps.hebergements import api as hebergements
 from apps.hebergements.alertes import signaler_liberation
-from apps.hebergements.disponibilites import conflit, delai_paiement, verrouiller, verrouiller_types
+from apps.hebergements.disponibilites import delai_paiement, verrouiller, verrouiller_types
 from apps.reservations.models import ReservationModel
 
 from . import fedapay, paypal, tarifs
@@ -143,7 +144,7 @@ def demarrer_paiement(reservation, moyen: str = 'mobile_money') -> str:
         reservation.save(update_fields=['payment_method'])
     return creer_paiement(
         objet=reservation, montant=tarifs.montants_de(reservation).total, moyen=moyen, voyageur=reservation.guest,
-        description=f"Kwa-Ba {reservation.reference}, {reservation.hebergement.name}",
+        description=f"Kwa-Ba {reservation.reference}, {tarifs._annonce(reservation)['name']}",
         url_retour=f"{settings.FRONTEND_URL}/reservation/paiement/{reservation.id}",
     )
 
@@ -235,8 +236,8 @@ def _paiement_reussi(paiement_id, donnees: dict):
             verrouiller_types([reservation.type_logement_id])
         else:
             verrouiller(reservation.hebergement_id)
-        if conflit(reservation.hebergement_id, reservation.check_in, reservation.check_out, exclure=reservation.pk,
-                   type_logement=reservation.type_logement, nb=reservation.nb_unites or 1):
+        if hebergements.conflit(reservation.hebergement_id, reservation.check_in, reservation.check_out, exclure=reservation.pk,
+                                type_logement_id=reservation.type_logement_id, nb=reservation.nb_unites or 1):
             rembourser(paiement, paiement.montant, "Dates plus disponibles au moment du paiement")
             reservation.status, reservation.annule_par = 'cancelled', 'plateforme'
             reservation.annule_le = timezone.now()
@@ -255,7 +256,7 @@ def _planifier_versement(reservation):
     VersementModel.objects.update_or_create(
         reservation=reservation,
         defaults={
-            'hote_id': reservation.hebergement.host_id,
+            'hote_id': tarifs._annonce(reservation)['host_id'],
             'montant_brut': montants.prix_nuits,
             'commission': montants.commission_hote,
             'montant': montants.montant_hote,

@@ -2,9 +2,10 @@ import uuid
 from collections.abc import Iterable
 from datetime import date
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 
+from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 
 from .models import ReservationModel
@@ -33,7 +34,8 @@ def paires_confirmees(paires: Iterable[tuple[uuid.UUID, uuid.UUID]]) -> set[tupl
 
 
 def confirmee_pour_hote(reservation_id: uuid.UUID, hote_id: uuid.UUID) -> tuple[uuid.UUID, uuid.UUID] | None:
-    return (ReservationModel.objects.filter(pk=reservation_id, hebergement__host_id=hote_id, status='confirmed')
+    return (ReservationModel.objects.filter(pk=reservation_id, hebergement_id__in=hebergements.ids_annonces_de(hote_id),
+                                            status='confirmed')
             .values_list('hebergement_id', 'guest_id').first())
 
 
@@ -59,3 +61,8 @@ def reduire_frais_pack_sejour(reservation_id: uuid.UUID, voyageur_id: uuid.UUID)
     r.frais_service, r.total_price = nouveaux_frais, r.prix_nuits + nouveaux_frais
     r.save(update_fields=['frais_service', 'total_price'])
     return ecart, r.reference
+
+
+def nb_par_annonce(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, int]:
+    return dict(ReservationModel.objects.filter(hebergement_id__in=list(hebergement_ids)).values('hebergement_id')
+                .annotate(n=Count('id')).values_list('hebergement_id', 'n'))

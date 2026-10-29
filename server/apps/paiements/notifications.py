@@ -55,8 +55,9 @@ def _admins() -> list[str]:
 
 
 def _sejour(r) -> dict:
+    annonce = tarifs._annonce(r)
     return {
-        'hebergement': r.hebergement.name, 'ville': r.hebergement.city, 'reference': r.reference,
+        'hebergement': annonce['name'], 'ville': annonce['city'], 'reference': r.reference,
         'arrivee': _date(r.check_in), 'depart': _date(r.check_out), 'voyageurs': r.guests_count,
     }
 
@@ -64,7 +65,7 @@ def _sejour(r) -> dict:
 def reservation_payee_voyageur(paiement: PaiementModel):
     r = paiement.reservation
     voyageur = r.guest
-    _envoyer('reservation_payee_voyageur', f"Séjour confirmé : {r.hebergement.name}", [voyageur.email], {
+    _envoyer('reservation_payee_voyageur', f"Séjour confirmé : {tarifs._annonce(r)['name']}", [voyageur.email], {
         **_sejour(r), 'prenom': voyageur.first_name, 'montant': _fcfa(paiement.montant),
         'url': f"{settings.FRONTEND_URL}/reservation/confirmation/{r.id}",
         'url_remboursement': f"{settings.FRONTEND_URL}/remboursement",
@@ -74,9 +75,10 @@ def reservation_payee_voyageur(paiement: PaiementModel):
 
 def reservation_payee_hote(paiement: PaiementModel):
     r = paiement.reservation
-    voyageur, hote = r.guest, r.hebergement.host
+    annonce = tarifs._annonce(r)
+    voyageur, hote = r.guest, get_user_model().objects.get(pk=annonce['host_id'])
     montants = tarifs.montants_de(r)
-    _envoyer('reservation_payee_hote', f"Nouvelle réservation payée : {r.hebergement.name}", [hote.email], {
+    _envoyer('reservation_payee_hote', f"Nouvelle réservation payée : {annonce['name']}", [hote.email], {
         **_sejour(r), 'prenom': hote.first_name, 'voyageur': f"{voyageur.first_name} {voyageur.last_name}".strip(),
         'message': r.message, 'montant_hote': _fcfa(montants.montant_hote),
         'date_versement': _date(tarifs.date_versement(r)),
@@ -93,7 +95,7 @@ def versement_envoye(v: VersementModel):
         'prenom': v.hote.first_name, 'montant': _fcfa(v.montant), 'montant_brut': _fcfa(v.montant_brut),
         'commission': _fcfa(v.commission), 'operateur': nom_operateur(v.mode),
         'numero': f"+{indicatif} {v.numero}" if indicatif else v.numero,
-        'voyageur': r.guest.first_name, 'hebergement': r.hebergement.name, 'reference': r.reference,
+        'voyageur': r.guest.first_name, 'hebergement': tarifs._annonce(r)['name'], 'reference': r.reference,
         'url_revenus': f"{settings.FRONTEND_URL}/hote/espace?onglet=revenus",
     })
 
@@ -137,7 +139,7 @@ def _traiter(qs, fonction, drapeau='notifie'):
 
 
 def envoyer_notifications() -> int:
-    relations = ('reservation__guest', 'reservation__hebergement__host')
+    relations = ('reservation__guest',)
     payes = PaiementModel.objects.filter(statut='reussi', reservation__status='confirmed').select_related(*relations)
     total = _traiter(payes.filter(notifie=False), reservation_payee_voyageur)
     total += _traiter(payes.filter(notifie_hote=False), reservation_payee_hote, drapeau='notifie_hote')
@@ -148,9 +150,9 @@ def envoyer_notifications() -> int:
     total += _traiter(
         VersementModel.objects.filter(statut='echoue', notifie=False).select_related('hote', *relations),
         lambda v: alerte_admin('Versement à un hôte', v, f"{v.hote.email} ({nom_operateur(v.mode)} {v.numero})",
-                               reference=v.reservation.reference, libelle=v.reservation.hebergement.name),
+                               reference=v.reservation.reference, libelle=tarifs._annonce(v.reservation)['name']),
     )
-    relations_remb = ('paiement', 'reservation__guest', 'reservation__hebergement', 'transfert__voyageur', 'transfert__aeroport',
+    relations_remb = ('paiement', 'reservation__guest', 'transfert__voyageur', 'transfert__aeroport',
                       'location__voyageur', 'location__categorie', 'location__lieu_prise')
     total += _traiter(
         RemboursementModel.objects.filter(statut='envoye', notifie=False).select_related(*relations_remb),

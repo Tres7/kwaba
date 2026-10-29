@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.utils import formats, timezone
 
+from . import tarifs
 from .notifications import _envoyer, _fcfa
 from .services import delai_paiement
 
@@ -39,7 +40,8 @@ def _heure(moment) -> str:
 
 
 def _reservation(r) -> Objet:
-    return Objet(r.guest, f"votre séjour « {r.hebergement.name} » ({r.hebergement.city}), "
+    annonce = tarifs._annonce(r)
+    return Objet(r.guest, f"votre séjour « {annonce['name']} » ({annonce['city']}), "
                           f"du {formats.date_format(r.check_in, 'j F')} au {formats.date_format(r.check_out, 'j F Y')}",
                  int(r.total_price), f"{settings.FRONTEND_URL}/reservation/paiement/{r.id}")
 
@@ -64,7 +66,7 @@ def _sources():
     from apps.transferts.models import TransfertModel
 
     return [
-        (ReservationModel.objects.select_related('guest', 'hebergement'), 'status', 'pending', 'cancelled',
+        (ReservationModel.objects.select_related('guest'), 'status', 'pending', 'cancelled',
          'annule_par', _reservation),
         (TransfertModel.objects.select_related('voyageur', 'aeroport'), 'statut', 'en_attente_paiement', 'annule',
          'annule_par', _transfert),

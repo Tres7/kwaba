@@ -32,8 +32,12 @@ def test_arrondi_au_franc():
 def _resa(dans_jours, nuits=3, politique='moderee', reservee_il_y_a=timedelta(days=10)):
     arrivee = timezone.localdate() + timedelta(days=dans_jours)
     return SimpleNamespace(check_in=arrivee, check_out=arrivee + timedelta(days=nuits),
-                           created_at=timezone.now() - reservee_il_y_a,
-                           hebergement=SimpleNamespace(politique_annulation=politique))
+                           created_at=timezone.now() - reservee_il_y_a, politique_annulation=politique)
+
+
+@pytest.fixture(autouse=True)
+def annonce_sans_base(monkeypatch):
+    monkeypatch.setattr(tarifs, '_annonce', lambda r: {'politique_annulation': getattr(r, 'politique_annulation', '')})
 
 
 M = tarifs.calculer(20000, 3)  # 60 000 + 3 600 de frais ; commission 4 800

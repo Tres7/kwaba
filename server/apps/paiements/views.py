@@ -49,7 +49,7 @@ class ConfigView(APIView):
 
 
 def _reservation_du_voyageur(pk, user):
-    return ReservationModel.objects.select_related('hebergement', 'guest').filter(pk=pk, guest=user).first()
+    return ReservationModel.objects.select_related('guest').filter(pk=pk, guest=user).first()
 
 
 class PayerView(APIView):
@@ -229,7 +229,7 @@ class RevenusView(APIView):
         versements = (
             VersementModel.objects.filter(hote=request.user)
             .exclude(statut='annule')
-            .select_related('reservation', 'reservation__hebergement', 'reservation__guest')
+            .select_related('reservation', 'reservation__guest')
             .order_by('-date_prevue')
         )
 
@@ -254,7 +254,7 @@ class RevenusView(APIView):
                     'id': str(v.id),
                     'reservation_id': str(v.reservation_id),
                     'reference': v.reservation.reference,
-                    'hebergement': v.reservation.hebergement.name,
+                    'hebergement': tarifs._annonce(v.reservation)['name'],
                     'voyageur': f"{v.reservation.guest.first_name} {v.reservation.guest.last_name}".strip(),
                     'check_in': v.reservation.check_in,
                     'check_out': v.reservation.check_out,

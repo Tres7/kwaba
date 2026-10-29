@@ -56,7 +56,7 @@ def test_overlap_rejected_but_check_in_on_previous_check_out_accepted(client_for
 def test_cancelled_reservation_does_not_block_dates(client_for, make_user, make_hebergement):
     hebergement = make_hebergement()
     check_in, check_out = _stay_dates()
-    ReservationModel.objects.create(hebergement=hebergement, guest=make_user(), check_in=check_in,
+    ReservationModel.objects.create(hebergement_id=hebergement.id, guest=make_user(), check_in=check_in,
                                     check_out=check_out, total_price=0, status='cancelled')
 
     assert _book(client_for(make_user()), hebergement, check_in, check_out).status_code == 201

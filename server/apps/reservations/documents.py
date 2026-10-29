@@ -1,7 +1,9 @@
 """Documents of a stay: voucher, payment receipt and invoice lines (registered in documents at start-up)."""
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from apps.documents.api import Document, Produit, date, fcfa, nom as _nom
+from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 
 from .models import ReservationModel
@@ -11,16 +13,21 @@ def _heure(t) -> str:
     return t.strftime('%H h %M').replace(' 00', '') if t else ''
 
 
+def _annonce(r) -> dict:
+    return hebergements.fiche(r.hebergement_id, archivees=True)
+
+
 def bon(r) -> bytes:
-    h = r.hebergement
+    h = _annonce(r)
+    hote = get_user_model().objects.get(pk=h['host_id'])
     doc = Document('Bon de réservation', r.reference, sous_titre=f"émis le {date(timezone.now())}",
                    destinataire=[_nom(r.guest), r.guest.email])
     doc.bloc('Votre séjour', [
-        ('Logement', h.name), ('Adresse', ', '.join(x for x in (h.location, h.city) if x)),
-        ('Arrivée', f"{date(r.check_in, 'l j F Y')}" + (f", à partir de {_heure(h.arrivee_a_partir)}" if h.arrivee_a_partir else '')),
-        ('Départ', f"{date(r.check_out, 'l j F Y')}" + (f", avant {_heure(h.depart_avant)}" if h.depart_avant else '')),
+        ('Logement', h['name']), ('Adresse', ', '.join(x for x in (h['location'], h['city']) if x)),
+        ('Arrivée', f"{date(r.check_in, 'l j F Y')}" + (f", à partir de {_heure(h['arrivee_a_partir'])}" if h['arrivee_a_partir'] else '')),
+        ('Départ', f"{date(r.check_out, 'l j F Y')}" + (f", avant {_heure(h['depart_avant'])}" if h['depart_avant'] else '')),
         ('Durée', f"{r.nights} nuit(s)"), ('Voyageurs', str(r.guests_count)),
-        ('Hôte', _nom(h.host) + ', contact par la messagerie Kwa-Ba'),
+        ('Hôte', _nom(hote) + ', contact par la messagerie Kwa-Ba'),
     ])
     lignes = []
     if r.prix_nuits is not None:
@@ -36,11 +43,11 @@ def bon(r) -> bytes:
 
 def lignes_facture(r) -> list[dict]:
     """Invoice lines of a paid stay (amounts including tax in FCFA)."""
-    h = r.hebergement
+    h = _annonce(r)
     if r.prix_nuits is None:
-        return [{'libelle': f"Séjour « {h.name} » du {date(r.check_in)} au {date(r.check_out)}",
+        return [{'libelle': f"Séjour « {h['name']} » du {date(r.check_in)} au {date(r.check_out)}",
                  'quantite': 1, 'prix_unitaire': int(r.total_price)}]
-    lignes = [{'libelle': f"Hébergement « {h.name} », {h.city}, du {date(r.check_in)} au {date(r.check_out)}",
+    lignes = [{'libelle': f"Hébergement « {h['name']} », {h['city']}, du {date(r.check_in)} au {date(r.check_out)}",
                'quantite': r.nights, 'prix_unitaire': r.prix_nuits // max(r.nights, 1)}]
     reste = r.prix_nuits - lignes[0]['quantite'] * lignes[0]['prix_unitaire']
     if reste:

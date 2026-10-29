@@ -37,7 +37,7 @@ Une PR par module. L'API vue par le client ne change pas.
 | 11 | transferts | Migré : passe par `paiements.api` et `reservations.api` (séjour associé vérifié avec `appartient_au_voyageur`) ; le transfert garde l'identifiant du séjour |
 | 12 | locations | Migré : chauffeurs lus via `transferts.api` (`fiche_chauffeur`, `fiches_chauffeurs`, `chauffeurs_actifs`, `chauffeurs_des_transferts_termines`) ; Pack Séjour via `reservations.api.reduire_frais_pack_sejour` et `paiements.api.rembourser_en_partie` ; la location et le versement au chauffeur gardent les identifiants du séjour et des chauffeurs |
 | 13 | hebergements | Migré : ne lit plus les réservations ; disponibilités, calendrier de l'hôte, archivage et suppression d'un type passent par un registre que `reservations` remplit au démarrage (`hebergements/occupations.py`) ; règle de publication via `contrats.api.condition_contrat_signe` et `documents.api.condition_societe_immatriculee` ; emails d'alerte et tarif fidélité via `paiements.api` |
-| 13 bis | reservations | À faire |
+| 13 bis | reservations | Migré : la réservation garde les identifiants de l'annonce et du type ; création via `hebergements.api` (`fiche`, `fiche_type`, `type_par_defaut`, `verrouiller_types`, `conflit`) et `paiements.api` (`devis_sejour`, `montants_de`, `annuler_reservation`) ; carte de l'annonce lue une fois par liste (`cartes`) ; `paiements` et `backoffice` lisent l'annonce d'une réservation via `hebergements.api` |
 | 14 | paiements | À faire |
 | 15 | backoffice | À faire |
 | 16 | users (clés étrangères vers les comptes) | À faire |

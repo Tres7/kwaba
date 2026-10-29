@@ -6,19 +6,19 @@ from .models import ConditionsHoteModel, PaiementModel
 from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
 from .paypal import FCFA_PAR_EURO
 from .services import (
-    INDISPONIBLE, PaiementErreur, creer_paiement, delai_paiement, envoyer_payout, fedapay_actif,
+    INDISPONIBLE, PaiementErreur, annuler as annuler_reservation, creer_paiement, delai_paiement, envoyer_payout, fedapay_actif,
     indiquer_numero_remboursement, moyens_actifs, paiement_actif, rembourser, reservation_possible,
     synchroniser_paiement, synchroniser_payout,
 )
 from .views import CompteRemboursementSerializer
 
 __all__ = [
-    'CompteRemboursementSerializer', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
+    'CompteRemboursementSerializer', 'annuler_reservation', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
     'PaiementErreur', 'alerte_admin', 'date_fr', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
     'documents_joints', 'emails_admins', 'envoyer_email', 'envoyer_payout', 'fcfa', 'fedapay_actif', 'frais_voyageur',
     'indiquer_numero_remboursement', 'moyens_actifs', 'paiement_actif', 'paiement_reussi', 'recu_pdf', 'rembourser',
     'reservation_possible', 'synchroniser_paiement', 'synchroniser_payout', 'texte_politique', 'total_sejour',
-    'frais_reduits', 'frais_reduits_sejour', 'hotes_deja_visites', 'rembourser_en_partie',
+    'devis_sejour', 'frais_reduits', 'frais_reduits_sejour', 'montants_de', 'hotes_deja_visites', 'rembourser_en_partie',
 ]
 
 # Emails of the products paid online (stays, transfers, rentals, donations): same sending rules as the payment emails
@@ -89,3 +89,13 @@ def frais_reduits() -> Decimal:
 def hotes_deja_visites(voyageur) -> set:
     """Hosts the traveller already stayed with (loyal customer rate)."""
     return tarifs.hotes_deja_visites(voyageur)
+
+
+def devis_sejour(prix_par_nuit, hote_id, nuits: int, voyageur=None, nb_unites: int = 1) -> tarifs.Montants:
+    """Amounts of a stay with the rates of this host and this traveller."""
+    return tarifs.devis(prix_par_nuit, hote_id, nuits, voyageur=voyageur, nb_unites=nb_unites)
+
+
+def montants_de(reservation, prix_par_nuit=None) -> tarifs.Montants:
+    """Frozen amounts of a booking."""
+    return tarifs.montants_de(reservation, prix_par_nuit)
