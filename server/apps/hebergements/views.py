@@ -17,8 +17,8 @@ from .archivage import ArchivageImpossible, archiver
 from . import stock
 from .disponibilites import a_des_reservations, periodes_indisponibles, verrouiller, verrouiller_types
 from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
-from .photos import InvalidPhoto, normalize_photo
 from apps.securite import fraude
+from apps.securite.photos import InvalidPhoto, normalize_photo
 
 from . import types_logement
 from .serializers import (

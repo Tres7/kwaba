@@ -16,14 +16,15 @@ Une PR par module. L'API vue par le client ne change pas.
 4. **Filtres qui traversent les modules** (`x__hebergement__host`, `select_related`). Les remplacer par des listes d'identifiants obtenues via l'interface.
 5. **Suppressions.** Remplacer les `on_delete` entre modules : soit l'objet disparaît de l'affichage parce que l'interface ne le renvoie plus, soit le module réagit à un événement.
 6. **`.importlinter`.** Retirer les lignes du module dans `ignore_imports` et vérifier que `lint-imports` passe.
-7. **Tests.** Comportement inchangé, plus un test qui vérifie que le nombre de requêtes d'une liste ne dépend pas du nombre d'éléments.
+7. **Écrans d'administration.** Ils appartiennent au module : `admin_views.py` et `admin_urls.py`, branchés sur `api/v1/admin/<module>/` dans `config/urls.py`, avant `apps.backoffice.urls`. Les briques communes (`ListeAdmin`, `FicheAdmin`, `Journalise`, `ChampPhoto`) sont dans `apps.securite.backoffice`.
+8. **Tests.** Comportement inchangé, plus un test qui vérifie que le nombre de requêtes d'une liste ne dépend pas du nombre d'éléments.
 
 ## Avancement
 
 | Ordre | Module | État |
 |---|---|---|
 | 1 | favoris | Migré : `hebergements.api` (`est_publiee`, `cartes`), `favoris.api` (`ids_favoris`), plus de clé étrangère vers les annonces |
-| 2 | experiences | À faire |
+| 2 | experiences | Migré : écrans d'administration déplacés de `backoffice` dans le module (`admin_urls.py`) ; normalisation des photos et briques du back-office déplacées dans `securite` |
 | 3 | voyages | À faire |
 | 4 | concierge | À faire |
 | 5 | messaging | À faire (clé étrangère vers l'annonce, contrôleur qui contourne ses ports) |

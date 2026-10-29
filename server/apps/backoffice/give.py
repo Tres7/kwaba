@@ -13,10 +13,10 @@ from rest_framework.views import APIView
 from apps.give import services
 from apps.give.models import DonModel, OrganisationModel, ProjetModel, ReversementModel
 from apps.securite.audit import journaliser
+from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 from apps.verifications.fichiers import FichierInvalide, piece_identite
 
-from .commun import ChampPhoto, FicheAdmin, ListeAdmin
 from .views import _nom, _paginer
 
 
