@@ -1,0 +1,218 @@
+[importlinter]
+root_package = apps
+
+[importlinter:contract:modules-metier]
+name = Les modules métier ne dépendent pas les uns des autres
+type = independence
+modules =
+    apps.avis
+    apps.backoffice
+    apps.concierge
+    apps.contrats
+    apps.documents
+    apps.experiences
+    apps.favoris
+    apps.give
+    apps.hebergements
+    apps.locations
+    apps.messaging
+    apps.paiements
+    apps.reservations
+    apps.terrain
+    apps.transferts
+    apps.users
+    apps.verifications
+    apps.voyages
+ignore_imports =
+    apps.avis.models -> apps.hebergements.models
+    apps.avis.models -> apps.reservations.models
+    apps.avis.serializers -> apps.reservations.models
+    apps.avis.services -> apps.hebergements.models
+    apps.avis.services -> apps.reservations.models
+    apps.avis.views -> apps.hebergements.models
+    apps.avis.views -> apps.hebergements.serializers
+    apps.backoffice.commun -> apps.hebergements.photos
+    apps.backoffice.experiences -> apps.experiences.models
+    apps.backoffice.give -> apps.give.models
+    apps.backoffice.give -> apps.give.services
+    apps.backoffice.give -> apps.verifications.fichiers
+    apps.backoffice.locations -> apps.locations.models
+    apps.backoffice.locations -> apps.locations.services
+    apps.backoffice.locations -> apps.paiements.operateurs
+    apps.backoffice.locations -> apps.transferts.models
+    apps.backoffice.transferts -> apps.paiements.operateurs
+    apps.backoffice.transferts -> apps.transferts.models
+    apps.backoffice.transferts -> apps.transferts.services
+    apps.backoffice.urls -> apps.hebergements.lancement
+    apps.backoffice.views -> apps.avis.models
+    apps.backoffice.views -> apps.hebergements.archivage
+    apps.backoffice.views -> apps.hebergements.models
+    apps.backoffice.views -> apps.paiements.models
+    apps.backoffice.views -> apps.paiements.services
+    apps.backoffice.views -> apps.paiements.tarifs
+    apps.backoffice.views -> apps.reservations.models
+    apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
+    apps.backoffice.views -> apps.verifications.services
+    apps.concierge.outils -> apps.hebergements.disponibilites
+    apps.concierge.outils -> apps.hebergements.models
+    apps.concierge.outils -> apps.paiements.tarifs
+    apps.concierge.outils -> apps.transferts.models
+    apps.concierge.outils -> apps.transferts.services
+    apps.contrats.management.commands.inviter_hotes_contrat -> apps.documents.models
+    apps.contrats.migrations.0001_initial -> apps.documents.models
+    apps.contrats.models -> apps.documents.models
+    apps.contrats.pdf -> apps.documents.models
+    apps.contrats.pdf -> apps.documents.pdf
+    apps.contrats.services -> apps.documents.models
+    apps.contrats.services -> apps.documents.pdf
+    apps.contrats.services -> apps.give.montants
+    apps.contrats.services -> apps.locations.models
+    apps.contrats.services -> apps.paiements.tarifs
+    apps.contrats.services -> apps.transferts.tarifs
+    apps.contrats.services -> apps.verifications.services
+    apps.contrats.views -> apps.backoffice.views
+    apps.contrats.views -> apps.documents.models
+    apps.contrats.views -> apps.give.models
+    apps.contrats.views -> apps.locations.models
+    apps.contrats.views -> apps.transferts.models
+    apps.documents.generateurs -> apps.give.montants
+    apps.documents.generateurs -> apps.paiements.models
+    apps.documents.generateurs -> apps.paiements.tarifs
+    apps.documents.views -> apps.backoffice.views
+    apps.documents.views -> apps.contrats.services
+    apps.documents.views -> apps.give.models
+    apps.documents.views -> apps.locations.models
+    apps.documents.views -> apps.reservations.models
+    apps.documents.views -> apps.transferts.models
+    apps.favoris.models -> apps.hebergements.models
+    apps.favoris.serializers -> apps.hebergements.models
+    apps.favoris.serializers -> apps.hebergements.serializers
+    apps.give.models -> apps.paiements.operateurs
+    apps.give.notifications -> apps.paiements.notifications
+    apps.give.services -> apps.paiements.services
+    apps.give.views -> apps.paiements.paypal
+    apps.give.views -> apps.paiements.services
+    apps.hebergements.alertes -> apps.paiements.notifications
+    apps.hebergements.disponibilites -> apps.reservations.models
+    apps.hebergements.management.commands.seed_demo -> apps.users.infrastructure.persistence.models
+    apps.hebergements.models -> apps.contrats.models
+    apps.hebergements.models -> apps.documents.models
+    apps.hebergements.serializers -> apps.paiements.tarifs
+    apps.hebergements.stock -> apps.reservations.models
+    apps.hebergements.views -> apps.contrats.preinscription
+    apps.hebergements.views -> apps.favoris.models
+    apps.hebergements.views -> apps.verifications.services
+    apps.locations.models -> apps.paiements.operateurs
+    apps.locations.notifications -> apps.paiements.notifications
+    apps.locations.services -> apps.paiements.services
+    apps.locations.services -> apps.paiements.tarifs
+    apps.locations.services -> apps.reservations.models
+    apps.locations.services -> apps.transferts.models
+    apps.locations.views -> apps.paiements.services
+    apps.locations.views -> apps.paiements.views
+    apps.locations.views -> apps.reservations.models
+    apps.locations.views -> apps.transferts.models
+    apps.messaging.infrastructure.http.controllers.ConversationController -> apps.hebergements.models
+    apps.messaging.infrastructure.http.controllers.ConversationController -> apps.reservations.models
+    apps.messaging.infrastructure.lookups.DjangoBookingLookup -> apps.reservations.models
+    apps.messaging.infrastructure.lookups.DjangoHebergementLookup -> apps.hebergements.models
+    apps.messaging.infrastructure.persistence.models -> apps.hebergements.models
+    apps.paiements.notifications -> apps.documents.services
+    apps.paiements.relances -> apps.locations.models
+    apps.paiements.relances -> apps.reservations.models
+    apps.paiements.relances -> apps.transferts.models
+    apps.paiements.services -> apps.give.services
+    apps.paiements.services -> apps.hebergements.alertes
+    apps.paiements.services -> apps.hebergements.disponibilites
+    apps.paiements.services -> apps.locations.models
+    apps.paiements.services -> apps.locations.services
+    apps.paiements.services -> apps.reservations.models
+    apps.paiements.services -> apps.transferts.models
+    apps.paiements.services -> apps.transferts.services
+    apps.paiements.tarifs -> apps.reservations.models
+    apps.paiements.views -> apps.reservations.models
+    apps.reservations.models -> apps.hebergements.models
+    apps.reservations.serializers -> apps.avis.services
+    apps.reservations.serializers -> apps.hebergements.disponibilites
+    apps.reservations.serializers -> apps.hebergements.serializers
+    apps.reservations.serializers -> apps.hebergements.types_logement
+    apps.reservations.serializers -> apps.paiements.services
+    apps.reservations.serializers -> apps.paiements.tarifs
+    apps.reservations.views -> apps.paiements.services
+    apps.terrain.types -> apps.hebergements.models
+    apps.terrain.types -> apps.verifications.models
+    apps.terrain.types -> apps.verifications.services
+    apps.terrain.types -> apps.verifications.views
+    apps.transferts.models -> apps.paiements.operateurs
+    apps.transferts.notifications -> apps.paiements.notifications
+    apps.transferts.services -> apps.paiements.services
+    apps.transferts.views -> apps.paiements.services
+    apps.transferts.views -> apps.paiements.views
+    apps.transferts.views -> apps.reservations.models
+    apps.verifications.services -> apps.contrats.services
+    apps.verifications.services -> apps.documents.models
+    apps.verifications.services -> apps.hebergements.models
+    apps.verifications.views -> apps.hebergements.models
+    apps.verifications.views -> apps.terrain.services
+    apps.voyages.views -> apps.hebergements.disponibilites
+    apps.voyages.views -> apps.hebergements.models
+    apps.voyages.views -> apps.paiements.tarifs
+    apps.voyages.views -> apps.reservations.models
+
+[importlinter:contract:noyau-partage]
+name = securite et notifications ne dépendent d'aucun module métier
+type = forbidden
+source_modules =
+    apps.securite
+    apps.notifications
+forbidden_modules =
+    apps.avis
+    apps.backoffice
+    apps.concierge
+    apps.contrats
+    apps.documents
+    apps.experiences
+    apps.favoris
+    apps.give
+    apps.hebergements
+    apps.locations
+    apps.messaging
+    apps.paiements
+    apps.reservations
+    apps.terrain
+    apps.transferts
+    apps.users
+    apps.verifications
+    apps.voyages
+
+[importlinter:contract:emails]
+name = Les emails passent par EmailRequestBus, pas par send_mail
+type = forbidden
+source_modules =
+    apps.avis
+    apps.backoffice
+    apps.concierge
+    apps.contrats
+    apps.documents
+    apps.experiences
+    apps.favoris
+    apps.give
+    apps.hebergements
+    apps.locations
+    apps.messaging
+    apps.paiements
+    apps.reservations
+    apps.terrain
+    apps.transferts
+    apps.users
+    apps.verifications
+    apps.voyages
+forbidden_modules =
+    apps.notifications.infrastructure.email
+allow_indirect_imports = True
+ignore_imports =
+    apps.contrats.services -> apps.notifications.infrastructure.email.envoi
+    apps.hebergements.lancement -> apps.notifications.infrastructure.email.envoi
+    apps.paiements.notifications -> apps.notifications.infrastructure.email.envoi
+    apps.users.infrastructure.messaging.FallbackEventBus -> apps.notifications.infrastructure.email.DjangoEmailSender
+    apps.verifications.services -> apps.notifications.infrastructure.email.envoi

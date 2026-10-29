@@ -6,4 +6,5 @@ pytest-cov>=7.1.0,<8
 diff-cover>=9,<10
 moto[s3]>=5.2.4,<6
 ruff>=0.17.1,<1
+import-linter>=2.15,<3
 pre-commit>=4.7.0,<5
