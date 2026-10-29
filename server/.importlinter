@@ -25,22 +25,6 @@ modules =
     apps.voyages
 ignore_imports =
     apps.** -> apps.*.api
-    apps.backoffice.give -> apps.give.models
-    apps.backoffice.give -> apps.give.services
-    apps.backoffice.locations -> apps.locations.models
-    apps.backoffice.locations -> apps.locations.services
-    apps.backoffice.locations -> apps.paiements.operateurs
-    apps.backoffice.transferts -> apps.paiements.operateurs
-    apps.backoffice.transferts -> apps.transferts.models
-    apps.backoffice.transferts -> apps.transferts.services
-    apps.backoffice.urls -> apps.hebergements.lancement
-    apps.backoffice.views -> apps.avis.models
-    apps.backoffice.views -> apps.hebergements.archivage
-    apps.backoffice.views -> apps.hebergements.models
-    apps.backoffice.views -> apps.paiements.models
-    apps.backoffice.views -> apps.paiements.services
-    apps.backoffice.views -> apps.paiements.tarifs
-    apps.backoffice.views -> apps.reservations.models
     apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
 
 [importlinter:contract:noyau-partage]

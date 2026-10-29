@@ -3,7 +3,7 @@ from decimal import Decimal
 from . import notifications, tarifs
 from .documents import recu_paiement
 from .models import ConditionsHoteModel, PaiementModel, RemboursementModel
-from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
+from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES, operateurs_du_pays
 from .paypal import FCFA_PAR_EURO
 from .registre import ProduitPaye, Relance, enregistrer as enregistrer_produit
 from .services import (
@@ -15,7 +15,7 @@ from .services import (
 from .views import CompteRemboursementSerializer
 
 __all__ = [
-    'ProduitPaye', 'Relance', 'enregistrer_produit', 'autre_paiement_reussi', 'etats_paiement', 'etats_pour_serializer',
+    'FONDATEURS_MAX', 'conditions_commission', 'modifier_conditions_hote', 'operateurs_du_pays', 'ProduitPaye', 'Relance', 'enregistrer_produit', 'autre_paiement_reussi', 'etats_paiement', 'etats_pour_serializer',
     'ids_paiements_echoues', 'numero_remboursement_requis', 'synchroniser_dernier_paiement',
     'synchroniser_paiements_en_attente', 'CompteRemboursementSerializer', 'annuler_paiement_reservation', 'planifier_versement_hote', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
     'PaiementErreur', 'alerte_admin', 'date_fr', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
@@ -175,3 +175,42 @@ def ids_paiements_echoues(type_objet: str) -> set:
     actifs = set(PaiementModel.objects.filter(**{f'{champ}__in': echoues}, statut__in=('en_attente', 'reussi'))
                  .values_list(champ, flat=True))
     return echoues - actifs
+
+
+FONDATEURS_MAX = 50
+
+
+def conditions_commission(hote) -> dict:
+    """Host's commission: category, Founders Programme and rate applied today."""
+    c = ConditionsHoteModel.objects.filter(hote=hote).first()
+    return {
+        'categorie': c.categorie if c else 'particulier',
+        'fondateur_debut': c.fondateur_debut if c else None,
+        'fondateur_fin': c.fondateur_fin if c else None,
+        'commission_pourcent': float(tarifs.taux_commission(hote) * 100),
+    }
+
+
+def modifier_conditions_hote(hote, valeurs, par) -> str | None:
+    """Category (individual, hotel) and Founders Programme dates of a host, set by an administrator.
+    Returns an error message, or None once saved."""
+    from django.utils.dateparse import parse_date
+
+    if hote.role != 'hote' or not isinstance(valeurs, dict):
+        return "Seul un hôte a des conditions de commission."
+    categorie = valeurs.get('categorie', 'particulier')
+    if categorie not in dict(ConditionsHoteModel.CATEGORIES):
+        return "Catégorie inconnue."
+    debut, fin = (parse_date(str(valeurs.get(c) or '')) or None for c in ('fondateur_debut', 'fondateur_fin'))
+    if bool(debut) != bool(fin):
+        return "Indiquez le début et la fin du Programme Fondateurs, ou aucun des deux."
+    if debut and fin <= debut:
+        return "La fin du Programme Fondateurs doit être après son début."
+    if debut and categorie == 'hotel':
+        return "Le Programme Fondateurs concerne les hôtes particuliers."
+    if debut and not ConditionsHoteModel.objects.filter(hote=hote, fondateur_debut__isnull=False).exists() \
+            and ConditionsHoteModel.objects.filter(fondateur_debut__isnull=False).count() >= FONDATEURS_MAX:
+        return f"Le Programme Fondateurs est limité aux {FONDATEURS_MAX} premiers hôtes."
+    ConditionsHoteModel.objects.update_or_create(hote=hote, defaults={
+        'categorie': categorie, 'fondateur_debut': debut, 'fondateur_fin': fin, 'mis_a_jour_par': par})
+    return None

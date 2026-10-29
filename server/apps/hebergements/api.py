@@ -173,3 +173,14 @@ def passe_alertes() -> dict:
     from .alertes import passe
 
     return passe()
+
+
+def statistiques() -> dict:
+    """Listings for the back-office dashboard: total, visible, verified, waiting for an agent's visit."""
+    return HebergementModel.objects.aggregate(
+        total=Count('id'),
+        visibles=Count('id', filter=Q(is_available=True, statut_verification='verifiee')),
+        verifiees=Count('id', filter=Q(statut_verification='verifiee')),
+        # Waiting for an agent's visit (refused listings wait for the host, not for an agent)
+        en_attente=Count('id', filter=Q(statut_verification='en_attente')),
+    )

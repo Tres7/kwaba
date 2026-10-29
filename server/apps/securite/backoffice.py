@@ -1,7 +1,8 @@
 """Shared back-office building blocks: admin access, audit log at every write, normalised photos."""
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .audit import journaliser
 from .permissions import EstAdministrateur
@@ -82,3 +83,38 @@ def paginer(request, qs, serialiser, en_lot=False) -> Response:
         'page': page,
         'page_size': taille,
     })
+
+
+MOTIF_MIN, MOTIF_MAX = 5, 500
+
+
+class VueAdmin(APIView):
+    permission_classes = [EstAdministrateur]
+
+
+def booleen(valeur):
+    """'true' / 'false' (URL parameter) → bool; any other value → None (filter ignored)."""
+    return {'true': True, 'false': False}.get((valeur or '').lower())
+
+
+def motif(valeur):
+    """Required reason for deletions and cancellations: (reason, error response or None)."""
+    texte = (valeur or '').strip()
+    if not MOTIF_MIN <= len(texte) <= MOTIF_MAX:
+        return texte, Response(
+            {'motif': [f'Indiquez un motif de {MOTIF_MIN} à {MOTIF_MAX} caractères.']},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return texte, None
+
+
+def nom(utilisateur) -> str:
+    return f'{utilisateur.first_name} {utilisateur.last_name}'.strip() or utilisateur.email
+
+
+def introuvable(quoi: str) -> Response:
+    return Response({'detail': f'{quoi} introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+def entier(valeur, defaut: int, minimum: int = 1, maximum: int | None = None) -> int:
+    return _entier(valeur, defaut, minimum, maximum)

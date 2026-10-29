@@ -7,18 +7,19 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.locations import services
-from apps.locations.models import (
-    CategorieVehiculeModel, LieuRemiseModel, LocationModel, ParametresLocationModel, PartenaireLocationModel,
-    PhotoVehiculeModel,
-)
-from apps.paiements.operateurs import operateurs_du_pays
+from apps.paiements.api import operateurs_du_pays
 from apps.transferts import api as transferts
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 
-from .views import _motif, _nom, _paginer
+from apps.securite.backoffice import motif as _motif, nom as _nom, paginer as _paginer
+
+from . import services
+from .models import (
+    CategorieVehiculeModel, LieuRemiseModel, LocationModel, ParametresLocationModel, PartenaireLocationModel,
+    PhotoVehiculeModel,
+)
 
 
 # --- Rules (a single row) ------------------------------------------------------------------
