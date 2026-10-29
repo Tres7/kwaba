@@ -1,6 +1,7 @@
 import math
 import uuid
 
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.db.models import Count
 from rest_framework import serializers, status
@@ -8,10 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.hebergements.disponibilites import est_disponible
-from apps.hebergements.models import HebergementModel
-from apps.paiements import tarifs
-from apps.reservations.models import ReservationModel
+from apps.hebergements import api as hebergements
+from apps.paiements import api as paiements
+from apps.reservations import api as reservations_api
 
 from .models import (
     EtapeModel, LienReservationModel, MembreModel, PropositionModel, VoteModel, VoyageGroupeModel, nouveau_code,
@@ -55,44 +55,55 @@ def budget(hebergement, voyage) -> dict | None:
     """Cost of the listing for the trip dates, service fees included, and everyone's share."""
     if not voyage.nuits:
         return None
-    m = tarifs.devis(hebergement, voyage.nuits)
+    total = paiements.total_sejour(hebergement['price_per_night'], voyage.nuits)
     personnes = max(1, voyage.nb_voyageurs)
-    return {'nuits': voyage.nuits, 'total': m.total, 'par_personne': math.ceil(m.total / personnes), 'personnes': personnes}
+    return {'nuits': voyage.nuits, 'total': total, 'par_personne': math.ceil(total / personnes), 'personnes': personnes}
 
 
 def detail(voyage, user, request) -> dict:
     membres = list(voyage.membres.select_related('utilisateur'))
     votes = list(voyage.votes.all())
     mon_vote = next((v.proposition_id for v in votes if v.utilisateur_id == user.id), None)
+    liste_propositions = list(voyage.propositions.select_related('propose_par'))
+    liens = list(voyage.reservations.select_related('ajoute_par'))
+    resas = reservations_api.resumes(lien.reservation_id for lien in liens)
+    annonces = hebergements.resumes({p.hebergement_id for p in liste_propositions} | {r['hebergement_id'] for r in resas.values()})
+    voyageurs = {u.id: u for u in get_user_model().objects.filter(id__in={r['voyageur_id'] for r in resas.values()})}
     propositions = []
-    for p in voyage.propositions.select_related('hebergement', 'propose_par'):
-        h = p.hebergement
+    for p in liste_propositions:
+        h = annonces.get(p.hebergement_id)
+        if not h:
+            continue
         disponible = None
         if voyage.date_debut and voyage.date_fin:
-            disponible = h.est_publiee and est_disponible(h.id, voyage.date_debut, voyage.date_fin)
+            disponible = h['publiee'] and hebergements.est_disponible(h['id'], voyage.date_debut, voyage.date_fin)
         propositions.append({
             'id': p.id, 'commentaire': p.commentaire, 'propose_par': _nom(p.propose_par),
             'peut_supprimer': user.id in (p.propose_par_id, voyage.organisateur_id),
             'votes': sum(1 for v in votes if v.proposition_id == p.id),
             'votants': [_nom(m.utilisateur) for m in membres if any(v.utilisateur_id == m.utilisateur_id and v.proposition_id == p.id for v in votes)],
             'hebergement': {
-                'id': str(h.id), 'name': h.name, 'city': h.city, 'location': h.location, 'type': h.type,
-                'image_url': h.image_url, 'price_per_night': float(h.price_per_night), 'max_guests': h.max_guests,
-                'rating': h.rating, 'review_count': h.review_count,
+                'id': str(h['id']), 'name': h['name'], 'city': h['city'], 'location': h['location'], 'type': h['type'],
+                'image_url': h['image_url'], 'price_per_night': float(h['price_per_night']), 'max_guests': h['max_guests'],
+                'rating': h['rating'], 'review_count': h['review_count'],
             },
             'budget': budget(h, voyage),
             'disponible': disponible,
-            'assez_grand': h.max_guests >= voyage.nb_voyageurs,
+            'assez_grand': h['max_guests'] >= voyage.nb_voyageurs,
         })
     propositions.sort(key=lambda p: (-p['votes'], p['id']))
     reservations = []
-    for lien in voyage.reservations.select_related('reservation__hebergement', 'reservation__guest', 'ajoute_par'):
-        r = lien.reservation
+    for lien in liens:
+        r = resas.get(lien.reservation_id)
+        h = annonces.get(r['hebergement_id']) if r else None
+        if not h:
+            continue
+        voyageur = voyageurs.get(r['voyageur_id'])
         reservations.append({
-            'id': lien.id, 'reservation_id': str(r.id), 'reference': r.reference, 'hebergement': r.hebergement.name,
-            'hebergement_id': str(r.hebergement_id), 'ville': r.hebergement.city, 'adresse': r.hebergement.location,
-            'check_in': r.check_in, 'check_out': r.check_out, 'voyageurs': r.guests_count, 'statut': r.status,
-            'total': float(r.total_price), 'reserve_par': _nom(r.guest),
+            'id': lien.id, 'reservation_id': str(r['id']), 'reference': r['reference'], 'hebergement': h['name'],
+            'hebergement_id': str(h['id']), 'ville': h['city'], 'adresse': h['location'],
+            'check_in': r['check_in'], 'check_out': r['check_out'], 'voyageurs': r['voyageurs'], 'statut': r['statut'],
+            'total': float(r['total']), 'reserve_par': _nom(voyageur) if voyageur else '',
             'peut_retirer': user.id in (lien.ajoute_par_id, voyage.organisateur_id),
         })
     return {
@@ -252,13 +263,13 @@ class PropositionsView(APIView):
         voyage = _voyage(pk, request.user)
         if not voyage:
             return _introuvable()
-        hebergement = HebergementModel.objects.publiees().filter(pk=_uuid(request.data.get('hebergement'))).first()
-        if not hebergement:
+        hebergement_id = _uuid(request.data.get('hebergement'))
+        if not hebergement_id or not hebergements.est_publiee(hebergement_id):
             return Response({'hebergement': ['Logement introuvable.']}, status=status.HTTP_400_BAD_REQUEST)
         try:
             with transaction.atomic():  # the duplicate must not break the request's transaction
                 PropositionModel.objects.create(
-                    voyage=voyage, hebergement=hebergement, propose_par=request.user,
+                    voyage=voyage, hebergement_id=hebergement_id, propose_par=request.user,
                     commentaire=str(request.data.get('commentaire', ''))[:280],
                 )
         except IntegrityError:
@@ -373,10 +384,11 @@ class ReservationsPartageesView(APIView):
         if not voyage:
             return _introuvable()
         # Only one's own bookings can be shared
-        reservation = ReservationModel.objects.filter(pk=_uuid(request.data.get('reservation')), guest=request.user).first()
-        if not reservation:
+        reservation_id = _uuid(request.data.get('reservation'))
+        if not reservation_id or not reservations_api.appartient_au_voyageur(reservation_id, request.user.id):
             return Response({'reservation': ['Réservation introuvable.']}, status=status.HTTP_400_BAD_REQUEST)
-        LienReservationModel.objects.get_or_create(voyage=voyage, reservation=reservation, defaults={'ajoute_par': request.user})
+        LienReservationModel.objects.get_or_create(voyage=voyage, reservation_id=reservation_id,
+                                                   defaults={'ajoute_par': request.user})
         voyage.save(update_fields=['mis_a_jour_le'])
         return Response(detail(voyage, request.user, request), status=status.HTTP_201_CREATED)
 

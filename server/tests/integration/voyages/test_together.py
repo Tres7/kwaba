@@ -148,3 +148,27 @@ def test_dates_coherentes(client_for, make_user):
     assert r.status_code == 400 and 'date_fin' in r.data
     sans_dates = orga.post(VOYAGES, {'nom': 'Plus tard', 'destination': 'Lomé'}, format='json')
     assert sans_dates.status_code == 201 and sans_dates.data['nuits'] is None
+
+
+def test_unpublished_listing_cannot_be_proposed(client_for, make_user, make_hebergement):
+    orga = client_for(make_user())
+    v = _creer(orga)
+    masquee = make_hebergement(is_available=False)
+
+    reponse = orga.post(f"{VOYAGES}{v['id']}/propositions/", {'hebergement': str(masquee.id)}, format='json')
+
+    assert reponse.status_code == 400
+
+
+def test_archived_listing_stays_in_the_proposals_but_is_unavailable(client_for, make_user, make_hebergement):
+    orga = client_for(make_user())
+    v = _creer(orga)
+    annonce = make_hebergement(name='Villa Assinie', city='Abidjan', price_per_night=50000, max_guests=6)
+    orga.post(f"{VOYAGES}{v['id']}/propositions/", {'hebergement': str(annonce.id)}, format='json')
+
+    assert client_for(annonce.host).delete(f'/api/v1/hebergements/{annonce.id}/').status_code == 204
+
+    proposition = orga.get(f"{VOYAGES}{v['id']}/").data['propositions'][0]
+    assert proposition['hebergement']['name'] == 'Villa Assinie'
+    assert proposition['disponible'] is False
+    assert proposition['budget'] == {'nuits': 4, 'total': 212000, 'par_personne': 53000, 'personnes': 4}
