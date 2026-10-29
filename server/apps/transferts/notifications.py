@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.utils import formats, timezone
 
-from apps.paiements.notifications import _admins, _documents, _envoyer, _fcfa, alerte_admin
+from apps.paiements import api as paiements
 
 from . import tarifs
 from .models import TransfertModel, VersementChauffeurModel
@@ -29,20 +29,20 @@ def _course(t: TransfertModel) -> dict:
 
 
 def confirme(t: TransfertModel):
-    _envoyer('emails/transferts/transfert_confirme.txt', f"Transfert confirmé : {t.aeroport.ville}", [t.voyageur.email], {
-        **_course(t), 'prenom': t.voyageur.first_name, 'montant': _fcfa(t.prix),
-    }, pieces_jointes=_documents(t))
+    paiements.envoyer_email('emails/transferts/transfert_confirme.txt', f"Transfert confirmé : {t.aeroport.ville}", [t.voyageur.email], {
+        **_course(t), 'prenom': t.voyageur.first_name, 'montant': paiements.fcfa(t.prix),
+    }, pieces_jointes=paiements.documents_joints(t))
 
 
 def a_attribuer(t: TransfertModel, urgent: bool = False):
-    destinataires = _admins()
+    destinataires = paiements.emails_admins()
     if not destinataires:
         logger.error("Transfert %s à attribuer mais aucun administrateur à prévenir", t.reference)
         return
     from .services import chauffeurs_disponibles
 
     sujet = f"[Kwa-Ba] {'URGENT : ' if urgent else ''}Chauffeur à attribuer : {t.reference}"
-    _envoyer('emails/transferts/a_attribuer.txt', sujet, destinataires, {
+    paiements.envoyer_email('emails/transferts/a_attribuer.txt', sujet, destinataires, {
         **_course(t), 'urgent': urgent, 'nb_chauffeurs': chauffeurs_disponibles(t).count(),
         'url_admin': f"{settings.BACKEND_URL}/admin/transferts/transfertmodel/{t.id}/change/",
     })
@@ -50,7 +50,7 @@ def a_attribuer(t: TransfertModel, urgent: bool = False):
 
 def chauffeur_au_voyageur(t: TransfertModel):
     c = t.chauffeur
-    _envoyer('emails/transferts/chauffeur_assigne.txt', f"Votre chauffeur à {t.aeroport.ville}", [t.voyageur.email], {
+    paiements.envoyer_email('emails/transferts/chauffeur_assigne.txt', f"Votre chauffeur à {t.aeroport.ville}", [t.voyageur.email], {
         **_course(t), 'prenom': t.voyageur.first_name, 'chauffeur': f"{c.prenom} {c.nom}",
         'telephone_chauffeur': c.telephone, 'vehicule': c.vehicule, 'immatriculation': c.immatriculation,
         'assistance': settings.ASSISTANCE_CONTACT,
@@ -61,8 +61,8 @@ def course_au_chauffeur(t: TransfertModel):
     c = t.chauffeur
     if not c.email:
         return  # driver told by phone by the team
-    _envoyer('emails/transferts/course_chauffeur.txt', f"Nouvelle course Kwa-Ba : {_heure(t)}", [c.email], {
-        **_course(t), 'prenom': c.prenom, 'message': t.message, 'montant': _fcfa(t.montant_chauffeur),
+    paiements.envoyer_email('emails/transferts/course_chauffeur.txt', f"Nouvelle course Kwa-Ba : {_heure(t)}", [c.email], {
+        **_course(t), 'prenom': c.prenom, 'message': t.message, 'montant': paiements.fcfa(t.montant_chauffeur),
     })
 
 
@@ -70,9 +70,9 @@ def versement_au_chauffeur(v: VersementChauffeurModel):
     c, t = v.chauffeur, v.transfert
     if not c.email:
         return
-    _envoyer('emails/transferts/versement_chauffeur.txt', f"Versement de {_fcfa(v.montant)} envoyé", [c.email], {
+    paiements.envoyer_email('emails/transferts/versement_chauffeur.txt', f"Versement de {paiements.fcfa(v.montant)} envoyé", [c.email], {
         'prenom': c.prenom, 'reference': t.reference, 'aeroport': t.aeroport.ville, 'arrivee': _heure(t),
-        'montant': _fcfa(v.montant), 'montant_brut': _fcfa(v.montant_brut), 'commission': _fcfa(v.commission),
+        'montant': paiements.fcfa(v.montant), 'montant_brut': paiements.fcfa(v.montant_brut), 'commission': paiements.fcfa(v.commission),
     })
 
 
@@ -106,7 +106,7 @@ def envoyer_notifications() -> int:
     total += _traiter(versements.filter(statut='envoye', notifie=False), versement_au_chauffeur, 'notifie')
     total += _traiter(
         versements.filter(statut='echoue', notifie=False),
-        lambda v: alerte_admin(
+        lambda v: paiements.alerte_admin(
             'Versement à un chauffeur', v, f"{v.chauffeur} ({v.mode} {v.numero})",
             reference=v.transfert.reference, libelle=f"Transfert {v.transfert.aeroport.ville}", section='transferts',
         ),

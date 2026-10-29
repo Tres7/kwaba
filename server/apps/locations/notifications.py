@@ -6,8 +6,9 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.utils import formats, timezone
 
-from apps.paiements.notifications import _admins, _documents, _envoyer, _fcfa, alerte_admin
+from apps.paiements import api as paiements
 from apps.securite import coordonnees
+from apps.transferts import api as transferts
 
 from .models import LocationModel, ParametresLocationModel, VersementChauffeurLocationModel, VersementPartenaireModel
 
@@ -34,10 +35,10 @@ def _location(loc: LocationModel) -> dict:
         'retour': f"{loc.lieu_retour.nom}{', ' + loc.adresse_retour if loc.adresse_retour else ''}",
         'debut': _date(loc, loc.debut), 'fin': _date(loc, loc.fin), 'jours': loc.jours, 'passagers': loc.passagers,
         'jours_hors_lome': loc.jours_hors_lome, 'jours_hors_pays': loc.jours_hors_pays,
-        'primes': _fcfa(loc.primes) if loc.primes else '',
+        'primes': paiements.fcfa(loc.primes) if loc.primes else '',
         'precisions': loc.precisions, 'voyageur': f"{loc.voyageur.first_name} {loc.voyageur.last_name}".strip(),
         'telephone_voyageur': loc.telephone, 'conducteur': loc.conducteur, 'permis': loc.permis_numero,
-        'permis_pays': loc.permis_pays, 'caution': _fcfa(loc.caution) if loc.caution else '',
+        'permis_pays': loc.permis_pays, 'caution': paiements.fcfa(loc.caution) if loc.caution else '',
         'caution_en_ligne': bool(loc.caution_gardee), 'restitution_heures': _restitution_heures(),
         'chauffeur': loc.chauffeur_nom, 'telephone_chauffeur': loc.chauffeur_telephone,
         'vehicule': loc.vehicule, 'immatriculation': loc.immatriculation,
@@ -46,30 +47,30 @@ def _location(loc: LocationModel) -> dict:
 
 
 def confirmee(loc: LocationModel):
-    _envoyer('emails/locations/location_confirmee.txt', f"Réservation confirmée : {loc.lieu_prise.ville}", [loc.voyageur.email], {
-        **_location(loc), 'prenom': loc.voyageur.first_name, 'montant': _fcfa(loc.montant_a_payer),
-    }, pieces_jointes=_documents(loc))
+    paiements.envoyer_email('emails/locations/location_confirmee.txt', f"Réservation confirmée : {loc.lieu_prise.ville}", [loc.voyageur.email], {
+        **_location(loc), 'prenom': loc.voyageur.first_name, 'montant': paiements.fcfa(loc.montant_a_payer),
+    }, pieces_jointes=paiements.documents_joints(loc))
 
 
 def a_attribuer(loc: LocationModel, urgent: bool = False):
-    destinataires = _admins()
+    destinataires = paiements.emails_admins()
     if not destinataires:
         logger.error("Location %s à attribuer mais aucun administrateur à prévenir", loc.reference)
         return
     from .services import partenaires_disponibles
 
-    demande = loc.chauffeur_demande
+    demande = transferts.fiche_chauffeur(loc.chauffeur_demande_id) if loc.chauffeur_demande_id else None
     sujet = f"[Kwa-Ba] {'URGENT : ' if urgent else ''}Location à attribuer : {loc.reference}"
-    _envoyer('emails/locations/a_attribuer.txt', sujet, destinataires, {
+    paiements.envoyer_email('emails/locations/a_attribuer.txt', sujet, destinataires, {
         **_location(loc), 'urgent': urgent, 'nb_partenaires': partenaires_disponibles(loc).count(),
-        'chauffeur_demande': f"{demande.prenom} {demande.nom}" if demande else '',
+        'chauffeur_demande': f"{demande['prenom']} {demande['nom']}" if demande else '',
         'url_admin': f"{settings.BACKEND_URL}/admin/locations/locationmodel/{loc.id}/change/",
     })
 
 
 def partenaire_au_voyageur(loc: LocationModel):
     p = loc.partenaire
-    _envoyer('emails/locations/partenaire_assigne.txt', f"Votre {'chauffeur' if loc.formule == 'chauffeur_seul' else 'véhicule'} à {loc.lieu_prise.ville}",
+    paiements.envoyer_email('emails/locations/partenaire_assigne.txt', f"Votre {'chauffeur' if loc.formule == 'chauffeur_seul' else 'véhicule'} à {loc.lieu_prise.ville}",
              [loc.voyageur.email], {
                  **_location(loc), 'prenom': loc.voyageur.first_name, 'partenaire': p.nom if p else '',
                  'contact': p.contact if p else '', 'telephone_partenaire': p.telephone if p else '',
@@ -89,19 +90,19 @@ def location_au_partenaire(loc: LocationModel):
     p = loc.partenaire
     if not p or not p.email:
         return  # owner told by phone by the team
-    _envoyer('emails/locations/location_partenaire.txt', f"Nouvelle location Kwa-Ba : {_date(loc, loc.debut)}", [p.email], {
+    paiements.envoyer_email('emails/locations/location_partenaire.txt', f"Nouvelle location Kwa-Ba : {_date(loc, loc.debut)}", [p.email], {
         **_sans_telephone_du_voyageur(loc), 'contact': p.contact,
-        'montant': _fcfa(loc.montant_partenaire), 'assistance': settings.ASSISTANCE_CONTACT,
+        'montant': paiements.fcfa(loc.montant_partenaire), 'assistance': settings.ASSISTANCE_CONTACT,
     })
 
 
 def mission_au_chauffeur(loc: LocationModel):
-    c = loc.chauffeur_partenaire
-    if not c or not c.email:
+    c = transferts.fiche_chauffeur(loc.chauffeur_partenaire_id) if loc.chauffeur_partenaire_id else None
+    if not c or not c['email']:
         return  # driver told by phone by the team
-    _envoyer('emails/locations/mission_chauffeur.txt', f"Mission Kwa-Ba : {_date(loc, loc.debut)}", [c.email], {
-        **_sans_telephone_du_voyageur(loc), 'prenom_chauffeur': c.prenom,
-        'montant': _fcfa(loc.montant_chauffeur), 'assistance': settings.ASSISTANCE_CONTACT,
+    paiements.envoyer_email('emails/locations/mission_chauffeur.txt', f"Mission Kwa-Ba : {_date(loc, loc.debut)}", [c['email']], {
+        **_sans_telephone_du_voyageur(loc), 'prenom_chauffeur': c['prenom'],
+        'montant': paiements.fcfa(loc.montant_chauffeur), 'assistance': settings.ASSISTANCE_CONTACT,
     })
 
 
@@ -109,19 +110,19 @@ def versement_au_partenaire(v: VersementPartenaireModel):
     p, loc = v.partenaire, v.location
     if not p.email:
         return
-    _envoyer('emails/locations/versement_partenaire.txt', f"Versement de {_fcfa(v.montant)} envoyé", [p.email], {
-        'contact': p.contact, 'reference': loc.reference, 'debut': _date(loc, loc.debut), 'montant': _fcfa(v.montant),
-        'montant_brut': _fcfa(v.montant_brut), 'commission': _fcfa(v.commission),
-        'retenue': _fcfa(loc.caution_retenue) if loc.caution_retenue else '', 'motif': loc.caution_motif,
+    paiements.envoyer_email('emails/locations/versement_partenaire.txt', f"Versement de {paiements.fcfa(v.montant)} envoyé", [p.email], {
+        'contact': p.contact, 'reference': loc.reference, 'debut': _date(loc, loc.debut), 'montant': paiements.fcfa(v.montant),
+        'montant_brut': paiements.fcfa(v.montant_brut), 'commission': paiements.fcfa(v.commission),
+        'retenue': paiements.fcfa(loc.caution_retenue) if loc.caution_retenue else '', 'motif': loc.caution_motif,
     })
 
 
 def caution_au_voyageur(loc: LocationModel):
     """Deposit return: amount given back, withheld amount and its reason; Mobile Money number to give if needed."""
     rendu = loc.caution - loc.caution_retenue
-    _envoyer('emails/locations/caution_restituee.txt', f"Restitution de votre caution : {loc.reference}", [loc.voyageur.email], {
-        'prenom': loc.voyageur.first_name, 'reference': loc.reference, 'caution': _fcfa(loc.caution),
-        'rendu': _fcfa(rendu), 'retenue': _fcfa(loc.caution_retenue) if loc.caution_retenue else '',
+    paiements.envoyer_email('emails/locations/caution_restituee.txt', f"Restitution de votre caution : {loc.reference}", [loc.voyageur.email], {
+        'prenom': loc.voyageur.first_name, 'reference': loc.reference, 'caution': paiements.fcfa(loc.caution),
+        'rendu': paiements.fcfa(rendu), 'retenue': paiements.fcfa(loc.caution_retenue) if loc.caution_retenue else '',
         'motif': loc.caution_motif, 'numero_requis': loc.remboursements.filter(statut='attente_numero').exists(),
         'url': f"{settings.FRONTEND_URL}/location/{loc.id}", 'assistance': settings.ASSISTANCE_CONTACT,
     })
@@ -140,9 +141,13 @@ def _traiter(qs, fonction, drapeau):
     return envoyes
 
 
+def _nom_chauffeur(chauffeur_id) -> str:
+    c = transferts.fiche_chauffeur(chauffeur_id)
+    return f"{c['prenom']} {c['nom']}" if c else f"chauffeur {chauffeur_id}"
+
+
 def envoyer_notifications() -> int:
-    qs = LocationModel.objects.select_related('voyageur', 'categorie', 'lieu_prise', 'lieu_retour', 'partenaire',
-                                              'chauffeur_partenaire', 'chauffeur_demande')
+    qs = LocationModel.objects.select_related('voyageur', 'categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
     payees = qs.filter(statut__in=('confirmee', 'partenaire_assigne'))
     total = _traiter(payees.filter(confirmation_notifiee=False), confirmee, 'confirmation_notifiee')
     total += _traiter(payees.filter(admins_notifies=False), a_attribuer, 'admins_notifies')
@@ -164,19 +169,19 @@ def envoyer_notifications() -> int:
     total += _traiter(versements.filter(statut='envoye', notifie=False), versement_au_partenaire, 'notifie')
     total += _traiter(
         versements.filter(statut='echoue', notifie=False),
-        lambda v: alerte_admin(
+        lambda v: paiements.alerte_admin(
             'Versement à un propriétaire', v, f"{v.partenaire} ({v.mode} {v.numero})",
             reference=v.location.reference, libelle=f"Location {v.location.lieu_prise.ville}", section='locations',
         ),
         'notifie',
     )
-    chauffeurs = VersementChauffeurLocationModel.objects.select_related('chauffeur', 'location__lieu_prise')
+    chauffeurs = VersementChauffeurLocationModel.objects.select_related('location__lieu_prise')
     # Payout sent: nothing to tell the driver (they see it on their Mobile Money); failure: alert to the team
     total += _traiter(chauffeurs.filter(statut='envoye', notifie=False), lambda v: None, 'notifie')
     total += _traiter(
         chauffeurs.filter(statut='echoue', notifie=False),
-        lambda v: alerte_admin(
-            'Versement à un chauffeur (location)', v, f"{v.chauffeur} ({v.mode} {v.numero})",
+        lambda v: paiements.alerte_admin(
+            'Versement à un chauffeur (location)', v, f"{_nom_chauffeur(v.chauffeur_id)} ({v.mode} {v.numero})",
             reference=v.location.reference, libelle=f"Location {v.location.lieu_prise.ville}", section='locations',
         ),
         'notifie',

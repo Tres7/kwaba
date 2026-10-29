@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from django.utils import formats, timezone
 
-from apps.paiements.notifications import _admins, _documents, _envoyer, _fcfa
+from apps.paiements import api as paiements
 
 from . import montants
 from .models import DonModel, ReversementModel
@@ -18,24 +18,24 @@ def _mois(periode) -> str:
 
 def recu(don: DonModel):
     o = don.organisation
-    _envoyer('emails/give/recu_don.txt', f"Merci pour votre don à {o.nom}", [don.donateur.email], {
+    paiements.envoyer_email('emails/give/recu_don.txt', f"Merci pour votre don à {o.nom}", [don.donateur.email], {
         'prenom': don.donateur.first_name, 'organisation': o.nom, 'projet': don.projet.titre if don.projet else '',
         'reference': don.reference, 'date': formats.date_format(don.paye_le, 'j F Y'),
-        'montant': _fcfa(don.montant), 'total': _fcfa(don.total), 'frais': _fcfa(don.frais),
-        'montant_ong': _fcfa(don.montant_ong), 'couvre_frais': don.couvre_frais,
+        'montant': paiements.fcfa(don.montant), 'total': paiements.fcfa(don.total), 'frais': paiements.fcfa(don.frais),
+        'montant_ong': paiements.fcfa(don.montant_ong), 'couvre_frais': don.couvre_frais,
         'date_reversement': formats.date_format(montants.date_reversement(timezone.localtime(don.paye_le).date()), 'j F Y'),
         'url': f"{settings.FRONTEND_URL}/profil/dons",
-    }, pieces_jointes=_documents(don))
+    }, pieces_jointes=paiements.documents_joints(don))
 
 
 def reversement_a_effectuer(r: ReversementModel):
-    destinataires = _admins()
+    destinataires = paiements.emails_admins()
     if not destinataires:
         logger.error("Reversement %s à effectuer mais aucun administrateur à prévenir", r.reference)
         return
-    _envoyer('emails/give/reversement_a_effectuer.txt', f"[Kwa-Ba Give] Reversement à effectuer : {r.organisation.nom}",
+    paiements.envoyer_email('emails/give/reversement_a_effectuer.txt', f"[Kwa-Ba Give] Reversement à effectuer : {r.organisation.nom}",
              destinataires, {
-                 'organisation': r.organisation.nom, 'mois': _mois(r.periode), 'montant': _fcfa(r.montant),
+                 'organisation': r.organisation.nom, 'mois': _mois(r.periode), 'montant': paiements.fcfa(r.montant),
                  'nb_dons': r.nb_dons, 'date_prevue': formats.date_format(r.date_prevue, 'j F Y'),
                  'reference': r.reference, 'url_admin': f"{settings.BACKEND_URL}/admin/give/reversementmodel/{r.pk}/change/",
              })
@@ -43,9 +43,9 @@ def reversement_a_effectuer(r: ReversementModel):
 
 def don_reverse(don: DonModel):
     r = don.reversement
-    _envoyer('emails/give/don_reverse.txt', f"Votre don a été reversé à {r.organisation.nom}", [don.donateur.email], {
+    paiements.envoyer_email('emails/give/don_reverse.txt', f"Votre don a été reversé à {r.organisation.nom}", [don.donateur.email], {
         'prenom': don.donateur.first_name, 'organisation': r.organisation.nom, 'reference': don.reference,
-        'montant_ong': _fcfa(don.montant_ong), 'mois': _mois(r.periode), 'total': _fcfa(r.montant),
+        'montant_ong': paiements.fcfa(don.montant_ong), 'mois': _mois(r.periode), 'total': paiements.fcfa(r.montant),
         'nb_dons': r.nb_dons, 'date': formats.date_format(r.effectue_le, 'j F Y'), 'note': r.note,
         'url': f"{settings.FRONTEND_URL}/give/{r.organisation.slug}#reversements",
     })

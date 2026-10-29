@@ -15,7 +15,7 @@ from django.db import transaction
 from django.db.models import Count, Sum
 from django.utils import timezone
 
-from apps.paiements import services as paiements
+from apps.paiements import api as paiements
 
 from . import montants
 from .models import DonModel, OrganisationModel, ReversementModel

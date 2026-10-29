@@ -8,9 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.prelancement import verifier_ouverture
-from apps.paiements import services as paiements
-from apps.paiements.views import CompteRemboursementSerializer
-from apps.reservations.models import ReservationModel
+from apps.paiements import api as paiements
+from apps.reservations import api as reservations
 
 from . import services, tarifs
 from .models import AeroportModel, TransfertModel
@@ -37,6 +36,7 @@ class TransfertSerializer(serializers.ModelSerializer):
     paiement = serializers.SerializerMethodField()
     remboursement = serializers.SerializerMethodField()
     annulation_gratuite = serializers.SerializerMethodField()
+    reservation = serializers.UUIDField(source='reservation_id', read_only=True)
 
     class Meta:
         model = TransfertModel
@@ -94,13 +94,13 @@ class TransfertCreationSerializer(serializers.Serializer):
         'invalid': "Indiquez un numéro joignable à l'arrivée, avec l'indicatif (par ex. +33 6 12 34 56 78).",
     })
     message = serializers.CharField(max_length=500, required=False, allow_blank=True)
-    reservation = serializers.PrimaryKeyRelatedField(queryset=ReservationModel.objects.all(), required=False, allow_null=True)
+    reservation = serializers.UUIDField(source='reservation_id', required=False, allow_null=True)
 
     def validate_numero_vol(self, valeur):
         return valeur.replace(' ', '').upper()
 
     def validate_reservation(self, valeur):
-        if valeur and valeur.guest_id != self.context['request'].user.id:
+        if valeur and not reservations.appartient_au_voyageur(valeur, self.context['request'].user.id):
             raise serializers.ValidationError("Réservation introuvable.")
         return valeur
 
@@ -232,7 +232,7 @@ class CompteRemboursementTransfertView(APIView):
         transfert = _du_voyageur(pk, request.user)
         if not transfert:
             return Response({'detail': 'Transfert introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CompteRemboursementSerializer(data=request.data)
+        serializer = paiements.CompteRemboursementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if not paiements.indiquer_numero_remboursement(transfert, **serializer.validated_data):
             return Response({'detail': "Aucun remboursement n'attend de numéro pour ce transfert."}, status=status.HTTP_400_BAD_REQUEST)

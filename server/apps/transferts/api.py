@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from . import services, tarifs
-from .models import AeroportModel, ChauffeurModel
+from .models import AeroportModel, ChauffeurModel, TransfertModel
 
 
 def aeroports_ouverts() -> list[dict]:
@@ -46,3 +46,31 @@ def chauffeurs(q: str = '', limite: int = 30) -> list[dict]:
 
 def commission_chauffeur() -> Decimal:
     return tarifs.COMMISSION_CHAUFFEUR
+
+
+def _fiche(c: ChauffeurModel) -> dict:
+    return {'id': c.pk, 'prenom': c.prenom, 'nom': c.nom, 'telephone': c.telephone, 'email': c.email,
+            'excellence': c.excellence, 'actif': c.actif, 'pays_versement': c.pays_versement,
+            'operateur_versement': c.operateur_versement, 'numero_versement': c.numero_versement}
+
+
+def fiche_chauffeur(chauffeur_id) -> dict | None:
+    """A partner driver (rentals with a driver), active or not; None if unknown or invalid id."""
+    try:
+        c = ChauffeurModel.objects.filter(pk=int(chauffeur_id)).first()
+    except (TypeError, ValueError):
+        return None
+    return _fiche(c) if c else None
+
+
+def fiches_chauffeurs(chauffeur_ids) -> dict[int, dict]:
+    return {c.pk: _fiche(c) for c in ChauffeurModel.objects.filter(pk__in=[i for i in chauffeur_ids if i])}
+
+
+def chauffeurs_actifs() -> list[dict]:
+    return [_fiche(c) for c in ChauffeurModel.objects.filter(actif=True).order_by('prenom')]
+
+
+def chauffeurs_des_transferts_termines(voyageur_id) -> set[int]:
+    return set(TransfertModel.objects.filter(voyageur_id=voyageur_id, statut='termine', chauffeur_id__isnull=False)
+               .values_list('chauffeur_id', flat=True))

@@ -15,6 +15,7 @@ from apps.locations.models import (
 from apps.paiements import fedapay
 from apps.paiements import services as paiements
 from apps.paiements.models import PaiementModel, RemboursementModel
+from apps.transferts.api import fiche_chauffeur
 from apps.transferts.models import ChauffeurModel
 
 LOCATIONS = '/api/v1/locations/'
@@ -221,7 +222,7 @@ def test_full_cycle_owner_and_driver_payouts(client_for, make_user, faux, catalo
     assert list(services.partenaires_disponibles(loc)) == [loueur]
     with pytest.raises(services.LocationErreur, match='chauffeur'):
         services.attribuer(loc, partenaire=loueur)
-    services.attribuer(loc, partenaire=loueur, chauffeur=chauffeur)
+    services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     detail = client.get(f'{LOCATIONS}{loc.id}/').data
     assert detail['statut'] == 'partenaire_assigne'
     # The site shows the vehicle, never the owner nor the driver
@@ -258,7 +259,7 @@ def test_driver_only_for_the_customer_s_car(client_for, make_user, faux, catalog
     # 4 × 7,000 + 1,500 + 2,000; no vehicle, no handover fees, no deposit
     assert (loc.categorie_id, loc.prix, loc.frais_lieux, loc.caution) == (None, 31500, 0, 0)
     assert services.partenaires_disponibles(loc).count() == 0
-    services.attribuer(loc, chauffeur=chauffeur)
+    services.attribuer(loc, chauffeur=fiche_chauffeur(chauffeur.pk))
     vc = VersementChauffeurLocationModel.objects.get(location=loc)
     assert (vc.montant_brut, vc.commission, vc.montant) == (31500, 4000, 27500)  # allowances fully paid
     assert not VersementPartenaireModel.objects.filter(location=loc).exists()
@@ -269,7 +270,7 @@ def test_my_driver_and_excellence_pay_6500_a_day(client_for, make_user, faux, ca
     voyageur = make_user()
     client = client_for(voyageur)
     ancienne = _reserver_et_payer(client, faux, catalogue)
-    services.attribuer(ancienne, partenaire=loueur, chauffeur=chauffeur)
+    services.attribuer(ancienne, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     autre = ChauffeurModel.objects.create(prenom='Afi', nom='Dzifa', telephone='+228 92 00 00 00', categorie='berline',
                                           vehicule='-', immatriculation='-', pays_versement='TG',
                                           operateur_versement='togocel', numero_versement='92000000')
@@ -279,10 +280,10 @@ def test_my_driver_and_excellence_pay_6500_a_day(client_for, make_user, faux, ca
     assert client.get(f'{LOCATIONS}mes-chauffeurs/').data == [{'id': chauffeur.id, 'nom': 'Kodjo A.'}]
 
     loc = _reserver_et_payer(client, faux, catalogue, chauffeur_demande=chauffeur.id)
-    services.attribuer(loc, partenaire=loueur, chauffeur=chauffeur)
+    services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     assert VersementChauffeurLocationModel.objects.get(location=loc).montant == 26000  # 4 × 6 500
     ChauffeurModel.objects.filter(pk=autre.pk).update(excellence=True)
-    services.attribuer(loc, partenaire=loueur, chauffeur=ChauffeurModel.objects.get(pk=autre.pk))
+    services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(autre.pk))
     assert VersementChauffeurLocationModel.objects.get(location=loc).montant == 26000  # Excellence
 
 
@@ -324,7 +325,7 @@ def test_contacts_in_free_text_are_masked_for_the_partner(client_for, make_user,
     loc = _reserver_et_payer(client, faux, catalogue, lieu_prise=catalogue['livraison'].id,
                              adresse_prise='Bè Kpota, appelez le 90 11 22 33',
                              precisions='Siège enfant svp, écrivez-moi sur ama.k@gmail.com ou au 99 88 77 66.')
-    services.attribuer(loc, partenaire=loueur, chauffeur=chauffeur)
+    services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     mail.outbox.clear()
     paiements.passe()
     for destinataire in ('yao@test.kwaba', 'kodjo@test.kwaba'):
@@ -336,7 +337,7 @@ def test_contacts_in_free_text_are_masked_for_the_partner(client_for, make_user,
 def test_free_cancellation_then_refund_to_the_given_number(client_for, make_user, faux, catalogue, loueur, chauffeur):
     client = client_for(make_user())
     loc = _reserver_et_payer(client, faux, catalogue)
-    services.attribuer(loc, partenaire=loueur, chauffeur=chauffeur)
+    services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     assert client.get(f'{LOCATIONS}{loc.id}/').data['rembourse_si_annulation'] == loc.prix
     r = client.delete(f'{LOCATIONS}{loc.id}/')
     assert r.data['rembourse'] == loc.prix and r.data['numero_requis'] is True
@@ -351,7 +352,7 @@ def test_free_cancellation_then_refund_to_the_given_number(client_for, make_user
 def test_cancellation_between_48_and_24_hours_refunds_half(client_for, make_user, faux, catalogue, loueur, chauffeur):
     client = client_for(make_user())
     loc = _reserver_et_payer(client, faux, catalogue)
-    services.attribuer(loc, partenaire=loueur, chauffeur=chauffeur)
+    services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     LocationModel.objects.filter(pk=loc.pk).update(debut=timezone.now() + timedelta(hours=30))
     assert client.delete(f'{LOCATIONS}{loc.id}/').data['rembourse'] == 79000
     v = VersementPartenaireModel.objects.get(location=loc)
@@ -366,7 +367,7 @@ def test_cancellation_between_48_and_24_hours_refunds_half(client_for, make_user
 def test_late_cancellation_keeps_the_partners_paid(client_for, make_user, faux, catalogue, loueur, chauffeur):
     client = client_for(make_user())
     loc = _reserver_et_payer(client, faux, catalogue)
-    services.attribuer(loc, partenaire=loueur, chauffeur=chauffeur)
+    services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     LocationModel.objects.filter(pk=loc.pk).update(debut=timezone.now() + timedelta(hours=20))
     assert client.delete(f'{LOCATIONS}{loc.id}/').data['rembourse'] == 0
     assert not RemboursementModel.objects.filter(location=loc).exists()

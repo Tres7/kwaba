@@ -34,7 +34,9 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.paiements import services as paiements
+from apps.paiements import api as paiements
+from apps.reservations import api as reservations
+from apps.transferts import api as transferts
 from config.site import module_actif
 
 from .models import (
@@ -119,14 +121,13 @@ def client_sans_incident(voyageur) -> bool:
     return LocationModel.objects.filter(voyageur=voyageur, statut='terminee', caution_retenue=0).count() >= LOCATIONS_CLIENT_FIDELE
 
 
-def mes_chauffeurs(voyageur):
-    """Drivers who have already driven this traveller (finished rental or transfer): "My driver"."""
-    from apps.transferts.models import ChauffeurModel
-
-    return ChauffeurModel.objects.filter(actif=True).filter(
-        Q(locations__voyageur=voyageur, locations__statut='terminee')
-        | Q(transferts__voyageur=voyageur, transferts__statut='termine'),
-    ).distinct()
+def mes_chauffeurs(voyageur) -> list[dict]:
+    """Active drivers who have already driven this traveller (finished rental or transfer): "My driver"."""
+    ids = set(LocationModel.objects.filter(voyageur=voyageur, statut='terminee', chauffeur_partenaire_id__isnull=False)
+              .values_list('chauffeur_partenaire_id', flat=True))
+    ids |= transferts.chauffeurs_des_transferts_termines(voyageur.pk)
+    fiches = transferts.fiches_chauffeurs(ids)
+    return sorted((c for c in fiches.values() if c['actif']), key=lambda c: (c['prenom'], c['id']))
 
 
 # --- Prix -------------------------------------------------------------------------------------------
@@ -193,7 +194,7 @@ def verifier_dates(params: ParametresLocationModel, debut: datetime, fin: dateti
 
 def creer(*, voyageur, categorie: CategorieVehiculeModel | None, formule: str, lieu_prise: LieuRemiseModel,
           lieu_retour: LieuRemiseModel, debut: datetime, fin: datetime, passagers: int, jours_hors_lome: int = 0,
-          jours_hors_pays: int = 0, chauffeur_demande=None, **champs) -> LocationModel:
+          jours_hors_pays: int = 0, chauffeur_demande_id=None, **champs) -> LocationModel:
     params = ParametresLocationModel.courants()
     if not params or not active():
         raise LocationErreur("La location de voitures n'est pas encore disponible.")
@@ -211,7 +212,8 @@ def creer(*, voyageur, categorie: CategorieVehiculeModel | None, formule: str, l
             raise LocationErreur(f"Indiquez l'adresse pour « {lieu.nom} ».")
     if formule == 'sans_chauffeur' and not all(champs.get(c, '').strip() for c in ('conducteur', 'permis_numero', 'permis_pays')):
         raise LocationErreur("Pour conduire vous-même, indiquez le nom du conducteur et son permis de conduire.")
-    if chauffeur_demande and (formule == 'sans_chauffeur' or not mes_chauffeurs(voyageur).filter(pk=chauffeur_demande.pk).exists()):
+    if chauffeur_demande_id and (formule == 'sans_chauffeur'
+                                 or chauffeur_demande_id not in {c['id'] for c in mes_chauffeurs(voyageur)}):
         raise LocationErreur("Vous ne pouvez redemander qu'un chauffeur qui vous a déjà conduit.")
     verifier_dates(params, debut, fin)
 
@@ -227,7 +229,7 @@ def creer(*, voyageur, categorie: CategorieVehiculeModel | None, formule: str, l
         commission=devis.commission, part_kwaba_chauffeur=devis.part_kwaba_chauffeur, caution=devis.caution,
         caution_en_ligne=params.caution_en_ligne and devis.caution > 0,
         jours_hors_lome=jours_hors_lome if devis.prix_chauffeur else 0,
-        jours_hors_pays=jours_hors_pays if devis.prix_chauffeur else 0, chauffeur_demande=chauffeur_demande,
+        jours_hors_pays=jours_hors_pays if devis.prix_chauffeur else 0, chauffeur_demande_id=chauffeur_demande_id,
         statut='en_attente_paiement' if en_ligne else 'confirmee',
         expire_le=timezone.now() + paiements.delai_paiement() if en_ligne else None,
         **champs,
@@ -252,26 +254,14 @@ def demarrer_paiement(location: LocationModel, moyen: str) -> str:
 def appliquer_pack_sejour(location: LocationModel) -> int:
     """Stay Pack + Driver (terms of sale, art. 6.4): an upcoming Kwa-Ba stay booked with an option with a driver gets
     service fees lowered to 3 %; the difference is refunded to the traveller. Returns the refunded amount."""
-    from apps.paiements import tarifs
-    from apps.reservations.models import ReservationModel
-
     if not location.reservation_id or not location.avec_chauffeur:
         return 0
-    r = ReservationModel.objects.select_for_update().filter(pk=location.reservation_id).first()
-    if not r or r.guest_id != location.voyageur_id or r.status != 'confirmed' or r.check_in <= timezone.localdate():
+    ecart, reference = reservations.reduire_frais_pack_sejour(location.reservation_id, location.voyageur_id)
+    if not ecart:
         return 0
-    if r.prix_nuits is None or r.frais_service is None:
-        return 0
-    nouveaux_frais = tarifs.arrondi(Decimal(r.prix_nuits) * tarifs.FRAIS_REDUITS)
-    ecart = r.frais_service - nouveaux_frais
-    if ecart <= 0:
-        return 0
-    r.frais_service, r.total_price = nouveaux_frais, r.prix_nuits + nouveaux_frais
-    r.save(update_fields=['frais_service', 'total_price'])
-    paiement = paiements.paiement_reussi(r)
-    if paiement:
-        paiements.rembourser(paiement, ecart, "Pack Séjour + Chauffeur : frais de service ramenés à 3 %")
-    logger.info("Pack Séjour : %s FCFA rendus sur %s (location %s)", ecart, r.reference, location.reference)
+    paiements.rembourser_en_partie('reservation', location.reservation_id, ecart,
+                                   "Pack Séjour + Chauffeur : frais de service ramenés à 3 %")
+    logger.info("Pack Séjour : %s FCFA rendus sur %s (location %s)", ecart, reference, location.reference)
     return ecart
 
 
@@ -305,15 +295,10 @@ def partenaires_disponibles(location: LocationModel):
     ).distinct()
 
 
-def chauffeurs_disponibles(location: LocationModel):
+def chauffeurs_disponibles(location: LocationModel) -> list[dict]:
     """Active partner drivers, the driver asked for again ("My driver") and the Excellence ones first."""
-    from django.db.models import Case, IntegerField, Value, When
-
-    from apps.transferts.models import ChauffeurModel
-
-    return ChauffeurModel.objects.filter(actif=True).annotate(
-        demande=Case(When(pk=location.chauffeur_demande_id, then=Value(0)), default=Value(1), output_field=IntegerField()),
-    ).order_by('demande', '-excellence', 'prenom')
+    return sorted(transferts.chauffeurs_actifs(),
+                  key=lambda c: (c['id'] != location.chauffeur_demande_id, not c['excellence'], c['prenom']))
 
 
 def _date_versement(location: LocationModel):
@@ -339,10 +324,12 @@ def _montants_chauffeur(location: LocationModel, part: Decimal = Decimal(1)) -> 
     return {'montant_brut': brut, 'commission': commission, 'montant': brut - commission}
 
 
-def attribuer(location: LocationModel, *, partenaire: PartenaireLocationModel | None = None, chauffeur=None,
+def attribuer(location: LocationModel, *, partenaire: PartenaireLocationModel | None = None, chauffeur: dict | None = None,
               vehicule: str = '', immatriculation: str = ''):
     """Assigns (or changes) the owner and/or the partner driver, records the handed-over vehicle, schedules the
-    payouts. The driver gets 6,500 FCFA per day with the Excellence status or if they were asked for again."""
+    payouts. The driver gets 6,500 FCFA per day with the Excellence status or if they were asked for again.
+
+    `chauffeur`: the driver given by transferts.api (fiche_chauffeur)."""
     with transaction.atomic():
         location = LocationModel.objects.select_for_update(of=('self',)).select_related('categorie').get(pk=location.pk)
         if location.statut not in ('confirmee', 'partenaire_assigne'):
@@ -359,14 +346,15 @@ def attribuer(location: LocationModel, *, partenaire: PartenaireLocationModel | 
             raise LocationErreur("Ce propriétaire ne fournit pas ce véhicule à ce lieu de remise.")
 
         changement = ((location.partenaire_id and location.partenaire_id != getattr(partenaire, 'pk', None))
-                      or (location.chauffeur_partenaire_id and location.chauffeur_partenaire_id != getattr(chauffeur, 'pk', None)))
-        location.partenaire, location.chauffeur_partenaire, location.statut = partenaire, chauffeur, 'partenaire_assigne'
+                      or (location.chauffeur_partenaire_id and location.chauffeur_partenaire_id != (chauffeur or {}).get('id')))
+        location.partenaire, location.statut = partenaire, 'partenaire_assigne'
+        location.chauffeur_partenaire_id = chauffeur['id'] if chauffeur else None
         categorie = location.categorie
         location.vehicule = vehicule or (f"{categorie.exemple_modele or categorie.nom}" if categorie else '')
         location.immatriculation = immatriculation or (categorie.immatriculation if categorie else '')
         if chauffeur:
-            location.chauffeur_nom, location.chauffeur_telephone = f"{chauffeur.prenom} {chauffeur.nom}", chauffeur.telephone
-            reduite = chauffeur.excellence or chauffeur.pk == location.chauffeur_demande_id
+            location.chauffeur_nom, location.chauffeur_telephone = f"{chauffeur['prenom']} {chauffeur['nom']}", chauffeur['telephone']
+            reduite = chauffeur['excellence'] or chauffeur['id'] == location.chauffeur_demande_id
             location.part_kwaba_chauffeur = (PART_KWABA_JOUR_REDUITE if reduite else PART_KWABA_JOUR) * location.jours
         else:
             location.chauffeur_nom = location.chauffeur_telephone = ''
@@ -384,13 +372,13 @@ def attribuer(location: LocationModel, *, partenaire: PartenaireLocationModel | 
             VersementPartenaireModel.objects.filter(location=location, statut__in=('planifie', 'echoue')).update(statut='annule')
         if chauffeur:
             VersementChauffeurLocationModel.objects.update_or_create(location=location, defaults={
-                'chauffeur': chauffeur, **_montants_chauffeur(location), 'date_prevue': location.fin + DELAI_VERSEMENT,
+                'chauffeur_id': chauffeur['id'], **_montants_chauffeur(location), 'date_prevue': location.fin + DELAI_VERSEMENT,
                 'statut': 'planifie',
             })
         else:
             VersementChauffeurLocationModel.objects.filter(location=location, statut__in=('planifie', 'echoue')).update(statut='annule')
     logger.info("Location %s attribuée (propriétaire %s, chauffeur %s)", location.reference,
-                getattr(partenaire, 'pk', None), getattr(chauffeur, 'pk', None))
+                getattr(partenaire, 'pk', None), (chauffeur or {}).get('id'))
     return location
 
 
@@ -533,12 +521,16 @@ def envoyer_versements_partenaires() -> int:
         )
     chauffeurs = VersementChauffeurLocationModel.objects.filter(
         statut='planifie', date_prevue__lte=maintenant, location__statut__in=statuts,
-    ).select_related('chauffeur')[:50]
+    )[:50]
+    fiches = transferts.fiches_chauffeurs(v.chauffeur_id for v in chauffeurs)
     for v in chauffeurs:
-        c = v.chauffeur
+        c = fiches.get(v.chauffeur_id)
+        if not c:
+            logger.error("Versement chauffeur %s : chauffeur %s introuvable", v.pk, v.chauffeur_id)
+            continue
         envoyes += paiements.envoyer_payout(
-            v, mode=c.operateur_versement, numero=c.numero_versement, pays=c.pays_versement,
-            email=c.email or settings.DEFAULT_FROM_EMAIL, titulaire=f"{c.prenom} {c.nom}",
+            v, mode=c['operateur_versement'], numero=c['numero_versement'], pays=c['pays_versement'],
+            email=c['email'] or settings.DEFAULT_FROM_EMAIL, titulaire=f"{c['prenom']} {c['nom']}",
         )
     for modele in (VersementPartenaireModel, VersementChauffeurLocationModel):
         for v in modele.objects.filter(statut='en_cours').exclude(payout_id='')[:50]:

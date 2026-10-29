@@ -1,5 +1,7 @@
 from django.contrib import admin, messages
 
+from apps.transferts import api as transferts
+
 from . import services
 from .models import (
     CategorieVehiculeModel, LieuRemiseModel, LocationModel, ParametresLocationModel, PartenaireLocationModel,
@@ -47,21 +49,21 @@ class PartenaireAdmin(admin.ModelAdmin):
 class LocationAdmin(admin.ModelAdmin):
     """To assign: open the rental, choose the owner (and the driver) and the handed-over vehicle, save."""
     list_display = ['reference', 'categorie', 'formule', 'lieu_prise', 'debut', 'jours', 'prix', 'statut', 'partenaire',
-                    'chauffeur_partenaire']
+                    'chauffeur_partenaire_id']
     list_filter = ['statut', 'formule', 'lieu_prise__ville', 'categorie__gamme']
     search_fields = ['voyageur__email', 'telephone', 'conducteur']
     ordering = ['debut']
     readonly_fields = [
-        'voyageur', 'reservation', 'categorie', 'formule', 'lieu_prise', 'adresse_prise', 'lieu_retour', 'adresse_retour',
+        'voyageur', 'reservation_id', 'categorie', 'formule', 'lieu_prise', 'adresse_prise', 'lieu_retour', 'adresse_retour',
         'debut', 'fin', 'passagers', 'telephone', 'precisions', 'conducteur', 'permis_numero', 'permis_pays', 'jours',
-        'jours_hors_lome', 'jours_hors_pays', 'chauffeur_demande', 'prix_jour', 'frais_lieux', 'prix_chauffeur', 'primes',
+        'jours_hors_lome', 'jours_hors_pays', 'chauffeur_demande_id', 'prix_jour', 'frais_lieux', 'prix_chauffeur', 'primes',
         'prix', 'commission', 'part_kwaba_chauffeur', 'caution', 'moyen', 'statut', 'expire_le', 'annulee_par',
         'annulee_le', 'cree_le', 'chauffeur_nom', 'chauffeur_telephone',
     ]
     exclude = ['confirmation_notifiee', 'admins_notifies', 'alerte_sans_partenaire', 'partenaire_notifie',
                'location_envoyee_partenaire', 'mission_envoyee_chauffeur']
     actions = ['annuler_et_rembourser']
-    CHAMPS = ('partenaire', 'chauffeur_partenaire', 'vehicule', 'immatriculation')
+    CHAMPS = ('partenaire', 'chauffeur_partenaire_id', 'vehicule', 'immatriculation')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         # Only the owners who can provide this vehicle at this handover place are offered
@@ -76,9 +78,10 @@ class LocationAdmin(admin.ModelAdmin):
         if set(self.CHAMPS) & set(form.changed_data):
             choix = {champ: getattr(obj, champ) for champ in self.CHAMPS}
             obj.partenaire_id = form.initial.get('partenaire')  # the assignment goes through the service
-            obj.chauffeur_partenaire_id = form.initial.get('chauffeur_partenaire')
+            obj.chauffeur_partenaire_id = form.initial.get('chauffeur_partenaire_id')
+            chauffeur = transferts.fiche_chauffeur(choix['chauffeur_partenaire_id']) if choix['chauffeur_partenaire_id'] else None
             try:
-                services.attribuer(obj, partenaire=choix['partenaire'], chauffeur=choix['chauffeur_partenaire'],
+                services.attribuer(obj, partenaire=choix['partenaire'], chauffeur=chauffeur,
                                    vehicule=choix['vehicule'], immatriculation=choix['immatriculation'])
                 self.message_user(request, "Location attribuée : le voyageur va recevoir les coordonnées.")
             except services.LocationErreur as exc:
@@ -103,5 +106,5 @@ class VersementPartenaireAdmin(admin.ModelAdmin):
 
 @admin.register(VersementChauffeurLocationModel)
 class VersementChauffeurLocationAdmin(admin.ModelAdmin):
-    list_display = ['location', 'chauffeur', 'montant', 'commission', 'statut', 'date_prevue', 'derniere_erreur']
+    list_display = ['location', 'chauffeur_id', 'montant', 'commission', 'statut', 'date_prevue', 'derniere_erreur']
     list_filter = ['statut']

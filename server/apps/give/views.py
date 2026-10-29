@@ -6,8 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.prelancement import verifier_ouverture
-from apps.paiements import paypal
-from apps.paiements import services as paiements
+from apps.paiements import api as paiements
 
 from . import montants, services
 from .models import DonModel, OrganisationModel, ProjetModel, ReversementModel
@@ -129,7 +128,7 @@ class ConfigView(APIView):
             'frais_paiement': float(montants.FRAIS_PAIEMENT),
             'commission_kwaba': float(montants.COMMISSION_KWABA),
             'jour_reversement': montants.JOUR_REVERSEMENT,
-            'fcfa_par_euro': float(paypal.FCFA_PAR_EURO),
+            'fcfa_par_euro': float(paiements.FCFA_PAR_EURO),
             'causes': [{'code': code, **c} for code, c in montants.CAUSES.items()],
         })
 

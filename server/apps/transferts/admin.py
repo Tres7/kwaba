@@ -31,7 +31,7 @@ class TransfertAdmin(admin.ModelAdmin):
     search_fields = ['numero_vol', 'voyageur__email', 'telephone']
     ordering = ['arrivee']
     readonly_fields = [
-        'voyageur', 'reservation', 'aeroport', 'arrivee', 'numero_vol', 'passagers', 'bagages', 'categorie',
+        'voyageur', 'reservation_id', 'aeroport', 'arrivee', 'numero_vol', 'passagers', 'bagages', 'categorie',
         'destination', 'telephone', 'message', 'prix', 'commission', 'majoration_nuit', 'moyen', 'statut',
         'expire_le', 'annule_par', 'annule_le', 'cree_le',
     ]
