@@ -12,4 +12,4 @@ tzdata>=2026.5
 google-genai>=2.31.0,<3
 django-storages[s3]>=1.14.6,<2
 whitenoise>=6.12,<7
-reportlab>=5.0.1,<6
+reportlab>=5.1.0,<6
