@@ -108,6 +108,19 @@ def test_devis_transfert_et_aeroport_non_desservi():
     assert 'non desservi' in inconnu['erreur'] and 'Lomé (LFW)' in inconnu['erreur']
 
 
+def test_group_trip_keeps_only_published_listings_and_ignores_bad_ids(make_hebergement):
+    publiee = make_hebergement(name='Villa Baguida', city='Lomé')
+    masquee = make_hebergement(name='Appart masqué', city='Lomé', is_available=False)
+
+    resultat, cartes = outils.proposer_voyage_de_groupe({
+        'nom': 'Lomé entre amis', 'destination': 'Lomé', 'voyageurs': 4,
+        'logements': [str(publiee.id), str(masquee.id), 'pas-un-identifiant', 42],
+    })
+
+    assert resultat['logements_retenus'] == ['Villa Baguida']
+    assert cartes[0]['logements'] == [{'id': str(publiee.id), 'nom': 'Villa Baguida'}]
+
+
 def test_declarations_de_fonctions_au_format_gemini():
     for d in outils.DEFINITIONS:
         assert d['type'] == 'function' and d['parameters']['type'] == 'object'
