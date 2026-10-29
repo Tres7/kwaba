@@ -1,5 +1,6 @@
 import uuid
 from collections.abc import Iterable
+from datetime import date
 
 from django.db.models import Q
 
@@ -31,3 +32,10 @@ def paires_confirmees(paires: Iterable[tuple[uuid.UUID, uuid.UUID]]) -> set[tupl
 def confirmee_pour_hote(reservation_id: uuid.UUID, hote_id: uuid.UUID) -> tuple[uuid.UUID, uuid.UUID] | None:
     return (ReservationModel.objects.filter(pk=reservation_id, hebergement__host_id=hote_id, status='confirmed')
             .values_list('hebergement_id', 'guest_id').first())
+
+
+def sejours_termines(voyageur_id: uuid.UUID, depart_depuis: date, depart_jusqu_a: date) -> list[dict]:
+    return [{
+        'id': r.id, 'hebergement_id': r.hebergement_id, 'check_in': r.check_in, 'check_out': r.check_out,
+    } for r in ReservationModel.objects.filter(guest_id=voyageur_id, status='confirmed', check_out__lte=depart_jusqu_a,
+                                               check_out__gte=depart_depuis).order_by('-check_out')]

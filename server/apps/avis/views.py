@@ -9,8 +9,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.hebergements.models import HebergementModel
-from apps.hebergements.serializers import HebergementSerializer
+from apps.hebergements import api as hebergements
+from apps.reservations import api as reservations
+
 from .models import AvisModel, CRITERES
 from .serializers import AvisCreateSerializer, AvisSerializer, ReponseHoteSerializer
 from .services import motif_refus, recalculer_note, sejours_a_evaluer
@@ -45,10 +46,9 @@ class AvisListCreateView(APIView):
     def get(self, request):
         # Missing or malformed id: same response as an unknown listing (and not a 500 error)
         hebergement_id = _uuid(request.query_params.get('hebergement'))
-        if hebergement_id is None:
+        if hebergement_id is None or not hebergements.existe(hebergement_id):
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        hebergement = get_object_or_404(HebergementModel, pk=hebergement_id)
-        qs = AvisModel.objects.filter(hebergement=hebergement).select_related('auteur', 'reservation')
+        qs = AvisModel.objects.filter(hebergement_id=hebergement_id).select_related('auteur')
 
         agregats = qs.aggregate(
             moyenne=Avg('note'), total=Count('id'),
@@ -79,15 +79,17 @@ class AvisListCreateView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        reservation = serializer.validated_data['reservation']
-        refus = motif_refus(reservation, request.user)
+        reservation_id = serializer.validated_data['reservation_id']
+        sejour = reservations.resumes([reservation_id])[reservation_id]
+        deja_evalue = AvisModel.objects.filter(reservation_id=reservation_id).exists()
+        refus = motif_refus(sejour, request.user.id, deja_evalue)
         if refus:
             return Response({'detail': refus}, status=status.HTTP_403_FORBIDDEN)
 
         try:
             with transaction.atomic():
-                avis = serializer.save(auteur=request.user, hebergement_id=reservation.hebergement_id)
-                recalculer_note(reservation.hebergement_id)
+                avis = serializer.save(auteur=request.user, hebergement_id=sejour['hebergement_id'])
+                recalculer_note(sejour['hebergement_id'])
         except IntegrityError:
             return Response({'detail': "Vous avez déjà laissé un avis pour ce séjour."}, status=status.HTTP_409_CONFLICT)
 
@@ -99,14 +101,16 @@ class AvisALaisserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        sejours = sejours_a_evaluer(request.user)
+        cartes = hebergements.cartes({s['hebergement_id'] for s in sejours}, request, publiees_seulement=False)
         resultats = [
             {
-                'reservation_id': str(r.id),
-                'check_in': r.check_in,
-                'check_out': r.check_out,
-                'hebergement': HebergementSerializer(r.hebergement, context={'request': request}).data,
+                'reservation_id': str(s['id']),
+                'check_in': s['check_in'],
+                'check_out': s['check_out'],
+                'hebergement': cartes[s['hebergement_id']],
             }
-            for r in sejours_a_evaluer(request.user)
+            for s in sejours if s['hebergement_id'] in cartes
         ]
         return Response({'results': resultats, 'count': len(resultats)})
 
@@ -116,8 +120,9 @@ class ReponseHoteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        avis = get_object_or_404(AvisModel.objects.select_related('hebergement'), pk=pk)
-        if avis.hebergement.host_id != request.user.id:
+        avis = get_object_or_404(AvisModel, pk=pk)
+        annonce = hebergements.resumes([avis.hebergement_id]).get(avis.hebergement_id)
+        if not annonce or annonce['host_id'] != request.user.id:
             return Response({'detail': "Seul l'hôte de ce logement peut répondre."}, status=status.HTTP_403_FORBIDDEN)
         if avis.reponse_hote:
             return Response({'detail': 'Vous avez déjà répondu à cet avis.'}, status=status.HTTP_409_CONFLICT)

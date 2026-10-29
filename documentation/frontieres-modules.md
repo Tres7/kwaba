@@ -29,7 +29,7 @@ Une PR par module. L'API vue par le client ne change pas.
 | 4 | concierge | Migré : `hebergements.api` (`rechercher`), `transferts.api` (`aeroports_ouverts`, `devis`), `paiements.api` (`total_sejour`) ; aucune clé étrangère à retirer |
 | 5 | messaging | Migré : ses adaptateurs (`DjangoHebergementLookup`, `DjangoBookingLookup`) passent par `hebergements.api` et `reservations.api` (`paires_confirmees`, `confirmee_pour_hote`) ; le contrôleur passe par eux ; la conversation garde l'identifiant de l'annonce |
 | 6 | terrain | Migré : `terrain` devient un moteur de missions générique avec un registre de types (`terrain.api.enregistrer`) ; `verifications` y déclare ses types au démarrage (`missions.py`), ce qui casse la boucle `terrain` ⇄ `verifications` |
-| 7 | avis | À faire |
+| 7 | avis | Migré : l'avis garde les identifiants de la réservation et de l'annonce ; `reservations.api` (`sejours_termines`), `hebergements.api` (`existe`, `ids_par_nom`, `mettre_a_jour_note`) ; `avis.api` (`avis_des_reservations`, `motif_refus`), utilisé par `reservations` à la place de la relation inverse |
 | 8 | verifications | À faire |
 | 9 | documents, contrats | À faire |
 | 10 | give | À faire |

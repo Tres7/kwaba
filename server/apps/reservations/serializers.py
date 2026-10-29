@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 from .models import ReservationModel
+from apps.avis import api as avis
 from apps.hebergements import types_logement
 from apps.hebergements.disponibilites import conflit, verrouiller_types
 from apps.hebergements.serializers import HebergementSerializer
@@ -55,14 +56,24 @@ class ReservationSerializer(serializers.ModelSerializer):
             statut = 'en_cours'
         return {'montant': sum(r.montant for r in lignes), 'statut': statut}
 
+    def _avis(self) -> dict:
+        """Reviews of the serialized bookings, read once for the whole list."""
+        if '_avis' not in self.context:
+            instance = self.parent.instance if self.parent is not None else self.instance
+            reservations = [instance] if isinstance(instance, ReservationModel) else list(instance)
+            self.context['_avis'] = avis.avis_des_reservations(r.pk for r in reservations)
+        return self.context['_avis']
+
     def get_avis_id(self, obj):
-        avis = getattr(obj, 'avis', None) if hasattr(obj, 'avis') else None
-        return str(avis.id) if avis else None
+        avis_id = self._avis().get(obj.pk)
+        return str(avis_id) if avis_id else None
 
     def get_peut_evaluer(self, obj):
-        from apps.avis.services import motif_refus
         request = self.context.get('request')
-        return bool(request and motif_refus(obj, request.user) is None)
+        if not (request and request.user.is_authenticated):
+            return False
+        sejour = {'voyageur_id': obj.guest_id, 'statut': obj.status, 'check_out': obj.check_out}
+        return avis.motif_refus(sejour, request.user.id, obj.pk in self._avis()) is None
 
     def get_guest_name(self, obj):
         return f"{obj.guest.first_name} {obj.guest.last_name}".strip()

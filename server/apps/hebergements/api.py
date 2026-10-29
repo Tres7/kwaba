@@ -13,9 +13,13 @@ def est_publiee(hebergement_id: uuid.UUID) -> bool:
     return HebergementModel.objects.publiees().filter(pk=hebergement_id).exists()
 
 
-def cartes(hebergement_ids: Iterable[uuid.UUID], request=None) -> dict[uuid.UUID, dict]:
-    annonces = (HebergementModel.objects.publiees().filter(pk__in=list(hebergement_ids))
-                .select_related('host', 'host__piece_identite'))
+def existe(hebergement_id: uuid.UUID) -> bool:
+    return HebergementModel.objects.filter(pk=hebergement_id).exists()
+
+
+def cartes(hebergement_ids: Iterable[uuid.UUID], request=None, publiees_seulement: bool = True) -> dict[uuid.UUID, dict]:
+    qs = HebergementModel.objects.publiees() if publiees_seulement else HebergementModel.tous.all()
+    annonces = qs.filter(pk__in=list(hebergement_ids)).select_related('host', 'host__piece_identite')
     donnees = HebergementSerializer(annonces, many=True, context={'request': request}).data
     return {uuid.UUID(carte['id']): carte for carte in donnees}
 
@@ -48,3 +52,11 @@ def rechercher(ville: str, voyageurs: int | None = None, prix_max_nuit: int | No
         'description': h.description, 'image_url': h.image_url, 'price_per_night': h.price_per_night,
         'rating': h.rating, 'review_count': h.review_count, 'max_guests': h.max_guests, 'amenities': h.amenities,
     } for h in qs.order_by('-rating', 'price_per_night')[:limite]]
+
+
+def ids_par_nom(texte: str) -> set[uuid.UUID]:
+    return set(HebergementModel.tous.filter(name__icontains=texte).values_list('pk', flat=True))
+
+
+def mettre_a_jour_note(hebergement_id: uuid.UUID, note: float, nombre_avis: int) -> None:
+    HebergementModel.tous.filter(pk=hebergement_id).update(rating=round(note, 2), review_count=nombre_avis)

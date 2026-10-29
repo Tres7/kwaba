@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.avis.models import AvisModel
+from apps.hebergements import api as hebergements
 from apps.hebergements.archivage import ArchivageImpossible, archiver, restaurer
 from apps.hebergements.models import HebergementModel
 from apps.paiements import services as paiements, tarifs
@@ -44,12 +45,13 @@ def _entier(valeur, defaut: int, minimum: int = 1, maximum: int | None = None) -
     return min(nombre, maximum) if maximum else nombre
 
 
-def _paginer(request, qs, serialiser) -> Response:
+def _paginer(request, qs, serialiser, en_lot=False) -> Response:
     page = _entier(request.query_params.get('page'), 1)
     taille = _entier(request.query_params.get('page_size'), PAGE_SIZE, maximum=PAGE_SIZE_MAX)
     debut = (page - 1) * taille
+    objets = list(qs[debut:debut + taille])
     return Response({
-        'results': [serialiser(objet) for objet in qs[debut:debut + taille]],
+        'results': serialiser(objets) if en_lot else [serialiser(objet) for objet in objets],
         'count': qs.count(),
         'page': page,
         'page_size': taille,
@@ -402,24 +404,26 @@ class ReservationAnnulerView(VueAdmin):
 
 # --- 5. Avis ----------------------------------------------------------------------------------------
 
-def _avis(a) -> dict:
-    return {
+def _avis(liste) -> list[dict]:
+    annonces = hebergements.resumes({a.hebergement_id for a in liste})
+    return [{
         'id': str(a.id), 'note': a.note, 'commentaire': a.commentaire,
         'auteur': {'id': str(a.auteur_id), 'nom': _nom(a.auteur), 'email': a.auteur.email},
-        'hebergement': {'id': str(a.hebergement_id), 'name': a.hebergement.name},
+        'hebergement': {'id': str(a.hebergement_id), 'name': annonces[a.hebergement_id]['name'] if a.hebergement_id in annonces else ''},
         'reponse_hote': a.reponse_hote, 'created_at': a.created_at,
-    }
+    } for a in liste]
 
 
 class AvisListView(VueAdmin):
     def get(self, request):
-        qs = AvisModel.objects.select_related('auteur', 'hebergement').order_by('-created_at')
+        qs = AvisModel.objects.select_related('auteur').order_by('-created_at')
         params = request.query_params
         if q := params.get('q', '').strip():
-            qs = qs.filter(Q(commentaire__icontains=q) | Q(hebergement__name__icontains=q) | Q(auteur__email__icontains=q))
+            qs = qs.filter(Q(commentaire__icontains=q) | Q(hebergement_id__in=hebergements.ids_par_nom(q))
+                           | Q(auteur__email__icontains=q))
         if (note := _entier(params.get('note'), 0, minimum=0)) in range(1, 6):
             qs = qs.filter(note=note)
-        return _paginer(request, qs, _avis)
+        return _paginer(request, qs, _avis, en_lot=True)
 
 
 class AvisDetailView(VueAdmin):
@@ -427,10 +431,11 @@ class AvisDetailView(VueAdmin):
         motif, erreur = _motif(request.query_params.get('motif'))
         if erreur:
             return erreur
-        avis = AvisModel.objects.select_related('auteur', 'hebergement').filter(pk=pk).first()
+        avis = AvisModel.objects.select_related('auteur').filter(pk=pk).first()
         if not avis:
             return _introuvable('Avis')
-        trace = {'avis_id': str(avis.pk), 'annonce': avis.hebergement.name, 'auteur': avis.auteur.email,
+        annonce = hebergements.resumes([avis.hebergement_id]).get(avis.hebergement_id)
+        trace = {'avis_id': str(avis.pk), 'annonce': annonce['name'] if annonce else '', 'auteur': avis.auteur.email,
                  'note': avis.note, 'motif': motif}
         avis.delete()  # the post_delete signal of the avis app computes the listing's rating again
         journaliser('avis_supprime', request, utilisateur=request.user, **trace)
