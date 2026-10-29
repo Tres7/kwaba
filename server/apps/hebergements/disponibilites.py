@@ -5,11 +5,10 @@ the `fin` day (departure) stays free for a new arrival.
 """
 from datetime import date, timedelta
 
-from django.conf import settings
 from django.db.models import Q
-from django.utils import timezone
 
 from .models import BlocageModel, HebergementModel
+from .occupations import reservations
 
 
 def verrouiller(hebergement_id) -> None:
@@ -32,47 +31,14 @@ def verrouiller_types(type_ids) -> None:
     list(TypeLogementModel.objects.select_for_update().filter(pk__in=list(type_ids)).order_by('pk').values_list('pk', flat=True))
 
 
-def filtre_actives(prefixe: str = ''):
-    """Bookings that hold their dates: confirmed, or waiting for a non-expired payment.
-
-    A pending booking without a deadline (created before online payment, or by hand) holds its dates for the
-    payment delay after its creation, never forever.
-    """
-    p = prefixe
-    maintenant = timezone.now()
-    return (
-        Q(**{f'{p}status': 'confirmed'})
-        | Q(**{f'{p}status': 'pending', f'{p}expire_le__isnull': True, f'{p}created_at__gt': maintenant - delai_paiement()})
-        | Q(**{f'{p}status': 'pending', f'{p}expire_le__gt': maintenant})
-    )
-
-
-def delai_paiement() -> timedelta:
-    """Time given to pay a booking (same setting as apps.paiements.services.delai_paiement)."""
-    return timedelta(minutes=settings.FEDAPAY['EXPIRATION_MINUTES'])
-
-
-def _reservations(hebergement_id, debut: date, fin: date, exclure=None):
-    from apps.reservations.models import ReservationModel  # local import: avoids a circular import
-    qs = ReservationModel.objects.filter(
-        filtre_actives(),
-        hebergement_id=hebergement_id,
-        check_in__lt=fin,
-        check_out__gt=debut,
-    )
-    return qs.exclude(pk=exclure) if exclure else qs
-
-
 def _blocages(hebergement_id, debut: date, fin: date):
     return BlocageModel.objects.filter(hebergement_id=hebergement_id, debut__lt=fin, fin__gt=debut)
 
 
 def a_des_reservations(hebergement_id, debut: date, fin: date, type_logement=None) -> bool:
     """Active bookings over the period: of the whole establishment, or of one unit type (and those without a type)."""
-    qs = _reservations(hebergement_id, debut, fin)
-    if type_logement is not None:
-        qs = qs.filter(Q(type_logement=type_logement) | Q(type_logement__isnull=True))
-    return qs.exists()
+    return any(type_logement is None or r['type_logement_id'] in (type_logement.pk, None)
+               for r in reservations().actives([hebergement_id], debut, fin))
 
 
 def _types(hebergement_id, type_logement=None) -> list:
@@ -123,16 +89,18 @@ def periodes_indisponibles(hebergement_id, debut: date, fin: date, detail: bool 
     establishment), merged into periods, without any information on why.
     """
     if detail:
-        reservations, blocages = _reservations(hebergement_id, debut, fin), _blocages(hebergement_id, debut, fin)
+        from .models import TypeLogementModel
+
+        sejours, blocages = reservations().detail(hebergement_id, debut, fin), _blocages(hebergement_id, debut, fin)
         if type_logement is not None:
-            du_type = Q(type_logement=type_logement) | Q(type_logement__isnull=True)
-            reservations, blocages = reservations.filter(du_type), blocages.filter(du_type)
+            sejours = [r for r in sejours if r['type_logement_id'] in (type_logement.pk, None)]
+            blocages = blocages.filter(Q(type_logement=type_logement) | Q(type_logement__isnull=True))
+        noms = dict(TypeLogementModel.objects.filter(hebergement_id=hebergement_id).values_list('pk', 'nom'))
         periodes = []
-        for r in reservations.select_related('guest', 'type_logement'):
-            periodes.append({'debut': r.check_in, 'fin': r.check_out, 'type': 'reservation', 'id': str(r.id),
-                             'reference': r.reference, 'voyageur': f"{r.guest.first_name} {r.guest.last_name}".strip(),
-                             'statut': r.status, 'nb_unites': r.nb_unites,
-                             'type_logement': r.type_logement.nom if r.type_logement else None})
+        for r in sejours:
+            periodes.append({'debut': r['check_in'], 'fin': r['check_out'], 'type': 'reservation', 'id': str(r['id']),
+                             'reference': r['reference'], 'voyageur': r['voyageur'], 'statut': r['statut'],
+                             'nb_unites': r['nb_unites'], 'type_logement': noms.get(r['type_logement_id'])})
         for b in blocages.select_related('type_logement'):
             periodes.append({'debut': b.debut, 'fin': b.fin, 'type': 'blocage', 'id': str(b.id), 'motif': b.motif,
                              'type_logement': b.type_logement.nom if b.type_logement else None})

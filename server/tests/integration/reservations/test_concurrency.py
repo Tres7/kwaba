@@ -64,7 +64,7 @@ def test_two_simultaneous_bookings_of_same_dates_only_one_succeeds(make_user, ma
     hebergement = make_hebergement()
     check_in, check_out = _stay()
     payload = {'hebergement': str(hebergement.id), 'check_in': check_in.isoformat(), 'check_out': check_out.isoformat()}
-    _interleave(monkeypatch, (reservation_serializers, 'conflit'))
+    _interleave(monkeypatch, (reservation_serializers.hebergements, 'conflit'))
 
     statuses = _run_concurrently(
         (make_user(), 'post', '/api/v1/reservations/', payload),
@@ -72,13 +72,13 @@ def test_two_simultaneous_bookings_of_same_dates_only_one_succeeds(make_user, ma
     )
 
     assert sorted(statuses) == [201, 400]
-    assert ReservationModel.objects.filter(hebergement=hebergement).count() == 1
+    assert ReservationModel.objects.filter(hebergement_id=hebergement.id).count() == 1
 
 
 def test_host_closing_dates_while_guest_books_them_only_one_succeeds(make_user, make_hebergement, monkeypatch):
     hebergement = make_hebergement()
     check_in, check_out = _stay()
-    _interleave(monkeypatch, (reservation_serializers, 'conflit'), (hebergement_views, 'a_des_reservations'))
+    _interleave(monkeypatch, (reservation_serializers.hebergements, 'conflit'), (hebergement_views, 'a_des_reservations'))
 
     statuses = _run_concurrently(
         (make_user(), 'post', '/api/v1/reservations/',
@@ -89,7 +89,7 @@ def test_host_closing_dates_while_guest_books_them_only_one_succeeds(make_user, 
 
     # Depending on the arrival order: booking accepted and closure refused (409), or the reverse (400)
     assert sorted(statuses) in ([201, 400], [201, 409])
-    reservations = ReservationModel.objects.filter(hebergement=hebergement).count()
+    reservations = ReservationModel.objects.filter(hebergement_id=hebergement.id).count()
     blocages = BlocageModel.objects.filter(hebergement=hebergement).count()
     assert reservations + blocages == 1
 
@@ -104,19 +104,19 @@ def test_three_travellers_for_the_last_two_rooms_only_two_succeed(make_user, mak
     hotel = _hotel(make_hebergement, chambres=2)
     check_in, check_out = _stay()
     payload = {'hebergement': str(hotel.id), 'check_in': check_in.isoformat(), 'check_out': check_out.isoformat()}
-    _interleave(monkeypatch, (reservation_serializers, 'conflit'), parties=3)
+    _interleave(monkeypatch, (reservation_serializers.hebergements, 'conflit'), parties=3)
 
     statuses = _run_concurrently(*[(make_user(), 'post', '/api/v1/reservations/', payload) for _ in range(3)])
 
     assert sorted(statuses) == [201, 201, 400]
-    assert sum(ReservationModel.objects.filter(hebergement=hotel).values_list('nb_unites', flat=True)) == 2
+    assert sum(ReservationModel.objects.filter(hebergement_id=hotel.id).values_list('nb_unites', flat=True)) == 2
 
 
 def test_a_group_and_a_traveller_for_the_last_two_rooms(make_user, make_hebergement, monkeypatch):
     hotel = _hotel(make_hebergement, chambres=2)
     check_in, check_out = _stay()
     payload = {'hebergement': str(hotel.id), 'check_in': check_in.isoformat(), 'check_out': check_out.isoformat()}
-    _interleave(monkeypatch, (reservation_serializers, 'conflit'))
+    _interleave(monkeypatch, (reservation_serializers.hebergements, 'conflit'))
 
     statuses = _run_concurrently(
         (make_user(), 'post', '/api/v1/reservations/', {**payload, 'nb_unites': 2, 'guests_count': 4}),
@@ -125,7 +125,7 @@ def test_a_group_and_a_traveller_for_the_last_two_rooms(make_user, make_hebergem
 
     # Whoever comes first: the group takes both rooms, or the traveller one and the group is refused
     assert sorted(statuses) == [201, 400]
-    assert sum(ReservationModel.objects.filter(hebergement=hotel).values_list('nb_unites', flat=True)) <= 2
+    assert sum(ReservationModel.objects.filter(hebergement_id=hotel.id).values_list('nb_unites', flat=True)) <= 2
 
 
 def test_two_room_types_of_one_hotel_are_booked_at_the_same_time(make_user, make_hebergement, monkeypatch):
@@ -137,7 +137,7 @@ def test_two_room_types_of_one_hotel_are_booked_at_the_same_time(make_user, make
     payload = {'hebergement': str(hotel.id), 'check_in': check_in.isoformat(), 'check_out': check_out.isoformat()}
     attentes = []
     barrier = threading.Barrier(2, timeout=3)
-    original = reservation_serializers.conflit
+    original = reservation_serializers.hebergements.conflit
 
     def check_then_wait(*args, **kwargs):
         result = original(*args, **kwargs)
@@ -148,7 +148,7 @@ def test_two_room_types_of_one_hotel_are_booked_at_the_same_time(make_user, make
             attentes.append('seul')
         return result
 
-    monkeypatch.setattr(reservation_serializers, 'conflit', check_then_wait)
+    monkeypatch.setattr(reservation_serializers.hebergements, 'conflit', check_then_wait)
     statuses = _run_concurrently(
         (make_user(), 'post', '/api/v1/reservations/', payload),
         (make_user(), 'post', '/api/v1/reservations/', {**payload, 'type_logement': str(suite.id)}),

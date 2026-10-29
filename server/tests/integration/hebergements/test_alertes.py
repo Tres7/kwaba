@@ -10,6 +10,7 @@ from apps.hebergements import alertes
 from apps.hebergements.models import AlerteDisponibiliteModel, BlocageModel
 from apps.paiements import services as paiements
 from apps.reservations.models import ReservationModel
+from apps.reservations import paiement as reservations_paiement
 
 HEBERGEMENTS = '/api/v1/hebergements/'
 
@@ -27,7 +28,7 @@ def _sans_pause(settings):
 def complet(make_hebergement, make_user):
     """A one-unit listing booked from day 10 to day 12."""
     h = make_hebergement(name='Villa Soleil')
-    r = ReservationModel.objects.create(hebergement=h, type_logement=h.types.get(), guest=make_user(), check_in=_jour(10),
+    r = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest=make_user(), check_in=_jour(10),
                                         check_out=_jour(12), total_price=0, status='confirmed')
     return h, r
 
@@ -107,7 +108,7 @@ class TestDoubleOptIn:
     def test_unconfirmed_alert_is_never_sent(self, complet):
         h, reservation = complet
         _alerte(APIClient(), h, email='awa@exemple.com')
-        paiements.annuler(reservation, par='hote')
+        reservations_paiement.annuler(reservation, par='hote')
         assert _passe()['alertes_envoyees'] == 0
 
     def test_unknown_token(self):
@@ -142,14 +143,14 @@ class TestTriggers:
     def test_cancellation(self, active, django_capture_on_commit_callbacks):
         h, reservation, alerte = active
         with django_capture_on_commit_callbacks(execute=True):
-            paiements.annuler(reservation, par='voyageur')
+            reservations_paiement.annuler(reservation, par='voyageur')
         self._prevenu(alerte)
 
     def test_payment_never_made(self, active, make_user, django_capture_on_commit_callbacks):
         h, reservation, alerte = active
         ReservationModel.objects.filter(pk=reservation.pk).update(status='pending', expire_le=timezone.now() - timedelta(minutes=1))
         with django_capture_on_commit_callbacks(execute=True):
-            assert paiements.expirer_reservations() == 1
+            assert reservations_paiement.expirer() == 1
         self._prevenu(alerte)
 
     def test_closure_reopened(self, client_for, make_user, make_hebergement, django_capture_on_commit_callbacks):
@@ -168,10 +169,10 @@ class TestTriggers:
 
     def test_other_dates_freed(self, active, make_user, django_capture_on_commit_callbacks):
         h, _, alerte = active
-        ailleurs = ReservationModel.objects.create(hebergement=h, type_logement=h.types.get(), guest=make_user(),
+        ailleurs = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest=make_user(),
                                                    check_in=_jour(20), check_out=_jour(22), total_price=0, status='confirmed')
         with django_capture_on_commit_callbacks(execute=True):
-            paiements.annuler(ailleurs, par='voyageur')
+            reservations_paiement.annuler(ailleurs, par='voyageur')
         alerte.refresh_from_db()
         assert not alerte.a_verifier
         assert _passe()['alertes_envoyees'] == 0
@@ -191,10 +192,10 @@ class TestTriggers:
                                 format='json')
         suite = h.types.get(nom='Suite')
         for t in (chambre, suite):
-            ReservationModel.objects.create(hebergement=h, type_logement=t, guest=make_user(), check_in=_jour(10),
+            ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=t.id, guest=make_user(), check_in=_jour(10),
                                             check_out=_jour(12), total_price=0, status='confirmed')
         _alerte(client_for(make_user()), h, type_logement=str(suite.id))
-        ReservationModel.objects.filter(type_logement=chambre).update(status='cancelled')
+        ReservationModel.objects.filter(type_logement_id=chambre.id).update(status='cancelled')
         AlerteDisponibiliteModel.objects.update(a_verifier=True)
         assert _passe()['alertes_envoyees'] == 0
         # The same freed room satisfies an alert on any type of the hotel
@@ -244,7 +245,7 @@ class TestEndOfAlert:
         reponse = APIClient().post(f'{HEBERGEMENTS}alertes/desinscrire/', {'jeton': alerte.jeton}, format='json')
         assert reponse.status_code == 200 and reponse.data['statut'] == 'annulee'
         with django_capture_on_commit_callbacks(execute=True):
-            paiements.annuler(reservation, par='voyageur')
+            reservations_paiement.annuler(reservation, par='voyageur')
         assert _passe()['alertes_envoyees'] == 0
 
     def test_open_alerts_per_address_are_limited(self, client_for, make_user, complet):

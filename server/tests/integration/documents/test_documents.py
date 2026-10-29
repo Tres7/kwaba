@@ -29,7 +29,8 @@ _n = iter(range(1, 1000))
 
 
 def _paye(objet, montant, **champ):
-    return PaiementModel.objects.create(montant=montant, statut='reussi', transaction_id=f'T{next(_n)}', **champ)
+    return PaiementModel.objects.create(montant=montant, statut='reussi', transaction_id=f'T{next(_n)}',
+                                        **{f'{cle}_id': valeur.pk for cle, valeur in champ.items()})
 
 
 @pytest.fixture

@@ -311,11 +311,11 @@ def test_stay_pack_lowers_the_accommodation_fee_to_3_percent(client_for, make_us
     sejour = make_reservation(make_hebergement(), guest=voyageur, starts_in=6, nights=2)
     sejour.prix_nuits, sejour.frais_service, sejour.commission_hote, sejour.total_price = 50000, 3000, 4000, 53000
     sejour.save()
-    PaiementModel.objects.create(reservation=sejour, montant=53000, statut='reussi', transaction_id='T-SEJOUR')
+    PaiementModel.objects.create(reservation_id=sejour.id, montant=53000, statut='reussi', transaction_id='T-SEJOUR')
     _reserver_et_payer(client_for(voyageur), faux, catalogue, reservation=str(sejour.id))
     sejour.refresh_from_db()
     assert (sejour.frais_service, sejour.total_price) == (1500, 51500)
-    rb = RemboursementModel.objects.get(reservation=sejour)
+    rb = RemboursementModel.objects.get(reservation_id=sejour.id)
     assert rb.montant == 1500 and 'Pack Séjour' in rb.motif
 
 
@@ -370,7 +370,7 @@ def test_late_cancellation_keeps_the_partners_paid(client_for, make_user, faux, 
     services.attribuer(loc, partenaire=loueur, chauffeur=fiche_chauffeur(chauffeur.pk))
     LocationModel.objects.filter(pk=loc.pk).update(debut=timezone.now() + timedelta(hours=20))
     assert client.delete(f'{LOCATIONS}{loc.id}/').data['rembourse'] == 0
-    assert not RemboursementModel.objects.filter(location=loc).exists()
+    assert not RemboursementModel.objects.filter(location_id=loc.id).exists()
     assert VersementPartenaireModel.objects.get(location=loc).statut == 'planifie'
     assert VersementChauffeurLocationModel.objects.get(location=loc).montant == 24000
 
@@ -431,7 +431,7 @@ def test_deposit_paid_online_then_refunded_minus_damages(client_for, make_user, 
     paiements.passe()
     loc.refresh_from_db()
     assert loc.caution_restituee_le is not None
-    rb = RemboursementModel.objects.get(location=loc)
+    rb = RemboursementModel.objects.get(location_id=loc.id)
     assert (rb.montant, rb.motif, rb.statut) == (30000, 'Restitution de la caution', 'attente_numero')
     au_voyageur = next(m for m in mail.outbox if m.to == ['ama@test.kwaba'] and 'caution' in m.subject)
     assert '30 000' in au_voyageur.body and 'Rétroviseur cassé' in au_voyageur.body and 'numéro Mobile Money' in au_voyageur.body

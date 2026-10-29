@@ -74,7 +74,7 @@ class TestPrelaunchOn:
         reservation = make_reservation(make_hebergement(), status='pending')
 
         with pytest.raises(paiements.PaiementErreur):
-            paiements.creer_paiement(objet=reservation, montant=1000, moyen='mobile_money', description='test',
+            paiements.creer_paiement(type_objet='reservation', objet_id=reservation.id, montant=1000, moyen='mobile_money', description='test',
                                      url_retour='https://kwa-ba.com', voyageur=reservation.guest)
 
 

@@ -100,32 +100,35 @@ def taux_commission(hote, jour=None) -> Decimal:
 
 def hotes_deja_visites(voyageur) -> set:
     """Hosts the traveller has already stayed with through Kwa-Ba (paid and finished stay): loyal customer rate."""
-    from apps.reservations.models import ReservationModel
+    from apps.reservations import api as reservations  # local import: reservations depends on paiements
 
-    if not voyageur or not voyageur.is_authenticated:
-        return set()
-    return set(ReservationModel.objects.filter(guest=voyageur, status='confirmed', check_out__lte=timezone.localdate())
-               .values_list('hebergement__host_id', flat=True))
+    return reservations.hotes_deja_visites(voyageur)
 
 
-def taux_frais(voyageur, hebergement) -> Decimal:
+def taux_frais(voyageur, hote_id) -> Decimal:
     """6 %; 3 % for a loyal customer (new stay with the same host through Kwa-Ba)."""
-    return FRAIS_REDUITS if hebergement.host_id in hotes_deja_visites(voyageur) else FRAIS_VOYAGEUR
+    return FRAIS_REDUITS if hote_id in hotes_deja_visites(voyageur) else FRAIS_VOYAGEUR
 
 
-def devis(hebergement, nuits: int, voyageur=None, jour=None, type_logement=None, nb_unites: int = 1) -> Montants:
-    """Amounts of a stay with the rates of this host and this traveller: `nb_unites` units of the unit type
-    (the establishment's price when no type is given)."""
-    prix = type_logement.prix_nuit if type_logement is not None else hebergement.price_per_night
-    return calculer(prix * nb_unites, nuits, frais=taux_frais(voyageur, hebergement),
-                    commission=taux_commission(hebergement.host, jour))
+def devis(prix_par_nuit, hote_id, nuits: int, voyageur=None, jour=None, nb_unites: int = 1) -> Montants:
+    """Amounts of a stay with the rates of this host and this traveller: `nb_unites` units at `prix_par_nuit`."""
+    return calculer(prix_par_nuit * nb_unites, nuits, frais=taux_frais(voyageur, hote_id),
+                    commission=taux_commission(hote_id, jour))
 
 
-def montants_de(reservation) -> Montants:
-    """Frozen amounts of a booking (computed again for bookings older than online payment)."""
+def _annonce(reservation) -> dict:
+    from apps.hebergements import api as hebergements
+
+    return hebergements.fiche(reservation.hebergement_id, archivees=True) or {}
+
+
+def montants_de(reservation, prix_par_nuit=None) -> Montants:
+    """Frozen amounts of a booking (computed again for bookings older than online payment, from `prix_par_nuit` or
+    the listing's current price)."""
     if reservation.prix_nuits is not None:
         return Montants(reservation.prix_nuits, reservation.frais_service, reservation.commission_hote)
-    return calculer(reservation.hebergement.price_per_night, reservation.nights)
+    return calculer(prix_par_nuit if prix_par_nuit is not None else _annonce(reservation)['price_per_night'],
+                    reservation.nights)
 
 
 def arrivee(reservation) -> datetime:
@@ -158,7 +161,7 @@ def _retenue(montants: Montants, nuits_retenues: int, frais_rendus: bool = False
 
 
 def politique(reservation) -> str:
-    return getattr(reservation.hebergement, 'politique_annulation', '') or POLITIQUE_PAR_DEFAUT
+    return _annonce(reservation).get('politique_annulation') or POLITIQUE_PAR_DEFAUT
 
 
 REGLES_POLITIQUES = {

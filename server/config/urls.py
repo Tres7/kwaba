@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/v1/reservations/', include('apps.reservations.urls')),
     path('api/v1/favoris/', include('apps.favoris.urls')),
     path('api/v1/avis/', include('apps.avis.urls')),
+    path('api/v1/paiements/', include('apps.reservations.paiement_urls')),
     path('api/v1/paiements/', include('apps.paiements.urls')),
     path('api/v1/transferts/', include('apps.transferts.urls')),
     path('api/v1/voyages/', include('apps.voyages.urls')),

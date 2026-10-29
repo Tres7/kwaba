@@ -20,6 +20,7 @@ from apps.hebergements.archivage import ArchivageImpossible, archiver, restaurer
 from apps.hebergements.models import HebergementModel
 from apps.paiements import services as paiements, tarifs
 from apps.paiements.models import ConditionsHoteModel
+from apps.reservations import api as reservations_api
 from apps.reservations.models import ReservationModel
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import paginer as _paginer
@@ -237,20 +238,25 @@ FONDATEURS_MAX = 50
 
 # --- 3. Annonces ------------------------------------------------------------------------------------
 
-def _hebergement(h) -> dict:
-    return {
+def _hebergements_json(liste) -> list[dict]:
+    nb_reservations = reservations_api.nb_par_annonce(h.id for h in liste)
+    return [{
         'id': str(h.id), 'name': h.name, 'type': h.type, 'city': h.city, 'location': h.location,
         'price_per_night': h.price_per_night, 'image_url': h.image_url, 'is_available': h.is_available,
         'est_verifie': h.statut_verification == 'verifiee', 'statut_verification': h.statut_verification,
-        'rating': h.rating, 'review_count': h.review_count, 'nb_reservations': h.nb_reservations,
+        'rating': h.rating, 'review_count': h.review_count, 'nb_reservations': nb_reservations.get(h.id, 0),
         'host': {'id': str(h.host_id), 'nom': _nom(h.host), 'email': h.host.email},
         'created_at': h.created_at, 'archivee_le': h.archivee_le,
-    }
+    } for h in liste]
+
+
+def _hebergement(h) -> dict:
+    return _hebergements_json([h])[0]
 
 
 def _hebergements(archivees=False):
     qs = HebergementModel.tous.filter(archivee_le__isnull=False) if archivees else HebergementModel.objects.all()
-    return qs.select_related('host').annotate(nb_reservations=Count('reservations')).order_by('-created_at')
+    return qs.select_related('host').order_by('-created_at')
 
 
 class HebergementListView(VueAdmin):
@@ -267,7 +273,7 @@ class HebergementListView(VueAdmin):
             qs = qs.filter(statut_verification='verifiee') if verifie else qs.exclude(statut_verification='verifiee')
         if (statut := params.get('statut', '')) in dict(HebergementModel.STATUTS_VERIFICATION):
             qs = qs.filter(statut_verification=statut)
-        return _paginer(request, qs, _hebergement)
+        return _paginer(request, qs, _hebergements_json, en_lot=True)
 
 
 class HebergementDetailView(VueAdmin):
@@ -331,21 +337,31 @@ class HebergementRestaurerView(VueAdmin):
 
 # --- 4. Bookings --------------------------------------------------------------------------------
 
+def _reservations_json(liste) -> list[dict]:
+    annonces = hebergements.resumes({r.hebergement_id for r in liste})
+    hotes = {u.pk: u for u in User.objects.filter(pk__in={a['host_id'] for a in annonces.values()})}
+    resultats = []
+    for r in liste:
+        h = annonces.get(r.hebergement_id, {})
+        hote = hotes.get(h.get('host_id'))
+        resultats.append({
+            'id': str(r.id), 'reference': r.reference,
+            'hebergement': {'id': str(r.hebergement_id), 'name': h.get('name', ''), 'city': h.get('city', '')},
+            'voyageur': {'id': str(r.guest_id), 'nom': _nom(r.guest), 'email': r.guest.email},
+            'hote': {'id': str(h['host_id']) if h else '', 'nom': _nom(hote) if hote else ''},
+            'check_in': r.check_in, 'check_out': r.check_out, 'nights': r.nights, 'guests_count': r.guests_count,
+            'total_price': int(r.total_price), 'status': r.status, 'payment_method': r.payment_method,
+            'created_at': r.created_at,
+        })
+    return resultats
+
+
 def _reservation(r) -> dict:
-    h = r.hebergement
-    return {
-        'id': str(r.id), 'reference': r.reference,
-        'hebergement': {'id': str(h.id), 'name': h.name, 'city': h.city},
-        'voyageur': {'id': str(r.guest_id), 'nom': _nom(r.guest), 'email': r.guest.email},
-        'hote': {'id': str(h.host_id), 'nom': _nom(h.host)},
-        'check_in': r.check_in, 'check_out': r.check_out, 'nights': r.nights, 'guests_count': r.guests_count,
-        'total_price': int(r.total_price), 'status': r.status, 'payment_method': r.payment_method,
-        'created_at': r.created_at,
-    }
+    return _reservations_json([r])[0]
 
 
 def _reservations():
-    return ReservationModel.objects.select_related('hebergement__host', 'guest').order_by('-created_at')
+    return ReservationModel.objects.select_related('guest').order_by('-created_at')
 
 
 class ReservationListView(VueAdmin):
@@ -353,7 +369,7 @@ class ReservationListView(VueAdmin):
         qs = _reservations()
         params = request.query_params
         if q := params.get('q', '').strip():
-            filtre = Q(hebergement__name__icontains=q) | Q(guest__email__icontains=q)
+            filtre = Q(hebergement_id__in=hebergements.ids_par_nom(q)) | Q(guest__email__icontains=q)
             # Reference RES-AF2026-3A43: the last 4 characters are the start of the id
             if q.upper().startswith('RES-'):
                 fin = q.rsplit('-', 1)[-1]
@@ -367,7 +383,7 @@ class ReservationListView(VueAdmin):
             qs = qs.filter(check_out__gt=debut)
         if fin := parse_date(params.get('fin', '') or ''):
             qs = qs.filter(check_in__lt=fin)
-        return _paginer(request, qs, _reservation)
+        return _paginer(request, qs, _reservations_json, en_lot=True)
 
 
 class ReservationAnnulerView(VueAdmin):
@@ -380,7 +396,7 @@ class ReservationAnnulerView(VueAdmin):
             return _introuvable('Réservation')
         try:
             # Cancellation by Kwa-Ba: the traveller is fully refunded if they paid (even for a stay already started)
-            rembourse = paiements.annuler(reservation, par='plateforme')
+            rembourse = reservations_api.annuler(reservation, par='plateforme')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser('reservation_annulee', request, utilisateur=request.user, reservation_id=str(reservation.pk),

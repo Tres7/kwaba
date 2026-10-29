@@ -65,7 +65,7 @@ def test_no_email_when_the_archiving_is_refused(client_for, annonce, make_reserv
         assert _supprimer(client_for, annonce).status_code == 409
 
     assert mailoutbox == []
-    assert annonce.reservations.filter(status='pending').exists()
+    assert ReservationModel.objects.filter(hebergement_id=annonce.id, status='pending').exists()
 
 
 @pytest.mark.parametrize('starts_in, nights', [(10, 3), (-1, 3), (-3, 3)])
@@ -120,7 +120,7 @@ def test_back_office_deletion_archives_too(client_for, make_user, annonce, make_
     assert admin.delete(f'{ADMIN}{annonce.id}/?motif=Annonce frauduleuse').status_code == 204
 
     assert HebergementModel.tous.get(pk=annonce.pk).archivee_le is not None
-    assert annonce.reservations.count() == 1
+    assert ReservationModel.objects.filter(hebergement_id=annonce.id).count() == 1
 
 
 class TestRestauration:

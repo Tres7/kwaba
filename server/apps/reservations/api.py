@@ -1,10 +1,12 @@
 import uuid
 from collections.abc import Iterable
 from datetime import date
+from types import SimpleNamespace
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 
+from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 
 from .models import ReservationModel
@@ -33,7 +35,8 @@ def paires_confirmees(paires: Iterable[tuple[uuid.UUID, uuid.UUID]]) -> set[tupl
 
 
 def confirmee_pour_hote(reservation_id: uuid.UUID, hote_id: uuid.UUID) -> tuple[uuid.UUID, uuid.UUID] | None:
-    return (ReservationModel.objects.filter(pk=reservation_id, hebergement__host_id=hote_id, status='confirmed')
+    return (ReservationModel.objects.filter(pk=reservation_id, hebergement_id__in=hebergements.ids_annonces_de(hote_id),
+                                            status='confirmed')
             .values_list('hebergement_id', 'guest_id').first())
 
 
@@ -59,3 +62,47 @@ def reduire_frais_pack_sejour(reservation_id: uuid.UUID, voyageur_id: uuid.UUID)
     r.frais_service, r.total_price = nouveaux_frais, r.prix_nuits + nouveaux_frais
     r.save(update_fields=['frais_service', 'total_price'])
     return ecart, r.reference
+
+
+def nb_par_annonce(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, int]:
+    return dict(ReservationModel.objects.filter(hebergement_id__in=list(hebergement_ids)).values('hebergement_id')
+                .annotate(n=Count('id')).values_list('hebergement_id', 'n'))
+
+
+def _objet(r: ReservationModel) -> SimpleNamespace:
+    return SimpleNamespace(
+        id=r.id, pk=r.pk, reference=r.reference, hebergement_id=r.hebergement_id, type_logement_id=r.type_logement_id,
+        guest=r.guest, guest_id=r.guest_id, check_in=r.check_in, check_out=r.check_out, nights=r.nights,
+        guests_count=r.guests_count, message=r.message, status=r.status, payment_method=r.payment_method,
+        total_price=r.total_price, prix_nuits=r.prix_nuits, frais_service=r.frais_service,
+        commission_hote=r.commission_hote, created_at=r.created_at, expire_le=r.expire_le, annule_par=r.annule_par,
+    )
+
+
+def objets(reservation_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, SimpleNamespace]:
+    """Bookings as plain read-only objects (emails, payouts, earnings)."""
+    return {r.id: _objet(r) for r in ReservationModel.objects.filter(pk__in=list(reservation_ids)).select_related('guest')}
+
+
+def objet(reservation_id: uuid.UUID) -> SimpleNamespace | None:
+    return objets([reservation_id]).get(reservation_id)
+
+
+def ids_confirmees(reservation_ids: Iterable[uuid.UUID]) -> set[uuid.UUID]:
+    return set(ReservationModel.objects.filter(pk__in=list(reservation_ids), status='confirmed').values_list('pk', flat=True))
+
+
+def hotes_deja_visites(voyageur) -> set:
+    """Hosts the traveller has already stayed with through Kwa-Ba (paid and finished stay): loyal customer rate."""
+    if not voyageur or not voyageur.is_authenticated:
+        return set()
+    sejours = (ReservationModel.objects.filter(guest=voyageur, status='confirmed', check_out__lte=timezone.localdate())
+               .values_list('hebergement_id', flat=True))
+    return set(hebergements.hotes_des_annonces(set(sejours)).values())
+
+
+def annuler(reservation, par: str) -> int:
+    """Cancels the booking (voyageur, hote or plateforme) and refunds the traveller. Returns the refunded amount."""
+    from .paiement import annuler as annuler_reservation
+
+    return annuler_reservation(reservation, par)

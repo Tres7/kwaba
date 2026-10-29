@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from apps.paiements import fedapay, paypal, services
 from apps.paiements.models import PaiementModel, ProfilVersementModel, RemboursementModel, VersementModel
 from apps.reservations.models import ReservationModel
+from apps.reservations import paiement as reservations_paiement
 
 FEDAPAY_TEST = {'SECRET_KEY': 'sk_sandbox_test', 'ENV': 'sandbox', 'WEBHOOK_SECRET': '', 'EXPIRATION_MINUTES': 30}
 
@@ -96,11 +97,11 @@ def test_worker_une_passe(faux, make_user, make_hebergement, monkeypatch):
     voyageur = _client(make_user())
     resa = _reservation_payee(voyageur, make_hebergement(host=hote))
     ProfilVersementModel.objects.create(hote=hote, pays='TG', operateur='togocel', numero='90000001', titulaire='Ama Hote')
-    VersementModel.objects.filter(reservation=resa).update(date_prevue=timezone.now() - timedelta(minutes=1))
+    VersementModel.objects.filter(reservation_id=resa.id).update(date_prevue=timezone.now() - timedelta(minutes=1))
 
     call_command('traiter_paiements', '--once')  # sending of the payout
     call_command('traiter_paiements', '--once')  # FedaPay confirms: paid, email to the host
-    v = VersementModel.objects.get(reservation=resa)
+    v = VersementModel.objects.get(reservation_id=resa.id)
     assert v.statut == 'envoye' and v.notifie
     assert any('Versement de' in m.subject for m in mail.outbox)
 
@@ -110,7 +111,7 @@ def test_versement_refuse_puis_echoue_et_alerte(faux, make_user, make_hebergemen
     hote = make_user(role='hote')
     resa = _reservation_payee(_client(make_user()), make_hebergement(host=hote))
     ProfilVersementModel.objects.create(hote=hote, pays='TG', operateur='togocel', numero='90000001', titulaire='Ama')
-    v = VersementModel.objects.get(reservation=resa)
+    v = VersementModel.objects.get(reservation_id=resa.id)
     VersementModel.objects.filter(pk=v.pk).update(date_prevue=timezone.now() - timedelta(minutes=1), tentatives=services.MAX_TENTATIVES - 1,
                                                   mis_a_jour_le=timezone.now() - timedelta(days=1))
 
@@ -126,7 +127,7 @@ def test_versement_refuse_puis_echoue_et_alerte(faux, make_user, make_hebergemen
 def test_versement_signale_en_echec_par_fedapay_puis_webhook(faux, make_user, make_hebergement):
     hote = make_user(role='hote')
     resa = _reservation_payee(_client(make_user()), make_hebergement(host=hote))
-    v = VersementModel.objects.get(reservation=resa)
+    v = VersementModel.objects.get(reservation_id=resa.id)
     VersementModel.objects.filter(pk=v.pk).update(statut='en_cours', payout_id='P7', tentatives=1)
     faux.payout_statut = 'failed'
     services.traiter_evenement({'name': 'payout.failed', 'entity': {'id': 'P7'}})
@@ -141,7 +142,7 @@ def test_remboursement_paypal_en_attente_puis_confirme(faux, make_user, make_heb
     assert resa.status == 'confirmed'
     voyageur.delete(f'/api/v1/reservations/{resa.id}/')
     services.envoyer_remboursements()
-    rb = RemboursementModel.objects.get(reservation=resa)
+    rb = RemboursementModel.objects.get(reservation_id=resa.id)
     assert (rb.statut, rb.payout_id) == ('en_cours', 'REF9')
     faux.remboursement = 'COMPLETED'
     services.passe()
@@ -154,7 +155,7 @@ def test_remboursement_paypal_refuse_et_sans_capture(faux, make_user, make_heber
     voyageur = _client(make_user())
     resa = _reservation_payee(voyageur, make_hebergement(), moyen='paypal')
     voyageur.delete(f'/api/v1/reservations/{resa.id}/')
-    rb = RemboursementModel.objects.get(reservation=resa)
+    rb = RemboursementModel.objects.get(reservation_id=resa.id)
     RemboursementModel.objects.filter(pk=rb.pk).update(statut='en_cours', payout_id='REF9')
     faux.remboursement = 'FAILED'
     services.synchroniser_remboursement(RemboursementModel.objects.get(pk=rb.pk))
@@ -169,10 +170,10 @@ def test_remboursement_paypal_refuse_et_sans_capture(faux, make_user, make_heber
 def test_remboursement_mobile_money_suivi_par_fedapay(faux, make_user, make_hebergement):
     voyageur = _client(make_user())
     resa = _reservation_payee(voyageur, make_hebergement())
-    assert PaiementModel.objects.get(reservation=resa).telephone == '90000009'
+    assert PaiementModel.objects.get(reservation_id=resa.id).telephone == '90000009'
     voyageur.delete(f'/api/v1/reservations/{resa.id}/')
     services.envoyer_remboursements()
-    rb = RemboursementModel.objects.get(reservation=resa)
+    rb = RemboursementModel.objects.get(reservation_id=resa.id)
     assert rb.statut == 'en_cours'
     faux.payout_statut = 'failed'
     services.traiter_evenement({'name': 'payout.failed', 'entity': {'id': rb.payout_id}})
@@ -181,10 +182,10 @@ def test_remboursement_mobile_money_suivi_par_fedapay(faux, make_user, make_hebe
 
 def test_annulation_par_l_hote_rembourse_tout(faux, make_user, make_hebergement):
     resa = _reservation_payee(_client(make_user()), make_hebergement(), dans=3)
-    assert services.annuler(resa, par='hote') == resa.total_price
-    assert VersementModel.objects.get(reservation=resa).statut == 'annule'
+    assert reservations_paiement.annuler(resa, par='hote') == resa.total_price
+    assert VersementModel.objects.get(reservation_id=resa.id).statut == 'annule'
     with pytest.raises(services.PaiementErreur):
-        services.annuler(resa, par='plateforme')
+        reservations_paiement.annuler(resa, par='plateforme')
 
 
 def test_demarrer_paiement_refuse(faux, make_user, make_hebergement, settings):

@@ -42,33 +42,6 @@ ignore_imports =
     apps.backoffice.views -> apps.paiements.tarifs
     apps.backoffice.views -> apps.reservations.models
     apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
-    apps.hebergements.alertes -> apps.paiements.notifications
-    apps.hebergements.disponibilites -> apps.reservations.models
-    apps.hebergements.management.commands.seed_demo -> apps.users.infrastructure.persistence.models
-    apps.hebergements.models -> apps.contrats.models
-    apps.hebergements.models -> apps.documents.models
-    apps.hebergements.serializers -> apps.paiements.tarifs
-    apps.hebergements.stock -> apps.reservations.models
-    apps.paiements.relances -> apps.locations.models
-    apps.paiements.relances -> apps.reservations.models
-    apps.paiements.relances -> apps.transferts.models
-    apps.paiements.services -> apps.give.services
-    apps.paiements.services -> apps.hebergements.alertes
-    apps.paiements.services -> apps.hebergements.disponibilites
-    apps.paiements.services -> apps.locations.models
-    apps.paiements.services -> apps.locations.services
-    apps.paiements.services -> apps.reservations.models
-    apps.paiements.services -> apps.transferts.models
-    apps.paiements.services -> apps.transferts.services
-    apps.paiements.tarifs -> apps.reservations.models
-    apps.paiements.views -> apps.reservations.models
-    apps.reservations.models -> apps.hebergements.models
-    apps.reservations.serializers -> apps.hebergements.disponibilites
-    apps.reservations.serializers -> apps.hebergements.serializers
-    apps.reservations.serializers -> apps.hebergements.types_logement
-    apps.reservations.serializers -> apps.paiements.services
-    apps.reservations.serializers -> apps.paiements.tarifs
-    apps.reservations.views -> apps.paiements.services
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier

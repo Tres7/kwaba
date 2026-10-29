@@ -181,7 +181,7 @@ def _url(alerte, chemin: str) -> str:
 def _date(alerte, jour) -> str:
     if alerte.langue == 'en':
         return f"{jour.strftime('%B')} {jour.day}, {jour.year}"
-    from apps.paiements.notifications import _date as date_fr  # local import: paiements depends on hebergements
+    from apps.paiements.api import date_fr  # local import: paiements depends on hebergements
     return date_fr(jour)
 
 
@@ -195,21 +195,21 @@ def _contexte(alerte) -> dict:
 
 
 def envoyer_confirmation(alerte):
-    from apps.paiements.notifications import _envoyer
+    from apps.paiements.api import envoyer_email
     sujet = "Confirm your Kwa-Ba alert" if alerte.langue == 'en' else "Confirmez votre alerte Kwa-Ba"
-    _envoyer('emails/hebergements/alerte_confirmation.txt', sujet, [alerte.email], {
+    envoyer_email('emails/hebergements/alerte_confirmation.txt', sujet, [alerte.email], {
         **_contexte(alerte), 'url_confirmation': _url(alerte, f"/alertes?confirmer={alerte.jeton}"),
     })
 
 
 def envoyer_disponible(alerte):
-    from apps.paiements.notifications import _envoyer
+    from apps.paiements.api import envoyer_email
     h = alerte.hebergement
     sujet = f"Dates available again: {h.name}" if alerte.langue == 'en' else f"Des dates se sont libérées : {h.name}"
     lien = f"/hebergements/{h.id}?check_in={alerte.date_debut}&check_out={alerte.date_fin}"
     if alerte.type_logement_id:
         lien += f"&type={alerte.type_logement_id}&unites={alerte.nb_unites}"
-    _envoyer('emails/hebergements/alerte_disponible.txt', sujet, [alerte.email], {**_contexte(alerte), 'url': _url(alerte, lien)})
+    envoyer_email('emails/hebergements/alerte_disponible.txt', sujet, [alerte.email], {**_contexte(alerte), 'url': _url(alerte, lien)})
 
 
 def passe() -> dict:

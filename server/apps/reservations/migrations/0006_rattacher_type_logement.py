@@ -7,7 +7,7 @@ def rattacher(apps, schema_editor):
     Reservation = apps.get_model('reservations', 'ReservationModel')
     TypeLogement = apps.get_model('hebergements', 'TypeLogementModel')
     premier_type = TypeLogement.objects.filter(hebergement_id=OuterRef('hebergement_id')).order_by('ordre', 'prix_nuit', 'created_at')
-    Reservation.objects.filter(type_logement__isnull=True).update(type_logement_id=Subquery(premier_type.values('id')[:1]))
+    Reservation.objects.filter(type_logement_id__isnull=True).update(type_logement_id=Subquery(premier_type.values('id')[:1]))
 
 
 class Migration(migrations.Migration):

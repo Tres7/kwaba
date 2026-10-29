@@ -11,8 +11,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from config.prelancement import verifier_ouverture
-from apps.reservations.models import ReservationModel
 from apps.securite.audit import journaliser
 
 from . import fedapay, paypal, services, tarifs
@@ -45,46 +43,6 @@ class ConfigView(APIView):
                  'operateurs': [{'code': c, 'nom': n} for c, n in p['operateurs']]}
                 for code, p in pays_ouverts().items()
             ],
-        })
-
-
-def _reservation_du_voyageur(pk, user):
-    return ReservationModel.objects.select_related('hebergement', 'guest').filter(pk=pk, guest=user).first()
-
-
-class PayerView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, pk):
-        verifier_ouverture()
-        reservation = _reservation_du_voyageur(pk, request.user)
-        if not reservation:
-            return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        moyen = request.data.get('moyen') or reservation.payment_method
-        try:
-            url = services.demarrer_paiement(reservation, moyen)
-        except services.PaiementErreur as exc:
-            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'url': url})
-
-
-class StatutView(APIView):
-    """Polled by the return page after payment: reads the transaction again from FedaPay if needed."""
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, pk):
-        reservation = _reservation_du_voyageur(pk, request.user)
-        if not reservation:
-            return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        dernier = reservation.paiements.order_by('-cree_le').first()
-        if dernier and dernier.statut == 'en_attente':
-            services.synchroniser_paiement(dernier)
-            reservation.refresh_from_db()
-        return Response({
-            'reservation': reservation.status,
-            'paiement': dernier.statut if dernier else None,
-            'expire_le': reservation.expire_le,
-            'annule_par': reservation.annule_par,
         })
 
 
@@ -154,21 +112,6 @@ class CompteRemboursementSerializer(serializers.Serializer):
         return _valider_compte(data)
 
 
-class CompteRemboursementView(APIView):
-    """The traveller gives the Mobile Money account to be refunded on."""
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request, pk):
-        reservation = _reservation_du_voyageur(pk, request.user)
-        if not reservation:
-            return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CompteRemboursementSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if not services.indiquer_numero_remboursement(reservation, **serializer.validated_data):
-            return Response({'detail': "Aucun remboursement n'attend de numéro pour cette réservation."}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'detail': 'Numéro enregistré : le remboursement va être envoyé.'})
-
-
 class ProfilVersementSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfilVersementModel
@@ -229,9 +172,15 @@ class RevenusView(APIView):
         versements = (
             VersementModel.objects.filter(hote=request.user)
             .exclude(statut='annule')
-            .select_related('reservation', 'reservation__hebergement', 'reservation__guest')
             .order_by('-date_prevue')
         )
+
+        from apps.hebergements import api as hebergements  # local imports: these modules depend on paiements
+        from apps.reservations import api as reservations
+
+        derniers = list(versements[:200])
+        sejours = reservations.objets(v.reservation_id for v in derniers)
+        annonces = hebergements.resumes({r.hebergement_id for r in sejours.values()})
 
         def total(*statuts):
             return versements.filter(statut__in=statuts).aggregate(s=Sum('montant'))['s'] or 0
@@ -253,11 +202,11 @@ class RevenusView(APIView):
                 {
                     'id': str(v.id),
                     'reservation_id': str(v.reservation_id),
-                    'reference': v.reservation.reference,
-                    'hebergement': v.reservation.hebergement.name,
-                    'voyageur': f"{v.reservation.guest.first_name} {v.reservation.guest.last_name}".strip(),
-                    'check_in': v.reservation.check_in,
-                    'check_out': v.reservation.check_out,
+                    'reference': sejours[v.reservation_id].reference,
+                    'hebergement': annonces.get(sejours[v.reservation_id].hebergement_id, {}).get('name', ''),
+                    'voyageur': f"{sejours[v.reservation_id].guest.first_name} {sejours[v.reservation_id].guest.last_name}".strip(),
+                    'check_in': sejours[v.reservation_id].check_in,
+                    'check_out': sejours[v.reservation_id].check_out,
                     'montant_brut': v.montant_brut,
                     'commission': v.commission,
                     'montant': v.montant,
@@ -266,6 +215,6 @@ class RevenusView(APIView):
                     'envoye_le': v.envoye_le,
                     'probleme': v.derniere_erreur if v.statut in ('planifie', 'echoue') else '',
                 }
-                for v in versements[:200]
+                for v in derniers if v.reservation_id in sejours
             ],
         })

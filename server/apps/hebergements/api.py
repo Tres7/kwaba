@@ -6,7 +6,10 @@ from django.db.models import Count, Q
 from django.utils import timezone
 
 from . import disponibilites
-from .models import HebergementModel
+from . import occupations
+from .occupations import FournisseurReservations as FournisseurReservations
+from . import types_logement
+from .models import HebergementModel, TypeLogementModel
 from .serializers import HebergementSerializer
 
 
@@ -69,11 +72,15 @@ def _fiche(h: HebergementModel) -> dict:
         'location': h.location, 'description': h.description, 'price_per_night': h.price_per_night,
         'max_guests': h.max_guests, 'amenities': h.amenities, 'image_url': h.image_url, 'images': h.images,
         'created_at': h.created_at, 'host_id': h.host_id, 'statut_verification': h.statut_verification,
+        'politique_annulation': h.politique_annulation, 'arrivee_a_partir': h.arrivee_a_partir,
+        'depart_avant': h.depart_avant,
     }
 
 
-def fiche(hebergement_id: uuid.UUID) -> dict | None:
-    h = HebergementModel.objects.filter(pk=hebergement_id).first()
+def fiche(hebergement_id: uuid.UUID, archivees: bool = False) -> dict | None:
+    """`archivees`: also an archived listing (history of a booking)."""
+    qs = HebergementModel.tous if archivees else HebergementModel.objects
+    h = qs.filter(pk=hebergement_id).first()
     return _fiche(h) if h else None
 
 
@@ -106,3 +113,63 @@ def enregistrer_verification(hebergement_id: uuid.UUID, verifiee: bool, motif: s
     else:
         HebergementModel.objects.filter(pk=hebergement_id).update(
             statut_verification='refusee', motif_refus=motif, updated_at=maintenant)
+
+
+def enregistrer_reservations(fournisseur: FournisseurReservations) -> None:
+    occupations.enregistrer(fournisseur)
+
+
+def ids_annonces_de(hote_id) -> set[uuid.UUID]:
+    """The host's listings, archived ones included (their bookings stay in the history)."""
+    return set(HebergementModel.tous.filter(host_id=hote_id).values_list('pk', flat=True))
+
+
+def hotes_des_annonces(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, uuid.UUID]:
+    return dict(HebergementModel.tous.filter(pk__in=list(hebergement_ids)).values_list('pk', 'host_id'))
+
+
+def _fiche_type(t: TypeLogementModel) -> dict:
+    return {'id': t.id, 'hebergement_id': t.hebergement_id, 'nom': t.nom, 'capacite': t.capacite,
+            'prix_nuit': t.prix_nuit, 'quantite': t.quantite, 'actif': t.actif}
+
+
+def fiche_type(type_logement_id) -> dict | None:
+    t = TypeLogementModel.objects.filter(pk=type_logement_id).first()
+    return _fiche_type(t) if t else None
+
+
+def type_par_defaut(hebergement_id) -> dict:
+    """The unit type booked when none is chosen (created if missing)."""
+    return fiche_type(types_logement.type_par_defaut_id(hebergement_id))
+
+
+def noms_types(type_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+    return dict(TypeLogementModel.objects.filter(pk__in=[i for i in type_ids if i]).values_list('pk', 'nom'))
+
+
+def verrouiller_types(type_ids) -> None:
+    disponibilites.verrouiller_types(type_ids)
+
+
+def verrouiller(hebergement_id) -> None:
+    disponibilites.verrouiller(hebergement_id)
+
+
+def conflit(hebergement_id, debut: date, fin: date, exclure=None, type_logement_id=None, nb: int = 1) -> str | None:
+    """Why `nb` units of the type (default type if none) cannot be booked over the period, or None."""
+    type_logement = TypeLogementModel.objects.get(pk=type_logement_id) if type_logement_id else None
+    return disponibilites.conflit(hebergement_id, debut, fin, exclure=exclure, type_logement=type_logement, nb=nb)
+
+
+def signaler_liberation(hebergement_id, debut=None, fin=None) -> None:
+    """Dates freed (cancellation, expiry): the availability alerts on them are checked at the next pass."""
+    from .alertes import signaler_liberation as signaler
+
+    signaler(hebergement_id, debut, fin)
+
+
+def passe_alertes() -> dict:
+    """Checks the availability alerts flagged since the last pass and sends the emails."""
+    from .alertes import passe
+
+    return passe()
