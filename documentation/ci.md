@@ -4,14 +4,14 @@ Chaque push sur une branche de travail lance un contrôle rapide (`push_branch.y
 
 ## Sur chaque push de branche
 
-`push_branch.yml`, sur toute branche sauf `main` et `dependabot/**` : `ruff check` et tests unitaires du serveur, ESLint et `tsc` du client, gitleaks sur les commits poussés.
+`push_branch.yml`, sur toute branche sauf `main` et `dependabot/**` : `ruff check`, `lint-imports` et tests unitaires du serveur, ESLint et `tsc` du client, gitleaks sur les commits poussés.
 
 ## Sur chaque pull request
 
 | Job | Contenu | Quand |
 | --- | --- | --- |
 | Plan | Chemins modifiés → serveur, client, infra, broker, docs seules | Toujours |
-| App / Serveur | `ruff check`, `makemigrations --check`, `check --deploy` (bloquant sur tout avertissement), tests `unit` puis `integration` (PostgreSQL 16), couverture combinée et ses deux seuils (voir plus bas) | `server/**` ou `.github/**` modifié |
+| App / Serveur | `ruff check`, `lint-imports`, `makemigrations --check`, `check --deploy` (bloquant sur tout avertissement), tests `unit` puis `integration` (PostgreSQL 16), couverture combinée et ses deux seuils (voir plus bas) | `server/**` ou `.github/**` modifié |
 | App / Client | ESLint, `tsc` | `client/**` ou `.github/**` modifié |
 | Config | actionlint (workflows, avec shellcheck), hadolint (Dockerfiles) | Workflows, Dockerfiles ou compose modifiés |
 | Docker | `docker compose config` ; image du serveur : build, smoke test (non root, migrations, `/api/health/` contre un PostgreSQL jetable), Trivy ; image du client : build Next.js, smoke test (non root, pages et Auth.js derrière un proxy simulé), Trivy | Après App et Config, hors brouillon |
@@ -140,9 +140,15 @@ make install    # venv du serveur, dépendances, npm ci, hooks pre-push
 make help       # autres commandes : lint, test-unit, test
 ```
 
-Avant chaque push : gitleaks sur les commits poussés, `ruff check` et tests unitaires si `server/` a changé, ESLint et `tsc` si `client/` a changé. La première installation compile gitleaks (quelques minutes), puis l'environnement est réutilisé.
+Avant chaque push : gitleaks sur les commits poussés, `ruff check`, `lint-imports` et tests unitaires si `server/` a changé, ESLint et `tsc` si `client/` a changé. La première installation compile gitleaks (quelques minutes), puis l'environnement est réutilisé.
 
 ## Lint
 
 - Serveur : `server/ruff.toml`. Seules les règles qui révèlent des bugs sont actives (`E4`, `E7`, `E9`, `F`). Le tri des imports et `ruff format` viendront dans une PR dédiée.
+- Dépendances entre modules : `server/.importlinter`, vérifié par `lint-imports` (constat A2 de `AUDIT-ARCHITECTURE.md`). Trois contrats :
+  - les modules métier ne s'importent pas entre eux ; les imports existants à l'introduction de la règle sont listés dans `ignore_imports` et tolérés ;
+  - `securite` et `notifications` (noyau partagé, que tous les modules peuvent importer) n'importent aucun module métier ;
+  - aucun module métier n'importe `apps.notifications.infrastructure.email` : un email passe par `EmailRequestBus`.
+
+  Un nouvel import entre deux modules métier fait échouer la PR. La liste ne doit que raccourcir : un import supprimé du code doit aussi être retiré de `ignore_imports`, sinon `lint-imports` échoue (entrée sans correspondance). Ajouter une ligne n'est acceptable qu'avec une justification dans la PR.
 - Client : `client/eslint.config.mjs` (`next/core-web-vitals`, `next/typescript`), lancé par `npm run lint`.

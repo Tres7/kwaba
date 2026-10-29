@@ -1,6 +1,6 @@
 name: Backend checks
 description: >-
-  ruff, migrations, check --deploy, puis pytest unit et integration sur la même machine
+  ruff, import-linter, migrations, check --deploy, puis pytest unit et integration sur la même machine
   pour que la couverture soit combinée. Attend PostgreSQL (service du job) et l'environnement Django.
 
 inputs:
@@ -18,6 +18,11 @@ runs:
       shell: bash
       working-directory: server
       run: ruff check . --output-format=github
+
+    - name: Dépendances entre modules (import-linter)
+      shell: bash
+      working-directory: server
+      run: lint-imports --no-cache --no-logo
 
     - name: Migrations à jour
       shell: bash

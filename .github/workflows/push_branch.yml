@@ -33,6 +33,9 @@ jobs:
       - name: Lint (ruff)
         working-directory: server
         run: ruff check . --output-format=github
+      - name: Dépendances entre modules (import-linter)
+        working-directory: server
+        run: lint-imports --no-cache --no-logo
       - name: Tests unitaires
         working-directory: server
         run: pytest -m unit

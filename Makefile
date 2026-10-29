@@ -18,6 +18,7 @@ install: $(PY) ## Sets up the machine: server venv, dependencies, npm ci, pre-pu
 
 lint: ## Lint of the server and the client
 	cd server && .venv/bin/ruff check .
+	cd server && .venv/bin/lint-imports --no-cache --no-logo
 	npm --prefix client run lint
 	npm --prefix client run typecheck
 
