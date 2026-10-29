@@ -1389,7 +1389,7 @@
     "devenirHote": "Devenir hôte",
     "masquee": "Annonce masquée des recherches",
     "visible": "Annonce de nouveau visible",
-    "supprimerQuestion": "Supprimer définitivement « {nom} » ? Les réservations associées seront aussi supprimées.",
+    "supprimerQuestion": "Supprimer « {nom} » ? L'annonce disparaîtra du site et de votre espace, et les réservations en attente de paiement seront annulées. L'historique de vos séjours est conservé.",
     "supprimee": "Annonce supprimée",
     "nouvelle": "Nouvelle annonce",
     "modifier": "Modifier l'annonce",

@@ -46,6 +46,7 @@ yarn-error.log*
 /client/.env
 *.tsbuildinfo
 AUDIT-SECURITE.md
+AUDIT-ARCHITECTURE.md
 
 # =========================
 # Docker

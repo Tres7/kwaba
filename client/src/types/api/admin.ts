@@ -63,6 +63,7 @@ export interface AdminHebergement {
   nb_reservations: number;
   host: { id: string; nom: string; email: string };
   created_at: string;
+  archivee_le: string | null;
 }
 
 export interface AdminReservation {

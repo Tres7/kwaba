@@ -164,6 +164,7 @@ class TestAnnonces:
         reponse = api_admin.delete(f'{ADMIN}hebergements/{annonce.id}/?motif=Annonce frauduleuse')
         assert reponse.status_code == 204
         assert not HebergementModel.objects.filter(pk=annonce.pk).exists()
+        assert HebergementModel.tous.filter(pk=annonce.pk).exists()
         assert JournalAuditModel.objects.get(action='annonce_supprimee').details['motif'] == 'Annonce frauduleuse'
 
 

@@ -63,12 +63,12 @@ def test_a_booking_points_to_the_unit_type(client_for, make_user, make_hebergeme
     assert (reservation.type_logement, reservation.nb_unites) == (annonce.types.get(), 1)
 
 
-def test_deleting_an_establishment_with_bookings_still_cascades(client_for, make_hebergement, make_reservation):
+def test_deleting_an_establishment_with_bookings_keeps_its_types(client_for, make_hebergement, make_reservation):
     annonce = make_hebergement()
     make_reservation(annonce, status='cancelled')
     ReservationModel.objects.update(type_logement=annonce.types.get())
     assert client_for(annonce.host).delete(f'{HEBERGEMENTS}{annonce.id}/').status_code == 204
-    assert not TypeLogementModel.objects.exists()
+    assert TypeLogementModel.objects.filter(hebergement=annonce).exists()
 
 
 class TestDataMigration:

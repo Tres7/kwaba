@@ -26,6 +26,10 @@ const VERIFICATION = [
   { value: "en_attente", label: "À vérifier" },
   { value: "refusee", label: "Refusées" },
 ];
+const ARCHIVAGE = [
+  { value: "", label: "Actives" },
+  { value: "true", label: "Supprimées" },
+];
 
 function Annonces() {
   const searchParams = useSearchParams();
@@ -33,10 +37,11 @@ function Annonces() {
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [visible, setVisible] = useState(searchParams.get("visible") ?? "");
   const [statut, setStatut] = useState(searchParams.get("statut") ?? "");
+  const [archivees, setArchivees] = useState(searchParams.get("archivees") ?? "");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const recherche = useDebounced(q);
 
-  const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminHebergement>("hebergements", { q: recherche, visible, statut });
+  const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminHebergement>("hebergements", { q: recherche, visible, statut, archivees });
 
   const executer = async (requete: Promise<unknown>, succes: string) => {
     try {
@@ -70,7 +75,7 @@ function Annonces() {
     {
       titre: "Statut",
       cellule: (h) => (
-        <div className="flex flex-col items-start gap-1">
+        h.archivee_le ? <Pill ton="rouge">Supprimée le {formatDate(h.archivee_le)}</Pill> : <div className="flex flex-col items-start gap-1">
           <Pill ton={h.is_available ? "vert" : "gris"}>{h.is_available ? "Visible" : "Masquée"}</Pill>
           {!h.est_verifie && <Pill ton={h.statut_verification === "refusee" ? "rouge" : "orange"}>{h.statut_verification === "refusee" ? "Refusée" : "À vérifier"}</Pill>}
         </div>
@@ -79,7 +84,14 @@ function Annonces() {
     { titre: "Créée le", className: "hidden 2xl:table-cell", cellule: (h) => <span className="text-xs text-gray-600 whitespace-nowrap">{formatDate(h.created_at)}</span> },
   ];
 
-  const actions = (h: AdminHebergement) => (
+  const actions = (h: AdminHebergement) => h.archivee_le ? (
+    <ActionButton onClick={() => setConfirmation({
+      titre: "Restaurer l'annonce",
+      message: <><strong>{h.name}</strong> réapparaîtra dans le back-office et dans l&apos;espace de son hôte, masquée : elle ne sera visible sur le site qu&apos;une fois republiée. Les réservations annulées lors de la suppression restent annulées.</>,
+      libelle: "Restaurer",
+      action: () => executer(api.post(`/v1/admin/hebergements/${h.id}/restaurer/`), "Annonce restaurée"),
+    })}>Restaurer</ActionButton>
+  ) : (
     <>
       <Link href={`/hebergements/${h.id}`} target="_blank" aria-label={`Voir l'annonce ${h.name} sur le site (nouvel onglet)`} className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-dark hover:bg-gray-50 flex items-center gap-1">
         Voir <ExternalLink size={12} />
@@ -102,8 +114,8 @@ function Annonces() {
         action: () => executer(api.patch(`/v1/admin/hebergements/${h.id}/`, { is_available: !h.is_available }), h.is_available ? "Annonce masquée" : "Annonce republiée"),
       })}>{h.is_available ? "Masquer" : "Republier"}</ActionButton>
       <ActionButton danger onClick={() => setConfirmation({
-        titre: "Supprimer définitivement",
-        message: <>Supprimer <strong>{h.name}</strong> ? Ses {h.nb_reservations} réservation(s), avis et conversations seront aussi supprimés. Action irréversible.</>,
+        titre: "Supprimer l'annonce",
+        message: <>Supprimer <strong>{h.name}</strong> ? Elle disparaîtra du site et du back-office, et ses réservations en attente de paiement seront annulées. Ses réservations, avis et conversations sont conservés. Action irréversible depuis le back-office.</>,
         libelle: "Supprimer", danger: true, motif: true,
         action: (motif) => executer(api.delete(`/v1/admin/hebergements/${h.id}/`, { params: { motif } }), "Annonce supprimée"),
       })}>Supprimer</ActionButton>
@@ -121,6 +133,7 @@ function Annonces() {
         <SearchInput value={q} onChange={setQ} placeholder="Nom, ville, quartier ou email de l'hôte" />
         <Select label="Visibilité" value={visible} onChange={setVisible} options={VISIBILITE} className="sm:w-44" icon={<span className="text-xs text-muted flex-shrink-0">Visibilité</span>} />
         <Select label="Vérification" value={statut} onChange={setStatut} options={VERIFICATION} className="sm:w-48" icon={<span className="text-xs text-muted flex-shrink-0">Vérification</span>} />
+        <Select label="Annonces" value={archivees} onChange={setArchivees} options={ARCHIVAGE} className="sm:w-48" icon={<span className="text-xs text-muted flex-shrink-0">Annonces</span>} />
       </div>
 
       <AdminTable
