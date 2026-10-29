@@ -6,3 +6,10 @@ class LocationsConfig(AppConfig):
     name = 'apps.locations'
     label = 'locations'
     verbose_name = 'Location de voitures'
+
+    def ready(self):
+        from apps.documents.api import enregistrer
+
+        from .documents import PRODUIT
+
+        enregistrer(PRODUIT)

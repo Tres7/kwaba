@@ -22,14 +22,13 @@ from apps.paiements import services as paiements, tarifs
 from apps.paiements.models import ConditionsHoteModel
 from apps.reservations.models import ReservationModel
 from apps.securite.audit import journaliser
+from apps.securite.backoffice import paginer as _paginer
 from apps.securite.permissions import EstAdministrateur
 from apps.users.infrastructure.http.controllers.AuthController import revoquer_jetons
-from apps.verifications import services as verifications
+from apps.verifications import api as verifications
 
 User = get_user_model()
 
-PAGE_SIZE = 20
-PAGE_SIZE_MAX = 100
 ROLES = [code for code, _ in User.ROLE_CHOICES]
 MOTIF_MIN, MOTIF_MAX = 5, 500
 
@@ -43,19 +42,6 @@ def _entier(valeur, defaut: int, minimum: int = 1, maximum: int | None = None) -
         return defaut
     nombre = max(nombre, minimum)
     return min(nombre, maximum) if maximum else nombre
-
-
-def _paginer(request, qs, serialiser, en_lot=False) -> Response:
-    page = _entier(request.query_params.get('page'), 1)
-    taille = _entier(request.query_params.get('page_size'), PAGE_SIZE, maximum=PAGE_SIZE_MAX)
-    debut = (page - 1) * taille
-    objets = list(qs[debut:debut + taille])
-    return Response({
-        'results': serialiser(objets) if en_lot else [serialiser(objet) for objet in objets],
-        'count': qs.count(),
-        'page': page,
-        'page_size': taille,
-    })
 
 
 def _booleen(valeur):
@@ -313,7 +299,7 @@ class HebergementDetailView(VueAdmin):
             journaliser('annonce_modifiee', request, utilisateur=request.user,
                         annonce_id=str(annonce.pk), annonce=annonce.name, **changements)
             if a_verifier:
-                verifications.visite_a_planifier(annonce)
+                verifications.visite_a_planifier(annonce.id)
         return Response(_hebergement(_hebergements().get(pk=annonce.pk)))
 
     def delete(self, request, pk):

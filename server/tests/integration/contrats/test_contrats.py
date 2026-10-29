@@ -14,6 +14,8 @@ from PIL import Image, ImageDraw
 
 from apps.contrats.models import ContratModel, ModeleContratModel
 from apps.documents.models import ParametresSocieteModel
+from apps.give.models import OrganisationModel
+from apps.locations.models import PartenaireLocationModel
 from apps.securite.models import JournalAuditModel
 from apps.transferts.models import ChauffeurModel
 from apps.verifications.models import PieceIdentiteModel
@@ -231,3 +233,34 @@ def test_signature_scannee_du_representant(admin, societe):
     # The white background has become transparent
     assert Image.open(BytesIO(png.content)).getpixel((0, 0))[3] == 0
     assert admin.put('/api/v1/admin/documents/societe/', {'supprimer_signature': 'true'}, format='multipart').data['signature_presente'] is False
+
+
+def _loueur():
+    return PartenaireLocationModel.objects.create(nom='Lomé Auto', contact='Yao', telephone='+22890112233',
+                                                  email='auto@exemple.tg', pays_versement='TG',
+                                                  operateur_versement='togocel', numero_versement='90112233')
+
+
+def _ong():
+    return OrganisationModel.objects.create(nom='Écoles du Mono', slug='ecoles', cause='education', pays='TG', ville='Aného',
+                                            resume='x', description='x', numero_enregistrement='TG-1', contact_nom='Afi',
+                                            contact_email='ecoles@exemple.tg')
+
+
+@pytest.mark.parametrize('type_contrat, creer, attendu', [
+    ('loueur', _loueur, 'représenté par Yao'),
+    ('ong', _ong, 'enregistrée sous le n° TG-1'),
+])
+def test_contract_for_a_rental_company_or_an_ngo(admin, societe, django_capture_on_commit_callbacks, type_contrat, creer,
+                                                 attendu):
+    partie = creer()
+    assert admin.get(f'{A}parties/', {'type': type_contrat, 'q': partie.nom[:4]}).data[0]['id'] == str(partie.pk)
+    assert admin.post(A, {'type': type_contrat, 'partie_id': 'inconnu'}, format='json').status_code == 400
+
+    with django_capture_on_commit_callbacks(execute=True):
+        reponse = admin.post(A, {'type': type_contrat, 'partie_id': str(partie.pk)}, format='json')
+
+    assert reponse.status_code == 201, reponse.data
+    contrat = ContratModel.objects.get()
+    assert contrat.partie_nom == partie.nom and attendu in contrat.corps
+    assert admin.get(f'{A}parties/', {'type': type_contrat}).data[0]['contrat'] == 'a_signer'

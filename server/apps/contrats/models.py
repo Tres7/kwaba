@@ -4,7 +4,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 
-from apps.documents.models import stockage_prive
+from apps.documents.api import stockage_prive
 
 TYPES = [
     ('hote', 'Hôte particulier'),
@@ -61,9 +61,9 @@ class ContratModel(models.Model):
 
     # Party: only one of these links depending on the type (host and hotel: the host account); its contact details are copied when issued
     hote = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='contrats')
-    chauffeur = models.ForeignKey('transferts.ChauffeurModel', null=True, blank=True, on_delete=models.PROTECT, related_name='contrats')
-    loueur = models.ForeignKey('locations.PartenaireLocationModel', null=True, blank=True, on_delete=models.PROTECT, related_name='contrats')
-    organisation = models.ForeignKey('give.OrganisationModel', null=True, blank=True, on_delete=models.PROTECT, related_name='contrats')
+    chauffeur_id = models.BigIntegerField(null=True, blank=True, db_index=True)
+    loueur_id = models.BigIntegerField(null=True, blank=True, db_index=True)
+    organisation_id = models.UUIDField(null=True, blank=True, db_index=True)
     partie_nom = models.CharField(max_length=150)
     partie_email = models.EmailField()
     partie_telephone = models.CharField(max_length=30, blank=True)
@@ -96,9 +96,9 @@ class ContratModel(models.Model):
         constraints = [
             # A single ongoing contract (to sign or signed) per party
             models.UniqueConstraint(fields=['hote'], condition=~models.Q(statut='annule') & models.Q(hote__isnull=False), name='un_contrat_par_hote'),
-            models.UniqueConstraint(fields=['chauffeur'], condition=~models.Q(statut='annule') & models.Q(chauffeur__isnull=False), name='un_contrat_par_chauffeur'),
-            models.UniqueConstraint(fields=['loueur'], condition=~models.Q(statut='annule') & models.Q(loueur__isnull=False), name='un_contrat_par_loueur'),
-            models.UniqueConstraint(fields=['organisation'], condition=~models.Q(statut='annule') & models.Q(organisation__isnull=False), name='un_contrat_par_ong'),
+            models.UniqueConstraint(fields=['chauffeur_id'], condition=~models.Q(statut='annule') & models.Q(chauffeur_id__isnull=False), name='un_contrat_par_chauffeur'),
+            models.UniqueConstraint(fields=['loueur_id'], condition=~models.Q(statut='annule') & models.Q(loueur_id__isnull=False), name='un_contrat_par_loueur'),
+            models.UniqueConstraint(fields=['organisation_id'], condition=~models.Q(statut='annule') & models.Q(organisation_id__isnull=False), name='un_contrat_par_ong'),
         ]
 
     def __str__(self):

@@ -27,7 +27,6 @@ ignore_imports =
     apps.** -> apps.*.api
     apps.backoffice.give -> apps.give.models
     apps.backoffice.give -> apps.give.services
-    apps.backoffice.give -> apps.verifications.fichiers
     apps.backoffice.locations -> apps.locations.models
     apps.backoffice.locations -> apps.locations.services
     apps.backoffice.locations -> apps.paiements.operateurs
@@ -44,33 +43,6 @@ ignore_imports =
     apps.backoffice.views -> apps.paiements.tarifs
     apps.backoffice.views -> apps.reservations.models
     apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
-    apps.backoffice.views -> apps.verifications.services
-    apps.contrats.management.commands.inviter_hotes_contrat -> apps.documents.models
-    apps.contrats.migrations.0001_initial -> apps.documents.models
-    apps.contrats.models -> apps.documents.models
-    apps.contrats.pdf -> apps.documents.models
-    apps.contrats.pdf -> apps.documents.pdf
-    apps.contrats.services -> apps.documents.models
-    apps.contrats.services -> apps.documents.pdf
-    apps.contrats.services -> apps.give.montants
-    apps.contrats.services -> apps.locations.models
-    apps.contrats.services -> apps.paiements.tarifs
-    apps.contrats.services -> apps.transferts.tarifs
-    apps.contrats.services -> apps.verifications.services
-    apps.contrats.views -> apps.backoffice.views
-    apps.contrats.views -> apps.documents.models
-    apps.contrats.views -> apps.give.models
-    apps.contrats.views -> apps.locations.models
-    apps.contrats.views -> apps.transferts.models
-    apps.documents.generateurs -> apps.give.montants
-    apps.documents.generateurs -> apps.paiements.models
-    apps.documents.generateurs -> apps.paiements.tarifs
-    apps.documents.views -> apps.backoffice.views
-    apps.documents.views -> apps.contrats.services
-    apps.documents.views -> apps.give.models
-    apps.documents.views -> apps.locations.models
-    apps.documents.views -> apps.reservations.models
-    apps.documents.views -> apps.transferts.models
     apps.give.models -> apps.paiements.operateurs
     apps.give.notifications -> apps.paiements.notifications
     apps.give.services -> apps.paiements.services
@@ -83,8 +55,6 @@ ignore_imports =
     apps.hebergements.models -> apps.documents.models
     apps.hebergements.serializers -> apps.paiements.tarifs
     apps.hebergements.stock -> apps.reservations.models
-    apps.hebergements.views -> apps.contrats.preinscription
-    apps.hebergements.views -> apps.verifications.services
     apps.locations.models -> apps.paiements.operateurs
     apps.locations.notifications -> apps.paiements.notifications
     apps.locations.services -> apps.paiements.services
@@ -95,7 +65,6 @@ ignore_imports =
     apps.locations.views -> apps.paiements.views
     apps.locations.views -> apps.reservations.models
     apps.locations.views -> apps.transferts.models
-    apps.paiements.notifications -> apps.documents.services
     apps.paiements.relances -> apps.locations.models
     apps.paiements.relances -> apps.reservations.models
     apps.paiements.relances -> apps.transferts.models
@@ -122,10 +91,6 @@ ignore_imports =
     apps.transferts.views -> apps.paiements.services
     apps.transferts.views -> apps.paiements.views
     apps.transferts.views -> apps.reservations.models
-    apps.verifications.services -> apps.contrats.services
-    apps.verifications.services -> apps.documents.models
-    apps.verifications.services -> apps.hebergements.models
-    apps.verifications.views -> apps.hebergements.models
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier

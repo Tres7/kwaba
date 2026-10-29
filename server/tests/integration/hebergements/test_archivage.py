@@ -29,7 +29,7 @@ def test_deleting_archives_and_keeps_the_history(client_for, make_user, annonce,
     maintenant = timezone.now()
     conversation = ConversationModel.objects.create(hebergement_id=annonce.id, guest=make_user(), host=annonce.host,
                                                     created_at=maintenant, last_message_at=maintenant)
-    visite = VisiteModel.objects.create(hebergement=annonce, decision='validee')
+    visite = VisiteModel.objects.create(hebergement_id=annonce.id, decision='validee')
 
     assert _supprimer(client_for, annonce).status_code == 204
 

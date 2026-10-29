@@ -7,24 +7,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.give.models import DonModel
-from apps.locations.models import LocationModel
-from apps.reservations.models import ReservationModel
+from apps.contrats import api as contrats
 from apps.securite.audit import journaliser
+from apps.securite.backoffice import paginer
 from apps.securite.permissions import EstAdministrateur
-from apps.transferts.models import TransfertModel
 
 from . import generateurs, services
 from .models import FactureModel, ParametresSocieteModel
-
-# object type → (model, owner field, available documents)
-OBJETS = {
-    'reservation': (ReservationModel, 'guest', ('bon', 'recu', 'facture')),
-    'transfert': (TransfertModel, 'voyageur', ('bon', 'recu', 'facture')),
-    'location': (LocationModel, 'voyageur', ('bon', 'recu', 'facture')),
-    'don': (DonModel, 'donateur', ('recu',)),
-}
-BONS = {'reservation': generateurs.bon_reservation, 'transfert': generateurs.bon_transfert, 'location': generateurs.bon_location}
+from .registre import PRODUITS
 
 
 def _pdf(contenu: bytes, nom: str) -> HttpResponse:
@@ -41,24 +31,22 @@ class DocumentView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, type_objet, pk, document):
-        if type_objet not in OBJETS or document not in OBJETS[type_objet][2]:
+        produit = PRODUITS.get(type_objet)
+        if not produit or document not in produit.documents:
             return Response({'detail': 'Document inconnu.'}, status=status.HTTP_404_NOT_FOUND)
-        modele, proprietaire, _ = OBJETS[type_objet]
-        objet = modele.objects.filter(pk=pk).first()
+        objet = produit.charger(pk)
         # Same response if the object does not exist or belongs to someone else: nothing leaks
-        if not objet or (getattr(objet, f"{proprietaire}_id") != request.user.pk and request.user.role != 'admin'):
+        if not objet or (produit.proprietaire_id(objet) != request.user.pk and request.user.role != 'admin'):
             return Response({'detail': 'Document introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        paiement = generateurs.paiement_reussi(objet)
-        if not paiement:
+        if not produit.paye(objet):
             return Response({'detail': 'Les documents sont disponibles une fois le paiement reçu.'}, status=status.HTTP_409_CONFLICT)
-        if type_objet == 'don':
-            return _pdf(generateurs.recu_don(objet), f"recu-don-{objet.reference}.pdf")
+        reference = produit.reference(objet)
         if document == 'bon':
-            return _pdf(BONS[type_objet](objet), f"bon-{objet.reference}.pdf")
+            return _pdf(produit.bon(objet), f"bon-{reference}.pdf")
         if document == 'recu':
-            return _pdf(generateurs.recu_paiement(paiement), f"recu-{objet.reference}.pdf")
+            return _pdf(produit.recu(objet), f"{produit.prefixe_recu}-{reference}.pdf")
         try:
-            f = services.facture_de(objet)
+            f = services.facture_de(type_objet, objet)
         except services.DocumentErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_409_CONFLICT)
         return _pdf(f.pdf.read() if f.pdf else generateurs.facture(f), f"facture-{f.numero}.pdf")
@@ -93,8 +81,6 @@ class SocieteView(APIView):
         return Response(SocieteSerializer(ParametresSocieteModel.courants()).data)
 
     def put(self, request):
-        from apps.contrats.services import ContratErreur, inviter_hotes_a_signer, signature_png
-
         societe = ParametresSocieteModel.courants()
         etait_immatriculee = societe.immatriculee
         serializer = SocieteSerializer(societe, data=request.data, partial=True)
@@ -105,8 +91,8 @@ class SocieteView(APIView):
             if fichier.size > MAX_SIGNATURE_SCAN:
                 return Response({'signature_representant': ['Image trop lourde (5 Mo au plus).']}, status=status.HTTP_400_BAD_REQUEST)
             try:
-                contenu = signature_png(fichier.read(), fond_blanc_transparent=True)
-            except ContratErreur as exc:
+                contenu = contrats.signature_png(fichier.read(), fond_blanc_transparent=True)
+            except contrats.ContratErreur as exc:
                 return Response({'signature_representant': [str(exc)]}, status=status.HTTP_400_BAD_REQUEST)
         societe = serializer.save()
         if contenu:
@@ -116,7 +102,7 @@ class SocieteView(APIView):
         journaliser("backoffice_modification", request, utilisateur=request.user, objet="societe", champs=sorted(request.data.keys()))
         if societe.immatriculee and not etait_immatriculee:
             # RCCM and NIF just filled in: hosts are invited to sign their agreement, once
-            invites = inviter_hotes_a_signer()
+            invites = contrats.inviter_hotes_a_signer()
             journaliser("backoffice_modification", request, utilisateur=request.user, objet="contrats_hotes", invites=invites)
         return Response(SocieteSerializer(societe).data)
 
@@ -160,21 +146,19 @@ class FacturesView(APIView):
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
-        from apps.backoffice.views import _paginer  # local import: backoffice depends on other apps
-
         qs = FactureModel.objects.all()
         if q := request.query_params.get('q', '').strip():
             qs = qs.filter(numero__icontains=q) | qs.filter(client_nom__icontains=q) | qs.filter(client_email__icontains=q)
-        return _paginer(request, qs.order_by('-emise_le'), _facture)
+        return paginer(request, qs.order_by('-emise_le'), _facture)
 
     def post(self, request):
         try:
-            if request.data.get('objet_type') in ('reservation', 'transfert', 'location'):
-                modele = OBJETS[request.data['objet_type']][0]
-                objet = modele.objects.filter(pk=request.data.get('objet_id')).first() if request.data.get('objet_id') else None
+            produit = PRODUITS.get(request.data.get('objet_type'))
+            if produit and produit.facture:
+                objet = produit.charger(request.data.get('objet_id')) if request.data.get('objet_id') else None
                 if not objet:
                     return Response({'detail': 'Élément introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-                f = services.facture_de(objet, par=request.user)
+                f = services.facture_de(produit.type, objet, par=request.user)
             else:
                 donnees = FactureLibreSerializer(data=request.data)
                 donnees.is_valid(raise_exception=True)

@@ -15,7 +15,7 @@ from apps.give.models import DonModel, OrganisationModel, ProjetModel, Reverseme
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
-from apps.verifications.fichiers import FichierInvalide, piece_identite
+from apps.verifications.api import FichierInvalide, piece_identite
 
 from .views import _nom, _paginer
 

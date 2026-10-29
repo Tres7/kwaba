@@ -23,10 +23,10 @@ class PhotoVisiteInline(admin.TabularInline):
 
 @admin.register(VisiteModel)
 class VisiteAdmin(admin.ModelAdmin):
-    list_display = ('hebergement', 'decision', 'agent', 'cree_le')
+    list_display = ('hebergement_id', 'decision', 'agent', 'cree_le')
     list_filter = ('decision',)
-    search_fields = ('hebergement__name', 'hebergement__city')
-    readonly_fields = ('hebergement', 'agent', 'decision', 'controles', 'commentaire', 'cree_le')
+    search_fields = ('hebergement_id',)
+    readonly_fields = ('hebergement_id', 'agent', 'decision', 'controles', 'commentaire', 'cree_le')
     inlines = [PhotoVisiteInline]
 
     def has_add_permission(self, request):

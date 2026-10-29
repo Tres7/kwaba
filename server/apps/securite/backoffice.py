@@ -1,6 +1,7 @@
 """Shared back-office building blocks: admin access, audit log at every write, normalised photos."""
 from rest_framework import generics, serializers
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.response import Response
 
 from .audit import journaliser
 from .permissions import EstAdministrateur
@@ -54,3 +55,30 @@ class FicheAdmin(Journalise, generics.RetrieveUpdateAPIView):
     """Read and update of an item (no deletion: it is deactivated, so the history stays consistent)."""
     permission_classes = [EstAdministrateur]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
+
+
+PAGE_SIZE = 20
+PAGE_SIZE_MAX = 100
+
+
+def _entier(valeur, defaut: int, minimum: int = 1, maximum: int | None = None) -> int:
+    try:
+        nombre = int(valeur)
+    except (TypeError, ValueError):
+        return defaut
+    nombre = max(nombre, minimum)
+    return min(nombre, maximum) if maximum else nombre
+
+
+def paginer(request, qs, serialiser, en_lot=False) -> Response:
+    """Page of a back-office list (?page=, ?page_size=). `en_lot`: the serialiser receives the whole page."""
+    page = _entier(request.query_params.get('page'), 1)
+    taille = _entier(request.query_params.get('page_size'), PAGE_SIZE, maximum=PAGE_SIZE_MAX)
+    debut = (page - 1) * taille
+    objets = list(qs[debut:debut + taille])
+    return Response({
+        'results': serialiser(objets) if en_lot else [serialiser(objet) for objet in objets],
+        'count': qs.count(),
+        'page': page,
+        'page_size': taille,
+    })

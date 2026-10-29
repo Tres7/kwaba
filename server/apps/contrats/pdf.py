@@ -6,8 +6,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import mm
 from reportlab.platypus import Image, KeepTogether, PageBreak, Spacer, Table, TableStyle
 
-from apps.documents.models import ParametresSocieteModel
-from apps.documents.pdf import Document, _p, date
+from apps.documents.api import Document, date, paragraphe as _p, societe as _societe
 
 from .models import ContratModel
 from .services import blocs
@@ -36,7 +35,7 @@ def _colonne(titre: str, image, lignes: list[str]) -> list:
 
 
 def contrat_pdf(c: ContratModel) -> bytes:
-    societe = ParametresSocieteModel.courants()
+    societe = _societe()
     signe = c.statut == 'signe'
     doc = Document(c.titre, c.reference, sous_titre=(f"signé le {date(c.signe_le)}" if signe else
                                                      f"émis le {date(c.cree_le)} · projet en attente de signature"))

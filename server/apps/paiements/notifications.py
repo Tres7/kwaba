@@ -40,10 +40,14 @@ def _envoyer(gabarit: str, sujet: str, destinataires: list[str], contexte: dict,
     )
 
 
+TYPES_OBJETS = {'ReservationModel': 'reservation', 'TransfertModel': 'transfert', 'LocationModel': 'location',
+                'DonModel': 'don'}
+
+
 def _documents(objet):
     """PDF voucher and receipt attached to the confirmation email."""
-    from apps.documents.services import pieces_confirmation  # local import: documents depends on paiements
-    return pieces_confirmation(objet)
+    from apps.documents.api import pieces_confirmation  # local import: documents depends on paiements
+    return pieces_confirmation(TYPES_OBJETS[type(objet).__name__], objet.pk)
 
 
 def _admins() -> list[str]:
