@@ -482,7 +482,9 @@
     "afficherCarte": "Map",
     "masquerCarte": "List",
     "disponiblesSurPeriode": "{nombre, plural, =0 {none available} one {# available} other {# available}} from {debut} to {fin}",
-    "disponiblesUniquement": "Available only"
+    "disponiblesUniquement": "Available only",
+    "plusEquipements": "More amenities",
+    "moinsEquipements": "Fewer amenities"
   },
   "fiche": {
     "introuvable": "Place not found",
@@ -541,7 +543,10 @@
     "unites": "Rooms",
     "unitesNombre": "{nombre, plural, one {# room} other {# rooms}}",
     "similairesVille": "Other stays in {ville}",
-    "similaires": "You may also like"
+    "similaires": "You may also like",
+    "reglesMaison": "House rules",
+    "voirTousEquipements": "Show all {nombre} amenities",
+    "voirMoinsEquipements": "Show less"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -1530,7 +1535,9 @@
       "hotel": "Room in a property with services",
       "villa": "Entire house, often with a garden or pool",
       "appartement": "Entire home in a building",
-      "auberge": "Simple, friendly place on a small budget"
+      "auberge": "Simple, friendly place on a small budget",
+      "maison": "Entire house, in town or in a village",
+      "residence": "Apartment or studio with hotel services (cleaning, reception)"
     },
     "erreurDroits": "Confirm that you hold the rights to the published photos.",
     "erreurPhotos": "Add at least one photo: listings without photos are almost never booked.",
@@ -1574,7 +1581,10 @@
     "depart": "Check-out by",
     "detailsManquants": "Add the details (floor area, bedrooms, beds, breakfast): they will appear on the listing.",
     "politique": "Cancellation policy",
-    "politiqueAide": "Shown on your listing and accepted by the traveller before payment. In addition, a booking cancelled within 48 hours, at least 7 days before arrival, is always refunded."
+    "politiqueAide": "Shown on your listing and accepted by the traveller before payment. In addition, a booking cancelled within 48 hours, at least 7 days before arrival, is always refunded.",
+    "reglesMaison": "House rules",
+    "reglesAide": "Shown on your listing: travellers know what to expect before booking.",
+    "nonPrecise": "Not specified"
   },
   "revenus": {
     "statuts": {

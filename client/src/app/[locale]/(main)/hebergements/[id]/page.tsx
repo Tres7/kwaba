@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, BadgeCheck, MapPin, ChevronDown, ChevronUp, Share2, Calendar, MessageCircle, Pencil, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import AlerteDisponibilite from "@/components/hebergement/AlerteDisponibilite";
-import AmenityBadge from "@/components/hebergement/AmenityBadge";
+import EquipementsLogement from "@/components/hebergement/EquipementsLogement";
 import DetailsLogement from "@/components/hebergement/DetailsLogement";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
 import FavoriteButton from "@/components/hebergement/FavoriteButton";
@@ -268,13 +268,7 @@ function HebergementContent() {
 
             <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("equipements")}</h2>
-              {hebergement.amenities.length > 0 ? (
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
-                  {hebergement.amenities.map((a) => <AmenityBadge key={a} amenity={a} />)}
-                </div>
-              ) : (
-                <p className="text-muted text-sm">{t("aucunEquipement")}</p>
-              )}
+              <EquipementsLogement amenities={hebergement.amenities} />
             </section>
 
             <PolitiqueAnnulation politique={hebergement.politique_annulation ?? "moderee"} />

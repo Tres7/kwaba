@@ -482,7 +482,9 @@
     "afficherCarte": "Carte",
     "masquerCarte": "Liste",
     "disponiblesSurPeriode": "{nombre, plural, =0 {aucun disponible} one {# disponible} other {# disponibles}} du {debut} au {fin}",
-    "disponiblesUniquement": "Disponibles uniquement"
+    "disponiblesUniquement": "Disponibles uniquement",
+    "plusEquipements": "Plus d'équipements",
+    "moinsEquipements": "Moins d'équipements"
   },
   "fiche": {
     "introuvable": "Hébergement introuvable",
@@ -541,7 +543,10 @@
     "unites": "Chambres",
     "unitesNombre": "{nombre, plural, one {# chambre} other {# chambres}}",
     "similairesVille": "Autres logements à {ville}",
-    "similaires": "Vous aimerez aussi"
+    "similaires": "Vous aimerez aussi",
+    "reglesMaison": "Règles de la maison",
+    "voirTousEquipements": "Afficher les {nombre} équipements",
+    "voirMoinsEquipements": "Afficher moins"
   },
   "avis": {
     "repondre": "Répondre publiquement",
@@ -1530,7 +1535,9 @@
       "hotel": "Chambre dans un établissement avec services",
       "villa": "Maison entière, souvent avec jardin ou piscine",
       "appartement": "Logement entier dans un immeuble",
-      "auberge": "Hébergement simple et convivial, petit budget"
+      "auberge": "Hébergement simple et convivial, petit budget",
+      "maison": "Maison entière, en ville ou au village",
+      "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)"
     },
     "erreurDroits": "Confirmez que vous détenez les droits sur les photos publiées.",
     "erreurPhotos": "Ajoutez au moins une photo : les annonces sans photo ne sont presque jamais réservées.",
@@ -1574,7 +1581,10 @@
     "depart": "Départ avant",
     "detailsManquants": "Complétez les détails (surface, chambres, lits, petit-déjeuner) : ils s'afficheront sur l'annonce.",
     "politique": "Politique d'annulation",
-    "politiqueAide": "Affichée sur votre annonce et acceptée par le voyageur avant le paiement. En plus, une réservation annulée dans les 48 heures, au moins 7 jours avant l'arrivée, est toujours remboursée."
+    "politiqueAide": "Affichée sur votre annonce et acceptée par le voyageur avant le paiement. En plus, une réservation annulée dans les 48 heures, au moins 7 jours avant l'arrivée, est toujours remboursée.",
+    "reglesMaison": "Règles de la maison",
+    "reglesAide": "Elles s'affichent sur votre annonce : les voyageurs savent à quoi s'attendre avant de réserver.",
+    "nonPrecise": "Non précisé"
   },
   "revenus": {
     "statuts": {
