@@ -50,39 +50,37 @@ class ConditionsHoteModel(models.Model):
 
 
 class ObjetPayeMixin:
-    """What is paid: a listing booking, an airport transfer, a car rental or a donation."""
+    """What is paid: a listing booking, an airport transfer, a car rental or a donation, described by its module
+    (paiements.registre)."""
+    TYPES_OBJETS = ('reservation', 'transfert', 'location', 'don')
 
     @property
-    def objet(self):
-        if self.reservation_id:
-            return self.reservation
-        if self.transfert_id:
-            return self.transfert
-        return self.location if getattr(self, 'location_id', None) else self.don
+    def type_objet(self) -> str:
+        return next(t for t in self.TYPES_OBJETS if getattr(self, f'{t}_id', None))
+
+    @property
+    def objet_id(self):
+        return getattr(self, f'{self.type_objet}_id')
+
+    @property
+    def description(self) -> dict:
+        from .registre import PRODUITS
+
+        if not hasattr(self, '_description'):
+            self._description = PRODUITS[self.type_objet].decrire(self.objet_id)
+        return self._description
 
     @property
     def payeur(self):
-        if self.reservation_id:
-            return self.reservation.guest
-        if self.transfert_id:
-            return self.transfert.voyageur
-        return self.location.voyageur if getattr(self, 'location_id', None) else self.don.donateur
+        return self.description['payeur']
 
     @property
     def reference(self):
-        return self.objet.reference
+        return self.description['reference']
 
     @property
     def libelle(self):
-        if self.reservation_id:
-            from .tarifs import _annonce
-
-            return _annonce(self.reservation)['name']
-        if self.transfert_id:
-            return f"Transfert depuis l'aéroport {self.transfert.aeroport.ville}"
-        if getattr(self, 'location_id', None):
-            return f"Location {self.location.libelle}, {self.location.lieu_prise.ville}"
-        return f"Don à {self.don.organisation.nom}"
+        return self.description['libelle']
 
 
 class PaiementModel(ObjetPayeMixin, models.Model):
@@ -99,16 +97,11 @@ class PaiementModel(ObjetPayeMixin, models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    reservation = models.ForeignKey(
-        'reservations.ReservationModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True,
-    )
-    transfert = models.ForeignKey(
-        'transferts.TransfertModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True,
-    )
-    don = models.ForeignKey('give.DonModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True)
-    location = models.ForeignKey(
-        'locations.LocationModel', on_delete=models.PROTECT, related_name='paiements', null=True, blank=True,
-    )
+    # The paid object, by id (the modules of the products keep their objects): exactly one is filled
+    reservation_id = models.UUIDField(null=True, blank=True, db_index=True)
+    transfert_id = models.UUIDField(null=True, blank=True, db_index=True)
+    don_id = models.UUIDField(null=True, blank=True, db_index=True)
+    location_id = models.UUIDField(null=True, blank=True, db_index=True)
     montant = models.PositiveIntegerField()
     devise = models.CharField(max_length=3, default='XOF')
     prestataire = models.CharField(max_length=20, choices=PRESTATAIRES, default='fedapay')
@@ -135,10 +128,10 @@ class PaiementModel(ObjetPayeMixin, models.Model):
         verbose_name = 'Paiement'
         # Exactly one paid object
         constraints = [models.CheckConstraint(
-            condition=models.Q(reservation__isnull=False, transfert__isnull=True, don__isnull=True, location__isnull=True)
-            | models.Q(reservation__isnull=True, transfert__isnull=False, don__isnull=True, location__isnull=True)
-            | models.Q(reservation__isnull=True, transfert__isnull=True, don__isnull=False, location__isnull=True)
-            | models.Q(reservation__isnull=True, transfert__isnull=True, don__isnull=True, location__isnull=False),
+            condition=models.Q(reservation_id__isnull=False, transfert_id__isnull=True, don_id__isnull=True, location_id__isnull=True)
+            | models.Q(reservation_id__isnull=True, transfert_id__isnull=False, don_id__isnull=True, location_id__isnull=True)
+            | models.Q(reservation_id__isnull=True, transfert_id__isnull=True, don_id__isnull=False, location_id__isnull=True)
+            | models.Q(reservation_id__isnull=True, transfert_id__isnull=True, don_id__isnull=True, location_id__isnull=False),
             name='paiement_un_seul_objet',
         )]
 
@@ -157,7 +150,7 @@ class VersementModel(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    reservation = models.OneToOneField('reservations.ReservationModel', on_delete=models.PROTECT, related_name='versement')
+    reservation_id = models.UUIDField(unique=True)
     hote = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='versements')
     montant_brut = models.PositiveIntegerField(help_text='Prix des nuits revenant à l\'hôte, avant commission')
     commission = models.PositiveIntegerField()
@@ -196,15 +189,9 @@ class RemboursementModel(ObjetPayeMixin, models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    reservation = models.ForeignKey(
-        'reservations.ReservationModel', on_delete=models.PROTECT, related_name='remboursements', null=True, blank=True,
-    )
-    transfert = models.ForeignKey(
-        'transferts.TransfertModel', on_delete=models.PROTECT, related_name='remboursements', null=True, blank=True,
-    )
-    location = models.ForeignKey(
-        'locations.LocationModel', on_delete=models.PROTECT, related_name='remboursements', null=True, blank=True,
-    )
+    reservation_id = models.UUIDField(null=True, blank=True, db_index=True)
+    transfert_id = models.UUIDField(null=True, blank=True, db_index=True)
+    location_id = models.UUIDField(null=True, blank=True, db_index=True)
     paiement = models.ForeignKey(PaiementModel, on_delete=models.PROTECT, related_name='remboursements')
     montant = models.PositiveIntegerField()
     devise = models.CharField(max_length=3, default='XOF')

@@ -159,3 +159,17 @@ def conflit(hebergement_id, debut: date, fin: date, exclure=None, type_logement_
     """Why `nb` units of the type (default type if none) cannot be booked over the period, or None."""
     type_logement = TypeLogementModel.objects.get(pk=type_logement_id) if type_logement_id else None
     return disponibilites.conflit(hebergement_id, debut, fin, exclure=exclure, type_logement=type_logement, nb=nb)
+
+
+def signaler_liberation(hebergement_id, debut=None, fin=None) -> None:
+    """Dates freed (cancellation, expiry): the availability alerts on them are checked at the next pass."""
+    from .alertes import signaler_liberation as signaler
+
+    signaler(hebergement_id, debut, fin)
+
+
+def passe_alertes() -> dict:
+    """Checks the availability alerts flagged since the last pass and sends the emails."""
+    from .alertes import passe
+
+    return passe()

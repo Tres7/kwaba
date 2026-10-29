@@ -5,7 +5,6 @@ the `fin` day (departure) stays free for a new arrival.
 """
 from datetime import date, timedelta
 
-from django.conf import settings
 from django.db.models import Q
 
 from .models import BlocageModel, HebergementModel
@@ -30,11 +29,6 @@ def verrouiller_types(type_ids) -> None:
     """
     from .models import TypeLogementModel
     list(TypeLogementModel.objects.select_for_update().filter(pk__in=list(type_ids)).order_by('pk').values_list('pk', flat=True))
-
-
-def delai_paiement() -> timedelta:
-    """Time given to pay a booking (same setting as apps.paiements.services.delai_paiement)."""
-    return timedelta(minutes=settings.FEDAPAY['EXPIRATION_MINUTES'])
 
 
 def _blocages(hebergement_id, debut: date, fin: date):

@@ -100,14 +100,9 @@ def taux_commission(hote, jour=None) -> Decimal:
 
 def hotes_deja_visites(voyageur) -> set:
     """Hosts the traveller has already stayed with through Kwa-Ba (paid and finished stay): loyal customer rate."""
-    from apps.hebergements import api as hebergements
-    from apps.reservations.models import ReservationModel
+    from apps.reservations import api as reservations  # local import: reservations depends on paiements
 
-    if not voyageur or not voyageur.is_authenticated:
-        return set()
-    sejours = (ReservationModel.objects.filter(guest=voyageur, status='confirmed', check_out__lte=timezone.localdate())
-               .values_list('hebergement_id', flat=True))
-    return set(hebergements.hotes_des_annonces(set(sejours)).values())
+    return reservations.hotes_deja_visites(voyageur)
 
 
 def taux_frais(voyageur, hote_id) -> Decimal:

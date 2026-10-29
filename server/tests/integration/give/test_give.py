@@ -86,9 +86,9 @@ def test_don_paye_frais_ajoutes(faux, make_user, ong):
     # The donor comes back: the payment is read again from FedaPay
     r = donateur.get(f'{GIVE}dons/{don.id}/')
     assert r.data['statut'] == 'paye' and r.data['date_reversement']
-    paiement = PaiementModel.objects.get(don=don)
+    paiement = PaiementModel.objects.get(don_id=don.id)
     assert paiement.payeur.email == 'ama@test.kwaba' and paiement.libelle == 'Don à Puits pour tous'
-    assert paiement.objet == don and paiement.reference == don.reference
+    assert (paiement.type_objet, paiement.objet_id) == ('don', don.id) and paiement.reference == don.reference
 
     # The worker sends the confirmation, only once
     services.passe()
@@ -126,7 +126,7 @@ def test_paiement_refuse_puis_abandon(faux, make_user, ong):
 def test_echec_constate_par_le_worker(faux, make_user, ong):
     faux.statut = 'pending'
     don = _donner(_client(make_user()), ong)
-    PaiementModel.objects.filter(don=don).update(statut='echoue')
+    PaiementModel.objects.filter(don_id=don.id).update(statut='echoue')
     assert services.passe()['dons_non_aboutis'] == 1
 
 
@@ -135,10 +135,10 @@ def test_paiement_tardif_accepte(faux, make_user, ong):
     don = _donner(_client(make_user()), ong)
     DonModel.objects.filter(pk=don.pk).update(statut='echoue')
     faux.statut = 'approved'
-    paiements.synchroniser_paiement(PaiementModel.objects.get(don=don))
+    paiements.synchroniser_paiement(PaiementModel.objects.get(don_id=don.id))
     don.refresh_from_db()
     assert don.statut == 'paye' and don.paye_le
-    services.paiement_recu(PaiementModel.objects.get(don=don))  # second notification: no effect
+    services.paiement_recu(PaiementModel.objects.get(don_id=don.id))  # second notification: no effect
 
 
 def test_refus(faux, make_user, ong, settings):

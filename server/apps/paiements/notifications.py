@@ -8,6 +8,7 @@ import time
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from apps.notifications.infrastructure.email.envoi import send_mail
 from django.template.loader import render_to_string
 from django.utils import formats
@@ -44,10 +45,14 @@ TYPES_OBJETS = {'ReservationModel': 'reservation', 'TransfertModel': 'transfert'
                 'DonModel': 'don'}
 
 
-def _documents(objet):
+def _pieces(type_objet: str, objet_id):
     """PDF voucher and receipt attached to the confirmation email."""
     from apps.documents.api import pieces_confirmation  # local import: documents depends on paiements
-    return pieces_confirmation(TYPES_OBJETS[type(objet).__name__], objet.pk)
+    return pieces_confirmation(type_objet, objet_id)
+
+
+def _documents(objet):
+    return _pieces(TYPES_OBJETS[type(objet).__name__], objet.pk)
 
 
 def _admins() -> list[str]:
@@ -62,19 +67,26 @@ def _sejour(r) -> dict:
     }
 
 
+def _reservation(reservation_id):
+    """The booking as a plain object (reservations.api), for the emails about its money."""
+    from apps.reservations import api as reservations  # local import: reservations depends on paiements
+
+    return reservations.objet(reservation_id)
+
+
 def reservation_payee_voyageur(paiement: PaiementModel):
-    r = paiement.reservation
+    r = _reservation(paiement.reservation_id)
     voyageur = r.guest
     _envoyer('reservation_payee_voyageur', f"Séjour confirmé : {tarifs._annonce(r)['name']}", [voyageur.email], {
         **_sejour(r), 'prenom': voyageur.first_name, 'montant': _fcfa(paiement.montant),
         'url': f"{settings.FRONTEND_URL}/reservation/confirmation/{r.id}",
         'url_remboursement': f"{settings.FRONTEND_URL}/remboursement",
         'politique': tarifs.texte_politique(r),
-    }, pieces_jointes=_documents(r))
+    }, pieces_jointes=_pieces('reservation', r.id))
 
 
 def reservation_payee_hote(paiement: PaiementModel):
-    r = paiement.reservation
+    r = _reservation(paiement.reservation_id)
     annonce = tarifs._annonce(r)
     voyageur, hote = r.guest, get_user_model().objects.get(pk=annonce['host_id'])
     montants = tarifs.montants_de(r)
@@ -89,7 +101,7 @@ def reservation_payee_hote(paiement: PaiementModel):
 
 
 def versement_envoye(v: VersementModel):
-    r = v.reservation
+    r = _reservation(v.reservation_id)
     indicatif = next((p['indicatif'] for p in PAYS.values() if any(c == v.mode for c, _ in p['operateurs'])), '')
     _envoyer('versement_envoye', f"Versement de {_fcfa(v.montant)} envoyé", [v.hote.email], {
         'prenom': v.hote.first_name, 'montant': _fcfa(v.montant), 'montant_brut': _fcfa(v.montant_brut),
@@ -139,27 +151,29 @@ def _traiter(qs, fonction, drapeau='notifie'):
 
 
 def envoyer_notifications() -> int:
-    relations = ('reservation__guest',)
-    payes = PaiementModel.objects.filter(statut='reussi', reservation__status='confirmed').select_related(*relations)
+    from apps.reservations import api as reservations  # local import: reservations depends on paiements
+
+    a_notifier = (PaiementModel.objects.filter(statut='reussi', reservation_id__isnull=False)
+                  .filter(Q(notifie=False) | Q(notifie_hote=False)).values_list('reservation_id', flat=True))
+    payes = PaiementModel.objects.filter(statut='reussi', reservation_id__in=reservations.ids_confirmees(a_notifier))
     total = _traiter(payes.filter(notifie=False), reservation_payee_voyageur)
     total += _traiter(payes.filter(notifie_hote=False), reservation_payee_hote, drapeau='notifie_hote')
     total += _traiter(
-        VersementModel.objects.filter(statut='envoye', notifie=False).select_related('hote', *relations),
+        VersementModel.objects.filter(statut='envoye', notifie=False).select_related('hote'),
         versement_envoye,
     )
     total += _traiter(
-        VersementModel.objects.filter(statut='echoue', notifie=False).select_related('hote', *relations),
+        VersementModel.objects.filter(statut='echoue', notifie=False).select_related('hote'),
         lambda v: alerte_admin('Versement à un hôte', v, f"{v.hote.email} ({nom_operateur(v.mode)} {v.numero})",
-                               reference=v.reservation.reference, libelle=tarifs._annonce(v.reservation)['name']),
+                               reference=_reservation(v.reservation_id).reference,
+                               libelle=tarifs._annonce(_reservation(v.reservation_id))['name']),
     )
-    relations_remb = ('paiement', 'reservation__guest', 'transfert__voyageur', 'transfert__aeroport',
-                      'location__voyageur', 'location__categorie', 'location__lieu_prise')
     total += _traiter(
-        RemboursementModel.objects.filter(statut='envoye', notifie=False).select_related(*relations_remb),
+        RemboursementModel.objects.filter(statut='envoye', notifie=False).select_related('paiement'),
         remboursement_envoye,
     )
     total += _traiter(
-        RemboursementModel.objects.filter(statut='a_traiter', notifie=False).select_related(*relations_remb),
+        RemboursementModel.objects.filter(statut='a_traiter', notifie=False).select_related('paiement'),
         lambda rb: alerte_admin('Remboursement', rb, rb.payeur.email, reference=rb.reference, libelle=rb.libelle),
     )
     return total

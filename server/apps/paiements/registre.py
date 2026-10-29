@@ -19,6 +19,8 @@ class Relance:
 @dataclass(frozen=True)
 class ProduitPaye:
     type: str                                                # reservation, transfert, location or don
+    # object id -> {'payeur': user, 'reference', 'libelle', 'moyen'} (receipts, refunds, emails); None if unknown
+    decrire: Callable[[object], dict | None] = None
     paiement_recu: Callable[[object], None] | None = None    # in the payment's transaction, once it succeeded
     passe: Callable[[], dict] | None = None                  # the product's part of the worker's pass
     versements: Callable[[str], list] | None = None          # payout id -> its ongoing payout lines (webhook)

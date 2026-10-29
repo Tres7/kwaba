@@ -177,7 +177,7 @@ def test_annulation_moins_de_24h_pas_de_remboursement(client_for, make_user, fau
     services.assigner_chauffeur(t, chauffeur)
     r = client.delete(f'{TRANSFERTS}{t.id}/')
     assert r.data['rembourse'] == 0
-    assert not RemboursementModel.objects.filter(transfert=t).exists()
+    assert not RemboursementModel.objects.filter(transfert_id=t.id).exists()
     assert VersementChauffeurModel.objects.get(transfert=t).statut == 'planifie'  # the driver is still paid
 
 

@@ -16,14 +16,9 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 
 from config import prelancement
-from apps.hebergements import api as hebergements
-from apps.hebergements.alertes import signaler_liberation
-from apps.hebergements.disponibilites import delai_paiement, verrouiller, verrouiller_types
-from apps.reservations.models import ReservationModel
 
 from . import fedapay, paypal, tarifs
 from .models import PaiementModel, ProfilVersementModel, RemboursementModel, VersementModel
@@ -58,8 +53,9 @@ MOYENS = {
 }
 
 
-# Paid model → field of PaiementModel that points to it
-CIBLES = {'reservationmodel': 'reservation', 'transfertmodel': 'transfert', 'donmodel': 'don', 'locationmodel': 'location'}
+def delai_paiement() -> timedelta:
+    """Time given to pay a booking, a transfer or a rental: their dates are held meanwhile."""
+    return timedelta(minutes=settings.FEDAPAY['EXPIRATION_MINUTES'])
 
 
 def fedapay_actif() -> bool:
@@ -86,21 +82,18 @@ def reservation_possible() -> bool:
     return paiement_actif() or settings.PAIEMENT_HORS_LIGNE
 
 
-def paiement_reussi(reservation) -> PaiementModel | None:
-    return reservation.paiements.filter(statut='reussi').order_by('cree_le').first()
-
-
 # --- Encaissement ------------------------------------------------------------------------
 
-def creer_paiement(*, objet, montant: int, moyen: str, description: str, url_retour: str, voyageur) -> str:
-    """Creates the transaction at the provider for `objet` (booking, transfer or donation) and returns
+def creer_paiement(*, type_objet: str, objet_id, montant: int, moyen: str, description: str, url_retour: str,
+                   voyageur) -> str:
+    """Creates the transaction at the provider for the object (booking, transfer, rental or donation) and returns
     the address of the payment page. `url_retour`: page of the site the traveller comes back to."""
     # Backstop: the views already refuse in pre-launch mode, no payment may ever be created before the opening
     if prelancement.actif():
         raise PaiementErreur(prelancement.MESSAGE)
     if moyen not in moyens_actifs():
         raise PaiementErreur("Ce moyen de paiement n'est pas disponible.")
-    cible = {CIBLES[objet._meta.model_name]: objet}
+    cible = {f'{type_objet}_id': objet_id}
 
     if MOYENS[moyen] == 'paypal':
         paiement = PaiementModel(**cible, montant=montant, prestataire='paypal', montant_eur=paypal.en_euros(montant))
@@ -110,7 +103,7 @@ def creer_paiement(*, objet, montant: int, moyen: str, description: str, url_ret
                 url_retour=url_retour, url_annulation=f"{url_retour}?annule=1",
             )
         except paypal.PayPalErreur:
-            logger.exception("Création de la commande PayPal impossible pour %s", objet.pk)
+            logger.exception("Création de la commande PayPal impossible pour %s", objet_id)
             raise PaiementErreur("PayPal est momentanément indisponible. Réessayez ou choisissez un autre moyen de paiement.")
         paiement.save()
         return paiement.url_paiement
@@ -125,29 +118,10 @@ def creer_paiement(*, objet, montant: int, moyen: str, description: str, url_ret
             },
         )
     except fedapay.FedaPayErreur:
-        logger.exception("Création de la transaction impossible pour %s", objet.pk)
+        logger.exception("Création de la transaction impossible pour %s", objet_id)
         raise PaiementErreur("Le service de paiement est momentanément indisponible. Réessayez dans quelques instants.")
     PaiementModel.objects.create(**cible, montant=montant, transaction_id=transaction_id, url_paiement=url)
     return url
-
-
-def demarrer_paiement(reservation, moyen: str = 'mobile_money') -> str:
-    """Payment of a listing booking."""
-    if moyen not in moyens_actifs():
-        raise PaiementErreur("Ce moyen de paiement n'est pas disponible.")
-    if reservation.status != 'pending':
-        raise PaiementErreur("Cette réservation n'attend pas de paiement.")
-    if reservation.expire_le and reservation.expire_le <= timezone.now():
-        raise PaiementErreur("Le délai de paiement est dépassé : les dates ont été libérées. Refaites la réservation.")
-
-    if reservation.payment_method != moyen:
-        reservation.payment_method = moyen
-        reservation.save(update_fields=['payment_method'])
-    return creer_paiement(
-        objet=reservation, montant=tarifs.montants_de(reservation).total, moyen=moyen, voyageur=reservation.guest,
-        description=f"Kwa-Ba {reservation.reference}, {tarifs._annonce(reservation)['name']}",
-        url_retour=f"{settings.FRONTEND_URL}/reservation/paiement/{reservation.id}",
-    )
 
 
 def synchroniser_paiement(paiement: PaiementModel) -> str:
@@ -211,43 +185,15 @@ def _paiement_reussi(paiement_id, donnees: dict):
         paiement.save()
         logger.info("Paiement reçu : %s FCFA pour %s", paiement.montant, paiement.reference)
 
-        for type_objet in ('transfert', 'don', 'location'):
-            if getattr(paiement, f'{type_objet}_id'):
-                PRODUITS[type_objet].paiement_recu(paiement)
-                return
-
-        reservation = ReservationModel.objects.select_for_update().get(pk=paiement.reservation_id)
-        if reservation.paiements.filter(statut='reussi').exclude(pk=paiement.pk).exists():
-            rembourser(paiement, paiement.montant, "Paiement reçu en double")
-            return
-        if reservation.status == 'cancelled' and reservation.annule_par != 'expiration':
-            rembourser(paiement, paiement.montant, "Réservation annulée avant la confirmation du paiement")
-            return
-        # Payment arriving after the expiry: confirmed if the units are still free.
-        # Unit-type lock: a simultaneous booking cannot take them in the meantime.
-        if reservation.type_logement_id:
-            verrouiller_types([reservation.type_logement_id])
-        else:
-            verrouiller(reservation.hebergement_id)
-        if hebergements.conflit(reservation.hebergement_id, reservation.check_in, reservation.check_out, exclure=reservation.pk,
-                                type_logement_id=reservation.type_logement_id, nb=reservation.nb_unites or 1):
-            rembourser(paiement, paiement.montant, "Dates plus disponibles au moment du paiement")
-            reservation.status, reservation.annule_par = 'cancelled', 'plateforme'
-            reservation.annule_le = timezone.now()
-            reservation.save(update_fields=['status', 'annule_par', 'annule_le'])
-            return
-
-        reservation.status = 'confirmed'
-        reservation.expire_le = None
-        reservation.annule_par, reservation.annule_le = '', None
-        reservation.save(update_fields=['status', 'expire_le', 'annule_par', 'annule_le'])
-        _planifier_versement(reservation)
+        # The module of the paid object handles it (confirmation, refund if paid twice or cancelled meanwhile…)
+        PRODUITS[paiement.type_objet].paiement_recu(paiement)
 
 
-def _planifier_versement(reservation):
+def planifier_versement_hote(reservation):
+    """Payout to the host of a paid stay (arrival + 24 h), from the booking's frozen amounts."""
     montants = tarifs.montants_de(reservation)
     VersementModel.objects.update_or_create(
-        reservation=reservation,
+        reservation_id=reservation.id,
         defaults={
             'hote_id': tarifs._annonce(reservation)['host_id'],
             'montant_brut': montants.prix_nuits,
@@ -260,11 +206,7 @@ def _planifier_versement(reservation):
 
 
 def _par_carte(paiement) -> bool:
-    if paiement.reservation_id:
-        moyen = paiement.reservation.payment_method
-    else:
-        moyen = (paiement.location if paiement.location_id else paiement.transfert).moyen
-    return moyen == 'carte' or 'card' in paiement.mode.lower()
+    return paiement.description['moyen'] == 'carte' or 'card' in paiement.mode.lower()
 
 
 def rembourser(paiement, montant: int, motif: str):
@@ -282,56 +224,45 @@ def rembourser(paiement, montant: int, motif: str):
     )
 
 
-def indiquer_numero_remboursement(objet, pays: str, operateur: str, numero: str) -> int:
-    """Saves the traveller's Mobile Money account on the pending refunds of `objet`
+def indiquer_numero_remboursement(type_objet: str, objet_id, pays: str, operateur: str, numero: str) -> int:
+    """Saves the traveller's Mobile Money account on the pending refunds of the object
     (booking, transfer or rental). Returns their number."""
-    return objet.remboursements.filter(statut='attente_numero').update(
+    return RemboursementModel.objects.filter(**{f'{type_objet}_id': objet_id}, statut='attente_numero').update(
         pays=pays, operateur=operateur, numero=numero, statut='a_envoyer', derniere_erreur='',
     )
 
 
 # --- Annulation --------------------------------------------------------------------------
 
-def annuler(reservation, par: str) -> int:
-    """Cancels the booking. `par`: voyageur, hote or plateforme. Returns the amount refunded to the traveller."""
-    with transaction.atomic():
-        reservation = ReservationModel.objects.select_for_update().get(pk=reservation.pk)
-        if reservation.status == 'cancelled':
-            raise PaiementErreur("Cette réservation est déjà annulée.")
+def annuler_paiement_reservation(reservation, par: str) -> int:
+    """Money of a cancelled stay: the traveller's refund according to the scale, the host's payout reduced or
+    cancelled. `par`: voyageur, hote or plateforme. Returns the amount refunded (0 if never paid)."""
+    paiement = PaiementModel.objects.filter(reservation_id=reservation.id, statut='reussi').order_by('cree_le').first()
+    if not paiement:
+        return 0
+    montants = tarifs.montants_de(reservation)
+    if par == 'voyageur':
+        bareme = tarifs.bareme_voyageur(montants, reservation)
+        motif = "Annulation par le voyageur"
+    else:
+        bareme = tarifs.Annulation(rembourse_voyageur=montants.total, nuits_retenues=0)
+        motif = "Annulation par l'hôte" if par == 'hote' else "Annulation par Kwa-Ba"
 
-        rembourse = 0
-        paiement = paiement_reussi(reservation)
-        if paiement:
-            montants = tarifs.montants_de(reservation)
-            if par == 'voyageur':
-                bareme = tarifs.bareme_voyageur(montants, reservation)
-                motif = "Annulation par le voyageur"
-            else:
-                bareme = tarifs.Annulation(rembourse_voyageur=montants.total, nuits_retenues=0)
-                motif = "Annulation par l'hôte" if par == 'hote' else "Annulation par Kwa-Ba"
+    versement = VersementModel.objects.select_for_update().filter(reservation_id=reservation.id).first()
+    if versement and versement.statut in ('planifie', 'echoue'):
+        if bareme.nuits_retenues:
+            versement.montant_brut = bareme.nuits_retenues
+            versement.commission = bareme.commission_hote
+            versement.montant = bareme.montant_hote
+            versement.statut = 'planifie'
+        else:
+            versement.statut = 'annule'
+        versement.save()
+    elif versement and versement.statut in ('en_cours', 'envoye'):
+        logger.warning("Annulation de %s après le versement à l'hôte : à régulariser", reservation.reference)
 
-            versement = VersementModel.objects.select_for_update().filter(reservation=reservation).first()
-            if versement and versement.statut in ('planifie', 'echoue'):
-                if bareme.nuits_retenues:
-                    versement.montant_brut = bareme.nuits_retenues
-                    versement.commission = bareme.commission_hote
-                    versement.montant = bareme.montant_hote
-                    versement.statut = 'planifie'
-                else:
-                    versement.statut = 'annule'
-                versement.save()
-            elif versement and versement.statut in ('en_cours', 'envoye'):
-                logger.warning("Annulation de %s après le versement à l'hôte : à régulariser", reservation.reference)
-
-            rembourser(paiement, bareme.rembourse_voyageur, motif)
-            rembourse = bareme.rembourse_voyageur
-
-        reservation.status = 'cancelled'
-        reservation.annule_par = par
-        reservation.annule_le = timezone.now()
-        reservation.save(update_fields=['status', 'annule_par', 'annule_le'])
-        signaler_liberation(reservation.hebergement_id, reservation.check_in, reservation.check_out)
-        return rembourse
+    rembourser(paiement, bareme.rembourse_voyageur, motif)
+    return bareme.rembourse_voyageur
 
 
 # --- Payouts and refunds (worker) -----------------------------------------------
@@ -397,10 +328,11 @@ def envoyer_versements_dus() -> int:
     if not fedapay_actif():
         return 0  # payouts to hosts go through FedaPay
     envoyes = 0
-    dus = VersementModel.objects.filter(
-        statut='planifie', date_prevue__lte=timezone.now(), reservation__status='confirmed',
-    ).select_related('hote')[:50]
-    for versement in dus:
+    from apps.reservations import api as reservations  # local import: reservations depends on paiements
+
+    dus = list(VersementModel.objects.filter(statut='planifie', date_prevue__lte=timezone.now()).select_related('hote'))
+    confirmees = reservations.ids_confirmees(v.reservation_id for v in dus)
+    for versement in [v for v in dus if v.reservation_id in confirmees][:50]:
         profil = ProfilVersementModel.objects.filter(hote=versement.hote).first()
         if not profil:
             if not versement.derniere_erreur:
@@ -420,9 +352,7 @@ def synchroniser_versement(versement: VersementModel):
 
 def envoyer_remboursements() -> int:
     envoyes = 0
-    for remboursement in RemboursementModel.objects.filter(statut='a_envoyer').select_related(
-        'paiement', 'reservation__guest', 'transfert__voyageur', 'location__voyageur',
-    )[:50]:
+    for remboursement in RemboursementModel.objects.filter(statut='a_envoyer').select_related('paiement')[:50]:
         if not _peut_reessayer(remboursement):
             continue
         paiement = remboursement.paiement
@@ -513,22 +443,6 @@ def synchroniser_remboursement(remboursement: RemboursementModel):
     remboursement.save()
 
 
-def expirer_reservations() -> int:
-    """Releases the dates of the bookings not paid in time (after a last check)."""
-    expirees = 0
-    maintenant = timezone.now()
-    a_expirer = Q(expire_le__lte=maintenant) | Q(expire_le__isnull=True, created_at__lte=maintenant - delai_paiement())
-    for reservation in ReservationModel.objects.filter(a_expirer, status='pending'):
-        for paiement in reservation.paiements.filter(statut='en_attente'):
-            synchroniser_paiement(paiement)
-        if ReservationModel.objects.filter(pk=reservation.pk, status='pending').update(
-            status='cancelled', annule_par='expiration', annule_le=maintenant,
-        ):
-            expirees += 1
-            signaler_liberation(reservation.hebergement_id, reservation.check_in, reservation.check_out)
-    return expirees
-
-
 def passe() -> dict:
     """One pass of the worker. Also catches up on lost webhooks (and their absence locally)."""
     recents = PaiementModel.objects.filter(statut='en_attente', cree_le__gte=timezone.now() - timedelta(hours=2))[:50]
@@ -539,18 +453,14 @@ def passe() -> dict:
     for remboursement in RemboursementModel.objects.filter(statut='en_cours').exclude(payout_id='').select_related('paiement')[:50]:
         synchroniser_remboursement(remboursement)
     from . import notifications  # local import: notifications imports the models and the rates
-    from apps.hebergements import alertes
 
     stats = {
-        'reservations_expirees': expirer_reservations(),
         'versements_envoyes': envoyer_versements_dus(),
         'remboursements_envoyes': envoyer_remboursements(),
     }
     for produit in PRODUITS.values():
         if produit.passe:
             stats.update(produit.passe())
-    # After the expiries of this pass: the dates they freed are checked at once
-    stats.update(alertes.passe())
     from . import relances
     # After the expiries: the "cancelled for lack of payment" email goes in the same pass
     stats['relances'] = relances.envoyer_relances()

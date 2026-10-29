@@ -225,6 +225,6 @@ class CompteRemboursementTransfertView(APIView):
             return Response({'detail': 'Transfert introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = paiements.CompteRemboursementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if not paiements.indiquer_numero_remboursement(transfert, **serializer.validated_data):
+        if not paiements.indiquer_numero_remboursement('transfert', transfert.pk, **serializer.validated_data):
             return Response({'detail': "Aucun remboursement n'attend de numéro pour ce transfert."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'detail': 'Numéro enregistré : le remboursement va être envoyé.'})

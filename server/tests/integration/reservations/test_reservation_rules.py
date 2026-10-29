@@ -7,6 +7,7 @@ from django.utils import timezone
 from apps.hebergements.disponibilites import est_disponible
 from apps.paiements import services as paiements
 from apps.reservations.models import ReservationModel
+from apps.reservations import paiement as reservations_paiement
 
 HEBERGEMENTS = '/api/v1/hebergements/'
 RESERVATIONS = '/api/v1/reservations/'
@@ -40,7 +41,7 @@ class TestPendingWithoutDeadline:
         r = self._pending(make_user, hebergement, paiements.delai_paiement() + timedelta(minutes=1))
         assert est_disponible(hebergement.id, r.check_in, r.check_out)
 
-        assert paiements.expirer_reservations() == 1
+        assert reservations_paiement.expirer() == 1
         r.refresh_from_db()
         assert (r.status, r.annule_par) == ('cancelled', 'expiration')
 

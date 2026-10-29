@@ -319,6 +319,6 @@ class CompteRemboursementLocationView(APIView):
             return Response({'detail': 'Location introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = paiements.CompteRemboursementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if not paiements.indiquer_numero_remboursement(location, **serializer.validated_data):
+        if not paiements.indiquer_numero_remboursement('location', location.pk, **serializer.validated_data):
             return Response({'detail': "Aucun remboursement n'attend de numéro pour cette location."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'detail': 'Numéro enregistré : le remboursement va être envoyé.'})

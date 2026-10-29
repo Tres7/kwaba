@@ -396,7 +396,7 @@ class ReservationAnnulerView(VueAdmin):
             return _introuvable('Réservation')
         try:
             # Cancellation by Kwa-Ba: the traveller is fully refunded if they paid (even for a stay already started)
-            rembourse = paiements.annuler(reservation, par='plateforme')
+            rembourse = reservations_api.annuler(reservation, par='plateforme')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser('reservation_annulee', request, utilisateur=request.user, reservation_id=str(reservation.pk),

@@ -83,7 +83,7 @@ class TestRefused:
 
 def test_payment_after_expiry_refunded_when_the_units_are_gone(make_user, hotel, monkeypatch):
     """A booking whose payment arrives late is confirmed only if its units are still free (stock checked again)."""
-    from apps.paiements import services
+    from apps.paiements import api as paiements_api, services
     from apps.paiements.models import PaiementModel
 
     double = hotel.types.get()
@@ -93,11 +93,36 @@ def test_payment_after_expiry_refunded_when_the_units_are_gone(make_user, hotel,
         total_price=0, status='cancelled', annule_par='expiration')
     ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=double.id, nb_unites=2, guest=make_user(),
                                     check_in=arrivee, check_out=depart, total_price=0, status='confirmed')
-    paiement = PaiementModel.objects.create(reservation=en_retard, montant=1000, statut='en_attente')
+    paiement = PaiementModel.objects.create(reservation_id=en_retard.id, montant=1000, statut='en_attente')
     rembourses = []
-    monkeypatch.setattr(services, 'rembourser', lambda p, montant, motif: rembourses.append(motif))  # no real refund
+    monkeypatch.setattr(paiements_api, 'rembourser', lambda p, montant, motif: rembourses.append(motif))  # no real refund
 
     services._paiement_reussi(paiement.pk, {})
 
     en_retard.refresh_from_db()
     assert en_retard.status == 'cancelled' and rembourses == ["Dates plus disponibles au moment du paiement"]
+
+
+@pytest.mark.parametrize('cas, motif', [
+    ('paye_deux_fois', "Paiement reçu en double"),
+    ('annulee_avant', "Réservation annulée avant la confirmation du paiement"),
+])
+def test_payment_refunded_when_paid_twice_or_cancelled_before(make_user, hotel, monkeypatch, cas, motif):
+    from apps.paiements import api as paiements_api, services
+    from apps.paiements.models import PaiementModel
+
+    arrivee, depart = _sejour()
+    reservation = ReservationModel.objects.create(
+        hebergement_id=hotel.id, type_logement_id=hotel.types.get().id, guest=make_user(), check_in=arrivee,
+        check_out=depart, total_price=1000, status='cancelled' if cas == 'annulee_avant' else 'confirmed',
+        annule_par='voyageur' if cas == 'annulee_avant' else '')
+    if cas == 'paye_deux_fois':
+        PaiementModel.objects.create(reservation_id=reservation.id, montant=1000, statut='reussi', transaction_id='T-1')
+    paiement = PaiementModel.objects.create(reservation_id=reservation.id, montant=1000, statut='en_attente',
+                                            transaction_id='T-2')
+    rembourses = []
+    monkeypatch.setattr(paiements_api, 'rembourser', lambda p, montant, m: rembourses.append((montant, m)))
+
+    services._paiement_reussi(paiement.pk, {})
+
+    assert rembourses == [(1000, motif)]

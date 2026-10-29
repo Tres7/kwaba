@@ -9,6 +9,7 @@ from config.prelancement import verifier_ouverture
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 
+from . import paiement
 from .models import ReservationModel
 from .serializers import ReservationSerializer, ReservationCreateSerializer
 
@@ -65,7 +66,7 @@ class ReservationDetailView(APIView):
         if obj.status not in ('confirmed', 'pending'):
             return Response({'detail': 'Cette réservation ne peut pas être annulée.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            rembourse = paiements.annuler_reservation(obj, par='voyageur')
+            rembourse = paiement.annuler(obj, par='voyageur')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         numero_requis = paiements.numero_remboursement_requis('reservation', obj.pk)

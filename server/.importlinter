@@ -42,11 +42,6 @@ ignore_imports =
     apps.backoffice.views -> apps.paiements.tarifs
     apps.backoffice.views -> apps.reservations.models
     apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
-    apps.paiements.services -> apps.hebergements.alertes
-    apps.paiements.services -> apps.hebergements.disponibilites
-    apps.paiements.services -> apps.reservations.models
-    apps.paiements.tarifs -> apps.reservations.models
-    apps.paiements.views -> apps.reservations.models
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier

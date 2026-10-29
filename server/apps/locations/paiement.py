@@ -19,8 +19,17 @@ def _decrire(loc) -> dict:
                     f"au {formats.date_format(loc.fin.astimezone(FUSEAU), 'j F Y')}"}
 
 
+def _decrire_paiement(location_id) -> dict | None:
+    loc = LocationModel.objects.filter(pk=location_id).select_related('voyageur', 'categorie', 'lieu_prise').first()
+    if not loc:
+        return None
+    return {'payeur': loc.voyageur, 'reference': loc.reference, 'libelle': f"Location {loc.libelle}, {loc.lieu_prise.ville}",
+            'moyen': loc.moyen}
+
+
 PRODUIT_PAYE = ProduitPaye(
     type='location',
+    decrire=_decrire_paiement,
     paiement_recu=services.paiement_recu,
     passe=services.passe,
     versements=lambda payout_id: list(VersementPartenaireModel.objects.filter(payout_id=payout_id, statut='en_cours')),

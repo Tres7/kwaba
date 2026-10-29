@@ -18,8 +18,17 @@ def _decrire(t) -> dict:
                     f"({formats.date_format(t.arrivee.astimezone(FUSEAU), 'j F Y')})"}
 
 
+def _decrire_paiement(transfert_id) -> dict | None:
+    t = TransfertModel.objects.filter(pk=transfert_id).select_related('voyageur', 'aeroport').first()
+    if not t:
+        return None
+    return {'payeur': t.voyageur, 'reference': t.reference, 'libelle': f"Transfert depuis l'aéroport {t.aeroport.ville}",
+            'moyen': t.moyen}
+
+
 PRODUIT_PAYE = ProduitPaye(
     type='transfert',
+    decrire=_decrire_paiement,
     paiement_recu=services.paiement_recu,
     passe=services.passe,
     versements=lambda payout_id: list(VersementChauffeurModel.objects.filter(payout_id=payout_id, statut='en_cours')),
