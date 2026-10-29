@@ -215,7 +215,50 @@
     },
     "devenezHote": "Become a Kwa-Ba host",
     "devenezHoteTexte": "Earn extra income by sharing your home and show travellers your region.",
-    "commencer": "Get started"
+    "commencer": "Get started",
+    "confiance": {
+      "verifies": "Hosts checked on site",
+      "paiement": "Mobile Money or card",
+      "prix": "Fees included in prices"
+    },
+    "services": {
+      "titre": "Your whole trip in one place",
+      "texte": "Beyond the stay: a driver when you land, a car, outings and a space to travel as a group.",
+      "transfert": {
+        "titre": "Airport transfer",
+        "texte": "Your driver waits at the exit with a sign bearing your name. Fixed price, paid in advance."
+      },
+      "location": {
+        "titre": "Cars and drivers",
+        "texte": "Vehicles and drivers checked by Kwa-Ba, handed over at the airport or at your address."
+      },
+      "experiences": {
+        "titre": "Experiences",
+        "texte": "Waterfalls, beaches, heritage sites and good restaurants around your stay."
+      },
+      "together": {
+        "titre": "Travel as a group",
+        "texte": "Choose the stay together and share the budget, without getting lost in WhatsApp."
+      },
+      "concierge": {
+        "titre": "AI Concierge",
+        "texte": "Describe what you want: it suggests stays, an itinerary and a budget."
+      },
+      "give": {
+        "titre": "Kwa-Ba Give",
+        "texte": "Support a verified local NGO, from 500 FCFA, with proof of every payout."
+      },
+      "decouvrir": "Explore"
+    },
+    "avis": {
+      "titre": "They stayed with Kwa-Ba",
+      "texte": "Reviews left only after a real stay."
+    },
+    "hoteChiffres": {
+      "gratuit": "Free listing",
+      "agent": "Visit by a Kwa-Ba agent",
+      "versement": "Paid 24 h after arrival"
+    }
   },
   "auth": {
     "noticeVerifie": "Account verified! You can now log in.",
@@ -496,7 +539,9 @@
     "typeLogement": "Room type",
     "capaciteUnite": "{nombre, plural, one {# guest} other {up to # guests}}",
     "unites": "Rooms",
-    "unitesNombre": "{nombre, plural, one {# room} other {# rooms}}"
+    "unitesNombre": "{nombre, plural, one {# room} other {# rooms}}",
+    "similairesVille": "Other stays in {ville}",
+    "similaires": "You may also like"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -1262,7 +1307,8 @@
     "ecrit": "The Concierge is typing",
     "ia": "AI",
     "nouvelleConversation": "New conversation",
-    "nouvelle": "New"
+    "nouvelle": "New",
+    "exemples": "What you can ask"
   },
   "conciergeCartes": {
     "voir": "View",

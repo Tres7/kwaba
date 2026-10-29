@@ -215,7 +215,50 @@
     },
     "devenezHote": "Devenez hôte Kwa-Ba",
     "devenezHoteTexte": "Gagnez un revenu complémentaire en partageant votre logement et faites découvrir votre région.",
-    "commencer": "Commencer maintenant"
+    "commencer": "Commencer maintenant",
+    "confiance": {
+      "verifies": "Hôtes vérifiés sur place",
+      "paiement": "Mobile Money ou carte",
+      "prix": "Prix frais inclus"
+    },
+    "services": {
+      "titre": "Tout votre voyage au même endroit",
+      "texte": "Au-delà du logement : un chauffeur à l'arrivée, une voiture, des sorties et un espace pour voyager à plusieurs.",
+      "transfert": {
+        "titre": "Transfert aéroport",
+        "texte": "Votre chauffeur vous attend à la sortie avec une pancarte à votre nom. Prix fixe, payé à l'avance."
+      },
+      "location": {
+        "titre": "Voitures et chauffeurs",
+        "texte": "Des véhicules et des chauffeurs vérifiés par Kwa-Ba, remis à l'aéroport ou à votre adresse."
+      },
+      "experiences": {
+        "titre": "Expériences",
+        "texte": "Cascades, plages, sites classés et bonnes tables autour de votre logement."
+      },
+      "together": {
+        "titre": "Voyager à plusieurs",
+        "texte": "Choisissez le logement ensemble et partagez le budget, sans vous perdre dans WhatsApp."
+      },
+      "concierge": {
+        "titre": "Concierge IA",
+        "texte": "Décrivez votre envie : il propose logements, itinéraire et budget."
+      },
+      "give": {
+        "titre": "Kwa-Ba Give",
+        "texte": "Soutenez une ONG locale vérifiée, dès 500 FCFA, avec la preuve du reversement."
+      },
+      "decouvrir": "Découvrir"
+    },
+    "avis": {
+      "titre": "Ils ont séjourné avec Kwa-Ba",
+      "texte": "Des avis laissés uniquement après un séjour réel."
+    },
+    "hoteChiffres": {
+      "gratuit": "Publication gratuite",
+      "agent": "Visite d'un agent Kwa-Ba",
+      "versement": "Versement 24 h après l'arrivée"
+    }
   },
   "auth": {
     "noticeVerifie": "Compte vérifié ! Vous pouvez maintenant vous connecter.",
@@ -496,7 +539,9 @@
     "typeLogement": "Type de logement",
     "capaciteUnite": "{nombre, plural, one {# voyageur} other {jusqu’à # voyageurs}}",
     "unites": "Chambres",
-    "unitesNombre": "{nombre, plural, one {# chambre} other {# chambres}}"
+    "unitesNombre": "{nombre, plural, one {# chambre} other {# chambres}}",
+    "similairesVille": "Autres logements à {ville}",
+    "similaires": "Vous aimerez aussi"
   },
   "avis": {
     "repondre": "Répondre publiquement",
@@ -1262,7 +1307,8 @@
     "ecrit": "Le Concierge écrit",
     "ia": "IA",
     "nouvelleConversation": "Nouvelle conversation",
-    "nouvelle": "Nouvelle"
+    "nouvelle": "Nouvelle",
+    "exemples": "Ce que vous pouvez lui demander"
   },
   "conciergeCartes": {
     "voir": "Voir",

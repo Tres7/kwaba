@@ -17,6 +17,7 @@ import RatingBadge from "@/components/avis/RatingBadge";
 import AvisSection from "@/components/avis/AvisSection";
 import ProposerAuGroupe from "@/components/voyage/ProposerAuGroupe";
 import MapEmbed from "@/components/hebergement/MapEmbed";
+import LogementsSimilaires from "@/components/hebergement/LogementsSimilaires";
 import api, { apiErrorMessage } from "@/lib/api";
 import { addDays, calculateNights, calculateServiceFee, SERVICE_FEE_RATE, cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate, prixNuitFraisInclus, TYPE_LABELS } from "@/lib/utils";
 import { nuitsIndisponibles, useDisponibilites } from "@/lib/useDisponibilites";
@@ -292,9 +293,9 @@ function HebergementContent() {
           <div className="lg:col-span-1" id="reserver">
             <div className="bg-white rounded-3xl shadow-soft border border-gray-100 p-5 sm:p-7 lg:sticky lg:top-28">
               <div className="mb-5">
-                <div className="flex items-baseline gap-2">
+                <div className="flex flex-wrap items-baseline gap-x-2">
                   <span className="text-dark font-heading font-bold text-3xl">{formatPrice(nuitTtc.total)}</span>
-                  <span className="text-muted text-sm font-medium">{t("parNuitFraisInclus")}</span>
+                  <span className="text-muted text-sm font-medium whitespace-nowrap">{t("parNuitFraisInclus")}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
                   {t("detailNuit", { prix: formatPrice(prixUnite), frais: formatPrice(nuitTtc.frais), taux: Math.round(tauxFrais * 100) })}
@@ -395,6 +396,8 @@ function HebergementContent() {
             </div>
           </div>
         </div>
+
+        <LogementsSimilaires hebergement={hebergement} />
       </div>
 
       {/* Mobile booking bar */}

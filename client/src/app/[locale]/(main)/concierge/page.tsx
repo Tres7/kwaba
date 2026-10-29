@@ -11,6 +11,7 @@ import api, { apiErrorMessage, jetonAcces } from "@/lib/api";
 import { getApiBaseUrl } from "@/lib/api-url";
 import { cn } from "@/lib/utils";
 import TexteConcierge from "@/components/concierge/TexteConcierge";
+import PageHero from "@/components/layout/PageHero";
 import CartesConcierge from "@/components/concierge/CartesConcierge";
 import type { Carte, ConversationResume, MessageConcierge } from "@/types/api/concierge";
 import { useLocale, useTranslations } from "next-intl";
@@ -50,6 +51,7 @@ async function lireFlux(reponse: Response, surEvenement: (nom: string, donnees: 
 
 function ConciergeContent() {
   const t = useTranslations("concierge");
+  const tNav = useTranslations("nav");
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -138,13 +140,27 @@ function ConciergeContent() {
 
   if (status === "unauthenticated") {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center px-4 bg-light">
-        <div className="max-w-md text-center bg-white rounded-3xl border border-gray-100 shadow-card p-8">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center"><Sparkles size={26} /></div>
-          <h1 className="font-heading font-bold text-dark text-2xl mt-4">Kwa-Ba Concierge</h1>
-          <p className="text-gray-600 mt-2">{t("presentation")}</p>
-          <Link href="/login?callbackUrl=/concierge" className="inline-block mt-6 bg-primary text-white font-bold px-6 py-3 rounded-xl">{t("seConnecter")}</Link>
-        </div>
+      <div className="min-h-[70vh] bg-light pb-12">
+        <PageHero surtitre={<><Sparkles size={16} /> Concierge {t("ia")}</>} titre="Kwa-Ba Concierge" sousTitre={t("presentation")}>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/login?callbackUrl=/concierge" className="inline-flex items-center gap-2 bg-white text-primary-700 font-bold px-6 py-3 rounded-xl hover:bg-primary-50">{t("seConnecter")}</Link>
+            <Link href="/register" className="inline-flex items-center gap-2 border border-white/40 text-white font-bold px-6 py-3 rounded-xl hover:bg-white/10">{tNav("creerCompte")}</Link>
+          </div>
+        </PageHero>
+        {/* Examples of questions: what the Concierge is for, before signing in */}
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-8" aria-labelledby="exemples-titre">
+          <h2 id="exemples-titre" className="font-heading font-bold text-dark text-xl mb-4">{t("exemples")}</h2>
+          <ul className="grid sm:grid-cols-2 gap-3">
+            {SUGGESTIONS.map((s) => (
+              <li key={s}>
+                <Link href="/login?callbackUrl=/concierge" className="h-full flex gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-sm text-dark leading-relaxed hover:border-primary/30 hover:shadow-card transition-all">
+                  <Sparkles size={18} className="text-accent flex-shrink-0 mt-0.5" aria-hidden />
+                  <span>{locale === "fr" ? `« ${t(`suggestions.${s}`)} »` : `“${t(`suggestions.${s}`)}”`}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     );
   }
