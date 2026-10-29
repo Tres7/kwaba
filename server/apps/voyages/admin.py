@@ -12,7 +12,7 @@ class MembreInline(admin.TabularInline):
 class PropositionInline(admin.TabularInline):
     model = PropositionModel
     extra = 0
-    raw_id_fields = ['hebergement', 'propose_par']
+    raw_id_fields = ['propose_par']
 
 
 @admin.register(VoyageGroupeModel)
