@@ -3,7 +3,7 @@ import uuid
 from datetime import date, timedelta
 
 from django.db import transaction
-from django.db.models import Count, Min, Q, RestrictedError
+from django.db.models import Count, Min, Q
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -17,6 +17,7 @@ from .archivage import ArchivageImpossible, archiver
 from . import stock
 from .disponibilites import a_des_reservations, periodes_indisponibles, verrouiller, verrouiller_types
 from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
+from .occupations import reservations
 from apps.securite import fraude
 from apps.securite.photos import InvalidPhoto, normalize_photo
 
@@ -523,10 +524,9 @@ class TypeLogementDetailView(APIView):
         if not hebergement.types.filter(actif=True).exclude(pk=pk).exists():
             return Response({'detail': "L'établissement doit garder au moins un type de logement proposé."},
                             status=status.HTTP_400_BAD_REQUEST)
-        try:
-            with transaction.atomic():
-                type_logement.delete()
-        except RestrictedError:
+        if reservations().type_reserve(type_logement.pk):
             return Response({'detail': "Ce type a déjà des réservations : désactivez-le plutôt."}, status=status.HTTP_409_CONFLICT)
+        with transaction.atomic():
+            type_logement.delete()
         types_logement.recalculer_etablissement(hebergement)
         return Response(status=status.HTTP_204_NO_CONTENT)

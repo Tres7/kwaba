@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from apps.paiements import tarifs
+from apps.paiements import api as paiements
 from apps.securite import coordonnees
 from apps.securite.images import MESSAGE as IMAGE_REFUSEE, url_image_autorisee
 
@@ -64,9 +64,9 @@ class HebergementSerializer(serializers.ModelSerializer):
         """Service fee rate for the visitor: 6 %, or 3 % if they already stayed with this host (loyal customer)."""
         request = self.context.get('request')
         if '_hotes_visites' not in self.context:
-            self.context['_hotes_visites'] = tarifs.hotes_deja_visites(request.user if request else None)
+            self.context['_hotes_visites'] = paiements.hotes_deja_visites(request.user if request else None)
         reduit = obj.host_id in self.context['_hotes_visites']
-        return float(tarifs.FRAIS_REDUITS if reduit else tarifs.FRAIS_VOYAGEUR)
+        return float(paiements.frais_reduits() if reduit else paiements.frais_voyageur())
 
     def get_types(self, obj):
         """Unit types to choose from (listing page only: one query, never per row of a list)."""

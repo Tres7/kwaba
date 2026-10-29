@@ -14,17 +14,18 @@ from .views import CompteRemboursementSerializer
 
 __all__ = [
     'CompteRemboursementSerializer', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
-    'PaiementErreur', 'alerte_admin', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
+    'PaiementErreur', 'alerte_admin', 'date_fr', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
     'documents_joints', 'emails_admins', 'envoyer_email', 'envoyer_payout', 'fcfa', 'fedapay_actif', 'frais_voyageur',
     'indiquer_numero_remboursement', 'moyens_actifs', 'paiement_actif', 'paiement_reussi', 'recu_pdf', 'rembourser',
     'reservation_possible', 'synchroniser_paiement', 'synchroniser_payout', 'texte_politique', 'total_sejour',
-    'frais_reduits_sejour', 'rembourser_en_partie',
+    'frais_reduits', 'frais_reduits_sejour', 'hotes_deja_visites', 'rembourser_en_partie',
 ]
 
 # Emails of the products paid online (stays, transfers, rentals, donations): same sending rules as the payment emails
 envoyer_email = notifications._envoyer
 emails_admins = notifications._admins
 fcfa = notifications._fcfa
+date_fr = notifications._date
 documents_joints = notifications._documents
 alerte_admin = notifications.alerte_admin
 
@@ -79,3 +80,12 @@ def rembourser_en_partie(type_objet: str, objet_id, montant: int, motif: str) ->
         return False
     rembourser(paiement, montant, motif)
     return True
+
+
+def frais_reduits() -> Decimal:
+    return tarifs.FRAIS_REDUITS
+
+
+def hotes_deja_visites(voyageur) -> set:
+    """Hosts the traveller already stayed with (loyal customer rate)."""
+    return tarifs.hotes_deja_visites(voyageur)

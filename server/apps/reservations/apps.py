@@ -8,7 +8,10 @@ class ReservationsConfig(AppConfig):
 
     def ready(self):
         from apps.documents.api import enregistrer
+        from apps.hebergements.api import enregistrer_reservations
 
         from .documents import PRODUIT
+        from .occupations import FOURNISSEUR
 
         enregistrer(PRODUIT)
+        enregistrer_reservations(FOURNISSEUR)

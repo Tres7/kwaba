@@ -6,6 +6,8 @@ from django.db.models import Count, Q
 from django.utils import timezone
 
 from . import disponibilites
+from . import occupations
+from .occupations import FournisseurReservations as FournisseurReservations
 from .models import HebergementModel
 from .serializers import HebergementSerializer
 
@@ -106,3 +108,7 @@ def enregistrer_verification(hebergement_id: uuid.UUID, verifiee: bool, motif: s
     else:
         HebergementModel.objects.filter(pk=hebergement_id).update(
             statut_verification='refusee', motif_refus=motif, updated_at=maintenant)
+
+
+def enregistrer_reservations(fournisseur: FournisseurReservations) -> None:
+    occupations.enregistrer(fournisseur)

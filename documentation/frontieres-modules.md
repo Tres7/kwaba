@@ -36,7 +36,8 @@ Une PR par module. L'API vue par le client ne change pas.
 | 10 | give | Migré : passe par `paiements.api`, qui expose les fonctions de paiement utilisées par les produits et les emails de paiement (`envoyer_email`, `emails_admins`, `fcfa`, `documents_joints`) ; la relation inverse `don.paiements` partira avec les clés étrangères de `PaiementModel` (étape `paiements`) |
 | 11 | transferts | Migré : passe par `paiements.api` et `reservations.api` (séjour associé vérifié avec `appartient_au_voyageur`) ; le transfert garde l'identifiant du séjour |
 | 12 | locations | Migré : chauffeurs lus via `transferts.api` (`fiche_chauffeur`, `fiches_chauffeurs`, `chauffeurs_actifs`, `chauffeurs_des_transferts_termines`) ; Pack Séjour via `reservations.api.reduire_frais_pack_sejour` et `paiements.api.rembourser_en_partie` ; la location et le versement au chauffeur gardent les identifiants du séjour et des chauffeurs |
-| 13 | reservations, hebergements | À faire |
+| 13 | hebergements | Migré : ne lit plus les réservations ; disponibilités, calendrier de l'hôte, archivage et suppression d'un type passent par un registre que `reservations` remplit au démarrage (`hebergements/occupations.py`) ; règle de publication via `contrats.api.condition_contrat_signe` et `documents.api.condition_societe_immatriculee` ; emails d'alerte et tarif fidélité via `paiements.api` |
+| 13 bis | reservations | À faire |
 | 14 | paiements | À faire |
 | 15 | backoffice | À faire |
 | 16 | users (clés étrangères vers les comptes) | À faire |

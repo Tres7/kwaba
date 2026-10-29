@@ -4,7 +4,7 @@ A type is available over [debut, fin) for `nb` units if, FOR EACH NIGHT from deb
 excluded), its quantity minus the units held by active bookings covering that night is at least `nb`, and no
 closure covers that night (a closure without a type closes the whole establishment).
 
-Active bookings: confirmed, or waiting for a payment that has not expired (disponibilites.filtre_actives). A booking
+Active bookings: confirmed, or waiting for a payment that has not expired (given by the reservations module). A booking
 without a unit type (data written before the types) counts against every type of its establishment: never too few.
 
 Everything is read in two queries (bookings, closures) whatever the number of types and nights.
@@ -13,10 +13,8 @@ from collections import defaultdict
 from datetime import date, timedelta
 from typing import Iterable
 
-from django.db.models import Q
-
-from .disponibilites import filtre_actives
 from .models import BlocageModel, TypeLogementModel
+from .occupations import reservations
 
 
 def nuits(debut: date, fin: date) -> list[date]:
@@ -28,8 +26,6 @@ class Occupation:
     """Units taken and closed nights of some unit types over [debut, fin), read once."""
 
     def __init__(self, types: Iterable[TypeLogementModel], debut: date, fin: date, exclure=None):
-        from apps.reservations.models import ReservationModel  # local import: reservations depends on hebergements
-
         self.types = {t.id: t for t in types}
         self.debut, self.fin = debut, fin
         etablissements = {t.hebergement_id for t in self.types.values()}
@@ -42,16 +38,13 @@ class Occupation:
         for t in self.types.values():
             par_etablissement[t.hebergement_id].append(t.id)
 
-        reservations = ReservationModel.objects.filter(
-            filtre_actives(), check_in__lt=fin, check_out__gt=debut,
-        ).filter(Q(type_logement_id__in=self.types) | Q(type_logement__isnull=True, hebergement_id__in=etablissements))
-        if exclure:
-            reservations = reservations.exclude(pk=exclure)
-        for r in reservations.only('type_logement_id', 'hebergement_id', 'check_in', 'check_out', 'nb_unites'):
-            concernes = [r.type_logement_id] if r.type_logement_id else par_etablissement[r.hebergement_id]
-            for nuit in nuits(max(r.check_in, debut), min(r.check_out, fin)):
+        for r in reservations().actives(etablissements, debut, fin, exclure):
+            if r['type_logement_id'] and r['type_logement_id'] not in self.types:
+                continue
+            concernes = [r['type_logement_id']] if r['type_logement_id'] else par_etablissement[r['hebergement_id']]
+            for nuit in nuits(max(r['check_in'], debut), min(r['check_out'], fin)):
                 for type_id in concernes:
-                    self.prises[type_id][nuit] += r.nb_unites or 1
+                    self.prises[type_id][nuit] += r['nb_unites'] or 1
 
         blocages = BlocageModel.objects.filter(hebergement_id__in=etablissements, debut__lt=fin, fin__gt=debut)
         for b in blocages.only('hebergement_id', 'type_logement_id', 'debut', 'fin'):

@@ -42,13 +42,6 @@ ignore_imports =
     apps.backoffice.views -> apps.paiements.tarifs
     apps.backoffice.views -> apps.reservations.models
     apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
-    apps.hebergements.alertes -> apps.paiements.notifications
-    apps.hebergements.disponibilites -> apps.reservations.models
-    apps.hebergements.management.commands.seed_demo -> apps.users.infrastructure.persistence.models
-    apps.hebergements.models -> apps.contrats.models
-    apps.hebergements.models -> apps.documents.models
-    apps.hebergements.serializers -> apps.paiements.tarifs
-    apps.hebergements.stock -> apps.reservations.models
     apps.paiements.relances -> apps.locations.models
     apps.paiements.relances -> apps.reservations.models
     apps.paiements.relances -> apps.transferts.models
