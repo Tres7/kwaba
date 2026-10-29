@@ -148,14 +148,14 @@ class DevisView(APIView):
 
 def _du_voyageur(pk, user):
     return (TransfertModel.objects.select_related('aeroport', 'chauffeur')
-            .filter(pk=pk, voyageur=user).first())
+            .filter(pk=pk, voyageur_id=user.pk).first())
 
 
 class TransfertsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = (TransfertModel.objects.filter(voyageur=request.user).select_related('aeroport', 'chauffeur')
+        qs = (TransfertModel.objects.filter(voyageur_id=request.user.pk).select_related('aeroport', 'chauffeur')
               )
         reservation = request.query_params.get('reservation')
         if reservation:

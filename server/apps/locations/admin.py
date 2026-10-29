@@ -51,10 +51,10 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = ['reference', 'categorie', 'formule', 'lieu_prise', 'debut', 'jours', 'prix', 'statut', 'partenaire',
                     'chauffeur_partenaire_id']
     list_filter = ['statut', 'formule', 'lieu_prise__ville', 'categorie__gamme']
-    search_fields = ['voyageur__email', 'telephone', 'conducteur']
+    search_fields = ['voyageur_id', 'telephone', 'conducteur']
     ordering = ['debut']
     readonly_fields = [
-        'voyageur', 'reservation_id', 'categorie', 'formule', 'lieu_prise', 'adresse_prise', 'lieu_retour', 'adresse_retour',
+        'voyageur_id', 'reservation_id', 'categorie', 'formule', 'lieu_prise', 'adresse_prise', 'lieu_retour', 'adresse_retour',
         'debut', 'fin', 'passagers', 'telephone', 'precisions', 'conducteur', 'permis_numero', 'permis_pays', 'jours',
         'jours_hors_lome', 'jours_hors_pays', 'chauffeur_demande_id', 'prix_jour', 'frais_lieux', 'prix_chauffeur', 'primes',
         'prix', 'commission', 'part_kwaba_chauffeur', 'caution', 'moyen', 'statut', 'expire_le', 'annulee_par',

@@ -9,8 +9,8 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 from .infrastructure.persistence.models import UserModel
 
 __all__ = [
-    'Compte', 'ROLES', 'compte', 'comptes', 'emails_actifs', 'ids_actifs', 'ids_par_recherche', 'revoquer_jetons',
-    'statistiques',
+    'Compte', 'ROLES', 'attacher', 'compte', 'comptes', 'comptes_actifs', 'emails_actifs', 'ids_actifs', 'ids_par_recherche',
+    'revoquer_jetons', 'statistiques',
 ]
 
 ROLES = [code for code, _ in UserModel.ROLE_CHOICES]
@@ -29,6 +29,8 @@ class Compte:
     is_verified: bool
     date_joined: datetime
     avatar_url: str | None
+
+    is_authenticated = True
 
     @property
     def pk(self) -> uuid.UUID:
@@ -59,6 +61,16 @@ def comptes(user_ids: Iterable[uuid.UUID | None]) -> dict[uuid.UUID, Compte]:
     return {u.id: _compte(u) for u in UserModel.objects.filter(pk__in=ids)} if ids else {}
 
 
+def attacher(objets: Iterable, *champs: str) -> list:
+    """Loads in one query the accounts read through the `<champ>` cached property of each object."""
+    objets = list(objets)
+    trouves = comptes(getattr(o, f'{c}_id') for o in objets for c in champs)
+    for o in objets:
+        for c in champs:
+            o.__dict__[c] = trouves.get(getattr(o, f'{c}_id'))
+    return objets
+
+
 def ids_par_recherche(texte: str) -> list[uuid.UUID]:
     return list(UserModel.objects.filter(
         Q(email__icontains=texte) | Q(first_name__icontains=texte) | Q(last_name__icontains=texte)
@@ -67,6 +79,16 @@ def ids_par_recherche(texte: str) -> list[uuid.UUID]:
 
 def ids_actifs(roles: Iterable[str]) -> list[uuid.UUID]:
     return list(UserModel.objects.filter(role__in=list(roles), is_active=True).values_list('id', flat=True))
+
+
+def comptes_actifs(roles: Iterable[str], texte: str = '', ids: Iterable[uuid.UUID] | None = None,
+                   limite: int | None = None) -> list[Compte]:
+    qs = UserModel.objects.filter(role__in=list(roles), is_active=True).order_by('first_name', 'last_name')
+    if texte:
+        qs = qs.filter(Q(email__icontains=texte) | Q(first_name__icontains=texte) | Q(last_name__icontains=texte))
+    if ids is not None:
+        qs = qs.filter(pk__in=list(ids))
+    return [_compte(u) for u in (qs[:limite] if limite else qs)]
 
 
 def emails_actifs(roles: Iterable[str], limite: int | None = None) -> list[str]:

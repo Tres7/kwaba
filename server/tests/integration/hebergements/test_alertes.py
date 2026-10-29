@@ -28,7 +28,7 @@ def _sans_pause(settings):
 def complet(make_hebergement, make_user):
     """A one-unit listing booked from day 10 to day 12."""
     h = make_hebergement(name='Villa Soleil')
-    r = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest=make_user(), check_in=_jour(10),
+    r = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest_id=make_user().pk, check_in=_jour(10),
                                         check_out=_jour(12), total_price=0, status='confirmed')
     return h, r
 
@@ -50,7 +50,7 @@ class TestCreation:
         reponse = _alerte(client_for(voyageur), h)
         assert reponse.status_code == 201 and reponse.data['statut'] == 'active'
         alerte = AlerteDisponibiliteModel.objects.get()
-        assert (alerte.email, alerte.utilisateur, alerte.statut) == (voyageur.email, voyageur, 'active')
+        assert (alerte.email, alerte.utilisateur_id, alerte.statut) == (voyageur.email, voyageur.id, 'active')
         assert _passe() == {'alertes_expirees': 0, 'alertes_confirmations': 0, 'alertes_envoyees': 0}
         assert mail.outbox == []
 
@@ -169,7 +169,7 @@ class TestTriggers:
 
     def test_other_dates_freed(self, active, make_user, django_capture_on_commit_callbacks):
         h, _, alerte = active
-        ailleurs = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest=make_user(),
+        ailleurs = ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=h.types.get().id, guest_id=make_user().pk,
                                                    check_in=_jour(20), check_out=_jour(22), total_price=0, status='confirmed')
         with django_capture_on_commit_callbacks(execute=True):
             reservations_paiement.annuler(ailleurs, par='voyageur')
@@ -192,7 +192,7 @@ class TestTriggers:
                                 format='json')
         suite = h.types.get(nom='Suite')
         for t in (chambre, suite):
-            ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=t.id, guest=make_user(), check_in=_jour(10),
+            ReservationModel.objects.create(hebergement_id=h.id, type_logement_id=t.id, guest_id=make_user().pk, check_in=_jour(10),
                                             check_out=_jour(12), total_price=0, status='confirmed')
         _alerte(client_for(make_user()), h, type_logement=str(suite.id))
         ReservationModel.objects.filter(type_logement_id=chambre.id).update(status='cancelled')

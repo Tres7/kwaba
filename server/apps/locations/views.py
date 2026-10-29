@@ -247,14 +247,14 @@ class MesChauffeursView(APIView):
 
 def _de_l_utilisateur(pk, user):
     return (LocationModel.objects.select_related('categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
-            .prefetch_related('categorie__photos').filter(pk=pk, voyageur=user).first())
+            .prefetch_related('categorie__photos').filter(pk=pk, voyageur_id=user.pk).first())
 
 
 class LocationsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = (LocationModel.objects.filter(voyageur=request.user)
+        qs = (LocationModel.objects.filter(voyageur_id=request.user.pk)
               .select_related('categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
               .prefetch_related('categorie__photos'))
         data = LocationSerializer(qs, many=True, context={'request': request}).data

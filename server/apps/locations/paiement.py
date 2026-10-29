@@ -20,7 +20,7 @@ def _decrire(loc) -> dict:
 
 
 def _decrire_paiement(location_id) -> dict | None:
-    loc = LocationModel.objects.filter(pk=location_id).select_related('voyageur', 'categorie', 'lieu_prise').first()
+    loc = LocationModel.objects.filter(pk=location_id).select_related('categorie', 'lieu_prise').first()
     if not loc:
         return None
     return {'payeur': loc.voyageur, 'reference': loc.reference, 'libelle': f"Location {loc.libelle}, {loc.lieu_prise.ville}",
@@ -34,7 +34,7 @@ PRODUIT_PAYE = ProduitPaye(
     passe=services.passe,
     versements=lambda payout_id: list(VersementPartenaireModel.objects.filter(payout_id=payout_id, statut='en_cours')),
     relance=Relance(
-        requete=lambda: LocationModel.objects.select_related('voyageur', 'categorie'), champ_statut='statut',
+        requete=lambda: LocationModel.objects.select_related('categorie'), champ_statut='statut',
         en_attente='en_attente_paiement', annule='annulee', champ_annule_par='annulee_par', decrire=_decrire,
     ),
 )

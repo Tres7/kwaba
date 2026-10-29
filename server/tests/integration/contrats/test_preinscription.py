@@ -48,7 +48,7 @@ def test_acceptance_records_the_proof_once(client_for, make_user):
     assert _accepter(client).status_code == 201
     assert _accepter(client, langue='en').status_code == 201
 
-    proof = PreinscriptionModel.objects.get(hote=hote)
+    proof = PreinscriptionModel.objects.get(hote_id=hote.pk)
     assert proof.version == preinscription.VERSION and proof.langue == 'fr'
     assert proof.empreinte_texte == hashlib.sha256(preinscription.TEXTES['fr'].encode()).hexdigest()
     assert proof.ip == '127.0.0.1' and proof.user_agent == 'Mozilla/5.0 test'

@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from apps.hebergements.api import FournisseurReservations
 from apps.paiements import api as paiements
+from apps.users import api as users
 
 from .models import ReservationModel
 
@@ -38,7 +39,7 @@ def detail(hebergement_id, debut, fin) -> list[dict]:
         'id': r.id, 'hebergement_id': r.hebergement_id, 'type_logement_id': r.type_logement_id, 'check_in': r.check_in,
         'check_out': r.check_out, 'nb_unites': r.nb_unites, 'reference': r.reference, 'statut': r.status,
         'voyageur': f"{r.guest.first_name} {r.guest.last_name}".strip(),
-    } for r in _sur_la_periode([hebergement_id], debut, fin).select_related('guest')]
+    } for r in users.attacher(_sur_la_periode([hebergement_id], debut, fin), 'guest')]
 
 
 def sejour_paye_a_venir(hebergement_id) -> bool:
@@ -47,7 +48,7 @@ def sejour_paye_a_venir(hebergement_id) -> bool:
 
 
 def annuler_en_attente(hebergement_id) -> list[dict]:
-    en_attente = list(ReservationModel.objects.filter(hebergement_id=hebergement_id, status='pending').select_related('guest'))
+    en_attente = users.attacher(ReservationModel.objects.filter(hebergement_id=hebergement_id, status='pending'), 'guest')
     ReservationModel.objects.filter(pk__in=[r.pk for r in en_attente]).update(
         status='cancelled', annule_par='hote', annule_le=timezone.now(),
     )

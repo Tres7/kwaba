@@ -107,7 +107,7 @@ def passe() -> dict:
 
 
 def decrire(reservation_id) -> dict | None:
-    r = ReservationModel.objects.filter(pk=reservation_id).select_related('guest').first()
+    r = ReservationModel.objects.filter(pk=reservation_id).first()
     if not r:
         return None
     return {'payeur': r.guest, 'reference': r.reference, 'libelle': _annonce(r)['name'], 'moyen': r.payment_method}
@@ -127,7 +127,7 @@ PRODUIT_PAYE = ProduitPaye(
     paiement_recu=paiement_recu,
     passe=passe,
     relance=Relance(
-        requete=lambda: ReservationModel.objects.select_related('guest'), champ_statut='status', en_attente='pending',
+        requete=lambda: ReservationModel.objects, champ_statut='status', en_attente='pending',
         annule='cancelled', champ_annule_par='annule_par', decrire=_decrire_relance,
     ),
 )

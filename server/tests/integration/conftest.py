@@ -96,7 +96,7 @@ def make_hebergement(make_user):
         # Listing already verified by an agent (published); the verification tests pass statut_verification
         fields.setdefault('statut_verification', 'verifiee')
         # Its default unit type (quantity 1) comes with it: apps.hebergements.signals
-        return HebergementModel.objects.create(host=host or make_user(role='hote'), **fields)
+        return HebergementModel.objects.create(host_id=(host or make_user(role='hote')).pk, **fields)
 
     return _make
 
@@ -126,7 +126,7 @@ def make_reservation(make_user):
     def _make(hebergement, guest=None, starts_in=10, nights=3, status='confirmed'):
         check_in = timezone.localdate() + timedelta(days=starts_in)
         return ReservationModel.objects.create(
-            hebergement_id=hebergement.id, guest=guest or make_user(), check_in=check_in,
+            hebergement_id=hebergement.id, guest_id=(guest or make_user()).pk, check_in=check_in,
             check_out=check_in + timedelta(days=nights), total_price=0, status=status,
         )
 

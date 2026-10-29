@@ -85,7 +85,7 @@ def calculer(prix_par_nuit, nuits: int, frais=FRAIS_VOYAGEUR, commission=COMMISS
 def conditions(hote):
     from .models import ConditionsHoteModel
 
-    return ConditionsHoteModel.objects.filter(hote=hote).first()
+    return ConditionsHoteModel.objects.filter(hote_id=getattr(hote, 'pk', hote)).first()
 
 
 def taux_commission(hote, jour=None) -> Decimal:

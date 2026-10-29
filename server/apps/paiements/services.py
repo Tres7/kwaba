@@ -18,6 +18,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from apps.users import api as users
 from config import prelancement
 
 from . import fedapay, paypal, tarifs
@@ -330,10 +331,10 @@ def envoyer_versements_dus() -> int:
     envoyes = 0
     from apps.reservations import api as reservations  # local import: reservations depends on paiements
 
-    dus = list(VersementModel.objects.filter(statut='planifie', date_prevue__lte=timezone.now()).select_related('hote'))
+    dus = users.attacher(VersementModel.objects.filter(statut='planifie', date_prevue__lte=timezone.now()), 'hote')
     confirmees = reservations.ids_confirmees(v.reservation_id for v in dus)
     for versement in [v for v in dus if v.reservation_id in confirmees][:50]:
-        profil = ProfilVersementModel.objects.filter(hote=versement.hote).first()
+        profil = ProfilVersementModel.objects.filter(hote_id=versement.hote_id).first()
         if not profil:
             if not versement.derniere_erreur:
                 versement.derniere_erreur = "L'hôte n'a pas encore indiqué où recevoir son argent."

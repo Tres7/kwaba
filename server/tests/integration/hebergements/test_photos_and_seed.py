@@ -64,7 +64,7 @@ def test_seed_demo_is_idempotent(api_client, monkeypatch):
     call_command('seed_demo', stdout=StringIO())
 
     host = UserModel.objects.get(email='hote.demo@kwa-ba.com')
-    assert HebergementModel.objects.filter(host=host).count() == 12
+    assert HebergementModel.objects.filter(host_id=host.pk).count() == 12
     response = api_client.post('/api/v1/auth/login/', {'email': host.email, 'password': 'Kwa-Ba2026!'},
                                format='json')
     assert response.status_code == 200

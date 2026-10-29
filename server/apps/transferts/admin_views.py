@@ -9,6 +9,7 @@ from apps.paiements.api import operateurs_du_pays
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
+from apps.users import api as users
 
 from apps.securite.backoffice import motif as _motif, nom as _nom, paginer as _paginer
 
@@ -122,7 +123,7 @@ def _transfert(t: TransfertModel) -> dict:
 
 
 def _transferts():
-    return TransfertModel.objects.select_related('voyageur', 'aeroport', 'chauffeur')
+    return TransfertModel.objects.select_related('aeroport', 'chauffeur')
 
 
 class TransfertsView(APIView):
@@ -134,11 +135,11 @@ class TransfertsView(APIView):
         if (statut := request.query_params.get('statut')) in dict(TransfertModel.STATUTS):
             qs = qs.filter(statut=statut)
         if q := request.query_params.get('q', '').strip():
-            filtre = Q(voyageur__email__icontains=q) | Q(telephone__icontains=q) | Q(numero_vol__icontains=q)
+            filtre = Q(voyageur_id__in=users.ids_par_recherche(q)) | Q(telephone__icontains=q) | Q(numero_vol__icontains=q)
             if len(q.split('-')[-1]) >= 4:
                 filtre |= Q(id__istartswith=q.split('-')[-1])
             qs = qs.filter(filtre)
-        return _paginer(request, qs, _transfert)
+        return _paginer(request, qs, lambda page: [_transfert(x) for x in users.attacher(page, 'voyageur')], en_lot=True)
 
 
 class TransfertChauffeursView(APIView):

@@ -90,7 +90,7 @@ def test_units_left_for_a_hotel(api_client, listings, make_user):
     hotel = listings['hotel']
     hotel.types.update(quantite=5)
     check_in = timezone.localdate() + timedelta(days=10)
-    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=hotel.types.get().id, nb_unites=3, guest=make_user(),
+    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=hotel.types.get().id, nb_unites=3, guest_id=make_user().pk,
                                     check_in=check_in, check_out=check_in + timedelta(days=2), total_price=0,
                                     status='confirmed')
     (ligne,) = [h for h in api_client.get(HEBERGEMENTS, _dates(check_in)).data['results'] if h['name'] == 'Hôtel du Golfe']

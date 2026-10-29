@@ -25,7 +25,6 @@ modules =
     apps.voyages
 ignore_imports =
     apps.** -> apps.*.api
-    apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
 
 [importlinter:contract:noyau-partage]
 name = securite et notifications ne dépendent d'aucun module métier

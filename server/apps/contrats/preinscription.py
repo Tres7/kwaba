@@ -38,7 +38,7 @@ def empreinte(langue: str) -> str:
 
 
 def acceptee(hote) -> bool:
-    return PreinscriptionModel.objects.filter(hote=hote, version=VERSION).exists()
+    return PreinscriptionModel.objects.filter(hote_id=hote.pk, version=VERSION).exists()
 
 
 def requise(utilisateur) -> bool:
@@ -49,7 +49,7 @@ def requise(utilisateur) -> bool:
 def accepter(hote, *, langue: str, ip: str | None, user_agent: str) -> PreinscriptionModel:
     """Records the acceptance of the current version (idempotent: a second acceptance keeps the first proof)."""
     preinscription, _ = PreinscriptionModel.objects.get_or_create(
-        hote=hote, version=VERSION,
+        hote_id=hote.pk, version=VERSION,
         defaults={'langue': langue, 'empreinte_texte': empreinte(langue), 'ip': ip, 'user_agent': (user_agent or '')[:300]},
     )
     return preinscription

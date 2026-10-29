@@ -80,7 +80,7 @@ class HebergementListView(APIView):
             return Response(recherche.errors, status=status.HTTP_400_BAD_REQUEST)
         filtres = recherche.validated_data
 
-        qs = HebergementModel.objects.publiees().select_related('host', 'host__piece_identite')
+        qs = HebergementModel.objects.publiees()
 
         city = request.query_params.get('city')
         if city:
@@ -168,7 +168,7 @@ class HebergementListView(APIView):
             _signaler_coordonnees(request, serializer, 'nouvelle')
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        hebergement = serializer.save(host=request.user)  # its default unit type: signals.type_par_defaut
+        hebergement = serializer.save(host_id=request.user.pk)  # its default unit type: signals.type_par_defaut
         # Visible to travellers only after an agent's visit (offered once the host's identity is verified)
         verifications.visite_a_planifier(hebergement.id)
         return Response(
@@ -181,7 +181,7 @@ class MyHebergementsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = HebergementModel.objects.filter(host=request.user).select_related('host', 'host__piece_identite')
+        qs = HebergementModel.objects.filter(host_id=request.user.pk)
         serializer = HebergementSerializer(qs, many=True, context=_context(request, proprietaire=True))
         return Response({'results': serializer.data, 'count': len(serializer.data)})
 
@@ -256,7 +256,7 @@ class HebergementDetailView(APIView):
 
     def _get_object(self, pk):
         try:
-            return HebergementModel.objects.select_related('host', 'host__piece_identite').get(pk=pk)
+            return HebergementModel.objects.get(pk=pk)
         except HebergementModel.DoesNotExist:
             return None
 
@@ -320,7 +320,7 @@ class PhotoUploadView(APIView):
         except InvalidPhoto as e:
             return Response({'file': [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
 
-        photo = HebergementPhotoModel(owner=request.user, width=width, height=height)
+        photo = HebergementPhotoModel(owner_id=request.user.pk, width=width, height=height)
         photo.image.save('photo.jpg', content, save=False)
         photo.save()
         return Response(_photo_json(request, photo), status=status.HTTP_201_CREATED)
@@ -330,7 +330,7 @@ class PhotoDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-        photo = HebergementPhotoModel.objects.filter(pk=pk, owner=request.user).first()
+        photo = HebergementPhotoModel.objects.filter(pk=pk, owner_id=request.user.pk).first()
         if not photo:
             return Response({'detail': 'Photo introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         photo.image.delete(save=False)
@@ -441,7 +441,7 @@ class BlocageDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-        blocage = BlocageModel.objects.filter(pk=pk, hebergement__host=request.user).first()
+        blocage = BlocageModel.objects.filter(pk=pk, hebergement__host_id=request.user.pk).first()
         if not blocage:
             return Response({'detail': 'Blocage introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         blocage.delete()
@@ -450,7 +450,7 @@ class BlocageDetailView(APIView):
 
 
 def _type_du_proprietaire(request, pk):
-    return TypeLogementModel.objects.select_related('hebergement').filter(pk=pk, hebergement__host=request.user).first()
+    return TypeLogementModel.objects.select_related('hebergement').filter(pk=pk, hebergement__host_id=request.user.pk).first()
 
 
 class TypesLogementView(APIView):
@@ -458,7 +458,7 @@ class TypesLogementView(APIView):
     permission_classes = [IsAuthenticated]
 
     def _etablissement(self, request, pk):
-        return HebergementModel.objects.filter(pk=pk, host=request.user).first()
+        return HebergementModel.objects.filter(pk=pk, host_id=request.user.pk).first()
 
     def get(self, request, pk):
         hebergement = self._etablissement(request, pk)

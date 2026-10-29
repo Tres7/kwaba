@@ -8,7 +8,7 @@ ADMIN_ANNONCES = '/api/v1/admin/hebergements/'
 
 
 def _piece(hote, statut):
-    return PieceIdentiteModel.objects.create(hote=hote, type_piece='cni', statut=statut)
+    return PieceIdentiteModel.objects.create(hote_id=hote.pk, type_piece='cni', statut=statut)
 
 
 def test_counts_what_waits_for_an_agent(client_for, make_user, make_hebergement):

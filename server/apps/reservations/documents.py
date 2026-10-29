@@ -1,10 +1,10 @@
 """Documents of a stay: voucher, payment receipt and invoice lines (registered in documents at start-up)."""
-from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from apps.documents.api import Document, Produit, date, fcfa, nom as _nom
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
+from apps.users import api as users
 
 from .models import ReservationModel
 
@@ -19,7 +19,7 @@ def _annonce(r) -> dict:
 
 def bon(r) -> bytes:
     h = _annonce(r)
-    hote = get_user_model().objects.get(pk=h['host_id'])
+    hote = users.compte(h['host_id'])
     doc = Document('Bon de réservation', r.reference, sous_titre=f"émis le {date(timezone.now())}",
                    destinataire=[_nom(r.guest), r.guest.email])
     doc.bloc('Votre séjour', [

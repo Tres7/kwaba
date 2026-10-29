@@ -66,7 +66,7 @@ def test_projets_d_une_ong(admin):
 def test_reversement_effectue_avec_preuve(admin, make_user):
     ong = _ong(verifiee_le=date(2026, 9, 1), verification='Vérifiée')
     mois_dernier = (timezone.localdate().replace(day=1) - timedelta(days=1)).replace(day=1)
-    DonModel.objects.create(donateur=make_user(), organisation=ong, montant=2000, frais=0, total=2000, montant_ong=2000,
+    DonModel.objects.create(donateur_id=make_user().pk, organisation=ong, montant=2000, frais=0, total=2000, montant_ong=2000,
                             statut='paye', paye_le=timezone.make_aware(timezone.datetime.combine(mois_dernier, timezone.datetime.min.time())))
     assert admin.post(B + 'reversements/preparer/').data['dons'] == 1
     r = ReversementModel.objects.get(organisation=ong)
@@ -89,7 +89,7 @@ def test_reversement_effectue_avec_preuve(admin, make_user):
 
 def test_dons_en_lecture(admin, make_user):
     ong = _ong()
-    DonModel.objects.create(donateur=make_user(email='awa@test.tg'), organisation=ong, montant=500, frais=15, total=515,
+    DonModel.objects.create(donateur_id=make_user(email='awa@test.tg').pk, organisation=ong, montant=500, frais=15, total=515,
                             montant_ong=500, statut='paye', paye_le=timezone.now())
     assert admin.get(B + 'dons/', {'q': 'awa'}).data['count'] == 1
     assert admin.get(B + 'dons/', {'organisation': 'pas-un-uuid'}).status_code == 400

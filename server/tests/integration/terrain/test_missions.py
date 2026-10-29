@@ -31,14 +31,14 @@ def admin(make_user):
 def annonce(make_user, make_hebergement):
     """Listing ready for a visit: host identity verified."""
     hote = make_user(role='hote', phone='+22890000001')
-    PieceIdentiteModel.objects.create(hote=hote, type_piece='cni', statut='verifiee')
+    PieceIdentiteModel.objects.create(hote_id=hote.pk, type_piece='cni', statut='verifiee')
     return make_hebergement(host=hote, name='Villa des cocotiers', statut_verification='en_attente', city='Lomé')
 
 
 @pytest.fixture
 def piece(make_user):
     hote = make_user(role='hote', phone='+22890000002', first_name='Ama', last_name='Koffi')
-    return PieceIdentiteModel.objects.create(hote=hote, type_piece='passeport', statut='soumise')
+    return PieceIdentiteModel.objects.create(hote_id=hote.pk, type_piece='passeport', statut='soumise')
 
 
 def _url(type_mission, cible, action=''):

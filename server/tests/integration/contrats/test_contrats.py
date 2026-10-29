@@ -91,7 +91,7 @@ def test_hote_signe_son_contrat_depuis_son_espace(client_for, make_user, societe
         reponse = client.post(f'{C}hote/signer/', corps, format='json', HTTP_USER_AGENT='Mozilla/5.0 Test')
     assert reponse.status_code == 200, reponse.data
     assert reponse.data['statut'] == 'signe'
-    contrat = ContratModel.objects.get(hote=hote)
+    contrat = ContratModel.objects.get(hote_id=hote.pk)
     assert contrat.signataire_nom == 'Ama Mensah' and contrat.methode == 'compte Kwa-Ba'
     assert contrat.ip == '127.0.0.1' and contrat.user_agent == 'Mozilla/5.0 Test'
     assert len(contrat.empreinte_texte) == 64 and len(contrat.empreinte_pdf) == 64 and contrat.pdf
@@ -187,14 +187,14 @@ def test_contrat_hotel_emis_pour_un_compte_hote(admin, make_user, societe, djang
     with django_capture_on_commit_callbacks(execute=True):
         reponse = admin.post(A, {'type': 'hotel', 'partie_id': hotel.pk}, format='json')
     assert reponse.status_code == 201, reponse.data
-    contrat = ContratModel.objects.get(hote=hotel)
+    contrat = ContratModel.objects.get(hote_id=hotel.pk)
     assert contrat.type == 'hotel' and contrat.titre == 'Contrat hôtel et résidence hôtelière'
     assert "ci-après « l'Établissement »" in contrat.corps and '12 % du prix' in contrat.corps
     assert 'Charte du Réseau Kwa-Ba Partenaires' in contrat.corps and '{{' not in contrat.corps
 
 def test_la_visite_attend_la_signature_du_contrat(client_for, make_user, make_hebergement, societe, django_capture_on_commit_callbacks):
     hote = make_user(role='hote')
-    PieceIdentiteModel.objects.create(hote=hote, type_piece='cni', statut='verifiee')
+    PieceIdentiteModel.objects.create(hote_id=hote.pk, type_piece='cni', statut='verifiee')
     annonce = make_hebergement(host=hote, statut_verification='en_attente')
     make_user(role='agent', email='agent@kwa-ba.com')
     agent = client_for(make_user(role='agent'))
@@ -213,7 +213,7 @@ def test_la_visite_attend_la_signature_du_contrat(client_for, make_user, make_he
 
 def test_visites_inchangees_sans_informations_legales(client_for, make_user, make_hebergement):
     hote = make_user(role='hote')
-    PieceIdentiteModel.objects.create(hote=hote, type_piece='cni', statut='verifiee')
+    PieceIdentiteModel.objects.create(hote_id=hote.pk, type_piece='cni', statut='verifiee')
     make_hebergement(host=hote, statut_verification='en_attente')
     assert client_for(make_user(role='agent')).get('/api/v1/verifications/visites/').data['count'] == 1
 

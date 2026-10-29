@@ -42,6 +42,7 @@ urlpatterns = [
     path('api/v1/admin/', include('apps.give.admin_urls')),
     path('api/v1/admin/', include('apps.locations.admin_urls')),
     path('api/v1/admin/', include('apps.transferts.admin_urls')),
+    path('api/v1/admin/', include('apps.users.admin_urls')),
     path('api/v1/admin/', include('apps.backoffice.urls')),
     path('api/v1/documents/', include('apps.documents.urls')),
     path('api/v1/contrats/', include('apps.contrats.urls')),

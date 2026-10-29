@@ -65,7 +65,7 @@ def creer(*, voyageur, aeroport: AeroportModel, arrivee: datetime, categorie: st
     prix = tarifs.calculer(tarif.prix)
     en_ligne = paiements.paiement_actif()
     return TransfertModel.objects.create(
-        voyageur=voyageur, aeroport=aeroport, arrivee=arrivee, categorie=categorie, passagers=passagers,
+        voyageur_id=voyageur.pk, aeroport=aeroport, arrivee=arrivee, categorie=categorie, passagers=passagers,
         bagages=bagages, prix=prix.prix, commission=prix.commission,
         statut='en_attente_paiement' if en_ligne else 'confirme',
         expire_le=timezone.now() + paiements.delai_paiement() if en_ligne else None,

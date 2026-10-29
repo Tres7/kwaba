@@ -13,9 +13,9 @@ class PaiementAdmin(admin.ModelAdmin):
 
 @admin.register(VersementModel)
 class VersementAdmin(admin.ModelAdmin):
-    list_display = ['reservation_id', 'hote', 'montant', 'commission', 'statut', 'date_prevue', 'derniere_erreur']
+    list_display = ['reservation_id', 'hote_id', 'montant', 'commission', 'statut', 'date_prevue', 'derniere_erreur']
     list_filter = ['statut']
-    search_fields = ['hote__email', 'payout_id']
+    search_fields = ['hote_id', 'payout_id']
 
 
 @admin.register(RemboursementModel)
@@ -27,12 +27,12 @@ class RemboursementAdmin(admin.ModelAdmin):
 
 @admin.register(ProfilVersementModel)
 class ProfilVersementAdmin(admin.ModelAdmin):
-    list_display = ['hote', 'pays', 'operateur', 'numero', 'titulaire', 'mis_a_jour_le']
+    list_display = ['hote_id', 'pays', 'operateur', 'numero', 'titulaire', 'mis_a_jour_le']
     list_filter = ['pays', 'operateur']
 
 
 @admin.register(ConditionsHoteModel)
 class ConditionsHoteAdmin(admin.ModelAdmin):
-    list_display = ['hote', 'categorie', 'fondateur_debut', 'fondateur_fin', 'mis_a_jour_le']
+    list_display = ['hote_id', 'categorie', 'fondateur_debut', 'fondateur_fin', 'mis_a_jour_le']
     list_filter = ['categorie']
-    search_fields = ['hote__email']
+    search_fields = ['hote_id']

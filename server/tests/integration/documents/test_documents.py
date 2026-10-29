@@ -113,7 +113,7 @@ def test_recu_de_don(client_for, make_user):
     from django.utils import timezone
     ong = OrganisationModel.objects.create(nom='Écoles du Mono', slug='ecoles', cause='education', pays='TG', ville='Aného',
                                            resume='x', description='x', numero_enregistrement='TG-1')
-    don = DonModel.objects.create(donateur=make_user(), organisation=ong, montant=2000, frais=60, total=2060, montant_ong=2000,
+    don = DonModel.objects.create(donateur_id=make_user().pk, organisation=ong, montant=2000, frais=60, total=2060, montant_ong=2000,
                                   statut='paye', paye_le=timezone.now())
     _paye(don, 2060, don=don)
     _pdf(client_for(don.donateur).get(f'{D}don/{don.id}/recu/'))

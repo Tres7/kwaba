@@ -89,9 +89,9 @@ def test_payment_after_expiry_refunded_when_the_units_are_gone(make_user, hotel,
     double = hotel.types.get()
     arrivee, depart = _sejour()
     en_retard = ReservationModel.objects.create(
-        hebergement_id=hotel.id, type_logement_id=double.id, nb_unites=2, guest=make_user(), check_in=arrivee, check_out=depart,
+        hebergement_id=hotel.id, type_logement_id=double.id, nb_unites=2, guest_id=make_user().pk, check_in=arrivee, check_out=depart,
         total_price=0, status='cancelled', annule_par='expiration')
-    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=double.id, nb_unites=2, guest=make_user(),
+    ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=double.id, nb_unites=2, guest_id=make_user().pk,
                                     check_in=arrivee, check_out=depart, total_price=0, status='confirmed')
     paiement = PaiementModel.objects.create(reservation_id=en_retard.id, montant=1000, statut='en_attente')
     rembourses = []
@@ -113,7 +113,7 @@ def test_payment_refunded_when_paid_twice_or_cancelled_before(make_user, hotel, 
 
     arrivee, depart = _sejour()
     reservation = ReservationModel.objects.create(
-        hebergement_id=hotel.id, type_logement_id=hotel.types.get().id, guest=make_user(), check_in=arrivee,
+        hebergement_id=hotel.id, type_logement_id=hotel.types.get().id, guest_id=make_user().pk, check_in=arrivee,
         check_out=depart, total_price=1000, status='cancelled' if cas == 'annulee_avant' else 'confirmed',
         annule_par='voyageur' if cas == 'annulee_avant' else '')
     if cas == 'paye_deux_fois':

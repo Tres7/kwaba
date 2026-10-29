@@ -135,21 +135,21 @@ class ProfilVersementView(APIView):
     permission_classes = [EstHote]
 
     def get(self, request):
-        profil = ProfilVersementModel.objects.filter(hote=request.user).first()
+        profil = ProfilVersementModel.objects.filter(hote_id=request.user.pk).first()
         return Response(ProfilVersementSerializer(profil).data if profil else None)
 
     def put(self, request):
-        profil = ProfilVersementModel.objects.filter(hote=request.user).first()
+        profil = ProfilVersementModel.objects.filter(hote_id=request.user.pk).first()
         serializer = ProfilVersementSerializer(profil, data=request.data)
         serializer.is_valid(raise_exception=True)
         ancien = (profil.operateur, profil.numero) if profil else None
-        serializer.save(hote=request.user)
+        serializer.save(hote_id=request.user.pk)
         if ancien != (serializer.instance.operateur, serializer.instance.numero):
             # Changing the account that receives the money is the action targeted after an account takeover: it is logged
             journaliser('profil_versement_modifie', request, utilisateur=request.user,
                         operateur=serializer.instance.operateur, numero_fin=serializer.instance.numero[-2:])
         # Payouts blocked for lack of a profile start again at the next pass of the worker
-        VersementModel.objects.filter(hote=request.user, statut__in=('planifie', 'echoue')).update(
+        VersementModel.objects.filter(hote_id=request.user.pk, statut__in=('planifie', 'echoue')).update(
             statut='planifie', derniere_erreur='', tentatives=0,
         )
         return Response(serializer.data)
@@ -170,7 +170,7 @@ class RevenusView(APIView):
 
     def get(self, request):
         versements = (
-            VersementModel.objects.filter(hote=request.user)
+            VersementModel.objects.filter(hote_id=request.user.pk)
             .exclude(statut='annule')
             .order_by('-date_prevue')
         )
@@ -192,7 +192,7 @@ class RevenusView(APIView):
                 'verse': total('envoye'),
                 'commission': versements.aggregate(s=Sum('commission'))['s'] or 0,
             },
-            'profil_complet': ProfilVersementModel.objects.filter(hote=request.user).exists(),
+            'profil_complet': ProfilVersementModel.objects.filter(hote_id=request.user.pk).exists(),
             # This host's commission rate today (8 %, 12 % for a hotel, 5 % during the Founders Programme)
             'commission_pourcent': float(tarifs.taux_commission(request.user) * 100),
             # Partner type saved by the team (never editable by the host) and traveller's fee rate
@@ -204,7 +204,7 @@ class RevenusView(APIView):
                     'reservation_id': str(v.reservation_id),
                     'reference': sejours[v.reservation_id].reference,
                     'hebergement': annonces.get(sejours[v.reservation_id].hebergement_id, {}).get('name', ''),
-                    'voyageur': f"{sejours[v.reservation_id].guest.first_name} {sejours[v.reservation_id].guest.last_name}".strip(),
+                    'voyageur': sejours[v.reservation_id].guest.get_full_name() if sejours[v.reservation_id].guest else '',
                     'check_in': sejours[v.reservation_id].check_in,
                     'check_out': sejours[v.reservation_id].check_out,
                     'montant_brut': v.montant_brut,

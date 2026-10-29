@@ -88,8 +88,8 @@ def test_api_cas_d_erreur(sans_paiement, make_user):
     debut = timezone.localdate() + timedelta(days=30)
     from apps.reservations.models import ReservationModel
     from apps.hebergements.models import HebergementModel
-    h = HebergementModel.objects.create(name='V', city='Lomé', price_per_night=10000, host=make_user(role='hote'), amenities=[])
-    resa = ReservationModel.objects.create(hebergement_id=h.id, guest=autre, check_in=debut, check_out=debut + timedelta(days=1), total_price=10800)
+    h = HebergementModel.objects.create(name='V', city='Lomé', price_per_night=10000, host_id=make_user(role='hote').pk, amenities=[])
+    resa = ReservationModel.objects.create(hebergement_id=h.id, guest_id=autre.pk, check_in=debut, check_out=debut + timedelta(days=1), total_price=10800)
     r = client.post(TRANSFERTS, {'aeroport': 'LFW', 'arrivee': f'{jour}T14:30', 'numero_vol': 'AF520', 'passagers': 1, 'bagages': 1,
                                  'categorie': 'berline', 'destination': 'X', 'telephone': '+228 90 00 00 00', 'reservation': str(resa.id)},
                     format='json')

@@ -112,13 +112,13 @@ class AlerteCreateView(APIView):
                 return Response({'detail': f"Vous avez déjà {MAX_ALERTES_PAR_EMAIL} alertes en cours."},
                                 status=status.HTTP_400_BAD_REQUEST)
             alerte.email, alerte.langue = email, d['langue']
-            alerte.utilisateur = request.user if connecte else None
+            alerte.utilisateur_id = request.user.pk if connecte else None
             alerte.statut = 'active' if connecte else 'a_confirmer'
             alerte.save()
         elif connecte and existante.statut == 'a_confirmer':
             # Signed in with this address: no need to confirm it by email
-            existante.statut, existante.utilisateur = 'active', request.user
-            existante.save(update_fields=['statut', 'utilisateur'])
+            existante.statut, existante.utilisateur_id = 'active', request.user.pk
+            existante.save(update_fields=['statut', 'utilisateur_id'])
         # Same answer whether the alert existed or not: nothing is revealed about an address
         return Response({'statut': 'active' if connecte else 'a_confirmer', 'email': email}, status=status.HTTP_201_CREATED)
 

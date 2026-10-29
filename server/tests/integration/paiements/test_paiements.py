@@ -75,7 +75,7 @@ class CycleTests(TestCase):
         self.voyageur = User.objects.create_user('voy@test.tg', 'x', first_name='Kofi', last_name='Voy', role='voyageur')
         self.logement = HebergementModel.objects.create(
             statut_verification='verifiee',
-            name='Villa test', city='Lomé', price_per_night=20000, host=self.hote, amenities=[],
+            name='Villa test', city='Lomé', price_per_night=20000, host_id=self.hote.pk, amenities=[],
         )
         self.faux = FauxFedaPay()
         self.faux_paypal = FauxPayPal()

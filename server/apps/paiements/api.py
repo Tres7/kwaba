@@ -182,7 +182,7 @@ FONDATEURS_MAX = 50
 
 def conditions_commission(hote) -> dict:
     """Host's commission: category, Founders Programme and rate applied today."""
-    c = ConditionsHoteModel.objects.filter(hote=hote).first()
+    c = tarifs.conditions(hote)
     return {
         'categorie': c.categorie if c else 'particulier',
         'fondateur_debut': c.fondateur_debut if c else None,
@@ -208,9 +208,9 @@ def modifier_conditions_hote(hote, valeurs, par) -> str | None:
         return "La fin du Programme Fondateurs doit être après son début."
     if debut and categorie == 'hotel':
         return "Le Programme Fondateurs concerne les hôtes particuliers."
-    if debut and not ConditionsHoteModel.objects.filter(hote=hote, fondateur_debut__isnull=False).exists() \
+    if debut and not ConditionsHoteModel.objects.filter(hote_id=hote.pk, fondateur_debut__isnull=False).exists() \
             and ConditionsHoteModel.objects.filter(fondateur_debut__isnull=False).count() >= FONDATEURS_MAX:
         return f"Le Programme Fondateurs est limité aux {FONDATEURS_MAX} premiers hôtes."
-    ConditionsHoteModel.objects.update_or_create(hote=hote, defaults={
-        'categorie': categorie, 'fondateur_debut': debut, 'fondateur_fin': fin, 'mis_a_jour_par': par})
+    ConditionsHoteModel.objects.update_or_create(hote_id=hote.pk, defaults={
+        'categorie': categorie, 'fondateur_debut': debut, 'fondateur_fin': fin, 'mis_a_jour_par_id': getattr(par, 'pk', None)})
     return None

@@ -1,6 +1,6 @@
 import uuid
+from functools import cached_property
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -124,6 +124,11 @@ class ReversementModel(models.Model):
     def __str__(self):
         return f"{self.organisation.nom} · {self.periode:%m/%Y} · {self.montant} FCFA ({self.get_statut_display()})"
 
+    @cached_property
+    def donateur(self):
+        from apps.users.api import compte
+        return compte(self.donateur_id)
+
     @property
     def reference(self):
         return f"REV-{str(self.id)[:6].upper()}"
@@ -138,7 +143,7 @@ class DonModel(models.Model):
     MOYENS = [('mobile_money', 'Mobile Money'), ('carte', 'Carte bancaire'), ('paypal', 'PayPal')]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    donateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='dons')
+    donateur_id = models.UUIDField(db_index=True)
     organisation = models.ForeignKey(OrganisationModel, on_delete=models.PROTECT, related_name='dons')
     projet = models.ForeignKey(ProjetModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='dons')
     montant = models.PositiveIntegerField(help_text='Montant choisi par le donateur')
@@ -166,6 +171,11 @@ class DonModel(models.Model):
 
     def __str__(self):
         return f"{self.reference} · {self.montant} FCFA → {self.organisation.nom}"
+
+    @cached_property
+    def donateur(self):
+        from apps.users.api import compte
+        return compte(self.donateur_id)
 
     @property
     def reference(self):

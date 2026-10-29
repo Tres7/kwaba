@@ -118,12 +118,12 @@ def client_sans_incident(voyageur) -> bool:
     """At least 3 finished rentals without any amount withheld from the deposit: deposit halved."""
     if not voyageur or not getattr(voyageur, 'is_authenticated', False):
         return False
-    return LocationModel.objects.filter(voyageur=voyageur, statut='terminee', caution_retenue=0).count() >= LOCATIONS_CLIENT_FIDELE
+    return LocationModel.objects.filter(voyageur_id=voyageur.pk, statut='terminee', caution_retenue=0).count() >= LOCATIONS_CLIENT_FIDELE
 
 
 def mes_chauffeurs(voyageur) -> list[dict]:
     """Active drivers who have already driven this traveller (finished rental or transfer): "My driver"."""
-    ids = set(LocationModel.objects.filter(voyageur=voyageur, statut='terminee', chauffeur_partenaire_id__isnull=False)
+    ids = set(LocationModel.objects.filter(voyageur_id=voyageur.pk, statut='terminee', chauffeur_partenaire_id__isnull=False)
               .values_list('chauffeur_partenaire_id', flat=True))
     ids |= transferts.chauffeurs_des_transferts_termines(voyageur.pk)
     fiches = transferts.fiches_chauffeurs(ids)
@@ -223,7 +223,7 @@ def creer(*, voyageur, categorie: CategorieVehiculeModel | None, formule: str, l
                      jours_hors_lome=jours_hors_lome, jours_hors_pays=jours_hors_pays)
     en_ligne = paiements.paiement_actif()
     return LocationModel.objects.create(
-        voyageur=voyageur, categorie=categorie, formule=formule, lieu_prise=lieu_prise, lieu_retour=lieu_retour,
+        voyageur_id=voyageur.pk, categorie=categorie, formule=formule, lieu_prise=lieu_prise, lieu_retour=lieu_retour,
         debut=debut, fin=fin, passagers=passagers, jours=devis.jours, prix_jour=devis.prix_jour,
         frais_lieux=devis.frais_lieux, prix_chauffeur=devis.prix_chauffeur, primes=devis.primes, prix=devis.prix,
         commission=devis.commission, part_kwaba_chauffeur=devis.part_kwaba_chauffeur, caution=devis.caution,

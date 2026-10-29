@@ -96,7 +96,7 @@ def test_worker_une_passe(faux, make_user, make_hebergement, monkeypatch):
     hote = make_user(role='hote')
     voyageur = _client(make_user())
     resa = _reservation_payee(voyageur, make_hebergement(host=hote))
-    ProfilVersementModel.objects.create(hote=hote, pays='TG', operateur='togocel', numero='90000001', titulaire='Ama Hote')
+    ProfilVersementModel.objects.create(hote_id=hote.pk, pays='TG', operateur='togocel', numero='90000001', titulaire='Ama Hote')
     VersementModel.objects.filter(reservation_id=resa.id).update(date_prevue=timezone.now() - timedelta(minutes=1))
 
     call_command('traiter_paiements', '--once')  # sending of the payout
@@ -110,7 +110,7 @@ def test_versement_refuse_puis_echoue_et_alerte(faux, make_user, make_hebergemen
     make_user(role='admin', email='admin@test.kwaba')
     hote = make_user(role='hote')
     resa = _reservation_payee(_client(make_user()), make_hebergement(host=hote))
-    ProfilVersementModel.objects.create(hote=hote, pays='TG', operateur='togocel', numero='90000001', titulaire='Ama')
+    ProfilVersementModel.objects.create(hote_id=hote.pk, pays='TG', operateur='togocel', numero='90000001', titulaire='Ama')
     v = VersementModel.objects.get(reservation_id=resa.id)
     VersementModel.objects.filter(pk=v.pk).update(date_prevue=timezone.now() - timedelta(minutes=1), tentatives=services.MAX_TENTATIVES - 1,
                                                   mis_a_jour_le=timezone.now() - timedelta(days=1))

@@ -173,7 +173,7 @@ class ImpactView(APIView):
 
 
 def _dons_de(user):
-    return DonModel.objects.filter(donateur=user).select_related('organisation', 'projet', 'reversement')
+    return DonModel.objects.filter(donateur_id=user.pk).select_related('organisation', 'projet', 'reversement')
 
 
 class DonsView(APIView):
