@@ -27,7 +27,7 @@ def _supprimer(client_for, annonce):
 def test_deleting_archives_and_keeps_the_history(client_for, make_user, annonce, make_reservation):
     passee = make_reservation(annonce, starts_in=-10, nights=3)
     maintenant = timezone.now()
-    conversation = ConversationModel.objects.create(hebergement=annonce, guest=make_user(), host=annonce.host,
+    conversation = ConversationModel.objects.create(hebergement_id=annonce.id, guest=make_user(), host=annonce.host,
                                                     created_at=maintenant, last_message_at=maintenant)
     visite = VisiteModel.objects.create(hebergement=annonce, decision='validee')
 
@@ -103,7 +103,7 @@ def test_archived_listing_cannot_be_booked(client_for, make_user, annonce):
 def test_conversations_about_an_archived_listing_stay_readable(client_for, make_user, annonce):
     voyageur = make_user()
     maintenant = timezone.now()
-    ConversationModel.objects.create(hebergement=annonce, guest=voyageur, host=annonce.host,
+    ConversationModel.objects.create(hebergement_id=annonce.id, guest=voyageur, host=annonce.host,
                                      created_at=maintenant, last_message_at=maintenant)
     _supprimer(client_for, annonce)
 

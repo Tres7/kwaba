@@ -17,6 +17,8 @@ from apps.messaging.domain.exceptions import (
 )
 from apps.messaging.infrastructure.container import messaging_service
 from apps.messaging.infrastructure.http.permissions import IsVerified
+from apps.messaging.infrastructure.lookups.DjangoBookingLookup import DjangoBookingLookup
+from apps.messaging.infrastructure.lookups.DjangoHebergementLookup import DjangoHebergementLookup
 
 
 def _parse_uuid(value) -> Optional[uuid.UUID]:
@@ -103,9 +105,8 @@ class ConversationListCreateView(WriteGuardsMixin, APIView):
         if hebergement_id is None:
             return Response({'detail': 'hebergement_id invalide ou manquant.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        from apps.hebergements.models import HebergementModel  # check specific to this route, as below
         # Listing not verified yet or hidden: its host cannot be contacted yet
-        if not HebergementModel.objects.publiees().filter(pk=hebergement_id).exists():
+        if not DjangoHebergementLookup().is_published(hebergement_id):
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
@@ -126,25 +127,18 @@ class ConversationWithGuestView(WriteGuardsMixin, APIView):
     throttle_scope = 'messaging_conversation_create'
 
     def post(self, request):
-        from apps.reservations.models import ReservationModel  # access check specific to this route
-
         reservation_id = _parse_uuid(request.data.get('reservation_id'))
         if reservation_id is None:
             return Response({'detail': 'reservation_id invalide ou manquant.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Anti-abuse: a host can only write to a traveller who booked AND paid one of their listings
-        reservation = (
-            ReservationModel.objects
-            .filter(pk=reservation_id, hebergement__host_id=request.user.id, status='confirmed')
-            .first()
-        )
+        reservation = DjangoBookingLookup().confirmed_for_host(reservation_id, request.user.id)
         if reservation is None:
             return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
+        hebergement_id, guest_id = reservation
         try:
-            conversation, created = messaging_service().open_as_host(
-                request.user.id, reservation.hebergement_id, reservation.guest_id,
-            )
+            conversation, created = messaging_service().open_as_host(request.user.id, hebergement_id, guest_id)
         except HebergementNotFoundException as e:
             return _not_found(e)
         except (CannotContactOwnHebergementException, NotParticipantException) as e:
