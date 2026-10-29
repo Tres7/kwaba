@@ -34,7 +34,7 @@ Une PR par module. L'API vue par le client ne change pas.
 | 9 | documents | Migré : `documents` rend, numérote et sert les documents ; chaque produit (`reservations`, `transferts`, `locations`, `give`) y déclare au démarrage son bon, son reçu et ses lignes de facture (`documents.api.enregistrer`) ; le reçu de paiement passe dans `paiements` (`paiements.api.recu_pdf`) ; pagination du back-office partagée dans `securite.backoffice` |
 | 9 bis | contrats | Migré : parties au contrat lues via `transferts.api`, `locations.api` et `give.api` ; taux via `paiements.api` ; société via `documents.api.societe` ; le contrat garde l'identifiant du chauffeur, du loueur ou de l'association ; `contrats.api` pour les autres modules |
 | 10 | give | Migré : passe par `paiements.api`, qui expose les fonctions de paiement utilisées par les produits et les emails de paiement (`envoyer_email`, `emails_admins`, `fcfa`, `documents_joints`) ; la relation inverse `don.paiements` partira avec les clés étrangères de `PaiementModel` (étape `paiements`) |
-| 11 | transferts | À faire |
+| 11 | transferts | Migré : passe par `paiements.api` et `reservations.api` (séjour associé vérifié avec `appartient_au_voyageur`) ; le transfert garde l'identifiant du séjour |
 | 12 | locations | À faire |
 | 13 | reservations, hebergements | À faire |
 | 14 | paiements | À faire |

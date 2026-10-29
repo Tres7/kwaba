@@ -16,7 +16,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from apps.paiements import services as paiements
+from apps.paiements import api as paiements
 
 from . import tarifs
 from .models import AeroportModel, ChauffeurModel, TarifTransfertModel, TransfertModel, VersementChauffeurModel

@@ -207,3 +207,17 @@ def test_paiement_de_transfert_lie_au_transfert():
     p = PaiementModel._meta.constraints[0]
     assert p.name == 'paiement_un_seul_objet'
     assert AeroportModel.objects.get(pk='LFW').tarifs.count() == 3
+
+
+def test_a_transfer_can_only_be_linked_to_one_s_own_stay(client_for, make_user, faux, make_hebergement, make_reservation):
+    voyageur = make_user()
+    client = client_for(voyageur)
+    mon_sejour = make_reservation(make_hebergement(), guest=voyageur)
+    autre_sejour = make_reservation(make_hebergement())
+
+    refuse = client.post(TRANSFERTS, _payload(reservation=str(autre_sejour.id)), format='json')
+    accepte = client.post(TRANSFERTS, _payload(reservation=str(mon_sejour.id)), format='json')
+
+    assert refuse.status_code == 400 and 'reservation' in refuse.data
+    assert accepte.status_code == 201 and accepte.data['reservation'] == str(mon_sejour.id)
+    assert client.get(f'{TRANSFERTS}?reservation={mon_sejour.id}').data['count'] == 1

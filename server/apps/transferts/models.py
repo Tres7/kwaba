@@ -3,7 +3,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 
-from apps.paiements.operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
+from apps.paiements.api import OPERATEUR_CHOICES, PAYS_CHOICES
 
 from .tarifs import CATEGORIE_CHOICES
 
@@ -90,10 +90,7 @@ class TransfertModel(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     voyageur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='transferts')
-    reservation = models.ForeignKey(
-        'reservations.ReservationModel', on_delete=models.SET_NULL, null=True, blank=True, related_name='transferts',
-        help_text='Séjour Kwa-Ba associé (facultatif)',
-    )
+    reservation_id = models.UUIDField(null=True, blank=True, db_index=True, help_text='Séjour Kwa-Ba associé (facultatif)')
     aeroport = models.ForeignKey(AeroportModel, on_delete=models.PROTECT, related_name='transferts')
     arrivee = models.DateTimeField(help_text="Heure d'atterrissage prévue")
     numero_vol = models.CharField(max_length=10)
