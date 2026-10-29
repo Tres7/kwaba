@@ -52,11 +52,6 @@ ignore_imports =
     apps.backoffice.views -> apps.reservations.models
     apps.backoffice.views -> apps.users.infrastructure.http.controllers.AuthController
     apps.backoffice.views -> apps.verifications.services
-    apps.concierge.outils -> apps.hebergements.disponibilites
-    apps.concierge.outils -> apps.hebergements.models
-    apps.concierge.outils -> apps.paiements.tarifs
-    apps.concierge.outils -> apps.transferts.models
-    apps.concierge.outils -> apps.transferts.services
     apps.contrats.management.commands.inviter_hotes_contrat -> apps.documents.models
     apps.contrats.migrations.0001_initial -> apps.documents.models
     apps.contrats.models -> apps.documents.models

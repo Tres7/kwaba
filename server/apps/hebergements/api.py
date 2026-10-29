@@ -2,6 +2,8 @@ import uuid
 from collections.abc import Iterable
 from datetime import date
 
+from django.db.models import Q
+
 from . import disponibilites
 from .models import HebergementModel
 from .serializers import HebergementSerializer
@@ -30,3 +32,19 @@ def resumes(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, dict]:
 
 def est_disponible(hebergement_id: uuid.UUID, debut: date, fin: date) -> bool:
     return disponibilites.est_disponible(hebergement_id, debut, fin)
+
+
+def rechercher(ville: str, voyageurs: int | None = None, prix_max_nuit: int | None = None, type_: str | None = None,
+               limite: int = 20) -> list[dict]:
+    qs = HebergementModel.objects.publiees().filter(Q(city__icontains=ville) | Q(location__icontains=ville))
+    if voyageurs:
+        qs = qs.filter(max_guests__gte=voyageurs)
+    if prix_max_nuit:
+        qs = qs.filter(price_per_night__lte=prix_max_nuit)
+    if type_:
+        qs = qs.filter(type=type_)
+    return [{
+        'id': h.id, 'name': h.name, 'type': h.type, 'city': h.city, 'location': h.location,
+        'description': h.description, 'image_url': h.image_url, 'price_per_night': h.price_per_night,
+        'rating': h.rating, 'review_count': h.review_count, 'max_guests': h.max_guests, 'amenities': h.amenities,
+    } for h in qs.order_by('-rating', 'price_per_night')[:limite]]

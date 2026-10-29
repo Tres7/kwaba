@@ -26,7 +26,7 @@ Une PR par module. L'API vue par le client ne change pas.
 | 1 | favoris | Migré : `hebergements.api` (`est_publiee`, `cartes`), `favoris.api` (`ids_favoris`), plus de clé étrangère vers les annonces |
 | 2 | experiences | Migré : écrans d'administration déplacés de `backoffice` dans le module (`admin_urls.py`) ; normalisation des photos et briques du back-office déplacées dans `securite` |
 | 3 | voyages | Migré : `hebergements.api` (`resumes`, `est_disponible`), `reservations.api` (`appartient_au_voyageur`, `resumes`), `paiements.api` (`total_sejour`) ; propositions et réservations partagées gardent un identifiant au lieu d'une clé étrangère |
-| 4 | concierge | À faire |
+| 4 | concierge | Migré : `hebergements.api` (`rechercher`), `transferts.api` (`aeroports_ouverts`, `devis`), `paiements.api` (`total_sejour`) ; aucune clé étrangère à retirer |
 | 5 | messaging | À faire (clé étrangère vers l'annonce, contrôleur qui contourne ses ports) |
 | 6 | terrain | À faire |
 | 7 | avis | À faire |

@@ -4,16 +4,14 @@ Each tool returns (result for the model, cards for the interface). The arguments
 model: they are validated here before any query.
 """
 import json
+import uuid
 from datetime import date, datetime
 
-from django.db.models import Q
 from django.utils import timezone
 
-from apps.hebergements.disponibilites import est_disponible
-from apps.hebergements.models import HebergementModel
-from apps.paiements import tarifs as tarifs_sejour
-from apps.transferts import services as transferts
-from apps.transferts.models import AeroportModel
+from apps.hebergements import api as hebergements
+from apps.paiements import api as paiements
+from apps.transferts import api as transferts
 
 TYPES = ['hotel', 'villa', 'appartement', 'auberge']
 
@@ -114,6 +112,16 @@ def _texte(valeur, champ, maxi=120):
     return valeur.strip()
 
 
+def _uuids(valeurs) -> list[uuid.UUID]:
+    resultat = []
+    for valeur in valeurs:
+        try:
+            resultat.append(uuid.UUID(valeur))
+        except (ValueError, TypeError, AttributeError):
+            continue
+    return resultat
+
+
 def rechercher_logements(entree: dict):
     ville = _texte(entree.get('ville'), 'ville')
     arrivee, depart = _date(entree.get('arrivee'), 'arrivee'), _date(entree.get('depart'), 'depart')
@@ -127,35 +135,26 @@ def rechercher_logements(entree: dict):
     if arrivee and arrivee < timezone.localdate():
         raise EntreeInvalide("arrivee est dans le passé")
 
-    qs = HebergementModel.objects.publiees().filter(
-        Q(city__icontains=ville) | Q(location__icontains=ville))
-    if voyageurs:
-        qs = qs.filter(max_guests__gte=voyageurs)
-    if budget:
-        qs = qs.filter(price_per_night__lte=budget)
-    if type_:
-        qs = qs.filter(type=type_)
-
     nuits = (depart - arrivee).days if arrivee and depart else None
     resultats, cartes = [], []
-    for h in qs.order_by('-rating', 'price_per_night')[:20]:
-        if nuits and not est_disponible(h.id, arrivee, depart):
+    for h in hebergements.rechercher(ville, voyageurs, budget, type_):
+        if nuits and not hebergements.est_disponible(h['id'], arrivee, depart):
             continue
-        cout = tarifs_sejour.calculer(h.price_per_night, nuits) if nuits else None  # frais standard de 6 %
+        total = paiements.total_sejour(h['price_per_night'], nuits) if nuits else None  # frais standard de 6 %
         resultats.append({
-            'id': str(h.id), 'nom': h.name, 'type': h.type, 'ville': h.city, 'quartier': h.location,
-            'prix_nuit_fcfa': int(h.price_per_night), 'note': round(h.rating, 1), 'nb_avis': h.review_count,
-            'capacite': h.max_guests, 'equipements': (h.amenities or [])[:8],
+            'id': str(h['id']), 'nom': h['name'], 'type': h['type'], 'ville': h['city'], 'quartier': h['location'],
+            'prix_nuit_fcfa': int(h['price_per_night']), 'note': round(h['rating'], 1), 'nb_avis': h['review_count'],
+            'capacite': h['max_guests'], 'equipements': (h['amenities'] or [])[:8],
             # The host's free text: data to summarise, never an instruction (see SYSTEME)
-            'description_hote': (h.description or '')[:280],
-            **({'nuits': nuits, 'cout_total_sejour_fcfa': cout.total} if cout else {}),
+            'description_hote': (h['description'] or '')[:280],
+            **({'nuits': nuits, 'cout_total_sejour_fcfa': total} if total else {}),
         })
         cartes.append({
-            'type': 'logement', 'id': str(h.id), 'nom': h.name, 'ville': h.city, 'quartier': h.location,
-            'image': h.image_url, 'prix_nuit': int(h.price_per_night), 'note': h.rating, 'nb_avis': h.review_count,
-            'capacite': h.max_guests, 'arrivee': arrivee.isoformat() if arrivee else None,
+            'type': 'logement', 'id': str(h['id']), 'nom': h['name'], 'ville': h['city'], 'quartier': h['location'],
+            'image': h['image_url'], 'prix_nuit': int(h['price_per_night']), 'note': h['rating'],
+            'nb_avis': h['review_count'], 'capacite': h['max_guests'], 'arrivee': arrivee.isoformat() if arrivee else None,
             'depart': depart.isoformat() if depart else None, 'voyageurs': voyageurs,
-            'total': cout.total if cout else None, 'nuits': nuits,
+            'total': total, 'nuits': nuits,
         })
         if len(resultats) == 6:
             break
@@ -167,28 +166,27 @@ def rechercher_logements(entree: dict):
 
 def devis_transfert(entree: dict):
     code = _texte(entree.get('aeroport'), 'aeroport', 3).upper()
-    aeroport = AeroportModel.objects.filter(pk=code, actif=True).first()
-    if not aeroport:
-        ouverts = ', '.join(f"{a.ville} ({a.code})" for a in AeroportModel.objects.filter(actif=True))
-        return {'erreur': f"Aéroport non desservi. Aéroports desservis : {ouverts}."}, []
+    ouverts = transferts.aeroports_ouverts()
+    if code not in {a['code'] for a in ouverts}:
+        liste = ', '.join(f"{a['ville']} ({a['code']})" for a in ouverts)
+        return {'erreur': f"Aéroport non desservi. Aéroports desservis : {liste}."}, []
     try:
         naive = datetime.fromisoformat(str(entree.get('arrivee'))).replace(tzinfo=None)
     except ValueError:
         raise EntreeInvalide('arrivee : format attendu AAAA-MM-JJTHH:MM')
     passagers = _entier(entree.get('passagers'), 'passagers', 1, 7)
     bagages = _entier(entree.get('bagages'), 'bagages', 0, 10)
-    arrivee = transferts.heure_locale(aeroport, naive)
-    options = transferts.devis(aeroport, arrivee, passagers, bagages)
-    trop_tard = arrivee - timezone.now() < transferts.tarifs.DELAI_MIN_RESERVATION
+    devis = transferts.devis(code, naive, passagers, bagages)
+    aeroport, options, trop_tard = devis['aeroport'], devis['options'], devis['trop_tard']
     resultat = {
-        'aeroport': f"{aeroport.nom} ({aeroport.code})",
+        'aeroport': f"{aeroport['nom']} ({aeroport['code']})",
         'options': [{k: o[k] for k in ('nom', 'passagers', 'bagages', 'prix', 'disponible', 'motif')} for o in options],
         'regles': 'Prix fixe payé en ligne, le même de jour comme de nuit, 60 min d\'attente incluses, '
                   'annulation gratuite jusqu\'à 24 h avant.',
         **({'attention': 'Arrivée dans moins de 6 h : trop tard pour réserver un transfert.'} if trop_tard else {}),
     }
     carte = {
-        'type': 'transfert', 'aeroport': aeroport.code, 'ville': aeroport.ville, 'arrivee': naive.strftime('%Y-%m-%dT%H:%M'),
+        'type': 'transfert', 'aeroport': aeroport['code'], 'ville': aeroport['ville'], 'arrivee': naive.strftime('%Y-%m-%dT%H:%M'),
         'passagers': passagers, 'bagages': bagages, 'trop_tard': trop_tard,
         'options': [{'categorie': o['categorie'], 'nom': o['nom'], 'prix': o['prix'], 'disponible': o['disponible']} for o in options],
     }
@@ -203,8 +201,7 @@ def proposer_voyage_de_groupe(entree: dict):
     ids = entree.get('logements') or []
     if not isinstance(ids, list):
         raise EntreeInvalide('logements : liste attendue')
-    logements = list(HebergementModel.objects.publiees().filter(pk__in=[i for i in ids[:6] if isinstance(i, str) and len(i) == 36])
-                     .values('id', 'name'))
+    logements = [h for h in hebergements.resumes(_uuids(ids[:6])).values() if h['publiee']]
     carte = {
         'type': 'together', 'nom': nom, 'destination': destination,
         'arrivee': arrivee.isoformat() if arrivee else None, 'depart': depart.isoformat() if depart else None,
