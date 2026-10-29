@@ -13,7 +13,7 @@ from apps.locations.models import (
     PhotoVehiculeModel,
 )
 from apps.paiements.operateurs import operateurs_du_pays
-from apps.transferts.models import ChauffeurModel
+from apps.transferts import api as transferts
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
@@ -217,6 +217,11 @@ class PartenaireView(FicheAdmin):
 
 # --- Rental follow-up -------------------------------------------------------------------------
 
+def _chauffeur(chauffeur_id) -> dict | None:
+    c = transferts.fiche_chauffeur(chauffeur_id) if chauffeur_id else None
+    return {'id': chauffeur_id, 'nom': f"{c['prenom']} {c['nom']}" if c else ''} if chauffeur_id else None
+
+
 def _location(loc: LocationModel) -> dict:
     return {
         'id': str(loc.id), 'reference': loc.reference, 'statut': loc.statut, 'statut_libelle': loc.get_statut_display(),
@@ -226,10 +231,8 @@ def _location(loc: LocationModel) -> dict:
         'jours_hors_lome': loc.jours_hors_lome, 'jours_hors_pays': loc.jours_hors_pays,
         'prix_vehicule': loc.prix_jour * loc.jours, 'prix_chauffeur': loc.prix_chauffeur, 'primes': loc.primes,
         'commission': loc.commission, 'part_kwaba_chauffeur': loc.part_kwaba_chauffeur,
-        'chauffeur_demande': ({'id': loc.chauffeur_demande_id, 'nom': f"{loc.chauffeur_demande.prenom} {loc.chauffeur_demande.nom}"}
-                              if loc.chauffeur_demande_id else None),
-        'chauffeur_partenaire': ({'id': loc.chauffeur_partenaire_id, 'nom': f"{loc.chauffeur_partenaire.prenom} {loc.chauffeur_partenaire.nom}"}
-                                 if loc.chauffeur_partenaire_id else None),
+        'chauffeur_demande': _chauffeur(loc.chauffeur_demande_id),
+        'chauffeur_partenaire': _chauffeur(loc.chauffeur_partenaire_id),
         'lieu_prise': loc.lieu_prise.nom, 'adresse_prise': loc.adresse_prise,
         'lieu_retour': loc.lieu_retour.nom, 'adresse_retour': loc.adresse_retour,
         'debut': loc.debut, 'fin': loc.fin, 'jours': loc.jours, 'passagers': loc.passagers,
@@ -245,8 +248,7 @@ def _location(loc: LocationModel) -> dict:
 
 
 def _locations():
-    return LocationModel.objects.select_related('voyageur', 'categorie', 'lieu_prise', 'lieu_retour', 'partenaire',
-                                                'chauffeur_partenaire', 'chauffeur_demande')
+    return LocationModel.objects.select_related('voyageur', 'categorie', 'lieu_prise', 'lieu_retour', 'partenaire')
 
 
 class LocationsView(APIView):
@@ -278,8 +280,9 @@ class LocationPartenairesView(APIView):
         if request.query_params.get('chauffeurs'):
             return Response({
                 'partenaires': partenaires,
-                'chauffeurs': [{'id': c.id, 'nom': f"{c.prenom} {c.nom}", 'telephone': c.telephone, 'excellence': c.excellence,
-                                'demande': c.pk == loc.chauffeur_demande_id} for c in services.chauffeurs_disponibles(loc)]
+                'chauffeurs': [{'id': c['id'], 'nom': f"{c['prenom']} {c['nom']}", 'telephone': c['telephone'],
+                                'excellence': c['excellence'], 'demande': c['id'] == loc.chauffeur_demande_id}
+                               for c in services.chauffeurs_disponibles(loc)]
                 if loc.avec_chauffeur else [],
             })
         return Response(partenaires)
@@ -288,10 +291,17 @@ class LocationPartenairesView(APIView):
 class AttributionSerializer(serializers.Serializer):
     partenaire = serializers.PrimaryKeyRelatedField(queryset=PartenaireLocationModel.objects.filter(actif=True),
                                                     required=False, allow_null=True, default=None)
-    chauffeur = serializers.PrimaryKeyRelatedField(queryset=ChauffeurModel.objects.filter(actif=True),
-                                                   required=False, allow_null=True, default=None)
+    chauffeur = serializers.IntegerField(required=False, allow_null=True, default=None)
     vehicule = serializers.CharField(max_length=120, required=False, allow_blank=True, default='')
     immatriculation = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+
+    def validate_chauffeur(self, valeur):
+        if valeur is None:
+            return None
+        chauffeur = transferts.fiche_chauffeur(valeur)
+        if not chauffeur or not chauffeur['actif']:
+            raise serializers.ValidationError('Chauffeur introuvable.')
+        return chauffeur
 
 
 class LocationAttribuerView(APIView):
@@ -312,7 +322,7 @@ class LocationAttribuerView(APIView):
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser("backoffice_modification", request, utilisateur=request.user, objet="location", id=str(loc.pk),
                     libelle=loc.reference, partenaire=getattr(d['partenaire'], 'nom', ''),
-                    chauffeur=str(d['chauffeur'] or ''))
+                    chauffeur=f"{d['chauffeur']['prenom']} {d['chauffeur']['nom']}" if d['chauffeur'] else '')
         return Response(_location(_locations().get(pk=pk)))
 
 

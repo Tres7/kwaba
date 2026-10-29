@@ -30,7 +30,6 @@ ignore_imports =
     apps.backoffice.locations -> apps.locations.models
     apps.backoffice.locations -> apps.locations.services
     apps.backoffice.locations -> apps.paiements.operateurs
-    apps.backoffice.locations -> apps.transferts.models
     apps.backoffice.transferts -> apps.paiements.operateurs
     apps.backoffice.transferts -> apps.transferts.models
     apps.backoffice.transferts -> apps.transferts.services
@@ -50,16 +49,6 @@ ignore_imports =
     apps.hebergements.models -> apps.documents.models
     apps.hebergements.serializers -> apps.paiements.tarifs
     apps.hebergements.stock -> apps.reservations.models
-    apps.locations.models -> apps.paiements.operateurs
-    apps.locations.notifications -> apps.paiements.notifications
-    apps.locations.services -> apps.paiements.services
-    apps.locations.services -> apps.paiements.tarifs
-    apps.locations.services -> apps.reservations.models
-    apps.locations.services -> apps.transferts.models
-    apps.locations.views -> apps.paiements.services
-    apps.locations.views -> apps.paiements.views
-    apps.locations.views -> apps.reservations.models
-    apps.locations.views -> apps.transferts.models
     apps.paiements.relances -> apps.locations.models
     apps.paiements.relances -> apps.reservations.models
     apps.paiements.relances -> apps.transferts.models

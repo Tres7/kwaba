@@ -7,10 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.prelancement import verifier_ouverture
-from apps.paiements import services as paiements
-from apps.paiements.views import CompteRemboursementSerializer
-from apps.reservations.models import ReservationModel
-from apps.transferts.models import ChauffeurModel
+from apps.paiements import api as paiements
+from apps.reservations import api as reservations
 
 from . import services
 from .models import CategorieVehiculeModel, LieuRemiseModel, LocationModel, ParametresLocationModel
@@ -137,6 +135,9 @@ class LocationSerializer(serializers.ModelSerializer):
     rembourse_si_annulation = serializers.SerializerMethodField()
     libelle = serializers.CharField(read_only=True)
 
+    reservation = serializers.UUIDField(source='reservation_id', read_only=True)
+    chauffeur_demande = serializers.IntegerField(source='chauffeur_demande_id', read_only=True)
+
     class Meta:
         model = LocationModel
         fields = [
@@ -223,14 +224,14 @@ class LocationCreationSerializer(serializers.Serializer):
     conducteur = serializers.CharField(max_length=120, required=False, allow_blank=True, default='')
     permis_numero = serializers.CharField(max_length=40, required=False, allow_blank=True, default='')
     permis_pays = serializers.CharField(max_length=60, required=False, allow_blank=True, default='')
-    reservation = serializers.PrimaryKeyRelatedField(queryset=ReservationModel.objects.all(), required=False, allow_null=True)
+    reservation = serializers.UUIDField(source='reservation_id', required=False, allow_null=True)
     jours_hors_lome = serializers.IntegerField(min_value=0, max_value=365, required=False, default=0)
     jours_hors_pays = serializers.IntegerField(min_value=0, max_value=365, required=False, default=0)
-    chauffeur_demande = serializers.PrimaryKeyRelatedField(queryset=ChauffeurModel.objects.filter(actif=True),
-                                                           required=False, allow_null=True, default=None)
+    chauffeur_demande = serializers.IntegerField(source='chauffeur_demande_id', required=False, allow_null=True,
+                                                 default=None)
 
     def validate_reservation(self, valeur):
-        if valeur and valeur.guest_id != self.context['request'].user.id:
+        if valeur and not reservations.appartient_au_voyageur(valeur, self.context['request'].user.id):
             raise serializers.ValidationError("Réservation introuvable.")
         return valeur
 
@@ -248,7 +249,7 @@ class MesChauffeursView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response([{'id': c.id, 'nom': f"{c.prenom} {c.nom[:1]}.".strip()} for c in services.mes_chauffeurs(request.user)])
+        return Response([{'id': c['id'], 'nom': f"{c['prenom']} {c['nom'][:1]}.".strip()} for c in services.mes_chauffeurs(request.user)])
 
 
 def _de_l_utilisateur(pk, user):
@@ -325,7 +326,7 @@ class CompteRemboursementLocationView(APIView):
         location = _de_l_utilisateur(pk, request.user)
         if not location:
             return Response({'detail': 'Location introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CompteRemboursementSerializer(data=request.data)
+        serializer = paiements.CompteRemboursementSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if not paiements.indiquer_numero_remboursement(location, **serializer.validated_data):
             return Response({'detail': "Aucun remboursement n'attend de numéro pour cette location."}, status=status.HTTP_400_BAD_REQUEST)

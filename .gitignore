@@ -47,6 +47,7 @@ yarn-error.log*
 *.tsbuildinfo
 AUDIT-SECURITE.md
 AUDIT-ARCHITECTURE.md
+travail_de_refonte.md
 
 # =========================
 # Docker

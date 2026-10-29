@@ -18,6 +18,7 @@ __all__ = [
     'documents_joints', 'emails_admins', 'envoyer_email', 'envoyer_payout', 'fcfa', 'fedapay_actif', 'frais_voyageur',
     'indiquer_numero_remboursement', 'moyens_actifs', 'paiement_actif', 'paiement_reussi', 'recu_pdf', 'rembourser',
     'reservation_possible', 'synchroniser_paiement', 'synchroniser_payout', 'texte_politique', 'total_sejour',
+    'frais_reduits_sejour', 'rembourser_en_partie',
 ]
 
 # Emails of the products paid online (stays, transfers, rentals, donations): same sending rules as the payment emails
@@ -64,3 +65,17 @@ def conditions_hote(hote_id) -> dict | None:
     if not c:
         return None
     return {'categorie': c.categorie, 'fondateur_debut': c.fondateur_debut, 'fondateur_fin': c.fondateur_fin}
+
+
+def frais_reduits_sejour(prix_nuits: int) -> int:
+    """Service fees of a stay at the reduced rate (loyal customer, Stay Pack + Driver)."""
+    return tarifs.arrondi(Decimal(prix_nuits) * tarifs.FRAIS_REDUITS)
+
+
+def rembourser_en_partie(type_objet: str, objet_id, montant: int, motif: str) -> bool:
+    """Refunds part of the successful payment of the object; False if it was never paid."""
+    paiement = _paiement_reussi(type_objet, objet_id)
+    if not paiement:
+        return False
+    rembourser(paiement, montant, motif)
+    return True

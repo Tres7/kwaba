@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from apps.paiements.operateurs import OPERATEUR_CHOICES, PAYS_CHOICES
+from apps.paiements.api import OPERATEUR_CHOICES, PAYS_CHOICES
 
 FUSEAUX = [
     ('Africa/Lome', 'Togo, Ghana, Burkina Faso, Mali, Côte d\'Ivoire, Sénégal (UTC)'),
@@ -211,8 +211,8 @@ class LocationModel(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     voyageur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='locations')
-    reservation = models.ForeignKey(
-        'reservations.ReservationModel', on_delete=models.SET_NULL, null=True, blank=True, related_name='locations',
+    reservation_id = models.UUIDField(
+        null=True, blank=True, db_index=True,
         help_text='Séjour Kwa-Ba associé (facultatif) : avec un chauffeur, Pack Séjour (frais du logement à 3 %)',
     )
     categorie = models.ForeignKey(CategorieVehiculeModel, on_delete=models.PROTECT, null=True, blank=True,
@@ -234,9 +234,8 @@ class LocationModel(models.Model):
     # With a driver: days outside Lomé (travel allowances) and driver asked for again ("My driver")
     jours_hors_lome = models.PositiveSmallIntegerField(default=0, db_default=0, help_text='Jours dans le pays hors de Lomé')
     jours_hors_pays = models.PositiveSmallIntegerField(default=0, db_default=0)
-    chauffeur_demande = models.ForeignKey(
-        'transferts.ChauffeurModel', on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
-        help_text='« Mon chauffeur » : chauffeur que le voyageur redemande',
+    chauffeur_demande_id = models.BigIntegerField(
+        null=True, blank=True, db_index=True, help_text='« Mon chauffeur » : chauffeur que le voyageur redemande',
     )
 
     # Prices frozen at booking (rates may change afterwards). prix = vehicle + places + driver + allowances
@@ -266,9 +265,8 @@ class LocationModel(models.Model):
     annulee_le = models.DateTimeField(null=True, blank=True)
     # Assigned by the team
     partenaire = models.ForeignKey(PartenaireLocationModel, on_delete=models.PROTECT, null=True, blank=True, related_name='locations')
-    chauffeur_partenaire = models.ForeignKey(
-        'transferts.ChauffeurModel', on_delete=models.PROTECT, null=True, blank=True, related_name='locations',
-        help_text='Chauffeur partenaire de Kwa-Ba (formules avec chauffeur)',
+    chauffeur_partenaire_id = models.BigIntegerField(
+        null=True, blank=True, db_index=True, help_text='Chauffeur partenaire de Kwa-Ba (formules avec chauffeur)',
     )
     vehicule = models.CharField(max_length=120, blank=True, help_text='Marque, modèle et couleur du véhicule remis')
     immatriculation = models.CharField(max_length=20, blank=True)
@@ -369,11 +367,11 @@ class VersementPartenaireModel(_VersementMixin):
 class VersementChauffeurLocationModel(_VersementMixin):
     """Partner driver's payment: 6,000 FCFA per day (6,500 for Excellence or "My driver") and allowances."""
     location = models.OneToOneField(LocationModel, on_delete=models.PROTECT, related_name='versement_chauffeur')
-    chauffeur = models.ForeignKey('transferts.ChauffeurModel', on_delete=models.PROTECT, related_name='versements_locations')
+    chauffeur_id = models.BigIntegerField(db_index=True)
 
     class Meta(_VersementMixin.Meta):
         verbose_name = "Versement à un chauffeur (location)"
         verbose_name_plural = 'Versements aux chauffeurs (locations)'
 
     def __str__(self):
-        return f"{self.montant} FCFA → {self.chauffeur} ({self.get_statut_display()})"
+        return f"{self.montant} FCFA → chauffeur {self.chauffeur_id} ({self.get_statut_display()})"
