@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import date
 
 import pika
 from django.conf import settings
@@ -25,6 +26,7 @@ class RabbitMQConsumer:
         "users.welcome_email_requested": "handle_welcome_email",
         "users.password_reset_requested": "handle_password_reset_email",
         "messaging.new_message_email_requested": "handle_new_message_email",
+        "hebergements.booking_cancelled_listing_removed": "handle_booking_cancelled_listing_removed",
     }
 
     def __init__(self, host: str | None = None):
@@ -93,11 +95,7 @@ class RabbitMQConsumer:
     def _handle(self, ch, method, properties, body) -> None:
         routing_key = method.routing_key
         try:
-            data = json.loads(body)
-            handler_name = self.ROUTING_KEYS.get(routing_key)
-            if handler_name is None:
-                raise ValueError(f"Routing key non gérée : {routing_key}")
-            getattr(self, handler_name)(data)
+            self.dispatch(routing_key, json.loads(body))
         except Exception:
             # The message goes to the dead letter queue (notifications.events.dlq) instead of being lost
             logger.exception("Échec du traitement de '%s', message envoyé en dead-letter", routing_key)
@@ -105,6 +103,12 @@ class RabbitMQConsumer:
             return
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    def dispatch(self, routing_key: str, data: dict) -> None:
+        handler_name = self.ROUTING_KEYS.get(routing_key)
+        if handler_name is None:
+            raise ValueError(f"Routing key non gérée : {routing_key}")
+        getattr(self, handler_name)(data)
 
     def handle_verification_email(self, data: dict) -> None:
         self._service.send_verification_email(
@@ -144,3 +148,14 @@ class RabbitMQConsumer:
             code=data["code"],
         )
         logger.info("Email de réinitialisation envoyé (user_id=%s)", data.get("user_id"))
+
+    def handle_booking_cancelled_listing_removed(self, data: dict) -> None:
+        self._service.send_booking_cancelled_listing_removed_email(
+            to=data["email"],
+            first_name=data["first_name"],
+            hebergement_name=data["hebergement_name"],
+            city=data["city"],
+            check_in=date.fromisoformat(data["check_in"]),
+            check_out=date.fromisoformat(data["check_out"]),
+        )
+        logger.info("Email d'annulation (annonce supprimée) envoyé (reservation_id=%s)", data.get("reservation_id"))

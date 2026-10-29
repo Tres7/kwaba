@@ -1,6 +1,9 @@
+from datetime import date
+
 from apps.notifications.infrastructure.email.envoi import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.utils import formats
 from apps.notifications.application.ports.NotificationSender import NotificationSender
 
 
@@ -54,6 +57,24 @@ class DjangoEmailSender(NotificationSender):
         })
         send_mail(
             subject='Réinitialisation de votre mot de passe Kwa-Ba',
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[to],
+        )
+
+    def send_booking_cancelled_listing_removed_email(
+        self, to: str, first_name: str, hebergement_name: str, city: str, check_in: date, check_out: date,
+    ) -> None:
+        message = render_to_string('emails/booking_cancelled_listing_removed.txt', {
+            'first_name': first_name,
+            'hebergement_name': hebergement_name,
+            'city': city,
+            'check_in': formats.date_format(check_in, 'j F'),
+            'check_out': formats.date_format(check_out, 'j F Y'),
+            'search_url': f"{settings.FRONTEND_URL.rstrip('/')}/recherche",
+        })
+        send_mail(
+            subject='Réservation annulée : le logement n\'est plus proposé',
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[to],
