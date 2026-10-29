@@ -262,7 +262,7 @@ export default function VerifyPage() {
   return (
     <AuthShell
       reverse
-      image="https://images.unsplash.com/photo-1542314831-c6a4d27ce6a2?q=80&w=2000&auto=format&fit=crop"
+      image="/accueil/hero-7-mobile.jpg?v=2"
       title={t("verifierVisuelTitre")}
       subtitle={t("verifierVisuelTexte")}
     >

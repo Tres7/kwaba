@@ -28,7 +28,7 @@ export default function ContenuFr() {
             <>
               <p>
                 Indispensables au fonctionnement du site (connexion, sécurité). Ils sont exemptés de consentement et ne
-                peuvent pas être désactivés depuis le site. Ils sont inaccessibles aux scripts (option « HttpOnly »).
+                peuvent pas être désactivés depuis le site. Ils sont inaccessibles aux scripts (option « HttpOnly »).
               </p>
               <table>
                 <thead><tr><th>Nom</th><th>Rôle</th><th>Durée</th></tr></thead>
@@ -48,8 +48,8 @@ export default function ContenuFr() {
           contenu: (
             <>
               <p>
-                Il retient un choix que vous avez fait vous-même, sans servir à autre chose : il est exempté de consentement.
-                Le site le lit pour afficher la bonne langue (il n&apos;est donc pas « HttpOnly »).
+                Il retient un choix que vous avez fait vous-même, sans servir à autre chose : il est exempté de consentement.
+                Le site le lit pour afficher la bonne langue (il n&apos;est donc pas « HttpOnly »).
               </p>
               <table>
                 <thead><tr><th>Nom</th><th>Rôle</th><th>Durée</th></tr></thead>
@@ -102,8 +102,8 @@ export default function ContenuFr() {
                 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">politique de confidentialité de Google</a>.
               </p>
               <p>
-                <strong>Connexion avec Google</strong> (si elle est proposée) : le service de Google n&apos;est contacté que lorsque vous
-                cliquez sur « Continuer avec Google ». Google peut alors utiliser ses propres cookies pour vous identifier.
+                <strong>Connexion avec Google</strong> (si elle est proposée) : le service de Google n&apos;est contacté que lorsque vous
+                cliquez sur « Continuer avec Google ». Google peut alors utiliser ses propres cookies pour vous identifier.
               </p>
             </>
           ),
@@ -114,8 +114,8 @@ export default function ContenuFr() {
           contenu: (
             <>
               <p>
-                Vous pouvez changer d&apos;avis à tout moment, aussi simplement que vous avez donné votre accord : lien
-                « Gérer les cookies » en bas de chaque page. Refuser n&apos;empêche pas d&apos;utiliser Kwa-Ba : seule la carte
+                Vous pouvez changer d&apos;avis à tout moment, aussi simplement que vous avez donné votre accord : lien
+                « Gérer les cookies » en bas de chaque page. Refuser n&apos;empêche pas d&apos;utiliser Kwa-Ba : seule la carte
                 interactive est remplacée par un encart.
               </p>
               <p>

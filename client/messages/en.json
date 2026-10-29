@@ -70,7 +70,9 @@
     "memorise": "Your choice is remembered on this device.",
     "devise": "Currency",
     "fcfa": "CFA franc (FCFA)",
-    "fcfaTexte": "All prices are shown in FCFA"
+    "fcfaTexte": "All prices are shown in FCFA",
+    "euro": "Euro (€)",
+    "euroTexte": "Prices shown in euros as a guide; payment stays in FCFA"
   },
   "roles": {
     "voyageur": "Traveller",
@@ -213,7 +215,50 @@
     },
     "devenezHote": "Become a Kwa-Ba host",
     "devenezHoteTexte": "Earn extra income by sharing your home and show travellers your region.",
-    "commencer": "Get started"
+    "commencer": "Get started",
+    "confiance": {
+      "verifies": "Hosts checked on site",
+      "paiement": "Mobile Money or card",
+      "prix": "Fees included in prices"
+    },
+    "services": {
+      "titre": "Your whole trip in one place",
+      "texte": "Beyond the stay: a driver when you land, a car, outings and a space to travel as a group.",
+      "transfert": {
+        "titre": "Airport transfer",
+        "texte": "Your driver waits at the exit with a sign bearing your name. Fixed price, paid in advance."
+      },
+      "location": {
+        "titre": "Cars and drivers",
+        "texte": "Vehicles and drivers checked by Kwa-Ba, handed over at the airport or at your address."
+      },
+      "experiences": {
+        "titre": "Experiences",
+        "texte": "Waterfalls, beaches, heritage sites and good restaurants around your stay."
+      },
+      "together": {
+        "titre": "Travel as a group",
+        "texte": "Choose the stay together and share the budget, without getting lost in WhatsApp."
+      },
+      "concierge": {
+        "titre": "AI Concierge",
+        "texte": "Describe what you want: it suggests stays, an itinerary and a budget."
+      },
+      "give": {
+        "titre": "Kwa-Ba Give",
+        "texte": "Support a verified local NGO, from 500 FCFA, with proof of every payout."
+      },
+      "decouvrir": "Explore"
+    },
+    "avis": {
+      "titre": "They stayed with Kwa-Ba",
+      "texte": "Reviews left only after a real stay."
+    },
+    "hoteChiffres": {
+      "gratuit": "Free listing",
+      "agent": "Visit by a Kwa-Ba agent",
+      "versement": "Paid 24 h after arrival"
+    }
   },
   "auth": {
     "noticeVerifie": "Account verified! You can now log in.",
@@ -437,7 +482,9 @@
     "afficherCarte": "Map",
     "masquerCarte": "List",
     "disponiblesSurPeriode": "{nombre, plural, =0 {none available} one {# available} other {# available}} from {debut} to {fin}",
-    "disponiblesUniquement": "Available only"
+    "disponiblesUniquement": "Available only",
+    "plusEquipements": "More amenities",
+    "moinsEquipements": "Fewer amenities"
   },
   "fiche": {
     "introuvable": "Place not found",
@@ -494,7 +541,12 @@
     "typeLogement": "Room type",
     "capaciteUnite": "{nombre, plural, one {# guest} other {up to # guests}}",
     "unites": "Rooms",
-    "unitesNombre": "{nombre, plural, one {# room} other {# rooms}}"
+    "unitesNombre": "{nombre, plural, one {# room} other {# rooms}}",
+    "similairesVille": "Other stays in {ville}",
+    "similaires": "You may also like",
+    "reglesMaison": "House rules",
+    "voirTousEquipements": "Show all {nombre} amenities",
+    "voirMoinsEquipements": "Show less"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -1260,7 +1312,8 @@
     "ecrit": "The Concierge is typing",
     "ia": "AI",
     "nouvelleConversation": "New conversation",
-    "nouvelle": "New"
+    "nouvelle": "New",
+    "exemples": "What you can ask"
   },
   "conciergeCartes": {
     "voir": "View",
@@ -1482,7 +1535,9 @@
       "hotel": "Room in a property with services",
       "villa": "Entire house, often with a garden or pool",
       "appartement": "Entire home in a building",
-      "auberge": "Simple, friendly place on a small budget"
+      "auberge": "Simple, friendly place on a small budget",
+      "maison": "Entire house, in town or in a village",
+      "residence": "Apartment or studio with hotel services (cleaning, reception)"
     },
     "erreurDroits": "Confirm that you hold the rights to the published photos.",
     "erreurPhotos": "Add at least one photo: listings without photos are almost never booked.",
@@ -1526,7 +1581,10 @@
     "depart": "Check-out by",
     "detailsManquants": "Add the details (floor area, bedrooms, beds, breakfast): they will appear on the listing.",
     "politique": "Cancellation policy",
-    "politiqueAide": "Shown on your listing and accepted by the traveller before payment. In addition, a booking cancelled within 48 hours, at least 7 days before arrival, is always refunded."
+    "politiqueAide": "Shown on your listing and accepted by the traveller before payment. In addition, a booking cancelled within 48 hours, at least 7 days before arrival, is always refunded.",
+    "reglesMaison": "House rules",
+    "reglesAide": "Shown on your listing: travellers know what to expect before booking.",
+    "nonPrecise": "Not specified"
   },
   "revenus": {
     "statuts": {

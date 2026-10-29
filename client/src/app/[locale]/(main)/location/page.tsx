@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import PageHero from "@/components/layout/PageHero";
 import { toast } from "sonner";
 import { BadgeCheck, Briefcase, Car, ChevronLeft, ChevronRight, Fuel, Snowflake, UserRound, Users } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -393,9 +394,8 @@ export default function LocationPage() {
 
   return (
     <div className="bg-light min-h-[70vh]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-        <h1 className="font-heading font-bold text-dark text-3xl sm:text-4xl">{t("titre")}</h1>
-        <p className="text-gray-600 mt-2 max-w-2xl">{t(sansChauffeur ? "sousTitreSansChauffeur" : "sousTitre")}</p>
+      <PageHero surtitre={<><Car size={16} /> {tNav("location")}</>} titre={t("titre")} sousTitre={t(sansChauffeur ? "sousTitreSansChauffeur" : "sousTitre")} />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
 
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">{[0, 1, 2].map((i) => <div key={i} className="h-80 skeleton rounded-3xl" />)}</div>

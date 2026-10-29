@@ -8,8 +8,8 @@ export function cn(...inputs: ClassValue[]) {
 /** Traveller's service fees (terms of sale, art. 6.4); the listing gives the visitor's exact rate (3 % for loyal customers). */
 export const SERVICE_FEE_RATE = 0.06;
 
-export const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1542314831-c6a4d27ce6a2?q=80&w=1200&auto=format&fit=crop";
+/** Listing without a photo: neutral drawing served by the site (a stock photo would pass for the place itself). */
+export const FALLBACK_IMAGE = "/brand/logement-sans-photo.svg";
 
 // Display language of dates, prices and labels: set at every render by <SynchroLangue /> (site root)
 let langueCourante: "fr" | "en" = "fr";

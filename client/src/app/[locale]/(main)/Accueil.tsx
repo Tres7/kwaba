@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, type Variants } from "framer-motion";
-import { Search, MapPin, ChevronRight } from "lucide-react";
+import { Search, MapPin, ChevronRight, Check } from "lucide-react";
 import { ArrowCounterClockwiseIcon, BackpackIcon, BedIcon, BuildingApartmentIcon, ChatsCircleIcon, HouseLineIcon, LightningIcon, WalletIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -16,6 +16,8 @@ import DateRangeField from "@/components/ui/DateRangeField";
 import GuestsField from "@/components/ui/GuestsField";
 import PropertyCard from "@/components/hebergement/PropertyCard";
 import ChampDestination from "@/components/hebergement/ChampDestination";
+import Services from "@/components/accueil/Services";
+import AvisVoyageurs from "@/components/accueil/AvisVoyageurs";
 import type { City, Hebergement, Paginated } from "@/types/api/models";
 
 // Slideshow photos (public/accueil): 1240 × 1550 portrait cropped on the subject for phones, 2560 px from
@@ -185,6 +187,14 @@ export default function HomePage() {
             {t("sousTitre")}
           </p>
           <HeroSearch />
+          <ul className="animate-fade-up-delay-2 mt-5 md:mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-medium text-white/95 drop-shadow">
+            {(["verifies", "paiement", "prix"] as const).map((cle) => (
+              <li key={cle} className="flex items-center gap-1.5">
+                <span className="h-5 w-5 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"><Check size={13} strokeWidth={3} aria-hidden /></span>
+                {t(`confiance.${cle}`)}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -252,12 +262,21 @@ export default function HomePage() {
               {[0, 1, 2, 3].map((i) => <div key={i} className="h-72 rounded-2xl skeleton" />)}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {recommended.map((prop) => <PropertyCard key={prop.id} property={prop} />)}
+            // Phones: a row to swipe instead of 8 cards one under the other
+            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0">
+              {recommended.map((prop) => (
+                <div key={prop.id} className="w-[82%] flex-shrink-0 snap-start sm:w-auto">
+                  <PropertyCard property={prop} />
+                </div>
+              ))}
             </div>
           )}
         </section>
         )}
+
+        <Services />
+
+        <AvisVoyageurs hebergements={recommended} />
 
         <section className="py-12 bg-white rounded-[2rem] md:rounded-[3rem] px-6 md:px-8 text-center">
           <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl mb-3">{t("pourquoi")}</h2>
@@ -278,13 +297,20 @@ export default function HomePage() {
         </section>
       </div>
 
-      <section className="bg-primary py-14 md:py-20 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+      <section className="relative overflow-hidden bg-primary-900 py-14 md:py-20 px-4 sm:px-6">
+        <div aria-hidden className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2000&auto=format&fit=crop')" }} />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-primary-900 via-primary-900/90 to-primary-900/50" />
+        <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
           <div className="text-white max-w-xl">
             <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">{t("devenezHote")}</h2>
             <p className="text-white/90 text-sm md:text-base leading-relaxed">
               {t("devenezHoteTexte")}
             </p>
+            <ul className="mt-6 flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-2 text-sm font-semibold">
+              {(["gratuit", "agent", "versement"] as const).map((cle) => (
+                <li key={cle} className="flex items-center gap-1.5"><Check size={16} strokeWidth={3} className="text-accent" aria-hidden /> {t(`hoteChiffres.${cle}`)}</li>
+              ))}
+            </ul>
           </div>
           <Link href="/hote" className="bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-full font-bold transition-colors shadow-lg flex-shrink-0">
             {t("commencer")}

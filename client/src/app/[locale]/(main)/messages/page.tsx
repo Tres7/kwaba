@@ -41,15 +41,15 @@ export default function MessagesPage() {
 
   return (
     <div className="min-h-screen bg-light">
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        <h1 className="font-heading font-bold text-dark text-2xl mb-6">{t("titre")}</h1>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl mb-8">{t("titre")}</h1>
 
         {loading ? (
           <p className="text-muted text-center py-16">{t("chargement")}</p>
         ) : error ? (
           <p className="text-muted text-center py-16">{t("erreurChargement")}</p>
         ) : conversations.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-card p-16 flex flex-col items-center gap-4 border border-light text-center max-w-lg mx-auto mt-12">
+          <div className="bg-white rounded-3xl shadow-card p-10 sm:p-16 flex flex-col items-center gap-4 border border-light text-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2">
               <MessageCircle size={36} className="text-primary" />
             </div>

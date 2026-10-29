@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api, { firstErrorMessage } from "@/lib/api";
-import { AMENITIES } from "@/components/hebergement/AmenityBadge";
+import { CATEGORIES_EQUIPEMENTS, REGLES } from "@/components/hebergement/AmenityBadge";
 import PhotoUploader from "@/components/hote/PhotoUploader";
 import EstimateurRevenus from "@/components/hote/EstimateurRevenus";
 import type { Revenus } from "@/types/api/paiement";
@@ -73,6 +73,12 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
 
   const toggleAmenity = (a: string) =>
     setForm((prev) => ({ ...prev, amenities: prev.amenities.includes(a) ? prev.amenities.filter((x) => x !== a) : [...prev.amenities, a] }));
+  // House rule: one value of the pair, or none ("not specified")
+  const choisirRegle = (regle: (typeof REGLES)[number], valeur: string | null) =>
+    setForm((prev) => ({
+      ...prev,
+      amenities: [...prev.amenities.filter((x) => x !== regle.oui.id && x !== regle.non.id), ...(valeur ? [valeur] : [])],
+    }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,14 +278,45 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
 
       <fieldset>
         <legend className={labelClass}>{t("equipements")}</legend>
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(AMENITIES).map(([id, { label, Icone }]) => {
-            const active = form.amenities.includes(id);
+        <div className="space-y-4">
+          {CATEGORIES_EQUIPEMENTS.map((c) => (
+            <div key={c.id}>
+              <p className="text-xs text-gray-500 font-semibold mb-2">{c.label}</p>
+              <div className="flex flex-wrap gap-2">
+                {c.equipements.map(({ id, label, Icone }) => {
+                  const active = form.amenities.includes(id);
+                  return (
+                    <button key={id} type="button" aria-pressed={active} onClick={() => toggleAmenity(id)}
+                      className={cn("inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors", active ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}>
+                      <Icone size={18} weight="duotone" aria-hidden /> {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className={labelClass}>{t("reglesMaison")}</legend>
+        <p className="text-xs text-gray-500 -mt-1 mb-3">{t("reglesAide")}</p>
+        <div className="space-y-3">
+          {REGLES.map((r) => {
+            const valeur = form.amenities.includes(r.oui.id) ? r.oui.id : form.amenities.includes(r.non.id) ? r.non.id : null;
+            const options = [{ id: null, label: t("nonPrecise") }, { id: r.oui.id, label: r.oui.label }, { id: r.non.id, label: r.non.label }];
             return (
-              <button key={id} type="button" aria-pressed={active} onClick={() => toggleAmenity(id)}
-                className={cn("inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors", active ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}>
-                <Icone size={18} weight="duotone" aria-hidden /> {label}
-              </button>
+              <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <span className="text-sm font-semibold text-dark sm:w-40 flex-shrink-0">{r.label}</span>
+                <div role="radiogroup" aria-label={r.label} className="inline-flex flex-wrap rounded-xl border border-gray-200 bg-white p-1 gap-1">
+                  {options.map((o) => (
+                    <button key={o.id ?? "aucun"} type="button" role="radio" aria-checked={valeur === o.id} onClick={() => choisirRegle(r, o.id)}
+                      className={cn("px-3 py-1.5 rounded-lg text-sm transition-colors", valeur === o.id ? "bg-primary text-white font-semibold" : "text-dark hover:bg-gray-50")}>
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             );
           })}
         </div>

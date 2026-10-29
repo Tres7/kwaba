@@ -11,6 +11,7 @@ import CarteOrganisation from "@/components/give/CarteOrganisation";
 import ChiffresImpact from "@/components/give/ChiffresImpact";
 import type { CodeCause, ImpactGlobal, Organisation } from "@/types/api/give";
 import { useTranslations } from "next-intl";
+import PageHero from "@/components/layout/PageHero";
 
 const ENGAGEMENTS = [
   { icon: BadgeCheck, id: "verifiees" },
@@ -37,19 +38,12 @@ export default function GivePage() {
 
   return (
     <div className="bg-light pb-12">
-      <section className="bg-gradient-to-br from-primary-700 to-primary-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <p className="flex items-center gap-2 text-sm font-semibold text-accent"><HandHeart size={16} /> Kwa-Ba Give</p>
-          <h1 className="font-heading font-bold text-3xl sm:text-4xl mt-2 max-w-2xl">{t("titre")}</h1>
-          <p className="text-white/85 mt-3 max-w-xl">
-            {t("sousTitre")}
-          </p>
+      <PageHero surtitre={<><HandHeart size={16} /> Kwa-Ba Give</>} titre={t("titre")} sousTitre={t("sousTitre")}>
           <a href="#organisations" className="mt-6 inline-flex items-center gap-2 bg-secondary text-white font-bold px-6 py-3 rounded-xl hover:bg-secondary/90">
             {t("choisirOng")} <ArrowRight size={18} />
           </a>
           {impact && impact.nb_dons > 0 && <div className="mt-8"><ChiffresImpact impact={impact} clair /></div>}
-        </div>
-      </section>
+      </PageHero>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10">
         <section aria-labelledby="causes-titre">

@@ -131,7 +131,7 @@ export default function ForgotPasswordPage() {
   const t = useTranslations("auth");
   return (
     <AuthShell
-      image="https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=2072&auto=format&fit=crop"
+      image="/accueil/hero-6-mobile.jpg?v=2"
       title={t("mdpVisuelTitre")}
       subtitle={t("mdpVisuelTexte")}
     >

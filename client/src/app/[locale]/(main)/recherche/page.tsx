@@ -17,7 +17,7 @@ import Select from "@/components/ui/Select";
 import type { Hebergement, Paginated } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import ChampDestination from "@/components/hebergement/ChampDestination";
-import { AMENITIES } from "@/components/hebergement/AmenityBadge";
+import { AMENITIES, EQUIPEMENTS_PRINCIPAUX, estRegle } from "@/components/hebergement/AmenityBadge";
 import MapEmbed from "@/components/hebergement/MapEmbed";
 import { QUARTIERS_LOME } from "@/lib/quartiers";
 
@@ -37,6 +37,11 @@ const TYPES = [
   { id: "maison", label: "maisons" },
   { id: "residence", label: "residences" },
 ];
+
+// Behind « more amenities »: every other amenity, and the house rules a traveller looks for
+const REGLES_RECHERCHEES = ["animaux_acceptes", "non_fumeur", "fumeur_autorise", "fetes_autorisees"];
+const AUTRES_EQUIPEMENTS = Object.keys(AMENITIES).filter((id) => !EQUIPEMENTS_PRINCIPAUX.includes(id)
+  && (!estRegle(id) || REGLES_RECHERCHEES.includes(id)));
 
 const FILTER_KEYS = ["city", "check_in", "check_out", "guests", "type", "sort", "price_min", "price_max", "petit_dejeuner", "equipements", "disponibles"] as const;
 
@@ -59,6 +64,7 @@ function RechercheContent() {
   const [priceMax, setPriceMax] = useState(params.price_max);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [carte, setCarte] = useState(false);
+  const [tousEquipements, setTousEquipements] = useState(false);
 
   // Syncs the form again when the URL changes (search from the navbar, back button…)
   useEffect(() => {
@@ -144,7 +150,7 @@ function RechercheContent() {
       <div>
         <p className="text-xs text-muted font-bold uppercase tracking-wider mb-2">{t("equipements")}</p>
         <div className="flex flex-wrap gap-2">
-          {Object.entries(AMENITIES).map(([id, { label }]) => (
+          {[...EQUIPEMENTS_PRINCIPAUX, ...AUTRES_EQUIPEMENTS.filter((id) => tousEquipements || equipements.includes(id))].map((id) => [id, AMENITIES[id]] as const).map(([id, { label }]) => (
             <button
               key={id}
               onClick={() => basculerEquipement(id)}
@@ -155,6 +161,10 @@ function RechercheContent() {
             </button>
           ))}
         </div>
+        <button type="button" onClick={() => setTousEquipements((v) => !v)} aria-expanded={tousEquipements}
+          className="mt-2 text-sm font-bold text-primary hover:underline">
+          {tousEquipements ? t("moinsEquipements") : t("plusEquipements")}
+        </button>
       </div>
 
       <div>
@@ -199,7 +209,7 @@ function RechercheContent() {
     <div className="min-h-screen bg-light">
       <div className="bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 py-4">
         <form method="post" onSubmit={submitSearch} className="max-w-7xl mx-auto grid grid-cols-2 lg:flex gap-2 sm:gap-3 items-stretch">
-          <label className="col-span-2 lg:flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-light-muted">
+          <label className="col-span-2 lg:flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white focus-within:border-primary transition-colors">
             <Search size={16} className="text-muted flex-shrink-0" />
             <ChampDestination
               value={city} onChange={setCity}

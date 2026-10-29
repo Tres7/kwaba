@@ -8,6 +8,22 @@
     scroll-behavior: smooth;
   }
 
+  /* Titles on balanced lines: no word left alone, no « Kwa- / Ba » cut on phones */
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  /* Anchors and scrollIntoView stop under the sticky navigation bar (plus its search row on tablets) */
+  html {
+    scroll-padding-top: 5.5rem;
+  }
+  @media (min-width: 768px) and (max-width: 1023px) {
+    html { scroll-padding-top: 9.5rem; }
+  }
+  @media (min-width: 1024px) {
+    html { scroll-padding-top: 6.5rem; }
+  }
+
   ::selection {
     @apply bg-primary/20 text-primary;
   }

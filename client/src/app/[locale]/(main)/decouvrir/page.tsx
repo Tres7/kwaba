@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@/i18n/navigation";
-import { MapPin, Search, ArrowRight } from "lucide-react";
+import { Compass, MapPin, Search, ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import PageHero from "@/components/layout/PageHero";
 import api from "@/lib/api";
 import { cn, formatPrice } from "@/lib/utils";
 import Select from "@/components/ui/Select";
@@ -34,6 +35,7 @@ function localiser(e: Experience, locale: string) {
 
 export default function DecouvrirPage() {
   const t = useTranslations("decouvrir");
+  const tNav = useTranslations("nav");
   const locale = useLocale();
   const [tab, setTab] = useState<Category | "tout">("tout");
   const [city, setCity] = useState("");
@@ -58,10 +60,9 @@ export default function DecouvrirPage() {
 
   return (
     <div className="min-h-screen bg-light">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+      <PageHero large surtitre={<><Compass size={16} /> {tNav("experiences")}</>} titre={t("titre")} sousTitre={t("sousTitre")} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
         <div className="mb-6 md:mb-8">
-          <h1 className="font-heading font-bold text-3xl md:text-4xl text-dark mb-2">{t("titre")}</h1>
-          <p className="text-gray-500 text-sm md:text-base mb-6">{t("sousTitre")}</p>
 
           <div className="flex gap-6 overflow-x-auto scrollbar-hide border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0" role="tablist">
             {TABS.map((o) => (

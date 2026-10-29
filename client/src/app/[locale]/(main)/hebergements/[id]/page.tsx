@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, BadgeCheck, MapPin, ChevronDown, ChevronUp, Share2, Calendar, MessageCircle, Pencil, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import AlerteDisponibilite from "@/components/hebergement/AlerteDisponibilite";
-import AmenityBadge from "@/components/hebergement/AmenityBadge";
+import EquipementsLogement from "@/components/hebergement/EquipementsLogement";
 import DetailsLogement from "@/components/hebergement/DetailsLogement";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
 import FavoriteButton from "@/components/hebergement/FavoriteButton";
@@ -17,6 +17,7 @@ import RatingBadge from "@/components/avis/RatingBadge";
 import AvisSection from "@/components/avis/AvisSection";
 import ProposerAuGroupe from "@/components/voyage/ProposerAuGroupe";
 import MapEmbed from "@/components/hebergement/MapEmbed";
+import LogementsSimilaires from "@/components/hebergement/LogementsSimilaires";
 import api, { apiErrorMessage } from "@/lib/api";
 import { addDays, calculateNights, calculateServiceFee, SERVICE_FEE_RATE, cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate, prixNuitFraisInclus, TYPE_LABELS } from "@/lib/utils";
 import { nuitsIndisponibles, useDisponibilites } from "@/lib/useDisponibilites";
@@ -25,6 +26,20 @@ import Stepper from "@/components/ui/Stepper";
 import type { Hebergement } from "@/types/api/models";
 import type { MessagingConversation } from "@/types/api/messaging";
 import { useTranslations } from "next-intl";
+
+/**
+ * Place of photo i in the 4 × 2 desktop mosaic, so that it is always full whatever the number of photos:
+ * the first one takes the left half, the others share the right half.
+ */
+function celluleMosaique(i: number, nombre: number) {
+  if (nombre === 1) return "col-span-4 row-span-2";
+  if (i === 0) return "col-span-2 row-span-2";
+  if (nombre === 2) return "col-span-2 row-span-2";
+  if (nombre === 3) return "col-span-2";
+  // 4 photos: two small ones on top, a wide one under them
+  if (nombre === 4 && i === 3) return "col-span-2";
+  return "";
+}
 
 function HebergementContent() {
   const t = useTranslations("fiche");
@@ -201,7 +216,7 @@ function HebergementContent() {
         </div>
         <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 h-[420px] lg:h-[480px] rounded-3xl overflow-hidden mb-12 shadow-card">
           {photos.slice(0, 5).map((img, i) => (
-            <div key={img + i} className={i === 0 ? "col-span-2 row-span-2 overflow-hidden" : "overflow-hidden"} style={photos.length === 1 ? { gridColumn: "1 / -1", gridRow: "1 / -1" } : undefined}>
+            <div key={img + i} className={cn("overflow-hidden", celluleMosaique(i, Math.min(photos.length, 5)))}>
               <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
             </div>
           ))}
@@ -253,13 +268,7 @@ function HebergementContent() {
 
             <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("equipements")}</h2>
-              {hebergement.amenities.length > 0 ? (
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
-                  {hebergement.amenities.map((a) => <AmenityBadge key={a} amenity={a} />)}
-                </div>
-              ) : (
-                <p className="text-muted text-sm">{t("aucunEquipement")}</p>
-              )}
+              <EquipementsLogement amenities={hebergement.amenities} />
             </section>
 
             <PolitiqueAnnulation politique={hebergement.politique_annulation ?? "moderee"} />
@@ -278,9 +287,9 @@ function HebergementContent() {
           <div className="lg:col-span-1" id="reserver">
             <div className="bg-white rounded-3xl shadow-soft border border-gray-100 p-5 sm:p-7 lg:sticky lg:top-28">
               <div className="mb-5">
-                <div className="flex items-baseline gap-2">
+                <div className="flex flex-wrap items-baseline gap-x-2">
                   <span className="text-dark font-heading font-bold text-3xl">{formatPrice(nuitTtc.total)}</span>
-                  <span className="text-muted text-sm font-medium">{t("parNuitFraisInclus")}</span>
+                  <span className="text-muted text-sm font-medium whitespace-nowrap">{t("parNuitFraisInclus")}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
                   {t("detailNuit", { prix: formatPrice(prixUnite), frais: formatPrice(nuitTtc.frais), taux: Math.round(tauxFrais * 100) })}
@@ -381,6 +390,8 @@ function HebergementContent() {
             </div>
           </div>
         </div>
+
+        <LogementsSimilaires hebergement={hebergement} />
       </div>
 
       {/* Mobile booking bar */}

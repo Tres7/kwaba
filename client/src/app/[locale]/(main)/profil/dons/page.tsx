@@ -48,8 +48,8 @@ export default function MesDonsPage() {
 
   return (
     <div className="bg-light min-h-[70vh] pb-12">
-      <SubPageHeader title={t("titre")} />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-4">
+        <SubPageHeader title={t("titre")} />
         {data && data.nb_payes > 0 && (
           <div className="bg-primary text-white rounded-2xl p-5 flex items-center gap-4">
             <HandHeart size={28} className="text-accent flex-shrink-0" />
