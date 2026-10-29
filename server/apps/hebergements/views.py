@@ -3,7 +3,7 @@ import uuid
 from datetime import date, timedelta
 
 from django.db import transaction
-from django.db.models import Count, Min, ProtectedError, Q, RestrictedError
+from django.db.models import Count, Min, Q, RestrictedError
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +13,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAu
 from rest_framework.throttling import ScopedRateThrottle
 
 from .alertes import signaler_liberation
+from .archivage import ArchivageImpossible, archiver
 from . import stock
 from .disponibilites import a_des_reservations, periodes_indisponibles, verrouiller, verrouiller_types
 from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
@@ -277,12 +278,9 @@ class HebergementDetailView(APIView):
         if obj.host_id != request.user.id:
             return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
         try:
-            obj.delete()
-        except ProtectedError:
-            return Response(
-                {'detail': "Cette annonce a des réservations payées : elle ne peut pas être supprimée. Masquez-la plutôt."},
-                status=status.HTTP_409_CONFLICT,
-            )
+            archiver(obj)
+        except ArchivageImpossible as e:
+            return Response({'detail': str(e)}, status=status.HTTP_409_CONFLICT)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

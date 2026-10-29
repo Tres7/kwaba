@@ -11,6 +11,7 @@ urlpatterns = [
     path('users/<uuid:pk>/', views.UtilisateurDetailView.as_view(), name='admin-user'),
     path('hebergements/', views.HebergementListView.as_view(), name='admin-hebergements'),
     path('hebergements/<uuid:pk>/', views.HebergementDetailView.as_view(), name='admin-hebergement'),
+    path('hebergements/<uuid:pk>/restaurer/', views.HebergementRestaurerView.as_view(), name='admin-hebergement-restaurer'),
     path('reservations/', views.ReservationListView.as_view(), name='admin-reservations'),
     path('reservations/<uuid:pk>/annuler/', views.ReservationAnnulerView.as_view(), name='admin-reservation-annuler'),
     path('avis/', views.AvisListView.as_view(), name='admin-avis'),

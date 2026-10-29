@@ -37,6 +37,11 @@ class HebergementQuerySet(models.QuerySet):
         return self.filter(is_available=True, statut_verification='verifiee').filter(~_societe_immatriculee() | contrat_signe)
 
 
+class HebergementManager(models.Manager.from_queryset(HebergementQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().filter(archivee_le__isnull=True)
+
+
 class HebergementModel(models.Model):
     STATUTS_VERIFICATION = [
         ('en_attente', 'En attente de vérification'),
@@ -93,10 +98,12 @@ class HebergementModel(models.Model):
         on_delete=models.CASCADE,
         related_name='hebergements',
     )
+    archivee_le = models.DateTimeField(null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    objects = HebergementQuerySet.as_manager()
+    objects = HebergementManager()
+    tous = HebergementQuerySet.as_manager()
 
     class Meta:
         app_label = 'hebergements'

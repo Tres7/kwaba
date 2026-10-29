@@ -41,6 +41,7 @@ class JournalAuditModel(models.Model):
         ('compte_reactive', 'Compte réactivé'),
         ('annonce_modifiee', 'Annonce modifiée par un administrateur'),
         ('annonce_supprimee', 'Annonce supprimée par un administrateur'),
+        ('annonce_restauree', 'Annonce restaurée par un administrateur'),
         ('reservation_annulee', 'Réservation annulée par un administrateur'),
         ('avis_supprime', 'Avis supprimé par un administrateur'),
         ('identite_verifiee', "Pièce d'identité validée"),

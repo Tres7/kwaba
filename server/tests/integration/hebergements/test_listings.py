@@ -85,13 +85,13 @@ class TestUpdateAndDelete:
         assert intruder.delete(f'{HEBERGEMENTS}{listing.id}/').status_code == 403
         assert HebergementModel.objects.filter(pk=listing.id).exists()
 
-    def test_host_deletes_listing_with_cascade(self, client_for, make_hebergement, make_reservation):
+    def test_host_deletes_listing_by_archiving_it(self, client_for, make_hebergement, make_reservation):
         listing = make_hebergement()
-        reservation = make_reservation(listing)
+        reservation = make_reservation(listing, starts_in=-10)
 
         assert client_for(listing.host).delete(f'{HEBERGEMENTS}{listing.id}/').status_code == 204
         assert not HebergementModel.objects.filter(pk=listing.id).exists()
-        assert not type(reservation).objects.filter(pk=reservation.id).exists()
+        assert type(reservation).objects.filter(pk=reservation.id).exists()
 
 
 def test_mine_lists_own_listings_including_hidden(client_for, make_user, make_hebergement):

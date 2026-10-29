@@ -1,3 +1,5 @@
+from datetime import date
+
 from apps.notifications.application.ports.NotificationSender import NotificationSender
 
 
@@ -22,3 +24,10 @@ class NotificationService:
 
     def send_password_reset_email(self, to: str, first_name: str, code: str) -> None:
         self._sender.send_password_reset_email(to, first_name, code)
+
+    def send_booking_cancelled_listing_removed_email(
+        self, to: str, first_name: str, hebergement_name: str, city: str, check_in: date, check_out: date,
+    ) -> None:
+        self._sender.send_booking_cancelled_listing_removed_email(
+            to, first_name, hebergement_name, city, check_in, check_out,
+        )

@@ -28,6 +28,10 @@ EVENTS = {
         'recipient_first_name': 'Kofi', 'sender_first_name': 'Ama', 'hebergement_name': 'Villa Océane',
         'message_preview': 'Bonjour',
     },
+    'hebergements.booking_cancelled_listing_removed': {
+        'reservation_id': 'r-1', 'email': 'ama@example.tg', 'first_name': 'Ama', 'hebergement_name': 'Villa Océane',
+        'city': 'Lomé', 'check_in': '2026-12-20', 'check_out': '2026-12-23',
+    },
 }
 
 

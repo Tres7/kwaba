@@ -17,9 +17,9 @@ class DjangoHebergementLookup(HebergementLookup):
         )
 
     def get(self, hebergement_id: uuid.UUID) -> Optional[HebergementInfo]:
-        row = HebergementModel.objects.filter(id=hebergement_id).values(*self.FIELDS).first()
+        row = HebergementModel.tous.filter(id=hebergement_id).values(*self.FIELDS).first()
         return self._to_info(row) if row else None
 
     def get_many(self, hebergement_ids: List[uuid.UUID]) -> Dict[uuid.UUID, HebergementInfo]:
-        rows = HebergementModel.objects.filter(id__in=hebergement_ids).values(*self.FIELDS)
+        rows = HebergementModel.tous.filter(id__in=hebergement_ids).values(*self.FIELDS)
         return {row['id']: self._to_info(row) for row in rows}

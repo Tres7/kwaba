@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour {{ first_name }},
+
+Votre réservation pour « {{ hebergement_name }} » ({{ city }}), du {{ check_in }} au {{ check_out }}, est annulée : l'hôte ne propose plus ce logement sur Kwa-Ba.
+
+Aucun montant ne vous a été prélevé. Si un paiement arrive malgré tout, il vous sera remboursé automatiquement.
+
+Vous pouvez trouver un autre logement pour ces dates ici :
+{{ search_url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

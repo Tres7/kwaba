@@ -6,8 +6,7 @@ recorded in the audit log (apps.securite) with the administrator, the target and
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
-from django.db import transaction
-from django.db.models import Avg, Count, ProtectedError, Q, Sum
+from django.db.models import Avg, Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -16,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.avis.models import AvisModel
+from apps.hebergements.archivage import ArchivageImpossible, archiver, restaurer
 from apps.hebergements.models import HebergementModel
 from apps.paiements import services as paiements, tarifs
 from apps.paiements.models import ConditionsHoteModel
@@ -256,19 +256,19 @@ def _hebergement(h) -> dict:
         'est_verifie': h.statut_verification == 'verifiee', 'statut_verification': h.statut_verification,
         'rating': h.rating, 'review_count': h.review_count, 'nb_reservations': h.nb_reservations,
         'host': {'id': str(h.host_id), 'nom': _nom(h.host), 'email': h.host.email},
-        'created_at': h.created_at,
+        'created_at': h.created_at, 'archivee_le': h.archivee_le,
     }
 
 
-def _hebergements():
-    return (HebergementModel.objects.select_related('host')
-            .annotate(nb_reservations=Count('reservations')).order_by('-created_at'))
+def _hebergements(archivees=False):
+    qs = HebergementModel.tous.filter(archivee_le__isnull=False) if archivees else HebergementModel.objects.all()
+    return qs.select_related('host').annotate(nb_reservations=Count('reservations')).order_by('-created_at')
 
 
 class HebergementListView(VueAdmin):
     def get(self, request):
-        qs = _hebergements()
         params = request.query_params
+        qs = _hebergements(archivees=_booleen(params.get('archivees')) is True)
         if q := params.get('q', '').strip():
             qs = qs.filter(Q(name__icontains=q) | Q(city__icontains=q) | Q(location__icontains=q) | Q(host__email__icontains=q))
         if ville := params.get('ville', '').strip():
@@ -323,15 +323,22 @@ class HebergementDetailView(VueAdmin):
             return _introuvable('Annonce')
         trace = {'annonce_id': str(annonce.pk), 'annonce': annonce.name, 'hote': annonce.host.email, 'motif': motif}
         try:
-            with transaction.atomic():
-                annonce.delete()
-        except ProtectedError:
-            return Response(
-                {'detail': "Cette annonce a des réservations payées : elle ne peut pas être supprimée. Masquez-la plutôt."},
-                status=status.HTTP_409_CONFLICT,
-            )
+            archiver(annonce)
+        except ArchivageImpossible as e:
+            return Response({'detail': str(e)}, status=status.HTTP_409_CONFLICT)
         journaliser('annonce_supprimee', request, utilisateur=request.user, **trace)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class HebergementRestaurerView(VueAdmin):
+    def post(self, request, pk):
+        annonce = HebergementModel.tous.select_related('host').filter(pk=pk, archivee_le__isnull=False).first()
+        if not annonce:
+            return _introuvable('Annonce archivée')
+        restaurer(annonce)
+        journaliser('annonce_restauree', request, utilisateur=request.user, annonce_id=str(annonce.pk),
+                    annonce=annonce.name, hote=annonce.host.email)
+        return Response(_hebergement(_hebergements().get(pk=annonce.pk)))
 
 
 # --- 4. Bookings --------------------------------------------------------------------------------

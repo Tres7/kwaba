@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 
 from apps.hebergements.models import HebergementModel
 from apps.reservations.models import ReservationModel
+from apps.notifications.infrastructure.messaging.EmailRequestBus import EmailRequestBus
 from apps.users.infrastructure.messaging.RabbitMQEventBus import RabbitMQEventBus
 from apps.users.infrastructure.persistence.models import UserModel
 
@@ -38,10 +39,11 @@ def _broker_down(monkeypatch):
 
     Real exchanges with the broker are tested in tests/broker.
     """
-    def refuse_connection(self, event):
+    def refuse_connection(self, *args):
         raise ConnectionError('RabbitMQ indisponible (tests d\'intégration)')
 
     monkeypatch.setattr(RabbitMQEventBus, 'publish', refuse_connection)
+    monkeypatch.setattr(EmailRequestBus, '_publish', refuse_connection)
 
 
 @pytest.fixture

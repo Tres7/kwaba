@@ -1389,7 +1389,7 @@
     "devenirHote": "Become a host",
     "masquee": "Listing hidden from search",
     "visible": "Listing visible again",
-    "supprimerQuestion": "Permanently delete “{nom}”? Related bookings will also be deleted.",
+    "supprimerQuestion": "Delete “{nom}”? The listing will disappear from the site and your space, and bookings awaiting payment will be cancelled. Your stay history is kept.",
     "supprimee": "Listing deleted",
     "nouvelle": "New listing",
     "modifier": "Edit listing",
