@@ -1,8 +1,8 @@
 {
   "meta": {
-    "titre": "Kwa-Ba | Lomé vous accueille",
+    "titre": "Kwa-Ba | L'Afrique vous accueille",
     "description": "Réservez un logement vérifié à Lomé, un transfert depuis l'aéroport ou une voiture avec chauffeur, et payez par Mobile Money ou carte.",
-    "slogan": "Kwa-Ba. Lomé vous accueille.",
+    "slogan": "Kwa-Ba. L'Afrique vous accueille.",
     "pages": {
       "recherche": {
         "titre": "Hébergements à Lomé",
@@ -55,7 +55,7 @@
     "allerAuContenu": "Aller au contenu principal",
     "chargement": "Chargement…",
     "retour": "Retour",
-    "slogan": "Lomé vous accueille.",
+    "slogan": "L'Afrique vous accueille.",
     "choisir": "Choisir"
   },
   "langue": {
@@ -176,7 +176,7 @@
     "voyageurs": "Voyageurs",
     "rechercher": "Rechercher",
     "bienvenue": "Bienvenue sur Kwa-Ba ! Votre compte est vérifié.",
-    "titre": "Lomé vous<br></br>accueille",
+    "titre": "Découvrez l'Afrique<br></br>autrement",
     "sousTitre": "Réservez des hébergements uniques et vivez des expériences authentiques.",
     "destinationsPopulaires": "Destinations populaires",
     "destinationsTexte": "Les villes où nos voyageurs posent leurs valises",
