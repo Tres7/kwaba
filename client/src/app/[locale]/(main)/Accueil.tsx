@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, type Variants } from "framer-motion";
 import { Search, MapPin, ChevronRight, Check } from "lucide-react";
-import { ArrowCounterClockwiseIcon, BackpackIcon, BedIcon, BuildingApartmentIcon, ChatsCircleIcon, HouseLineIcon, LightningIcon, WalletIcon } from "@phosphor-icons/react";
+import { ArrowCounterClockwiseIcon, BackpackIcon, BedIcon, BuildingApartmentIcon, ChatsCircleIcon, ClockCountdownIcon, HouseLineIcon, LightningIcon, SealCheckIcon, ShieldCheckIcon, UsersThreeIcon, WalletIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
@@ -49,6 +49,13 @@ const FEATURES = [
   { title: "instantanee", icon: LightningIcon, color: "text-secondary ring-secondary/20" },
   { title: "contact", icon: ChatsCircleIcon, color: "text-accent ring-accent/30" },
   { title: "annulation", icon: ArrowCounterClockwiseIcon, color: "text-dark ring-dark/15" },
+];
+
+const GARANTIES = [
+  { title: "verifies", icon: SealCheckIcon, color: "text-primary ring-primary/20" },
+  { title: "garantie", icon: ShieldCheckIcon, color: "text-secondary ring-secondary/20" },
+  { title: "equipe", icon: UsersThreeIcon, color: "text-accent ring-accent/30" },
+  { title: "versement", icon: ClockCountdownIcon, color: "text-dark ring-dark/15" },
 ];
 
 const cardVariants: Variants = {
@@ -291,6 +298,17 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-bold text-dark text-lg mb-2">{t(`atouts.${feat.title}.titre`)}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed max-w-[240px]">{t(`atouts.${feat.title}.texte`)}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+          <motion.div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8" variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}>
+            {GARANTIES.map((garantie) => (
+              <motion.div key={garantie.title} variants={cardVariants} className="flex flex-col items-center text-center">
+                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white ring-1 shadow-sm flex items-center justify-center mb-4 md:mb-6 ${garantie.color}`}>
+                  <garantie.icon className="w-9 h-9 md:w-11 md:h-11" weight="duotone" aria-hidden />
+                </div>
+                <h3 className="font-bold text-dark text-lg mb-2">{t(`garanties.${garantie.title}.titre`)}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed max-w-[240px]">{t(`garanties.${garantie.title}.texte`)}</p>
               </motion.div>
             ))}
           </motion.div>

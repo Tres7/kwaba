@@ -77,9 +77,9 @@ export default function Societe() {
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        {texte("raison_sociale", "Raison sociale", { required: true, placeholder: "Ex. Kwa-Ba SARL" })}
+        {texte("raison_sociale", "Raison sociale", { required: true, placeholder: "Ex. KWA-BA SAS" })}
         {texte("nom_commercial", "Nom commercial")}
-        {texte("forme_juridique", "Forme juridique", { placeholder: "SARL, SAS, SA…" })}
+        {texte("forme_juridique", "Forme juridique", { placeholder: "SAS, SARL, SA…" })}
         {texte("pays", "Pays")}
         <Champ label="Adresse du siège" erreur={erreurs.adresse} className="sm:col-span-2">
           <Zone rows={2} value={form.adresse} onChange={(e) => champ("adresse")(e.target.value)} required />
@@ -96,7 +96,7 @@ export default function Societe() {
         <legend className="float-left w-full text-sm font-semibold text-dark">Signataire des contrats</legend>
         <div className="clear-both grid sm:grid-cols-2 gap-4">
           {texte("representant_nom", "Représentant légal", { placeholder: "Prénom et nom" })}
-          {texte("representant_qualite", "Qualité", { placeholder: "Cogérant, gérant…" })}
+          {texte("representant_qualite", "Qualité", { placeholder: "Président, directeur général…" })}
         </div>
         <Champ label="Signature scannée" erreur={erreurs.signature_representant}
           aide="Imprimée sur les contrats, côté Kwa-Ba. Signature à l'encre foncée sur papier blanc : le fond devient transparent.">

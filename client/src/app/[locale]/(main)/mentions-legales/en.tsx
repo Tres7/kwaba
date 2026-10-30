@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import LienContact from "@/components/legal/LienContact";
+import FormeSociete from "@/components/legal/FormeSociete";
 import MentionSociete from "@/components/legal/MentionSociete";
 import LegalPage, { AC, VersionFrancaiseFaitFoi } from "@/components/legal/LegalPage";
 
@@ -8,7 +9,7 @@ export default function ContenuEn() {
   return (
     <LegalPage
       titre="Legal notice"
-      miseAJour="23 October 2026"
+      miseAJour="30 October 2026"
       intro={
         <>
           <p>Information about the publisher of the Kwa-Ba website, its host and the content published on it.</p>
@@ -21,13 +22,13 @@ export default function ContenuEn() {
           titre: "Website publisher",
           contenu: (
             <ul>
-              <li>Company name: <strong>KWA-BA SARL</strong>, a limited liability company with a share capital of 100,000 F CFA</li>
+              <li>Company name: <strong>KWA-BA</strong>, <FormeSociete /> with a share capital of 100,000 F CFA</li>
               <li>Registered office: Totsi Gblenkomé district, street 243, Lomé (Togo)</li>
               <li>Registration: Lomé RCCM no. <MentionSociete cle="rccm" libelle="RCCM" />; tax number (NIF) <MentionSociete cle="nif" libelle="NIF" /></li>
               <li>E-commerce: registered as an e-commerce provider under no. <MentionSociete cle="commerce_electronique" libelle="number" /> (decree no. 2018-062/PR)</li>
               <li>Personal data: declaration to the personal data protection authority (IPDCP) no. <MentionSociete cle="ipdcp" libelle="number" /></li>
               <li>Contact: <LienContact />; postal address: Totsi Gblenkomé district, street 243, Lomé, Togo</li>
-              <li>Co-managers (cogérants): Mr MENDE Fadel and Mr KPOGLO Dzidoula Godwin Trésor — Publication director: Mr MENDE Fadel.</li>
+              <li>President: Mr MENDE Fadel — General Manager: Mr KPOGLO Dzidoula Godwin Trésor — Publication director: Mr MENDE Fadel.</li>
             </ul>
           ),
         },
@@ -53,7 +54,7 @@ export default function ContenuEn() {
           titre: "Intellectual property",
           contenu: (
             <p>
-              The Kwa-Ba name, logo, graphic charter, texts and code of the Platform belong to KWA-BA SARL, unless stated otherwise{" "}
+              The Kwa-Ba name, logo, graphic charter, texts and code of the Platform belong to KWA-BA, unless stated otherwise{" "}
               <AC>trademark registered with OAPI under no. …, if filed</AC>. Any reproduction without permission is prohibited. Listings, photos and reviews published by users remain the
               property of their authors.
             </p>
