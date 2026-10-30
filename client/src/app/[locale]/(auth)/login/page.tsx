@@ -69,6 +69,8 @@ function LoginForm() {
         setError(t("desactive"));
       } else if (res.code === "too_many_attempts") {
         setError(t("tropDeTentatives"));
+      } else if (res.code === "serveur") {
+        setError(t("serveurInjoignable"));
       } else {
         setError(t("identifiantsIncorrects"));
       }

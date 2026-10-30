@@ -102,6 +102,16 @@ class TestLimitesParIP:
         assert JournalAuditModel.objects.get(action='connexion', email=user.email).ip == '41.207.0.1'
 
 
+class TestHotePublic:
+    def test_absolute_addresses_use_the_host_sent_by_the_proxy(self, rf, settings):
+        settings.ALLOWED_HOSTS = ['kwa-ba.com', 'api']
+        requete = rf.get('/', HTTP_HOST='api:8000', HTTP_X_FORWARDED_HOST='kwa-ba.com')
+        assert requete.build_absolute_uri('/media/photo.jpg') == 'http://kwa-ba.com/media/photo.jpg'
+
+    def test_unknown_forwarded_host_refused(self, api_client):
+        assert api_client.get(ME, HTTP_X_FORWARDED_HOST='evil.example').status_code == 400
+
+
 class TestAdministration:
     URL = '/admin/login/'
 

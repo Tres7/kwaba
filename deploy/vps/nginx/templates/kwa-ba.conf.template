@@ -58,6 +58,13 @@ server {
         proxy_pass http://kwaba_client;
     }
 
+    # API calls of the browser: the client relays them to Django with the session's token (client/src/app/api/proxy).
+    # Direct calls to /api/ remain for what does not come from a browser (payment webhooks, health check).
+    location ^~ /api/proxy/ {
+        include /etc/nginx/snippets/proxy.conf;
+        proxy_pass http://kwaba_client;
+    }
+
     # Host photos, fetched from the public R2 bucket and cached locally (the r2.dev address is rate limited).
     # The R2 host is resolved when the configuration loads; the container is recreated at every deployment.
     location ^~ /photos/ {

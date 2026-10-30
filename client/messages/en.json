@@ -327,7 +327,7 @@
     "inscriptionVisuelTexte": "Book verified stays, save your favourites and talk directly with hosts.",
     "googleIndisponible": "Google is not available right now. Please try again in a moment.",
     "googleJeton": "Could not get the Google token.",
-    "googleSession": "Google sign-in worked, but we could not start your session.",
+    "googleRefus": "Google sign-in failed. Try again or use your email.",
     "ouParEmail": "or with email",
     "codeInvalide": "Invalid or expired code.",
     "codeRenvoye": "A new code has been sent to your email address.",

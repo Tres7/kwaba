@@ -3,7 +3,8 @@ import type { JWT } from "next-auth/jwt";
 import { getApiBaseUrl } from "@/lib/api-url";
 import { fetchBackendUser } from "@/lib/api/auth/me";
 import { credentialsProvider } from "@/lib/providers/auth/credentials";
-import { backendSessionProvider } from "@/lib/providers/auth/backend-session";
+import { emailCodeProvider } from "@/lib/providers/auth/email-code";
+import { googleProvider } from "@/lib/providers/auth/google";
 import { fermerSession, sessionFermee } from "@/lib/sessions-fermees";
 
 // Renews the access token 30 s before it expires
@@ -52,7 +53,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [credentialsProvider, backendSessionProvider],
+  providers: [credentialsProvider, googleProvider, emailCodeProvider],
   trustHost: true,
 
   callbacks: {
@@ -85,8 +86,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
+    // What the browser can read: never a token, they stay in the encrypted cookie (see app/api/proxy)
     async session({ session, token }) {
-      session.accessToken = token.accessToken ?? "";
       session.user.id = token.userId ?? "";
       session.user.role = token.role ?? "voyageur";
       session.error = token.error;

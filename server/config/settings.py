@@ -210,6 +210,10 @@ REST_FRAMEWORK = {
 NUM_PROXIES = int(os.getenv('DJANGO_NUM_PROXIES', '0'))
 REST_FRAMEWORK['NUM_PROXIES'] = NUM_PROXIES
 
+# Absolute addresses (uploaded photos) use the public host, not the internal name of the API: the Next.js proxy and
+# nginx both set this header, and nginx replaces whatever a visitor sends. ALLOWED_HOSTS still applies to it.
+USE_X_FORWARDED_HOST = True
+
 # Rate and attempt limits (sign-in, sign-up, codes, administration…). Can be disabled for a load test
 # only; always active in production.
 LIMITES_ACTIVES = _env_bool('LIMITES_ACTIVES', 'True')

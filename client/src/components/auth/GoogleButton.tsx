@@ -3,7 +3,6 @@
 import { useRouter } from "@/i18n/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { authenticateWithGoogle } from "@/lib/api/auth/google";
 
 declare global {
   interface Window {
@@ -74,21 +73,20 @@ export default function GoogleButton({ label, callbackUrl, onError }: GoogleButt
           return;
         }
         try {
-          const data = await authenticateWithGoogle(response.credential);
-          const res = await signIn("backend-session", {
-            redirect: false,
-            // Identity and role read again by the server from the API (see backend-session.ts)
-            accessToken: data.access,
-            refreshToken: data.refresh,
-          });
+          const res = await signIn("google-id-token", { redirect: false, idToken: response.credential });
           if (res?.error) {
-            onError(t("googleSession"));
+            const messages: Record<string, string> = {
+              inactive: t("desactive"),
+              too_many_attempts: t("tropDeTentatives"),
+              serveur: t("serveurInjoignable"),
+            };
+            onError(messages[res.code ?? ""] ?? t("googleRefus"));
             return;
           }
           router.push(callbackUrl);
           router.refresh();
-        } catch (err) {
-          onError(err instanceof Error ? err.message : t("serveurInjoignable"));
+        } catch {
+          onError(t("serveurInjoignable"));
         }
       },
     });
