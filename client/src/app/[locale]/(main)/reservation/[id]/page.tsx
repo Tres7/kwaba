@@ -7,11 +7,12 @@ import { useSession } from "next-auth/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Info, Smartphone, CreditCard, Wallet, MapPin, Lock } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
-import { allerPayer, enEuros, useConfigPaiement, useOperateursMobileMoney } from "@/lib/paiement";
+import { allerPayer, enEuros, useConfigPaiement, useDevisSejour, useOperateursMobileMoney } from "@/lib/paiement";
 import RatingBadge from "@/components/avis/RatingBadge";
+import Chargement from "@/components/ui/Chargement";
 import { MontantDebite } from "@/components/layout/Devise";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
-import { calculateNights, calculateServiceFee, cn, FALLBACK_IMAGE, formatDate, formatFcfa, formatPrice, isoDate, SERVICE_FEE_RATE } from "@/lib/utils";
+import { calculateNights, cn, FALLBACK_IMAGE, formatDate, formatFcfa, formatPrice, isoDate, SERVICE_FEE_RATE } from "@/lib/utils";
 import type { Hebergement, Reservation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 
@@ -56,6 +57,11 @@ function ReservationContent() {
     retry: false,
   });
 
+  const nights = calculateNights(checkIn, checkOut);
+  const typeLogement = hebergement?.types?.find((u) => u.id === typeDemande) ?? hebergement?.types?.[0];
+  const nbUnites = Math.min(unitesDemandees, typeLogement?.quantite ?? 1);
+  const { data: devis, isError: devisEnErreur } = useDevisSejour(params.id, hebergement ? nights : 0, typeLogement?.id, nbUnites);
+
   if (isLoading) {
     return <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10"><div className="h-96 skeleton rounded-3xl" /></div>;
   }
@@ -69,21 +75,16 @@ function ReservationContent() {
     );
   }
 
-  const nights = calculateNights(checkIn, checkOut);
   const datesInvalid = !checkIn || !checkOut || nights <= 0 || checkIn < isoDate();
-  const typeLogement = hebergement.types?.find((u) => u.id === typeDemande) ?? hebergement.types?.[0];
-  const nbUnites = Math.min(unitesDemandees, typeLogement?.quantite ?? 1);
   const prixUnite = Number(typeLogement?.prix_nuit ?? hebergement.price_per_night);
-  const subtotal = prixUnite * nbUnites * nights;
-  // Visitor's rate: 6 %, or 3 % if they already stayed with this host (the server applies the same calculation)
+  // Visitor's rate: 6 %, or 3 % if they already stayed with this host
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
-  const serviceFee = calculateServiceFee(subtotal, tauxFrais);
-  const total = subtotal + serviceFee;
+  const total = devis?.total ?? 0;
   const backToListing = `/hebergements/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${guestsCount}`
     + (typeLogement ? `&type=${typeLogement.id}&unites=${nbUnites}` : "");
 
   const handleConfirm = async () => {
-    if (datesInvalid || submitting) return;
+    if (datesInvalid || submitting || !devis) return;
     setSubmitting(true);
     setError("");
     try {
@@ -96,7 +97,7 @@ function ReservationContent() {
         payment_method: moyenChoisi,
         message: message.trim(),
         // The server computes the total again and refuses if it changed since this summary was displayed
-        total_attendu: total,
+        total_attendu: devis.total,
       });
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       if (res.data.status !== "pending") {
@@ -112,7 +113,7 @@ function ReservationContent() {
     } catch (err) {
       setError(apiErrorMessage(err, t("reservationNonEnregistree")));
       // Price changed in the meantime: the summary is updated with the new total
-      queryClient.invalidateQueries({ queryKey: ["hebergement", params.id, "reservation"] });
+      queryClient.invalidateQueries({ queryKey: ["hebergement", params.id] });
       setSubmitting(false);
     }
   };
@@ -194,7 +195,7 @@ function ReservationContent() {
                         <p className={cn("font-bold text-sm", isActive ? "text-primary" : "text-dark")}>{t(`moyens.${method.label}`)}</p>
                         <p className="text-gray-500 text-xs mt-0.5">
                           {method.sublabel === "paypalDetail" ? t("moyens.paypalDetail") : method.sublabel === "operateurs" ? operateurs : method.sublabel}
-                          {method.id === "paypal" && config && !datesInvalid && <> · <strong className="text-dark">{enEuros(total, config.fcfa_par_euro)}</strong></>}
+                          {method.id === "paypal" && config && !datesInvalid && devis && <> · <strong className="text-dark">{enEuros(total, config.fcfa_par_euro)}</strong></>}
                         </p>
                       </div>
                       <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0", isActive ? "border-primary bg-primary" : "border-gray-300")}>
@@ -244,24 +245,25 @@ function ReservationContent() {
                       <span className="text-gray-600">
                         {formatPrice(prixUnite)} × {nbUnites > 1 && <>{tFiche("unitesNombre", { nombre: nbUnites })} × </>}{tFiche("nuits", { nombre: nights })}
                       </span>
-                      <span className="font-medium text-dark">{formatPrice(subtotal)}</span>
+                      <span className="font-medium text-dark">{devis ? formatPrice(devis.prix_nuits) : <Chargement />}</span>
                     </div>
                     <div className="flex justify-between gap-2">
                       <span className="text-gray-600">
                         {tFiche("fraisService", { taux: Math.round(tauxFrais * 100) })}
                         {tauxFrais < SERVICE_FEE_RATE && <span className="block text-xs text-secondary font-semibold">{tFiche("clientFidele")}</span>}
                       </span>
-                      <span className="font-medium text-dark">{formatPrice(serviceFee)}</span>
+                      <span className="font-medium text-dark">{devis ? formatPrice(devis.frais_service) : <Chargement />}</span>
                     </div>
                   </div>
 
                   <div className="pt-5 flex justify-between items-center mb-5">
                     <span className="font-heading font-bold text-dark text-lg">{tFiche("total")}</span>
-                    <span className="text-right"><span className="block font-heading font-bold text-primary text-2xl">{formatPrice(total)}</span><MontantDebite montant={total} /></span>
+                    <span className="text-right"><span className="block font-heading font-bold text-primary text-2xl">{devis ? formatPrice(total) : <Chargement />}</span>{devis && <MontantDebite montant={total} />}</span>
                   </div>
                 </>
               )}
 
+              {devisEnErreur && !datesInvalid && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl p-3 mb-4">{tFiche("prixIndisponible")}</p>}
               {error && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl p-3 mb-4">{error}</p>}
 
               {enLigne && (
@@ -286,8 +288,8 @@ function ReservationContent() {
                 </span>
               </label>
 
-              <button onClick={handleConfirm} disabled={submitting || datesInvalid || !accepte} className="w-full bg-secondary hover:bg-secondary-600 text-white font-bold py-4 rounded-2xl shadow-md transition-all text-base disabled:opacity-60">
-                {datesInvalid ? tFiche("selectionnezDates") : submitting
+              <button onClick={handleConfirm} disabled={submitting || datesInvalid || !accepte || !devis} className="w-full bg-secondary hover:bg-secondary-600 text-white font-bold py-4 rounded-2xl shadow-md transition-all text-base disabled:opacity-60">
+                {datesInvalid ? tFiche("selectionnezDates") : !devis ? t("confirmerReservation") : submitting
                   ? enLigne ? t("redirection") : t("traitement")
                   : enLigne ? t("payer", { montant: moyenChoisi === "paypal" && config ? enEuros(total, config.fcfa_par_euro) : formatFcfa(total) }) : t("confirmerReservation")}
               </button>

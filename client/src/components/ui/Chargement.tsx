@@ -1,8 +1,4 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-
-/** « Chargement... » / « Loading... » */
+/** Placeholder of a short value being loaded (an amount, for example). */
 export default function Chargement() {
-  return <>{useTranslations("commun")("chargement")}</>;
+  return <span aria-hidden className="inline-block h-[1em] w-16 skeleton rounded align-middle" />;
 }
