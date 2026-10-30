@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import LienContact from "@/components/legal/LienContact";
+import FormeSociete from "@/components/legal/FormeSociete";
 import MentionSociete from "@/components/legal/MentionSociete";
 import LegalPage, { AC, VersionFrancaiseFaitFoi } from "@/components/legal/LegalPage";
 
@@ -13,19 +14,19 @@ export default function ContenuEn() {
   return (
     <LegalPage
       titre="Terms of sale"
-      miseAJour="23 October 2026"
+      miseAJour="30 October 2026"
       intro={
         <>
           <VersionFrancaiseFaitFoi />
           <p>
-            The kwa-ba.com website and its applications (the “Platform”) are operated by <strong>KWA-BA SARL</strong>, a limited liability
-            company (SARL) with a share capital of 100,000 F CFA, whose registered office is in the Totsi Gblenkomé district, street 243,
+            The kwa-ba.com website and its applications (the “Platform”) are operated by <strong>KWA-BA</strong>, <FormeSociete /> with a
+            share capital of 100,000 F CFA, whose registered office is in the Totsi Gblenkomé district, street 243,
             Lomé (Togo), registered with the Lomé RCCM under number <MentionSociete cle="rccm" libelle="RCCM" />, tax number (NIF) <MentionSociete cle="nif" libelle="NIF" />, registered as an
-            e-commerce provider under number <MentionSociete cle="commerce_electronique" libelle="registration number" />, represented by its co-managers (cogérants), Mr MENDE Fadel and Mr KPOGLO Dzidoula Godwin Trésor.
+            e-commerce provider under number <MentionSociete cle="commerce_electronique" libelle="registration number" />, represented by its President, Mr MENDE Fadel, and its General Manager, Mr KPOGLO Dzidoula Godwin Trésor.
           </p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Contact: <LienContact sujet="Terms of sale" />; postal address: Totsi Gblenkomé district, street 243, Lomé, Togo.</li>
-            <li>Co-managers (cogérants): Mr MENDE Fadel and Mr KPOGLO Dzidoula Godwin Trésor — Publication director: Mr MENDE Fadel.</li>
+            <li>President: Mr MENDE Fadel — General Manager: Mr KPOGLO Dzidoula Godwin Trésor — Publication director: Mr MENDE Fadel.</li>
           </ul>
           <p>
             These terms of sale (the “Terms of Sale”) supplement the <Link href="/cgu">terms of use</Link> and the{" "}

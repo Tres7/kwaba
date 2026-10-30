@@ -5,6 +5,8 @@ export interface ReglagesSite {
   modules: Record<Module, boolean>;
   /** Empty while the value is not known: the site then shows "to be completed". */
   mentions: { rccm: string; nif: string; commerce_electronique: string; ipdcp: string };
+  /** Company not registered yet (SOCIETE_EN_FORMATION): "SAS en formation" on the site. */
+  en_formation: boolean;
   contact_email: string;
 }
 

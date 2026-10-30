@@ -1,11 +1,11 @@
 {
   "meta": {
-    "titre": "Kwa-Ba | L'Afrique vous accueille",
-    "description": "Plateforme de réservation d'hébergements en Afrique. Découvrez les meilleurs logements, activités et restaurants.",
-    "slogan": "Kwa-Ba. L'Afrique vous accueille.",
+    "titre": "Kwa-Ba | Lomé vous accueille",
+    "description": "Réservez un logement vérifié à Lomé, un transfert depuis l'aéroport ou une voiture avec chauffeur, et payez par Mobile Money ou carte.",
+    "slogan": "Kwa-Ba. Lomé vous accueille.",
     "pages": {
       "recherche": {
-        "titre": "Hébergements en Afrique de l'Ouest",
+        "titre": "Hébergements à Lomé",
         "description": "Villas, appartements, hôtels et auberges à Lomé, Cotonou, Ouagadougou et ailleurs. Comparez les prix par nuit et réservez en Mobile Money ou par carte."
       },
       "decouvrir": {
@@ -55,7 +55,7 @@
     "allerAuContenu": "Aller au contenu principal",
     "chargement": "Chargement…",
     "retour": "Retour",
-    "slogan": "L'Afrique vous accueille.",
+    "slogan": "Lomé vous accueille.",
     "choisir": "Choisir"
   },
   "langue": {
@@ -117,7 +117,7 @@
     "accueil": "Kwa-Ba, accueil"
   },
   "pied": {
-    "accroche": "Réservez des hébergements authentiques en Afrique et payez par Mobile Money ou carte.",
+    "accroche": "Réservez des logements vérifiés à Lomé et payez par Mobile Money ou carte.",
     "droits": "Tous droits réservés.",
     "informationsLegales": "Informations légales",
     "titres": {
@@ -176,7 +176,7 @@
     "voyageurs": "Voyageurs",
     "rechercher": "Rechercher",
     "bienvenue": "Bienvenue sur Kwa-Ba ! Votre compte est vérifié.",
-    "titre": "Découvrez l'Afrique<br></br>autrement",
+    "titre": "Lomé vous<br></br>accueille",
     "sousTitre": "Réservez des hébergements uniques et vivez des expériences authentiques.",
     "destinationsPopulaires": "Destinations populaires",
     "destinationsTexte": "Les villes où nos voyageurs posent leurs valises",
@@ -194,7 +194,7 @@
     "voirMieuxNotes": "Voir tous les logements les mieux notés",
     "aucunHebergement": "Aucun hébergement publié pour le moment.",
     "pourquoi": "Pourquoi choisir Kwa-Ba ?",
-    "pourquoiTexte": "Nous rendons votre voyage en Afrique aussi simple et serein que possible.",
+    "pourquoiTexte": "Nous rendons votre séjour à Lomé aussi simple et serein que possible.",
     "atouts": {
       "paiement": {
         "titre": "Paiement flexible",
@@ -211,6 +211,24 @@
       "annulation": {
         "titre": "Annulation simple",
         "texte": "Annulez en un clic depuis votre espace réservations."
+      }
+    },
+    "garanties": {
+      "verifies": {
+        "titre": "Logements vérifiés par un agent Kwa-Ba",
+        "texte": "Chaque logement est visité par un agent Kwa-Ba avant d'être publié."
+      },
+      "garantie": {
+        "titre": "Garantie Kwa-Ba sur chaque séjour",
+        "texte": "Logement très différent de l'annonce ou annulé par l'hôte : relogement équivalent ou remboursement."
+      },
+      "equipe": {
+        "titre": "Équipe locale à Lomé",
+        "texte": "Une équipe sur place, qui vous répond par email."
+      },
+      "versement": {
+        "titre": "Votre hôte payé 24 h après votre arrivée",
+        "texte": "Vous avez le temps de signaler un problème avant que l'hôte ne soit payé."
       }
     },
     "devenezHote": "Devenez hôte Kwa-Ba",
@@ -282,7 +300,7 @@
     "seConnecter": "Se connecter",
     "pasDeCompte": "Pas encore de compte ?",
     "creerCompte": "Créer un compte",
-    "connexionVisuelTitre": "Découvrez des séjours authentiques en Afrique",
+    "connexionVisuelTitre": "Des séjours vérifiés à Lomé",
     "connexionVisuelTexte": "Villas, riads, appartements et auberges sélectionnés, avec paiement Mobile Money ou carte.",
     "mdpTropCourt": "Le mot de passe doit contenir au moins 8 caractères.",
     "mdpDifferents": "Les mots de passe ne correspondent pas.",

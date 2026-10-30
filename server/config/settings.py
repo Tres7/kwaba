@@ -302,6 +302,8 @@ MENTIONS_LEGALES = {
     'commerce_electronique': _mention('SOCIETE_COMMERCE_ELECTRONIQUE'),  # decree no. 2018-062/PR
     'ipdcp': _mention('SOCIETE_IPDCP'),  # declaration to the IPDCP
 }
+# Company not registered yet: "SAS en formation" on the site, until the RCCM
+SOCIETE_EN_FORMATION = _env_bool('SOCIETE_EN_FORMATION', 'True')
 
 # Reply-to address of the sent emails (users' replies arrive in this mailbox)
 EMAIL_REPLY_TO = os.getenv('EMAIL_REPLY_TO', '')

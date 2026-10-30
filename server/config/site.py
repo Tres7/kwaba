@@ -1,4 +1,5 @@
-"""Public site settings: module switches and legal numbers (settings.MODULES and settings.MENTIONS_LEGALES).
+"""Public site settings: module switches and legal numbers (settings.MODULES, settings.MENTIONS_LEGALES and
+settings.SOCIETE_EN_FORMATION).
 
 They come from the API environment, so a restart of the API is enough to change them: the website reads them from
 GET /api/v1/site/ (menus, footer, sitemap, redirects of masked pages, legal notices).
@@ -34,5 +35,6 @@ def site(request):
     return JsonResponse({
         'modules': {nom: bool(actif) for nom, actif in settings.MODULES.items()},
         'mentions': mentions_legales(),
+        'en_formation': settings.SOCIETE_EN_FORMATION,
         'contact_email': settings.ASSISTANCE_CONTACT,
     })

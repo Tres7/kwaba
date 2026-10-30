@@ -1,11 +1,11 @@
 {
   "meta": {
-    "titre": "Kwa-Ba | Africa welcomes you",
-    "description": "Book places to stay in Africa. Discover the best homes, experiences and restaurants.",
-    "slogan": "Kwa-Ba. Africa welcomes you.",
+    "titre": "Kwa-Ba | Lomé welcomes you",
+    "description": "Book a verified place to stay in Lomé, an airport transfer or a car with a driver, and pay by Mobile Money or card.",
+    "slogan": "Kwa-Ba. Lomé welcomes you.",
     "pages": {
       "recherche": {
-        "titre": "Places to stay in West Africa",
+        "titre": "Places to stay in Lomé",
         "description": "Villas, apartments, hotels and guesthouses in Lomé, Cotonou, Ouagadougou and beyond. Compare nightly prices and book with Mobile Money or card."
       },
       "decouvrir": {
@@ -55,7 +55,7 @@
     "allerAuContenu": "Skip to main content",
     "chargement": "Loading…",
     "retour": "Back",
-    "slogan": "Africa welcomes you.",
+    "slogan": "Lomé welcomes you.",
     "choisir": "Choose"
   },
   "langue": {
@@ -117,7 +117,7 @@
     "accueil": "Kwa-Ba, home"
   },
   "pied": {
-    "accroche": "Book authentic places to stay in Africa and pay by Mobile Money or card.",
+    "accroche": "Book verified places to stay in Lomé and pay by Mobile Money or card.",
     "droits": "All rights reserved.",
     "informationsLegales": "Legal information",
     "titres": {
@@ -176,7 +176,7 @@
     "voyageurs": "Guests",
     "rechercher": "Search",
     "bienvenue": "Welcome to Kwa-Ba! Your account is verified.",
-    "titre": "Discover Africa<br></br>differently",
+    "titre": "Lomé<br></br>welcomes you",
     "sousTitre": "Book unique places to stay and enjoy authentic experiences.",
     "destinationsPopulaires": "Popular destinations",
     "destinationsTexte": "The cities where our travellers stay",
@@ -194,7 +194,7 @@
     "voirMieuxNotes": "See all top-rated stays",
     "aucunHebergement": "No stays published yet.",
     "pourquoi": "Why choose Kwa-Ba?",
-    "pourquoiTexte": "We make your trip to Africa as simple and stress-free as possible.",
+    "pourquoiTexte": "We make your stay in Lomé as simple and stress-free as possible.",
     "atouts": {
       "paiement": {
         "titre": "Flexible payment",
@@ -211,6 +211,24 @@
       "annulation": {
         "titre": "Easy cancellation",
         "texte": "Cancel in one click from your bookings."
+      }
+    },
+    "garanties": {
+      "verifies": {
+        "titre": "Places verified by a Kwa-Ba agent",
+        "texte": "Every place is visited by a Kwa-Ba agent before it is published."
+      },
+      "garantie": {
+        "titre": "Kwa-Ba Guarantee on every stay",
+        "texte": "Place very different from the listing or cancelled by the host: equivalent rehousing or a refund."
+      },
+      "equipe": {
+        "titre": "Local team in Lomé",
+        "texte": "A team on the ground that answers you by email."
+      },
+      "versement": {
+        "titre": "Your host is paid 24 h after you arrive",
+        "texte": "You have time to report a problem before the host is paid."
       }
     },
     "devenezHote": "Become a Kwa-Ba host",
@@ -282,7 +300,7 @@
     "seConnecter": "Log in",
     "pasDeCompte": "Don't have an account?",
     "creerCompte": "Create an account",
-    "connexionVisuelTitre": "Discover authentic stays in Africa",
+    "connexionVisuelTitre": "Verified stays in Lomé",
     "connexionVisuelTexte": "Hand-picked villas, riads, apartments and guesthouses, with Mobile Money or card payment.",
     "mdpTropCourt": "Your password must be at least 8 characters long.",
     "mdpDifferents": "Passwords do not match.",

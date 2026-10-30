@@ -26,6 +26,7 @@ def test_reglages_du_lancement(lancement):
     }
     # Numbers not assigned yet: empty, the site shows "to be completed"
     assert reglages['mentions'] == {'rccm': '', 'nif': '', 'commerce_electronique': '', 'ipdcp': ''}
+    assert reglages['en_formation'] is True
     assert reglages['contact_email']
 
 
@@ -43,6 +44,12 @@ def test_numeros_legaux_depuis_l_environnement_puis_le_back_office(settings):
     assert mentions['rccm'] == 'TG-LFW-01-2026-B13-00001' and mentions['nif'] == '1000000001'
     settings.MENTIONS_LEGALES = {**settings.MENTIONS_LEGALES, 'rccm': 'RCCM-ENV'}
     assert APIClient().get(SITE).json()['mentions']['rccm'] == 'RCCM-ENV'
+
+
+def test_societe_immatriculee_par_l_environnement(settings):
+    # The day of the RCCM: SOCIETE_EN_FORMATION=False removes "en formation" from the site, without a code change
+    settings.SOCIETE_EN_FORMATION = False
+    assert APIClient().get(SITE).json()['en_formation'] is False
 
 
 def test_un_commentaire_lu_comme_valeur_compte_comme_vide(monkeypatch):
