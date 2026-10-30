@@ -21,9 +21,6 @@ x-server: &server
   environment:
     POSTGRES_HOST: postgres
     RABBITMQ_HOST: rabbitmq
-    # nginx is the only proxy in front of the API. Without this value, every visitor has the address of nginx:
-    # limits per IP shared by the whole site, wrong address in the audit log
-    DJANGO_NUM_PROXIES: '1'
   restart: unless-stopped
   logging: *logging
   security_opt: *security
@@ -60,6 +57,10 @@ services:
       POSTGRES_HOST: postgres
       RABBITMQ_HOST: rabbitmq
       WEB_CONCURRENCY: '2'
+      # nginx is the only proxy in front of the API. Without this value, every visitor has the address of nginx:
+      # limits per IP shared by the whole site, wrong address in the audit log. Set here and not in x-server:
+      # an environment block of a service replaces the one of the anchor.
+      DJANGO_NUM_PROXIES: '1'
     healthcheck:
       test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/', timeout=5)"]
       interval: 15s
