@@ -64,7 +64,7 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - stockés sous forme d'empreinte HMAC ;
   - un code est invalidé après 5 échecs ;
   - 10 essais par heure et par adresse, nouveaux codes compris : redemander un code ne donne pas d'essais supplémentaires.
-- **Limites par adresse IP** : inscription 10/h, codes 30/h, envois de codes 10/h, Google 30/min, connexion 60 par quart d'heure. La connexion passe par le serveur Next.js, qui transmet à l'API le `X-Forwarded-For` reçu de nginx : tout nouvel appel de serveur à serveur soumis à une limite par IP doit faire de même.
+- **Limites par adresse IP** : inscription 10/h, codes 30/h, envois de codes 10/h, Google 30/min, connexion 60 par quart d'heure. Ces routes passent par le serveur Next.js, qui transmet à l'API le `X-Forwarded-For` reçu de nginx : tout nouvel appel de serveur à serveur soumis à une limite par IP doit faire de même.
 - **Compteurs atomiques** : les limites reposent sur `apps/securite/limites.py` (une requête PostgreSQL `INSERT … ON CONFLICT` par incrément). Le cache de Django lit puis écrit en deux temps : il laisserait passer des requêtes simultanées.
 - **Jetons** :
   - jeton d'accès valable 15 minutes ;
@@ -72,6 +72,11 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - une réinitialisation ou une désactivation met tous les refresh tokens sur liste noire ;
   - la déconnexion met le refresh token de la session sur liste noire (`POST /v1/auth/logout/`, appelé par le serveur Next.js). Le jeton d'accès reste valable jusqu'à son expiration, 15 minutes au plus. Une lecture de session encore en cours peut remettre le cookie juste après son effacement : le serveur Next.js garde la session en mémoire (`lib/sessions-fermees.ts`) et la lecture suivante la referme.
 - **Session NextAuth** : l'identité et le rôle viennent toujours de l'API (`/users/me/`), jamais du navigateur.
+- **Aucun jeton dans le navigateur** : les jetons de l'API restent dans le cookie de session chiffré, `HttpOnly`, et `/api/auth/session` n'en renvoie aucun.
+  - La connexion par mot de passe, par Google et par code passe par le serveur Next.js (`authorize()` d'Auth.js).
+  - Le navigateur appelle `/api/proxy/…`, qui ajoute le jeton puis relaie vers Django (`client/src/app/api/proxy`). Seules les routes `/v1/…` sont accessibles. Une écriture doit venir du site (contrôle d'`Origin`), car le cookie remplace le Bearer, qui protégeait du CSRF. Django reçoit l'hôte public par `X-Forwarded-Host` (`USE_X_FORWARDED_HOST`), imposé par nginx et le proxy, et toujours soumis à `ALLOWED_HOSTS`.
+  - Le proxy ne fait que lire le cookie. Le renouvellement reste dans `/api/auth/session`, seul endroit qui peut enregistrer les nouveaux jetons : ne pas utiliser `auth()` dans le proxy, qui perdrait le `Set-Cookie`.
+  - Une XSS ne peut plus voler de jeton, mais elle peut encore appeler le proxy tant que la page est ouverte : la CSP reste indispensable.
 - **Redirection après connexion** : `safeCallback` (`client/src/lib/redirection.ts`) contrôle l'adresse telle que le navigateur la lit, résultat compris. Tout nouveau paramètre de redirection doit passer par cette fonction.
 - **Administration Django** : 5 échecs par email et 20 par IP par quart d'heure, échecs journalisés.
 
@@ -90,7 +95,6 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
 
 ### Points ouverts
 
-- **Jeton d'accès lisible en JavaScript** : il est exposé au navigateur via la session (`session.accessToken`), qui appelle l'API directement. La CSP et la durée de 15 minutes limitent l'impact d'une XSS. Le supprimer demanderait de faire passer tous les appels par le serveur Next.js.
 - **Inscription** : elle indique qu'une adresse a déjà un compte (choix d'ergonomie), dans la limite de 10 essais par heure et par adresse IP.
 - **Numéros Mobile Money** : ils sont stockés en clair, car ils sont nécessaires aux versements. Le chiffrement au repos dépend de l'hébergeur de la base.
 - **Montées de version majeures** à planifier, chacune dans sa propre PR : Next.js 16, Tailwind 4, ESLint 10, next-auth (stable dès sa sortie).

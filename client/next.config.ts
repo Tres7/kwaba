@@ -3,7 +3,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-/** Origin of the API called by the browser (baked at build time, like NEXT_PUBLIC_API_URL). */
+/** Public origin of the API, which serves the uploaded photos (baked at build time, like NEXT_PUBLIC_API_URL). */
 function apiOrigin(): string {
   try {
     return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api").origin;
@@ -24,7 +24,8 @@ const csp = [
   // any site through the address of an image.
   `img-src 'self' data: blob: ${apiOrigin()} https://*.googleusercontent.com https://images.unsplash.com${isDev ? " http: https:" : ""}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin()} https://accounts.google.com${isDev ? " ws: http://localhost:8000" : ""}`,
+  // The browser only calls the site: the API is reached through the Next.js server (app/api/proxy)
+  `connect-src 'self' https://accounts.google.com${isDev ? " ws:" : ""}`,
   "frame-src https://accounts.google.com https://maps.google.com https://www.google.com https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "object-src 'none'",

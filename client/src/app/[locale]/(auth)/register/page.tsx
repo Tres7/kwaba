@@ -4,7 +4,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Mail, Lock, User, Phone, Eye, EyeOff, Plane, Home } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getApiBaseUrl } from "@/lib/api-url";
+import { urlProxy } from "@/lib/api-url";
 import { firstErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import AuthShell from "@/components/auth/AuthShell";
@@ -82,7 +82,7 @@ function RegisterForm() {
     const email = form.email.trim().toLowerCase();
 
     try {
-      const res = await fetch(`${getApiBaseUrl()}/v1/auth/register/`, {
+      const res = await fetch(urlProxy("/v1/auth/register/"), {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept-Language": locale },
         body: JSON.stringify({ ...form, email, role, phone: form.phone.trim() || null, captcha: captcha ?? "" }),

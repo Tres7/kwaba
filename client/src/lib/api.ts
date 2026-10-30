@@ -1,57 +1,37 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { getSession, signOut } from "next-auth/react";
-import { getApiBaseUrl } from "@/lib/api-url";
+import { getApiBaseUrl, PROXY_API, sansSlashFinal } from "@/lib/api-url";
 import { langue, selon } from "@/lib/utils";
 
+const navigateur = typeof window !== "undefined";
 
+// In the browser, every call goes through the Next.js server, which adds the session's token (app/api/proxy)
 const api = axios.create({
-  baseURL:  getApiBaseUrl(),
+  baseURL: navigateur ? PROXY_API : getApiBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Token kept up to date by SessionTokenSync (providers/AuthProvider.tsx) at every session change.
-// undefined = session not known yet: it is then asked once from NextAuth.
-let accessToken: string | null | undefined;
-
-export function setApiAccessToken(token: string | null) {
-  accessToken = token;
-}
-
-/** Current access token, for requests made outside axios (Concierge SSE stream). */
-export async function jetonAcces(): Promise<string | null> {
-  if (accessToken !== undefined) return accessToken;
-  return (await getSession())?.accessToken ?? null;
-}
-
-api.interceptors.request.use(async (config) => {
+api.interceptors.request.use((config) => {
   // User's language: Concierge answers and, eventually, API messages
   config.headers["Accept-Language"] = langue();
-  if (typeof window !== "undefined") {
-    // Avoids a call to /api/auth/session per request (the messaging polling would make one every 4 s)
-    const token = accessToken !== undefined ? accessToken : (await getSession())?.accessToken;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
+  if (navigateur && config.url) config.url = sansSlashFinal(config.url);
   return config;
 });
 
 // Several requests may fail at the same time: a single shared renewal
-let refreshing: Promise<{ token: string | null; expiree: boolean }> | null = null;
+let refreshing: Promise<{ ouverte: boolean; expiree: boolean }> | null = null;
 
 /** `expiree`: the API refused the refresh token (session really over). An unreadable session
  * (network down when the computer wakes up, for example) is not an expiry: the user is not signed out. */
-async function refreshAccessToken(): Promise<{ token: string | null; expiree: boolean }> {
+async function renouvelerSession(): Promise<{ ouverte: boolean; expiree: boolean }> {
   if (!refreshing) {
     // getSession() calls NextAuth again, whose jwt callback renews the expired Django token
     refreshing = getSession()
       .then((session) => {
         const expiree = session?.error === "RefreshAccessTokenError";
-        const token = session && !expiree ? session.accessToken || null : null;
-        if (session) setApiAccessToken(token);
-        return { token, expiree };
+        return { ouverte: !!session && !expiree, expiree };
       })
       .finally(() => { refreshing = null; });
   }
@@ -63,19 +43,15 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const config = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
 
-    if (typeof window !== "undefined" && error.response?.status === 401 && config?.headers?.Authorization) {
-      // Cached token expired: it is renewed, then the request is replayed once
+    if (navigateur && error.response?.status === 401 && config) {
+      // Token expired: it is renewed, then the request is replayed once
       if (config._retried) return Promise.reject(error);
       config._retried = true;
-      const { token, expiree } = await refreshAccessToken();
-      if (token && `Bearer ${token}` !== config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${token}`;
-        return api(config);
-      }
-      // Renewal impossible for now (API or network unavailable): the session is kept
+      const { ouverte, expiree } = await renouvelerSession();
+      if (ouverte) return api(config);
+      // Not signed in, or renewal impossible for now (API or network unavailable): the session is kept
       if (!expiree) return Promise.reject(error);
       // Django refresh token refused: clean sign-out
-      setApiAccessToken(null);
       // The sign-in page stays in the current language; the return goes without the /en prefix (added by the router)
       const prefixe = langue() === "en" ? "/en" : "";
       const chemin = window.location.pathname.replace(/^\/en(?=\/|$)/, "") || "/";
