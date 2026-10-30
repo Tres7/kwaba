@@ -267,6 +267,7 @@
     "nonVerifie": "Votre compte n'est pas encore vérifié.",
     "desactive": "Ce compte a été désactivé. Contactez le support.",
     "identifiantsIncorrects": "Email ou mot de passe incorrect.",
+    "tropDeTentatives": "Trop de tentatives. Réessayez dans quelques minutes.",
     "connexion": "Connexion",
     "connexionTexte": "Connectez-vous pour réserver et retrouver vos voyages.",
     "continuerGoogle": "Continuer avec Google",

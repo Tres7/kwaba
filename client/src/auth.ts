@@ -4,9 +4,11 @@ import { getApiBaseUrl } from "@/lib/api-url";
 import { fetchBackendUser } from "@/lib/api/auth/me";
 import { credentialsProvider } from "@/lib/providers/auth/credentials";
 import { backendSessionProvider } from "@/lib/providers/auth/backend-session";
+import { fermerSession, sessionFermee } from "@/lib/sessions-fermees";
 
 // Renews the access token 30 s before it expires
 const REFRESH_MARGIN_MS = 30_000;
+const SESSION_MAX_AGE_S = 5 * 60;
 
 function decodeExpiry(accessToken?: string): number {
   if (!accessToken) return 0;
@@ -64,6 +66,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.error = undefined;
       }
 
+      // Returning null deletes the cookie, which a session read in flight during the sign-out may have put back
+      if (sessionFermee(token.refreshToken)) return null;
+
       if (token.refreshToken && Date.now() >= (token.accessTokenExpires ?? 0) - REFRESH_MARGIN_MS) {
         token = await refreshAccessToken(token);
       }
@@ -89,6 +94,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 
+  events: {
+    // Deleting the cookie is not enough: the refresh token it holds would stay valid for a day. The sign-out waits for
+    // this call, hence the time limit; Auth.js logs a failure and closes the session anyway, and the API refusing a
+    // token that is already invalid changes nothing.
+    async signOut(message) {
+      if (!("token" in message) || !message.token?.refreshToken) return;
+      fermerSession(message.token.refreshToken, SESSION_MAX_AGE_S * 1000);
+      await fetch(`${getApiBaseUrl()}/v1/auth/logout/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh: message.token.refreshToken }),
+        signal: AbortSignal.timeout(3_000),
+      });
+    },
+  },
+
   pages: {
     signIn: "/login",
     newUser: "/register",
@@ -97,7 +118,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
     // 5 min after leaving the site (tab or browser closed), signing in again is needed: while a tab
     // is open, AuthProvider reads the session every minute and each read pushes the expiry back
-    maxAge: 5 * 60,
+    maxAge: SESSION_MAX_AGE_S,
   },
   cookies: {
     sessionToken: {
