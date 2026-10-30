@@ -178,7 +178,7 @@ export default function HomePage() {
           return (
             <div
               key={i}
-              className={`absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${img} ${i === currentBg ? "animate-ken-burns" : ""}`}
+              className={`absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${img} ${i === currentBg || i === previousBg ? "animate-ken-burns" : ""}`}
               style={{ opacity: i === currentBg ? 1 : 0 }}
             />
           );
