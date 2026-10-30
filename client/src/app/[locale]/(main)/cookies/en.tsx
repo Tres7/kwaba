@@ -70,6 +70,8 @@ export default function ContenuEn() {
               <tbody>
                 <tr><td><code>kwaba_consentement</code></td><td>Remembers your cookie choices (date and preferences).</td><td>6 months, after which you are asked again</td></tr>
                 <tr><td><code>kwaba_devise</code></td><td>Remembers the currency chosen to display prices (CFA franc or euro).</td><td>Until deleted</td></tr>
+                <tr><td><code>kwaba_bientot_fermee</code></td><td>Remembers when the “Places to stay are coming very soon” window was closed so it is not shown again right away.</td><td>7 days</td></tr>
+                <tr><td><code>kwaba_bientot_inscrit</code></td><td>Stops showing the “Places to stay are coming very soon” window once you have signed up for the opening announcement.</td><td>Until deleted</td></tr>
               </tbody>
             </table>
           ),
@@ -86,6 +88,7 @@ export default function ContenuEn() {
                   <tr><td><code>verify_email</code></td><td>Keeps the address entered at sign-up during code verification.</td><td>Deleted after verification or when the tab is closed</td></tr>
                   <tr><td><code>splash_shown</code></td><td>Avoids showing the animated welcome screen on every page.</td><td>Until the tab is closed</td></tr>
                   <tr><td><code>kwaba_transfert_brouillon</code></td><td>Keeps your transfer request while you sign in to pay.</td><td>Deleted when you return to the page or close the tab</td></tr>
+                  <tr><td><code>kwaba_bientot_vue</code></td><td>Avoids showing the “Places to stay are coming very soon” window on every page.</td><td>Until the tab is closed</td></tr>
                 </tbody>
               </table>
             </>

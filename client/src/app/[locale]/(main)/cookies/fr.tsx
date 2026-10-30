@@ -69,6 +69,8 @@ export default function ContenuFr() {
               <tbody>
                 <tr><td><code>kwaba_consentement</code></td><td>Mémorise vos choix de cookies (date et préférences).</td><td>6 mois, puis le choix vous est redemandé</td></tr>
                 <tr><td><code>kwaba_devise</code></td><td>Retient la devise choisie pour l&apos;affichage des prix (FCFA ou euro).</td><td>Jusqu&apos;à suppression</td></tr>
+                <tr><td><code>kwaba_bientot_fermee</code></td><td>Retient la date de fermeture de la fenêtre « Les logements arrivent très bientôt » pour ne pas la réafficher aussitôt.</td><td>7 jours</td></tr>
+                <tr><td><code>kwaba_bientot_inscrit</code></td><td>Évite de vous reproposer la fenêtre « Les logements arrivent très bientôt » une fois inscrit à l&apos;annonce d&apos;ouverture.</td><td>Jusqu&apos;à suppression</td></tr>
               </tbody>
             </table>
           ),
@@ -85,6 +87,7 @@ export default function ContenuFr() {
                   <tr><td><code>verify_email</code></td><td>Retient l&apos;adresse saisie à l&apos;inscription le temps de la vérification par code.</td><td>Effacé après la vérification ou à la fermeture de l&apos;onglet</td></tr>
                   <tr><td><code>splash_shown</code></td><td>Évite de réafficher l&apos;écran d&apos;accueil animé à chaque page.</td><td>Fermeture de l&apos;onglet</td></tr>
                   <tr><td><code>kwaba_transfert_brouillon</code></td><td>Garde votre demande de transfert le temps de vous connecter pour payer.</td><td>Effacé au retour sur la page ou à la fermeture de l&apos;onglet</td></tr>
+                  <tr><td><code>kwaba_bientot_vue</code></td><td>Évite de réafficher la fenêtre « Les logements arrivent très bientôt » à chaque page.</td><td>Fermeture de l&apos;onglet</td></tr>
                 </tbody>
               </table>
             </>
