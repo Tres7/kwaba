@@ -106,3 +106,7 @@ deploy/vps/backups/
 deploy/vps/logs/
 deploy/vps/.deploy.env*
 deploy/vps/deployments.log
+
+# Local audit reports
+AUDIT_SECURITE_FRONT.md
+AUDIT_ARCHITECTURE_FRONT.md
