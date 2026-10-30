@@ -3,10 +3,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, FileClock } from "lucide-react";
-import axios from "axios";
 import { toast } from "sonner";
 import { Link } from "@/i18n/navigation";
-import api from "@/lib/api";
+import api, { estErreurApi } from "@/lib/api";
 import { telechargerPdf } from "@/lib/documents";
 import LectureSignature from "@/components/contrats/LectureSignature";
 import type { ContratPublic, SignatureContrat } from "@/types/api/contrat";
@@ -30,7 +29,7 @@ export default function ContratHotePage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       // Text changed in the meantime: the new text is loaded, to be read again
-      if (axios.isAxiosError(err) && err.response?.status === 409) {
+      if (estErreurApi(err) && err.response?.status === 409) {
         await refetch();
         window.scrollTo({ top: 0, behavior: "smooth" });
         throw new Error(t("versionModifiee"));
@@ -51,7 +50,7 @@ export default function ContratHotePage() {
           <div className="bg-white rounded-3xl border border-gray-100 p-8 text-center">
             <FileClock size={40} className="mx-auto text-gray-400" aria-hidden />
             <p className="mt-4 text-dark font-semibold">
-              {axios.isAxiosError(error) && error.response?.status === 403 ? t("reserveHotes") : t("indisponible")}
+              {estErreurApi(error) && error.response?.status === 403 ? t("reserveHotes") : t("indisponible")}
             </p>
           </div>
         ) : (

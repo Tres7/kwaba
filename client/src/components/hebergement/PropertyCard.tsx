@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { BadgeCheck, CalendarX, Flame, MapPin } from "lucide-react";
 import type { Hebergement } from "@/types/api/models";
-import FavoriteButton from "@/components/hebergement/FavoriteButton";
+import { FavoriteButton } from "@/features/favoris";
 import RatingBadge from "@/components/avis/RatingBadge";
 import { FALLBACK_IMAGE, SERVICE_FEE_RATE, cn, prixNuitFraisInclus } from "@/lib/utils";
 import { useTranslations } from "next-intl";

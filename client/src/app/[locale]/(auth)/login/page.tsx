@@ -133,7 +133,7 @@ function LoginForm() {
             }
           />
           <div className="text-right mt-2">
-            <Link href={`/mot-de-passe-oublie${email ? `?email=${encodeURIComponent(email)}` : ""}`} className="relative zone-tactile text-xs text-primary font-medium hover:underline">
+            <Link href="/mot-de-passe-oublie" onClick={() => retenirEmail(email.trim().toLowerCase())} className="relative zone-tactile text-xs text-primary font-medium hover:underline">
               {t("mdpOublie")}
             </Link>
           </div>

@@ -5,9 +5,9 @@ import { Heart } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { ajouterFavori, retirerFavori } from "./api";
 
 interface FavoriteButtonProps {
   hebergementId: string;
@@ -38,8 +38,7 @@ export default function FavoriteButton({ hebergementId, initial, onChange, varia
     setIsFavorite(next);
     setPending(true);
     try {
-      if (next) await api.post("/v1/favoris/", { hebergement: hebergementId });
-      else await api.delete(`/v1/favoris/${hebergementId}/`);
+      await (next ? ajouterFavori : retirerFavori)(hebergementId);
       onChange?.(next);
       toast.success(next ? t("ajoute") : t("retire"));
     } catch {

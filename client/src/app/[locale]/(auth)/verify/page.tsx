@@ -5,18 +5,17 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { Mail, RefreshCw } from "lucide-react";
-import { urlProxy } from "@/lib/api-url";
+import api, { SANS_REJET } from "@/lib/api";
 import AuthShell from "@/components/auth/AuthShell";
 import { cn } from "@/lib/utils";
 import { emailRetenu, oublierEmail, retenirEmail } from "@/lib/email-en-cours";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 const EMPTY = ["", "", "", "", "", ""];
 
 function VerifyForm() {
   const router = useRouter();
   const t = useTranslations("auth");
-  const locale = useLocale();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [emailKnown, setEmailKnown] = useState(false);
@@ -115,16 +114,11 @@ function VerifyForm() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch(urlProxy("/v1/auth/resend-code/"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept-Language": locale },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) {
+      const { status, data } = await api.post("/v1/auth/resend-code/", { email }, SANS_REJET);
+      if (status < 400) {
         setSuccess(t("codeRenvoye"));
         setCooldown(60);
-      } else if (res.status === 429) {
+      } else if (status === 429) {
         setCooldown(data.retry_after ?? 60);
         setError(data.detail ?? t("patienter"));
       } else if (data.code === "already_verified") {

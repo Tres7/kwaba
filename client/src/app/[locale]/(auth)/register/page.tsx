@@ -4,15 +4,14 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Mail, Lock, User, Phone, Eye, EyeOff, Plane, Home } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { urlProxy } from "@/lib/api-url";
-import { firstErrorMessage } from "@/lib/api";
+import api, { firstErrorMessage, SANS_REJET } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import AuthShell from "@/components/auth/AuthShell";
 import GoogleButton from "@/components/auth/GoogleButton";
 import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
 import FormField from "@/components/ui/FormField";
 import { retenirEmail } from "@/lib/email-en-cours";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 type Role = "voyageur" | "hote";
 type FieldErrors = Partial<Record<"email" | "first_name" | "last_name" | "phone" | "password" | "password_confirm" | "role", string>>;
@@ -35,7 +34,6 @@ function passwordStrength(pw: string): { score: number } {
 function RegisterForm() {
   const router = useRouter();
   const t = useTranslations("auth");
-  const locale = useLocale();
   const searchParams = useSearchParams();
   const [role, setRole] = useState<Role>(searchParams.get("role") === "hote" ? "hote" : "voyageur");
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", password: "", password_confirm: "" });
@@ -83,14 +81,10 @@ function RegisterForm() {
     const email = form.email.trim().toLowerCase();
 
     try {
-      const res = await fetch(urlProxy("/v1/auth/register/"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept-Language": locale },
-        body: JSON.stringify({ ...form, email, role, phone: form.phone.trim() || null, captcha: captcha ?? "" }),
-      });
+      const res = await api.post("/v1/auth/register/", { ...form, email, role, phone: form.phone.trim() || null, captcha: captcha ?? "" }, SANS_REJET);
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
+      if (res.status >= 400) {
+        const data = res.data;
         // The captcha token can only be used once
         captchaRef.current?.reset();
         if ((data as { code?: string }).code === "captcha") {

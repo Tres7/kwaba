@@ -4,10 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { toast } from "sonner";
 import { ArrowLeft, Hand, Undo2, UserRound } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
+import api, { apiErrorMessage, estErreurApi } from "@/lib/api";
 import type { MissionEtat, TypeMission } from "@/lib/agent";
 import { formatDate } from "@/lib/utils";
 import FicheLogement, { type Logement } from "@/components/agent/FicheLogement";
@@ -69,7 +68,7 @@ export default function FicheMissionPage() {
   if (isLoading) return <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-28 skeleton rounded-2xl" />)}</div>;
 
   if (error || !data) {
-    const introuvable = axios.isAxiosError(error) && error.response?.status === 404;
+    const introuvable = estErreurApi(error) && error.response?.status === 404;
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
         <p className="font-heading font-bold text-dark">{introuvable ? "Cette mission n'est plus à faire" : "Impossible d'ouvrir cette mission"}</p>

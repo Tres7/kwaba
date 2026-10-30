@@ -62,6 +62,12 @@ api.interceptors.response.use(
   }
 );
 
+/** Error of a call to the API (with its response, if the server answered). */
+export const estErreurApi = axios.isAxiosError;
+
+/** Option of the calls that read the answer themselves, whatever its status: a refused form is not an exception. */
+export const SANS_REJET = { validateStatus: () => true };
+
 /** Extracts a readable message from a DRF error ({detail}, {field: [msg]}, ...). */
 export function apiErrorMessage(err: unknown, fallback?: string): string {
   const e = err as AxiosError<Record<string, unknown>>;

@@ -1,22 +1,19 @@
 "use client";
 
 import { Link, useRouter } from "@/i18n/navigation";
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { KeyRound, Lock, Mail } from "lucide-react";
-import { urlProxy } from "@/lib/api-url";
-import { firstErrorMessage } from "@/lib/api";
+import api, { firstErrorMessage, SANS_REJET } from "@/lib/api";
+import { emailRetenu, retenirEmail } from "@/lib/email-en-cours";
 import AuthShell from "@/components/auth/AuthShell";
 import FormField from "@/components/ui/FormField";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 function ResetForm() {
   const router = useRouter();
   const t = useTranslations("auth");
-  const locale = useLocale();
-  const searchParams = useSearchParams();
   const [step, setStep] = useState<"email" | "code">("email");
-  const [email, setEmail] = useState(searchParams.get("email") ?? "");
+  const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -24,19 +21,15 @@ function ResetForm() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  useEffect(() => setEmail((actuel) => actuel || emailRetenu()), []);
 
   const requestCode = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(urlProxy("/v1/auth/password-reset/"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept-Language": locale },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
+      const { status, data } = await api.post("/v1/auth/password-reset/", { email: email.trim().toLowerCase() }, SANS_REJET);
+      if (status >= 400) {
         setError(firstErrorMessage(data) ?? t("erreurEnvoi"));
       } else {
         setInfo(data.detail);
@@ -58,13 +51,9 @@ function ResetForm() {
     }
     setLoading(true);
     try {
-      const res = await fetch(urlProxy("/v1/auth/password-reset/confirm/"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept-Language": locale },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code, password, password_confirm: passwordConfirm }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
+      const { status, data } = await api.post("/v1/auth/password-reset/confirm/",
+        { email: email.trim().toLowerCase(), code, password, password_confirm: passwordConfirm }, SANS_REJET);
+      if (status >= 400) {
         const errs: Record<string, string> = {};
         for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
           const msg = firstErrorMessage(v);
@@ -75,7 +64,8 @@ function ResetForm() {
         setLoading(false);
         return;
       }
-      router.push(`/login?reset=1&email=${encodeURIComponent(email.trim().toLowerCase())}`);
+      retenirEmail(email.trim().toLowerCase());
+      router.push("/login?reset=1");
     } catch {
       setError(t("serveurInjoignable"));
       setLoading(false);
