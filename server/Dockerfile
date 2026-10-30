@@ -7,16 +7,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Unprivileged user: the application never runs as root
 RUN useradd --create-home --uid 10001 --user-group app
 
-# All dependencies have wheels (psycopg2-binary, Pillow…): no compiler nor system packages
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Static files (admin) served by WhiteNoise; fake key and password, used only during the build
 RUN DJANGO_SECRET_KEY=collectstatic-build-only POSTGRES_PASSWORD=collectstatic-build-only python manage.py collectstatic --noinput \
     && mkdir -p mediafiles prive && chown app:app mediafiles prive
 
