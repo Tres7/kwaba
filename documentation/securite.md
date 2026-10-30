@@ -26,7 +26,7 @@ Ce que fait le code, et ce qu'il reste à régler au déploiement. Fait suite à
 
 - `AUTH_SECRET` : 32+ octets aléatoires (`openssl rand -base64 32`), différent de toutes les autres clés.
 - `AUTH_URL` en `https://` : les cookies de session sont alors `Secure`.
-- Les en-têtes de sécurité (CSP, HSTS, X-Frame-Options…) sont envoyés par Next.js (`client/next.config.ts`). Une nouvelle ressource externe (script, iframe, API) doit y être ajoutée à la CSP, sinon le navigateur la bloque.
+- La CSP est écrite dans `client/src/lib/csp.ts`. Une nouvelle ressource externe (iframe, image, API) doit y être ajoutée, sinon le navigateur la bloque. HSTS et `X-Content-Type-Options` viennent de nginx, les autres en-têtes de `client/next.config.ts`.
 
 ### Base de données
 
@@ -52,6 +52,7 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
 
 - **Disponibilité** : un service de surveillance externe (UptimeRobot, Better Stack…) interroge `/api/health/` et la page d'accueil toutes les minutes, et alerte par email ou SMS.
 - **Erreurs** : les erreurs 500 partent par email aux `ADMINS` (sans les variables locales). La sonde de santé est exclue pour ne pas envoyer un email par appel pendant une panne.
+- **CSP** : les navigateurs signalent les violations à `/api/csp-report`, écrites dans les journaux du client (`docker compose logs client | grep csp-violation`). Une hausse soudaine sur une même page mérite un contrôle : ressource oubliée dans la CSP, ou injection. Les rapports sont publics, donc une piste et jamais une preuve.
 - **Paiements** : les anomalies (versement échoué, remboursement manuel) envoient déjà une alerte email (`apps/paiements/notifications.py`).
 - **Journal d'audit** : administration Django → Sécurité → Journal d'audit (lecture seule). Il contient les connexions, les échecs, les blocages, les réinitialisations de mot de passe, les changements de rôle, les changements de compte de versement et les webhooks refusés. À consulter en cas de doute sur un compte, notamment après une alerte « compte de versement modifié ».
 
@@ -77,6 +78,7 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - Le navigateur appelle `/api/proxy/…`, qui ajoute le jeton puis relaie vers Django (`client/src/app/api/proxy`). Seules les routes `/v1/…` sont accessibles. Une écriture doit venir du site (contrôle d'`Origin`), car le cookie remplace le Bearer, qui protégeait du CSRF. Django reçoit l'hôte public par `X-Forwarded-Host` (`USE_X_FORWARDED_HOST`), imposé par nginx et le proxy, et toujours soumis à `ALLOWED_HOSTS`.
   - Le proxy ne fait que lire le cookie. Le renouvellement reste dans `/api/auth/session`, seul endroit qui peut enregistrer les nouveaux jetons : ne pas utiliser `auth()` dans le proxy, qui perdrait le `Set-Cookie`.
   - Une XSS ne peut plus voler de jeton, mais elle peut encore appeler le proxy tant que la page est ouverte : la CSP reste indispensable.
+- **CSP à nonce** : `client/src/middleware.ts` tire un nonce par réponse. Seuls les scripts qui le portent s'exécutent, puis ceux qu'ils chargent (`'strict-dynamic'`). Toutes les pages sont donc rendues à la demande (`Document.tsx` lit les en-têtes) : un `<script>` en ligne ajouté à la main doit recevoir ce nonce, et une page statique serait bloquée. La CSP arrête le point d'entrée d'une injection (balise `<script>`, `onerror`, lien `javascript:`), pas un code déjà en exécution, qui peut ajouter des scripts : `strict-dynamic` le suppose fiable. Les styles en ligne restent permis.
 - **Redirection après connexion** : `safeCallback` (`client/src/lib/redirection.ts`) contrôle l'adresse telle que le navigateur la lit, résultat compris. Tout nouveau paramètre de redirection doit passer par cette fonction.
 - **Administration Django** : 5 échecs par email et 20 par IP par quart d'heure, échecs journalisés.
 
@@ -84,7 +86,7 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
 
 - **Isolation entre utilisateurs** : chaque vue filtre sur l'utilisateur connecté (réservations, annonces, messagerie, voyages, dons, transferts, Concierge). Un objet d'un autre utilisateur répond 404, comme un objet inexistant.
 - **Prix** : toujours recalculés côté serveur. Les webhooks FedaPay ne servent qu'à relire la transaction chez FedaPay, une seule fois (verrou).
-- **Images** : les URL d'images (annonces, avatars) doivent venir d'un hôte connu (`IMAGES_HOTES_AUTORISES`). Une image externe permettrait à son auteur de collecter l'adresse IP des visiteurs. La directive `img-src` de la CSP (`client/next.config.ts`) porte la même liste : un hôte ajouté d'un côté doit l'être de l'autre.
+- **Images** : les URL d'images (annonces, avatars) doivent venir d'un hôte connu (`IMAGES_HOTES_AUTORISES`). Une image externe permettrait à son auteur de collecter l'adresse IP des visiteurs. La directive `img-src` de la CSP (`client/src/lib/csp.ts`) porte la même liste : un hôte ajouté d'un côté doit l'être de l'autre.
 - **Photos envoyées** : ré-encodées en JPEG, métadonnées (GPS) supprimées, nom de fichier choisi par le serveur.
 - **Concierge IA** :
   - outils en lecture seule sur des données publiques ;
