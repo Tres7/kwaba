@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { useTranslations } from "next-intl";
 import { AlertTriangle, CheckCircle2, FileDown, Loader2, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { messageErreurPdf } from "@/lib/documents";
-import { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage, estErreurApi } from "@/lib/api";
 import PadSignature from "@/components/contrats/PadSignature";
 import type { ContratPublic, SignatureContrat } from "@/types/api/contrat";
 import { useFormat } from "@/lib/format";
@@ -49,7 +48,7 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
     try {
       await onSigner({ nom: nom.trim(), signature, accepte });
     } catch (err) {
-      setErreur(axios.isAxiosError(err) || !(err instanceof Error) ? apiErrorMessage(err) : err.message);
+      setErreur(estErreurApi(err) || !(err instanceof Error) ? apiErrorMessage(err) : err.message);
     } finally {
       setEnvoi(false);
     }

@@ -12,7 +12,7 @@ import AlerteDisponibilite from "@/components/hebergement/AlerteDisponibilite";
 import EquipementsLogement from "@/components/hebergement/EquipementsLogement";
 import DetailsLogement from "@/components/hebergement/DetailsLogement";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
-import FavoriteButton from "@/components/hebergement/FavoriteButton";
+import { FavoriteButton } from "@/features/favoris";
 import RatingBadge from "@/components/avis/RatingBadge";
 import AvisSection from "@/components/avis/AvisSection";
 import ProposerAuGroupe from "@/components/voyage/ProposerAuGroupe";

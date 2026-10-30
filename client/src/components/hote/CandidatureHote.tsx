@@ -1,11 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, Circle, Clock, XCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import api from "@/lib/api";
+import api, { estErreurApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import VerificationIdentite from "@/components/hote/VerificationIdentite";
 import type { ContratPublic } from "@/types/api/contrat";
@@ -40,7 +39,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
       try {
         return (await api.get<ContratPublic>("/v1/contrats/hote/")).data;
       } catch (err) {
-        if (axios.isAxiosError(err) && err.response?.status === 404) return null;
+        if (estErreurApi(err) && err.response?.status === 404) return null;
         throw err;
       }
     },

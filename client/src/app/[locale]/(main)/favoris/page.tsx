@@ -1,23 +1,15 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Heart, Search, ArrowLeft } from "lucide-react";
-import api from "@/lib/api";
 import PropertyCard from "@/components/hebergement/PropertyCard";
-import type { Favori, Paginated } from "@/types/api/models";
+import { useFavoris, useOterDeLaListe } from "@/features/favoris";
 import { useTranslations } from "next-intl";
 
 export default function FavorisPage() {
   const t = useTranslations("mesFavoris");
-  const queryClient = useQueryClient();
-  const { data: favoris = [], isLoading, isError, refetch } = useQuery({
-    queryKey: ["favoris"],
-    queryFn: async () => (await api.get<Paginated<Favori>>("/v1/favoris/")).data.results,
-  });
-
-  const removeLocally = (hebergementId: string) =>
-    queryClient.setQueryData<Favori[]>(["favoris"], (prev) => prev?.filter((f) => f.hebergement !== hebergementId));
+  const { data: favoris = [], isLoading, isError, refetch } = useFavoris();
+  const oterDeLaListe = useOterDeLaListe();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
@@ -61,7 +53,7 @@ export default function FavorisPage() {
             <PropertyCard
               key={f.id}
               property={{ ...f.hebergement_detail, is_favorite: true }}
-              onFavoriteChange={(fav) => { if (!fav) removeLocally(f.hebergement); }}
+              onFavoriteChange={(fav) => { if (!fav) oterDeLaListe(f.hebergement); }}
             />
           ))}
         </div>

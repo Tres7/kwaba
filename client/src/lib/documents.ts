@@ -1,5 +1,4 @@
-import axios from "axios";
-import api, { apiErrorMessage } from "@/lib/api";
+import api, { apiErrorMessage, estErreurApi } from "@/lib/api";
 import type { FactureAdmin } from "@/types/api/admin";
 
 export type ObjetDocument = "reservation" | "transfert" | "location" | "don";
@@ -29,7 +28,7 @@ export function telechargerDocument(objet: ObjetDocument, id: string, doc: TypeD
 
 /** Error message of a download: the response of a PDF is a Blob, the JSON has to be read again. */
 export async function messageErreurPdf(err: unknown, defaut?: string): Promise<string> {
-  if (axios.isAxiosError(err) && err.response?.data instanceof Blob) {
+  if (estErreurApi(err) && err.response?.data instanceof Blob) {
     try {
       const corps = JSON.parse(await err.response.data.text()) as { detail?: string };
       if (corps.detail) return corps.detail;
