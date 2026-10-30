@@ -3,16 +3,17 @@
 import { useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api, { firstErrorMessage } from "@/lib/api";
-import { CATEGORIES_EQUIPEMENTS, REGLES } from "@/components/hebergement/AmenityBadge";
+import { useEquipements } from "@/components/hebergement/AmenityBadge";
 import PhotoUploader from "@/components/hote/PhotoUploader";
 import EstimateurRevenus from "@/components/hote/EstimateurRevenus";
 import type { Revenus } from "@/types/api/paiement";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
-import { cn, TYPE_LABELS } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Hebergement, HebergementType, PolitiqueAnnulation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { useFormat } from "@/lib/format";
 
 // Aide de chaque type de logement : messages annonce.types.<type>
 // Cancellation policies chosen by the host (terms of sale, appendix 1): messages politiqueAnnulation.<politique>
@@ -28,6 +29,8 @@ const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl 
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
 
 export default function HebergementForm({ initial, onSaved, onCancel }: HebergementFormProps) {
+  const { CATEGORIES_EQUIPEMENTS, REGLES } = useEquipements();
+  const { TYPE_LABELS } = useFormat();
   const t = useTranslations("annonce");
   const tp = useTranslations("politiqueAnnulation");
   // Partner type set by the team (individual, hotel, founder): the preview's commission is theirs

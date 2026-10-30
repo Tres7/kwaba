@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import AmenityBadge, { CATEGORIES_EQUIPEMENTS, REGLES, estRegle } from "@/components/hebergement/AmenityBadge";
+import AmenityBadge, { estRegle, useEquipements } from "@/components/hebergement/AmenityBadge";
 
 /** Beyond this number, the list is folded (the first categories stay visible). */
 const PLIAGE = 10;
 
 /** Listing page: amenities by category, then the house rules the host gave. */
 export default function EquipementsLogement({ amenities }: { amenities: string[] }) {
+  const { CATEGORIES_EQUIPEMENTS, REGLES } = useEquipements();
   const t = useTranslations("fiche");
   const [deplie, setDeplie] = useState(false);
   const equipements = amenities.filter((a) => !estRegle(a));

@@ -6,12 +6,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Calendar, MapPin, CheckCircle, Clock, XCircle, Users, Star, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
-import { cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate } from "@/lib/utils";
+import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
 import PropertyCard from "@/components/hebergement/PropertyCard";
 import CompteRemboursementDialog from "@/components/paiement/CompteRemboursementDialog";
 import Documents from "@/components/documents/Documents";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const TABS = [
   { id: "upcoming", label: "aVenir" },
@@ -33,6 +34,7 @@ const STATUS = {
 };
 
 export default function ReservationsPage() {
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("mesReservations");
   const tVoy = useTranslations("voyageurs");
   const queryClient = useQueryClient();

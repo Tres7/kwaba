@@ -6,12 +6,13 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Link2, MapPin, Plus, Users, Vote, Wallet } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
-import { formatDate, isoDate } from "@/lib/utils";
+import { isoDate } from "@/lib/utils";
 import FormField from "@/components/ui/FormField";
 import Stepper from "@/components/ui/Stepper";
 import type { Voyage, VoyageResume } from "@/types/api/voyage";
 import { useTranslations } from "next-intl";
 import PageHero from "@/components/layout/PageHero";
+import { useFormat } from "@/lib/format";
 
 const ATOUTS = [
   { icon: Link2, id: "lien" },
@@ -21,6 +22,7 @@ const ATOUTS = [
 ];
 
 export default function TogetherPage() {
+  const { formatDate } = useFormat();
   const t = useTranslations("together");
   const router = useRouter();
   const { status } = useSession();

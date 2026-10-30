@@ -7,9 +7,10 @@ import { Compass, MapPin, Search, ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import PageHero from "@/components/layout/PageHero";
 import api from "@/lib/api";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import type { CategorieExperience, Experience } from "@/types/api/experience";
+import { useFormat } from "@/lib/format";
 
 type Category = CategorieExperience;
 
@@ -34,6 +35,7 @@ function localiser(e: Experience, locale: string) {
 }
 
 export default function DecouvrirPage() {
+  const { formatPrice } = useFormat();
   const t = useTranslations("decouvrir");
   const tNav = useTranslations("nav");
   const locale = useLocale();

@@ -6,11 +6,12 @@ import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, Users } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
-import { formatDate } from "@/lib/utils";
 import type { ApercuInvitation } from "@/types/api/voyage";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 export default function RejoindrePage() {
+  const { formatDate } = useFormat();
   const t = useTranslations("together");
   const { code } = useParams<{ code: string }>();
   const router = useRouter();

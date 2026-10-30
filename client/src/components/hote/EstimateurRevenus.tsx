@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Minus, Plus } from "lucide-react";
 import { useConfigPaiement } from "@/lib/paiement";
-import { calculateServiceFee, cn, formatFcfa } from "@/lib/utils";
+import { calculateServiceFee, cn } from "@/lib/utils";
+import { useFormat } from "@/lib/format";
 
 export type Partenaire = "particulier" | "fondateur" | "hotel";
 
@@ -25,6 +26,7 @@ export default function EstimateurRevenus({ partenaire: partenaireImpose, prix: 
   prix?: number;
   className?: string;
 }) {
+  const { formatFcfa } = useFormat();
   const t = useTranslations("estimateur");
   const { data: config } = useConfigPaiement();
   const [partenaireChoisi, setPartenaire] = useState<Partenaire>("particulier");

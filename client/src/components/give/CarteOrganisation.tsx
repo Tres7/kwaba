@@ -1,11 +1,14 @@
 import { Link } from "@/i18n/navigation";
 import { BadgeCheck, MapPin } from "lucide-react";
-import { CAUSES, PAYS } from "@/lib/give";
-import { cn, formatPrice } from "@/lib/utils";
+import { useTextesGive } from "@/lib/give";
+import { cn } from "@/lib/utils";
 import type { Organisation } from "@/types/api/give";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 export default function CarteOrganisation({ o }: { o: Organisation }) {
+  const { CAUSES, PAYS } = useTextesGive();
+  const { formatPrice } = useFormat();
   const t = useTranslations("give");
   const cause = CAUSES[o.cause];
   return (

@@ -6,11 +6,13 @@ import { signOut, useSession } from "next-auth/react";
 import { ChevronRight, User, CalendarCheck, Heart, CreditCard, Bell, Globe, HelpCircle, LogOut, Home, MessageCircle, BadgeCheck, Star, ShieldCheck, Plane, Users, Sparkles, HandHeart } from "lucide-react";
 import api from "@/lib/api";
 import { useReglagesSite, filtrerLiens } from "@/lib/site";
-import { FALLBACK_IMAGE, formatDate, initials, ROLE_LABELS } from "@/lib/utils";
+import { FALLBACK_IMAGE, initials } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import type { Favori, Me, Paginated, Reservation, SejourAEvaluer } from "@/types/api/models";
+import { useFormat } from "@/lib/format";
 
 export default function ProfilPage() {
+  const { ROLE_LABELS, formatDate } = useFormat();
   const t = useTranslations("profil");
   const locale = useLocale();
   const { data: session } = useSession();

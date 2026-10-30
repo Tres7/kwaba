@@ -9,12 +9,12 @@ import { Calendar, Car, CheckCircle, Clock, Loader2, Mail, MapPin, Users, XCircl
 import { Link } from "@/i18n/navigation";
 import api, { apiErrorMessage } from "@/lib/api";
 import { minutesRestantes, payerLocation, useConfigPaiement } from "@/lib/paiement";
-import { cn, formatPrice } from "@/lib/utils";
-import { dateVol } from "@/lib/transfert";
+import { cn } from "@/lib/utils";
 import CompteRemboursementDialog from "@/components/paiement/CompteRemboursementDialog";
 import Documents from "@/components/documents/Documents";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import type { Location, StatutLocation } from "@/types/api/location";
+import { useFormat } from "@/lib/format";
 
 const STATUTS: Record<StatutLocation, { className: string; icon: typeof Clock }> = {
   en_attente_paiement: { className: "bg-amber-100 text-amber-800", icon: Clock },
@@ -27,6 +27,7 @@ const STATUTS: Record<StatutLocation, { className: string; icon: typeof Clock }>
 const ATTENTE_MAX_MS = 3 * 60 * 1000;
 
 function LocationDetail() {
+  const { dateVol, formatPrice } = useFormat();
   const t = useTranslations("location");
   const td = useTranslations("location.detail");
   const tR = useTranslations("mesReservations");

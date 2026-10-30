@@ -11,7 +11,6 @@ import { ArrowCounterClockwiseIcon, BackpackIcon, BedIcon, BuildingApartmentIcon
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
-import { formatPrice } from "@/lib/utils";
 import DateRangeField from "@/components/ui/DateRangeField";
 import GuestsField from "@/components/ui/GuestsField";
 import PropertyCard from "@/components/hebergement/PropertyCard";
@@ -19,6 +18,7 @@ import ChampDestination from "@/components/hebergement/ChampDestination";
 import Services from "@/components/accueil/Services";
 import AvisVoyageurs from "@/components/accueil/AvisVoyageurs";
 import type { City, Hebergement, Paginated } from "@/types/api/models";
+import { useFormat } from "@/lib/format";
 
 // Slideshow photos (public/accueil): 1240 × 1550 portrait cropped on the subject for phones, 2560 px from
 // tablets, 3840 px on large screens (2xl). Classes written in full so that Tailwind generates them; the
@@ -141,6 +141,7 @@ function WelcomeToast() {
 }
 
 export default function HomePage() {
+  const { formatPrice } = useFormat();
   // Displayed and previous photo (kept during the fade); no previous one before the first change
   const [{ currentBg, previousBg }, setDiaporama] = useState({ currentBg: 0, previousBg: -1 });
   const { status } = useSession();

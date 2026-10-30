@@ -8,7 +8,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, Eye, EyeOff, BedDouble, Calendar, CalendarDays, Users, MapPin, MessageCircle, ShieldCheck, Clock, AlertTriangle, Hourglass } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
-import { cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate, TYPE_LABELS } from "@/lib/utils";
+import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
 import HebergementForm from "@/components/hote/HebergementForm";
 import RatingBadge from "@/components/avis/RatingBadge";
 import RevenusHote from "@/components/hote/RevenusHote";
@@ -19,6 +19,7 @@ import { usePrelancement } from "@/lib/usePrelancement";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";
 import type { MessagingConversation } from "@/types/api/messaging";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 type Tab = "annonces" | "reservations" | "revenus";
 
@@ -28,6 +29,7 @@ const CLE_FENETRE_VUE = "kwaba_fenetre_ouverture_vue";
 const PAYMENT_LABELS: Record<string, string> = { mobile_money: "mobileMoney", carte: "carte", paypal: "paypal" };
 
 function EspaceHoteContent() {
+  const { TYPE_LABELS, formatDate, formatPrice } = useFormat();
   const t = useTranslations("espaceHote");
   const tVerif = useTranslations("espaceHote.verification");
   const tAnnonce = useTranslations("annonce");

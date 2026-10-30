@@ -3,9 +3,10 @@ import { BadgeCheck, CalendarX, Flame, MapPin } from "lucide-react";
 import type { Hebergement } from "@/types/api/models";
 import FavoriteButton from "@/components/hebergement/FavoriteButton";
 import RatingBadge from "@/components/avis/RatingBadge";
-import { FALLBACK_IMAGE, TYPE_LABELS, SERVICE_FEE_RATE, cn, formatDate, formatPrice, prixNuitFraisInclus } from "@/lib/utils";
+import { FALLBACK_IMAGE, SERVICE_FEE_RATE, cn, prixNuitFraisInclus } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useResumeDetails } from "@/components/hebergement/DetailsLogement";
+import { useFormat } from "@/lib/format";
 
 /** "Only N left" from this number of units (hotels and other multi-unit establishments). */
 const SEUIL_STOCK_FAIBLE = 3;
@@ -17,6 +18,7 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property, query = "", onFavoriteChange }: PropertyCardProps) {
+  const { TYPE_LABELS, formatDate, formatPrice } = useFormat();
   const resume = useResumeDetails();
   const t = useTranslations("logement");
   const prix = Number(property.price_per_night);

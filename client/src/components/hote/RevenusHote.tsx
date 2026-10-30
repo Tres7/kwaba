@@ -6,12 +6,13 @@ import { AlertTriangle, CheckCircle, Clock, Loader2, Smartphone, Wallet } from "
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 import { useConfigPaiement } from "@/lib/paiement";
-import { cn, formatDate, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
 import type { ProfilVersement, Revenus, StatutVersement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
-import { PAYS } from "@/lib/give";
+import { useTextesGive } from "@/lib/give";
+import { useFormat } from "@/lib/format";
 
 const STATUTS: Record<StatutVersement, { label: string; className: string }> = {
   planifie: { label: "prevu", className: "bg-gray-100 text-dark" },
@@ -21,6 +22,7 @@ const STATUTS: Record<StatutVersement, { label: string; className: string }> = {
 };
 
 export default function RevenusHote() {
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("revenus");
   const { data: config } = useConfigPaiement();
   const { data: revenus, isLoading } = useQuery({
@@ -88,6 +90,7 @@ export default function RevenusHote() {
 }
 
 function ProfilVersementForm({ manquant }: { manquant: boolean }) {
+  const { PAYS } = useTextesGive();
   const t = useTranslations("revenus");
   const tD = useTranslations("remboursementDialog");
   const queryClient = useQueryClient();

@@ -5,7 +5,8 @@ import {
   ThermometerColdIcon, TowelIcon, TShirtIcon, UmbrellaIcon, VaultIcon, WashingMachineIcon, WavesIcon, WheelchairIcon, WifiHighIcon,
   type Icon,
 } from "@phosphor-icons/react";
-import { cn, selon } from "@/lib/utils";
+import { useLocale } from "next-intl";
+import { cn } from "@/lib/utils";
 
 type Equipement = [id: string, fr: string, en: string, Icone: Icon];
 
@@ -75,30 +76,37 @@ const REGLES_MAISON: { id: string; fr: string; en: string; oui: Equipement; non:
 /** Most searched amenities: always shown in the search filters, the others behind « more ». */
 export const EQUIPEMENTS_PRINCIPAUX = ["wifi", "clim", "ventilateur", "groupe_electrogene", "eau_chaude", "piscine", "parking", "cuisine", "gardien"];
 
-const avecLibelle = ([id, fr, en, Icone]: Equipement) => ({ id, Icone, get label() { return selon({ fr, en }); } });
+function creerEquipements(langue: "fr" | "en") {
+  const avecLibelle = ([id, fr, en, Icone]: Equipement) => ({ id, Icone, label: langue === "en" ? en : fr });
+  return {
+    CATEGORIES_EQUIPEMENTS: CATEGORIES.map((c) => ({ id: c.id, label: c[langue], equipements: c.equipements.map(avecLibelle) })),
+    REGLES: REGLES_MAISON.map((r) => ({ id: r.id, label: r[langue], oui: avecLibelle(r.oui), non: avecLibelle(r.non) })),
+    /** Amenities and house rules. */
+    AMENITIES: Object.fromEntries(
+      [...CATEGORIES.flatMap((c) => c.equipements), ...REGLES_MAISON.flatMap((r) => [r.oui, r.non])]
+        .map(([id, fr, en, Icone]) => [id, { Icone, label: langue === "en" ? en : fr }]),
+    ) as Record<string, { label: string; Icone: Icon }>,
+  };
+}
 
-export const CATEGORIES_EQUIPEMENTS = CATEGORIES.map((c) => ({
-  id: c.id, get label() { return selon({ fr: c.fr, en: c.en }); }, equipements: c.equipements.map(avecLibelle),
-}));
+const EQUIPEMENTS = { fr: creerEquipements("fr"), en: creerEquipements("en") };
 
-export const REGLES = REGLES_MAISON.map((r) => ({
-  id: r.id, get label() { return selon({ fr: r.fr, en: r.en }); }, oui: avecLibelle(r.oui), non: avecLibelle(r.non),
-}));
+export const IDS_EQUIPEMENTS = Object.keys(EQUIPEMENTS.fr.AMENITIES);
 
-const VALEURS_REGLES = new Set(REGLES.flatMap((r) => [r.oui.id, r.non.id]));
+/** Amenities and house rules, labelled in the language of the page. */
+export function useEquipements() {
+  return EQUIPEMENTS[useLocale() === "en" ? "en" : "fr"];
+}
+
+const VALEURS_REGLES = new Set(REGLES_MAISON.flatMap((r) => [r.oui[0], r.non[0]]));
 export const estRegle = (id: string) => VALEURS_REGLES.has(id);
-
-/** Amenities and house rules, labelled in the current language. */
-export const AMENITIES: Record<string, { label: string; Icone: Icon }> = Object.fromEntries(
-  [...CATEGORIES.flatMap((c) => c.equipements), ...REGLES_MAISON.flatMap((r) => [r.oui, r.non])]
-    .map(([id, fr, en, Icone]) => [id, { Icone, get label() { return selon({ fr, en }); } }]),
-);
 
 interface AmenityBadgeProps {
   amenity: string;
 }
 
 export default function AmenityBadge({ amenity }: AmenityBadgeProps) {
+  const { AMENITIES, REGLES } = useEquipements();
   const { label, Icone } = AMENITIES[amenity] ?? { label: amenity, Icone: CheckCircleIcon };
   // A forbidden house rule: same picture, struck through and muted
   const interdit = REGLES.some((r) => r.non.id === amenity);

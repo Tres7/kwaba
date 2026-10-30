@@ -7,10 +7,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
 import api, { firstErrorMessage } from "@/lib/api";
-import { cn, FALLBACK_IMAGE, formatDate } from "@/lib/utils";
+import { cn, FALLBACK_IMAGE } from "@/lib/utils";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { CritereAvis, Reservation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 // Labels of ratings 1 to 5: messages avisDepot.notes.1 … 5
 
@@ -42,6 +43,7 @@ function StarInput({ value, onChange, size = 28, label }: { value: number; onCha
 }
 
 export default function LaisserAvisPage() {
+  const { formatDate } = useFormat();
   const t = useTranslations("avisDepot");
   const tAvis = useTranslations("avis");
   const { id } = useParams<{ id: string }>();

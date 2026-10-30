@@ -6,11 +6,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BedDouble, Eye, EyeOff, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import PhotoUploader from "@/components/hote/PhotoUploader";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { Hebergement, Paginated, TypeLogement } from "@/types/api/models";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 type Brouillon = Pick<TypeLogement, "nom" | "description" | "photos"> & { capacite: string; prix_nuit: string; quantite: string };
 
@@ -22,6 +23,7 @@ function brouillonDe(u: TypeLogement): Brouillon {
 }
 
 export default function TypesLogementPage() {
+  const { formatPrice } = useFormat();
   const t = useTranslations("typesHote");
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();

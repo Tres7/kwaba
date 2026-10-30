@@ -6,16 +6,19 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, BadgeCheck, ExternalLink, MapPin } from "lucide-react";
 import api from "@/lib/api";
-import { CAUSES, PAYS } from "@/lib/give";
-import { cn, formatDate, formatPrice } from "@/lib/utils";
+import { useTextesGive } from "@/lib/give";
+import { cn } from "@/lib/utils";
 import { urlExterneSure } from "@/lib/url-sure";
 import ChiffresImpact from "@/components/give/ChiffresImpact";
 import FormulaireDon from "@/components/give/FormulaireDon";
 import PreuveReversement from "@/components/give/PreuveReversement";
 import type { OrganisationDetail } from "@/types/api/give";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 function PageOrganisation() {
+  const { CAUSES, PAYS } = useTextesGive();
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("ongPage");
   const tG = useTranslations("give");
   const { slug } = useParams<{ slug: string }>();

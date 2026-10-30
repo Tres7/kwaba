@@ -8,13 +8,13 @@ import { CheckCircle, Clock, Loader2, MapPin, MessageCircle, Phone, Plane, Users
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 import { payerTransfert, minutesRestantes, useConfigPaiement } from "@/lib/paiement";
-import { cn, formatPrice } from "@/lib/utils";
-import { dateVol } from "@/lib/transfert";
+import { cn } from "@/lib/utils";
 import CompteRemboursementDialog from "@/components/paiement/CompteRemboursementDialog";
 import Documents from "@/components/documents/Documents";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import type { StatutTransfert, Transfert } from "@/types/api/transfert";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const STATUTS: Record<StatutTransfert, { label: string; className: string; icon: typeof Clock }> = {
   en_attente_paiement: { label: "enAttente", className: "bg-amber-100 text-amber-800", icon: Clock },
@@ -27,6 +27,7 @@ const STATUTS: Record<StatutTransfert, { label: string; className: string; icon:
 const ATTENTE_MAX_MS = 3 * 60 * 1000;
 
 function TransfertDetail() {
+  const { dateVol, formatPrice } = useFormat();
   const tr = useTranslations("transfertDetail");
   const tT = useTranslations("transfert");
   const tR = useTranslations("mesReservations");

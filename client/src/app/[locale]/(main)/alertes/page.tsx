@@ -5,8 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { BellOff, BellRing } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import api, { apiErrorMessage } from "@/lib/api";
-import { formatDate } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 interface Resume {
   statut: string;
@@ -19,6 +19,7 @@ interface Resume {
 /** Links of the alert emails: /alertes?confirmer=<token> or /alertes?desinscrire=<token>. Nothing happens without a
  *  click: mail scanners that open links must not confirm or stop an alert. */
 function Alertes() {
+  const { formatDate } = useFormat();
   const t = useTranslations("alerte");
   const params = useSearchParams();
   const jeton = params.get("confirmer") || params.get("desinscrire") || "";

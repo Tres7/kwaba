@@ -4,14 +4,17 @@ import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import api from "@/lib/api";
-import { CAUSES } from "@/lib/give";
-import { cn, formatPrice } from "@/lib/utils";
+import { useTextesGive } from "@/lib/give";
+import { cn } from "@/lib/utils";
 import ChiffresImpact from "@/components/give/ChiffresImpact";
 import PreuveReversement from "@/components/give/PreuveReversement";
 import type { ImpactGlobal } from "@/types/api/give";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 export default function ImpactPage() {
+  const { CAUSES } = useTextesGive();
+  const { formatPrice } = useFormat();
   const t = useTranslations("impactPage");
   const tG = useTranslations("give");
   const { data: impact, isLoading } = useQuery({

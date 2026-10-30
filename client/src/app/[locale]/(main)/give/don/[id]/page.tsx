@@ -6,14 +6,15 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarClock, CheckCircle, HandHeart, Loader2, XCircle } from "lucide-react";
 import api from "@/lib/api";
-import { formatDate, formatPrice } from "@/lib/utils";
 import type { Don } from "@/types/api/give";
 import Documents from "@/components/documents/Documents";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const ATTENTE_MAX_MS = 3 * 60 * 1000;
 
 function RetourDon() {
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("retourDon");
   const { id } = useParams<{ id: string }>();
   const annule = useSearchParams().get("annule") === "1";

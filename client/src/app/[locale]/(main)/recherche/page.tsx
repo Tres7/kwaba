@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { List, Map as IconeCarte, Search, SlidersHorizontal, X } from "lucide-react";
 import api from "@/lib/api";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import Chargement from "@/components/ui/Chargement";
 import PropertyCard from "@/components/hebergement/PropertyCard";
 import { BandeauBientot, useAucunLogement } from "@/components/lancement/BientotDisponible";
@@ -17,9 +17,10 @@ import Select from "@/components/ui/Select";
 import type { Hebergement, Paginated } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import ChampDestination from "@/components/hebergement/ChampDestination";
-import { AMENITIES, EQUIPEMENTS_PRINCIPAUX, estRegle } from "@/components/hebergement/AmenityBadge";
+import { EQUIPEMENTS_PRINCIPAUX, IDS_EQUIPEMENTS, estRegle, useEquipements } from "@/components/hebergement/AmenityBadge";
 import MapEmbed from "@/components/hebergement/MapEmbed";
 import { QUARTIERS_LOME } from "@/lib/quartiers";
+import { useFormat } from "@/lib/format";
 
 const SORTS = [
   { id: "", label: "pertinence" },
@@ -40,12 +41,14 @@ const TYPES = [
 
 // Behind « more amenities »: every other amenity, and the house rules a traveller looks for
 const REGLES_RECHERCHEES = ["animaux_acceptes", "non_fumeur", "fumeur_autorise", "fetes_autorisees"];
-const AUTRES_EQUIPEMENTS = Object.keys(AMENITIES).filter((id) => !EQUIPEMENTS_PRINCIPAUX.includes(id)
+const AUTRES_EQUIPEMENTS = IDS_EQUIPEMENTS.filter((id) => !EQUIPEMENTS_PRINCIPAUX.includes(id)
   && (!estRegle(id) || REGLES_RECHERCHEES.includes(id)));
 
 const FILTER_KEYS = ["city", "check_in", "check_out", "guests", "type", "sort", "price_min", "price_max", "petit_dejeuner", "equipements", "disponibles"] as const;
 
 function RechercheContent() {
+  const { AMENITIES } = useEquipements();
+  const { formatDate } = useFormat();
   const t = useTranslations("recherche");
   const aucunLogement = useAucunLogement();
   const router = useRouter();

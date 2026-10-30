@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, ScrollText } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
-import { langue } from "@/lib/utils";
 import type { Preinscription } from "@/types/api/contrat";
+import { useFormat } from "@/lib/format";
 
 interface Props {
   /** The listing form, shown once the pre-registration is accepted (or when none is needed). */
@@ -19,6 +19,7 @@ interface Props {
  * the API, which records the acceptance (date, IP address, browser, text version) and refuses a listing without it.
  */
 export default function PreinscriptionHote({ children, onCancel }: Props) {
+  const { langue } = useFormat();
   const t = useTranslations("preinscription");
   const queryClient = useQueryClient();
   const [cochee, setCochee] = useState(false);
