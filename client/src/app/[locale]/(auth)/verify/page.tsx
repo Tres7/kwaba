@@ -8,6 +8,7 @@ import { Mail, RefreshCw } from "lucide-react";
 import { urlProxy } from "@/lib/api-url";
 import AuthShell from "@/components/auth/AuthShell";
 import { cn } from "@/lib/utils";
+import { emailRetenu, oublierEmail, retenirEmail } from "@/lib/email-en-cours";
 import { useLocale, useTranslations } from "next-intl";
 
 const EMPTY = ["", "", "", "", "", ""];
@@ -17,8 +18,8 @@ function VerifyForm() {
   const t = useTranslations("auth");
   const locale = useLocale();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState(searchParams.get("email") ?? "");
-  const [emailKnown, setEmailKnown] = useState(!!searchParams.get("email"));
+  const [email, setEmail] = useState("");
+  const [emailKnown, setEmailKnown] = useState(false);
   const [digits, setDigits] = useState(EMPTY);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -32,13 +33,12 @@ function VerifyForm() {
 
   // sessionStorage only exists in the browser
   useEffect(() => {
-    const stored = sessionStorage.getItem("verify_email");
-    if (!email && stored) {
+    const stored = emailRetenu();
+    if (stored) {
       setEmail(stored);
       setEmailKnown(true);
     }
     inputs.current[0]?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -58,7 +58,8 @@ function VerifyForm() {
 
     if (!res || res.error) {
       if (res?.code === "already_verified") {
-        router.push(`/login?verified=1&email=${encodeURIComponent(email)}`);
+        retenirEmail(email);
+        router.push("/login?verified=1");
         return;
       }
       const messages: Record<string, string> = { too_many_attempts: t("tropDeTentatives"), serveur: t("serveurInjoignable") };
@@ -69,7 +70,7 @@ function VerifyForm() {
       return;
     }
 
-    sessionStorage.removeItem("verify_email");
+    oublierEmail();
     const session = await getSession();
     router.push(session?.user.role === "hote" ? "/hote/espace?bienvenue=1" : "/?bienvenue=1");
     router.refresh();
@@ -127,7 +128,8 @@ function VerifyForm() {
         setCooldown(data.retry_after ?? 60);
         setError(data.detail ?? t("patienter"));
       } else if (data.code === "already_verified") {
-        router.push(`/login?verified=1&email=${encodeURIComponent(email)}`);
+        retenirEmail(email);
+        router.push("/login?verified=1");
       } else {
         setError(data.detail ?? t("erreurEnvoi"));
       }

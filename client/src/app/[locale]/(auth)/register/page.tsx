@@ -11,6 +11,7 @@ import AuthShell from "@/components/auth/AuthShell";
 import GoogleButton from "@/components/auth/GoogleButton";
 import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
 import FormField from "@/components/ui/FormField";
+import { retenirEmail } from "@/lib/email-en-cours";
 import { useLocale, useTranslations } from "next-intl";
 
 type Role = "voyageur" | "hote";
@@ -115,8 +116,8 @@ function RegisterForm() {
       return;
     }
 
-    sessionStorage.setItem("verify_email", email);
-    router.push(`/verify?email=${encodeURIComponent(email)}`);
+    retenirEmail(email);
+    router.push("/verify");
   };
 
   return (
@@ -166,9 +167,9 @@ function RegisterForm() {
           {existingAccount && (
             <p className="text-xs text-gray-500 mt-1.5 ml-1">
               {t("cestVous")}{" "}
-              <Link href={`/login?email=${encodeURIComponent(form.email)}`} className="text-primary font-bold hover:underline">{t("seConnecter")}</Link>
+              <Link href="/login" onClick={() => retenirEmail(form.email.trim().toLowerCase())} className="text-primary font-bold hover:underline">{t("seConnecter")}</Link>
               {" "}{t("ou")}{" "}
-              <Link href={`/verify?email=${encodeURIComponent(form.email.trim().toLowerCase())}`} className="text-primary font-bold hover:underline">{t("verifierCompte")}</Link>
+              <Link href="/verify" onClick={() => retenirEmail(form.email.trim().toLowerCase())} className="text-primary font-bold hover:underline">{t("verifierCompte")}</Link>
             </p>
           )}
         </div>

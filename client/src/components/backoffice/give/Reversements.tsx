@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList } from "@/lib/useAdminList";
+import { urlExterneSure } from "@/lib/url-sure";
 import AdminTable, { ActionButton, Pagination, Pill, type Colonne } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Liste, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
 import Select from "@/components/ui/Select";
@@ -61,7 +62,7 @@ export default function Reversements() {
     { titre: "Statut", cellule: (r) => (
       <div className="flex flex-col items-start gap-1">
         <Pill ton={r.statut === "effectue" ? "vert" : "orange"}>{r.statut_libelle}</Pill>
-        {r.justificatif && <a href={r.justificatif} target="_blank" rel="noreferrer" className="relative zone-tactile text-xs text-primary font-semibold inline-flex items-center gap-1">Preuve <ExternalLink size={11} /></a>}
+        {urlExterneSure(r.justificatif) && <a href={urlExterneSure(r.justificatif)} target="_blank" rel="noreferrer" className="relative zone-tactile text-xs text-primary font-semibold inline-flex items-center gap-1">Preuve <ExternalLink size={11} /></a>}
       </div>
     ) },
   ];

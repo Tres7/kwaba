@@ -1,6 +1,7 @@
 import { CheckCircle, Clock, FileText } from "lucide-react";
 import { moisAnnee } from "@/lib/give";
 import { formatDate, formatPrice } from "@/lib/utils";
+import { urlExterneSure } from "@/lib/url-sure";
 import type { Reversement } from "@/types/api/give";
 import { useTranslations } from "next-intl";
 
@@ -22,8 +23,8 @@ export default function PreuveReversement({ r, avecOrganisation = false }: { r: 
         </p>
         {r.note && <p className="text-xs text-dark mt-1.5 italic">« {r.note} »</p>}
       </div>
-      {r.justificatif && (
-        <a href={r.justificatif} target="_blank" rel="noopener noreferrer"
+      {urlExterneSure(r.justificatif) && (
+        <a href={urlExterneSure(r.justificatif)} target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-xs font-bold text-primary border border-primary/30 rounded-full px-3 py-1.5 hover:bg-primary/5">
           <FileText size={14} /> {t("preuve")}<span className="sr-only"> ({t("nouvelOnglet")})</span>
         </a>

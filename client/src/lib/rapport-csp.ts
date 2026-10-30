@@ -11,15 +11,20 @@ const TAILLE_CHAMP = 200;
 
 const texte = (valeur: unknown) => (typeof valeur === "string" ? valeur.slice(0, TAILLE_CHAMP) : "");
 
-/** Address without query string nor fragment (they can hold an email or a token). "inline" or "eval" stay as they are. */
+/**
+ * Address without query string nor fragment (they can hold an email or a token), nor the token of a signature link, which
+ * gives access to the contract. "inline" or "eval" stay as they are.
+ */
 function sansRequete(valeur: unknown): string {
   const adresse = texte(valeur);
+  let chemin: string;
   try {
     const { origin, pathname } = new URL(adresse);
-    return origin === "null" ? adresse.split(/[?#]/)[0] : `${origin}${pathname}`;
+    chemin = origin === "null" ? adresse.split(/[?#]/)[0] : `${origin}${pathname}`;
   } catch {
-    return adresse.split(/[?#]/)[0];
+    chemin = adresse.split(/[?#]/)[0];
   }
+  return chemin.replace(/(\/(?:contrat|contrats\/signature)\/)[^/]+/, "$1***");
 }
 
 function violation(page: unknown, directive: unknown, bloque: unknown, source: unknown, ligne: unknown): ViolationCsp {

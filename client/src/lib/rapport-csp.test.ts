@@ -24,6 +24,12 @@ describe("lireRapportsCsp", () => {
     expect(JSON.stringify(v)).not.toMatch(/ama|secret/);
   });
 
+  it("masque le jeton d'un lien de signature", () => {
+    const [v] = lireRapportsCsp({ "csp-report": { "document-uri": "https://kwa-ba.com/en/contrat/jeton-secret", "source-file": "https://kwa-ba.com/api/proxy/v1/contrats/signature/jeton-secret/pdf/" } });
+    expect(v.page).toBe("https://kwa-ba.com/en/contrat/***");
+    expect(v.source).toBe("https://kwa-ba.com/api/proxy/v1/contrats/signature/***/pdf/");
+  });
+
   it("tronque les champs et ignore ceux qui ne sont pas du texte", () => {
     const [v] = lireRapportsCsp({ "csp-report": { "violated-directive": "x".repeat(5000), "blocked-uri": { a: 1 }, "line-number": "12" } });
     expect(v.directive).toHaveLength(200);

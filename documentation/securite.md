@@ -93,10 +93,13 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - rien n'est créé sans clic du voyageur ;
   - quota atomique par utilisateur ;
   - les textes des hôtes et du web sont présentés au modèle comme des données, jamais comme des instructions.
-- **Journaux** : jamais de code, de mot de passe ni de jeton. En développement seulement, le code de vérification est affiché pour tester sans SMTP.
+- **Liens externes** : une adresse reçue de l'API passe par `urlExterneSure` avant d'aller dans un `href` (http ou https uniquement, `site_web` compris côté API). Seules les pages de FedaPay et de PayPal peuvent recevoir le voyageur pour un paiement (`estPagePaiement`, `client/src/lib/url-sure.ts`) : un nouveau prestataire doit y être ajouté.
+- **Adresses** : l'email ne passe jamais dans une URL. Il reste dans `sessionStorage` entre l'inscription, le code et la connexion (`client/src/lib/email-en-cours.ts`). Le brouillon de transfert, qui contient un numéro de téléphone, expire après 30 minutes.
+- **Journaux** : jamais de code, de mot de passe ni de jeton. Le jeton des liens de signature (`/contrat/…`) est masqué par nginx, gunicorn (`config/journal_gunicorn.py`) et les rapports de CSP. En développement seulement, le code de vérification est affiché pour tester sans SMTP.
 
 ### Points ouverts
 
+- **HSTS** : `includeSubDomains` est actif. Tout sous-domaine ouvert dans un navigateur doit donc être servi en HTTPS, y compris un futur domaine de suivi d'emails. Le préchargement (`preload`, hstspreload.org) n'est pas demandé : un retrait prend des mois, à décider une fois les sous-domaines stabilisés.
 - **Inscription** : elle indique qu'une adresse a déjà un compte (choix d'ergonomie), dans la limite de 10 essais par heure et par adresse IP.
 - **Numéros Mobile Money** : ils sont stockés en clair, car ils sont nécessaires aux versements. Le chiffrement au repos dépend de l'hébergeur de la base.
 - **Montées de version majeures** à planifier, chacune dans sa propre PR : Next.js 16, Tailwind 4, ESLint 10, next-auth (stable dès sa sortie).
