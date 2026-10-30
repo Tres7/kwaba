@@ -9,12 +9,8 @@ import AuthShell from "@/components/auth/AuthShell";
 import GoogleButton from "@/components/auth/GoogleButton";
 import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
 import FormField from "@/components/ui/FormField";
+import { safeCallback } from "@/lib/redirection";
 import { useTranslations } from "next-intl";
-
-/** Only allows internal redirects (prevents open redirects). */
-function safeCallback(url: string | null): string {
-  return url && url.startsWith("/") && !url.startsWith("//") ? url : "/";
-}
 
 function LoginForm() {
   const router = useRouter();
@@ -71,6 +67,8 @@ function LoginForm() {
         setError(t("nonVerifie"));
       } else if (res.code === "inactive") {
         setError(t("desactive"));
+      } else if (res.code === "too_many_attempts") {
+        setError(t("tropDeTentatives"));
       } else {
         setError(t("identifiantsIncorrects"));
       }

@@ -10,14 +10,15 @@ export const credentialsProvider = Credentials({
     password: { label: "Password", type: "password" },
     captcha: { label: "Captcha", type: "text" },
   },
-  async authorize(credentials) {
+  async authorize(credentials, request) {
     if (!credentials?.email || !credentials?.password) return null;
 
     try {
       const data = await authenticateWithCredentials(
         String(credentials.email),
         String(credentials.password),
-        String(credentials.captcha ?? "")
+        String(credentials.captcha ?? ""),
+        request.headers.get("x-forwarded-for")
       );
 
       return {
@@ -31,7 +32,7 @@ export const credentialsProvider = Credentials({
       };
     } catch (err) {
       const code = (err as { code?: string } | undefined)?.code;
-      if (code === "unverified_email" || code === "inactive" || code === "captcha") {
+      if (code === "unverified_email" || code === "inactive" || code === "captcha" || code === "too_many_attempts") {
         const error = new CredentialsSignin();
         error.code = code;
         throw error;

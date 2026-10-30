@@ -13,7 +13,7 @@ Ce que fait le code, et ce qu'il reste à régler au déploiement. Fait suite à
 | `POSTGRES_PASSWORD` | long et aléatoire | obligatoire hors développement (plus de mot de passe par défaut) |
 | `POSTGRES_USER` | `kwaba_app` | rôle à droits minimaux, voir plus bas |
 | `JWT_SIGNING_KEY` | optionnelle | à défaut, dérivée de `DJANGO_SECRET_KEY` (clé distincte pour les JWT) |
-| `DJANGO_NUM_PROXIES` | `1` (nginx du VPS ajoute l'adresse réelle dans `X-Forwarded-For`) | adresse IP réelle du client pour les limites de débit |
+| `DJANGO_NUM_PROXIES` | `1`, fixé dans `deploy/vps/compose.yml` (nginx du VPS ajoute l'adresse réelle dans `X-Forwarded-For`) | adresse IP réelle du client pour les limites de débit et le journal d'audit |
 | `FORWARDED_ALLOW_IPS` | `*` sur le VPS (l'API n'est joignable que par le réseau interne Docker) | en-têtes `X-Forwarded-*` acceptés par Gunicorn |
 | `DJANGO_ADMIN_URL` | `admin/` sur le VPS : nginx ne route que `/admin/` vers Django, changer les deux ensemble | les connexions à l'administration sont de toute façon limitées et journalisées |
 | `ADMINS` | `tech@kwa-ba.com` | reçoit les erreurs 500 par email |
@@ -64,20 +64,22 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - stockés sous forme d'empreinte HMAC ;
   - un code est invalidé après 5 échecs ;
   - 10 essais par heure et par adresse, nouveaux codes compris : redemander un code ne donne pas d'essais supplémentaires.
-- **Limites par adresse IP** sur les routes appelées par le navigateur : inscription 10/h, codes 30/h, envois de codes 10/h, Google 30/min.
+- **Limites par adresse IP** : inscription 10/h, codes 30/h, envois de codes 10/h, Google 30/min, connexion 60 par quart d'heure. La connexion passe par le serveur Next.js, qui transmet à l'API le `X-Forwarded-For` reçu de nginx : tout nouvel appel de serveur à serveur soumis à une limite par IP doit faire de même.
 - **Compteurs atomiques** : les limites reposent sur `apps/securite/limites.py` (une requête PostgreSQL `INSERT … ON CONFLICT` par incrément). Le cache de Django lit puis écrit en deux temps : il laisserait passer des requêtes simultanées.
 - **Jetons** :
   - jeton d'accès valable 15 minutes ;
   - les jetons portent une empreinte du mot de passe, donc en changer invalide tous les jetons d'accès émis avant ;
-  - une réinitialisation ou une désactivation met tous les refresh tokens sur liste noire.
+  - une réinitialisation ou une désactivation met tous les refresh tokens sur liste noire ;
+  - la déconnexion met le refresh token de la session sur liste noire (`POST /v1/auth/logout/`, appelé par le serveur Next.js). Le jeton d'accès reste valable jusqu'à son expiration, 15 minutes au plus. Une lecture de session encore en cours peut remettre le cookie juste après son effacement : le serveur Next.js garde la session en mémoire (`lib/sessions-fermees.ts`) et la lecture suivante la referme.
 - **Session NextAuth** : l'identité et le rôle viennent toujours de l'API (`/users/me/`), jamais du navigateur.
+- **Redirection après connexion** : `safeCallback` (`client/src/lib/redirection.ts`) contrôle l'adresse telle que le navigateur la lit, résultat compris. Tout nouveau paramètre de redirection doit passer par cette fonction.
 - **Administration Django** : 5 échecs par email et 20 par IP par quart d'heure, échecs journalisés.
 
 ### Données et entrées
 
 - **Isolation entre utilisateurs** : chaque vue filtre sur l'utilisateur connecté (réservations, annonces, messagerie, voyages, dons, transferts, Concierge). Un objet d'un autre utilisateur répond 404, comme un objet inexistant.
 - **Prix** : toujours recalculés côté serveur. Les webhooks FedaPay ne servent qu'à relire la transaction chez FedaPay, une seule fois (verrou).
-- **Images** : les URL d'images (annonces, avatars) doivent venir d'un hôte connu (`IMAGES_HOTES_AUTORISES`). Une image externe permettrait à son auteur de collecter l'adresse IP des visiteurs.
+- **Images** : les URL d'images (annonces, avatars) doivent venir d'un hôte connu (`IMAGES_HOTES_AUTORISES`). Une image externe permettrait à son auteur de collecter l'adresse IP des visiteurs. La directive `img-src` de la CSP (`client/next.config.ts`) porte la même liste : un hôte ajouté d'un côté doit l'être de l'autre.
 - **Photos envoyées** : ré-encodées en JPEG, métadonnées (GPS) supprimées, nom de fichier choisi par le serveur.
 - **Concierge IA** :
   - outils en lecture seule sur des données publiques ;

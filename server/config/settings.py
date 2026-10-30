@@ -311,7 +311,8 @@ BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
 
 # Hosts displayed images may come from (avatars, listing photos): the API itself (uploaded photos),
 # the R2 public domain, Google avatars and the demo photos. A host starting with a dot
-# covers its subdomains. IMAGES_HOTES adds hosts (separated by commas).
+# covers its subdomains. IMAGES_HOTES adds hosts (separated by commas), to add as well to img-src in
+# client/next.config.ts: the browser refuses any other host.
 IMAGES_HOTES_AUTORISES = [
     h for h in {
         urlsplit(BACKEND_URL).hostname,

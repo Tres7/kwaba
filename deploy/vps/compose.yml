@@ -21,6 +21,9 @@ x-server: &server
   environment:
     POSTGRES_HOST: postgres
     RABBITMQ_HOST: rabbitmq
+    # nginx is the only proxy in front of the API. Without this value, every visitor has the address of nginx:
+    # limits per IP shared by the whole site, wrong address in the audit log
+    DJANGO_NUM_PROXIES: '1'
   restart: unless-stopped
   logging: *logging
   security_opt: *security
