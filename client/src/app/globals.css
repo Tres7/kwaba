@@ -25,7 +25,7 @@
   }
 
   ::selection {
-    @apply bg-primary/20 text-primary;
+    @apply bg-primary text-white;
   }
 
   :root {
