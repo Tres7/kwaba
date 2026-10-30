@@ -9,6 +9,7 @@ import SplashScreen from "@/components/layout/SplashScreen";
 import SynchroLangue from "@/components/layout/SynchroLangue";
 import { DeviseProvider } from "@/components/layout/Devise";
 import { Toaster } from "sonner";
+import { headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import type { Langue } from "@/i18n/routing";
@@ -56,8 +57,12 @@ export async function metadataDuSite(locale: Langue): Promise<Metadata> {
  * Full HTML page (fonts, providers, skip link) in a given language.
  * Rendered by app/[locale]/layout.tsx: changing the language rebuilds the whole tree,
  * texts of the client components included.
+ *
+ * Reading the headers makes every page rendered on request: a page generated at build time could not carry the nonce of
+ * the response (middleware.ts), and the browser would block its scripts.
  */
 export default async function Document({ locale, children }: { locale: Langue; children: React.ReactNode }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const t = await getTranslations({ locale, namespace: "commun" });
   const messages = await getMessages({ locale });
   return (
@@ -65,7 +70,7 @@ export default async function Document({ locale, children }: { locale: Langue; c
       <body className={`${montserrat.variable} ${inter.variable} font-body`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
         <SynchroLangue />
-        <ThemeProvider>
+        <ThemeProvider nonce={nonce}>
           <AuthProvider>
             <Providers>
               <ConsentProvider>

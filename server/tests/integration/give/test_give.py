@@ -261,6 +261,18 @@ def test_slug_reserve():
     assert not o.publiee and str(o) == 'X'
 
 
+@pytest.mark.parametrize('adresse, statut', [
+    ('https://ong.example', 200),
+    ('http://ong.example', 200),
+    ('ftp://ong.example', 400),
+    ('javascript:alert(1)', 400),
+])
+def test_site_web_en_http_seulement(make_user, ong, adresse, statut):
+    admin = _client(make_user(role='admin', is_staff=True, is_superuser=True))
+    r = admin.patch(f'/api/v1/admin/give/organisations/{ong.pk}/', {'site_web': adresse}, format='json')
+    assert r.status_code == statut, r.data
+
+
 # --- Admin and demo --------------------------------------------------------------
 
 def test_admin(faux, make_user, ong):

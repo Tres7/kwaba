@@ -10,6 +10,7 @@ import GoogleButton from "@/components/auth/GoogleButton";
 import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
 import FormField from "@/components/ui/FormField";
 import { safeCallback } from "@/lib/redirection";
+import { emailRetenu, oublierEmail, retenirEmail } from "@/lib/email-en-cours";
 import { useTranslations } from "next-intl";
 
 function LoginForm() {
@@ -17,7 +18,7 @@ function LoginForm() {
   const t = useTranslations("auth");
   const searchParams = useSearchParams();
   const callbackUrl = safeCallback(searchParams.get("callbackUrl"));
-  const [email, setEmail] = useState(searchParams.get("email") ?? "");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,10 @@ function LoginForm() {
   const [captchaRequis, setCaptchaRequis] = useState(false);
   // Button enabled once the page is ready (JavaScript loaded): an earlier click would send the form without it
   const [pret, setPret] = useState(false);
-  useEffect(() => setPret(true), []);
+  useEffect(() => {
+    setPret(true);
+    setEmail((actuel) => actuel || emailRetenu());
+  }, []);
   const captchaRef = useRef<CaptchaHandle>(null);
 
   const notice =
@@ -69,6 +73,8 @@ function LoginForm() {
         setError(t("desactive"));
       } else if (res.code === "too_many_attempts") {
         setError(t("tropDeTentatives"));
+      } else if (res.code === "serveur") {
+        setError(t("serveurInjoignable"));
       } else {
         setError(t("identifiantsIncorrects"));
       }
@@ -76,6 +82,7 @@ function LoginForm() {
       return;
     }
 
+    oublierEmail();
     router.push(callbackUrl);
     router.refresh();
   };
@@ -100,7 +107,7 @@ function LoginForm() {
             {unverified && (
               <>
                 {" "}
-                <Link href={`/verify?email=${encodeURIComponent(email.trim().toLowerCase())}&resend=1`} className="underline font-bold">
+                <Link href="/verify?resend=1" onClick={() => retenirEmail(email.trim().toLowerCase())} className="underline font-bold">
                   {t("verifierMaintenant")}
                 </Link>
               </>

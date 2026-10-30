@@ -4,13 +4,11 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { KeyRound, Lock, Mail } from "lucide-react";
-import { getApiBaseUrl } from "@/lib/api-url";
+import { urlProxy } from "@/lib/api-url";
 import { firstErrorMessage } from "@/lib/api";
 import AuthShell from "@/components/auth/AuthShell";
 import FormField from "@/components/ui/FormField";
 import { useLocale, useTranslations } from "next-intl";
-
-const API_URL = getApiBaseUrl();
 
 function ResetForm() {
   const router = useRouter();
@@ -32,7 +30,7 @@ function ResetForm() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/v1/auth/password-reset/`, {
+      const res = await fetch(urlProxy("/v1/auth/password-reset/"), {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept-Language": locale },
         body: JSON.stringify({ email: email.trim().toLowerCase() }),
@@ -60,7 +58,7 @@ function ResetForm() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/v1/auth/password-reset/confirm/`, {
+      const res = await fetch(urlProxy("/v1/auth/password-reset/confirm/"), {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept-Language": locale },
         body: JSON.stringify({ email: email.trim().toLowerCase(), code, password, password_confirm: passwordConfirm }),

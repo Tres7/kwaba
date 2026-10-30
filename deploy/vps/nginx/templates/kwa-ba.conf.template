@@ -11,6 +11,22 @@ upstream kwaba_client { server client:3000; keepalive 16; }
 # on where the files live. File names are unique and never rewritten, so they can be cached for a long time.
 proxy_cache_path /var/cache/nginx/photos levels=1:2 keys_zone=photos:10m max_size=2g inactive=30d use_temp_path=off;
 
+# CSP reports: public address that ends up in the logs
+limit_req_zone $binary_remote_addr zone=rapports_csp:1m rate=10r/m;
+
+# Signature links: the token in the address gives access to the contract, it stays out of the logs. Same format as
+# nginx's default one.
+map $request_uri $uri_journal {
+    "~^(?<avant>.*/(?:contrat|contrats/signature)/)[^/?]+(?<apres>.*)$" "$avant***$apres";
+    default $request_uri;
+}
+map $http_referer $referer_journal {
+    "~^(?<avant>.*/(?:contrat|contrats/signature)/)[^/?]+(?<apres>.*)$" "$avant***$apres";
+    default $http_referer;
+}
+log_format journal '$remote_addr - $remote_user [$time_local] "$request_method $uri_journal $server_protocol" '
+                   '$status $body_bytes_sent "$referer_journal" "$http_user_agent" "$http_x_forwarded_for"';
+
 server_tokens off;
 gzip on;
 gzip_proxied any;
@@ -21,6 +37,7 @@ server {
     listen 80;
     listen [::]:80;
     server_name kwa-ba.com www.kwa-ba.com;
+    access_log /var/log/nginx/access.log journal;
 
     location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://kwa-ba.com$request_uri; }
@@ -32,6 +49,7 @@ server {
     listen [::]:443 ssl;
     http2 on;
     server_name www.kwa-ba.com;
+    access_log /var/log/nginx/access.log journal;
     include /etc/nginx/snippets/tls.conf;
     return 301 https://kwa-ba.com$request_uri;
 }
@@ -41,19 +59,38 @@ server {
     listen [::]:443 ssl;
     http2 on;
     server_name kwa-ba.com;
+    access_log /var/log/nginx/access.log journal;
     include /etc/nginx/snippets/tls.conf;
 
     # Host photos: 10 MB max on the API side, plus some headroom for the multipart envelope
     client_max_body_size 12m;
 
-    # A single HSTS header for the whole site (Django's is removed to avoid a duplicate)
-    add_header Strict-Transport-Security "max-age=31536000" always;
+    # A single HSTS header for the whole site (Django's is removed to avoid a duplicate). includeSubDomains: any subdomain
+    # opened in a browser must be served in HTTPS. No "preload": see documentation/securite.md.
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
     # Auth.js (NextAuth) is served by the client under /api/auth/. "^~" makes it win over the /api/ regex
     # location below (otherwise nginx would send /api/auth/ to Django)
     location ^~ /api/auth/ {
+        include /etc/nginx/snippets/proxy.conf;
+        proxy_pass http://kwaba_client;
+    }
+
+    # API calls of the browser: the client relays them to Django with the session's token (client/src/app/api/proxy).
+    # Direct calls to /api/ remain for what does not come from a browser (payment webhooks, health check).
+    location ^~ /api/proxy/ {
+        include /etc/nginx/snippets/proxy.conf;
+        proxy_pass http://kwaba_client;
+    }
+
+    # Browsers' CSP violation reports (client/src/app/api/csp-report)
+    location = /api/csp-report {
+        limit_except POST { deny all; }
+        limit_req zone=rapports_csp burst=20 nodelay;
+        limit_req_status 429;
+        client_max_body_size 32k;
         include /etc/nginx/snippets/proxy.conf;
         proxy_pass http://kwaba_client;
     }
@@ -76,7 +113,7 @@ server {
         proxy_cache_lock on;
         add_header Cache-Control "public, max-age=2592000, immutable" always;
         add_header X-Cache-Status $upstream_cache_status always;
-        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         add_header X-Content-Type-Options "nosniff" always;
     }
 

@@ -3,15 +3,14 @@
 import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { Mail, RefreshCw } from "lucide-react";
-import { getApiBaseUrl } from "@/lib/api-url";
-import type { BackendAuthResponse } from "@/types/api/auth";
+import { urlProxy } from "@/lib/api-url";
 import AuthShell from "@/components/auth/AuthShell";
 import { cn } from "@/lib/utils";
+import { emailRetenu, oublierEmail, retenirEmail } from "@/lib/email-en-cours";
 import { useLocale, useTranslations } from "next-intl";
 
-const API_URL = getApiBaseUrl();
 const EMPTY = ["", "", "", "", "", ""];
 
 function VerifyForm() {
@@ -19,8 +18,8 @@ function VerifyForm() {
   const t = useTranslations("auth");
   const locale = useLocale();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState(searchParams.get("email") ?? "");
-  const [emailKnown, setEmailKnown] = useState(!!searchParams.get("email"));
+  const [email, setEmail] = useState("");
+  const [emailKnown, setEmailKnown] = useState(false);
   const [digits, setDigits] = useState(EMPTY);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -34,13 +33,12 @@ function VerifyForm() {
 
   // sessionStorage only exists in the browser
   useEffect(() => {
-    const stored = sessionStorage.getItem("verify_email");
-    if (!email && stored) {
+    const stored = emailRetenu();
+    if (stored) {
       setEmail(stored);
       setEmailKnown(true);
     }
     inputs.current[0]?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -55,50 +53,27 @@ function VerifyForm() {
     setSuccess("");
     setLoading(true);
 
-    let data: Partial<BackendAuthResponse> & { detail?: string; code?: string };
-    try {
-      const res = await fetch(`${API_URL}/v1/auth/verify/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept-Language": locale },
-        body: JSON.stringify({ email, code: codeVal }),
-      });
-      data = await res.json().catch(() => ({}));
+    // The code proves ownership of the address: the session opens without a password
+    const res = await signIn("email-code", { redirect: false, email, code: codeVal }).catch(() => null);
 
-      if (!res.ok) {
-        if (data.code === "already_verified") {
-          router.push(`/login?verified=1&email=${encodeURIComponent(email)}`);
-          return;
-        }
-        setError(data.detail ?? t("codeInvalide"));
-        setDigits(EMPTY);
-        inputs.current[0]?.focus();
-        setLoading(false);
+    if (!res || res.error) {
+      if (res?.code === "already_verified") {
+        retenirEmail(email);
+        router.push("/login?verified=1");
         return;
       }
-    } catch {
-      setError(t("serveurInjoignable"));
+      const messages: Record<string, string> = { too_many_attempts: t("tropDeTentatives"), serveur: t("serveurInjoignable") };
+      setError(res ? (messages[res.code ?? ""] ?? t("codeInvalide")) : t("serveurInjoignable"));
+      setDigits(EMPTY);
+      inputs.current[0]?.focus();
       setLoading(false);
       return;
     }
 
-    sessionStorage.removeItem("verify_email");
-
-    // The backend returns the tokens directly: the session opens without a password
-    if (data.access && data.refresh && data.user) {
-      const loginRes = await signIn("backend-session", {
-        redirect: false,
-        // Identity and role read again by the server from the API (see backend-session.ts)
-        accessToken: data.access,
-        refreshToken: data.refresh,
-      });
-      if (!loginRes?.error) {
-        router.push(data.user.role === "hote" ? "/hote/espace?bienvenue=1" : "/?bienvenue=1");
-        router.refresh();
-        return;
-      }
-    }
-
-    router.push(`/login?verified=1&email=${encodeURIComponent(email)}`);
+    oublierEmail();
+    const session = await getSession();
+    router.push(session?.user.role === "hote" ? "/hote/espace?bienvenue=1" : "/?bienvenue=1");
+    router.refresh();
   };
 
   const handleChange = (i: number, val: string) => {
@@ -140,7 +115,7 @@ function VerifyForm() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch(`${API_URL}/v1/auth/resend-code/`, {
+      const res = await fetch(urlProxy("/v1/auth/resend-code/"), {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept-Language": locale },
         body: JSON.stringify({ email }),
@@ -153,7 +128,8 @@ function VerifyForm() {
         setCooldown(data.retry_after ?? 60);
         setError(data.detail ?? t("patienter"));
       } else if (data.code === "already_verified") {
-        router.push(`/login?verified=1&email=${encodeURIComponent(email)}`);
+        retenirEmail(email);
+        router.push("/login?verified=1");
       } else {
         setError(data.detail ?? t("erreurEnvoi"));
       }

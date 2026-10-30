@@ -7,8 +7,8 @@ import { useSession } from "next-auth/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUp, Loader2, MessageSquarePlus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage, jetonAcces } from "@/lib/api";
-import { getApiBaseUrl } from "@/lib/api-url";
+import api, { apiErrorMessage } from "@/lib/api";
+import { urlProxy } from "@/lib/api-url";
 import { cn } from "@/lib/utils";
 import TexteConcierge from "@/components/concierge/TexteConcierge";
 import PageHero from "@/components/layout/PageHero";
@@ -98,10 +98,9 @@ function ConciergeContent() {
         id = (await api.post<{ id: string }>("/v1/concierge/conversations/")).data.id;
         router.replace(`/concierge?c=${id}`);
       }
-      const jeton = await jetonAcces();
-      const reponse = await fetch(`${getApiBaseUrl()}/v1/concierge/conversations/${id}/messages/`, {
+      const reponse = await fetch(urlProxy(`/v1/concierge/conversations/${id}/messages/`), {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept-Language": locale, ...(jeton ? { Authorization: `Bearer ${jeton}` } : {}) },
+        headers: { "Content-Type": "application/json", "Accept-Language": locale },
         body: JSON.stringify({ texte: message }),
       });
       if (!reponse.ok) {

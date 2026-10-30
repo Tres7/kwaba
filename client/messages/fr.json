@@ -345,7 +345,7 @@
     "inscriptionVisuelTexte": "Réservez des hébergements vérifiés, sauvegardez vos coups de cœur et échangez directement avec les hôtes.",
     "googleIndisponible": "Google n'est pas disponible pour le moment. Réessayez dans un instant.",
     "googleJeton": "Impossible de récupérer le token Google.",
-    "googleSession": "Authentification Google réussie, mais ouverture de session impossible.",
+    "googleRefus": "Connexion Google impossible. Réessayez ou utilisez votre email.",
     "ouParEmail": "ou par e-mail",
     "codeInvalide": "Code invalide ou expiré.",
     "codeRenvoye": "Un nouveau code a été envoyé à votre adresse e-mail.",

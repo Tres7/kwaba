@@ -1,43 +1,11 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-
-const isDev = process.env.NODE_ENV !== "production";
-
-/** Origin of the API called by the browser (baked at build time, like NEXT_PUBLIC_API_URL). */
-function apiOrigin(): string {
-  try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api").origin;
-  } catch {
-    return "";
-  }
-}
-
-// Content security policy: the browser only loads what comes from these origins. Limits the impact
-// of an XSS flaw (no script injected from another site, no data sent to an unknown server).
-// 'unsafe-inline' is still needed by the Next.js hydration scripts without a nonce.
-const csp = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style",
-  // Photos: site and API (R2 storage is served under /photos/), Google avatars, Unsplash (backgrounds in the code and
-  // seeded experiences). Same hosts as IMAGES_HOTES_AUTORISES on the API. Never "https:": a script could send data to
-  // any site through the address of an image.
-  `img-src 'self' data: blob: ${apiOrigin()} https://*.googleusercontent.com https://images.unsplash.com${isDev ? " http: https:" : ""}`,
-  "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin()} https://accounts.google.com${isDev ? " ws: http://localhost:8000" : ""}`,
-  "frame-src https://accounts.google.com https://maps.google.com https://www.google.com https://challenges.cloudflare.com",
-  "frame-ancestors 'none'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  // Payments (FedaPay, PayPal) go through redirects, not forms: only the site itself receives
-  "form-action 'self'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
-].join("; ");
+import { politiqueCsp, RAPPORTS_CSP } from "./src/lib/csp";
 
 // HSTS, X-Content-Type-Options and Referrer-Policy are set by nginx for the whole site (deploy/vps/nginx):
 // repeating them here would send them twice.
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: csp },
+  { key: "Reporting-Endpoints", value: `csp="${RAPPORTS_CSP}"` },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
   // The Google Identity Services window must be able to talk to the page (sign-in popup)
@@ -54,6 +22,9 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      // Pages get their CSP from middleware.ts, with a nonce for each response. Never here for every path: the browser
+      // would enforce both policies, and this one blocks the scripts of the pages.
+      { source: "/api/:path*", headers: [{ key: "Content-Security-Policy", value: politiqueCsp() }] },
       // Home page photos kept a week by the browser (Next.js serves public/ with max-age=0).
       // To change a photo, give it a new name: otherwise the old one would stay in the cache.
       { source: "/accueil/:fichier*", headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }] },

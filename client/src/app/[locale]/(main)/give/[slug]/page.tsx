@@ -8,6 +8,7 @@ import { ArrowLeft, BadgeCheck, ExternalLink, MapPin } from "lucide-react";
 import api from "@/lib/api";
 import { CAUSES, PAYS } from "@/lib/give";
 import { cn, formatDate, formatPrice } from "@/lib/utils";
+import { urlExterneSure } from "@/lib/url-sure";
 import ChiffresImpact from "@/components/give/ChiffresImpact";
 import FormulaireDon from "@/components/give/FormulaireDon";
 import PreuveReversement from "@/components/give/PreuveReversement";
@@ -72,8 +73,8 @@ function PageOrganisation() {
               </div>
             </div>
             <p className="text-dark mt-4 whitespace-pre-line">{o.description}</p>
-            {o.site_web && (
-              <a href={o.site_web} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline">
+            {urlExterneSure(o.site_web) && (
+              <a href={urlExterneSure(o.site_web)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline">
                 {t("site")} <ExternalLink size={14} /><span className="sr-only"> ({tG("nouvelOnglet")})</span>
               </a>
             )}

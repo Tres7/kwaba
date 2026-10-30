@@ -26,7 +26,7 @@ Ce que fait le code, et ce qu'il reste à régler au déploiement. Fait suite à
 
 - `AUTH_SECRET` : 32+ octets aléatoires (`openssl rand -base64 32`), différent de toutes les autres clés.
 - `AUTH_URL` en `https://` : les cookies de session sont alors `Secure`.
-- Les en-têtes de sécurité (CSP, HSTS, X-Frame-Options…) sont envoyés par Next.js (`client/next.config.ts`). Une nouvelle ressource externe (script, iframe, API) doit y être ajoutée à la CSP, sinon le navigateur la bloque.
+- La CSP est écrite dans `client/src/lib/csp.ts`. Une nouvelle ressource externe (iframe, image, API) doit y être ajoutée, sinon le navigateur la bloque. HSTS et `X-Content-Type-Options` viennent de nginx, les autres en-têtes de `client/next.config.ts`.
 
 ### Base de données
 
@@ -52,6 +52,7 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
 
 - **Disponibilité** : un service de surveillance externe (UptimeRobot, Better Stack…) interroge `/api/health/` et la page d'accueil toutes les minutes, et alerte par email ou SMS.
 - **Erreurs** : les erreurs 500 partent par email aux `ADMINS` (sans les variables locales). La sonde de santé est exclue pour ne pas envoyer un email par appel pendant une panne.
+- **CSP** : les navigateurs signalent les violations à `/api/csp-report`, écrites dans les journaux du client (`docker compose logs client | grep csp-violation`). Une hausse soudaine sur une même page mérite un contrôle : ressource oubliée dans la CSP, ou injection. Les rapports sont publics, donc une piste et jamais une preuve.
 - **Paiements** : les anomalies (versement échoué, remboursement manuel) envoient déjà une alerte email (`apps/paiements/notifications.py`).
 - **Journal d'audit** : administration Django → Sécurité → Journal d'audit (lecture seule). Il contient les connexions, les échecs, les blocages, les réinitialisations de mot de passe, les changements de rôle, les changements de compte de versement et les webhooks refusés. À consulter en cas de doute sur un compte, notamment après une alerte « compte de versement modifié ».
 
@@ -64,7 +65,7 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - stockés sous forme d'empreinte HMAC ;
   - un code est invalidé après 5 échecs ;
   - 10 essais par heure et par adresse, nouveaux codes compris : redemander un code ne donne pas d'essais supplémentaires.
-- **Limites par adresse IP** : inscription 10/h, codes 30/h, envois de codes 10/h, Google 30/min, connexion 60 par quart d'heure. La connexion passe par le serveur Next.js, qui transmet à l'API le `X-Forwarded-For` reçu de nginx : tout nouvel appel de serveur à serveur soumis à une limite par IP doit faire de même.
+- **Limites par adresse IP** : inscription 10/h, codes 30/h, envois de codes 10/h, Google 30/min, connexion 60 par quart d'heure. Ces routes passent par le serveur Next.js, qui transmet à l'API le `X-Forwarded-For` reçu de nginx : tout nouvel appel de serveur à serveur soumis à une limite par IP doit faire de même.
 - **Compteurs atomiques** : les limites reposent sur `apps/securite/limites.py` (une requête PostgreSQL `INSERT … ON CONFLICT` par incrément). Le cache de Django lit puis écrit en deux temps : il laisserait passer des requêtes simultanées.
 - **Jetons** :
   - jeton d'accès valable 15 minutes ;
@@ -72,6 +73,12 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - une réinitialisation ou une désactivation met tous les refresh tokens sur liste noire ;
   - la déconnexion met le refresh token de la session sur liste noire (`POST /v1/auth/logout/`, appelé par le serveur Next.js). Le jeton d'accès reste valable jusqu'à son expiration, 15 minutes au plus. Une lecture de session encore en cours peut remettre le cookie juste après son effacement : le serveur Next.js garde la session en mémoire (`lib/sessions-fermees.ts`) et la lecture suivante la referme.
 - **Session NextAuth** : l'identité et le rôle viennent toujours de l'API (`/users/me/`), jamais du navigateur.
+- **Aucun jeton dans le navigateur** : les jetons de l'API restent dans le cookie de session chiffré, `HttpOnly`, et `/api/auth/session` n'en renvoie aucun.
+  - La connexion par mot de passe, par Google et par code passe par le serveur Next.js (`authorize()` d'Auth.js).
+  - Le navigateur appelle `/api/proxy/…`, qui ajoute le jeton puis relaie vers Django (`client/src/app/api/proxy`). Seules les routes `/v1/…` sont accessibles. Une écriture doit venir du site (contrôle d'`Origin`), car le cookie remplace le Bearer, qui protégeait du CSRF. Django reçoit l'hôte public par `X-Forwarded-Host` (`USE_X_FORWARDED_HOST`), imposé par nginx et le proxy, et toujours soumis à `ALLOWED_HOSTS`.
+  - Le proxy ne fait que lire le cookie. Le renouvellement reste dans `/api/auth/session`, seul endroit qui peut enregistrer les nouveaux jetons : ne pas utiliser `auth()` dans le proxy, qui perdrait le `Set-Cookie`.
+  - Une XSS ne peut plus voler de jeton, mais elle peut encore appeler le proxy tant que la page est ouverte : la CSP reste indispensable.
+- **CSP à nonce** : `client/src/middleware.ts` tire un nonce par réponse. Seuls les scripts qui le portent s'exécutent, puis ceux qu'ils chargent (`'strict-dynamic'`). Toutes les pages sont donc rendues à la demande (`Document.tsx` lit les en-têtes) : un `<script>` en ligne ajouté à la main doit recevoir ce nonce, et une page statique serait bloquée. La CSP arrête le point d'entrée d'une injection (balise `<script>`, `onerror`, lien `javascript:`), pas un code déjà en exécution, qui peut ajouter des scripts : `strict-dynamic` le suppose fiable. Les styles en ligne restent permis.
 - **Redirection après connexion** : `safeCallback` (`client/src/lib/redirection.ts`) contrôle l'adresse telle que le navigateur la lit, résultat compris. Tout nouveau paramètre de redirection doit passer par cette fonction.
 - **Administration Django** : 5 échecs par email et 20 par IP par quart d'heure, échecs journalisés.
 
@@ -79,18 +86,20 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
 
 - **Isolation entre utilisateurs** : chaque vue filtre sur l'utilisateur connecté (réservations, annonces, messagerie, voyages, dons, transferts, Concierge). Un objet d'un autre utilisateur répond 404, comme un objet inexistant.
 - **Prix** : toujours recalculés côté serveur. Les webhooks FedaPay ne servent qu'à relire la transaction chez FedaPay, une seule fois (verrou).
-- **Images** : les URL d'images (annonces, avatars) doivent venir d'un hôte connu (`IMAGES_HOTES_AUTORISES`). Une image externe permettrait à son auteur de collecter l'adresse IP des visiteurs. La directive `img-src` de la CSP (`client/next.config.ts`) porte la même liste : un hôte ajouté d'un côté doit l'être de l'autre.
+- **Images** : les URL d'images (annonces, avatars) doivent venir d'un hôte connu (`IMAGES_HOTES_AUTORISES`). Une image externe permettrait à son auteur de collecter l'adresse IP des visiteurs. La directive `img-src` de la CSP (`client/src/lib/csp.ts`) porte la même liste : un hôte ajouté d'un côté doit l'être de l'autre.
 - **Photos envoyées** : ré-encodées en JPEG, métadonnées (GPS) supprimées, nom de fichier choisi par le serveur.
 - **Concierge IA** :
   - outils en lecture seule sur des données publiques ;
   - rien n'est créé sans clic du voyageur ;
   - quota atomique par utilisateur ;
   - les textes des hôtes et du web sont présentés au modèle comme des données, jamais comme des instructions.
-- **Journaux** : jamais de code, de mot de passe ni de jeton. En développement seulement, le code de vérification est affiché pour tester sans SMTP.
+- **Liens externes** : une adresse reçue de l'API passe par `urlExterneSure` avant d'aller dans un `href` (http ou https uniquement, `site_web` compris côté API). Seules les pages de FedaPay et de PayPal peuvent recevoir le voyageur pour un paiement (`estPagePaiement`, `client/src/lib/url-sure.ts`) : un nouveau prestataire doit y être ajouté.
+- **Adresses** : l'email ne passe jamais dans une URL. Il reste dans `sessionStorage` entre l'inscription, le code et la connexion (`client/src/lib/email-en-cours.ts`). Le brouillon de transfert, qui contient un numéro de téléphone, expire après 30 minutes.
+- **Journaux** : jamais de code, de mot de passe ni de jeton. Le jeton des liens de signature (`/contrat/…`) est masqué par nginx, gunicorn (`config/journal_gunicorn.py`) et les rapports de CSP. En développement seulement, le code de vérification est affiché pour tester sans SMTP.
 
 ### Points ouverts
 
-- **Jeton d'accès lisible en JavaScript** : il est exposé au navigateur via la session (`session.accessToken`), qui appelle l'API directement. La CSP et la durée de 15 minutes limitent l'impact d'une XSS. Le supprimer demanderait de faire passer tous les appels par le serveur Next.js.
+- **HSTS** : `includeSubDomains` est actif. Tout sous-domaine ouvert dans un navigateur doit donc être servi en HTTPS, y compris un futur domaine de suivi d'emails. Le préchargement (`preload`, hstspreload.org) n'est pas demandé : un retrait prend des mois, à décider une fois les sous-domaines stabilisés.
 - **Inscription** : elle indique qu'une adresse a déjà un compte (choix d'ergonomie), dans la limite de 10 essais par heure et par adresse IP.
 - **Numéros Mobile Money** : ils sont stockés en clair, car ils sont nécessaires aux versements. Le chiffrement au repos dépend de l'hébergeur de la base.
 - **Montées de version majeures** à planifier, chacune dans sa propre PR : Next.js 16, Tailwind 4, ESLint 10, next-auth (stable dès sa sortie).

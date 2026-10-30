@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { CalendarClock, CreditCard, Lock, ShieldCheck, Smartphone, Wallet } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
 import { calculerDon, dateReversement, useConfigGive } from "@/lib/give";
-import { enEuros } from "@/lib/paiement";
+import { enEuros, versPagePaiement } from "@/lib/paiement";
 import { cn, formatDate, formatFcfa } from "@/lib/utils";
 import type { OrganisationDetail } from "@/types/api/give";
 import type { MoyenPaiement } from "@/types/api/paiement";
@@ -53,7 +53,7 @@ export default function FormulaireDon({ organisation, projetId }: { organisation
         organisation: organisation.slug, projet: projet?.id ?? null, montant: valeur,
         couvre_frais: couvreFrais, moyen: moyenChoisi, partage_identite: partage,
       });
-      window.location.assign(res.data.url);
+      versPagePaiement(res.data.url);
     } catch (err) {
       setErreur(apiErrorMessage(err, t("erreurDemarrage")));
       setEnvoi(false);
