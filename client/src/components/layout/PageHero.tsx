@@ -24,9 +24,9 @@ export default function PageHero({ surtitre, titre, sousTitre, image, children, 
       {/* Warm halo of the brand (rising sun of the logo) */}
       <div aria-hidden className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-accent/25 blur-3xl" />
       <div className={cn("relative mx-auto px-4 sm:px-6 py-10 sm:py-14", large ? "max-w-7xl" : "max-w-6xl")}>
-        <p className="flex items-center gap-2 text-sm font-semibold text-accent [&_svg]:flex-shrink-0">{surtitre}</p>
-        <h1 className="font-heading font-bold text-3xl sm:text-4xl mt-2 max-w-2xl leading-tight">{titre}</h1>
-        {sousTitre && <p className="text-white/85 mt-3 max-w-xl">{sousTitre}</p>}
+        <p className="flex items-center gap-2 text-sm font-semibold text-accent [&_svg]:flex-shrink-0 selection:bg-white selection:text-primary">{surtitre}</p>
+        <h1 className="font-heading font-bold text-3xl sm:text-4xl mt-2 max-w-2xl leading-tight selection:bg-white selection:text-primary">{titre}</h1>
+        {sousTitre && <p className="text-white/85 mt-3 max-w-xl selection:bg-white selection:text-primary">{sousTitre}</p>}
         {children}
       </div>
     </section>

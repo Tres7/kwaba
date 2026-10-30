@@ -57,13 +57,13 @@ export default function DevenirHotePage() {
         {/* The photo stays visible; the gradient keeps the text readable */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary-900/95 via-primary-900/70 to-primary-900/40" />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-center">
-          <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl mb-4 drop-shadow-sm">{t("titre")}</h1>
-          <p className="text-white/90 text-base md:text-lg max-w-2xl mx-auto mb-8">
+          <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl mb-4 drop-shadow-sm selection:bg-white selection:text-primary">{t("titre")}</h1>
+          <p className="text-white/90 text-base md:text-lg max-w-2xl mx-auto mb-8 selection:bg-white selection:text-primary">
             {t("sousTitre")}
           </p>
           {cta}
           {status === "unauthenticated" && (
-            <p className="text-white/80 text-sm mt-4">
+            <p className="text-white/80 text-sm mt-4 selection:bg-white selection:text-primary">
               {t.rich("dejaInscrit", { lien: (x) => <Link href="/login?callbackUrl=/hote" className="font-bold underline">{x}</Link> })}
             </p>
           )}

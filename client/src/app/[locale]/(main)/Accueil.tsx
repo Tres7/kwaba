@@ -301,7 +301,7 @@ export default function HomePage() {
         <div aria-hidden className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2000&auto=format&fit=crop')" }} />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-primary-900 via-primary-900/90 to-primary-900/50" />
         <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-          <div className="text-white max-w-xl">
+          <div className="text-white max-w-xl selection:bg-white selection:text-primary">
             <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">{t("devenezHote")}</h2>
             <p className="text-white/90 text-sm md:text-base leading-relaxed">
               {t("devenezHoteTexte")}
