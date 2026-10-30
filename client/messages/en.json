@@ -267,6 +267,7 @@
     "nonVerifie": "Your account is not verified yet.",
     "desactive": "This account has been deactivated. Please contact support.",
     "identifiantsIncorrects": "Incorrect email or password.",
+    "tropDeTentatives": "Too many attempts. Please try again in a few minutes.",
     "connexion": "Log in",
     "connexionTexte": "Log in to book and find your trips.",
     "continuerGoogle": "Continue with Google",

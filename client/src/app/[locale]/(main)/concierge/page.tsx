@@ -153,8 +153,7 @@ function ConciergeContent() {
           <ul className="grid sm:grid-cols-2 gap-3">
             {SUGGESTIONS.map((s) => (
               <li key={s}>
-                <Link href="/login?callbackUrl=/concierge" className="h-full flex gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-sm text-dark leading-relaxed hover:border-primary/30 hover:shadow-card transition-all">
-                  <Sparkles size={18} className="text-accent flex-shrink-0 mt-0.5" aria-hidden />
+                <Link href="/login?callbackUrl=/concierge" className="h-full block bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-sm text-dark leading-relaxed hover:border-primary/30 hover:shadow-card transition-all">
                   <span>{locale === "fr" ? `« ${t(`suggestions.${s}`)} »` : `“${t(`suggestions.${s}`)}”`}</span>
                 </Link>
               </li>

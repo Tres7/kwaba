@@ -1,5 +1,5 @@
 name: Client checks
-description: ESLint et vérification des types du client (Vitest viendra en phase 3).
+description: ESLint, vérification des types et tests (Vitest) du client.
 
 runs:
   using: composite
@@ -13,3 +13,8 @@ runs:
       shell: bash
       working-directory: client
       run: npm run typecheck
+
+    - name: Tests (Vitest)
+      shell: bash
+      working-directory: client
+      run: npm test

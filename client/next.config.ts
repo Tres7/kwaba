@@ -19,8 +19,10 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style",
-  // Photos: API, R2 storage, Google avatars, Unsplash demo (URLs are filtered by the API when saved)
-  `img-src 'self' data: blob: https:${isDev ? " http:" : ""}`,
+  // Photos: site and API (R2 storage is served under /photos/), Google avatars, Unsplash (backgrounds in the code and
+  // seeded experiences). Same hosts as IMAGES_HOTES_AUTORISES on the API. Never "https:": a script could send data to
+  // any site through the address of an image.
+  `img-src 'self' data: blob: ${apiOrigin()} https://*.googleusercontent.com https://images.unsplash.com${isDev ? " http: https:" : ""}`,
   "font-src 'self' data:",
   `connect-src 'self' ${apiOrigin()} https://accounts.google.com${isDev ? " ws: http://localhost:8000" : ""}`,
   "frame-src https://accounts.google.com https://maps.google.com https://www.google.com https://challenges.cloudflare.com",
