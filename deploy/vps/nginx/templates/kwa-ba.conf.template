@@ -11,6 +11,9 @@ upstream kwaba_client { server client:3000; keepalive 16; }
 # on where the files live. File names are unique and never rewritten, so they can be cached for a long time.
 proxy_cache_path /var/cache/nginx/photos levels=1:2 keys_zone=photos:10m max_size=2g inactive=30d use_temp_path=off;
 
+# CSP reports: public address that ends up in the logs
+limit_req_zone $binary_remote_addr zone=rapports_csp:1m rate=10r/m;
+
 server_tokens off;
 gzip on;
 gzip_proxied any;
@@ -61,6 +64,16 @@ server {
     # API calls of the browser: the client relays them to Django with the session's token (client/src/app/api/proxy).
     # Direct calls to /api/ remain for what does not come from a browser (payment webhooks, health check).
     location ^~ /api/proxy/ {
+        include /etc/nginx/snippets/proxy.conf;
+        proxy_pass http://kwaba_client;
+    }
+
+    # Browsers' CSP violation reports (client/src/app/api/csp-report)
+    location = /api/csp-report {
+        limit_except POST { deny all; }
+        limit_req zone=rapports_csp burst=20 nodelay;
+        limit_req_status 429;
+        client_max_body_size 32k;
         include /etc/nginx/snippets/proxy.conf;
         proxy_pass http://kwaba_client;
     }
