@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, BadgeCheck, BadgePercent, CalendarClock, FileCheck2, HandHeart } from "lucide-react";
 import api from "@/lib/api";
-import { CAUSES, useConfigGive } from "@/lib/give";
+import { useConfigGive, useTextesGive } from "@/lib/give";
 import { cn } from "@/lib/utils";
 import CarteOrganisation from "@/components/give/CarteOrganisation";
 import ChiffresImpact from "@/components/give/ChiffresImpact";
@@ -22,6 +22,7 @@ const ENGAGEMENTS = [
 ];
 
 export default function GivePage() {
+  const { CAUSES } = useTextesGive();
   const t = useTranslations("givePage");
   const [cause, setCause] = useState<CodeCause | null>(null);
   const { data: config } = useConfigGive();

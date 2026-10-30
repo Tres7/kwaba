@@ -7,9 +7,9 @@ import { AlertTriangle, CheckCircle2, FileDown, Loader2, PenLine } from "lucide-
 import { toast } from "sonner";
 import { messageErreurPdf } from "@/lib/documents";
 import { apiErrorMessage } from "@/lib/api";
-import { formatDate, langue } from "@/lib/utils";
 import PadSignature from "@/components/contrats/PadSignature";
 import type { ContratPublic, SignatureContrat } from "@/types/api/contrat";
+import { useFormat } from "@/lib/format";
 
 /** Reading the contract then signing: typed name, drawn signature, express consent. */
 export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
@@ -17,6 +17,7 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
   onSigner: (donnees: SignatureContrat) => Promise<void>;
   onTelecharger: () => Promise<void>;
 }) {
+  const { formatDate, langue } = useFormat();
   const t = useTranslations("contrat");
   const [nom, setNom] = useState("");
   const [signature, setSignature] = useState<string | null>(null);

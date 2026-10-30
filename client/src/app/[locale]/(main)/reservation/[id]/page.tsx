@@ -12,9 +12,10 @@ import RatingBadge from "@/components/avis/RatingBadge";
 import Chargement from "@/components/ui/Chargement";
 import { MontantDebite } from "@/components/layout/Devise";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
-import { calculateNights, cn, FALLBACK_IMAGE, formatDate, formatFcfa, formatPrice, isoDate, SERVICE_FEE_RATE } from "@/lib/utils";
+import { calculateNights, cn, FALLBACK_IMAGE, isoDate, SERVICE_FEE_RATE } from "@/lib/utils";
 import type { Hebergement, Reservation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const PAYMENT_METHODS = [
   { id: "mobile_money", label: "mobileMoney", sublabel: "operateurs", icon: Smartphone },
@@ -23,6 +24,7 @@ const PAYMENT_METHODS = [
 ] as const;
 
 function ReservationContent() {
+  const { formatDate, formatFcfa, formatPrice } = useFormat();
   const t = useTranslations("reservation");
   const tFiche = useTranslations("fiche");
   const tVoy = useTranslations("voyageurs");

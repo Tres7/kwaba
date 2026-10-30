@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { MessageCircle } from "lucide-react";
-import { cn, formatDate, langue } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/format";
 import api from "@/lib/api";
 import { usePolling } from "@/lib/usePolling";
 import type { MessagingConversation } from "@/types/api/messaging";
@@ -11,7 +12,7 @@ import { useTranslations } from "next-intl";
 
 const LIST_POLL_INTERVAL_MS = 10_000;
 
-function formatTime(iso: string) {
+function formatTime(iso: string, { formatDate, langue }: ReturnType<typeof useFormat>) {
   const date = new Date(iso);
   const isToday = date.toDateString() === new Date().toDateString();
   return isToday
@@ -21,6 +22,7 @@ function formatTime(iso: string) {
 
 export default function MessagesPage() {
   const t = useTranslations("messages");
+  const format = useFormat();
   const [conversations, setConversations] = useState<MessagingConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -91,7 +93,7 @@ export default function MessagesPage() {
                         {name}
                         <span className="ml-2 text-xs font-medium text-muted">{conv.my_role === "host" ? t("voyageur") : t("hote")}</span>
                       </p>
-                      <p className="text-muted text-xs font-medium flex-shrink-0">{formatTime(conv.last_message_at)}</p>
+                      <p className="text-muted text-xs font-medium flex-shrink-0">{formatTime(conv.last_message_at, format)}</p>
                     </div>
                     <p className="text-primary text-sm font-medium mb-1 truncate">{conv.hebergement?.name ?? t("supprime")}</p>
                     <p className={cn("text-sm truncate", unread ? "text-dark font-semibold" : "text-muted")}>

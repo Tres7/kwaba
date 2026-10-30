@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Send, ShieldCheck, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { cn, langue, selon } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/format";
 import api from "@/lib/api";
 import { usePolling } from "@/lib/usePolling";
 import type { MessagingConversation, MessagingMessage } from "@/types/api/messaging";
@@ -15,7 +16,7 @@ const CHAT_POLL_INTERVAL_MS = 4_000;
 
 type ChatMessage = MessagingMessage & { pending?: boolean };
 
-function errorMessage(err: unknown): string {
+function errorMessage(err: unknown, selon: ReturnType<typeof useFormat>["selon"]): string {
   const response = (err as { response?: { status?: number; data?: { detail?: string } } }).response;
   if (response?.status === 429) return selon({ fr: "Vous envoyez trop de messages. Réessayez dans un instant.", en: "You are sending too many messages. Please try again in a moment." });
   return response?.data?.detail ?? selon({ fr: "Le message n'a pas pu être envoyé.", en: "The message could not be sent." });
@@ -23,6 +24,7 @@ function errorMessage(err: unknown): string {
 
 export default function ChatPage() {
   const t = useTranslations("messages");
+  const { langue, selon } = useFormat();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const conversationId = params.id;
@@ -106,7 +108,7 @@ export default function ChatPage() {
     } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setInput(content);
-      setSendError(errorMessage(err));
+      setSendError(errorMessage(err, selon));
     }
   };
 

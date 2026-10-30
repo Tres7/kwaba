@@ -7,10 +7,11 @@ import { CalendarClock, CreditCard, Lock, ShieldCheck, Smartphone, Wallet } from
 import api, { apiErrorMessage } from "@/lib/api";
 import { calculerDon, dateReversement, useConfigGive } from "@/lib/give";
 import { enEuros, versPagePaiement } from "@/lib/paiement";
-import { cn, formatDate, formatFcfa } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { OrganisationDetail } from "@/types/api/give";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = [
   { id: "mobile_money", label: "mobileMoney", icon: Smartphone },
@@ -20,6 +21,7 @@ const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = 
 
 /** Choice of the amount, fees and payment method; everything about the donation is shown before paying. */
 export default function FormulaireDon({ organisation, projetId }: { organisation: OrganisationDetail; projetId: string | null }) {
+  const { formatDate, formatFcfa } = useFormat();
   const t = useTranslations("don");
   const tRes = useTranslations("reservation");
   const pathname = usePathname();

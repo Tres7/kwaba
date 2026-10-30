@@ -4,7 +4,8 @@ import { useState } from "react";
 import { FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { messageErreurPdf, telechargerDocument, type ObjetDocument, type TypeDocument } from "@/lib/documents";
-import { cn, selon } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/format";
 
 const NOMS: Record<TypeDocument, { fr: string; en: string }> = {
   bon: { fr: "Bon", en: "Voucher" },
@@ -14,6 +15,7 @@ const NOMS: Record<TypeDocument, { fr: string; en: string }> = {
 
 /** Download buttons for the PDFs of a paid item (voucher, receipt, invoice; receipt only for a donation). */
 export default function Documents({ objet, id, className }: { objet: ObjetDocument; id: string; className?: string }) {
+  const { selon } = useFormat();
   const [enCours, setEnCours] = useState<TypeDocument | null>(null);
   const types: TypeDocument[] = objet === "don" ? ["recu"] : ["bon", "recu", "facture"];
 

@@ -4,13 +4,13 @@ import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle, Clock, FileText, HandHeart } from "lucide-react";
 import api from "@/lib/api";
-import { CAUSES } from "@/lib/give";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { useTextesGive } from "@/lib/give";
 import { urlExterneSure } from "@/lib/url-sure";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { Don } from "@/types/api/give";
 import Documents from "@/components/documents/Documents";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 interface ReponseDons {
   results: Don[];
@@ -19,6 +19,7 @@ interface ReponseDons {
 }
 
 function Suivi({ don }: { don: Don }) {
+  const { formatDate } = useFormat();
   const t = useTranslations("mesDons");
   if (don.statut === "en_attente") return <span className="flex items-center gap-1 text-amber-700"><Clock size={13} /> {t("enAttente")}</span>;
   if (don.reversement?.statut === "effectue") {
@@ -41,6 +42,8 @@ function Suivi({ don }: { don: Don }) {
 }
 
 export default function MesDonsPage() {
+  const { formatDate, formatPrice } = useFormat();
+  const { CAUSES } = useTextesGive();
   const t = useTranslations("mesDons");
   const { data, isLoading } = useQuery({
     queryKey: ["give", "dons"],

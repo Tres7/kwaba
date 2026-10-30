@@ -5,8 +5,9 @@ import { Calendar, X } from "lucide-react";
 import DateRangeCalendar from "@/components/calendrier/DateRangeCalendar";
 import Floating from "@/components/ui/Floating";
 import { usePopover } from "@/lib/usePopover";
-import { calculateNights, cn, formatDate } from "@/lib/utils";
+import { calculateNights, cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 interface DateRangeFieldProps {
   checkIn: string;
@@ -21,6 +22,7 @@ const AUCUNE = new Set<string>();
 
 /** Arrival / departure choice with our calendar (identical on all browsers and phones). */
 export default function DateRangeField({ checkIn, checkOut, onChange, variant = "field", className }: DateRangeFieldProps) {
+  const { formatDate } = useFormat();
   const t = useTranslations("dates");
   const { open, setOpen, ref, panelRef } = usePopover();
   const nuits = useMemo(() => calculateNights(checkIn, checkOut), [checkIn, checkOut]);

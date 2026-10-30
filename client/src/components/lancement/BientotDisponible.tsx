@@ -10,8 +10,8 @@ import { Car, CheckCircle2, HandHeart, Home, Loader2, Plane, X } from "lucide-re
 import { Link } from "@/i18n/navigation";
 import api, { apiErrorMessage } from "@/lib/api";
 import { EVENEMENT, lireConsentement } from "@/lib/consentement";
-import { langue } from "@/lib/utils";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
+import { useFormat } from "@/lib/format";
 
 // Old key that kept the window from coming back: cleared from the browsers that still have it
 const ANCIENNE_CLE = "kwaba_bientot_ferme";
@@ -55,6 +55,7 @@ export function useAucunLogement(): boolean {
 
 /** "Notify me" form: the email is only used to announce the opening. */
 export function PrevenezMoi({ compact }: { compact?: boolean }) {
+  const { langue } = useFormat();
   const t = useTranslations("bientot");
   const [email, setEmail] = useState("");
   const [etat, setEtat] = useState<"saisie" | "envoi" | "ok">("saisie");

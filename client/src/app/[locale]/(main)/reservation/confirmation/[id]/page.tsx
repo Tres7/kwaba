@@ -7,10 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { CheckCircle, Calendar, MapPin, Users, ArrowRight, MessageCircle, Plane } from "lucide-react";
 import api from "@/lib/api";
-import { FALLBACK_IMAGE, formatDate, formatPrice } from "@/lib/utils";
+import { FALLBACK_IMAGE } from "@/lib/utils";
 import type { Reservation } from "@/types/api/models";
 import Documents from "@/components/documents/Documents";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const PAYMENT_LABELS: Record<string, string> = {
   mobile_money: "mobileMoney",
@@ -19,6 +20,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 };
 
 export default function ConfirmationPage() {
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("paiement");
   const tRes = useTranslations("reservation");
   const params = useParams<{ id: string }>();

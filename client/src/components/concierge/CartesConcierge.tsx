@@ -5,11 +5,13 @@ import { useState } from "react";
 import { Car, MapPin, Star, Users } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
-import { FALLBACK_IMAGE, formatDate, formatPrice } from "@/lib/utils";
+import { FALLBACK_IMAGE } from "@/lib/utils";
 import type { Carte, CarteLogement, CarteTogether, CarteTransfert } from "@/types/api/concierge";
 import { useLocale, useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 function Logement({ c }: { c: CarteLogement }) {
+  const { formatPrice } = useFormat();
   const t = useTranslations("conciergeCartes");
   const sejour = c.arrivee && c.depart ? `?check_in=${c.arrivee}&check_out=${c.depart}&guests=${c.voyageurs ?? 1}` : "";
   return (
@@ -34,6 +36,7 @@ function Logement({ c }: { c: CarteLogement }) {
 }
 
 function Transfert({ c }: { c: CarteTransfert }) {
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("conciergeCartes");
   const locale = useLocale();
   const tT = useTranslations("transfert");
@@ -60,6 +63,7 @@ function Transfert({ c }: { c: CarteTransfert }) {
 }
 
 function Together({ c }: { c: CarteTogether }) {
+  const { formatDate } = useFormat();
   const t = useTranslations("conciergeCartes");
   const tV = useTranslations("voyageurs");
   const router = useRouter();

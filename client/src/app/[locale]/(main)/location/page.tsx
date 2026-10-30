@@ -11,10 +11,11 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import api, { apiErrorMessage } from "@/lib/api";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
-import { cn, formatDate, formatPrice, isoDate } from "@/lib/utils";
+import { cn, isoDate } from "@/lib/utils";
 import { useModule } from "@/lib/site";
 import type { Reservation } from "@/types/api/models";
 import type { CatalogueLocation, CategorieVehicule, DevisLocation, Formule, Location, MonChauffeur } from "@/types/api/location";
+import { useFormat } from "@/lib/format";
 
 const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
@@ -73,6 +74,7 @@ function Galerie({ photos, nom }: { photos: string[]; nom: string }) {
 function CarteVehicule({ c, formule, prixChauffeur, onChoisir }: {
   c: CategorieVehicule; formule: Formule; prixChauffeur: number; onChoisir: () => void;
 }) {
+  const { formatPrice } = useFormat();
   const t = useTranslations("location");
   const propose = formule === "avec_chauffeur" ? c.formules.avec_chauffeur : c.formules.sans_chauffeur;
   return (
@@ -117,6 +119,7 @@ function CarteVehicule({ c, formule, prixChauffeur, onChoisir }: {
 function FormulaireLocation({ catalogue, categorie, formule, onChanger }: {
   catalogue: CatalogueLocation; categorie: CategorieVehicule | null; formule: Formule; onChanger: () => void;
 }) {
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("location");
   const router = useRouter();
   const pathname = usePathname();
@@ -341,6 +344,7 @@ function FormulaireLocation({ catalogue, categorie, formule, onChanger }: {
 }
 
 function MesLocations() {
+  const { formatDate } = useFormat();
   const t = useTranslations("location");
   const { status } = useSession();
   const { data } = useQuery({
@@ -371,6 +375,7 @@ function MesLocations() {
 
 /** Car and driver hire: partner owners' vehicles, filters, detailed request, online payment. */
 export default function LocationPage() {
+  const { formatPrice } = useFormat();
   const t = useTranslations("location");
   const tNav = useTranslations("nav");
   const [formule, setFormule] = useState<Formule>("avec_chauffeur");

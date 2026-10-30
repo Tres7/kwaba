@@ -1,9 +1,10 @@
-import { formatPrice } from "@/lib/utils";
 import type { Impact } from "@/types/api/give";
 import { useLocale, useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 /** Collected / transferred / pending: transparency in three figures. */
 export default function ChiffresImpact({ impact, clair = false }: { impact: Impact; clair?: boolean }) {
+  const { formatPrice } = useFormat();
   const t = useTranslations("give");
   const locale = useLocale();
   const cases = [

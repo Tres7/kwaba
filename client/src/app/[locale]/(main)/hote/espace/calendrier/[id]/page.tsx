@@ -7,14 +7,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Lock, Trash2, User } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
-import { addDays, calculateNights, cn, formatDate, isoDate } from "@/lib/utils";
+import { addDays, calculateNights, cn, isoDate } from "@/lib/utils";
 import { useDisponibilites, type PeriodeIndispo } from "@/lib/useDisponibilites";
 import MonthGrid from "@/components/calendrier/MonthGrid";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { Hebergement } from "@/types/api/models";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 export default function CalendrierHotePage() {
+  const { formatDate } = useFormat();
   const t = useTranslations("calendrierHote");
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();

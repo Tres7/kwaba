@@ -1,12 +1,12 @@
 import { CheckCircle, Clock, FileText } from "lucide-react";
-import { moisAnnee } from "@/lib/give";
-import { formatDate, formatPrice } from "@/lib/utils";
 import { urlExterneSure } from "@/lib/url-sure";
 import type { Reversement } from "@/types/api/give";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 /** One transfer line: amount, date and proof of the transfer (public). */
 export default function PreuveReversement({ r, avecOrganisation = false }: { r: Reversement; avecOrganisation?: boolean }) {
+  const { formatDate, formatPrice, moisAnnee } = useFormat();
   const t = useTranslations("give");
   const fait = r.statut === "effectue";
   return (

@@ -19,7 +19,7 @@ import ProposerAuGroupe from "@/components/voyage/ProposerAuGroupe";
 import MapEmbed from "@/components/hebergement/MapEmbed";
 import LogementsSimilaires from "@/components/hebergement/LogementsSimilaires";
 import api, { apiErrorMessage } from "@/lib/api";
-import { addDays, calculateNights, SERVICE_FEE_RATE, cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate, prixNuitFraisInclus, TYPE_LABELS } from "@/lib/utils";
+import { addDays, calculateNights, SERVICE_FEE_RATE, cn, FALLBACK_IMAGE, isoDate, prixNuitFraisInclus } from "@/lib/utils";
 import { nuitsIndisponibles, useDisponibilites } from "@/lib/useDisponibilites";
 import DateRangeCalendar from "@/components/calendrier/DateRangeCalendar";
 import Stepper from "@/components/ui/Stepper";
@@ -28,6 +28,7 @@ import { useDevisSejour } from "@/lib/paiement";
 import type { Hebergement } from "@/types/api/models";
 import type { MessagingConversation } from "@/types/api/messaging";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 /**
  * Place of photo i in the 4 × 2 desktop mosaic, so that it is always full whatever the number of photos:
@@ -44,6 +45,7 @@ function celluleMosaique(i: number, nombre: number) {
 }
 
 function HebergementContent() {
+  const { TYPE_LABELS, formatDate, formatPrice } = useFormat();
   const t = useTranslations("fiche");
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();

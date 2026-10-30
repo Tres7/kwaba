@@ -7,11 +7,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, Clock, CreditCard, Loader2, Lock, Smartphone, Wallet, XCircle } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
 import { allerPayer, enEuros, minutesRestantes, useConfigPaiement } from "@/lib/paiement";
-import { cn, FALLBACK_IMAGE, formatDate, formatFcfa, formatPrice } from "@/lib/utils";
+import { cn, FALLBACK_IMAGE } from "@/lib/utils";
 import { MontantDebite } from "@/components/layout/Devise";
 import type { Reservation } from "@/types/api/models";
 import type { MoyenPaiement, StatutPaiementReservation } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = [
   { id: "mobile_money", label: "mobileMoney", icon: Smartphone },
@@ -23,6 +24,7 @@ const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = 
 const ATTENTE_MAX_MS = 3 * 60 * 1000;
 
 function PaiementContent() {
+  const { formatDate, formatFcfa, formatPrice } = useFormat();
   const t = useTranslations("paiement");
   const tRes = useTranslations("reservation");
   const router = useRouter();

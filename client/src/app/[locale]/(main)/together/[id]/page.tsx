@@ -9,12 +9,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
-import { cn, FALLBACK_IMAGE, formatDate, formatPrice } from "@/lib/utils";
+import { cn, FALLBACK_IMAGE } from "@/lib/utils";
 import FormField from "@/components/ui/FormField";
 import RatingBadge from "@/components/avis/RatingBadge";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";
 import type { Voyage } from "@/types/api/voyage";
 import { useLocale, useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 type Onglet = "logements" | "itineraire" | "reservations" | "membres";
 
@@ -35,6 +36,7 @@ function messageErreur(err: unknown, defaut: string) {
 }
 
 function VoyageContent() {
+  const { formatDate } = useFormat();
   const t = useTranslations("voyage");
   const tT = useTranslations("together");
   const tFiche = useTranslations("fiche");
@@ -128,6 +130,7 @@ interface SectionProps {
 }
 
 function Logements({ v, appliquer, recharger }: SectionProps) {
+  const { formatPrice } = useFormat();
   const t = useTranslations("voyage");
   const [recherche, setRecherche] = useState(v.destination);
   const [ouvert, setOuvert] = useState(v.propositions.length === 0);
@@ -271,6 +274,7 @@ function Logements({ v, appliquer, recharger }: SectionProps) {
 }
 
 function Itineraire({ v, appliquer, recharger }: SectionProps) {
+  const { formatDate } = useFormat();
   const locale = useLocale();
   const t = useTranslations("voyage");
   const [form, setForm] = useState({ date: v.date_debut ?? "", heure: "", titre: "", lieu: "", details: "" });
@@ -341,6 +345,7 @@ function Itineraire({ v, appliquer, recharger }: SectionProps) {
 }
 
 function Reservations({ v, appliquer, recharger }: SectionProps) {
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("voyage");
   const tVoy = useTranslations("voyageurs");
   const [notes, setNotes] = useState(v.notes);

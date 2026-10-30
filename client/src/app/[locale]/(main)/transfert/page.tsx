@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Car, Clock, CreditCard, Lock, Luggage, Plane, ShieldCheck, Smartphone, Users, Wallet } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
 import { enEuros, payerTransfert, useConfigPaiement } from "@/lib/paiement";
-import { cn, formatFcfa, formatPrice, isoDate } from "@/lib/utils";
+import { cn, isoDate } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
 import FormField from "@/components/ui/FormField";
@@ -18,6 +18,7 @@ import type { MoyenPaiement } from "@/types/api/paiement";
 import type { Aeroport, CategorieVehicule, Devis, Transfert } from "@/types/api/transfert";
 import { useTranslations } from "next-intl";
 import PageHero from "@/components/layout/PageHero";
+import { useFormat } from "@/lib/format";
 
 const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = [
   { id: "mobile_money", label: "mobileMoney", icon: Smartphone },
@@ -34,6 +35,7 @@ const DUREE_BROUILLON_MS = 30 * 60 * 1000;
 const champ = "w-full py-3 px-4 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 function TransfertContent() {
+  const { formatFcfa, formatPrice } = useFormat();
   const t = useTranslations("transfert");
   const tRes = useTranslations("reservation");
   const router = useRouter();

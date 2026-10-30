@@ -5,9 +5,10 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, MessageSquareReply, Star } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
-import { cn, formatDate, initials } from "@/lib/utils";
+import { cn, initials } from "@/lib/utils";
 import type { Avis, AvisPage, CritereAvis } from "@/types/api/models";
 import { useLocale, useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const PAGE = 6;
 
@@ -65,6 +66,7 @@ function ReponseForm({ avis, onDone }: { avis: Avis; onDone: (a: Avis) => void }
 }
 
 function AvisCard({ avis, isOwner, hostName, onUpdate }: { avis: Avis; isOwner: boolean; hostName: string; onUpdate: (a: Avis) => void }) {
+  const { formatDate } = useFormat();
   const t = useTranslations("avis");
   const [deplie, setDeplie] = useState(false);
   const long = avis.commentaire.length > 280;

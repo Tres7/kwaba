@@ -4,11 +4,11 @@ import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Car, Plane, Plus } from "lucide-react";
 import api from "@/lib/api";
-import { dateVol } from "@/lib/transfert";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Paginated } from "@/types/api/models";
 import type { StatutTransfert, Transfert } from "@/types/api/transfert";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/format";
 
 const LIBELLES: Record<StatutTransfert, { label: string; className: string }> = {
   en_attente_paiement: { label: "enAttente", className: "bg-amber-100 text-amber-800" },
@@ -19,6 +19,7 @@ const LIBELLES: Record<StatutTransfert, { label: string; className: string }> = 
 };
 
 export default function MesTransfertsPage() {
+  const { dateVol, formatPrice } = useFormat();
   const tr = useTranslations("mesTransferts");
   const { data: transferts = [], isLoading } = useQuery({
     queryKey: ["transferts"],
