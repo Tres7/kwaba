@@ -1,11 +1,6 @@
-# Development only. The database, pgAdmin and RabbitMQ only listen on 127.0.0.1 (invisible from the local network);
-# pgAdmin and the RabbitMQ console must never be deployed in production.
 name: kwaba
 
 services:
-  # ========================
-  # Base de donnees
-  # ========================
   db:
     image: postgres:16-bookworm
     container_name: kwaba-db
@@ -21,32 +16,22 @@ services:
       timeout: 5s
       retries: 20
 
-  # ========================
-  # pgAdmin
-  # ========================
   pgadmin:
     image: dpage/pgadmin4:9
     container_name: kwaba-pgadmin
     env_file:
       - server/.env
-    # environment:
-    #   PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-    #   PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "127.0.0.1:5051:80"
     depends_on:
       db:
         condition: service_healthy
 
-  # ========================
-  # Backend Django
-  # ========================
   backend:
     build:
       context: ./server
       dockerfile: Dockerfile
     container_name: kwaba-backend
-    # Not root: __pycache__ and mediafiles are written in the mounted folder with your uid
     user: "${UID:-1000}:${GID:-1000}"
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -59,16 +44,12 @@ services:
       db:
         condition: service_healthy
 
-  # ========================
-  # Frontend Next.js
-  # ========================
   frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
-      target: dev # the production image (default target) is used on the VPS
+      target: dev
     container_name: kwaba-frontend
-    # Not root: .next is written in the mounted folder with your uid (otherwise tsc and the pre-push hook fail)
     user: node
     command: npm run dev
     volumes:
@@ -80,7 +61,6 @@ services:
       - client/.env
     environment:
       - INTERNAL_API_URL=http://backend:8000/api
-      # Docker Desktop (Windows/macOS) does not forward file events: polling
       - WATCHPACK_POLLING=true
     depends_on:
       - backend
@@ -92,9 +72,6 @@ services:
     ports:
       - "127.0.0.1:5672:5672"
       - "127.0.0.1:15672:15672"
-    # environment:
-    #   RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-    #   RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -112,7 +89,6 @@ services:
       - db
     restart: on-failure
 
-  # Messaging outbox relay: publishes the due notifications (a single instance, see ADR-016)
   messaging-relay:
     build:
       context: ./server
@@ -129,7 +105,6 @@ services:
         condition: service_started
     restart: on-failure
 
-  # Payments worker: expiry of unpaid bookings, payouts to hosts, refunds
   paiements-worker:
     build:
       context: ./server
