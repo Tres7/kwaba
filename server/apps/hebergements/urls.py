@@ -5,7 +5,7 @@ from .lancement import InscriptionLancementView
 from .views import (
     HebergementListView, HebergementDetailView, MyHebergementsView, CityListView, SuggestionsView,
     PhotoUploadView, PhotoDetailView,
-    DisponibiliteView, BlocageCreateView, BlocageDetailView, TypesLogementView, TypeLogementDetailView,
+    DevisView, DisponibiliteView, BlocageCreateView, BlocageDetailView, TypesLogementView, TypeLogementDetailView,
 )
 
 urlpatterns = [
@@ -22,6 +22,7 @@ urlpatterns = [
     path('types/<uuid:pk>/', TypeLogementDetailView.as_view(), name='type-logement-detail'),
     path('<uuid:pk>/', HebergementDetailView.as_view(), name='hebergement-detail'),
     path('<uuid:pk>/disponibilites/', DisponibiliteView.as_view(), name='hebergement-disponibilites'),
+    path('<uuid:pk>/devis/', DevisView.as_view(), name='hebergement-devis'),
     path('<uuid:pk>/blocages/', BlocageCreateView.as_view(), name='hebergement-blocages'),
     path('<uuid:pk>/types/', TypesLogementView.as_view(), name='hebergement-types'),
     path('<uuid:pk>/alertes/', AlerteCreateView.as_view(), name='hebergement-alertes'),

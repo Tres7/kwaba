@@ -555,6 +555,7 @@
     "hoteVerifie": "Verified host",
     "hoteVerifieAide": "Kwa-Ba has checked this host's ID document.",
     "clientFidele": "Loyal customer rate: you have already stayed with this host",
+    "prixIndisponible": "We could not calculate the price. Please try again in a moment.",
     "parNuitFraisInclus": "/ night, service fee included",
     "detailNuit": "Accommodation {prix} + Kwa-Ba service fee {frais} ({taux}%)",
     "typeLogement": "Room type",

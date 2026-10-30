@@ -19,10 +19,12 @@ import ProposerAuGroupe from "@/components/voyage/ProposerAuGroupe";
 import MapEmbed from "@/components/hebergement/MapEmbed";
 import LogementsSimilaires from "@/components/hebergement/LogementsSimilaires";
 import api, { apiErrorMessage } from "@/lib/api";
-import { addDays, calculateNights, calculateServiceFee, SERVICE_FEE_RATE, cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate, prixNuitFraisInclus, TYPE_LABELS } from "@/lib/utils";
+import { addDays, calculateNights, SERVICE_FEE_RATE, cn, FALLBACK_IMAGE, formatDate, formatPrice, isoDate, prixNuitFraisInclus, TYPE_LABELS } from "@/lib/utils";
 import { nuitsIndisponibles, useDisponibilites } from "@/lib/useDisponibilites";
 import DateRangeCalendar from "@/components/calendrier/DateRangeCalendar";
 import Stepper from "@/components/ui/Stepper";
+import Chargement from "@/components/ui/Chargement";
+import { useDevisSejour } from "@/lib/paiement";
 import type { Hebergement } from "@/types/api/models";
 import type { MessagingConversation } from "@/types/api/messaging";
 import { useTranslations } from "next-intl";
@@ -76,6 +78,10 @@ function HebergementContent() {
   const typeLogement = types.find((u) => u.id === typeChoisi) ?? types[0];
   const { data: periodes = [], isLoading: dispoChargement } = useDisponibilites(params.id, 365, typeLogement?.id);
   const indisponibles = useMemo(() => nuitsIndisponibles(periodes), [periodes]);
+  const nights = calculateNights(checkIn, checkOut);
+  const unitesMax = Math.min(typeLogement?.quantite ?? 1, 20);
+  const nbUnites = Math.min(unites, unitesMax);
+  const { data: devis, isError: devisEnErreur } = useDevisSejour(params.id, nights, typeLogement?.id, nbUnites);
 
   if (isLoading || status === "loading") {
     return (
@@ -97,16 +103,10 @@ function HebergementContent() {
   }
 
   const isOwner = session?.user?.id === hebergement.host_id;
-  const nights = calculateNights(checkIn, checkOut);
   const prixUnite = Number(typeLogement?.prix_nuit ?? hebergement.price_per_night);
-  const unitesMax = Math.min(typeLogement?.quantite ?? 1, 20);
-  const nbUnites = Math.min(unites, unitesMax);
   const capacite = (typeLogement?.capacite ?? hebergement.max_guests) * nbUnites;
-  const subtotal = prixUnite * nbUnites * nights;
   // Visitor's rate: 6 %, or 3 % if they already stayed with this host (loyal customer)
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
-  const serviceFee = calculateServiceFee(subtotal, tauxFrais);
-  const total = subtotal + serviceFee;
   // Displayed headline price: the night with service fees included, details just below
   // Price of one unit of the chosen type (the establishment's "from" price otherwise)
   const nuitTtc = prixNuitFraisInclus(prixUnite, tauxFrais);
@@ -366,19 +366,20 @@ function HebergementContent() {
                     <span className="text-gray-600">
                       {formatPrice(prixUnite)} × {nbUnites > 1 && <>{t("unitesNombre", { nombre: nbUnites })} × </>}{t("nuits", { nombre: nights })}
                     </span>
-                    <span className="text-dark">{formatPrice(subtotal)}</span>
+                    <span className="text-dark">{devis ? formatPrice(devis.prix_nuits) : <Chargement />}</span>
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-gray-600">
                       {t("fraisService", { taux: Math.round(tauxFrais * 100) })}
                       {tauxFrais < SERVICE_FEE_RATE && <span className="block text-xs text-secondary font-semibold">{t("clientFidele")}</span>}
                     </span>
-                    <span className="text-dark">{formatPrice(serviceFee)}</span>
+                    <span className="text-dark">{devis ? formatPrice(devis.frais_service) : <Chargement />}</span>
                   </div>
                   <div className="flex justify-between font-heading font-bold pt-3 border-t border-gray-100 text-lg">
                     <span className="text-dark">{t("total")}</span>
-                    <span className="text-primary">{formatPrice(total)}</span>
+                    <span className="text-primary">{devis ? formatPrice(devis.total) : <Chargement />}</span>
                   </div>
+                  {devisEnErreur && <p role="alert" className="text-xs text-red-700">{t("prixIndisponible")}</p>}
                 </div>
               )}
 
@@ -397,7 +398,7 @@ function HebergementContent() {
       {/* Mobile booking bar */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <div className="min-w-0">
-          <p className="font-heading font-bold text-dark truncate">{formatPrice(nights > 0 ? total : nuitTtc.total)}</p>
+          <p className="font-heading font-bold text-dark truncate">{formatPrice(devis && nights > 0 ? devis.total : nuitTtc.total)}</p>
           <p className="text-xs text-muted">{nights > 0 ? t("nuitsFraisInclus", { nombre: nights }) : t("parNuitFraisInclus")}</p>
         </div>
         <button

@@ -26,11 +26,13 @@ from .serializers import (
     BlocageSerializer, HebergementSerializer, HebergementCreateSerializer, RechercheSerializer, TypeLogementSerializer,
 )
 from apps.contrats import api as contrats
+from apps.paiements import api as paiements
 from apps.favoris import api as favoris
 from apps.verifications import api as verifications
 
 HOST_ROLES = ('hote', 'admin')
 MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
+MAX_NUITS = 90  # same limit as a booking
 MAX_RESULTATS = 200
 # Search with dates: listings whose availability is computed before sorting (available ones first)
 MAX_CANDIDATS = 600
@@ -354,6 +356,13 @@ def _uuid(valeur):
         return None
 
 
+def _entier(valeur):
+    try:
+        return int(valeur)
+    except (TypeError, ValueError):
+        return None
+
+
 def _parse_date(value, defaut):
     if not value:
         return defaut
@@ -363,18 +372,50 @@ def _parse_date(value, defaut):
         return None
 
 
+def _annonce_consultable(request, pk):
+    """The listing, if this visitor can see it: not published yet (in verification, hidden), only its host and the team."""
+    hebergement = HebergementModel.objects.filter(pk=pk).only('id', 'host_id').first()
+    utilisateur = request.user
+    est_hote = utilisateur.is_authenticated and utilisateur.id == getattr(hebergement, 'host_id', None)
+    equipe = utilisateur.is_authenticated and utilisateur.role in ('agent', 'admin')
+    if not hebergement or not (est_hote or equipe or HebergementModel.objects.publiees().filter(pk=pk).exists()):
+        return None
+    return hebergement
+
+
+class DevisView(APIView):
+    """GET ?nuits=&type_logement=&nb_unites=: amounts of a stay with the rates of this host and this visitor. The site shows
+    them as they are and sends the total back with the booking, which computes it again."""
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        hebergement = _annonce_consultable(request, pk)
+        if not hebergement:
+            return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        nuits, nb_unites = _entier(request.query_params.get('nuits')), _entier(request.query_params.get('nb_unites', 1))
+        if nuits is None or not 1 <= nuits <= MAX_NUITS:
+            return Response({'detail': f'Nombre de nuits invalide (de 1 à {MAX_NUITS}).'}, status=status.HTTP_400_BAD_REQUEST)
+        type_id = request.query_params.get('type_logement')
+        type_logement = TypeLogementModel.objects.filter(
+            pk=_uuid(type_id) if type_id else types_logement.type_par_defaut_id(hebergement.id),
+            hebergement_id=hebergement.id, actif=True).first()
+        if type_logement is None:
+            return Response({'detail': 'Type de logement inconnu.'}, status=status.HTTP_400_BAD_REQUEST)
+        if nb_unites is None or not 1 <= nb_unites <= type_logement.quantite:
+            return Response({'detail': "Nombre d'unités invalide."}, status=status.HTTP_400_BAD_REQUEST)
+        montants = paiements.devis_sejour(type_logement.prix_nuit, hebergement.host_id, nuits, voyageur=request.user, nb_unites=nb_unites)
+        return Response({'prix_nuits': montants.prix_nuits, 'frais_service': montants.frais_service, 'total': montants.total})
+
+
 class DisponibiliteView(APIView):
     """GET ?debut=&fin=: unavailable periods. The listing's host receives the details (bookings, blocks)."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        hebergement = HebergementModel.objects.filter(pk=pk).only('id', 'host_id').first()
-        utilisateur = request.user
-        est_hote = utilisateur.is_authenticated and utilisateur.id == getattr(hebergement, 'host_id', None)
-        # A listing not published yet (in verification, hidden) shows its calendar only to its host and to the team
-        equipe = utilisateur.is_authenticated and utilisateur.role in ('agent', 'admin')
-        if not hebergement or not (est_hote or equipe or HebergementModel.objects.publiees().filter(pk=pk).exists()):
+        hebergement = _annonce_consultable(request, pk)
+        if not hebergement:
             return Response({'detail': 'Hébergement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        est_hote = request.user.is_authenticated and request.user.id == hebergement.host_id
 
         today = timezone.localdate()
         debut = _parse_date(request.query_params.get('debut'), today)

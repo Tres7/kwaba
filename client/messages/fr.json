@@ -555,6 +555,7 @@
     "hoteVerifie": "Hôte vérifié",
     "hoteVerifieAide": "Kwa-Ba a contrôlé la pièce d'identité de cet hôte.",
     "clientFidele": "Tarif Client fidèle : vous avez déjà séjourné chez cet hôte",
+    "prixIndisponible": "Le prix n'a pas pu être calculé. Réessayez dans un instant.",
     "parNuitFraisInclus": "/ nuit, frais de service inclus",
     "detailNuit": "Hébergement {prix} + frais de service Kwa-Ba {frais} ({taux} %)",
     "typeLogement": "Type de logement",
