@@ -27,4 +27,4 @@ EXPOSE 8000
 # but the machine itself). Behind Render's proxy, whose address varies, set "*" in the service's environment,
 # with DJANGO_NUM_PROXIES=1.
 ENV FORWARDED_ALLOW_IPS=127.0.0.1
-CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --workers ${WEB_CONCURRENCY:-2} --access-logfile - --forwarded-allow-ips \"${FORWARDED_ALLOW_IPS}\""]
+CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --workers ${WEB_CONCURRENCY:-2} --access-logfile - --logger-class config.journal_gunicorn.JournalSansJeton --forwarded-allow-ips \"${FORWARDED_ALLOW_IPS}\""]

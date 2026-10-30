@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Camera, CheckCircle2, FileText, MapPin, Phone, XCircle } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
 import { cn, formatPrice, libelleType } from "@/lib/utils";
+import { urlExterneSure } from "@/lib/url-sure";
 import { ouvrirPiece } from "./documents";
 
 export interface Logement {
@@ -106,7 +107,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         <div className="flex gap-2 overflow-x-auto pb-1">
           {/* The cover also appears in the gallery: each photo only once */}
           {Array.from(new Set(logement.photos)).map((url) => (
-            <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
+            <a key={url} href={urlExterneSure(url)} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
               <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg" />
             </a>
           ))}

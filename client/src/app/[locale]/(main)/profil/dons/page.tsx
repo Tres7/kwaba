@@ -6,6 +6,7 @@ import { CheckCircle, Clock, FileText, HandHeart } from "lucide-react";
 import api from "@/lib/api";
 import { CAUSES } from "@/lib/give";
 import { formatDate, formatPrice } from "@/lib/utils";
+import { urlExterneSure } from "@/lib/url-sure";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { Don } from "@/types/api/give";
 import Documents from "@/components/documents/Documents";
@@ -24,8 +25,8 @@ function Suivi({ don }: { don: Don }) {
     return (
       <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-secondary">
         <span className="flex items-center gap-1"><CheckCircle size={13} /> {t("reverseLe", { date: formatDate(don.reversement.effectue_le ?? "") })}</span>
-        {don.reversement.justificatif && (
-          <a href={don.reversement.justificatif} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-bold text-primary hover:underline">
+        {urlExterneSure(don.reversement.justificatif) && (
+          <a href={urlExterneSure(don.reversement.justificatif)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-bold text-primary hover:underline">
             <FileText size={13} /> {t("preuve")}<span className="sr-only"> {t("preuveSr")}</span>
           </a>
         )}

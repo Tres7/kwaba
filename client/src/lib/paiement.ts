@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
+import { estPagePaiement } from "@/lib/url-sure";
 import type { ConfigPaiement, MoyenPaiement } from "@/types/api/paiement";
 
 /** Public online payment settings (active or not, rates, countries and operators). */
@@ -12,21 +13,27 @@ export function useConfigPaiement() {
   });
 }
 
+/** Leaves the site for the provider's payment page. Any other address fails like a refused payment, for the caller to show. */
+export function versPagePaiement(url: string) {
+  if (!estPagePaiement(url)) throw new Error("Adresse de paiement inattendue");
+  window.location.assign(url);
+}
+
 /** Creates the FedaPay transaction and sends the browser to the secure payment page. */
 export async function allerPayer(reservationId: string, moyen?: MoyenPaiement) {
   const res = await api.post<{ url: string }>(`/v1/paiements/reservations/${reservationId}/payer/`, moyen ? { moyen } : {});
-  window.location.assign(res.data.url);
+  versPagePaiement(res.data.url);
 }
 
 /** Payment of an airport transfer: same principle as for a listing. */
 export async function payerTransfert(transfertId: string, moyen: MoyenPaiement) {
   const res = await api.post<{ url: string }>(`/v1/transferts/${transfertId}/payer/`, { moyen });
-  window.location.assign(res.data.url);
+  versPagePaiement(res.data.url);
 }
 
 export async function payerLocation(locationId: string, moyen: MoyenPaiement) {
   const res = await api.post<{ url: string }>(`/v1/locations/${locationId}/payer/`, { moyen });
-  window.location.assign(res.data.url);
+  versPagePaiement(res.data.url);
 }
 
 /** Time left before the dates are released, in minutes (rounded up). */

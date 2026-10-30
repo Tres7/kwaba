@@ -28,6 +28,8 @@ const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = 
 const CATEGORIES: CategorieVehicule[] = ["berline", "confort", "van"];
 // Input kept while signing in (session storage, cleared when the tab is closed)
 const BROUILLON = "kwaba_transfert_brouillon";
+// The draft holds a phone number: a tab left open does not keep it for long
+const DUREE_BROUILLON_MS = 30 * 60 * 1000;
 
 const champ = "w-full py-3 px-4 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
@@ -65,6 +67,7 @@ function TransfertContent() {
       if (!brouillon) return;
       sessionStorage.removeItem(BROUILLON);
       const b = JSON.parse(brouillon);
+      if (!(Date.now() - b.enregistreLe < DUREE_BROUILLON_MS)) return;
       setAeroport(b.aeroport ?? ""); setDate(b.date ?? ""); setHeure(b.heure ?? ""); setVol(b.vol ?? "");
       setPassagers(b.passagers ?? 1); setBagages(b.bagages ?? 1); setCategorie(b.categorie ?? null);
       setDestination(b.destination ?? ""); setTelephone(b.telephone ?? ""); setMessage(b.message ?? "");
@@ -122,7 +125,7 @@ function TransfertContent() {
     if (!connecte) {
       // The whole request is filled in without an account; sign-in is only asked here, just before payment
       try {
-        sessionStorage.setItem(BROUILLON, JSON.stringify({ aeroport, date, heure, vol, passagers, bagages, categorie: choix?.categorie ?? categorie, destination, telephone, message }));
+        sessionStorage.setItem(BROUILLON, JSON.stringify({ enregistreLe: Date.now(), aeroport, date, heure, vol, passagers, bagages, categorie: choix?.categorie ?? categorie, destination, telephone, message }));
       } catch { /* without storage, the traveller types it again after signing in */ }
       router.push(`/login?callbackUrl=${encodeURIComponent(`${pathname}?${searchParams.toString()}`)}`);
       return;

@@ -1,5 +1,6 @@
 import uuid
 from functools import cached_property
+from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -9,6 +10,12 @@ from apps.paiements.api import PAYS_CHOICES
 from .montants import CAUSE_CHOICES
 
 SLUGS_RESERVES = {'don', 'impact'}
+
+
+def valider_site_web(adresse):
+    """http or https only: the address becomes a link of the site. A function, because DRF drops the URLValidator of a model."""
+    if urlsplit(adresse).scheme not in ('http', 'https'):
+        raise ValidationError("L'adresse doit commencer par http:// ou https://.")
 
 
 class OrganisationModel(models.Model):
@@ -23,7 +30,7 @@ class OrganisationModel(models.Model):
     description = models.TextField(help_text='Mission, actions menées, résultats')
     logo = models.ImageField(upload_to='give/logos/', blank=True)
     image = models.ImageField(upload_to='give/images/', blank=True, help_text='Photo de couverture')
-    site_web = models.URLField(blank=True)
+    site_web = models.URLField(blank=True, validators=[valider_site_web])
     numero_enregistrement = models.CharField(
         max_length=80, help_text="Numéro de récépissé ou d'enregistrement officiel (affiché publiquement)",
     )
