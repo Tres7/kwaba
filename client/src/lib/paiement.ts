@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import api from "@/lib/api";
 import { estPagePaiement } from "@/lib/url-sure";
-import type { ConfigPaiement, MoyenPaiement } from "@/types/api/paiement";
+import type { ConfigPaiement, DevisSejour, MoyenPaiement } from "@/types/api/paiement";
 
 /** Public online payment settings (active or not, rates, countries and operators). */
 export function useConfigPaiement() {
@@ -10,6 +11,19 @@ export function useConfigPaiement() {
     queryFn: async () => (await api.get<ConfigPaiement>("/v1/paiements/config/")).data,
     // Short: a payment method enabled on the server must show without reloading the page
     staleTime: 60 * 1000,
+  });
+}
+
+/** Amounts of a stay, computed by the API: rates of this host and of this visitor, who may be a loyal customer. */
+export function useDevisSejour(hebergementId: string, nuits: number, typeLogement: string | undefined, nbUnites: number) {
+  const { status } = useSession();
+  return useQuery({
+    queryKey: ["hebergement", hebergementId, "devis", nuits, typeLogement, nbUnites, status],
+    queryFn: async () => (await api.get<DevisSejour>(`/v1/hebergements/${hebergementId}/devis/`, {
+      params: { nuits, nb_unites: nbUnites, ...(typeLogement ? { type_logement: typeLogement } : {}) },
+    })).data,
+    enabled: nuits > 0 && status !== "loading",
+    retry: false,
   });
 }
 
