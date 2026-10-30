@@ -19,6 +19,29 @@ const ANCIENNE_CLE = "kwaba_bientot_ferme";
 const DELAI_MS = 2400;
 // Pages where the window would get in the way: becoming a host, signing a contract
 const PAGES_EXCLUES = /^\/(en\/)?(hote|contrat)(\/|$)/;
+const CLE_VUE = "kwaba_bientot_vue";
+const CLE_FERMEE = "kwaba_bientot_fermee";
+const CLE_INSCRIT = "kwaba_bientot_inscrit";
+const PAUSE_APRES_FERMETURE_MS = 7 * 24 * 60 * 60_000;
+
+function doitAfficher(): boolean {
+  try {
+    if (window.sessionStorage.getItem(CLE_VUE) === "1") return false;
+    if (window.localStorage.getItem(CLE_INSCRIT) === "1") return false;
+    const fermee = Number(window.localStorage.getItem(CLE_FERMEE));
+    return !fermee || Date.now() - fermee >= PAUSE_APRES_FERMETURE_MS;
+  } catch {
+    return true;
+  }
+}
+
+function memoriser(stockage: "sessionStorage" | "localStorage", cle: string, valeur: string) {
+  try {
+    window[stockage].setItem(cle, valeur);
+  } catch {
+    return;
+  }
+}
 
 /** True while no listing is published (the window and the banner disappear by themselves with the first one). */
 export function useAucunLogement(): boolean {
@@ -43,6 +66,7 @@ export function PrevenezMoi({ compact }: { compact?: boolean }) {
     setEtat("envoi");
     try {
       await api.post("/v1/hebergements/lancement/", { email: email.trim(), langue: langue() });
+      memoriser("localStorage", CLE_INSCRIT, "1");
       setEtat("ok");
     } catch (err) {
       setErreur(apiErrorMessage(err, t("erreur")));
@@ -75,8 +99,8 @@ export function PrevenezMoi({ compact }: { compact?: boolean }) {
   );
 }
 
-/** Window shown at every visit while the site has no published listing: on arrival on the site and at every
- * refresh, once per page load (navigating from page to page does not open it again). */
+/** Window shown while the site has no published listing: once per browsing session, not again for 7 days
+ * after being closed, and never again once the visitor has subscribed to the opening announcement. */
 export default function BientotDisponible() {
   const t = useTranslations("bientot");
   const pathname = usePathname();
@@ -98,11 +122,12 @@ export default function BientotDisponible() {
 
   // After the cookie choice (the consent banner comes first) and the splash screen
   useEffect(() => {
-    if (!aucunLogement || exclue || montree.current) return;
+    if (!aucunLogement || exclue || montree.current || !doitAfficher()) return;
     let minuteur: ReturnType<typeof setTimeout> | undefined;
     const planifier = () => {
       minuteur = setTimeout(() => {
         montree.current = true;
+        memoriser("sessionStorage", CLE_VUE, "1");
         setOuverte(true);
       }, DELAI_MS);
     };
@@ -114,7 +139,10 @@ export default function BientotDisponible() {
     };
   }, [aucunLogement, exclue]);
 
-  const fermer = useCallback(() => setOuverte(false), []);
+  const fermer = useCallback(() => {
+    memoriser("localStorage", CLE_FERMEE, String(Date.now()));
+    setOuverte(false);
+  }, []);
 
   useEffect(() => {
     if (!ouverte) return;
