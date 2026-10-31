@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import Floating from "@/components/ui/Floating";
 import { usePopover } from "@/lib/usePopover";
 import { useModule } from "@/lib/site";
-import type { VoyageResume } from "@/types/api/voyage";
+import { proposerLogement } from "./api";
+import { useMesVoyages } from "./hooks";
+import type { VoyageResume } from "./types";
 import { useTranslations } from "next-intl";
 
 /** Button of the listing page: suggest this listing to one of your group trips. */
@@ -22,18 +23,14 @@ export default function ProposerAuGroupe({ hebergementId }: { hebergementId: str
   const [envoi, setEnvoi] = useState<string | null>(null);
   const together = useModule("together");
 
-  const { data: voyages = [] } = useQuery({
-    queryKey: ["voyages"],
-    queryFn: async () => (await api.get<{ results: VoyageResume[] }>("/v1/voyages/")).data.results,
-    enabled: status === "authenticated" && together,
-  });
+  const { data: voyages = [] } = useMesVoyages(status === "authenticated" && together);
 
   if (status !== "authenticated" || !together) return null;
 
   const proposer = async (v: VoyageResume) => {
     setEnvoi(v.id);
     try {
-      await api.post(`/v1/voyages/${v.id}/propositions/`, { hebergement: hebergementId });
+      await proposerLogement(v.id, hebergementId);
       toast.success(t("propose", { nom: v.nom }), { action: { label: t("voir"), onClick: () => router.push(`/together/${v.id}`) } });
       setOpen(false);
     } catch (err) {

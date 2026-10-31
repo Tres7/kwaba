@@ -1,5 +1,12 @@
 import type { HebergementType } from "@/types/api/models";
 
+/** Props of the tabs of a trip. */
+export interface SectionVoyage {
+  v: Voyage;
+  appliquer: (d: Voyage) => void;
+  recharger: () => void;
+}
+
 export interface VoyageResume {
   id: string;
   nom: string;
