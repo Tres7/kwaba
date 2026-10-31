@@ -9,7 +9,7 @@ export default function ContenuEn() {
   return (
     <LegalPage
       titre="Privacy policy"
-      miseAJour="30 October 2026"
+      miseAJour="31 October 2026"
       intro={
         <>
           <p>
@@ -59,7 +59,8 @@ export default function ContenuEn() {
                 <tr><td>Kwa-Ba Give donations: chosen NGO and project, amount, fees, payment method, consent to share your identity with the NGO</td><td>Collect the donation, pay it to the NGO, send you the confirmation and payout updates</td><td>Performance of the contract</td></tr>
                 <tr><td>Conversations with the AI Concierge: your messages and the replies, suggested offers</td><td>Help you plan your stay; monitor the cost of the service</td><td>Performance of the contract (requested service)</td></tr>
                 <tr><td>Favourites</td><td>Find saved places again</td><td>Performance of the contract</td></tr>
-                <tr><td>Hosts: listings, photos (metadata and GPS location removed on upload), calendar</td><td>Publish and manage places</td><td>Performance of the contract</td></tr>
+                <tr><td>Audience measurement, only with your consent: pages viewed, IP address, random browser identifier, device type</td><td>Knowing which pages are useful and improving the site</td><td>Consent</td></tr>
+                <tr><td>Hosts: listings, exact position of the place (travellers only see an approximate zone), photos (metadata and GPS location removed on upload), calendar</td><td>Publish and manage places</td><td>Performance of the contract</td></tr>
                 <tr><td>Temporary verification codes, number of attempts</td><td>Verify your email, secure password resets, block abuse</td><td>Legitimate interest (security)</td></tr>
                 <tr><td>Chosen language (French or English)</td><td>Show the site in your language</td><td>Performance of the contract</td></tr>
               </tbody>
@@ -95,15 +96,15 @@ export default function ContenuEn() {
               <li>Email delivery (codes, notifications): <strong>Brevo</strong> (Sendinblue SAS, Paris, France), with data hosted in the European Union. Receives your email address and the content of the messages sent.</li>
               <li><strong>FedaPay</strong> (Benin): Mobile Money and card payments, payouts to hosts and refunds. Receives your name, email, the amount and, for hosts, the payout number.</li>
               <li>
-                <strong>Google</strong> (United States), for three uses, each only if you use it:
+                <strong>Google</strong> (United States), for two uses, each only if you use it:
                 <ul>
                   <li>AI Concierge (Gemini API): receives the content of your messages to generate replies and keeps the conversation history for up to 55 days so it can be continued. Used on a paid plan: under its terms, Google then does not use this data to improve its products. Do not include sensitive data.</li>
                   <li>Google sign-in: when you choose “Continue with Google”.</li>
-                  <li>Map of listings (Google Maps): when you agree to show it (see the <Link href="/cookies">cookie policy</Link>).</li>
                 </ul>
                 Google may process data outside the European Union, under the EU–US Data Privacy Framework.
               </li>
               <li><strong>PayPal</strong> (Europe): only if you choose this payment method. Receives the amount and the booking reference.</li>
+              <li>Base map: <strong>OpenFreeMap</strong> (Hyperknot Software Kft., Hungary), which may go through the Cloudflare network. Receives your IP address when a map is shown, and sets no cookies.</li>
               <li>Unsplash: some illustration photos are loaded from its servers, which then receive your IP address.</li>
             </ul>
           ),
@@ -125,7 +126,7 @@ export default function ContenuEn() {
           titre: "Retention periods",
           contenu: (
             <ul>
-              <li>Verification codes: 10 minutes. Cookie choices: 6 months. Language choice: 1 year.</li>
+              <li>Verification codes: 10 minutes. Cookie choices: 6 months. Language choice: 1 year. Visit statistics: 14 months at most.</li>
               <li>Inactive account: 3 years after the last activity, then deleted or anonymised.</li>
               <li>Bookings and contracts concluded online (acceptances, signed contracts): 5 years after their performance (<Link href="/cgv#preuve">terms of sale, art. 22.2</Link>).</li>
               <li>Payments, payouts, refunds, invoices, donations and payouts to NGOs: 10 years (accounting records).</li>

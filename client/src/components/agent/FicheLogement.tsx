@@ -14,6 +14,8 @@ export interface Logement {
   type: string;
   city: string;
   location: string;
+  /** Exact position placed by the host, for the visit */
+  position: { lat: number; lng: number } | null;
   description: string;
   price_per_night: number;
   max_guests: number;
@@ -53,7 +55,8 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
   const toutCoche = Object.keys(controlesLibelles).every((cle) => controles[cle]);
   const piece = PIECE[logement.hote.piece.statut];
   const telephone = logement.hote.telephone?.replace(/[^\d+]/g, "");
-  const carte = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${logement.location}, ${logement.city}`)}`;
+  const destination = logement.position ? `${logement.position.lat},${logement.position.lng}` : `${logement.location}, ${logement.city}`;
+  const carte = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
 
   const decider = async (decision: "validee" | "refusee") => {
     if (decision === "refusee" && commentaire.trim().length < 10) {

@@ -27,6 +27,7 @@ Ce que fait le code, et ce qu'il reste à régler au déploiement. Fait suite à
 - `AUTH_SECRET` : 32+ octets aléatoires (`openssl rand -base64 32`), différent de toutes les autres clés.
 - `AUTH_URL` en `https://` : les cookies de session sont alors `Secure`.
 - La CSP est écrite dans `client/src/lib/csp.ts`. Une nouvelle ressource externe (iframe, image, API) doit y être ajoutée, sinon le navigateur la bloque. HSTS et `X-Content-Type-Options` viennent de nginx, les autres en-têtes de `client/next.config.ts`.
+- Google Analytics impose des hôtes larges dans `connect-src` et `img-src` (`*.google-analytics.com`, `*.analytics.google.com`, `*.googletagmanager.com`), que Google choisit selon la région. Une XSS pourrait s'en servir pour envoyer des données vers un compte Analytics à elle : retirer ces hôtes de `client/src/lib/csp.ts` si la mesure d'audience est abandonnée.
 
 ### Base de données
 
@@ -86,6 +87,7 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
 
 - **Isolation entre utilisateurs** : chaque vue filtre sur l'utilisateur connecté (réservations, annonces, messagerie, voyages, dons, transferts, Concierge). Un objet d'un autre utilisateur répond 404, comme un objet inexistant.
 - **Prix** : toujours recalculés côté serveur. Les webhooks FedaPay ne servent qu'à relire la transaction chez FedaPay, une seule fois (verrou).
+- **Position des logements** : la position exacte reste chez l'hôte et dans la file des visites des agents. Les voyageurs reçoivent un point décalé de 150 à 400 m, fixe pour chaque annonce (`apps/hebergements/positions.py`, [carte](modules/carte.md)). Une nouvelle sortie d'API sur les annonces ne doit pas exposer `latitude` ni `longitude`.
 - **Images** : les URL d'images (annonces, avatars) doivent venir d'un hôte connu (`IMAGES_HOTES_AUTORISES`). Une image externe permettrait à son auteur de collecter l'adresse IP des visiteurs. La directive `img-src` de la CSP (`client/src/lib/csp.ts`) porte la même liste : un hôte ajouté d'un côté doit l'être de l'autre.
 - **Photos envoyées** : ré-encodées en JPEG, métadonnées (GPS) supprimées, nom de fichier choisi par le serveur.
 - **Concierge IA** :

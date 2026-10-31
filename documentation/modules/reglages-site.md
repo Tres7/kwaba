@@ -1,4 +1,4 @@
-# Réglages du site : modules et mentions légales
+# Réglages du site : modules, mentions légales et mesure d'audience
 
 Depuis l'audit n° 3 (octobre 2026), certains éléments du site se règlent dans l'environnement de l'API
 (`server/.env` en local, `server.env` sur le VPS) : il suffit de modifier la variable puis de **redémarrer l'API**.
@@ -51,6 +51,29 @@ lu comme la valeur. Une valeur qui commence par `#` compte de toute façon comme
 
 Pas de numéro WhatsApp Kwa-Ba : le contact passe par la messagerie du site, le formulaire de réclamation et
 l'email `ASSISTANCE_CONTACT`.
+
+## Mesure d'audience
+
+`GOOGLE_ANALYTICS_ID` reçoit l'identifiant de mesure Google Analytics (`G-…`, Administration → Flux de données).
+
+- Vide ou mal formée, le site ne mesure rien et n'affiche ni bandeau de cookies ni lien « Gérer les cookies » : il n'y a
+  rien à accepter.
+- Renseignée, le bandeau est proposé aux visiteurs. Google n'est contacté, et ses cookies déposés, qu'après leur accord
+  (`client/src/lib/mesure-audience.ts`).
+- Refuser ou retirer son accord coupe l'envoi et supprime les cookies `_ga`. Le choix est redemandé après 6 mois.
+
+Google reçoit le chemin de la page, jamais ses paramètres, et l'identifiant n'est conservé que pour les fiches publiques
+(logements, projets Give) : les liens de contrat et d'invitation sont des secrets. Une nouvelle page avec un paramètre doit
+rejoindre `PAGES_PRIVEES`, un test le vérifie. Le back-office et l'espace agent ne sont pas mesurés. Les fonctions
+publicitaires restent coupées.
+
+À régler dans Google Analytics :
+
+- Administration → Conservation des données : 14 mois au plus, durée annoncée dans la politique de confidentialité ;
+- Google Signals désactivé.
+
+Ajouter un autre outil soumis à consentement : nouvelle catégorie dans `client/src/lib/consentement.ts`, avec
+`VERSION_CONSENTEMENT` augmentée pour redemander le choix, et mise à jour des politiques de cookies et de confidentialité.
 
 ## Réclamations
 

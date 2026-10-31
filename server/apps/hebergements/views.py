@@ -57,7 +57,10 @@ def _remettre_en_verification(hebergement, avant: dict) -> bool:
     if what the agent checked (address, city, photos) changed. Returns True if it is put back."""
     if hebergement.statut_verification == 'en_attente':
         return False
-    change = any(avant[champ] != getattr(hebergement, champ) for champ in hebergement.CHAMPS_VERIFIES)
+    # First position of an older listing: nothing the agent saw has moved
+    premiere_position = avant['latitude'] is None
+    change = any(avant[champ] != getattr(hebergement, champ) for champ in hebergement.CHAMPS_VERIFIES
+                 if not (premiere_position and champ in ('latitude', 'longitude')))
     if hebergement.statut_verification == 'verifiee' and not change:
         return False
     deja_verifiee = hebergement.statut_verification == 'verifiee'

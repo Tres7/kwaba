@@ -19,7 +19,7 @@ Refuser une candidature : dans le back-office, repasser le compte en voyageur (o
 
 | Statut (`statut_verification`) | Visible des voyageurs | Quand |
 |---|---|---|
-| `en_attente` | non | À la création ; après une modification de la ville, de l'adresse ou des photos ; après une modification d'une annonce refusée |
+| `en_attente` | non | À la création ; après une modification de la ville, de l'adresse, de la position sur la carte ou des photos ; après une modification d'une annonce refusée |
 | `verifiee` | oui (si l'hôte ne l'a pas masquée) | L'agent a validé la visite |
 | `refusee` | non | L'agent a refusé, avec un motif envoyé à l'hôte |
 
@@ -39,7 +39,7 @@ Les annonces existantes au moment de la mise en place ont été marquées `verif
 ## Visite de l'agent
 
 1. Un email « Visite à planifier » part aux agents et aux administrateurs à chaque nouvelle annonce, ou à chaque annonce remise en vérification, **si l'identité de l'hôte est déjà vérifiée** (sinon, au moment où elle l'est).
-2. Dans l'espace agent (téléphone), les annonces en attente des hôtes vérifiés sont des missions **Logement à visiter**, les plus anciennes d'abord. L'agent en prend une, appelle l'hôte ou lui écrit sur WhatsApp et ouvre l'itinéraire.
+2. Dans l'espace agent (téléphone), les annonces en attente des hôtes vérifiés sont des missions **Logement à visiter**, les plus anciennes d'abord. L'agent en prend une, appelle l'hôte ou lui écrit sur WhatsApp et ouvre l'itinéraire, qui mène à la position exacte placée par l'hôte ([carte](carte.md)).
 3. Sur place, il coche la grille de contrôle :
    - la pièce correspond à la personne rencontrée ;
    - le logement est à l'adresse indiquée ;

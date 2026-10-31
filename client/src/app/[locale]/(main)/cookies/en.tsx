@@ -1,13 +1,13 @@
 import { Link } from "@/i18n/navigation";
-import LegalPage, { VersionFrancaiseFaitFoi } from "@/components/legal/LegalPage";
 import GererCookiesBouton from "@/components/legal/GererCookiesBouton";
+import LegalPage, { VersionFrancaiseFaitFoi } from "@/components/legal/LegalPage";
 
 /** English version (the French version prevails). */
 export default function ContenuEn() {
   return (
     <LegalPage
       titre="Cookie policy"
-      miseAJour="23 October 2026"
+      miseAJour="31 October 2026"
       intro={
         <>
           <p>
@@ -15,7 +15,8 @@ export default function ContenuEn() {
             cookies and storage items Kwa-Ba uses, what they are for and how long they last.
           </p>
           <p>
-            <strong>Kwa-Ba uses no analytics, advertising or social media cookies.</strong>
+            <strong>Kwa-Ba uses no advertising or social media cookies.</strong> Audience measurement only runs with your
+            consent.
           </p>
           <GererCookiesBouton className="mt-2 px-5 py-3 rounded-xl bg-dark text-white text-sm font-bold">Manage my cookie choices</GererCookiesBouton>
           <VersionFrancaiseFaitFoi />
@@ -62,6 +63,27 @@ export default function ContenuEn() {
           ),
         },
         {
+          id: "mesure",
+          titre: "Audience measurement, with your consent",
+          contenu: (
+            <>
+              <p>
+                If you accept, Google Analytics tells us which pages are viewed and where visits come from, so we can improve the
+                site. Google then receives your IP address and sets the cookies below. The addresses sent contain no booking,
+                conversation or personal link identifier, and advertising features are turned off.
+              </p>
+              <p>Without your consent, these cookies are not set and Google receives nothing.</p>
+              <table>
+                <thead><tr><th>Name</th><th>Purpose</th><th>Duration</th></tr></thead>
+                <tbody>
+                  <tr><td><code>_ga</code></td><td>Gives your browser a random identifier to count visits.</td><td>13 months after your last visit</td></tr>
+                  <tr><td><code>_ga_…</code></td><td>Keeps the state of your visit.</td><td>13 months after your last visit</td></tr>
+                </tbody>
+              </table>
+            </>
+          ),
+        },
+        {
           id: "stockage",
           titre: "Browser local storage",
           contenu: (
@@ -96,13 +118,13 @@ export default function ContenuEn() {
         },
         {
           id: "tiers",
-          titre: "Third-party content (with your consent)",
+          titre: "Third-party content",
           contenu: (
             <>
               <p>
-                <strong>Google Maps</strong> on listing pages. It only loads with your consent (banner, cookie settings or the
-                “Show map” button). Once shown, Google receives your IP address and may set its own cookies, governed by{" "}
-                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google&apos;s privacy policy</a>.
+                <strong>OpenFreeMap base map</strong> on search, listing pages and the host space. It receives your IP address to
+                show the map and sets no cookies (see its{" "}
+                <a href="https://openfreemap.org/privacy/" target="_blank" rel="noopener noreferrer">privacy policy</a>).
               </p>
               <p>
                 <strong>Sign in with Google</strong> (when offered): Google is only contacted when you click “Continue with Google”.
@@ -118,8 +140,10 @@ export default function ContenuEn() {
             <>
               <p>
                 You can change your mind at any time, as easily as you gave your consent: use the “Manage cookies” link at the
-                bottom of every page. Refusing does not stop you using Kwa-Ba: only the interactive map is replaced by a placeholder.
+                bottom of every page. Withdrawing your consent stops audience measurement and removes its cookies. Refusing does
+                not stop you using Kwa-Ba.
               </p>
+              <p>As long as audience measurement is not switched on for the site, you are not asked to choose.</p>
               <p>
                 You can also delete cookies in your browser settings. More information:{" "}
                 <a href="https://www.cnil.fr/fr/cookies-et-autres-traceurs/comment-se-proteger/maitriser-votre-navigateur" target="_blank" rel="noopener noreferrer">CNIL guide (in French)</a>.

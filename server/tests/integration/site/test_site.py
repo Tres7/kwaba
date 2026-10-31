@@ -28,6 +28,19 @@ def test_reglages_du_lancement(lancement):
     assert reglages['mentions'] == {'rccm': '', 'nif': '', 'commerce_electronique': '', 'ipdcp': ''}
     assert reglages['en_formation'] is True
     assert reglages['contact_email']
+    assert reglages['mesure_audience'] == ''
+
+
+@pytest.mark.parametrize(('valeur', 'attendu'), [
+    ('G-ABC123XYZ9', 'G-ABC123XYZ9'),
+    ('', ''),
+    ('UA-1234-1', ''),
+    ('G-ABC"><script>', ''),
+    ('G-ABC123\n', ''),
+])
+def test_mesure_audience_seulement_avec_un_identifiant_valide(settings, valeur, attendu):
+    settings.GOOGLE_ANALYTICS_ID = valeur
+    assert APIClient().get(SITE).json()['mesure_audience'] == attendu
 
 
 def test_un_module_se_rallume_par_l_environnement(lancement):

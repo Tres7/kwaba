@@ -86,6 +86,16 @@ function creerFormats(langueFormat: "fr" | "en") {
   /** Amount in FCFA whatever the chosen currency: charged amounts, payment buttons. */
   const formatFcfa = (price: number | string) => `${espaces(Math.round(Number(price)).toLocaleString(locale))}\u00a0FCFA`;
 
+  /** Prices stored in FCFA, displayed in the currency chosen by the visitor (euros rounded to the unit from 10 €). */
+  const formatPrice = (price: number | string): string => {
+    if (deviseCourante === "XOF") return formatFcfa(price);
+    const euros = Number(price) / FCFA_PAR_EURO;
+    const decimales = euros < 10 ? 2 : 0;
+    return espaces(euros.toLocaleString(locale, {
+      style: "currency", currency: "EUR", minimumFractionDigits: decimales, maximumFractionDigits: decimales,
+    }));
+  };
+
   return {
     langue: () => langueFormat,
     /** Picks the text of the language: selon({ fr: "…", en: "…" }). */
@@ -93,16 +103,10 @@ function creerFormats(langueFormat: "fr" | "en") {
     TYPE_LABELS: libelles(TYPES, langueFormat),
     ROLE_LABELS: libelles(ROLES, langueFormat),
     formatFcfa,
+    formatPrice,
 
-    /** Prices stored in FCFA, displayed in the currency chosen by the visitor (euros rounded to the unit from 10 €). */
-    formatPrice(price: number | string): string {
-      if (deviseCourante === "XOF") return formatFcfa(price);
-      const euros = Number(price) / FCFA_PAR_EURO;
-      const decimales = euros < 10 ? 2 : 0;
-      return espaces(euros.toLocaleString(locale, {
-        style: "currency", currency: "EUR", minimumFractionDigits: decimales, maximumFractionDigits: decimales,
-      }));
-    },
+    /** Where room is tight (prices on the map): "45 000 F" or "69 €". */
+    formatPrixCourt: (price: number | string) => (deviseCourante === "XOF" ? formatFcfa(price).replace(/FCFA$/, "F") : formatPrice(price)),
 
     formatDate(d: string, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" }) {
       if (!d) return "-";

@@ -1,9 +1,11 @@
-"""Public site settings: module switches and legal numbers (settings.MODULES, settings.MENTIONS_LEGALES and
-settings.SOCIETE_EN_FORMATION).
+"""Public site settings: module switches, legal numbers and audience measurement (settings.MODULES,
+settings.MENTIONS_LEGALES, settings.SOCIETE_EN_FORMATION and settings.GOOGLE_ANALYTICS_ID).
 
 They come from the API environment, so a restart of the API is enough to change them: the website reads them from
 GET /api/v1/site/ (menus, footer, sitemap, redirects of masked pages, legal notices).
 """
+import re
+
 from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.exceptions import NotFound
@@ -31,10 +33,17 @@ def mentions_legales() -> dict[str, str]:
     return mentions
 
 
+def mesure_audience() -> str:
+    """The website puts this value in the address of a script: anything else than a measurement ID counts as empty."""
+    identifiant = settings.GOOGLE_ANALYTICS_ID
+    return identifiant if re.fullmatch(r'G-[A-Z0-9]+', identifiant) else ''
+
+
 def site(request):
     return JsonResponse({
         'modules': {nom: bool(actif) for nom, actif in settings.MODULES.items()},
         'mentions': mentions_legales(),
         'en_formation': settings.SOCIETE_EN_FORMATION,
         'contact_email': settings.ASSISTANCE_CONTACT,
+        'mesure_audience': mesure_audience(),
     })
