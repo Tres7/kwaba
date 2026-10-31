@@ -401,6 +401,7 @@
     "ajouter": "Add to favourites"
   },
   "carte": {
+    "relief": "3D view",
     "titre": "Map of places to stay",
     "indisponible": "The map is temporarily unavailable.",
     "voirLogement": "{nom}, {prix} per night",
