@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, CalendarCheck, ChevronRight, Home, IdCard, Star, Users } from "lucide-react";
 import api from "@/lib/api";
-import { useCompteursVerification } from "@/lib/useCompteursVerification";
+import { useCompteursVerification } from "@/features/verifications";
 import { formatPrice } from "@/lib/utils";
 import CarteLancement from "@/components/backoffice/CarteLancement";
 import ReservationsChart from "@/components/backoffice/ReservationsChart";

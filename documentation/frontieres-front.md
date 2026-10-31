@@ -54,7 +54,7 @@ Fichiers avec un appel direct à l'API : `npm run lint`, règle `no-restricted-s
 | 5 | experiences | guide public et back-office | Migré |
 | 6 | give | public, profil et back-office | Migré |
 | 7 | voyages (Together) | liste, fiche découpée par onglet, invitation | Migré |
-| 8 | verifications, agent | | À faire |
+| 8 | verifications, agent | espace agent, pièce d'identité de l'hôte, compteurs | Migré |
 | 9 | contrats, documents | | À faire |
 | 10 | transferts | public et back-office | À faire |
 | 11 | locations | public et back-office | À faire |

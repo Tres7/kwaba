@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/api";
+import { lireCompteurs } from "./api";
 
 export interface CompteursVerification {
   /** Identity documents sent by hosts, not checked yet. */
@@ -13,7 +13,7 @@ export interface CompteursVerification {
 export function useCompteursVerification(actif: boolean) {
   return useQuery({
     queryKey: ["verification", "compteurs"],
-    queryFn: async () => (await api.get<CompteursVerification>("/v1/verifications/compteurs/")).data,
+    queryFn: lireCompteurs,
     enabled: actif,
     refetchInterval: 60_000,
     refetchIntervalInBackground: true,

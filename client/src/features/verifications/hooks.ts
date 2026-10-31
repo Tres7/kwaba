@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/api";
+import { lireMaPiece, lireTableauAgent, listerMissions } from "./api";
+import type { CompteursVerification } from "./compteurs";
+
+export type { CompteursVerification };
 
 /** What field agents check (see server/apps/terrain/types.py). */
 export type TypeMission = "logement" | "piece";
@@ -50,16 +53,23 @@ export function useTableauAgent(actif = true) {
   return useQuery({
     queryKey: ["agent", "tableau"],
     enabled: actif,
-    queryFn: async () => (await api.get<TableauAgent>("/v1/agent/tableau/")).data,
+    queryFn: lireTableauAgent,
     refetchInterval: 60_000,
     refetchOnWindowFocus: true,
   });
+}
+
+export const CLE_MA_PIECE = ["verification", "identite"];
+
+/** The host's own identity document. */
+export function useMaPiece<T>() {
+  return useQuery({ queryKey: CLE_MA_PIECE, queryFn: () => lireMaPiece<T>() });
 }
 
 export function useMissions(vue: VueMissions, filtres: { type?: TypeMission | ""; q?: string; agent?: "moi" | "" } = {}) {
   const params = Object.fromEntries(Object.entries({ vue, ...filtres }).filter(([, v]) => v));
   return useQuery({
     queryKey: ["agent", "missions", params],
-    queryFn: async () => (await api.get<{ results: MissionResume[]; count: number }>("/v1/agent/missions/", { params })).data,
+    queryFn: () => listerMissions(params),
   });
 }

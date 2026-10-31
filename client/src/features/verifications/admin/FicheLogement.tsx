@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Camera, CheckCircle2, FileText, MapPin, Phone, XCircle } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
+import { deciderVisite } from "../api";
 import { cn, formatPrice, libelleType } from "@/lib/utils";
 import { urlExterneSure } from "@/lib/url-sure";
 import { ouvrirPiece } from "./documents";
@@ -71,7 +72,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
     donnees.append("commentaire", commentaire);
     photos.forEach((photo) => donnees.append("photos", photo));
     try {
-      await api.post(`/v1/verifications/visites/${logement.id}/decision/`, donnees, { headers: { "Content-Type": "multipart/form-data" } });
+      await deciderVisite(logement.id, donnees);
       onTerminee(decision === "validee" ? "Annonce publiée, l'hôte est prévenu." : "Refus envoyé à l'hôte.");
     } catch (err) {
       toast.error(apiErrorMessage(err));
