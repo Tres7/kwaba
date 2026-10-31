@@ -1,22 +1,22 @@
 "use client";
 
+import { ajouterPhoto, rendrePrincipale, retirerPhoto } from "../api";
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, Star, Trash2, TriangleAlert, X } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { compressImage } from "@/lib/compressImage";
 import { cn } from "@/lib/utils";
 import type { PhotoVehicule } from "@/types/api/admin";
 
 export const MAX_PHOTOS_VEHICULE = 10;
 const FORMATS = ["image/jpeg", "image/png", "image/webp"];
-const url = (categorieId: number) => `/v1/admin/location/categories/${categorieId}/photos/`;
 
 /** Sends one photo (one request per photo: several at once would exceed the size accepted by the server).
  * Returns all the photos of the category, in order. */
 export async function envoyerPhotoVehicule(categorieId: number, fichier: File): Promise<PhotoVehicule[]> {
   const corps = new FormData();
   corps.append("image", await compressImage(fichier));
-  return (await api.post<PhotoVehicule[]>(url(categorieId), corps, { headers: { "Content-Type": "multipart/form-data" } })).data;
+  return ajouterPhoto(categorieId, corps);
 }
 
 export interface FichierEnAttente { cle: string; fichier: File; apercu: string }
@@ -78,20 +78,20 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
     }
   };
 
-  const modifier = async (photo: PhotoVehicule, requete: () => Promise<{ data: PhotoVehicule[] }>) => {
+  const modifier = async (photo: PhotoVehicule, requete: () => Promise<PhotoVehicule[]>) => {
     setAction(photo.id);
     setAvis("");
     try {
-      onPhotos((await requete()).data);
+      onPhotos(await requete());
     } catch (err) {
       setAvis(apiErrorMessage(err, "Modification impossible."));
     } finally {
       setAction(null);
     }
   };
-  const principale = (p: PhotoVehicule) => modifier(p, () => api.patch<PhotoVehicule[]>(`${url(categorieId!)}${p.id}/`, { principale: true }));
+  const principale = (p: PhotoVehicule) => modifier(p, () => rendrePrincipale(categorieId as number, p.id));
   const retirer = (p: PhotoVehicule) => {
-    if (window.confirm("Retirer cette photo ?")) modifier(p, () => api.delete<PhotoVehicule[]>(`${url(categorieId!)}${p.id}/`));
+    if (window.confirm("Retirer cette photo ?")) modifier(p, () => retirerPhoto(categorieId as number, p.id));
   };
   const oublier = (c: string) => {
     const f = [...envois, ...enAttente].find((x) => x.cle === c);

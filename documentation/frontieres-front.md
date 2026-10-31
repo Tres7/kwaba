@@ -57,7 +57,7 @@ Fichiers avec un appel direct à l'API : `npm run lint`, règle `no-restricted-s
 | 8 | verifications, agent | espace agent, pièce d'identité de l'hôte, compteurs | Migré |
 | 9 | contrats, documents | signature, contrat hôte, pré-inscription, documents, factures, société | Migré |
 | 10 | transferts | demande, suivi, profil et back-office | Migré |
-| 11 | locations | public et back-office | À faire |
+| 11 | locations | catalogue, réservation découpée, suivi, back-office | Migré |
 | 12 | hebergements | recherche, fiche, espace hôte | À faire |
 | 13 | reservations, paiements | | À faire |
 | 14 | users, auth | | À faire |

@@ -1,14 +1,15 @@
 "use client";
 
+import { creerLoueur, modifierLoueur } from "../api";
+import { clesLocations, useCategoriesAdmin, useLieuxAdmin, useLoueursAdmin } from "../hooks";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { cn, formatDate } from "@/lib/utils";
 import { useConfigPaiement } from "@/lib/paiement";
 import AdminTable, { ActionButton, Pill, type Colonne } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Liste, Saisie, erreursApi } from "@/components/backoffice/Panneau";
-import type { CategorieVehicule, LieuRemise, Loueur } from "@/types/api/admin";
+import type { Loueur } from "@/types/api/admin";
 
 type Formulaire = Omit<Loueur, "id" | "nb_locations" | "nb_vehicules" | "commission_pourcent" | "fondateur_debut" | "fondateur_fin"> & {
   fondateur_debut: string; fondateur_fin: string;
@@ -43,18 +44,9 @@ function Choix<T extends { id: number; nom: string }>({ label, elements, valeur,
 export default function Loueurs() {
   const queryClient = useQueryClient();
   const { data: config } = useConfigPaiement();
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["admin", "location", "loueurs"],
-    queryFn: async () => (await api.get<Loueur[]>("/v1/admin/location/loueurs/")).data,
-  });
-  const { data: categories = [] } = useQuery({
-    queryKey: ["admin", "location", "categories"],
-    queryFn: async () => (await api.get<CategorieVehicule[]>("/v1/admin/location/categories/")).data,
-  });
-  const { data: lieux = [] } = useQuery({
-    queryKey: ["admin", "location", "lieux"],
-    queryFn: async () => (await api.get<LieuRemise[]>("/v1/admin/location/lieux/")).data,
-  });
+  const { data, isLoading, isError, refetch } = useLoueursAdmin();
+  const { data: categories = [] } = useCategoriesAdmin();
+  const { data: lieux = [] } = useLieuxAdmin();
   const [edition, setEdition] = useState<Loueur | "nouveau" | null>(null);
   const [form, setForm] = useState<Formulaire>(VIDE);
   const [erreurs, setErreurs] = useState<Record<string, string>>({});
@@ -73,11 +65,11 @@ export default function Loueurs() {
     setEnvoi(true);
     const corps = { ...form, fondateur_debut: form.fondateur_debut || null, fondateur_fin: form.fondateur_fin || null };
     try {
-      if (edition === "nouveau") await api.post("/v1/admin/location/loueurs/", corps);
-      else if (edition) await api.patch(`/v1/admin/location/loueurs/${edition.id}/`, corps);
+      if (edition === "nouveau") await creerLoueur(corps);
+      else if (edition) await modifierLoueur(edition.id, corps);
       toast.success("Propriétaire enregistré");
       setEdition(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "location"] });
+      queryClient.invalidateQueries({ queryKey: clesLocations.admin });
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {

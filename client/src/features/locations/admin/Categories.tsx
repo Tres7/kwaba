@@ -1,15 +1,17 @@
 "use client";
 
+import { creerCategorie, modifierCategorie } from "../api";
+import { clesLocations, useCategoriesAdmin, useLoueursAdmin } from "../hooks";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Car, Images } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { formatDate, formatPrice, isoDate } from "@/lib/utils";
 import { Pill } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Liste, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
-import PhotosVehicule, { envoyerPhotoVehicule, liberer, type FichierEnAttente } from "@/components/backoffice/location/PhotosVehicule";
-import type { CategorieVehicule, Loueur, PhotoVehicule } from "@/types/api/admin";
+import PhotosVehicule, { envoyerPhotoVehicule, liberer, type FichierEnAttente } from "./PhotosVehicule";
+import type { CategorieVehicule, PhotoVehicule } from "@/types/api/admin";
 
 const GAMMES = [["citadine", "Citadine"], ["berline", "Berline"], ["suv", "SUV"], ["4x4", "4x4 tout-terrain"], ["minibus", "Minibus"], ["utilitaire", "Utilitaire"]];
 const BOITES = [["manuelle", "Manuelle"], ["automatique", "Automatique"]];
@@ -39,14 +41,8 @@ function expire(date: string | null) {
 /** Partner owners' vehicles: their price, deposit, options and papers. */
 export default function Categories() {
   const queryClient = useQueryClient();
-  const { data: categories, isLoading } = useQuery({
-    queryKey: ["admin", "location", "categories"],
-    queryFn: async () => (await api.get<CategorieVehicule[]>("/v1/admin/location/categories/")).data,
-  });
-  const { data: proprietaires } = useQuery({
-    queryKey: ["admin", "location", "loueurs"],
-    queryFn: async () => (await api.get<Loueur[]>("/v1/admin/location/loueurs/")).data,
-  });
+  const { data: categories, isLoading } = useCategoriesAdmin();
+  const { data: proprietaires } = useLoueursAdmin();
   const [edition, setEdition] = useState<CategorieVehicule | "nouvelle" | null>(null);
   const [form, setForm] = useState<Formulaire>(VIDE);
   const [photos, setPhotos] = useState<PhotoVehicule[]>([]);
@@ -75,7 +71,7 @@ export default function Categories() {
   // Photos added, removed or reordered: the vehicle list (thumbnails) follows
   const surPhotos = (liste: PhotoVehicule[]) => {
     setPhotos(liste);
-    queryClient.invalidateQueries({ queryKey: ["admin", "location", "categories"] });
+    queryClient.invalidateQueries({ queryKey: [...clesLocations.admin, "categories"] });
   };
 
   const enregistrer = async () => {
@@ -90,7 +86,7 @@ export default function Categories() {
     };
     try {
       if (edition === "nouvelle") {
-        const creee = (await api.post<CategorieVehicule>("/v1/admin/location/categories/", corps)).data;
+        const creee = await creerCategorie(corps);
         // Photos chosen before the creation: sent now, one after the other
         const echecs: string[] = [];
         for (const f of enAttente) {
@@ -102,11 +98,11 @@ export default function Categories() {
         }
         if (echecs.length) toast.error(`Véhicule créé, mais ${echecs.length} photo(s) non envoyée(s). ${echecs.join(" ; ")}`, { duration: 10000 });
       } else if (edition) {
-        await api.patch(`/v1/admin/location/categories/${edition.id}/`, corps);
+        await modifierCategorie(edition.id, corps);
       }
       toast.success("Véhicule enregistré");
       fermer();
-      queryClient.invalidateQueries({ queryKey: ["admin", "location"] });
+      queryClient.invalidateQueries({ queryKey: clesLocations.admin });
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {
