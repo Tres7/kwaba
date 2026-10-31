@@ -5,7 +5,7 @@ import { FavoriteButton } from "@/features/favoris";
 import RatingBadge from "@/components/ui/RatingBadge";
 import { FALLBACK_IMAGE, SERVICE_FEE_RATE, cn, prixNuitFraisInclus } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { useResumeDetails } from "@/components/hebergement/DetailsLogement";
+import { useResumeDetails } from "./DetailsLogement";
 import { useFormat } from "@/lib/format";
 
 /** "Only N left" from this number of units (hotels and other multi-unit establishments). */

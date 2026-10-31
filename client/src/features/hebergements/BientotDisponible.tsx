@@ -1,14 +1,15 @@
 "use client";
 
+import { sInscrireOuverture } from "./api";
+import { useAucunLogement } from "./hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { Car, CheckCircle2, HandHeart, Home, Loader2, Plane, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { EVENEMENT, lireConsentement } from "@/lib/consentement";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
 import { useFormat } from "@/lib/format";
@@ -43,16 +44,6 @@ function memoriser(stockage: "sessionStorage" | "localStorage", cle: string, val
   }
 }
 
-/** True while no listing is published (the window and the banner disappear by themselves with the first one). */
-export function useAucunLogement(): boolean {
-  const { data } = useQuery({
-    queryKey: ["lancement", "aucun-logement"],
-    queryFn: async () => (await api.get<{ count: number }>("/v1/hebergements/", { params: { limit: 1 } })).data.count === 0,
-    staleTime: 5 * 60_000,
-  });
-  return data === true;
-}
-
 /** "Notify me" form: the email is only used to announce the opening. */
 export function PrevenezMoi({ compact }: { compact?: boolean }) {
   const { langue } = useFormat();
@@ -66,7 +57,7 @@ export function PrevenezMoi({ compact }: { compact?: boolean }) {
     setErreur("");
     setEtat("envoi");
     try {
-      await api.post("/v1/hebergements/lancement/", { email: email.trim(), langue: langue() });
+      await sInscrireOuverture(email.trim(), langue());
       memoriser("localStorage", CLE_INSCRIT, "1");
       setEtat("ok");
     } catch (err) {

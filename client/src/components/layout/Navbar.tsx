@@ -12,7 +12,7 @@ import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import SelecteurLangue from "@/components/layout/SelecteurLangue";
 import { MentionDevise, SelecteurDevise } from "@/components/layout/Devise";
-import ChampDestination from "@/components/hebergement/ChampDestination";
+import { ChampDestination } from "@/features/hebergements";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
 
 const UNREAD_POLL_INTERVAL_MS = 10_000;

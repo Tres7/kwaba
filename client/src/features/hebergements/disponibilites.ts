@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/api";
 import { addDays, isoDate } from "@/lib/utils";
+import { lireDisponibilites } from "./api";
 
 export interface PeriodeIndispo {
   debut: string;
@@ -32,10 +32,7 @@ export function useDisponibilites(hebergementId: string | undefined, jours = 365
   const fin = addDays(debut, jours);
   return useQuery({
     queryKey: ["disponibilites", hebergementId, debut, jours, typeLogement ?? ""],
-    queryFn: async () =>
-      (await api.get<{ periodes: PeriodeIndispo[] }>(`/v1/hebergements/${hebergementId}/disponibilites/`, {
-        params: { debut, fin, ...(typeLogement ? { type_logement: typeLogement } : {}) },
-      })).data.periodes,
+    queryFn: () => lireDisponibilites(hebergementId as string, { debut, fin, ...(typeLogement ? { type_logement: typeLogement } : {}) }),
     enabled: !!hebergementId,
     staleTime: 30_000,
   });

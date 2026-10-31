@@ -1,10 +1,11 @@
 "use client";
 
+import { creerAlerte } from "./api";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { BellRing, Check } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { useLocale, useTranslations } from "next-intl";
 
 interface Props {
@@ -30,12 +31,11 @@ export default function AlerteDisponibilite({ hebergementId, checkIn, checkOut, 
     e?.preventDefault();
     setEnvoi(true);
     try {
-      const { data } = await api.post(`/v1/hebergements/${hebergementId}/alertes/`, {
+      setResultat(await creerAlerte(hebergementId, {
         debut: checkIn, fin: checkOut, nb_unites: nbUnites, langue: locale,
         ...(typeLogement ? { type_logement: typeLogement } : {}),
         ...(connecte ? {} : { email: email.trim() }),
-      });
-      setResultat(data);
+      }));
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {

@@ -11,7 +11,7 @@ import { allerPayer, enEuros, useConfigPaiement, useDevisSejour, useOperateursMo
 import RatingBadge from "@/components/ui/RatingBadge";
 import Chargement from "@/components/ui/Chargement";
 import { MontantDebite } from "@/components/layout/Devise";
-import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
+import PolitiqueAnnulation from "@/features/hebergements/PolitiqueAnnulation";
 import { calculateNights, cn, FALLBACK_IMAGE, isoDate, SERVICE_FEE_RATE } from "@/lib/utils";
 import type { Hebergement, Reservation } from "@/types/api/models";
 import { useTranslations } from "next-intl";

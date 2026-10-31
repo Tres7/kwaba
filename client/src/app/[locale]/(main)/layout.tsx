@@ -1,8 +1,8 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BoutonConcierge from "@/features/concierge/BoutonConcierge";
-import BientotDisponible from "@/components/lancement/BientotDisponible";
-import BandeauOuverture from "@/components/lancement/BandeauOuverture";
+import BientotDisponible from "@/features/hebergements/BientotDisponible";
+import BandeauOuverture from "@/features/hebergements/BandeauOuverture";
 
 export default function MainLayout({
   children,

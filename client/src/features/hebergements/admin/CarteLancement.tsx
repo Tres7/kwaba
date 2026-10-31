@@ -1,10 +1,11 @@
 "use client";
 
+import { annoncerOuverture, lireLancementAdmin } from "../api";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MailCheck } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import ConfirmDialog, { type Confirmation } from "@/components/backoffice/ConfirmDialog";
 
 interface Lancement {
@@ -18,7 +19,7 @@ export default function CarteLancement() {
   const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["admin", "lancement"],
-    queryFn: async () => (await api.get<Lancement>("/v1/admin/lancement/")).data,
+    queryFn: () => lireLancementAdmin<Lancement>(),
   });
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
 
@@ -44,7 +45,7 @@ export default function CarteLancement() {
         libelle: "Envoyer",
         action: async () => {
           try {
-            const { data: r } = await api.post<{ envoyes: number }>("/v1/admin/lancement/");
+            const r = await annoncerOuverture();
             toast.success(`${r.envoyes} email${r.envoyes > 1 ? "s" : ""} envoyé${r.envoyes > 1 ? "s" : ""}`);
             queryClient.invalidateQueries({ queryKey: ["admin", "lancement"] });
           } catch (err) {
