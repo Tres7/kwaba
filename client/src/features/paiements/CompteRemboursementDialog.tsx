@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Smartphone, X } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
-import { useConfigPaiement } from "@/lib/paiement";
+import { apiErrorMessage } from "@/lib/api";
+import { enregistrerCompteRemboursement } from "./api";
+import { useConfigPaiement } from "./paiement";
 import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
 import type { PaysPaiement } from "@/types/api/paiement";
@@ -55,7 +56,7 @@ export default function CompteRemboursementDialog({ endpoint, montant, onClose, 
     setEnvoi(true);
     setErreurs({});
     try {
-      await api.put(endpoint, { pays, operateur, numero });
+      await enregistrerCompteRemboursement(endpoint, { pays, operateur, numero });
       onDone();
     } catch (err) {
       const data = (err as { response?: { data?: Record<string, string[] | string> } }).response?.data;

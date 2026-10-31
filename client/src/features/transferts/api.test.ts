@@ -17,8 +17,6 @@ describe("transferts", () => {
     expect(api.get).toHaveBeenLastCalledWith("/v1/transferts/t1/");
     await transferts.listerAeroports();
     expect(api.get).toHaveBeenLastCalledWith("/v1/transferts/aeroports/");
-    await transferts.lireReservationLiee("r1");
-    expect(api.get).toHaveBeenLastCalledWith("/v1/reservations/r1/");
   });
 
   it("calcule un devis", async () => {

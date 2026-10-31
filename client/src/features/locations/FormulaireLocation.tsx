@@ -1,5 +1,6 @@
 "use client";
 
+import { listerMesReservations } from "@/features/reservations";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -11,7 +12,7 @@ import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
 import { cn, isoDate } from "@/lib/utils";
 import { useFormat } from "@/lib/format";
-import { calculerDevisLocation, creerLocation, listerMesChauffeurs, listerMesReservations } from "./api";
+import { calculerDevisLocation, creerLocation, listerMesChauffeurs } from "./api";
 import type { CatalogueLocation, CategorieVehicule, Formule } from "./types";
 
 const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";

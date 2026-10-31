@@ -8,7 +8,7 @@ import { apiErrorMessage } from "@/lib/api";
 import { demarrerDon } from "./api";
 import { useConfigGive } from "./hooks";
 import { calculerDon, dateReversement } from "./regles";
-import { enEuros, versPagePaiement } from "@/lib/paiement";
+import { enEuros, versPagePaiement } from "@/features/paiements";
 import { cn } from "@/lib/utils";
 import type { OrganisationDetail } from "./types";
 import type { MoyenPaiement } from "@/types/api/paiement";

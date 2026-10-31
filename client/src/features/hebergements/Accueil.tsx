@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import DateRangeField from "@/components/ui/DateRangeField";
 import GuestsField from "@/components/ui/GuestsField";
-import PropertyCard from "./PropertyCard";
+import PropertyCard from "@/components/hebergement/PropertyCard";
 import ChampDestination from "./ChampDestination";
 import Services from "@/components/accueil/Services";
 import { AvisVoyageurs } from "@/features/avis";

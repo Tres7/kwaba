@@ -1,6 +1,5 @@
 import api from "@/lib/api";
 import type { CategorieVehicule as CategorieAdmin, ChoixAttribution, LieuRemise, Loueur, PhotoVehicule, ReglesLocation } from "@/types/api/admin";
-import type { Paginated, Reservation } from "@/types/api/models";
 import type { CatalogueLocation, DevisLocation, Location, MonChauffeur } from "./types";
 
 const LOCATIONS = "/v1/locations";
@@ -13,10 +12,6 @@ export async function lireCatalogue() {
 
 export async function listerMesChauffeurs() {
   return (await api.get<MonChauffeur[]>(`${LOCATIONS}/mes-chauffeurs/`)).data;
-}
-
-export async function listerMesReservations() {
-  return (await api.get<Paginated<Reservation>>("/v1/reservations/")).data.results;
 }
 
 export async function calculerDevisLocation(params: Record<string, unknown>) {

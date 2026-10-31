@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Minus, Plus } from "lucide-react";
-import { useConfigPaiement } from "@/lib/paiement";
+import { useConfigPaiement } from "@/features/paiements";
 import { calculateServiceFee, cn } from "@/lib/utils";
 import { useFormat } from "@/lib/format";
 

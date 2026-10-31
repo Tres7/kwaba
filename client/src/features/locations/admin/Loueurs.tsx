@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn, formatDate } from "@/lib/utils";
-import { useConfigPaiement } from "@/lib/paiement";
+import { useConfigPaiement } from "@/features/paiements";
 import AdminTable, { ActionButton, Pill, type Colonne } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Liste, Saisie, erreursApi } from "@/components/backoffice/Panneau";
 import type { Loueur } from "@/types/api/admin";

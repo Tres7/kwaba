@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle, Clock, Loader2, Smartphone, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
-import { useConfigPaiement } from "@/lib/paiement";
+import { apiErrorMessage } from "@/lib/api";
+import { enregistrerProfilVersement, lireProfilVersement } from "./api";
+import { CLE_REVENUS, useConfigPaiement, useRevenus } from "./paiement";
 import { cn } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
-import type { ProfilVersement, Revenus, StatutVersement } from "@/types/api/paiement";
+import type { ProfilVersement, StatutVersement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
 import { useNomsPays } from "@/lib/pays";
 import { useFormat } from "@/lib/format";
@@ -25,10 +26,7 @@ export default function RevenusHote() {
   const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("revenus");
   const { data: config } = useConfigPaiement();
-  const { data: revenus, isLoading } = useQuery({
-    queryKey: ["paiements", "revenus"],
-    queryFn: async () => (await api.get<Revenus>("/v1/paiements/revenus/")).data,
-  });
+  const { data: revenus, isLoading } = useRevenus();
   // This host's rate (8 %, 12 % for a hotel, 5 % during the Founders Programme)
   const commission = revenus?.commission_pourcent ?? (config ? Math.round(config.commission_hote * 100) : 8);
 
@@ -97,7 +95,7 @@ function ProfilVersementForm({ manquant }: { manquant: boolean }) {
   const { data: config } = useConfigPaiement();
   const { data: profil, isLoading } = useQuery({
     queryKey: ["paiements", "profil-versement"],
-    queryFn: async () => (await api.get<ProfilVersement | null>("/v1/paiements/profil-versement/")).data,
+    queryFn: lireProfilVersement,
   });
 
   const [form, setForm] = useState<ProfilVersement>({ pays: "TG", operateur: "", numero: "", titulaire: "" });
@@ -118,9 +116,8 @@ function ProfilVersementForm({ manquant }: { manquant: boolean }) {
     setEnvoi(true);
     setErreurs({});
     try {
-      const res = await api.put<ProfilVersement>("/v1/paiements/profil-versement/", { ...form, operateur });
-      queryClient.setQueryData(["paiements", "profil-versement"], res.data);
-      queryClient.invalidateQueries({ queryKey: ["paiements", "revenus"] });
+      queryClient.setQueryData(["paiements", "profil-versement"], await enregistrerProfilVersement({ ...form, operateur }));
+      queryClient.invalidateQueries({ queryKey: CLE_REVENUS });
       toast.success(t("enregistrees"));
       setEdition(false);
     } catch (err) {

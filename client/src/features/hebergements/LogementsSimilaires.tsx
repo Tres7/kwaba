@@ -3,7 +3,7 @@
 import { chercherHebergements } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import PropertyCard from "./PropertyCard";
+import PropertyCard from "@/components/hebergement/PropertyCard";
 import type { Hebergement } from "@/types/api/models";
 
 const NOMBRE = 4;

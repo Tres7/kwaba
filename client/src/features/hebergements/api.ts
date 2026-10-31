@@ -1,6 +1,5 @@
 import api from "@/lib/api";
 import type { City, Hebergement, Paginated, Reservation, TypeLogement } from "@/types/api/models";
-import type { Revenus } from "@/types/api/paiement";
 import type { Suggestions } from "./ChampDestination";
 import type { PeriodeIndispo } from "./disponibilites";
 
@@ -102,10 +101,6 @@ export async function sInscrireOuverture(email: string, langue: string) {
 
 export async function listerReservationsHote() {
   return (await api.get<Paginated<Reservation>>("/v1/reservations/", { params: { as: "host" } })).data.results;
-}
-
-export async function lireRevenus() {
-  return (await api.get<Revenus>("/v1/paiements/revenus/")).data;
 }
 
 export function restaurerAnnonce(id: string) {
