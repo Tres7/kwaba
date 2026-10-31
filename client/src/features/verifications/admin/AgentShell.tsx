@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { ClipboardList, History, Home, LayoutDashboard, LogOut, ShieldAlert, UserCheck } from "lucide-react";
 import Logo from "@/components/layout/Logo";
-import AlerteVerifications from "@/components/verifications/AlerteVerifications";
-import { useTableauAgent } from "@/lib/agent";
-import { useCompteursVerification } from "@/lib/useCompteursVerification";
+import AlerteVerifications from "./AlerteVerifications";
+import { useTableauAgent } from "../hooks";
+import { useCompteursVerification } from "../compteurs";
 import { cn } from "@/lib/utils";
 
 type Compteur = "libres" | "miennes";

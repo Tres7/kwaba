@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, FileText, Mail, Phone, XCircle } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
+import { deciderPiece } from "../api";
 import { formatDate } from "@/lib/utils";
 import { ouvrirPiece } from "./documents";
 
@@ -31,7 +32,7 @@ export default function FichePiece({ piece, peutDecider, onTerminee }: {
     }
     setEnvoi(true);
     try {
-      await api.post(`/v1/verifications/identites/${piece.hote.id}/decision/`, { decision, motif });
+      await deciderPiece(piece.hote.id, { decision, motif });
       onTerminee(decision === "verifiee"
         ? "Identité vérifiée : ses logements passent dans les visites à faire."
         : "Refus envoyé à l'hôte, le document est supprimé.");

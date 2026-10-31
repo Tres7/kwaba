@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, ShieldCheck, Upload } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import Select from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
+import { envoyerMaPiece } from "./api";
+import { CLE_MA_PIECE, useMaPiece } from "./hooks";
 
 type TypePiece = "cni" | "passeport" | "permis" | "sejour";
 const TYPES: TypePiece[] = ["cni", "passeport", "permis", "sejour"];
@@ -26,10 +28,7 @@ export default function VerificationIdentite() {
   const [fichier, setFichier] = useState<File | null>(null);
   const [envoi, setEnvoi] = useState(false);
 
-  const { data: piece, isLoading } = useQuery({
-    queryKey: ["verification", "identite"],
-    queryFn: async () => (await api.get<PieceIdentite>("/v1/verifications/identite/")).data,
-  });
+  const { data: piece, isLoading } = useMaPiece<PieceIdentite>();
 
   if (isLoading || !piece) return null;
 
@@ -52,10 +51,10 @@ export default function VerificationIdentite() {
     donnees.append("type_piece", typePiece);
     donnees.append("fichier", fichier);
     try {
-      await api.post("/v1/verifications/identite/", donnees, { headers: { "Content-Type": "multipart/form-data" } });
+      await envoyerMaPiece(donnees);
       toast.success(t("envoyee"));
       setFichier(null);
-      await queryClient.invalidateQueries({ queryKey: ["verification", "identite"] });
+      await queryClient.invalidateQueries({ queryKey: CLE_MA_PIECE });
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {

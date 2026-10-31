@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { House, IdCard, X } from "lucide-react";
-import type { CompteursVerification } from "@/lib/useCompteursVerification";
+import type { CompteursVerification } from "../compteurs";
 
 const PREFIXE = /^\(\d+\) /;
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2, ChevronRight, Home, IdCard, MapPin, UserRound, XCircle } from "lucide-react";
-import { urlMission, type MissionResume, type TypeMission } from "@/lib/agent";
+import { urlMission, type MissionResume, type TypeMission } from "../hooks";
 import { cn, formatDate } from "@/lib/utils";
 
 const ICONES: Record<TypeMission, typeof Home> = { logement: Home, piece: IdCard };

@@ -6,7 +6,7 @@ import { CheckCircle2, Circle, Clock, XCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import api, { estErreurApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import VerificationIdentite from "@/components/hote/VerificationIdentite";
+import { useMaPiece, VerificationIdentite } from "@/features/verifications";
 import type { ContratPublic } from "@/types/api/contrat";
 import type { Me } from "@/types/api/models";
 
@@ -28,10 +28,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
     queryKey: ["me"],
     queryFn: async () => (await api.get<Me>("/v1/users/me/")).data,
   });
-  const { data: piece } = useQuery({
-    queryKey: ["verification", "identite"],
-    queryFn: async () => (await api.get<{ statut: StatutPiece }>("/v1/verifications/identite/")).data,
-  });
+  const { data: piece } = useMaPiece<{ statut: StatutPiece }>();
   // null: agreement not offered yet (Kwa-Ba has not filled in its legal information), step hidden
   const { data: contrat } = useQuery({
     queryKey: ["contrat-hote"],
