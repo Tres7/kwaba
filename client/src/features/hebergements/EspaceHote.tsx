@@ -1,13 +1,15 @@
 "use client";
 
 import { listerMesHebergements, listerReservationsHote, modifierHebergement, supprimerHebergement } from "./api";
-import { clesHebergements } from "./hooks";
+import { clesHebergements, useBrouillons } from "./hooks";
+import BrouillonsHote from "./BrouillonsHote";
+import type { BrouillonAnnonce } from "./brouillons";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Eye, EyeOff, BedDouble, Calendar, CalendarDays, Users, MapPin, MessageCircle, ShieldCheck, Clock, AlertTriangle, Hourglass } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Eye, EyeOff, BedDouble, Calendar, CalendarDays, Users, MapPin, MessageCircle, ShieldCheck, Clock, AlertTriangle, Hourglass } from "lucide-react";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
@@ -35,6 +37,7 @@ function EspaceHoteContent() {
   const t = useTranslations("espaceHote");
   const tVerif = useTranslations("espaceHote.verification");
   const tAnnonce = useTranslations("annonce");
+  const tCommun = useTranslations("commun");
   const tRes = useTranslations("reservation");
   const tPre = useTranslations("prelancement");
   const prelancement = usePrelancement();
@@ -45,6 +48,8 @@ function EspaceHoteContent() {
   const { data: session, status } = useSession();
   const [tab, setTab] = useState<Tab>("annonces");
   const [editing, setEditing] = useState<Hebergement | "new" | null>(null);
+  // New listing resumed from this draft
+  const [reprise, setReprise] = useState<BrouillonAnnonce | null>(null);
   const [contactId, setContactId] = useState<string | null>(null);
 
   // Opens (or finds) the conversation with the traveller of this booking
@@ -96,6 +101,8 @@ function EspaceHoteContent() {
     enabled: isHost,
   });
 
+  const { data: brouillons = [] } = useBrouillons(isHost);
+
   const { data: reservations = [], isLoading: resLoading } = useQuery({
     queryKey: ["reservations", "host"],
     queryFn: listerReservationsHote,
@@ -144,13 +151,19 @@ function EspaceHoteContent() {
   const revenue = reservations.filter((r) => r.status === "confirmed").reduce((s, r) => s + r.montants.montant_hote, 0);
 
   if (editing) {
+    const fermer = () => {
+      setEditing(null);
+      setReprise(null);
+    };
     const formulaire = (
       <HebergementForm
+        key={reprise?.id ?? "nouvelle"}
         initial={editing === "new" ? undefined : editing}
-        onCancel={() => setEditing(null)}
+        brouillon={editing === "new" ? reprise ?? undefined : undefined}
+        onCancel={fermer}
         onSaved={(h) => {
           toast.success(editing === "new" ? t("publiee") : t("miseAJour"));
-          setEditing(null);
+          fermer();
           refresh();
           if (editing === "new") router.push(`/hebergements/${h.id}`);
         }}
@@ -158,10 +171,16 @@ function EspaceHoteContent() {
     );
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark mb-6">{editing === "new" ? t("nouvelle") : t("modifier")}</h1>
+        <div className="mb-6 flex items-center gap-4">
+          <button type="button" onClick={fermer} aria-label={tCommun("retour")}
+            className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-dark hover:bg-light-muted transition-colors flex-shrink-0">
+            <ArrowLeft size={20} aria-hidden />
+          </button>
+          <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark">{editing === "new" ? t("nouvelle") : t("modifier")}</h1>
+        </div>
         <div className="bg-white rounded-3xl shadow-card p-5 sm:p-8">
           {/* Pre-launch: a new listing starts with the pre-registration (shown only if still to be accepted) */}
-          {editing === "new" ? <PreinscriptionHote onCancel={() => setEditing(null)}>{formulaire}</PreinscriptionHote> : formulaire}
+          {editing === "new" ? <PreinscriptionHote onCancel={fermer}>{formulaire}</PreinscriptionHote> : formulaire}
         </div>
       </div>
     );
@@ -203,6 +222,13 @@ function EspaceHoteContent() {
           </button>
         ))}
       </div>
+
+      {tab === "annonces" && brouillons.length > 0 && (
+        <BrouillonsHote brouillons={brouillons} onReprendre={(b) => {
+          setReprise(b);
+          setEditing("new");
+        }} />
+      )}
 
       {tab === "revenus" ? (
         <RevenusHote />
