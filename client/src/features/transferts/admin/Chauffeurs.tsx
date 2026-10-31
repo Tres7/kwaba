@@ -1,15 +1,16 @@
 "use client";
 
+import { creerChauffeur, modifierChauffeur } from "../api";
+import { clesTransferts, useAeroportsAdmin, useChauffeurs } from "../hooks";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useConfigPaiement } from "@/lib/paiement";
 import AdminTable, { ActionButton, Pill, type Colonne } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Liste, Saisie, erreursApi } from "@/components/backoffice/Panneau";
-import { CATEGORIES_TRANSFERT } from "@/components/backoffice/transferts/Aeroports";
-import type { AeroportAdmin, ChauffeurAdmin } from "@/types/api/admin";
+import { CATEGORIES_TRANSFERT } from "./Aeroports";
+import type { ChauffeurAdmin } from "@/types/api/admin";
 
 type Formulaire = Omit<ChauffeurAdmin, "id" | "nb_transferts">;
 const VIDE: Formulaire = { prenom: "", nom: "", telephone: "", email: "", aeroports: [], categorie: "berline", vehicule: "", immatriculation: "",
@@ -18,14 +19,8 @@ const VIDE: Formulaire = { prenom: "", nom: "", telephone: "", email: "", aeropo
 export default function Chauffeurs() {
   const queryClient = useQueryClient();
   const { data: config } = useConfigPaiement();
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["admin", "transferts", "chauffeurs"],
-    queryFn: async () => (await api.get<ChauffeurAdmin[]>("/v1/admin/transferts/chauffeurs/")).data,
-  });
-  const { data: aeroports = [] } = useQuery({
-    queryKey: ["admin", "transferts", "aeroports"],
-    queryFn: async () => (await api.get<AeroportAdmin[]>("/v1/admin/transferts/aeroports/")).data,
-  });
+  const { data, isLoading, isError, refetch } = useChauffeurs();
+  const { data: aeroports = [] } = useAeroportsAdmin();
   const [edition, setEdition] = useState<ChauffeurAdmin | "nouveau" | null>(null);
   const [form, setForm] = useState<Formulaire>(VIDE);
   const [erreurs, setErreurs] = useState<Record<string, string>>({});
@@ -42,11 +37,11 @@ export default function Chauffeurs() {
   const enregistrer = async () => {
     setEnvoi(true);
     try {
-      if (edition === "nouveau") await api.post("/v1/admin/transferts/chauffeurs/", form);
-      else if (edition) await api.patch(`/v1/admin/transferts/chauffeurs/${edition.id}/`, form);
+      if (edition === "nouveau") await creerChauffeur(form);
+      else if (edition) await modifierChauffeur(edition.id, form);
       toast.success("Chauffeur enregistré");
       setEdition(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "transferts"] });
+      queryClient.invalidateQueries({ queryKey: clesTransferts.admin });
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {

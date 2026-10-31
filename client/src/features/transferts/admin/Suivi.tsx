@@ -1,9 +1,10 @@
 "use client";
 
+import { annulerTransfertAdmin, attribuerChauffeur, listerChauffeursDisponibles } from "../api";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
@@ -40,7 +41,7 @@ export default function Suivi() {
 
   const { data: chauffeurs = [] } = useQuery({
     queryKey: ["admin", "transferts", "chauffeurs-dispo", attribution?.id],
-    queryFn: async () => (await api.get<{ id: number; nom: string; telephone: string; vehicule: string }[]>(`/v1/admin/transferts/transferts/${attribution!.id}/chauffeurs/`)).data,
+    queryFn: () => listerChauffeursDisponibles((attribution as AdminTransfert).id),
     enabled: !!attribution,
   });
 
@@ -48,7 +49,7 @@ export default function Suivi() {
     if (!attribution) return;
     setEnvoi(true);
     try {
-      await api.post(`/v1/admin/transferts/transferts/${attribution.id}/attribuer/`, { chauffeur: Number(chauffeur) });
+      await attribuerChauffeur(attribution.id, Number(chauffeur));
       toast.success("Chauffeur attribué : le voyageur reçoit ses coordonnées");
       setAttribution(null);
       queryClient.invalidateQueries({ queryKey: ["admin"] });
@@ -85,7 +86,7 @@ export default function Suivi() {
           message: <>Le transfert <strong>{t.reference}</strong> sera annulé et le voyageur remboursé intégralement s&apos;il a payé.</>,
           action: async (motif) => {
             try {
-              await api.post(`/v1/admin/transferts/transferts/${t.id}/annuler/`, { motif });
+              await annulerTransfertAdmin(t.id, motif);
               toast.success("Transfert annulé");
               queryClient.invalidateQueries({ queryKey: ["admin"] });
             } catch (err) {

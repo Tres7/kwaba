@@ -1,9 +1,10 @@
 "use client";
 
+import { creerAeroport, enregistrerTarifs, modifierAeroport } from "../api";
+import { clesTransferts, useAeroportsAdmin } from "../hooks";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import { Pill } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Saisie, erreursApi } from "@/components/backoffice/Panneau";
@@ -17,10 +18,7 @@ const VIDE = { code: "", nom: "", ville: "", pays: "TG", fuseau: "Africa/Lome", 
 
 export default function Aeroports() {
   const queryClient = useQueryClient();
-  const { data: aeroports, isLoading } = useQuery({
-    queryKey: ["admin", "transferts", "aeroports"],
-    queryFn: async () => (await api.get<AeroportAdmin[]>("/v1/admin/transferts/aeroports/")).data,
-  });
+  const { data: aeroports, isLoading } = useAeroportsAdmin();
   const [edition, setEdition] = useState<AeroportAdmin | "nouveau" | null>(null);
   const [form, setForm] = useState(VIDE);
   const [tarifs, setTarifs] = useState<Tarifs>({} as Tarifs);
@@ -41,14 +39,14 @@ export default function Aeroports() {
     setEnvoi(true);
     setErreurs({});
     try {
-      const code = edition === "nouveau" ? (await api.post<AeroportAdmin>("/v1/admin/transferts/aeroports/", form)).data.code : (edition as AeroportAdmin).code;
-      if (edition !== "nouveau") await api.patch(`/v1/admin/transferts/aeroports/${code}/`, form);
+      const code = edition === "nouveau" ? (await creerAeroport(form)).code : (edition as AeroportAdmin).code;
+      if (edition !== "nouveau") await modifierAeroport(code, form);
       // Only categories with a price have a fare
       const lignes = CATEGORIES_TRANSFERT.filter(({ code: c }) => tarifs[c].prix).map(({ code: c }) => ({ categorie: c, prix: Number(tarifs[c].prix), actif: tarifs[c].actif }));
-      await api.put(`/v1/admin/transferts/aeroports/${code}/tarifs/`, lignes);
+      await enregistrerTarifs(code, lignes);
       toast.success("Aéroport enregistré");
       setEdition(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "transferts"] });
+      queryClient.invalidateQueries({ queryKey: clesTransferts.admin });
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {
