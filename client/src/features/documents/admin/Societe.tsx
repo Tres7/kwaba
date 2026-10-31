@@ -3,23 +3,15 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { Champ, Interrupteur, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
 import { Pill } from "@/components/backoffice/AdminTable";
 import type { SocieteAdmin } from "@/types/api/admin";
+import { enregistrerSociete, lireSignature } from "../api";
+import { CLE_SOCIETE, useSociete } from "../hooks";
 
 type Form = Omit<SocieteAdmin, "complets" | "signature_presente">;
 type ChampTexte = Exclude<keyof Form, "assujetti_tva">;
 // The API client sends JSON by default: header needed to send the scanned signature
-const MULTIPART = { headers: { "Content-Type": "multipart/form-data" } };
-
-export function useSociete() {
-  return useQuery({
-    queryKey: ["admin", "documents", "societe"],
-    queryFn: async () => (await api.get<SocieteAdmin>("/v1/admin/documents/societe/")).data,
-  });
-}
-
 /** Legal information printed at the top of vouchers, receipts and invoices. */
 export default function Societe() {
   const queryClient = useQueryClient();
@@ -53,8 +45,7 @@ export default function Societe() {
       }
       if (signature) corps.append("signature_representant", signature);
       else if (supprimer) corps.append("supprimer_signature", "true");
-      const { data: maj } = await api.put<SocieteAdmin>("/v1/admin/documents/societe/", corps, MULTIPART);
-      queryClient.setQueryData(["admin", "documents", "societe"], maj);
+      queryClient.setQueryData(CLE_SOCIETE, await enregistrerSociete(corps));
       queryClient.invalidateQueries({ queryKey: ["admin", "documents", "signature"] });
       setSignature(null);
       setSupprimer(false);
@@ -141,7 +132,7 @@ export default function Societe() {
 function useApercuSignature(presente: boolean | undefined, fichier: File | null): string | null {
   const { data: enregistree } = useQuery({
     queryKey: ["admin", "documents", "signature"],
-    queryFn: async () => URL.createObjectURL((await api.get<Blob>("/v1/admin/documents/societe/signature/", { responseType: "blob" })).data),
+    queryFn: async () => URL.createObjectURL(await lireSignature()),
     enabled: !!presente,
   });
   const [locale, setLocale] = useState<string | null>(null);

@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarClock, CheckCircle, HandHeart, Loader2, XCircle } from "lucide-react";
 import { lireDon } from "./api";
 import { clesGive } from "./hooks";
-import Documents from "@/components/documents/Documents";
+import { Documents } from "@/features/documents";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 

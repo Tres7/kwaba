@@ -7,7 +7,7 @@ import { useTextesGive } from "./regles";
 import { urlExterneSure } from "@/lib/url-sure";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { Don } from "./types";
-import Documents from "@/components/documents/Documents";
+import { Documents } from "@/features/documents";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 

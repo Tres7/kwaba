@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { messageErreurPdf, telechargerDocument, type ObjetDocument, type TypeDocument } from "@/lib/documents";
+import { messageErreurPdf } from "@/lib/documents";
+import { telechargerDocument, type ObjetDocument, type TypeDocument } from "./api";
 import { cn } from "@/lib/utils";
 import { useFormat } from "@/lib/format";
 

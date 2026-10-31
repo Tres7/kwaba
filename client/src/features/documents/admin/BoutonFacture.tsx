@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { factureDe, messageErreurPdf } from "@/lib/documents";
+import { messageErreurPdf } from "@/lib/documents";
+import { factureDe } from "../api";
 import { ActionButton } from "@/components/backoffice/AdminTable";
 
 /** Issues (only once) then downloads the invoice of a paid stay, transfer or rental. */

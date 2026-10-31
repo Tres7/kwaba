@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, ScrollText } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
-import type { Preinscription } from "@/types/api/contrat";
+import { apiErrorMessage } from "@/lib/api";
+import { accepterPreinscription, lirePreinscription } from "./api";
 import { useFormat } from "@/lib/format";
 
 interface Props {
@@ -28,7 +28,7 @@ export default function PreinscriptionHote({ children, onCancel }: Props) {
 
   const { data, isLoading } = useQuery({
     queryKey: ["preinscription", langue()],
-    queryFn: async () => (await api.get<Preinscription>("/v1/contrats/preinscription/")).data,
+    queryFn: lirePreinscription,
   });
 
   if (isLoading) {
@@ -41,7 +41,7 @@ export default function PreinscriptionHote({ children, onCancel }: Props) {
     setErreur("");
     setEnvoi(true);
     try {
-      await api.post("/v1/contrats/preinscription/", { accepte: true, version: data.version, langue: data.langue });
+      await accepterPreinscription(data.version, data.langue);
       await queryClient.invalidateQueries({ queryKey: ["preinscription"] });
     } catch (err) {
       setErreur(apiErrorMessage(err, t("erreur")));

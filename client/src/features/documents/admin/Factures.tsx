@@ -5,13 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/lib/api";
-import { messageErreurPdf, telechargerFacture } from "@/lib/documents";
+import { messageErreurPdf } from "@/lib/documents";
+import { emettreFacture, telechargerFacture } from "../api";
+import { useSociete } from "../hooks";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
-import { useSociete } from "@/components/backoffice/documents/Societe";
 import type { FactureAdmin } from "@/types/api/admin";
 
 type Ligne = { libelle: string; quantite: string; prix_unitaire: string };
@@ -54,7 +54,7 @@ export default function Factures() {
     setEnvoi(true);
     setErreurs({});
     try {
-      const { data: f } = await api.post<FactureAdmin>("/v1/admin/documents/factures/", {
+      const f = await emettreFacture({
         ...client,
         lignes: lignes.map((l) => ({ libelle: l.libelle, quantite: Number(l.quantite) || 0, prix_unitaire: Number(l.prix_unitaire) || 0 })),
       });

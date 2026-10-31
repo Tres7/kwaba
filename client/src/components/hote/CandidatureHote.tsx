@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import api, { estErreurApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useMaPiece, VerificationIdentite } from "@/features/verifications";
-import type { ContratPublic } from "@/types/api/contrat";
+import { lireContratHote } from "@/features/contrats";
 import type { Me } from "@/types/api/models";
 
 type StatutPiece = "absente" | "soumise" | "verifiee" | "refusee";
@@ -34,7 +34,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
     queryKey: ["contrat-hote"],
     queryFn: async () => {
       try {
-        return (await api.get<ContratPublic>("/v1/contrats/hote/")).data;
+        return await lireContratHote();
       } catch (err) {
         if (estErreurApi(err) && err.response?.status === 404) return null;
         throw err;
