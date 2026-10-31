@@ -1,2 +1,1 @@
-export { default as BoutonConcierge } from "./BoutonConcierge";
-export { default as Concierge } from "./Concierge";
+export type { Carte } from "./types";

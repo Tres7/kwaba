@@ -14,7 +14,7 @@ Le backend a résolu le même problème par un monolithe modulaire migré module
 
 Le frontend adopte la même découpe, dans `client/src/features/<module>/`, avec les mêmes noms de modules que le backend quand ils existent.
 
-- Un module expose une interface, `index.ts`. Les autres modules et les pages n'importent que cet index.
+- Un module expose une interface, `index.ts`, que le reste du code importe. Une page importe directement l'écran de son module : webpack ne retire pas d'un index les composants client qu'il exporte, et tout l'index partirait avec chaque page (mesuré à 249 Ko sur toutes les pages en octobre 2026).
 - Les appels HTTP d'un module sont dans `api.ts`, et les requêtes TanStack Query dans `hooks.ts`.
 - `app/` reste la couche de composition : une page assemble des modules, sans appel HTTP.
 - `lib/` reste la couche partagée et ne dépend d'aucun module. `components/ui` et `components/layout` restent les composants partagés.

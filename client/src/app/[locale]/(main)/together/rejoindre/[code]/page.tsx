@@ -1,6 +1,6 @@
 "use client";
 
-import { Invitation } from "@/features/voyages";
+import Invitation from "@/features/voyages/Invitation";
 
 export default function RejoindrePage() {
   return <Invitation />;

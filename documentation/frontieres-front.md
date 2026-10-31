@@ -4,9 +4,9 @@ Règles : [ADR-020](ADR/ADR-020-frontend-par-modules.md). Vérification : `clien
 
 ```text
 client/src/
-  app/                   pages : assemblent les modules, sans appel HTTP
+  app/                   pages : importent l'écran de leur module, sans appel HTTP
   features/<module>/
-    index.ts             interface du module, seul fichier importé de l'extérieur
+    index.ts             interface du module pour le reste du code
     api.ts               appels à l'API
     hooks.ts             requêtes TanStack Query
     *.tsx                composants du module
@@ -22,7 +22,7 @@ Exemple complet : `client/src/features/favoris`. `client/src/features/carte` mon
 | Règle | Niveau |
 | --- | --- |
 | `axios` s'importe seulement dans `lib/api.ts` | erreur |
-| un module s'importe par son index, jamais `@/features/x/fichier` | erreur |
+| hors de `app/`, un module s'importe par son index, jamais `@/features/x/fichier` | erreur |
 | `lib/` n'importe ni `features/` ni `components/` | erreur |
 | dates, prix et libellés publics par `useFormat` | erreur |
 | `import api from "@/lib/api"` dans `app/` et `components/` | avertissement, à retirer module par module |
@@ -34,7 +34,7 @@ Une PR par module. L'affichage et l'API ne changent pas.
 1. **Appels.** Déplacer les appels à l'API dans `features/<module>/api.ts`, en fonctions nommées qui renvoient les données.
 2. **Requêtes.** Regrouper dans `hooks.ts` les `useQuery` répétés, avec une seule clé de cache. Une même clé déclarée dans deux pages est le signe qu'un hook manque.
 3. **Composants.** Déplacer les composants propres au module. Un composant utilisé par plusieurs modules reste dans `components/` ou va dans le module qui le possède, exporté par son index.
-4. **Pages.** Elles importent `@/features/<module>` et ne gardent que l'assemblage.
+4. **Pages.** Elles importent directement leur écran (`@/features/give/ListeOrganisations`) et ne gardent que l'assemblage. L'index ne contient que ce dont les autres modules ont besoin : un composant client dans un index part avec tous ceux qui l'importent, sur toutes leurs pages.
 5. **Dépendances.** Deux modules ne dépendent pas l'un de l'autre : ce qui doit les combiner va dans la page.
 6. **Tests.** Un test de `api.ts` pour les chemins et les corps envoyés, plus les tests existants.
 7. **Avancement.** Mettre à jour le tableau ci-dessous.

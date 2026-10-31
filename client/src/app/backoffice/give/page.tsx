@@ -3,7 +3,9 @@
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { DonsAdmin, OrganisationsAdmin, ReversementsAdmin } from "@/features/give";
+import DonsAdmin from "@/features/give/admin/Dons";
+import OrganisationsAdmin from "@/features/give/admin/Organisations";
+import ReversementsAdmin from "@/features/give/admin/Reversements";
 
 const ONGLETS = [
   { id: "ong", label: "ONG et projets", Composant: OrganisationsAdmin },

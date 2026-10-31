@@ -33,6 +33,16 @@ const eslintConfig = [
     rules: { "no-restricted-imports": ["error", { paths: [FONCTIONS_DE_LANGUE], patterns: [CLIENT_UNIQUE, PAR_INDEX] }] },
   },
   {
+    // A page imports its screen directly: through the index, it would load every screen of the module
+    files: ["src/app/**/*.{ts,tsx}"],
+    ignores: ["src/app/*locale*/**"],
+    rules: { "no-restricted-imports": ["error", { patterns: [CLIENT_UNIQUE] }] },
+  },
+  {
+    files: ["src/app/*locale*/**/*.{ts,tsx}"],
+    rules: { "no-restricted-imports": ["error", { paths: [FONCTIONS_DE_LANGUE], patterns: [CLIENT_UNIQUE] }] },
+  },
+  {
     files: ["src/lib/**/*.{ts,tsx}"],
     ignores: ["src/lib/api.ts"],
     rules: { "no-restricted-imports": ["error", { patterns: [CLIENT_UNIQUE, SANS_MODULES] }] },

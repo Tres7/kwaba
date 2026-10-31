@@ -1,4 +1,4 @@
-import { ExperiencesAdmin } from "@/features/experiences";
+import ExperiencesAdmin from "@/features/experiences/admin/Experiences";
 
 export const metadata = { title: "Expériences" };
 
