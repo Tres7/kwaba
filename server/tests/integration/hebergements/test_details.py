@@ -4,6 +4,7 @@ HEBERGEMENTS = '/api/v1/hebergements/'
 
 def _annonce(**extra):
     return {
+        'latitude': 6.13, 'longitude': 1.22,
         'name': 'Villa Océane', 'type': 'villa', 'city': 'Lomé', 'location': 'Baguida', 'price_per_night': 85000,
         'max_guests': 6, 'amenities': ['wifi'], 'image_url': 'https://images.unsplash.com/photo-1.jpg',
         'surface_m2': 140, 'chambres': 3, 'salles_de_bain': 2, 'lits_doubles': 2, 'lits_simples': 2, 'canapes_lits': 0,

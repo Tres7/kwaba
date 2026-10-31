@@ -8,6 +8,7 @@ from apps.securite import coordonnees
 from apps.securite.images import MESSAGE as IMAGE_REFUSEE, url_image_autorisee
 from apps.users import api as users
 
+from . import positions
 from .models import BlocageModel, HebergementModel, TypeLogementModel
 
 # Amenities a host can tick, by category (labels and icons: client/src/components/hebergement/AmenityBadge.tsx).
@@ -44,11 +45,12 @@ class HebergementSerializer(serializers.ModelSerializer):
     en_ligne = serializers.SerializerMethodField()
     frais_voyageur = serializers.SerializerMethodField()
     types = serializers.SerializerMethodField()
+    position = serializers.SerializerMethodField()
 
     class Meta:
         model = HebergementModel
         fields = [
-            'id', 'name', 'description', 'type', 'city', 'location',
+            'id', 'name', 'description', 'type', 'city', 'location', 'latitude', 'longitude', 'position',
             'price_per_night', 'rating', 'review_count', 'image_url', 'images',
             'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie',
             'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne',
@@ -65,6 +67,8 @@ class HebergementSerializer(serializers.ModelSerializer):
             for champ in ('name', 'description', 'location'):
                 if donnees.get(champ):
                     donnees[champ] = coordonnees.analyser(donnees[champ])[0]
+            # Anti-bypass: the exact position would lead to the host without booking
+            del donnees['latitude'], donnees['longitude']
         return donnees
 
     def _par_hote(self, cle: str, obj, charger):
@@ -89,6 +93,9 @@ class HebergementSerializer(serializers.ModelSerializer):
             verifies = hotes_verifies(ids)
             return {i: i in verifies for i in ids}
         return self._par_hote('_hotes_verifies', obj, charger)
+
+    def get_position(self, obj):
+        return positions.approchee(obj)
 
     def get_motif_refus(self, obj):
         # The agent's message for the host: never shown to travellers
@@ -126,13 +133,15 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = HebergementModel
         fields = [
-            'name', 'description', 'type', 'city', 'location',
+            'name', 'description', 'type', 'city', 'location', 'latitude', 'longitude',
             'price_per_night', 'image_url', 'images', 'max_guests',
             'amenities', 'is_available',
             'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant', 'politique_annulation',
         ]
         extra_kwargs = {
+            'latitude': {'min_value': -85, 'max_value': 85},
+            'longitude': {'min_value': -180, 'max_value': 180},
             'surface_m2': {'min_value': 5, 'max_value': 100000},
             'chambres': {'max_value': 200},
             'salles_de_bain': {'max_value': 200},
@@ -143,7 +152,9 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         }
 
     # Required at creation; a listing published before they were added can be changed without them
+    POSITION_MANQUANTE = "Placez votre logement sur la carte."
     DETAILS_OBLIGATOIRES = {
+        'latitude': POSITION_MANQUANTE,
         'surface_m2': "Indiquez la surface en m².",
         'chambres': "Indiquez le nombre de chambres.",
         'petit_dejeuner': "Indiquez si le petit-déjeuner est inclus, en option ou non proposé.",
@@ -156,6 +167,10 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
                 manquants['lits'] = ["Indiquez au moins un lit."]
             if manquants:
                 raise serializers.ValidationError(manquants)
+        latitude = data.get('latitude', getattr(self.instance, 'latitude', None))
+        longitude = data.get('longitude', getattr(self.instance, 'longitude', None))
+        if (latitude is None) != (longitude is None):
+            raise serializers.ValidationError({'latitude': [self.POSITION_MANQUANTE]})
         formule = data.get('petit_dejeuner', getattr(self.instance, 'petit_dejeuner', ''))
         if formule == 'option' and not data.get('petit_dejeuner_prix', getattr(self.instance, 'petit_dejeuner_prix', None)):
             raise serializers.ValidationError({'petit_dejeuner_prix': ["Indiquez le prix du petit-déjeuner par personne."]})

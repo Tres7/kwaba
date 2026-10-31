@@ -4,10 +4,11 @@ import { politiqueCsp, RAPPORTS_CSP } from "./src/lib/csp";
 
 // HSTS, X-Content-Type-Options and Referrer-Policy are set by nginx for the whole site (deploy/vps/nginx):
 // repeating them here would send them twice.
+// geolocation: the host can place a listing from where they stand (features/carte)
 const securityHeaders = [
   { key: "Reporting-Endpoints", value: `csp="${RAPPORTS_CSP}"` },
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), payment=(), usb=()" },
   // The Google Identity Services window must be able to talk to the page (sign-in popup)
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
 ];

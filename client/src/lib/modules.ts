@@ -8,6 +8,8 @@ export interface ReglagesSite {
   /** Company not registered yet (SOCIETE_EN_FORMATION): "SAS en formation" on the site. */
   en_formation: boolean;
   contact_email: string;
+  /** Google Analytics measurement ID. Empty: no measurement, so no cookie banner. */
+  mesure_audience: string;
 }
 
 /**

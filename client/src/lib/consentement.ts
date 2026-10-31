@@ -1,19 +1,19 @@
 /**
- * Consent to cookies and third-party content (GDPR / CNIL recommendations).
+ * Consent to cookies (GDPR / CNIL recommendations).
  *
  * Only non-essential trackers require consent. Today, a single category:
- * third-party content (Google Maps map), which may set its own cookies.
+ * audience measurement (Google Analytics, lib/mesure-audience.ts).
  * Sign-in and security cookies (NextAuth) are strictly necessary: no consent.
  */
 export interface Consentement {
   version: number;
   /** ISO date of the choice (proof and validity period). */
   date: string;
-  contenusTiers: boolean;
+  mesureAudience: boolean;
 }
 
 // To increase when a new category or a new third-party service is added: the choice is asked again
-export const VERSION_CONSENTEMENT = 1;
+export const VERSION_CONSENTEMENT = 2;
 const CLE = "kwaba_consentement";
 // Key used before the AfriStay → Kwa-Ba rename: its choice is carried over once (original date kept), then removed
 const ANCIENNE_CLE = "afristay_consentement";
@@ -45,8 +45,8 @@ export function lireConsentement(): Consentement | null {
   }
 }
 
-export function enregistrerConsentement(contenusTiers: boolean): Consentement {
-  const c: Consentement = { version: VERSION_CONSENTEMENT, date: new Date().toISOString(), contenusTiers };
+export function enregistrerConsentement(mesureAudience: boolean): Consentement {
+  const c: Consentement = { version: VERSION_CONSENTEMENT, date: new Date().toISOString(), mesureAudience };
   try {
     window.localStorage.setItem(CLE, JSON.stringify(c));
     window.localStorage.removeItem(ANCIENNE_CLE);

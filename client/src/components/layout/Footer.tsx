@@ -91,7 +91,7 @@ export default function Footer() {
               {LEGAL.map((l) => (
                 <li key={l.href}><Link href={l.href} className="text-gray-600 hover:text-primary underline-offset-2 hover:underline">{t(`legal.${l.label}`)}</Link></li>
               ))}
-              <li><GererCookiesBouton className="text-gray-600 hover:text-primary underline-offset-2 hover:underline" /></li>
+              {reglages?.mesure_audience && <li><GererCookiesBouton className="text-gray-600 hover:text-primary underline-offset-2 hover:underline" /></li>}
             </ul>
           </nav>
         </div>

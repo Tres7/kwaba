@@ -14,7 +14,7 @@ client/src/
   lib/                   client HTTP, formats, utilitaires : ne dépend d'aucun module
 ```
 
-Exemple complet : `client/src/features/favoris`.
+Exemple complet : `client/src/features/favoris`. `client/src/features/carte` montre un module chargé à la demande : son index exporte des composants `next/dynamic`.
 
 ## Ce que vérifie ESLint
 

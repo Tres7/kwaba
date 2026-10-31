@@ -9,7 +9,7 @@ export default function ContenuFr() {
   return (
     <LegalPage
       titre="Politique de confidentialité"
-      miseAJour="30 octobre 2026"
+      miseAJour="31 octobre 2026"
       intro={
         <>
           <p>
@@ -58,7 +58,8 @@ export default function ContenuFr() {
                 <tr><td>Dons Kwa-Ba Give : ONG et projet choisis, montant, frais, moyen de paiement, accord pour transmettre votre identité à l&apos;ONG</td><td>Encaisser le don, le reverser à l&apos;ONG, vous envoyer la confirmation et le suivi du reversement</td><td>Exécution du contrat</td></tr>
                 <tr><td>Conversations avec le Concierge IA : vos messages et les réponses, offres proposées</td><td>Vous aider à organiser votre séjour ; suivi du coût du service</td><td>Exécution du contrat (service demandé)</td></tr>
                 <tr><td>Favoris</td><td>Retrouver les logements sauvegardés</td><td>Exécution du contrat</td></tr>
-                <tr><td>Hôtes : annonces, photos (métadonnées et position GPS supprimées à l&apos;envoi), calendrier</td><td>Publier et gérer les logements</td><td>Exécution du contrat</td></tr>
+                <tr><td>Mesure d&apos;audience, seulement avec votre accord : pages consultées, adresse IP, identifiant aléatoire du navigateur, type d&apos;appareil</td><td>Savoir quelles pages sont utiles et améliorer le site</td><td>Consentement</td></tr>
+                <tr><td>Hôtes : annonces, position exacte du logement (les voyageurs ne voient qu&apos;une zone approximative), photos (métadonnées et position GPS supprimées à l&apos;envoi), calendrier</td><td>Publier et gérer les logements</td><td>Exécution du contrat</td></tr>
                 <tr><td>Codes de vérification temporaires, nombre de tentatives</td><td>Vérifier votre email, sécuriser la réinitialisation du mot de passe, bloquer les abus</td><td>Intérêt légitime (sécurité)</td></tr>
                 <tr><td>Langue choisie (français ou anglais)</td><td>Afficher le site dans votre langue</td><td>Exécution du contrat</td></tr>
               </tbody>
@@ -94,16 +95,17 @@ export default function ContenuFr() {
               <li>Envoi des emails (codes, notifications) : <strong>Brevo</strong> (Sendinblue SAS, Paris, France), données hébergées dans l&apos;Union européenne. Reçoit votre adresse email et le contenu des messages envoyés.</li>
               <li><strong>FedaPay</strong> (Bénin) : encaissement Mobile Money et carte, versements aux hôtes et remboursements. Reçoit votre nom, votre email, le montant et, pour les hôtes, le numéro de versement.</li>
               <li>
-                <strong>Google</strong> (États-Unis), pour trois usages, chacun seulement si vous y recourez :
+                <strong>Google</strong> (États-Unis), pour trois usages, chacun seulement si vous y recourez ou l&apos;acceptez :
                 <ul>
                   <li>Concierge IA (API Gemini) : reçoit le contenu de vos messages pour générer les réponses et conserve l&apos;historique de la conversation jusqu&apos;à 55 jours pour pouvoir la poursuivre. Service utilisé en offre payante : selon ses conditions, Google n&apos;utilise alors pas ces données pour améliorer ses produits. N&apos;y indiquez pas de données sensibles.</li>
                   <li>Connexion avec Google : lorsque vous choisissez « Continuer avec Google ».</li>
-                  <li>Carte des logements (Google Maps) : lorsque vous acceptez son affichage (voir la <Link href="/cookies">politique de cookies</Link>).</li>
+                  <li>Mesure d&apos;audience (Google Analytics) : seulement avec votre accord. Reçoit les pages consultées, votre adresse IP et un identifiant aléatoire, sans fonction publicitaire. Statistiques conservées 14 mois au plus.</li>
                 </ul>
                 Google peut traiter des données hors de l&apos;Union européenne, dans le cadre du Data Privacy Framework UE–États-Unis.
               </li>
               <li><strong>PayPal</strong> (Europe) : uniquement si vous choisissez ce moyen de paiement. Reçoit le montant et la référence de la réservation.</li>
-              <li>Unsplash : certaines photos d&apos;illustration sont chargées depuis ses serveurs, qui reçoivent alors votre adresse IP.</li>
+              <li>Fond de carte : <strong>OpenFreeMap</strong> (Hyperknot Software Kft., Hongrie), qui peut passer par le réseau Cloudflare. Reçoit votre adresse IP lorsqu&apos;une carte s&apos;affiche, sans déposer de cookie.</li>
+              <li>Unsplash : certaines photos d&apos;illustration sont chargées depuis ses serveurs, qui reçoivent alors votre adresse IP.</li>
             </ul>
           ),
         },
@@ -114,7 +116,7 @@ export default function ContenuFr() {
             <p>
               Certaines données sont hébergées ou consultées hors du Togo : par l&apos;hébergeur du site, par Brevo (Union européenne) pour
               l&apos;envoi des emails, par les associés de KWA-BA établis en France pour le service client et la gestion, par Google (États-Unis)
-              pour le Concierge IA, et par le prestataire de paiement FedaPay, établi au Bénin. Ces transferts se font dans le respect des
+              pour le Concierge IA et, avec votre accord, la mesure d&apos;audience, et par le prestataire de paiement FedaPay, établi au Bénin. Ces transferts se font dans le respect des
               conditions prévues par la loi n° 2019-014 et, le cas échéant, avec l&apos;autorisation de l&apos;IPDCP. Ils sont encadrés par des
               engagements de confidentialité et de sécurité.
             </p>
@@ -125,7 +127,7 @@ export default function ContenuFr() {
           titre: "Durées de conservation",
           contenu: (
             <ul>
-              <li>Codes de vérification : 10 minutes. Choix de cookies : 6 mois. Choix de la langue : 1 an.</li>
+              <li>Codes de vérification : 10 minutes. Choix de cookies : 6 mois. Choix de la langue : 1 an. Statistiques de visite : 14 mois au plus.</li>
               <li>Compte inactif : 3 ans après la dernière activité, puis suppression ou anonymisation.</li>
               <li>Réservations et contrats conclus en ligne (acceptations, contrats signés) : 5 ans après leur exécution (<Link href="/cgv#preuve">CGV, art. 22.2</Link>).</li>
               <li>Paiements, versements, remboursements, factures, dons et reversements aux ONG : 10 ans (pièces comptables).</li>

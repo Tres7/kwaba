@@ -2,9 +2,12 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Cookie, X } from "lucide-react";
 import { enregistrerConsentement, EVENEMENT, lireConsentement, type Consentement } from "@/lib/consentement";
+import { activerMesure, cheminMesurable, couperMesure, mesurerPage } from "@/lib/mesure-audience";
+import { useReglagesSite } from "@/lib/site";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +15,9 @@ interface ContexteConsentement {
   consentement: Consentement | null;
   /** true once the storage is read (avoids showing the banner then removing it) */
   pret: boolean;
-  definir: (contenusTiers: boolean) => void;
+  /** false while no measurement ID is set: there is then nothing to accept, hence no banner */
+  mesureActive: boolean;
+  definir: (mesureAudience: boolean) => void;
   ouvrirPreferences: () => void;
 }
 
@@ -39,7 +44,7 @@ function Interrupteur({ actif, onChange, desactive, id }: { actif: boolean; onCh
 }
 
 function Preferences({ initial, onFermer, onEnregistrer }: { initial: boolean; onFermer: () => void; onEnregistrer: (v: boolean) => void }) {
-  const [tiers, setTiers] = useState(initial);
+  const [mesure, setMesure] = useState(initial);
   const t = useTranslations("cookies");
 
   useEffect(() => {
@@ -72,18 +77,18 @@ function Preferences({ initial, onFermer, onEnregistrer }: { initial: boolean; o
           </div>
           <div className="flex items-start justify-between gap-4 p-4 rounded-2xl border border-gray-200">
             <div>
-              <label htmlFor="cookie-tiers" className="font-semibold text-dark text-sm">{t("tiers")}</label>
-              <p className="text-xs text-gray-600 mt-1">{t("tiersTexte")}</p>
+              <label htmlFor="cookie-mesure" className="font-semibold text-dark text-sm">{t("mesure")}</label>
+              <p className="text-xs text-gray-600 mt-1">{t("mesureTexte")}</p>
             </div>
-            <Interrupteur id="cookie-tiers" actif={tiers} onChange={setTiers} />
+            <Interrupteur id="cookie-mesure" actif={mesure} onChange={setMesure} />
           </div>
         </div>
 
-        <p className="text-xs text-gray-600 mt-4">{t("aucuneMesure")}</p>
+        <p className="text-xs text-gray-600 mt-4">{t("aucunePub")}</p>
 
         <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 mt-6">
           <Link href="/cookies" onClick={onFermer} className="text-sm font-semibold text-primary underline self-center">{t("politique")}</Link>
-          <button type="button" onClick={() => onEnregistrer(tiers)} className="px-5 py-3 rounded-xl bg-dark text-white text-sm font-bold">{t("enregistrer")}</button>
+          <button type="button" onClick={() => onEnregistrer(mesure)} className="px-5 py-3 rounded-xl bg-dark text-white text-sm font-bold">{t("enregistrer")}</button>
         </div>
       </div>
     </div>,
@@ -96,6 +101,10 @@ export default function ConsentProvider({ children }: { children: React.ReactNod
   const [pret, setPret] = useState(false);
   const [preferences, setPreferences] = useState(false);
   const t = useTranslations("cookies");
+  const idMesure = useReglagesSite().data?.mesure_audience ?? "";
+  const pathname = usePathname();
+  const pageMesurable = cheminMesurable(pathname) !== null;
+  const accord = consentement?.mesureAudience;
 
   useEffect(() => {
     setConsentement(lireConsentement());
@@ -110,18 +119,28 @@ export default function ConsentProvider({ children }: { children: React.ReactNod
     };
   }, []);
 
-  const definir = useCallback((contenusTiers: boolean) => {
-    setConsentement(enregistrerConsentement(contenusTiers));
+  useEffect(() => {
+    if (!idMesure || accord === undefined) return;
+    if (!accord) {
+      couperMesure(idMesure);
+    } else if (pageMesurable) {
+      activerMesure(idMesure);
+      mesurerPage(pathname);
+    }
+  }, [idMesure, accord, pageMesurable, pathname]);
+
+  const definir = useCallback((mesureAudience: boolean) => {
+    setConsentement(enregistrerConsentement(mesureAudience));
     setPreferences(false);
   }, []);
 
   const ouvrirPreferences = useCallback(() => setPreferences(true), []);
 
   return (
-    <Contexte.Provider value={{ consentement, pret, definir, ouvrirPreferences }}>
+    <Contexte.Provider value={{ consentement, pret, mesureActive: !!idMesure, definir, ouvrirPreferences }}>
       {children}
 
-      {pret && !consentement && !preferences && (
+      {pret && idMesure && pageMesurable && !consentement && !preferences && (
         <section
           role="region" aria-label={t("choix")}
           className="fixed z-[105] inset-x-3 bottom-3 sm:inset-x-auto sm:left-4 sm:bottom-4 sm:max-w-md bg-white rounded-3xl shadow-card-hover border border-gray-100 p-5"
@@ -146,7 +165,7 @@ export default function ConsentProvider({ children }: { children: React.ReactNod
       )}
 
       {preferences && (
-        <Preferences initial={consentement?.contenusTiers ?? false} onFermer={() => setPreferences(false)} onEnregistrer={definir} />
+        <Preferences initial={accord ?? false} onFermer={() => setPreferences(false)} onEnregistrer={definir} />
       )}
     </Contexte.Provider>
   );

@@ -1,13 +1,13 @@
 import { Link } from "@/i18n/navigation";
-import LegalPage from "@/components/legal/LegalPage";
 import GererCookiesBouton from "@/components/legal/GererCookiesBouton";
+import LegalPage from "@/components/legal/LegalPage";
 
 /** French version. */
 export default function ContenuFr() {
   return (
     <LegalPage
       titre="Politique de cookies"
-      miseAJour="23 octobre 2026"
+      miseAJour="31 octobre 2026"
       intro={
         <>
           <p>
@@ -15,7 +15,8 @@ export default function ContenuFr() {
             <strong> tous</strong> les cookies et éléments de stockage utilisés par Kwa-Ba, leur rôle et leur durée.
           </p>
           <p>
-            <strong>Kwa-Ba n&apos;utilise aucun cookie de mesure d&apos;audience, de publicité ni de réseau social.</strong>
+            <strong>Kwa-Ba n&apos;utilise aucun cookie de publicité ni de réseau social.</strong> La mesure d&apos;audience ne
+            fonctionne qu&apos;avec votre accord.
           </p>
           <GererCookiesBouton className="mt-2 px-5 py-3 rounded-xl bg-dark text-white text-sm font-bold">Gérer mes choix de cookies</GererCookiesBouton>
         </>
@@ -61,6 +62,28 @@ export default function ContenuFr() {
           ),
         },
         {
+          id: "mesure",
+          titre: "Mesure d'audience, avec votre accord",
+          contenu: (
+            <>
+              <p>
+                Si vous l&apos;acceptez, Google Analytics nous indique quelles pages sont consultées et d&apos;où viennent les
+                visites, pour améliorer le site. Google reçoit alors votre adresse IP et dépose les cookies ci-dessous. Les
+                adresses transmises ne contiennent aucun identifiant de réservation, de conversation ou de lien personnel, et les
+                fonctions publicitaires sont désactivées.
+              </p>
+              <p>Sans votre accord, ces cookies ne sont pas déposés et Google ne reçoit rien.</p>
+              <table>
+                <thead><tr><th>Nom</th><th>Rôle</th><th>Durée</th></tr></thead>
+                <tbody>
+                  <tr><td><code>_ga</code></td><td>Attribue un identifiant aléatoire à votre navigateur pour compter les visites.</td><td>13 mois après la dernière visite</td></tr>
+                  <tr><td><code>_ga_…</code></td><td>Retient l&apos;état de votre visite.</td><td>13 mois après la dernière visite</td></tr>
+                </tbody>
+              </table>
+            </>
+          ),
+        },
+        {
           id: "stockage",
           titre: "Stockage local du navigateur",
           contenu: (
@@ -95,14 +118,13 @@ export default function ContenuFr() {
         },
         {
           id: "tiers",
-          titre: "Contenus de services tiers (avec votre accord)",
+          titre: "Contenus de services tiers",
           contenu: (
             <>
               <p>
-                <strong>Carte Google Maps</strong> sur la fiche des logements. Elle n&apos;est chargée qu&apos;avec votre accord
-                (bandeau, paramètres des cookies ou bouton « Afficher la carte »). Une fois affichée, Google reçoit votre adresse IP
-                et peut déposer ses propres cookies, régis par la{" "}
-                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">politique de confidentialité de Google</a>.
+                <strong>Fond de carte OpenFreeMap</strong> sur la recherche, la fiche des logements et l&apos;espace hôte. Il reçoit
+                votre adresse IP pour afficher la carte et ne dépose aucun cookie (voir sa{" "}
+                <a href="https://openfreemap.org/privacy/" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>).
               </p>
               <p>
                 <strong>Connexion avec Google</strong> (si elle est proposée) : le service de Google n&apos;est contacté que lorsque vous
@@ -118,9 +140,10 @@ export default function ContenuFr() {
             <>
               <p>
                 Vous pouvez changer d&apos;avis à tout moment, aussi simplement que vous avez donné votre accord : lien
-                « Gérer les cookies » en bas de chaque page. Refuser n&apos;empêche pas d&apos;utiliser Kwa-Ba : seule la carte
-                interactive est remplacée par un encart.
+                « Gérer les cookies » en bas de chaque page. Retirer votre accord arrête la mesure d&apos;audience et
+                supprime ses cookies. Refuser n&apos;empêche pas d&apos;utiliser Kwa-Ba.
               </p>
+              <p>Tant que la mesure d&apos;audience n&apos;est pas activée sur le site, aucun choix ne vous est demandé.</p>
               <p>
                 Vous pouvez aussi supprimer les cookies depuis les réglages de votre navigateur. Plus d&apos;informations :{" "}
                 <a href="https://www.cnil.fr/fr/cookies-et-autres-traceurs/comment-se-proteger/maitriser-votre-navigateur" target="_blank" rel="noopener noreferrer">guide de la CNIL</a>.

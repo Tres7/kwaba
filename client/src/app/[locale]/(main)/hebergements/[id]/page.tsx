@@ -16,7 +16,7 @@ import { FavoriteButton } from "@/features/favoris";
 import RatingBadge from "@/components/avis/RatingBadge";
 import AvisSection from "@/components/avis/AvisSection";
 import ProposerAuGroupe from "@/components/voyage/ProposerAuGroupe";
-import MapEmbed from "@/components/hebergement/MapEmbed";
+import { CarteLogement } from "@/features/carte";
 import LogementsSimilaires from "@/components/hebergement/LogementsSimilaires";
 import api, { apiErrorMessage } from "@/lib/api";
 import { addDays, calculateNights, SERVICE_FEE_RATE, cn, FALLBACK_IMAGE, isoDate, prixNuitFraisInclus } from "@/lib/utils";
@@ -279,10 +279,13 @@ function HebergementContent() {
 
             <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("localisation")}</h2>
-              <div className="h-56 sm:h-64 rounded-xl overflow-hidden bg-light-muted">
-                <MapEmbed lieu={hebergement.location} ville={hebergement.city} />
-              </div>
-              <p className="text-sm text-muted mt-3">{t("adresseApres")}</p>
+              {hebergement.position && (
+                <div className="h-56 sm:h-72 rounded-xl overflow-hidden bg-light-muted mb-3">
+                  <CarteLogement key={hebergement.id} position={hebergement.position} />
+                </div>
+              )}
+              <p className="text-sm font-semibold text-dark">{hebergement.location ? `${hebergement.location}, ` : ""}{hebergement.city}</p>
+              <p className="text-sm text-muted mt-0.5">{t("adresseApres")}</p>
             </section>
           </div>
 

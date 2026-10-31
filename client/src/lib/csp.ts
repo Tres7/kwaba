@@ -1,5 +1,9 @@
 const isDev = process.env.NODE_ENV !== "production";
 
+// Google Analytics, loaded only after consent (lib/mesure-audience.ts). Wildcards: Google answers from regional hosts.
+const GOOGLE_ANALYTICS_IMAGES = "https://*.google-analytics.com https://*.googletagmanager.com";
+const GOOGLE_ANALYTICS_ENVOIS = `${GOOGLE_ANALYTICS_IMAGES} https://*.analytics.google.com`;
+
 /** Receives the browsers' violation reports (app/api/csp-report, with an exact location in nginx). */
 export const RAPPORTS_CSP = "/api/csp-report";
 
@@ -17,13 +21,13 @@ function apiOrigin(): string {
  * injected script, no data sent to an unknown server).
  *
  * With a nonce (pages, middleware.ts): only the scripts carrying the nonce of this response run, then the ones they load
- * themselves ('strict-dynamic': Next.js chunks, Google sign-in, Turnstile). Current browsers ignore 'self', the hosts and
+ * themselves ('strict-dynamic': Next.js chunks, Google sign-in, Turnstile, Google Analytics). Current browsers ignore 'self', the hosts and
  * 'unsafe-inline' next to these two, which only remain for older browsers.
  * Without a nonce (/api/, next.config.ts): those answers are data, no inline script has to run.
  */
 export function politiqueCsp(nonce?: string): string {
   const scripts = nonce
-    ? `'nonce-${nonce}' 'strict-dynamic' 'self' 'unsafe-inline' https://accounts.google.com/gsi/client https://challenges.cloudflare.com`
+    ? `'nonce-${nonce}' 'strict-dynamic' 'self' 'unsafe-inline' https://accounts.google.com/gsi/client https://challenges.cloudflare.com https://www.googletagmanager.com`
     : "'self'";
   return [
     "default-src 'self'",
@@ -33,11 +37,14 @@ export function politiqueCsp(nonce?: string): string {
     // Photos: site and API (R2 storage is served under /photos/), Google avatars, Unsplash (backgrounds in the code and
     // seeded experiences). Same hosts as IMAGES_HOTES_AUTORISES on the API. Never "https:": a script could send data to
     // any site through the address of an image.
-    `img-src 'self' data: blob: ${apiOrigin()} https://*.googleusercontent.com https://images.unsplash.com${isDev ? " http: https:" : ""}`,
+    `img-src 'self' data: blob: ${apiOrigin()} https://*.googleusercontent.com https://images.unsplash.com ${GOOGLE_ANALYTICS_IMAGES}${isDev ? " http: https:" : ""}`,
     "font-src 'self' data:",
-    // The browser only calls the site: the API is reached through the Next.js server (app/api/proxy)
-    `connect-src 'self' https://accounts.google.com${isDev ? " ws:" : ""}`,
-    "frame-src https://accounts.google.com https://maps.google.com https://www.google.com https://challenges.cloudflare.com",
+    // The browser only calls the site (the API is reached through the Next.js server, app/api/proxy), the map tiles and
+    // the audience measurement
+    `connect-src 'self' https://accounts.google.com https://tiles.openfreemap.org ${GOOGLE_ANALYTICS_ENVOIS}${isDev ? " ws:" : ""}`,
+    // MapLibre draws the map in a worker, published with the site
+    "worker-src 'self'",
+    "frame-src https://accounts.google.com https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
     "object-src 'none'",
     "base-uri 'self'",

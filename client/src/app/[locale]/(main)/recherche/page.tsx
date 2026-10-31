@@ -18,8 +18,7 @@ import type { Hebergement, Paginated } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import ChampDestination from "@/components/hebergement/ChampDestination";
 import { EQUIPEMENTS_PRINCIPAUX, IDS_EQUIPEMENTS, estRegle, useEquipements } from "@/components/hebergement/AmenityBadge";
-import MapEmbed from "@/components/hebergement/MapEmbed";
-import { QUARTIERS_LOME } from "@/lib/quartiers";
+import { CarteResultats } from "@/features/carte";
 import { useFormat } from "@/lib/format";
 
 const SORTS = [
@@ -67,6 +66,8 @@ function RechercheContent() {
   const [priceMax, setPriceMax] = useState(params.price_max);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [carte, setCarte] = useState(false);
+  // Listing pointed at in the list: its price stands out on the map
+  const [survol, setSurvol] = useState<string | null>(null);
   const [tousEquipements, setTousEquipements] = useState(false);
 
   // Syncs the form again when the URL changes (search from the navbar, back button…)
@@ -124,9 +125,7 @@ function RechercheContent() {
     pushParams({ equipements: suivants.join(",") });
   };
   const activeCount = [params.type, params.sort, params.price_min, params.price_max, params.petit_dejeuner].filter(Boolean).length + equipements.length;
-  // Map of the searched area (listings have no coordinates yet: no pin per listing)
-  const lieuCarte = params.city || "Lomé";
-  const villeCarte = !params.city || QUARTIERS_LOME.includes(params.city) ? "Lomé, Togo" : "Togo";
+  const grille = cn("grid grid-cols-1 sm:grid-cols-2 gap-5", !carte && "xl:grid-cols-3");
 
   const typesChips = (
     <div className="flex flex-wrap gap-2">
@@ -238,19 +237,21 @@ function RechercheContent() {
         </form>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="flex gap-8">
-          <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-2xl shadow-card p-5 sticky top-24">
-              <div className="flex items-center gap-2 mb-5">
-                <SlidersHorizontal size={16} className="text-primary" />
-                <h2 className="font-heading font-semibold text-dark">{t("filtres")}</h2>
+      <div className={cn("mx-auto px-4 sm:px-6 py-6", carte ? "max-w-[100rem]" : "max-w-7xl")}>
+        <div className={cn("flex", carte ? "flex-col lg:flex-row lg:gap-6" : "gap-8")}>
+          {!carte && (
+            <aside className="w-64 flex-shrink-0 hidden lg:block">
+              <div className="bg-white rounded-2xl shadow-card p-5 sticky top-24">
+                <div className="flex items-center gap-2 mb-5">
+                  <SlidersHorizontal size={16} className="text-primary" />
+                  <h2 className="font-heading font-semibold text-dark">{t("filtres")}</h2>
+                </div>
+                {filtersPanel}
               </div>
-              {filtersPanel}
-            </div>
-          </aside>
+            </aside>
+          )}
 
-          <div className="flex-1 min-w-0">
+          <div className={cn("flex-1 min-w-0", carte && "lg:flex-none lg:w-[55%] xl:w-1/2")}>
             <div className="flex items-center justify-between gap-3 mb-6">
               {isLoading ? (
                 <p className="text-muted text-sm">{t("rechercheEnCours")}</p>
@@ -273,55 +274,71 @@ function RechercheContent() {
                 <button onClick={() => setCarte((c) => !c)} aria-pressed={carte} className="flex items-center gap-2 border border-gray-200 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark">
                   {carte ? <List size={15} /> : <IconeCarte size={15} />} {carte ? t("masquerCarte") : t("afficherCarte")}
                 </button>
-                <button onClick={() => setFiltersOpen(true)} className="lg:hidden flex items-center gap-2 border border-gray-200 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark">
+                <button onClick={() => setFiltersOpen(true)} className={cn("flex items-center gap-2 border border-gray-200 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark", !carte && "lg:hidden")}>
                   <SlidersHorizontal size={15} /> {t("filtres")}{activeCount > 0 && <span className="bg-primary text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">{activeCount}</span>}
                 </button>
               </div>
             </div>
 
-            {/* Types always visible on mobile (the other filters are in the "Filters" panel) */}
-            <div className="lg:hidden -mt-2 mb-5 overflow-x-auto">{typesChips}</div>
+            {/* Types always visible without the side panel (the other filters are in the "Filters" panel) */}
+            <div className={cn("-mt-2 mb-5 overflow-x-auto", !carte && "lg:hidden")}>{typesChips}</div>
 
-            {carte && (
-              <div className="mb-6 h-72 sm:h-96 rounded-2xl overflow-hidden shadow-card bg-white">
-                <MapEmbed lieu={lieuCarte} ville={villeCarte} />
-              </div>
-            )}
-
-            {isError ? (
-              <div className="bg-white rounded-2xl shadow-card p-12 text-center">
-                <p className="text-dark font-semibold mb-2">{t("erreurChargement")}</p>
-                <button onClick={() => refetch()} className="text-primary font-bold hover:underline">{t("reessayer")}</button>
-              </div>
-            ) : isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className="h-72 rounded-2xl skeleton" />)}
-              </div>
-            ) : results.length === 0 && aucunLogement ? (
-              <BandeauBientot />
-            ) : results.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-card p-10 sm:p-16 text-center">
-                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                  <Search size={28} className="text-primary" />
+            {/* On a phone, the map replaces the list */}
+            <div className={cn(carte && "hidden lg:block")}>
+              {isError ? (
+                <div className="bg-white rounded-2xl shadow-card p-12 text-center">
+                  <p className="text-dark font-semibold mb-2">{t("erreurChargement")}</p>
+                  <button onClick={() => refetch()} className="text-primary font-bold hover:underline">{t("reessayer")}</button>
                 </div>
-                <p className="text-dark font-heading font-semibold text-xl mb-2">{t("aucunResultat")}</p>
-                <p className="text-muted">{t("aucunResultatTexte")}</p>
-                <button onClick={() => router.push(pathname)} className="mt-4 text-primary font-bold hover:underline">{t("voirTous")}</button>
-              </div>
-            ) : (
-              <section aria-labelledby="liste-resultats" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                <h2 id="liste-resultats" className="sr-only">{t("listeResultats")}</h2>
-                {results.map((h) => <PropertyCard key={h.id} property={h} query={stayQuery} />)}
-              </section>
-            )}
+              ) : isLoading ? (
+                <div className={grille}>
+                  {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className="h-72 rounded-2xl skeleton" />)}
+                </div>
+              ) : results.length === 0 && aucunLogement ? (
+                <BandeauBientot />
+              ) : results.length === 0 ? (
+                <div className="bg-white rounded-2xl shadow-card p-10 sm:p-16 text-center">
+                  <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                    <Search size={28} className="text-primary" />
+                  </div>
+                  <p className="text-dark font-heading font-semibold text-xl mb-2">{t("aucunResultat")}</p>
+                  <p className="text-muted">{t("aucunResultatTexte")}</p>
+                  <button onClick={() => router.push(pathname)} className="mt-4 text-primary font-bold hover:underline">{t("voirTous")}</button>
+                </div>
+              ) : (
+                <section aria-labelledby="liste-resultats" className={grille}>
+                  <h2 id="liste-resultats" className="sr-only">{t("listeResultats")}</h2>
+                  {results.map((h) => (
+                    <div key={h.id} onMouseEnter={carte ? () => setSurvol(h.id) : undefined} onMouseLeave={carte ? () => setSurvol(null) : undefined}>
+                      <PropertyCard property={h} query={stayQuery} />
+                    </div>
+                  ))}
+                </section>
+              )}
+            </div>
           </div>
+
+          {carte && (
+            // Whole screen on a phone; beside the list on a computer, without going past the bottom of the screen
+            <div className="fixed inset-0 z-50 bg-light-muted lg:z-auto lg:sticky lg:top-24 lg:flex-1 lg:h-[calc(100dvh-14rem)] lg:min-h-[28rem] lg:rounded-2xl lg:overflow-hidden lg:shadow-card">
+              <CarteResultats logements={results} query={stayQuery} ville={params.city} survol={survol} />
+              <div className="lg:hidden absolute top-3 left-3 flex gap-2">
+                <button onClick={() => setCarte(false)} className="flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark shadow-md">
+                  <List size={15} /> {t("masquerCarte")}
+                </button>
+                <button onClick={() => setFiltersOpen(true)} className="flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark shadow-md">
+                  <SlidersHorizontal size={15} /> {t("filtres")}{activeCount > 0 && <span className="bg-primary text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">{activeCount}</span>}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {filtersOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={t("filtres")}>
+        <div className={cn("fixed inset-0 z-[60]", !carte && "lg:hidden")} role="dialog" aria-modal="true" aria-label={t("filtres")}>
           <div className="absolute inset-0 bg-black/40" onClick={() => setFiltersOpen(false)} />
-          <div className="absolute bottom-0 inset-x-0 bg-white rounded-t-3xl p-5 pb-8 max-h-[85vh] overflow-y-auto">
+          <div className="absolute bottom-0 inset-x-0 bg-white rounded-t-3xl p-5 pb-8 max-h-[85vh] overflow-y-auto lg:top-0 lg:right-auto lg:w-96 lg:max-h-none lg:rounded-none lg:rounded-r-3xl">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-heading font-bold text-lg text-dark">{t("filtres")}</h2>
               <button onClick={() => setFiltersOpen(false)} className="p-2 -mr-2" aria-label={t("fermer")}><X size={20} /></button>

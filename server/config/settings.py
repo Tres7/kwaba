@@ -309,6 +309,9 @@ MENTIONS_LEGALES = {
 # Company not registered yet: "SAS en formation" on the site, until the RCCM
 SOCIETE_EN_FORMATION = _env_bool('SOCIETE_EN_FORMATION', 'True')
 
+# Google Analytics measurement ID (G-…). Empty: no audience measurement and no cookie banner (config/site.py)
+GOOGLE_ANALYTICS_ID = _mention('GOOGLE_ANALYTICS_ID')
+
 # Reply-to address of the sent emails (users' replies arrive in this mailbox)
 EMAIL_REPLY_TO = os.getenv('EMAIL_REPLY_TO', '')
 

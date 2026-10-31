@@ -6,6 +6,7 @@ import api, { firstErrorMessage } from "@/lib/api";
 import { useEquipements } from "@/components/hebergement/AmenityBadge";
 import PhotoUploader from "@/components/hote/PhotoUploader";
 import EstimateurRevenus from "@/components/hote/EstimateurRevenus";
+import { ChoixPosition, type PointCarte } from "@/features/carte";
 import type { Revenus } from "@/types/api/paiement";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
@@ -64,6 +65,10 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
     const all = [initial?.image_url, ...(initial?.images ?? [])].filter((u): u is string => !!u);
     return Array.from(new Set(all));
   });
+  // Exact position: required for a new listing, optional for one created before the map
+  const [position, setPosition] = useState<PointCarte | null>(() => (
+    initial?.latitude && initial.longitude ? { lat: Number(initial.latitude), lng: Number(initial.longitude) } : null
+  ));
   const [uploading, setUploading] = useState(false);
   // Copyright and image rights: the host certifies they own the rights to the published photos
   const [droitsPhotos, setDroitsPhotos] = useState(!!initial);
@@ -93,6 +98,10 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
       setErrors({ photos: t("erreurPhotos") });
       return;
     }
+    if (!position && !initial) {
+      setErrors({ latitude: t("erreurPosition") });
+      return;
+    }
     setSaving(true);
     setErrors({});
     const payload = {
@@ -100,6 +109,7 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
       type: form.type,
       city: form.city.trim(),
       location: form.location.trim(),
+      ...(position ? { latitude: position.lat, longitude: position.lng } : {}),
       price_per_night: Number(form.price_per_night),
       max_guests: Number(form.max_guests),
       description: form.description.trim(),
@@ -183,6 +193,12 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
             <EstimateurRevenus className="mt-3 bg-gray-50" partenaire={revenus?.partenaire ?? "particulier"} prix={Number(form.price_per_night)} />
           )}
         </div>
+      </div>
+
+      <div>
+        <p className={labelClass}>{t("position")}</p>
+        <ChoixPosition valeur={position} onChange={setPosition} ville={form.city} />
+        {err("latitude")}
       </div>
 
       <fieldset className="space-y-4">

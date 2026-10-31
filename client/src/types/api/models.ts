@@ -34,6 +34,11 @@ export interface Hebergement {
   type: HebergementType;
   city: string;
   location: string;
+  /** Approximate position shown to travellers (the real one is within rayon_m); null for an older listing */
+  position: { lat: number; lng: number; rayon_m: number } | null;
+  /** Exact position: only sent to the listing's host */
+  latitude?: string | null;
+  longitude?: string | null;
   price_per_night: number;
   rating: number;
   review_count: number;

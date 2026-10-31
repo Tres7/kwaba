@@ -106,7 +106,9 @@ export default function BientotDisponible() {
   const t = useTranslations("bientot");
   const pathname = usePathname();
   const aucunLogement = useAucunLogement();
-  const modules = useReglagesSite().data?.modules;
+  const { data: reglages, isFetched: reglagesLus } = useReglagesSite();
+  const modules = reglages?.modules;
+  const banniereCookies = !!reglages?.mesure_audience;
   const [ouverte, setOuverte] = useState(false);
   // Client-side rendering only (portal): no mismatch with the server HTML
   const [monte, setMonte] = useState(false);
@@ -123,7 +125,7 @@ export default function BientotDisponible() {
 
   // After the cookie choice (the consent banner comes first) and the splash screen
   useEffect(() => {
-    if (!aucunLogement || exclue || montree.current || !doitAfficher()) return;
+    if (!reglagesLus || !aucunLogement || exclue || montree.current || !doitAfficher()) return;
     let minuteur: ReturnType<typeof setTimeout> | undefined;
     const planifier = () => {
       minuteur = setTimeout(() => {
@@ -132,13 +134,13 @@ export default function BientotDisponible() {
         setOuverte(true);
       }, DELAI_MS);
     };
-    if (lireConsentement()) planifier();
+    if (!banniereCookies || lireConsentement()) planifier();
     else window.addEventListener(EVENEMENT, planifier, { once: true });
     return () => {
       clearTimeout(minuteur);
       window.removeEventListener(EVENEMENT, planifier);
     };
-  }, [aucunLogement, exclue]);
+  }, [reglagesLus, banniereCookies, aucunLogement, exclue]);
 
   const fermer = useCallback(() => {
     memoriser("localStorage", CLE_FERMEE, String(Date.now()));

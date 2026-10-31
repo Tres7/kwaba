@@ -40,7 +40,7 @@ class HebergementModel(models.Model):
         ('refusee', 'Refusée'),
     ]
     # Changing one of these fields after the visit puts the listing back into verification (what the agent checked)
-    CHAMPS_VERIFIES = ('city', 'location', 'image_url', 'images')
+    CHAMPS_VERIFIES = ('city', 'location', 'latitude', 'longitude', 'image_url', 'images')
 
     TYPE_CHOICES = [
         ('hotel', 'Hôtel'),
@@ -57,6 +57,9 @@ class HebergementModel(models.Model):
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='hotel')
     city = models.CharField(max_length=100)
     location = models.CharField(max_length=200, blank=True)
+    # Exact position placed by the host, for the agent's visit: travellers only get positions.approchee()
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
     rating = models.FloatField(default=0.0)
     review_count = models.IntegerField(default=0)
