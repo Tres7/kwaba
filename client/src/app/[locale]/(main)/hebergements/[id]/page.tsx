@@ -26,7 +26,7 @@ import Stepper from "@/components/ui/Stepper";
 import Chargement from "@/components/ui/Chargement";
 import { useDevisSejour } from "@/lib/paiement";
 import type { Hebergement } from "@/types/api/models";
-import type { MessagingConversation } from "@/types/api/messaging";
+import { contacterHote } from "@/features/messaging";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 
@@ -143,9 +143,8 @@ function HebergementContent() {
     }
     setContacting(true);
     try {
-      // Idempotent: returns the existing thread if this host was already contacted for this listing
-      const res = await api.post<MessagingConversation>("/v1/messaging/conversations/", { hebergement_id: hebergement.id });
-      router.push(`/messages/${res.data.id}`);
+      const conversation = await contacterHote(hebergement.id);
+      router.push(`/messages/${conversation.id}`);
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setContacting(false);

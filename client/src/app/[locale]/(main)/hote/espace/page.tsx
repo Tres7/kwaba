@@ -17,7 +17,7 @@ import PreinscriptionHote from "@/components/hote/PreinscriptionHote";
 import FenetreOuverture from "@/components/lancement/FenetreOuverture";
 import { usePrelancement } from "@/lib/usePrelancement";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";
-import type { MessagingConversation } from "@/types/api/messaging";
+import { contacterVoyageur as conversationAvecVoyageur } from "@/features/messaging";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 
@@ -49,8 +49,8 @@ function EspaceHoteContent() {
   const contacterVoyageur = async (r: Reservation) => {
     setContactId(r.id);
     try {
-      const res = await api.post<MessagingConversation>("/v1/messaging/conversations/avec-voyageur/", { reservation_id: r.id });
-      router.push(`/messages/${res.data.id}`);
+      const conversation = await conversationAvecVoyageur(r.id);
+      router.push(`/messages/${conversation.id}`);
     } catch (err) {
       toast.error(apiErrorMessage(err, t("erreurConversation")));
       setContactId(null);
