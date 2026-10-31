@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Document, { metadataDuSite } from "@/components/layout/Document";
-import { AgentShell } from "@/features/verifications";
+import AgentShell from "@/features/verifications/admin/AgentShell";
 
 // Field agents' space: in French, never indexed
 export async function generateMetadata(): Promise<Metadata> {

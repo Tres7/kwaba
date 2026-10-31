@@ -1,2 +1,1 @@
-export { default as ExperiencesAdmin } from "./admin/Experiences";
-export { default as Decouvrir } from "./Decouvrir";
+export type { Experience } from "./types";

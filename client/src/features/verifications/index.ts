@@ -1,10 +1,4 @@
-export { default as AccueilAgent } from "./admin/AccueilAgent";
-export { default as AgentShell } from "./admin/AgentShell";
 export { default as AlerteVerifications } from "./admin/AlerteVerifications";
-export { default as FicheMission } from "./admin/FicheMission";
-export { default as Historique } from "./admin/Historique";
-export { default as MesMissions } from "./admin/MesMissions";
-export { default as MissionsAFaire } from "./admin/MissionsAFaire";
 export { useCompteursVerification } from "./compteurs";
 export { useMaPiece } from "./hooks";
 export { default as VerificationIdentite } from "./VerificationIdentite";
