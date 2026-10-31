@@ -1,6 +1,7 @@
 "use client";
 
-import { calculerDevis, creerTransfert, lireReservationLiee, listerAeroports } from "./api";
+import { lireReservation } from "@/features/reservations";
+import { calculerDevis, creerTransfert, listerAeroports } from "./api";
 import { clesTransferts } from "./hooks";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -9,7 +10,7 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { Car, Clock, CreditCard, Lock, Luggage, Plane, ShieldCheck, Smartphone, Users, Wallet } from "lucide-react";
 import { apiErrorMessage } from "@/lib/api";
-import { enEuros, payerTransfert, useConfigPaiement } from "@/lib/paiement";
+import { enEuros, payerTransfert, useConfigPaiement } from "@/features/paiements";
 import { cn, isoDate } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
@@ -86,7 +87,7 @@ function TransfertContent() {
   // Related Kwa-Ba stay: the airport, date, travellers and address are prefilled
   const { data: reservation } = useQuery({
     queryKey: ["reservation", reservationId],
-    queryFn: () => lireReservationLiee(reservationId as string),
+    queryFn: () => lireReservation(reservationId as string),
     enabled: !!reservationId && connecte,
     retry: false,
   });

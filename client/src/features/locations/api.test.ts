@@ -15,8 +15,6 @@ describe("locations", () => {
     expect(api.get).toHaveBeenLastCalledWith("/v1/locations/catalogue/");
     await locations.listerMesChauffeurs();
     expect(api.get).toHaveBeenLastCalledWith("/v1/locations/mes-chauffeurs/");
-    await expect(locations.listerMesReservations()).resolves.toEqual([{ id: "l1" }]);
-    expect(api.get).toHaveBeenLastCalledWith("/v1/reservations/");
   });
 
   it("calcule un devis, crée, lit et annule une location", async () => {

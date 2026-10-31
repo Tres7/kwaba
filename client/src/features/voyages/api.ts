@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { Hebergement, Paginated, Reservation } from "@/types/api/models";
+import type { Hebergement, Paginated } from "@/types/api/models";
 import type { ApercuInvitation, Voyage, VoyageResume } from "./types";
 
 const VOYAGES = "/v1/voyages";
@@ -82,7 +82,3 @@ export async function chercherLogements(params: { q?: string; check_in?: string;
   return (await api.get<Paginated<Hebergement>>("/v1/hebergements/", { params })).data.results;
 }
 
-/** Bookings of the visitor, to share with the group. */
-export async function listerMesReservations() {
-  return (await api.get<Paginated<Reservation>>("/v1/reservations/")).data.results;
-}

@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { List, Map as IconeCarte, Search, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Chargement from "@/components/ui/Chargement";
-import PropertyCard from "./PropertyCard";
+import PropertyCard from "@/components/hebergement/PropertyCard";
 import { BandeauBientot } from "./BientotDisponible";
 import { useAucunLogement } from "./hooks";
 import DateRangeField from "@/components/ui/DateRangeField";

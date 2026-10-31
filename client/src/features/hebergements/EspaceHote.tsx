@@ -13,7 +13,7 @@ import { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
 import HebergementForm from "./HebergementForm";
 import RatingBadge from "@/components/ui/RatingBadge";
-import RevenusHote from "@/components/hote/RevenusHote";
+import { RevenusHote } from "@/features/paiements";
 import CandidatureHote from "./CandidatureHote";
 import { PreinscriptionHote } from "@/features/contrats";
 import FenetreOuverture from "./FenetreOuverture";

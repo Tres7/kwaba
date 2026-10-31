@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import api from "@/lib/api";
 import { estPagePaiement } from "@/lib/url-sure";
-import type { ConfigPaiement, DevisSejour, MoyenPaiement } from "@/types/api/paiement";
+import type { MoyenPaiement } from "@/types/api/paiement";
+import { demarrerPaiementLocation, demarrerPaiementReservation, demarrerPaiementTransfert, lireConfig, lireDevis, lireRevenus } from "./api";
 
 /** Public online payment settings (active or not, rates, countries and operators). */
 export function useConfigPaiement() {
   return useQuery({
     queryKey: ["paiements", "config"],
-    queryFn: async () => (await api.get<ConfigPaiement>("/v1/paiements/config/")).data,
+    queryFn: lireConfig,
     // Short: a payment method enabled on the server must show without reloading the page
     staleTime: 60 * 1000,
   });
@@ -19,12 +19,16 @@ export function useDevisSejour(hebergementId: string, nuits: number, typeLogemen
   const { status } = useSession();
   return useQuery({
     queryKey: ["hebergement", hebergementId, "devis", nuits, typeLogement, nbUnites, status],
-    queryFn: async () => (await api.get<DevisSejour>(`/v1/hebergements/${hebergementId}/devis/`, {
-      params: { nuits, nb_unites: nbUnites, ...(typeLogement ? { type_logement: typeLogement } : {}) },
-    })).data,
+    queryFn: () => lireDevis(hebergementId, { nuits, nb_unites: nbUnites, ...(typeLogement ? { type_logement: typeLogement } : {}) }),
     enabled: nuits > 0 && status !== "loading",
     retry: false,
   });
+}
+
+export const CLE_REVENUS = ["paiements", "revenus"];
+
+export function useRevenus() {
+  return useQuery({ queryKey: CLE_REVENUS, queryFn: lireRevenus });
 }
 
 /** Leaves the site for the provider's payment page. Any other address fails like a refused payment, for the caller to show. */
@@ -35,19 +39,16 @@ export function versPagePaiement(url: string) {
 
 /** Creates the FedaPay transaction and sends the browser to the secure payment page. */
 export async function allerPayer(reservationId: string, moyen?: MoyenPaiement) {
-  const res = await api.post<{ url: string }>(`/v1/paiements/reservations/${reservationId}/payer/`, moyen ? { moyen } : {});
-  versPagePaiement(res.data.url);
+  versPagePaiement(await demarrerPaiementReservation(reservationId, moyen));
 }
 
 /** Payment of an airport transfer: same principle as for a listing. */
 export async function payerTransfert(transfertId: string, moyen: MoyenPaiement) {
-  const res = await api.post<{ url: string }>(`/v1/transferts/${transfertId}/payer/`, { moyen });
-  versPagePaiement(res.data.url);
+  versPagePaiement(await demarrerPaiementTransfert(transfertId, moyen));
 }
 
 export async function payerLocation(locationId: string, moyen: MoyenPaiement) {
-  const res = await api.post<{ url: string }>(`/v1/locations/${locationId}/payer/`, { moyen });
-  versPagePaiement(res.data.url);
+  versPagePaiement(await demarrerPaiementLocation(locationId, moyen));
 }
 
 /** Time left before the dates are released, in minutes (rounded up). */

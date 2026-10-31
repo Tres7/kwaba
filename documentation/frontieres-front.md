@@ -59,5 +59,5 @@ Fichiers avec un appel direct à l'API : `npm run lint`, règle `no-restricted-s
 | 10 | transferts | demande, suivi, profil et back-office | Migré |
 | 11 | locations | catalogue, réservation découpée, suivi, back-office | Migré |
 | 12 | hebergements | accueil, recherche, fiche, espace hôte, calendrier, types, alertes, ouverture | Migré |
-| 13 | reservations, paiements | | À faire |
+| 13 | reservations, paiements | réservation, paiement, annulation, revenus, profil de versement | Migré |
 | 14 | users, auth | | À faire |

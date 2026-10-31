@@ -1,13 +1,13 @@
 "use client";
 
+import { useMesReservations } from "@/features/reservations";
 import { Link } from "@/i18n/navigation";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
-import { listerMesReservations, modifierVoyage, partagerReservation, retirerReservation } from "./api";
+import { modifierVoyage, partagerReservation, retirerReservation } from "./api";
 import { messageErreur } from "./erreurs";
 import type { SectionVoyage } from "./types";
 
@@ -17,10 +17,7 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
   const tVoy = useTranslations("voyageurs");
   const [notes, setNotes] = useState(v.notes);
   const [sauvegarde, setSauvegarde] = useState(false);
-  const { data: mesReservations = [] } = useQuery({
-    queryKey: ["reservations"],
-    queryFn: listerMesReservations,
-  });
+  const { data: mesReservations = [] } = useMesReservations();
   const partagees = new Set(v.reservations.map((r) => r.reservation_id));
   const aPartager = mesReservations.filter((r) => r.status !== "cancelled" && !partagees.has(r.id));
 

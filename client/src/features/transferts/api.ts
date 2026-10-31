@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import type { AeroportAdmin, ChauffeurAdmin } from "@/types/api/admin";
-import type { Paginated, Reservation } from "@/types/api/models";
+import type { Paginated } from "@/types/api/models";
 import type { Aeroport, Devis, Transfert } from "./types";
 
 const TRANSFERTS = "/v1/transferts";
@@ -31,11 +31,6 @@ export async function annulerTransfert(id: string) {
 }
 
 export const adresseCompteRemboursement = (id: string) => `${TRANSFERTS}/${id}/compte-remboursement/`;
-
-/** Related Kwa-Ba stay, to prefill the request. */
-export async function lireReservationLiee(id: string) {
-  return (await api.get<Reservation>(`/v1/reservations/${id}/`)).data;
-}
 
 export async function listerAeroportsAdmin() {
   return (await api.get<AeroportAdmin[]>(`${ADMIN}/aeroports/`)).data;

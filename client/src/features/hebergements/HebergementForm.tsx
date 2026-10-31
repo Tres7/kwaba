@@ -1,8 +1,8 @@
 "use client";
 
-import { creerHebergement, lireRevenus, modifierHebergement } from "./api";
+import { useRevenus } from "@/features/paiements";
+import { creerHebergement, modifierHebergement } from "./api";
 import { useCallback, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { firstErrorMessage } from "@/lib/api";
 import { useEquipements } from "./AmenityBadge";
 import PhotoUploader from "./PhotoUploader";
@@ -35,10 +35,7 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
   const t = useTranslations("annonce");
   const tp = useTranslations("politiqueAnnulation");
   // Partner type set by the team (individual, hotel, founder): the preview's commission is theirs
-  const { data: revenus } = useQuery({
-    queryKey: ["paiements", "revenus"],
-    queryFn: lireRevenus,
-  });
+  const { data: revenus } = useRevenus();
   const [form, setForm] = useState({
     name: initial?.name ?? "",
     type: initial?.type ?? "appartement",

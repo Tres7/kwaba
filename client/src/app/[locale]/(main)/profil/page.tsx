@@ -10,7 +10,8 @@ import { FALLBACK_IMAGE, initials } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useSejoursAEvaluer } from "@/features/avis";
 import { useFavoris } from "@/features/favoris";
-import type { Me, Paginated, Reservation } from "@/types/api/models";
+import { useMesReservations } from "@/features/reservations";
+import type { Me } from "@/types/api/models";
 import { useFormat } from "@/lib/format";
 
 export default function ProfilPage() {
@@ -23,10 +24,7 @@ export default function ProfilPage() {
     queryKey: ["me"],
     queryFn: async () => (await api.get<Me>("/v1/users/me/")).data,
   });
-  const { data: reservations } = useQuery({
-    queryKey: ["reservations"],
-    queryFn: async () => (await api.get<Paginated<Reservation>>("/v1/reservations/")).data.results,
-  });
+  const { data: reservations } = useMesReservations();
   const { data: aEvaluer = [] } = useSejoursAEvaluer();
   const { data: favoris } = useFavoris();
 

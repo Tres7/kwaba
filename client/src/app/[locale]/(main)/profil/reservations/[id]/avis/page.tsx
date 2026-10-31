@@ -3,14 +3,15 @@
 import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
-import api, { firstErrorMessage } from "@/lib/api";
+import { firstErrorMessage } from "@/lib/api";
 import { publierAvis, useRafraichirAvis } from "@/features/avis";
+import { clesReservations, useReservation } from "@/features/reservations";
 import { cn, FALLBACK_IMAGE } from "@/lib/utils";
 import SubPageHeader from "@/components/layout/SubPageHeader";
-import type { CritereAvis, Reservation } from "@/types/api/models";
+import type { CritereAvis } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 
@@ -57,11 +58,7 @@ export default function LaisserAvisPage() {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState("");
 
-  const { data: reservation, isLoading, isError } = useQuery({
-    queryKey: ["reservation", id],
-    queryFn: async () => (await api.get<Reservation>(`/v1/reservations/${id}/`)).data,
-    retry: false,
-  });
+  const { data: reservation, isLoading, isError } = useReservation(id);
 
   if (isLoading) return <div className="max-w-2xl mx-auto px-4 py-10"><div className="h-96 skeleton rounded-3xl" /></div>;
 
@@ -97,7 +94,7 @@ export default function LaisserAvisPage() {
     setErreur("");
     try {
       await publierAvis({ reservation: reservation.id, note, ...criteres, commentaire: commentaire.trim() });
-      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      queryClient.invalidateQueries({ queryKey: clesReservations.toutes });
       rafraichirAvis();
       toast.success(t("merci"));
       router.push(`/hebergements/${h.id}#avis`);
