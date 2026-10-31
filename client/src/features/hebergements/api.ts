@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import type { City, Hebergement, Paginated, Reservation, TypeLogement } from "@/types/api/models";
+import type { BrouillonAnnonce, DonneesAnnonce } from "./brouillons";
 import type { Suggestions } from "./ChampDestination";
 import type { PeriodeIndispo } from "./disponibilites";
 
@@ -28,6 +29,22 @@ export async function modifierHebergement(id: string, champs: Record<string, unk
 
 export async function supprimerHebergement(id: string) {
   await api.delete(`${HEBERGEMENTS}/${id}/`);
+}
+
+export async function listerBrouillons() {
+  return (await api.get<{ results: BrouillonAnnonce[] }>(`${HEBERGEMENTS}/brouillons/`)).data.results;
+}
+
+export async function creerBrouillon(donnees: DonneesAnnonce) {
+  return (await api.post<BrouillonAnnonce>(`${HEBERGEMENTS}/brouillons/`, { donnees })).data;
+}
+
+export async function modifierBrouillon(id: string, donnees: DonneesAnnonce) {
+  return (await api.put<BrouillonAnnonce>(`${HEBERGEMENTS}/brouillons/${id}/`, { donnees })).data;
+}
+
+export async function supprimerBrouillon(id: string) {
+  await api.delete(`${HEBERGEMENTS}/brouillons/${id}/`);
 }
 
 export async function listerVilles() {

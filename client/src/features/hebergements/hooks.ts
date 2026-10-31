@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { compterLogements, lireHebergement, lirePrelancement, listerVilles } from "./api";
+import { compterLogements, lireHebergement, lirePrelancement, listerBrouillons, listerVilles } from "./api";
 
 export const clesHebergements = {
   tous: ["hebergements"],
   villes: ["villes"],
   mes: ["hebergements", "mine"],
+  brouillons: ["hebergements", "brouillons"],
   fiche: (id: string) => ["hebergement", id],
   ficheHote: (id: string) => ["hebergement", id, "hote"],
   disponibilites: (id: string) => ["disponibilites", id],
@@ -17,6 +18,11 @@ export function useVilles(actif = true) {
 }
 
 /** Listing as its host sees it. */
+/** Host space: listings started and saved as drafts, the most recent first. */
+export function useBrouillons(actif = true) {
+  return useQuery({ queryKey: clesHebergements.brouillons, queryFn: listerBrouillons, enabled: actif });
+}
+
 export function useHebergementHote(id: string) {
   return useQuery({ queryKey: clesHebergements.ficheHote(id), queryFn: () => lireHebergement(id) });
 }
