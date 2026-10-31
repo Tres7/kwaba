@@ -6,8 +6,8 @@ import { AlertTriangle, CheckCircle2, FileDown, Loader2, PenLine } from "lucide-
 import { toast } from "sonner";
 import { messageErreurPdf } from "@/lib/documents";
 import { apiErrorMessage, estErreurApi } from "@/lib/api";
-import PadSignature from "@/components/contrats/PadSignature";
-import type { ContratPublic, SignatureContrat } from "@/types/api/contrat";
+import PadSignature from "./PadSignature";
+import type { ContratPublic, SignatureContrat } from "./types";
 import { useFormat } from "@/lib/format";
 
 /** Reading the contract then signing: typed name, drawn signature, express consent. */

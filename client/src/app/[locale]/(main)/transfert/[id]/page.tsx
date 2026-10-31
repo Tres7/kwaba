@@ -10,7 +10,7 @@ import api, { apiErrorMessage } from "@/lib/api";
 import { payerTransfert, minutesRestantes, useConfigPaiement } from "@/lib/paiement";
 import { cn } from "@/lib/utils";
 import CompteRemboursementDialog from "@/components/paiement/CompteRemboursementDialog";
-import Documents from "@/components/documents/Documents";
+import Documents from "@/features/documents/Documents";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import type { StatutTransfert, Transfert } from "@/types/api/transfert";
 import { useTranslations } from "next-intl";

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
-import { messageErreurPdf, telechargerPdf } from "@/lib/documents";
+import { apiErrorMessage } from "@/lib/api";
+import { messageErreurPdf } from "@/lib/documents";
+import { agirSurContrat, creerContrat, listerParties, telechargerContratAdmin } from "../api";
 import { cn, formatDate } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
@@ -13,7 +14,7 @@ import ConfirmDialog, { type Confirmation } from "@/components/backoffice/Confir
 import Panneau, { Champ, Liste, Saisie, erreursApi } from "@/components/backoffice/Panneau";
 import Select from "@/components/ui/Select";
 import type { ContratAdmin, PartieContrat } from "@/types/api/admin";
-import type { TypeContrat } from "@/types/api/contrat";
+import type { TypeContrat } from "../types";
 
 export const TYPES: { value: TypeContrat; label: string }[] = [
   { value: "hote", label: "Hôte particulier" }, { value: "hotel", label: "Hôtel" }, { value: "loueur", label: "Propriétaire de véhicule" },
@@ -44,7 +45,7 @@ export default function Contrats() {
   const qPartie = useDebounced(recherchePartie);
   const { data: parties, isFetching: chargementParties } = useQuery({
     queryKey: ["admin", "contrats-parties", typeNouveau, qPartie],
-    queryFn: async () => (await api.get<PartieContrat[]>("/v1/admin/contrats/parties/", { params: { type: typeNouveau, q: qPartie } })).data,
+    queryFn: () => listerParties<PartieContrat>(typeNouveau, qPartie),
     enabled: ouvert,
   });
 
@@ -53,7 +54,7 @@ export default function Contrats() {
   const telecharger = async (c: ContratAdmin) => {
     setTelechargement(c.id);
     try {
-      await telechargerPdf(`/v1/admin/contrats/${c.id}/pdf/`, `contrat-${c.reference}.pdf`);
+      await telechargerContratAdmin(c);
     } catch (err) {
       toast.error(await messageErreurPdf(err));
     } finally {
@@ -66,7 +67,7 @@ export default function Contrats() {
     setEnvoi(true);
     setErreurs({});
     try {
-      const { data: c } = await api.post<ContratAdmin>("/v1/admin/contrats/", { type: typeNouveau, partie_id: partie.id });
+      const c = await creerContrat<ContratAdmin>(typeNouveau, partie.id);
       toast.success(`Contrat ${c.reference} envoyé à ${c.partie_email}`);
       setOuvert(false);
       rafraichir();
@@ -79,7 +80,7 @@ export default function Contrats() {
 
   const action = async (c: ContratAdmin, nom: "renvoyer" | "annuler", motif?: string) => {
     try {
-      await api.post(`/v1/admin/contrats/${c.id}/${nom}/`, motif ? { motif } : {});
+      await agirSurContrat(c.id, nom, motif);
       toast.success(nom === "renvoyer" ? `Nouveau lien envoyé à ${c.partie_email}` : "Contrat annulé");
       rafraichir();
     } catch (err) {

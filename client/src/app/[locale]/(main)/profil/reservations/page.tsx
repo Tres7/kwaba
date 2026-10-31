@@ -9,7 +9,7 @@ import api, { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
 import PropertyCard from "@/components/hebergement/PropertyCard";
 import CompteRemboursementDialog from "@/components/paiement/CompteRemboursementDialog";
-import Documents from "@/components/documents/Documents";
+import Documents from "@/features/documents/Documents";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";

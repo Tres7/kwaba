@@ -13,7 +13,7 @@ import HebergementForm from "@/components/hote/HebergementForm";
 import RatingBadge from "@/components/ui/RatingBadge";
 import RevenusHote from "@/components/hote/RevenusHote";
 import CandidatureHote from "@/components/hote/CandidatureHote";
-import PreinscriptionHote from "@/components/hote/PreinscriptionHote";
+import { PreinscriptionHote } from "@/features/contrats";
 import FenetreOuverture from "@/components/lancement/FenetreOuverture";
 import { usePrelancement } from "@/lib/usePrelancement";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";

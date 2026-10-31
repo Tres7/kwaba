@@ -3,10 +3,10 @@
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Contrats from "@/components/backoffice/documents/Contrats";
-import Factures from "@/components/backoffice/documents/Factures";
-import ModelesContrats from "@/components/backoffice/documents/ModelesContrats";
-import Societe from "@/components/backoffice/documents/Societe";
+import Contrats from "@/features/contrats/admin/Contrats";
+import ModelesContrats from "@/features/contrats/admin/ModelesContrats";
+import Factures from "@/features/documents/admin/Factures";
+import Societe from "@/features/documents/admin/Societe";
 
 const ONGLETS = [
   { id: "factures", label: "Factures", Composant: Factures },

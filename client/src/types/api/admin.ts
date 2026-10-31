@@ -1,4 +1,4 @@
-import type { StatutContrat, TypeContrat } from "./contrat";
+import type { StatutContrat, TypeContrat } from "@/features/contrats";
 
 // Contrat : documentation/modules/backoffice-api.md
 

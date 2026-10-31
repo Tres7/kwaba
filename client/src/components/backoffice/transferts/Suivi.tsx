@@ -8,7 +8,7 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
 import ConfirmDialog, { type Confirmation } from "@/components/backoffice/ConfirmDialog";
-import BoutonFacture from "@/components/backoffice/documents/BoutonFacture";
+import { BoutonFacture } from "@/features/documents";
 import Panneau, { Champ, Liste, erreursApi } from "@/components/backoffice/Panneau";
 import Select from "@/components/ui/Select";
 import type { AdminTransfert } from "@/types/api/admin";

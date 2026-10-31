@@ -4,17 +4,17 @@ import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, FileSignature } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import Panneau, { Champ, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
 import type { ModeleContrat } from "@/types/api/admin";
+import { enregistrerModele, listerModeles } from "../api";
 
 /** Contract templates, versioned: contracts already issued keep the text of their version. */
 export default function ModelesContrats() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "contrats-modeles"],
-    queryFn: async () => (await api.get<{ modeles: ModeleContrat[]; variables: Record<string, string> }>("/v1/admin/contrats/modeles/")).data,
+    queryFn: () => listerModeles<ModeleContrat>(),
   });
   const [edition, setEdition] = useState<ModeleContrat | null>(null);
   const [titre, setTitre] = useState("");
@@ -40,7 +40,7 @@ export default function ModelesContrats() {
     setEnvoi(true);
     setErreurs({});
     try {
-      const { data: m } = await api.put<ModeleContrat>(`/v1/admin/contrats/modeles/${edition.type}/`, { titre, corps });
+      const m = await enregistrerModele<ModeleContrat>(edition.type, { titre, corps });
       toast.success(m.version > edition.version ? `Modèle enregistré (version ${m.version})` : "Aucune modification");
       setEdition(null);
       queryClient.invalidateQueries({ queryKey: ["admin", "contrats-modeles"] });

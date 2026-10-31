@@ -9,7 +9,7 @@ import { CheckCircle, Calendar, MapPin, Users, ArrowRight, MessageCircle, Plane 
 import api from "@/lib/api";
 import { FALLBACK_IMAGE } from "@/lib/utils";
 import type { Reservation } from "@/types/api/models";
-import Documents from "@/components/documents/Documents";
+import Documents from "@/features/documents/Documents";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 
