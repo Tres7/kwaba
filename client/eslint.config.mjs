@@ -29,7 +29,7 @@ const eslintConfig = [
   {
     // The back-office and the agents' space stay in French
     files: ["src/app/*locale*/**/*.{ts,tsx}", "src/components/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}"],
-    ignores: ["src/components/backoffice/**", "src/components/agent/**"],
+    ignores: ["src/components/backoffice/**", "src/components/agent/**", "src/features/*/admin/**"],
     rules: { "no-restricted-imports": ["error", { paths: [FONCTIONS_DE_LANGUE], patterns: [CLIENT_UNIQUE, PAR_INDEX] }] },
   },
   {

@@ -1,22 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Compass, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { cn, formatPrice } from "@/lib/utils";
 import { Pill } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Liste, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
 import type { CategorieExperience, ExperienceAdmin } from "@/types/api/admin";
+import { creerExperience, modifierExperience, supprimerExperience } from "../api";
+import { useExperiencesAdmin, useRafraichirExperiencesAdmin } from "../hooks";
 
 export const CATEGORIES_EXPERIENCE: { value: CategorieExperience; label: string }[] = [
   { value: "activites", label: "Activité" }, { value: "restaurants", label: "Restaurant" },
   { value: "loisirs", label: "Loisir" }, { value: "sites", label: "Site touristique" },
 ];
-const ADRESSE = "/v1/admin/experiences/";
-// The API client sends JSON by default: header needed to send the photo
-const MULTIPART = { headers: { "Content-Type": "multipart/form-data" } };
 
 type Formulaire = Omit<ExperienceAdmin, "id" | "photo" | "prix" | "ordre"> & { prix: string; ordre: string };
 const VIDE: Formulaire = {
@@ -30,11 +28,8 @@ const versFormulaire = (e: ExperienceAdmin): Formulaire => ({
 });
 
 export default function Experiences() {
-  const queryClient = useQueryClient();
-  const { data: experiences, isLoading } = useQuery({
-    queryKey: ["admin", "experiences"],
-    queryFn: async () => (await api.get<ExperienceAdmin[]>(ADRESSE)).data,
-  });
+  const rafraichir = useRafraichirExperiencesAdmin();
+  const { data: experiences, isLoading } = useExperiencesAdmin();
   const [filtre, setFiltre] = useState<CategorieExperience | "">("");
   const [edition, setEdition] = useState<ExperienceAdmin | "nouvelle" | null>(null);
   const [form, setForm] = useState<Formulaire>(VIDE);
@@ -67,11 +62,11 @@ export default function Experiences() {
     for (const [k, v] of Object.entries(form)) corps.append(k, typeof v === "boolean" ? (v ? "true" : "false") : String(v));
     if (photo) corps.append("image", photo);
     try {
-      if (edition === "nouvelle") await api.post(ADRESSE, corps, MULTIPART);
-      else if (edition) await api.patch(`${ADRESSE}${edition.id}/`, corps, MULTIPART);
+      if (edition === "nouvelle") await creerExperience(corps);
+      else if (edition) await modifierExperience(edition.id, corps);
       toast.success("Expérience enregistrée");
       setEdition(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "experiences"] });
+      rafraichir();
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {
@@ -82,10 +77,10 @@ export default function Experiences() {
   const supprimer = async () => {
     if (!edition || edition === "nouvelle" || !window.confirm(`Supprimer « ${edition.nom} » ? Elle disparaît de la page Découvrir.`)) return;
     try {
-      await api.delete(`${ADRESSE}${edition.id}/`);
+      await supprimerExperience(edition.id);
       toast.success("Expérience supprimée");
       setEdition(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "experiences"] });
+      rafraichir();
     } catch (err) {
       toast.error(apiErrorMessage(err, "Suppression impossible."));
     }

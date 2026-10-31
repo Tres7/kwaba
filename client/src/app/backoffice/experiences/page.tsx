@@ -1,4 +1,4 @@
-import Experiences from "@/components/backoffice/experiences/Experiences";
+import { ExperiencesAdmin } from "@/features/experiences";
 
 export const metadata = { title: "Expériences" };
 
@@ -11,7 +11,7 @@ export default function ExperiencesPage() {
           Activités, restaurants, loisirs et sites de la page Découvrir : ajout, photo, traduction anglaise, publication.
         </p>
       </div>
-      <Experiences />
+      <ExperiencesAdmin />
     </div>
   );
 }
