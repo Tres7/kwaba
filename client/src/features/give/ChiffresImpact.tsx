@@ -1,4 +1,4 @@
-import type { Impact } from "@/types/api/give";
+import type { Impact } from "./types";
 import { useLocale, useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 

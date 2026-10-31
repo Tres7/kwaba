@@ -9,7 +9,7 @@ import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
 import type { PaysPaiement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
-import { useTextesGive } from "@/lib/give";
+import { useNomsPays } from "@/lib/pays";
 import { useFormat } from "@/lib/format";
 
 interface Props {
@@ -23,7 +23,7 @@ interface Props {
 /** Asks the traveller for the Mobile Money account to refund them on (FedaPay does not give the charged number). */
 export default function CompteRemboursementDialog({ endpoint, montant, onClose, onDone }: Props) {
   const { formatPrice } = useFormat();
-  const { PAYS } = useTextesGive();
+  const PAYS = useNomsPays();
   const t = useTranslations("remboursementDialog");
   const { data: config } = useConfigPaiement();
   const [pays, setPays] = useState<PaysPaiement["code"]>("TG");

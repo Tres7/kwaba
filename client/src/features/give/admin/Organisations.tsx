@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { HandHeart } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import { Pill } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Liste, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
 import type { CauseGive, OngAdmin, ProjetAdmin } from "@/types/api/admin";
+import { creerOng, creerProjet, depublierOng, modifierOng, modifierProjet } from "../api";
+import { clesGive, useOngAdmin, useProjetsAdmin } from "../hooks";
 
 export const CAUSES: { value: CauseGive; label: string }[] = [
   { value: "education", label: "Éducation" }, { value: "sante", label: "Santé" },
@@ -17,7 +18,6 @@ export const CAUSES: { value: CauseGive; label: string }[] = [
 const PAYS = [{ value: "TG", label: "Togo" }, { value: "BJ", label: "Bénin" }, { value: "BF", label: "Burkina Faso" },
   { value: "NE", label: "Niger" }, { value: "ML", label: "Mali" }];
 // The API client sends JSON by default: header needed to send the photos
-const MULTIPART = { headers: { "Content-Type": "multipart/form-data" } };
 
 type FormOng = Omit<OngAdmin, "id" | "logo" | "image" | "collecte" | "nb_dons" | "nb_projets" | "verifiee_le"> & { verifiee_le: string };
 const ONG_VIDE: FormOng = { nom: "", slug: "", cause: "education", pays: "TG", ville: "", resume: "", description: "", site_web: "",
@@ -39,10 +39,7 @@ function formulaire(valeurs: Record<string, unknown>, photos: Record<string, Fil
 
 export default function Organisations() {
   const queryClient = useQueryClient();
-  const { data: ongs, isLoading } = useQuery({
-    queryKey: ["admin", "give", "organisations"],
-    queryFn: async () => (await api.get<OngAdmin[]>("/v1/admin/give/organisations/")).data,
-  });
+  const { data: ongs, isLoading } = useOngAdmin();
   const [edition, setEdition] = useState<OngAdmin | "nouvelle" | null>(null);
   const [form, setForm] = useState<FormOng>(ONG_VIDE);
   const [photos, setPhotos] = useState<{ logo: File | null; image: File | null }>({ logo: null, image: null });
@@ -54,11 +51,7 @@ export default function Organisations() {
   const [projet, setProjet] = useState<ProjetAdmin | "nouveau" | null>(null);
   const [formProjet, setFormProjet] = useState<FormProjet>(PROJET_VIDE);
   const [photoProjet, setPhotoProjet] = useState<File | null>(null);
-  const { data: projets = [] } = useQuery({
-    queryKey: ["admin", "give", "projets", ongProjets?.id],
-    queryFn: async () => (await api.get<ProjetAdmin[]>(`/v1/admin/give/organisations/${ongProjets!.id}/projets/`)).data,
-    enabled: !!ongProjets,
-  });
+  const { data: projets = [] } = useProjetsAdmin(ongProjets);
 
   const champ = <K extends keyof FormOng>(k: K) => (v: FormOng[K]) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -75,15 +68,14 @@ export default function Organisations() {
     const valeurs: Record<string, unknown> = { ...form, verifiee_le: form.verifiee_le || null };
     if (edition === "nouvelle" && !form.slug) delete valeurs.slug;
     try {
-      if (edition === "nouvelle") await api.post("/v1/admin/give/organisations/", formulaire(valeurs, photos), MULTIPART);
+      if (edition === "nouvelle") await creerOng(formulaire(valeurs, photos));
       else if (edition) {
-        await api.patch(`/v1/admin/give/organisations/${edition.id}/`, formulaire(valeurs, photos), MULTIPART);
-        // Unpublish: empty date, which multipart cannot send
-        if (!form.verifiee_le && edition.verifiee_le) await api.patch(`/v1/admin/give/organisations/${edition.id}/`, { verifiee_le: null });
+        await modifierOng(edition.id, formulaire(valeurs, photos));
+        if (!form.verifiee_le && edition.verifiee_le) await depublierOng(edition.id);
       }
       toast.success("ONG enregistrée");
       setEdition(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "give"] });
+      queryClient.invalidateQueries({ queryKey: clesGive.admin });
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {
@@ -103,11 +95,11 @@ export default function Organisations() {
     setEnvoi(true);
     const valeurs = { ...formProjet, objectif: formProjet.objectif || null };
     try {
-      if (projet === "nouveau") await api.post(`/v1/admin/give/organisations/${ongProjets.id}/projets/`, formulaire(valeurs, { image: photoProjet }), MULTIPART);
-      else if (projet) await api.patch(`/v1/admin/give/projets/${projet.id}/`, formulaire(valeurs, { image: photoProjet }), MULTIPART);
+      if (projet === "nouveau") await creerProjet(ongProjets.id, formulaire(valeurs, { image: photoProjet }));
+      else if (projet) await modifierProjet(projet.id, formulaire(valeurs, { image: photoProjet }));
       toast.success("Projet enregistré");
       setProjet(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "give"] });
+      queryClient.invalidateQueries({ queryKey: clesGive.admin });
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {

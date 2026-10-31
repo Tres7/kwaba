@@ -4,11 +4,13 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { CalendarClock, CreditCard, Lock, ShieldCheck, Smartphone, Wallet } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
-import { calculerDon, dateReversement, useConfigGive } from "@/lib/give";
+import { apiErrorMessage } from "@/lib/api";
+import { demarrerDon } from "./api";
+import { useConfigGive } from "./hooks";
+import { calculerDon, dateReversement } from "./regles";
 import { enEuros, versPagePaiement } from "@/lib/paiement";
 import { cn } from "@/lib/utils";
-import type { OrganisationDetail } from "@/types/api/give";
+import type { OrganisationDetail } from "./types";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
@@ -51,11 +53,11 @@ export default function FormulaireDon({ organisation, projetId }: { organisation
     setEnvoi(true);
     setErreur("");
     try {
-      const res = await api.post<{ id: string; url: string }>("/v1/give/dons/", {
+      const { url } = await demarrerDon({
         organisation: organisation.slug, projet: projet?.id ?? null, montant: valeur,
         couvre_frais: couvreFrais, moyen: moyenChoisi, partage_identite: partage,
       });
-      versPagePaiement(res.data.url);
+      versPagePaiement(url);
     } catch (err) {
       setErreur(apiErrorMessage(err, t("erreurDemarrage")));
       setEnvoi(false);
