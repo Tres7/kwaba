@@ -1,6 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import BoutonConcierge from "@/components/concierge/BoutonConcierge";
+import { BoutonConcierge } from "@/features/concierge";
 import BientotDisponible from "@/components/lancement/BientotDisponible";
 import BandeauOuverture from "@/components/lancement/BandeauOuverture";
 

@@ -4,11 +4,12 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { Car, MapPin, Star, Users } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { FALLBACK_IMAGE } from "@/lib/utils";
-import type { Carte, CarteLogement, CarteTogether, CarteTransfert } from "@/types/api/concierge";
 import { useLocale, useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { creerVoyageDeGroupe } from "./api";
+import type { Carte, CarteLogement, CarteTogether, CarteTransfert } from "./types";
 
 function Logement({ c }: { c: CarteLogement }) {
   const { formatPrice } = useFormat();
@@ -71,11 +72,7 @@ function Together({ c }: { c: CarteTogether }) {
   const creer = async () => {
     setEnvoi(true);
     try {
-      const v = await api.post<{ id: string }>("/v1/voyages/", {
-        nom: c.nom, destination: c.destination, date_debut: c.arrivee, date_fin: c.depart, nb_voyageurs: c.voyageurs,
-      });
-      await Promise.allSettled(c.logements.map((l) => api.post(`/v1/voyages/${v.data.id}/propositions/`, { hebergement: l.id })));
-      router.push(`/together/${v.data.id}?nouveau=1`);
+      router.push(`/together/${await creerVoyageDeGroupe(c)}?nouveau=1`);
     } catch (err) {
       toast.error(apiErrorMessage(err, t("erreurVoyage")));
       setEnvoi(false);
