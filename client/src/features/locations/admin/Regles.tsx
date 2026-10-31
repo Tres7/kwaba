@@ -1,11 +1,10 @@
 "use client";
 
+import { enregistrerRegles, lireRegles } from "../api";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { Champ, Interrupteur, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
-import type { ReglesLocation } from "@/types/api/admin";
 
 const VIDE = {
   commission_pourcent: "15", delai_min_jours: "2", duree_max_jours: "30", annulation_gratuite_heures: "48", conditions: "",
@@ -17,7 +16,7 @@ export default function Regles() {
   const queryClient = useQueryClient();
   const { data: regles, isLoading } = useQuery({
     queryKey: ["admin", "location", "regles"],
-    queryFn: async () => (await api.get<ReglesLocation | null>("/v1/admin/location/regles/")).data,
+    queryFn: lireRegles,
   });
   const [form, setForm] = useState(VIDE);
   const [erreurs, setErreurs] = useState<Record<string, string>>({});
@@ -33,7 +32,7 @@ export default function Regles() {
     setEnvoi(true);
     setErreurs({});
     try {
-      await api.put("/v1/admin/location/regles/", form);
+      await enregistrerRegles(form);
       toast.success("Règles enregistrées");
       queryClient.invalidateQueries({ queryKey: ["admin", "location", "regles"] });
     } catch (err) {

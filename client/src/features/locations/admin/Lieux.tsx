@@ -1,9 +1,10 @@
 "use client";
 
+import { creerLieu, modifierLieu } from "../api";
+import { clesLocations, useLieuxAdmin } from "../hooks";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import AdminTable, { ActionButton, Pill, type Colonne } from "@/components/backoffice/AdminTable";
 import Panneau, { Champ, Interrupteur, Liste, Saisie, erreursApi } from "@/components/backoffice/Panneau";
@@ -17,10 +18,7 @@ const VIDE = { nom: "", ville: "", fuseau: "Africa/Lome" as LieuRemise["fuseau"]
 
 export default function Lieux() {
   const queryClient = useQueryClient();
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["admin", "location", "lieux"],
-    queryFn: async () => (await api.get<LieuRemise[]>("/v1/admin/location/lieux/")).data,
-  });
+  const { data, isLoading, isError, refetch } = useLieuxAdmin();
   const [edition, setEdition] = useState<LieuRemise | "nouveau" | null>(null);
   const [form, setForm] = useState(VIDE);
   const [erreurs, setErreurs] = useState<Record<string, string>>({});
@@ -36,11 +34,11 @@ export default function Lieux() {
     setEnvoi(true);
     const corps = { ...form, frais: Number(form.frais) || 0, ordre: Number(form.ordre) || 0 };
     try {
-      if (edition === "nouveau") await api.post("/v1/admin/location/lieux/", corps);
-      else if (edition) await api.patch(`/v1/admin/location/lieux/${edition.id}/`, corps);
+      if (edition === "nouveau") await creerLieu(corps);
+      else if (edition) await modifierLieu(edition.id, corps);
       toast.success("Lieu enregistré");
       setEdition(null);
-      queryClient.invalidateQueries({ queryKey: ["admin", "location"] });
+      queryClient.invalidateQueries({ queryKey: clesLocations.admin });
     } catch (err) {
       setErreurs(erreursApi(err));
     } finally {

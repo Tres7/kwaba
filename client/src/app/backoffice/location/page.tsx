@@ -3,11 +3,11 @@
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Suivi from "@/components/backoffice/location/Suivi";
-import Categories from "@/components/backoffice/location/Categories";
-import Lieux from "@/components/backoffice/location/Lieux";
-import Loueurs from "@/components/backoffice/location/Loueurs";
-import Regles from "@/components/backoffice/location/Regles";
+import Categories from "@/features/locations/admin/Categories";
+import Lieux from "@/features/locations/admin/Lieux";
+import Loueurs from "@/features/locations/admin/Loueurs";
+import Regles from "@/features/locations/admin/Regles";
+import Suivi from "@/features/locations/admin/Suivi";
 
 const ONGLETS = [
   { id: "suivi", label: "Locations", Composant: Suivi },

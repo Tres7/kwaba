@@ -1,9 +1,10 @@
 "use client";
 
+import { annulerLocationAdmin, attribuerLocation, lireChoixAttribution, retenirCaution } from "../api";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
@@ -11,7 +12,7 @@ import ConfirmDialog, { type Confirmation } from "@/components/backoffice/Confir
 import { BoutonFacture } from "@/features/documents";
 import Panneau, { Champ, Liste, Saisie, erreursApi } from "@/components/backoffice/Panneau";
 import Select from "@/components/ui/Select";
-import type { AdminLocation, ChoixAttribution } from "@/types/api/admin";
+import type { AdminLocation } from "@/types/api/admin";
 
 const STATUTS = [
   { value: "", label: "Tous les statuts" },
@@ -42,7 +43,7 @@ export default function Suivi() {
 
   const { data: choix } = useQuery({
     queryKey: ["admin", "location", "attribution", attribution?.id],
-    queryFn: async () => (await api.get<ChoixAttribution>(`/v1/admin/location/locations/${attribution!.id}/loueurs/`, { params: { chauffeurs: 1 } })).data,
+    queryFn: () => lireChoixAttribution((attribution as AdminLocation).id),
     enabled: !!attribution,
   });
   const loueurs = choix?.partenaires ?? [];
@@ -60,7 +61,7 @@ export default function Suivi() {
     if (!attribution) return;
     setEnvoi(true);
     try {
-      await api.post(`/v1/admin/location/locations/${attribution.id}/attribuer/`, {
+      await attribuerLocation(attribution.id, {
         ...form, partenaire: form.partenaire ? Number(form.partenaire) : null, chauffeur: form.chauffeur ? Number(form.chauffeur) : null,
       });
       toast.success("Location attribuée : le voyageur reçoit les coordonnées");
@@ -83,7 +84,7 @@ export default function Suivi() {
     if (!retenue) return;
     setEnvoi(true);
     try {
-      await api.post(`/v1/admin/location/locations/${retenue.id}/caution/`, { montant: Number(formRetenue.montant || 0), motif: formRetenue.motif });
+      await retenirCaution(retenue.id, { montant: Number(formRetenue.montant || 0), motif: formRetenue.motif });
       toast.success(Number(formRetenue.montant) > 0 ? "Retenue enregistrée : elle sera versée au propriétaire" : "Retenue annulée");
       setRetenue(null);
       queryClient.invalidateQueries({ queryKey: ["admin"] });
@@ -128,7 +129,7 @@ export default function Suivi() {
           message: <>La location <strong>{l.reference}</strong> sera annulée et le voyageur remboursé intégralement s&apos;il a payé{l.caution_en_ligne ? ", caution comprise" : ""}.</>,
           action: async (motif) => {
             try {
-              await api.post(`/v1/admin/location/locations/${l.id}/annuler/`, { motif });
+              await annulerLocationAdmin(l.id, motif);
               toast.success("Location annulée");
               queryClient.invalidateQueries({ queryKey: ["admin"] });
             } catch (err) {
