@@ -15,7 +15,7 @@ import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
 import { FavoriteButton } from "@/features/favoris";
 import RatingBadge from "@/components/ui/RatingBadge";
 import { AvisSection } from "@/features/avis";
-import ProposerAuGroupe from "@/components/voyage/ProposerAuGroupe";
+import { ProposerAuGroupe } from "@/features/voyages";
 import { CarteLogement } from "@/features/carte";
 import LogementsSimilaires from "@/components/hebergement/LogementsSimilaires";
 import api, { apiErrorMessage } from "@/lib/api";

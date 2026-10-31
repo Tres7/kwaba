@@ -4,6 +4,7 @@ import { creerConversation, creerVoyageDeGroupe, lireMessages, lireStatut, liste
 import type { CarteTogether } from "./types";
 
 vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }));
+vi.mock("@/features/voyages", async () => import("@/features/voyages/api"));
 
 describe("concierge", () => {
   beforeEach(() => vi.clearAllMocks());

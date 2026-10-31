@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { urlProxy } from "@/lib/api-url";
+import { creerVoyage, proposerLogement } from "@/features/voyages";
 import type { CarteTogether, ConversationResume, MessageConcierge } from "./types";
 
 const CONVERSATIONS = "/v1/concierge/conversations";
@@ -40,9 +41,7 @@ export async function posterMessage(conversationId: string, texte: string, langu
 
 /** Group trip suggested by the Concierge. A listing refused by the API does not stop the others. */
 export async function creerVoyageDeGroupe(c: CarteTogether) {
-  const { id } = (await api.post<{ id: string }>("/v1/voyages/", {
-    nom: c.nom, destination: c.destination, date_debut: c.arrivee, date_fin: c.depart, nb_voyageurs: c.voyageurs,
-  })).data;
-  await Promise.allSettled(c.logements.map((l) => api.post(`/v1/voyages/${id}/propositions/`, { hebergement: l.id })));
+  const { id } = await creerVoyage({ nom: c.nom, destination: c.destination, date_debut: c.arrivee, date_fin: c.depart, nb_voyageurs: c.voyageurs });
+  await Promise.allSettled(c.logements.map((l) => proposerLogement(id, l.id)));
   return id;
 }
