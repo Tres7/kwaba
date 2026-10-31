@@ -48,7 +48,7 @@ Fichiers avec un appel direct à l'API : `npm run lint`, règle `no-restricted-s
 |---|---|---|---|
 | 1 | favoris | bouton, liste, compteur du profil | Migré |
 | 2 | avis | section de la fiche, accueil, dépôt, modération | Migré |
-| 3 | messaging | | À faire |
+| 3 | messaging | liste, conversation, compteur, prise de contact | Migré |
 | 4 | concierge | flux compris | À faire |
 | 5 | experiences | | À faire |
 | 6 | give | public et back-office | À faire |
