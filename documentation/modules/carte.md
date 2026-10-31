@@ -29,9 +29,18 @@ La position exacte mènerait à l'hôte sans réservation : elle n'est jamais en
 - Survoler un logement de la liste met son prix en avant. Toucher un prix ouvre un aperçu du logement.
 - Avec des dates, un logement complet garde son prix, en gris.
 
+## Vue 3D
+
+Le bouton **3D** incline et tourne la carte, sur la recherche et la fiche d'un logement. Il garde le zoom du visiteur : les bâtiments se dressent à partir du zoom 14 et, plus loin, on voit la ville en perspective.
+
+- La caméra est celle de la démo d'OpenFreeMap : 60° d'inclinaison, 55° d'orientation (`BoutonRelief.tsx`). Les bâtiments sont la couche `building-3d` du style (`COUCHE_RELIEF`, `features/carte/style.ts`) : le bouton ne charge aucun autre style.
+- La fiche s'ouvre en 3D sur grand écran. Sur téléphone, le visiteur choisit : en vue inclinée, il voit plus loin et charge environ 3 fois plus de tuiles (1,5 Mo contre 430 Ko à Lomé, mesuré au zoom 15).
+- La carte où l'hôte place son logement reste à plat : la précision compte plus que le relief.
+- Beaucoup de bâtiments du Togo n'ont pas de hauteur renseignée dans OpenStreetMap : ils s'affichent bas, et les plus connus ont leur vraie hauteur.
+
 ## Fond de carte
 
-MapLibre GL dessine la carte à partir des tuiles d'[OpenFreeMap](https://openfreemap.org), issues d'OpenStreetMap : pas de clé, pas de limite, pas de cookie. Le style `positron` est repeint aux couleurs de Kwa-Ba au chargement (`features/carte/style.ts`).
+MapLibre GL dessine la carte à partir des tuiles d'[OpenFreeMap](https://openfreemap.org), issues d'OpenStreetMap : pas de clé, pas de limite, pas de cookie. Toutes les cartes utilisent le style `liberty` tel quel, en couleurs : mer bleue, routes jaunes, verdure, noms des quartiers (`features/carte/style.ts`).
 
 - **Sans garantie de service** : OpenFreeMap est gratuit. S'il ne répond pas, un message remplace la carte au bout de 15 secondes et la liste reste utilisable. Les prix s'affichent dès que le style est reçu : une tuile lente ne les retarde pas. Changer de fournisseur : `STYLE_CARTE` dans `style.ts` et `connect-src` dans `client/src/lib/csp.ts`.
 - **Crédits** : MapLibre affiche ceux d'OpenStreetMap et d'OpenMapTiles sur chaque carte. Ils sont obligatoires, il ne faut pas les masquer.
