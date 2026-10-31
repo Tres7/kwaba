@@ -16,7 +16,7 @@ from .alertes import signaler_liberation
 from .archivage import ArchivageImpossible, archiver
 from . import stock
 from .disponibilites import a_des_reservations, periodes_indisponibles, verrouiller, verrouiller_types
-from .models import BlocageModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
+from .models import BlocageModel, BrouillonAnnonceModel, HebergementModel, HebergementPhotoModel, TypeLogementModel
 from .occupations import reservations
 from apps.securite import fraude
 from apps.securite.photos import InvalidPhoto, normalize_photo
@@ -75,6 +75,15 @@ def _signaler_coordonnees(request, serializer, objet_id) -> None:
     trouvailles = getattr(serializer, 'trouvailles', None)
     if trouvailles:
         fraude.signaler(request.user.id, 'annonce', objet_id, trouvailles)
+
+def _supprimer_brouillon(request) -> None:
+    """The listing was created from this draft (`brouillon`): the draft is no longer needed."""
+    try:
+        brouillon_id = uuid.UUID(str(request.data.get('brouillon')))
+    except ValueError:
+        return
+    BrouillonAnnonceModel.objects.filter(pk=brouillon_id, host_id=request.user.pk).delete()
+
 
 class HebergementListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -176,6 +185,7 @@ class HebergementListView(APIView):
         hebergement = serializer.save(host_id=request.user.pk)  # its default unit type: signals.type_par_defaut
         # Visible to travellers only after an agent's visit (offered once the host's identity is verified)
         verifications.visite_a_planifier(hebergement.id)
+        _supprimer_brouillon(request)
         return Response(
             HebergementSerializer(hebergement, context=_context(request, proprietaire=True)).data,
             status=status.HTTP_201_CREATED,

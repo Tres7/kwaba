@@ -1,9 +1,13 @@
 "use client";
 
 import { useRevenus } from "@/features/paiements";
-import { creerHebergement, modifierHebergement } from "./api";
+import { creerBrouillon, creerHebergement, modifierBrouillon, modifierHebergement } from "./api";
 import { useCallback, useState } from "react";
-import { firstErrorMessage } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { apiErrorMessage, firstErrorMessage } from "@/lib/api";
+import { completude, type BrouillonAnnonce, type DonneesAnnonce } from "./brouillons";
+import { clesHebergements } from "./hooks";
 import { useEquipements } from "./AmenityBadge";
 import PhotoUploader from "./PhotoUploader";
 import EstimateurRevenus from "./EstimateurRevenus";
@@ -22,6 +26,8 @@ const POLITIQUES: PolitiqueAnnulation[] = ["souple", "moderee", "ferme"];
 
 interface HebergementFormProps {
   initial?: Hebergement;
+  /** New listing resumed from a draft (host space) */
+  brouillon?: BrouillonAnnonce;
   onSaved: (h: Hebergement) => void;
   onCancel: () => void;
 }
@@ -29,43 +35,49 @@ interface HebergementFormProps {
 const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
 
-export default function HebergementForm({ initial, onSaved, onCancel }: HebergementFormProps) {
+export default function HebergementForm({ initial, brouillon, onSaved, onCancel }: HebergementFormProps) {
   const { CATEGORIES_EQUIPEMENTS, REGLES } = useEquipements();
   const { TYPE_LABELS } = useFormat();
   const t = useTranslations("annonce");
   const tp = useTranslations("politiqueAnnulation");
   // Partner type set by the team (individual, hotel, founder): the preview's commission is theirs
   const { data: revenus } = useRevenus();
+  const queryClient = useQueryClient();
+  // Values to start from: the listing being changed, or the draft being resumed
+  const source: DonneesAnnonce | undefined = initial ?? brouillon?.donnees;
   const [form, setForm] = useState({
-    name: initial?.name ?? "",
-    type: initial?.type ?? "appartement",
-    city: initial?.city ?? "",
-    location: initial?.location ?? "",
-    price_per_night: initial ? String(initial.price_per_night) : "",
-    max_guests: initial ? String(initial.max_guests) : "2",
-    description: initial?.description ?? "",
-    amenities: initial?.amenities ?? [],
-    surface_m2: initial?.surface_m2 ? String(initial.surface_m2) : "",
-    chambres: initial?.chambres ?? 1,
-    salles_de_bain: initial?.salles_de_bain ?? 1,
-    lits_doubles: initial?.lits_doubles ?? (initial ? 0 : 1),
-    lits_simples: initial?.lits_simples ?? 0,
-    canapes_lits: initial?.canapes_lits ?? 0,
-    petit_dejeuner: initial?.petit_dejeuner || "",
-    petit_dejeuner_prix: initial?.petit_dejeuner_prix ? String(initial.petit_dejeuner_prix) : "",
-    arrivee_a_partir: initial?.arrivee_a_partir?.slice(0, 5) ?? "14:00",
-    depart_avant: initial?.depart_avant?.slice(0, 5) ?? "11:00",
-    politique_annulation: initial?.politique_annulation ?? "moderee",
+    name: source?.name ?? "",
+    type: source?.type ?? "appartement",
+    city: source?.city ?? "",
+    location: source?.location ?? "",
+    price_per_night: source?.price_per_night ? String(source.price_per_night) : "",
+    max_guests: source?.max_guests ? String(source.max_guests) : "2",
+    description: source?.description ?? "",
+    amenities: source?.amenities ?? [],
+    surface_m2: source?.surface_m2 ? String(source.surface_m2) : "",
+    chambres: source?.chambres ?? 1,
+    salles_de_bain: source?.salles_de_bain ?? 1,
+    lits_doubles: source?.lits_doubles ?? (initial ? 0 : 1),
+    lits_simples: source?.lits_simples ?? 0,
+    canapes_lits: source?.canapes_lits ?? 0,
+    petit_dejeuner: (source?.petit_dejeuner || "") as Hebergement["petit_dejeuner"],
+    petit_dejeuner_prix: source?.petit_dejeuner_prix ? String(source.petit_dejeuner_prix) : "",
+    arrivee_a_partir: source?.arrivee_a_partir?.slice(0, 5) ?? "14:00",
+    depart_avant: source?.depart_avant?.slice(0, 5) ?? "11:00",
+    politique_annulation: source?.politique_annulation ?? "moderee",
   });
   // Photos in display order: the first one is the cover
   const [photos, setPhotos] = useState<string[]>(() => {
-    const all = [initial?.image_url, ...(initial?.images ?? [])].filter((u): u is string => !!u);
+    const all = [source?.image_url, ...(source?.images ?? [])].filter((u): u is string => !!u);
     return Array.from(new Set(all));
   });
   // Exact position: required for a new listing, optional for one created before the map
   const [position, setPosition] = useState<PointCarte | null>(() => (
-    initial?.latitude && initial.longitude ? { lat: Number(initial.latitude), lng: Number(initial.longitude) } : null
+    source?.latitude && source.longitude ? { lat: Number(source.latitude), lng: Number(source.longitude) } : null
   ));
+  // Draft of this new listing, once saved: later saves replace it, the submission deletes it
+  const [brouillonId, setBrouillonId] = useState(brouillon?.id ?? null);
+  const [savingBrouillon, setSavingBrouillon] = useState(false);
   const [uploading, setUploading] = useState(false);
   // Copyright and image rights: the host certifies they own the rights to the published photos
   const [droitsPhotos, setDroitsPhotos] = useState(!!initial);
@@ -85,6 +97,32 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
       amenities: [...prev.amenities.filter((x) => x !== regle.oui.id && x !== regle.non.id), ...(valeur ? [valeur] : [])],
     }));
 
+  // Fields as sent to the API; empty numbers stay empty (a draft keeps what is not filled in yet)
+  const donnees = (): DonneesAnnonce => ({
+    name: form.name.trim(),
+    type: form.type,
+    city: form.city.trim(),
+    location: form.location.trim(),
+    ...(position ? { latitude: position.lat, longitude: position.lng } : {}),
+    price_per_night: form.price_per_night ? Number(form.price_per_night) : null,
+    max_guests: Number(form.max_guests),
+    description: form.description.trim(),
+    image_url: photos[0],
+    images: photos,
+    amenities: form.amenities,
+    surface_m2: form.surface_m2 ? Number(form.surface_m2) : null,
+    chambres: form.chambres,
+    salles_de_bain: form.salles_de_bain,
+    lits_doubles: form.lits_doubles,
+    lits_simples: form.lits_simples,
+    canapes_lits: form.canapes_lits,
+    petit_dejeuner: form.petit_dejeuner,
+    petit_dejeuner_prix: form.petit_dejeuner === "option" && form.petit_dejeuner_prix ? Number(form.petit_dejeuner_prix) : null,
+    arrivee_a_partir: form.arrivee_a_partir || null,
+    depart_avant: form.depart_avant || null,
+    politique_annulation: form.politique_annulation,
+  });
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!droitsPhotos) {
@@ -101,32 +139,10 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
     }
     setSaving(true);
     setErrors({});
-    const payload = {
-      name: form.name.trim(),
-      type: form.type,
-      city: form.city.trim(),
-      location: form.location.trim(),
-      ...(position ? { latitude: position.lat, longitude: position.lng } : {}),
-      price_per_night: Number(form.price_per_night),
-      max_guests: Number(form.max_guests),
-      description: form.description.trim(),
-      image_url: photos[0],
-      images: photos,
-      amenities: form.amenities,
-      surface_m2: form.surface_m2 ? Number(form.surface_m2) : null,
-      chambres: form.chambres,
-      salles_de_bain: form.salles_de_bain,
-      lits_doubles: form.lits_doubles,
-      lits_simples: form.lits_simples,
-      canapes_lits: form.canapes_lits,
-      petit_dejeuner: form.petit_dejeuner,
-      petit_dejeuner_prix: form.petit_dejeuner === "option" && form.petit_dejeuner_prix ? Number(form.petit_dejeuner_prix) : null,
-      arrivee_a_partir: form.arrivee_a_partir || null,
-      depart_avant: form.depart_avant || null,
-      politique_annulation: form.politique_annulation,
-    };
+    const payload = { ...donnees(), ...(brouillonId ? { brouillon: brouillonId } : {}) };
     try {
       onSaved(initial ? await modifierHebergement(initial.id, payload) : await creerHebergement(payload));
+      if (brouillonId) queryClient.invalidateQueries({ queryKey: clesHebergements.brouillons });
     } catch (err) {
       const data = (err as { response?: { data?: Record<string, unknown> } }).response?.data ?? {};
       const errs: Record<string, string> = {};
@@ -140,11 +156,42 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
     }
   };
 
+
+  const enregistrerBrouillon = async () => {
+    setSavingBrouillon(true);
+    try {
+      const enregistre = brouillonId ? await modifierBrouillon(brouillonId, donnees()) : await creerBrouillon(donnees());
+      setBrouillonId(enregistre.id);
+      queryClient.invalidateQueries({ queryKey: clesHebergements.brouillons });
+      toast.success(t("brouillonEnregistre"));
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t("erreurBrouillon")));
+    } finally {
+      setSavingBrouillon(false);
+    }
+  };
+
+  // New listing: how far the host is from being able to submit it
+  const avancement = initial ? null : completude(donnees());
+
   const err = (k: string) => errors[k] && <p className="text-xs text-red-600 mt-1.5">{errors[k]}</p>;
 
   return (
     <form method="post" onSubmit={submit} className="space-y-5">
       {errors.detail && <p role="alert" className="text-sm text-red-700 bg-red-50 rounded-xl p-3">{errors.detail}</p>}
+
+      {avancement && (
+        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+          <p id="h-avancement" className="text-sm font-semibold text-dark">{t("completude.avancement", { pourcentage: avancement.pourcentage })}</p>
+          <div role="progressbar" aria-labelledby="h-avancement" aria-valuenow={avancement.pourcentage} aria-valuemin={0} aria-valuemax={100}
+            className="mt-2 h-2 rounded-full bg-gray-200 overflow-hidden">
+            <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${avancement.pourcentage}%` }} />
+          </div>
+          {avancement.manquants.length > 0 && (
+            <p className="mt-2 text-xs text-gray-500">{t("completude.reste", { liste: avancement.manquants.map((c) => t(`completude.${c}`)).join(", ") })}</p>
+          )}
+        </div>
+      )}
 
       <div>
         <label className={labelClass} htmlFor="h-name">{t("titre")}</label>
@@ -337,6 +384,12 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
 
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-gray-100">
         <button type="button" onClick={onCancel} className="px-6 py-3 rounded-xl border border-gray-200 text-dark font-medium hover:bg-gray-50">{t("annuler")}</button>
+        {!initial && (
+          <button type="button" onClick={enregistrerBrouillon} disabled={savingBrouillon || saving || uploading}
+            className="px-6 py-3 rounded-xl border border-primary/30 text-primary font-semibold hover:bg-primary/5 disabled:opacity-60">
+            {savingBrouillon ? t("enregistrement") : t("enregistrerBrouillon")}
+          </button>
+        )}
         <button type="submit" disabled={saving || uploading} className="px-8 py-3 bg-primary text-white rounded-xl font-bold shadow-md hover:bg-primary-600 disabled:opacity-60">
           {uploading ? t("envoiPhotos") : saving ? t("enregistrement") : initial ? t("enregistrerModifs") : t("publier")}
         </button>

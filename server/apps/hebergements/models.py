@@ -215,6 +215,25 @@ class InscriptionLancementModel(models.Model):
         return self.email
 
 
+class BrouillonAnnonceModel(models.Model):
+    """New listing being filled in by its host, resumed later. Never a listing: no unit type, no visit, invisible to
+    travellers and agents. Submitting it creates the listing (full checks) and deletes it."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    host_id = models.UUIDField(db_index=True)
+    # Fields of the listing form as entered, incomplete (see brouillons.CHAMPS)
+    donnees = models.JSONField(default=dict, blank=True)
+    cree_le = models.DateTimeField(auto_now_add=True)
+    modifie_le = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = 'hebergements'
+        ordering = ['-modifie_le']
+        verbose_name = "Brouillon d'annonce"
+
+    def __str__(self):
+        return f"Brouillon {self.donnees.get('name') or self.pk}"
+
+
 def _jeton_alerte() -> str:
     import secrets
     return secrets.token_urlsafe(32)

@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "@/lib/api";
 import * as h from "./api";
 
-vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }));
+vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }));
 
 describe("hebergements", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    for (const m of [api.get, api.post, api.patch]) vi.mocked(m).mockResolvedValue({ data: { id: "h1", results: [{ id: "h1" }], periodes: [], count: 0, prelancement: true } });
+    for (const m of [api.get, api.post, api.put, api.patch]) vi.mocked(m).mockResolvedValue({ data: { id: "h1", results: [{ id: "h1" }], periodes: [], count: 0, prelancement: true } });
   });
 
   it("cherche, lit et liste", async () => {
@@ -30,6 +30,17 @@ describe("hebergements", () => {
     expect(api.patch).toHaveBeenLastCalledWith("/v1/hebergements/h1/", { is_available: false });
     await h.supprimerHebergement("h1");
     expect(api.delete).toHaveBeenLastCalledWith("/v1/hebergements/h1/");
+  });
+
+  it("lists, creates, updates and deletes a draft", async () => {
+    await expect(h.listerBrouillons()).resolves.toEqual([{ id: "h1" }]);
+    expect(api.get).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/");
+    await h.creerBrouillon({ name: "Villa" });
+    expect(api.post).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/", { donnees: { name: "Villa" } });
+    await h.modifierBrouillon("b1", { name: "Villa", city: "Lomé" });
+    expect(api.put).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/b1/", { donnees: { name: "Villa", city: "Lomé" } });
+    await h.supprimerBrouillon("b1");
+    expect(api.delete).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/b1/");
   });
 
   it("lit les disponibilités et ferme ou rouvre des dates", async () => {
