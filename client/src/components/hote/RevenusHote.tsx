@@ -11,7 +11,7 @@ import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
 import type { ProfilVersement, Revenus, StatutVersement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
-import { useTextesGive } from "@/lib/give";
+import { useNomsPays } from "@/lib/pays";
 import { useFormat } from "@/lib/format";
 
 const STATUTS: Record<StatutVersement, { label: string; className: string }> = {
@@ -90,7 +90,7 @@ export default function RevenusHote() {
 }
 
 function ProfilVersementForm({ manquant }: { manquant: boolean }) {
-  const { PAYS } = useTextesGive();
+  const PAYS = useNomsPays();
   const t = useTranslations("revenus");
   const tD = useTranslations("remboursementDialog");
   const queryClient = useQueryClient();

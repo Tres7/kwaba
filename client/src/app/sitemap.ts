@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { cheminLocalise, lireApi, PAGES_PUBLIQUES, SITE_URL, versionsLinguistiques } from "@/lib/seo";
 import type { Hebergement } from "@/types/api/models";
-import type { Organisation } from "@/types/api/give";
+import type { Organisation } from "@/features/give";
 import { filtrerLiens, type ReglagesSite } from "@/lib/modules";
 
 // Computed on demand (never at build time, when the API cannot be reached); API reads are cached

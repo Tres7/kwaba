@@ -1,6 +1,6 @@
 import { CheckCircle, Clock, FileText } from "lucide-react";
 import { urlExterneSure } from "@/lib/url-sure";
-import type { Reversement } from "@/types/api/give";
+import type { Reversement } from "./types";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 

@@ -84,6 +84,12 @@ export interface OrganisationDetail extends Omit<Organisation, "impact"> {
   reversements: Reversement[];
 }
 
+export interface ReponseDons {
+  results: Don[];
+  total_donne: number;
+  nb_payes: number;
+}
+
 export interface ImpactGlobal extends Impact {
   nb_organisations: number;
   causes: { code: CodeCause; nom: string; collecte: number; nb_dons: number }[];

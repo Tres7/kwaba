@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList } from "@/lib/useAdminList";
 import { urlExterneSure } from "@/lib/url-sure";
@@ -12,6 +12,7 @@ import AdminTable, { ActionButton, Pagination, Pill, type Colonne } from "@/comp
 import Panneau, { Champ, Liste, Saisie, Zone, erreursApi } from "@/components/backoffice/Panneau";
 import Select from "@/components/ui/Select";
 import type { ReversementAdmin } from "@/types/api/admin";
+import { effectuerReversement, preparerReversements } from "../api";
 
 const STATUTS = [{ value: "a_effectuer", label: "À effectuer" }, { value: "effectue", label: "Effectués" }, { value: "", label: "Tous" }];
 const mois = (d: string) => formatDate(d, { month: "long", year: "numeric" });
@@ -28,7 +29,7 @@ export default function Reversements() {
 
   const preparer = async () => {
     try {
-      const { data: r } = await api.post<{ dons: number }>("/v1/admin/give/reversements/preparer/");
+      const r = await preparerReversements();
       toast.success(r.dons ? `${r.dons} don(s) rattaché(s) à leur reversement` : "Rien à préparer : tous les dons des mois terminés sont déjà rattachés");
       queryClient.invalidateQueries({ queryKey: ["admin"] });
     } catch (err) {
@@ -44,7 +45,7 @@ export default function Reversements() {
     for (const [k, v] of Object.entries(form)) if (v) corps.append(k, v);
     if (preuve) corps.append("justificatif", preuve);
     try {
-      await api.post(`/v1/admin/give/reversements/${cible.id}/effectuer/`, corps, { headers: { "Content-Type": "multipart/form-data" } });
+      await effectuerReversement(cible.id, corps);
       toast.success("Reversement effectué : la preuve est publiée sur la page de l'ONG");
       setCible(null);
       queryClient.invalidateQueries({ queryKey: ["admin"] });

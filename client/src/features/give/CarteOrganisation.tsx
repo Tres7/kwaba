@@ -1,8 +1,8 @@
 import { Link } from "@/i18n/navigation";
 import { BadgeCheck, MapPin } from "lucide-react";
-import { useTextesGive } from "@/lib/give";
+import { useTextesGive } from "./regles";
 import { cn } from "@/lib/utils";
-import type { Organisation } from "@/types/api/give";
+import type { Organisation } from "./types";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 
