@@ -8,7 +8,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Info, Smartphone, CreditCard, Wallet, MapPin, Lock } from "lucide-react";
 import api, { apiErrorMessage } from "@/lib/api";
 import { allerPayer, enEuros, useConfigPaiement, useDevisSejour, useOperateursMobileMoney } from "@/lib/paiement";
-import RatingBadge from "@/components/avis/RatingBadge";
+import RatingBadge from "@/components/ui/RatingBadge";
 import Chargement from "@/components/ui/Chargement";
 import { MontantDebite } from "@/components/layout/Devise";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";

@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, MessageSquareReply, Star } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { cn, initials } from "@/lib/utils";
-import type { Avis, AvisPage, CritereAvis } from "@/types/api/models";
+import type { Avis, CritereAvis } from "@/types/api/models";
 import { useLocale, useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { listerAvis, repondreAvis } from "./api";
+import { clesAvis } from "./hooks";
 
 const PAGE = 6;
 
@@ -39,8 +41,7 @@ function ReponseForm({ avis, onDone }: { avis: Avis; onDone: (a: Avis) => void }
   const envoyer = async () => {
     setEnvoi(true);
     try {
-      const res = await api.post<Avis>(`/v1/avis/${avis.id}/reponse/`, { reponse: texte.trim() });
-      onDone(res.data);
+      onDone(await repondreAvis(avis.id, texte.trim()));
       toast.success(t("reponsePubliee"));
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -117,13 +118,12 @@ export default function AvisSection({ hebergementId, isOwner, hostName }: AvisSe
   const locale = useLocale();
   const tNote = useTranslations("note");
   const queryClient = useQueryClient();
-  const queryKey = ["avis", hebergementId];
+  const queryKey = clesAvis.hebergement(hebergementId);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey,
     initialPageParam: 0,
-    queryFn: async ({ pageParam }) =>
-      (await api.get<AvisPage>("/v1/avis/", { params: { hebergement: hebergementId, limit: PAGE, offset: pageParam } })).data,
+    queryFn: ({ pageParam }) => listerAvis(hebergementId, { limit: PAGE, offset: pageParam }),
     getNextPageParam: (last, pages) => {
       const charges = pages.reduce((n, p) => n + p.results.length, 0);
       return charges < last.count ? charges : undefined;

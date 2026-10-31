@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LngLatBounds, Marker, type Map as CarteGl } from "maplibre-gl";
 import { MapPin, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import RatingBadge from "@/components/avis/RatingBadge";
+import RatingBadge from "@/components/ui/RatingBadge";
 import { Link } from "@/i18n/navigation";
 import { useFormat } from "@/lib/format";
 import { FALLBACK_IMAGE, SERVICE_FEE_RATE, cn, prixNuitFraisInclus } from "@/lib/utils";

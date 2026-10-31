@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
 import HebergementForm from "@/components/hote/HebergementForm";
-import RatingBadge from "@/components/avis/RatingBadge";
+import RatingBadge from "@/components/ui/RatingBadge";
 import RevenusHote from "@/components/hote/RevenusHote";
 import CandidatureHote from "@/components/hote/CandidatureHote";
 import PreinscriptionHote from "@/components/hote/PreinscriptionHote";

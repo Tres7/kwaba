@@ -47,7 +47,7 @@ Fichiers avec un appel direct à l'API : `npm run lint`, règle `no-restricted-s
 | Ordre | Module | Périmètre | État |
 |---|---|---|---|
 | 1 | favoris | bouton, liste, compteur du profil | Migré |
-| 2 | avis | | À faire |
+| 2 | avis | section de la fiche, accueil, dépôt, modération | Migré |
 | 3 | messaging | | À faire |
 | 4 | concierge | flux compris | À faire |
 | 5 | experiences | | À faire |

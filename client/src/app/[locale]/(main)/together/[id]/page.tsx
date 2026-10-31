@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE } from "@/lib/utils";
 import FormField from "@/components/ui/FormField";
-import RatingBadge from "@/components/avis/RatingBadge";
+import RatingBadge from "@/components/ui/RatingBadge";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";
 import type { Voyage } from "@/types/api/voyage";
 import { useLocale, useTranslations } from "next-intl";

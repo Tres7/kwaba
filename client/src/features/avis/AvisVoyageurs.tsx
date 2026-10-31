@@ -4,9 +4,10 @@ import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { QuotesIcon, SealCheckIcon, StarIcon } from "@phosphor-icons/react";
-import api from "@/lib/api";
 import { initials } from "@/lib/utils";
-import type { Avis, AvisPage, Hebergement } from "@/types/api/models";
+import type { Avis, Hebergement } from "@/types/api/models";
+import { listerAvis } from "./api";
+import { clesAvis } from "./hooks";
 
 /** Listings read (best rated first) and reviews shown. */
 const LOGEMENTS_LUS = 4;
@@ -24,13 +25,13 @@ export default function AvisVoyageurs({ hebergements }: { hebergements: Hebergem
   const sources = hebergements.filter((h) => h.review_count > 0).slice(0, LOGEMENTS_LUS);
 
   const { data: cites = [] } = useQuery({
-    queryKey: ["avis", "accueil", sources.map((h) => h.id)],
+    queryKey: clesAvis.accueil(sources.map((h) => h.id)),
     enabled: sources.length > 0,
     staleTime: 10 * 60_000,
     queryFn: async () => {
       const pages = await Promise.all(sources.map(async (h) => {
-        const res = await api.get<AvisPage>("/v1/avis/", { params: { hebergement: h.id, limit: 3 } }).catch(() => null);
-        const bons = (res?.data.results ?? []).filter((a) => a.note >= 4 && a.commentaire.trim().length >= LONGUEUR_MIN);
+        const page = await listerAvis(h.id, { limit: 3 }).catch(() => null);
+        const bons = (page?.results ?? []).filter((a) => a.note >= 4 && a.commentaire.trim().length >= LONGUEUR_MIN);
         return bons.map((avis) => ({ avis, h }));
       }));
       // One review per listing first, then the following ones

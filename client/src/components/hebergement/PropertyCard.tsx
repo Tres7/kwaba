@@ -2,7 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { BadgeCheck, CalendarX, Flame, MapPin } from "lucide-react";
 import type { Hebergement } from "@/types/api/models";
 import { FavoriteButton } from "@/features/favoris";
-import RatingBadge from "@/components/avis/RatingBadge";
+import RatingBadge from "@/components/ui/RatingBadge";
 import { FALLBACK_IMAGE, SERVICE_FEE_RATE, cn, prixNuitFraisInclus } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useResumeDetails } from "@/components/hebergement/DetailsLogement";
