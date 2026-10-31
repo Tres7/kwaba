@@ -3,9 +3,9 @@
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Suivi from "@/components/backoffice/transferts/Suivi";
-import Aeroports from "@/components/backoffice/transferts/Aeroports";
-import Chauffeurs from "@/components/backoffice/transferts/Chauffeurs";
+import Aeroports from "@/features/transferts/admin/Aeroports";
+import Chauffeurs from "@/features/transferts/admin/Chauffeurs";
+import Suivi from "@/features/transferts/admin/Suivi";
 
 const ONGLETS = [
   { id: "suivi", label: "Transferts", Composant: Suivi },
