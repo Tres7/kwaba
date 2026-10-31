@@ -1,17 +1,17 @@
 "use client";
 
+import { suggererDestinations } from "./api";
+import { useVilles } from "./hooks";
 import { Fragment, useId, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Building2, Home, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import api from "@/lib/api";
 import { useDebounced } from "@/lib/useAdminList";
 import { cn } from "@/lib/utils";
 import { QUARTIERS_LOME, quartiersCorrespondants } from "@/lib/quartiers";
-import type { City } from "@/types/api/models";
 
-interface Suggestions {
+export interface Suggestions {
   villes: { city: string; count: number }[];
   logements: { id: string; name: string; city: string; image_url: string }[];
 }
@@ -51,17 +51,13 @@ export default function ChampDestination({
   const saisie = useDebounced(value.trim(), 200);
   const { data: trouvees } = useQuery({
     queryKey: ["suggestions", saisie],
-    queryFn: async () => (await api.get<Suggestions>("/v1/hebergements/suggestions/", { params: { q: saisie } })).data,
+    queryFn: () => suggererDestinations(saisie),
     enabled: ouvert && saisie.length > 0,
     placeholderData: keepPreviousData,
     staleTime: 60_000,
   });
   // Empty field: popular destinations (same request as the home page, so often already cached)
-  const { data: populaires = [] } = useQuery({
-    queryKey: ["villes"],
-    queryFn: async () => (await api.get<{ results: City[] }>("/v1/hebergements/villes/")).data.results,
-    enabled: ouvert && !value.trim(),
-  });
+  const { data: populaires = [] } = useVilles(ouvert && !value.trim());
 
   const options: Option[] = value.trim()
     ? [

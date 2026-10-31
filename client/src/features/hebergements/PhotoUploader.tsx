@@ -1,8 +1,9 @@
 "use client";
 
+import { envoyerPhoto, supprimerPhoto } from "./api";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Star, Trash2, TriangleAlert } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { compressImage } from "@/lib/compressImage";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -57,14 +58,9 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error }: 
       const compressed = await compressImage(file);
       const body = new FormData();
       body.append("file", compressed);
-      const res = await api.post<{ id: string; url: string }>("/v1/hebergements/photos/", body, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (e) => {
-          if (e.total) update(key, { key, status: "uploading", preview, progress: Math.round((e.loaded / e.total) * 100) });
-        },
-      });
+      const photo = await envoyerPhoto(body, (progress) => update(key, { key, status: "uploading", preview, progress }));
       URL.revokeObjectURL(preview);
-      update(key, { key, status: "done", url: res.data.url, photoId: res.data.id });
+      update(key, { key, status: "done", url: photo.url, photoId: photo.id });
     } catch (err) {
       update(key, { key, status: "error", preview, error: apiErrorMessage(err, t("envoiImpossible")) });
     }
@@ -91,7 +87,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error }: 
   const remove = (item: Item) => {
     if (item.status !== "done") URL.revokeObjectURL(item.preview);
     // Photo uploaded during this edit: the file is also deleted on the server
-    if (item.status === "done" && item.photoId) api.delete(`/v1/hebergements/photos/${item.photoId}/`).catch(() => {});
+    if (item.status === "done" && item.photoId) supprimerPhoto(item.photoId).catch(() => {});
     setItems((prev) => prev.filter((i) => i.key !== item.key));
   };
 

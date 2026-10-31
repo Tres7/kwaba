@@ -1,12 +1,13 @@
 "use client";
 
+import { modifierAnnonceAdmin, restaurerAnnonce, supprimerAnnonceAdmin } from "@/features/hebergements/api";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { FALLBACK_IMAGE, formatDate, formatPrice, TYPE_LABELS } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
@@ -89,7 +90,7 @@ function Annonces() {
       titre: "Restaurer l'annonce",
       message: <><strong>{h.name}</strong> réapparaîtra dans le back-office et dans l&apos;espace de son hôte, masquée : elle ne sera visible sur le site qu&apos;une fois republiée. Les réservations annulées lors de la suppression restent annulées.</>,
       libelle: "Restaurer",
-      action: () => executer(api.post(`/v1/admin/hebergements/${h.id}/restaurer/`), "Annonce restaurée"),
+      action: () => executer(restaurerAnnonce(h.id), "Annonce restaurée"),
     })}>Restaurer</ActionButton>
   ) : (
     <>
@@ -103,7 +104,7 @@ function Annonces() {
           : <>Normalement, un agent de terrain valide l&apos;annonce après sa visite. Confirmez que <strong>{h.name}</strong> a bien été contrôlée (photos, adresse, équipements) : elle sera publiée avec le badge « Vérifié par Kwa-Ba ».</>,
         libelle: h.est_verifie ? "Retirer la validation" : "Valider",
         danger: h.est_verifie,
-        action: () => executer(api.patch(`/v1/admin/hebergements/${h.id}/`, { est_verifie: !h.est_verifie }), h.est_verifie ? "Annonce remise en vérification" : "Annonce validée"),
+        action: () => executer(modifierAnnonceAdmin(h.id, { est_verifie: !h.est_verifie }), h.est_verifie ? "Annonce remise en vérification" : "Annonce validée"),
       })}>{h.est_verifie ? "Retirer validation" : "Valider"}</ActionButton>
       <ActionButton onClick={() => setConfirmation({
         titre: h.is_available ? "Masquer l'annonce" : "Republier l'annonce",
@@ -111,13 +112,13 @@ function Annonces() {
           ? <><strong>{h.name}</strong> n&apos;apparaîtra plus dans les recherches. Les réservations existantes sont conservées.</>
           : <><strong>{h.name}</strong> sera de nouveau visible par les voyageurs{h.est_verifie ? "" : ", dès qu'elle aura été vérifiée"}.</>,
         libelle: h.is_available ? "Masquer" : "Republier",
-        action: () => executer(api.patch(`/v1/admin/hebergements/${h.id}/`, { is_available: !h.is_available }), h.is_available ? "Annonce masquée" : "Annonce republiée"),
+        action: () => executer(modifierAnnonceAdmin(h.id, { is_available: !h.is_available }), h.is_available ? "Annonce masquée" : "Annonce republiée"),
       })}>{h.is_available ? "Masquer" : "Republier"}</ActionButton>
       <ActionButton danger onClick={() => setConfirmation({
         titre: "Supprimer l'annonce",
         message: <>Supprimer <strong>{h.name}</strong> ? Elle disparaîtra du site et du back-office, et ses réservations en attente de paiement seront annulées. Ses réservations, avis et conversations sont conservés. Action irréversible depuis le back-office.</>,
         libelle: "Supprimer", danger: true, motif: true,
-        action: (motif) => executer(api.delete(`/v1/admin/hebergements/${h.id}/`, { params: { motif } }), "Annonce supprimée"),
+        action: (motif) => executer(supprimerAnnonceAdmin(h.id, motif), "Annonce supprimée"),
       })}>Supprimer</ActionButton>
     </>
   );

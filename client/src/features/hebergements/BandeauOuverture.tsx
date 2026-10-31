@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { InstagramLogoIcon } from "@phosphor-icons/react";
 import { X } from "lucide-react";
-import { usePrelancement } from "@/lib/usePrelancement";
+import { usePrelancement } from "./hooks";
 
 export const INSTAGRAM_URL = "https://www.instagram.com/kwabafrica";
 // Hidden for the rest of the browsing session once closed

@@ -6,7 +6,7 @@ import { BadgeCheck, CalendarCheck, ChevronRight, Home, IdCard, Star, Users } fr
 import api from "@/lib/api";
 import { useCompteursVerification } from "@/features/verifications";
 import { formatPrice } from "@/lib/utils";
-import CarteLancement from "@/components/backoffice/CarteLancement";
+import CarteLancement from "@/features/hebergements/admin/CarteLancement";
 import ReservationsChart from "@/components/backoffice/ReservationsChart";
 import type { AdminStats } from "@/types/api/admin";
 

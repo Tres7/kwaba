@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { Heart, Search, ArrowLeft } from "lucide-react";
-import PropertyCard from "@/components/hebergement/PropertyCard";
+import PropertyCard from "@/features/hebergements/PropertyCard";
 import { useFavoris, useOterDeLaListe } from "@/features/favoris";
 import { useTranslations } from "next-intl";
 

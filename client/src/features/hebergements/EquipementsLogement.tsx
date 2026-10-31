@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import AmenityBadge, { estRegle, useEquipements } from "@/components/hebergement/AmenityBadge";
+import AmenityBadge, { estRegle, useEquipements } from "./AmenityBadge";
 
 /** Beyond this number, the list is folded (the first categories stay visible). */
 const PLIAGE = 10;

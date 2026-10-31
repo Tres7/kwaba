@@ -1,13 +1,13 @@
 "use client";
 
+import { creerHebergement, lireRevenus, modifierHebergement } from "./api";
 import { useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import api, { firstErrorMessage } from "@/lib/api";
-import { useEquipements } from "@/components/hebergement/AmenityBadge";
-import PhotoUploader from "@/components/hote/PhotoUploader";
-import EstimateurRevenus from "@/components/hote/EstimateurRevenus";
+import { firstErrorMessage } from "@/lib/api";
+import { useEquipements } from "./AmenityBadge";
+import PhotoUploader from "./PhotoUploader";
+import EstimateurRevenus from "./EstimateurRevenus";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
-import type { Revenus } from "@/types/api/paiement";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
 import { cn } from "@/lib/utils";
@@ -37,7 +37,7 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
   // Partner type set by the team (individual, hotel, founder): the preview's commission is theirs
   const { data: revenus } = useQuery({
     queryKey: ["paiements", "revenus"],
-    queryFn: async () => (await api.get<Revenus>("/v1/paiements/revenus/")).data,
+    queryFn: lireRevenus,
   });
   const [form, setForm] = useState({
     name: initial?.name ?? "",
@@ -129,10 +129,7 @@ export default function HebergementForm({ initial, onSaved, onCancel }: Hebergem
       politique_annulation: form.politique_annulation,
     };
     try {
-      const res = initial
-        ? await api.patch<Hebergement>(`/v1/hebergements/${initial.id}/`, payload)
-        : await api.post<Hebergement>("/v1/hebergements/", payload);
-      onSaved(res.data);
+      onSaved(initial ? await modifierHebergement(initial.id, payload) : await creerHebergement(payload));
     } catch (err) {
       const data = (err as { response?: { data?: Record<string, unknown> } }).response?.data ?? {};
       const errs: Record<string, string> = {};

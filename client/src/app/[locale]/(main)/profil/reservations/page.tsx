@@ -7,7 +7,7 @@ import { ArrowLeft, Calendar, MapPin, CheckCircle, Clock, XCircle, Users, Star, 
 import { toast } from "sonner";
 import api, { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
-import PropertyCard from "@/components/hebergement/PropertyCard";
+import PropertyCard from "@/features/hebergements/PropertyCard";
 import CompteRemboursementDialog from "@/components/paiement/CompteRemboursementDialog";
 import Documents from "@/features/documents/Documents";
 import type { Hebergement, Paginated, Reservation } from "@/types/api/models";

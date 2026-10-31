@@ -1,10 +1,10 @@
 "use client";
 
+import { chercherHebergements } from "./api";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import api from "@/lib/api";
-import PropertyCard from "@/components/hebergement/PropertyCard";
-import type { Hebergement, Paginated } from "@/types/api/models";
+import PropertyCard from "./PropertyCard";
+import type { Hebergement } from "@/types/api/models";
 
 const NOMBRE = 4;
 
@@ -19,8 +19,7 @@ export default function LogementsSimilaires({ hebergement }: { hebergement: Hebe
     staleTime: 5 * 60_000,
     queryFn: async () => {
       const lire = async (params: Record<string, string | number>) =>
-        (await api.get<Paginated<Hebergement>>("/v1/hebergements/", { params: { limit: NOMBRE + 1, ...params } })).data.results
-          .filter((h) => h.id !== hebergement.id);
+        (await chercherHebergements({ limit: NOMBRE + 1, ...params })).results.filter((h) => h.id !== hebergement.id);
       const memeVille = await lire({ city: hebergement.city, sort: "note" });
       if (memeVille.length >= 2) return { ville: true, logements: memeVille.slice(0, NOMBRE) };
       const ailleurs = (await lire({ sort: "note" })).filter((h) => !memeVille.some((m) => m.id === h.id));

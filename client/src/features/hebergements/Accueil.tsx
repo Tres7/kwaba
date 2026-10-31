@@ -1,5 +1,7 @@
 "use client";
 
+import { chercherHebergements } from "./api";
+import { useVilles } from "./hooks";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -10,14 +12,12 @@ import { Search, MapPin, ChevronRight, Check } from "lucide-react";
 import { ArrowCounterClockwiseIcon, BackpackIcon, BedIcon, BuildingApartmentIcon, ChatsCircleIcon, ClockCountdownIcon, HouseLineIcon, LightningIcon, SealCheckIcon, ShieldCheckIcon, UsersThreeIcon, WalletIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import api from "@/lib/api";
 import DateRangeField from "@/components/ui/DateRangeField";
 import GuestsField from "@/components/ui/GuestsField";
-import PropertyCard from "@/components/hebergement/PropertyCard";
-import ChampDestination from "@/components/hebergement/ChampDestination";
+import PropertyCard from "./PropertyCard";
+import ChampDestination from "./ChampDestination";
 import Services from "@/components/accueil/Services";
-import AvisVoyageurs from "@/features/avis/AvisVoyageurs";
-import type { City, Hebergement, Paginated } from "@/types/api/models";
+import { AvisVoyageurs } from "@/features/avis";
 import { useFormat } from "@/lib/format";
 
 // Slideshow photos (public/accueil): 1240 × 1550 portrait cropped on the subject for phones, 2560 px from
@@ -155,14 +155,11 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-  const { data: cities = [], isLoading: citiesLoading } = useQuery({
-    queryKey: ["villes"],
-    queryFn: async () => (await api.get<{ results: City[] }>("/v1/hebergements/villes/")).data.results,
-  });
+  const { data: cities = [], isLoading: citiesLoading } = useVilles();
 
   const { data: recommended = [], isLoading: recoLoading } = useQuery({
     queryKey: ["hebergements", "recommandes", status],
-    queryFn: async () => (await api.get<Paginated<Hebergement>>("/v1/hebergements/", { params: { sort: "note", limit: 8 } })).data.results,
+    queryFn: async () => (await chercherHebergements({ sort: "note", limit: 8 })).results,
     enabled: status !== "loading",
   });
 
