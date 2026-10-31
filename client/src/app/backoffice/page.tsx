@@ -1,14 +1,13 @@
 "use client";
 
+import { lireStatsAdmin } from "@/features/users";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, CalendarCheck, ChevronRight, Home, IdCard, Star, Users } from "lucide-react";
-import api from "@/lib/api";
 import { useCompteursVerification } from "@/features/verifications";
 import { formatPrice } from "@/lib/utils";
 import CarteLancement from "@/features/hebergements/admin/CarteLancement";
 import ReservationsChart from "@/components/backoffice/ReservationsChart";
-import type { AdminStats } from "@/types/api/admin";
 
 function Tuile({ titre, valeur, detail, icone: Icone, href }: { titre: string; valeur: string; detail: string; icone: typeof Users; href: string }) {
   return (
@@ -26,7 +25,7 @@ function Tuile({ titre, valeur, detail, icone: Icone, href }: { titre: string; v
 export default function TableauDeBord() {
   const { data: s, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin", "stats"],
-    queryFn: async () => (await api.get<AdminStats>("/v1/admin/stats/")).data,
+    queryFn: lireStatsAdmin,
   });
   // Same query as the menu badge (shared cache): refreshed every minute
   const { data: compteurs } = useCompteursVerification(true);

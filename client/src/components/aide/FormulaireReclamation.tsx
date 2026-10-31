@@ -1,11 +1,12 @@
 "use client";
 
+import { envoyerReclamation } from "@/lib/site";
 import { useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, Paperclip } from "lucide-react";
-import api, { apiErrorMessage } from "@/lib/api";
-import Captcha, { type CaptchaHandle } from "@/components/auth/Captcha";
+import { apiErrorMessage } from "@/lib/api";
+import { Captcha, type CaptchaHandle } from "@/features/auth";
 import FormField from "@/components/ui/FormField";
 import Select from "@/components/ui/Select";
 
@@ -42,7 +43,7 @@ export default function FormulaireReclamation() {
     if (captcha) donnees.append("captcha", captcha);
     if (fichier) donnees.append("piece_jointe", fichier);
     try {
-      await api.post("/v1/site/reclamation/", donnees, { headers: { "Content-Type": "multipart/form-data" } });
+      await envoyerReclamation(donnees);
       setEtat("envoye");
     } catch (err) {
       setErreur(apiErrorMessage(err));

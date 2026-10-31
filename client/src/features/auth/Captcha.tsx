@@ -2,7 +2,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useLocale } from "next-intl";
-import api from "@/lib/api";
+import { lireCleCaptcha } from "./api";
 
 const SCRIPT = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
@@ -71,11 +71,11 @@ const Captcha = forwardRef<CaptchaHandle, CaptchaProps>(function Captcha({ onTok
 
   useEffect(() => {
     let annule = false;
-    api.get<{ site_key: string }>("/v1/auth/captcha/")
-      .then(({ data }) => {
+    lireCleCaptcha()
+      .then((siteKey) => {
         if (annule) return;
-        if (data.site_key) rappels.current.onActif?.();
-        setCle(data.site_key);
+        if (siteKey) rappels.current.onActif?.();
+        setCle(siteKey);
       })
       // API unreachable: submission is allowed, the server decides (it refuses a missing token if the captcha is active)
       .catch(() => !annule && setIndisponible(true));

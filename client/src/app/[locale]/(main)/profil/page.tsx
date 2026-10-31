@@ -1,17 +1,15 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
 import { ChevronRight, User, CalendarCheck, Heart, CreditCard, Bell, Globe, HelpCircle, LogOut, Home, MessageCircle, BadgeCheck, Star, ShieldCheck, Plane, Users, Sparkles, HandHeart } from "lucide-react";
-import api from "@/lib/api";
 import { useReglagesSite, filtrerLiens } from "@/lib/site";
 import { FALLBACK_IMAGE, initials } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useSejoursAEvaluer } from "@/features/avis";
 import { useFavoris } from "@/features/favoris";
+import { useMoi } from "@/features/users";
 import { useMesReservations } from "@/features/reservations";
-import type { Me } from "@/types/api/models";
 import { useFormat } from "@/lib/format";
 
 export default function ProfilPage() {
@@ -20,10 +18,7 @@ export default function ProfilPage() {
   const locale = useLocale();
   const { data: session } = useSession();
 
-  const { data: me } = useQuery({
-    queryKey: ["me"],
-    queryFn: async () => (await api.get<Me>("/v1/users/me/")).data,
-  });
+  const { data: me } = useMoi();
   const { data: reservations } = useMesReservations();
   const { data: aEvaluer = [] } = useSejoursAEvaluer();
   const { data: favoris } = useFavoris();
