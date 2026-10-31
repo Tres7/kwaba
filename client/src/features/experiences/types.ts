@@ -1,4 +1,4 @@
-import type { CategorieExperience } from "./admin";
+import type { CategorieExperience } from "@/types/api/admin";
 
 export type { CategorieExperience };
 
