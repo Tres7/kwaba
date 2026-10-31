@@ -16,15 +16,15 @@ const CHAT_POLL_INTERVAL_MS = 4_000;
 
 type ChatMessage = MessagingMessage & { pending?: boolean };
 
-function errorMessage(err: unknown, selon: ReturnType<typeof useFormat>["selon"]): string {
+function errorMessage(err: unknown, t: ReturnType<typeof useTranslations<"messages">>): string {
   const response = (err as { response?: { status?: number; data?: { detail?: string } } }).response;
-  if (response?.status === 429) return selon({ fr: "Vous envoyez trop de messages. Réessayez dans un instant.", en: "You are sending too many messages. Please try again in a moment." });
-  return response?.data?.detail ?? selon({ fr: "Le message n'a pas pu être envoyé.", en: "The message could not be sent." });
+  if (response?.status === 429) return t("tropDeMessages");
+  return response?.data?.detail ?? t("nonEnvoye");
 }
 
 export default function ChatPage() {
   const t = useTranslations("messages");
-  const { langue, selon } = useFormat();
+  const { langue } = useFormat();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const conversationId = params.id;
@@ -102,7 +102,7 @@ export default function ChatPage() {
     } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setInput(content);
-      setSendError(errorMessage(err, selon));
+      setSendError(errorMessage(err, t));
     }
   };
 

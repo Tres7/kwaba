@@ -1369,7 +1369,18 @@
     "creerVoyage": "Create this trip and invite friends",
     "offres": "Suggested Kwa-Ba offers"
   },
+  "documents": {
+    "titre": "Documents:",
+    "erreur": "The document could not be downloaded.",
+    "bon": "Voucher",
+    "recu": "Receipt",
+    "facture": "Invoice",
+    "don": "Donation receipt",
+    "telecharger": "Download {nom} (PDF)"
+  },
   "messages": {
+    "tropDeMessages": "You are sending too many messages. Please try again in a moment.",
+    "nonEnvoye": "The message could not be sent.",
     "titre": "Messages",
     "chargement": "Loading…",
     "erreurChargement": "Could not load your conversations.",
