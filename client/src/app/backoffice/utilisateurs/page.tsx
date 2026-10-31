@@ -6,11 +6,12 @@ import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { formatDate, initials, ROLE_LABELS } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
-import ConditionsHote from "@/components/backoffice/ConditionsHote";
+import { modifierUtilisateurAdmin } from "@/features/users";
+import ConditionsHote from "@/features/users/admin/ConditionsHote";
 import ConfirmDialog, { type Confirmation } from "@/components/backoffice/ConfirmDialog";
 import Select from "@/components/ui/Select";
 import type { AdminUser, Role } from "@/types/api/admin";
@@ -43,7 +44,7 @@ function Utilisateurs() {
 
   const modifier = async (u: AdminUser, patch: Partial<Pick<AdminUser, "is_active" | "role">>, succes: string) => {
     try {
-      await api.patch(`/v1/admin/users/${u.id}/`, patch);
+      await modifierUtilisateurAdmin(u.id, patch);
       toast.success(succes);
       queryClient.invalidateQueries({ queryKey: ["admin"] });
     } catch (err) {

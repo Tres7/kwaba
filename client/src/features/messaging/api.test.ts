@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "@/lib/api";
 import {
-  compterNonLus, contacterHote, contacterVoyageur, envoyerMessage, lireConversation, listerConversations, listerMessages, marquerLu,
+  compterNonLus, contacterHote, contacterVoyageur, envoyerMessage, lireConversation, listerConversations, listerMessages, marquerLu, traiterAlerteFraude,
 } from "./api";
 
 vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), post: vi.fn() } }));
@@ -42,6 +42,11 @@ describe("messaging", () => {
     vi.mocked(api.get).mockResolvedValue({ data: { unread_count: 3 } });
     await expect(compterNonLus()).resolves.toBe(3);
     expect(api.get).toHaveBeenCalledWith("/v1/messaging/unread-count/");
+  });
+
+  it("traite une alerte de fraude depuis le back-office", async () => {
+    await traiterAlerteFraude(7, "Compte averti");
+    expect(api.post).toHaveBeenCalledWith("/v1/admin/anti-fraude/7/traiter/", { note: "Compte averti" });
   });
 
   it("contacte un hôte depuis une annonce", async () => {

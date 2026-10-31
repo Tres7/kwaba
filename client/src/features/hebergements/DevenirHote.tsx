@@ -1,12 +1,13 @@
 "use client";
 
+import { devenirHote } from "@/features/users";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Car, CheckCircle, Home, MessageCircle, Wallet } from "lucide-react";
 import { CONTACT_EMAIL } from "@/lib/contact";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { useTranslations } from "next-intl";
 import EstimateurRevenus from "./EstimateurRevenus";
 
@@ -29,7 +30,7 @@ export default function DevenirHotePage() {
   const becomeHost = async () => {
     setLoading(true);
     try {
-      await api.patch("/v1/users/me/", { role: "hote" });
+      await devenirHote();
       await update({ role: "hote" });
       toast.success(t("active"));
       router.push("/hote/espace");

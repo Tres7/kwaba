@@ -1,14 +1,14 @@
 "use client";
 
+import { useMoi } from "@/features/users";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, Circle, Clock, XCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import api, { estErreurApi } from "@/lib/api";
+import { estErreurApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useMaPiece, VerificationIdentite } from "@/features/verifications";
 import { lireContratHote } from "@/features/contrats";
-import type { Me } from "@/types/api/models";
 
 type StatutPiece = "absente" | "soumise" | "verifiee" | "refusee";
 type Etat = "fait" | "attente" | "refuse" | "a_faire";
@@ -24,10 +24,7 @@ const ICONES: Record<Etat, { icone: typeof Circle; classe: string }> = {
  *  Shown while the identity is not verified; afterwards, a simple "Identity verified" mention. */
 export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces: number; onNouvelle: () => void }) {
   const t = useTranslations("espaceHote.candidature");
-  const { data: me } = useQuery({
-    queryKey: ["me"],
-    queryFn: async () => (await api.get<Me>("/v1/users/me/")).data,
-  });
+  const { data: me } = useMoi();
   const { data: piece } = useMaPiece<{ statut: StatutPiece }>();
   // null: agreement not offered yet (Kwa-Ba has not filled in its legal information), step hidden
   const { data: contrat } = useQuery({

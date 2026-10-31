@@ -1,2 +1,2 @@
-export { compterNonLus, contacterHote, contacterVoyageur } from "./api";
+export { compterNonLus, contacterHote, contacterVoyageur, traiterAlerteFraude } from "./api";
 export type { MessagingConversation, MessagingMessage } from "./types";

@@ -52,10 +52,10 @@ const eslintConfig = [
     rules: { "no-restricted-imports": "off" },
   },
   {
-    // Migration in progress: the number of warnings shows what is left
+    // The API is called from the modules: documentation/frontieres-front.md
     files: ["src/app/**/*.{ts,tsx}", "src/components/**/*.{ts,tsx}"],
     rules: {
-      "no-restricted-syntax": ["warn", {
+      "no-restricted-syntax": ["error", {
         selector: "ImportDeclaration[source.value='@/lib/api'] > ImportDefaultSpecifier",
         message: "Les appels à l'API d'un module vont dans features/<module>/api.ts.",
       }],

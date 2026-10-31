@@ -29,6 +29,11 @@ export async function compterNonLus() {
   return (await api.get<{ unread_count: number }>("/v1/messaging/unread-count/")).data.unread_count;
 }
 
+/** Back-office: alert about contact details shared in a conversation. */
+export async function traiterAlerteFraude(id: number, note: string) {
+  await api.post(`/v1/admin/anti-fraude/${id}/traiter/`, { note });
+}
+
 /** Idempotent: returns the existing thread if this host was already contacted for this listing. */
 export async function contacterHote(hebergementId: string) {
   return (await api.post<MessagingConversation>(`${CONVERSATIONS}/`, { hebergement_id: hebergementId })).data;

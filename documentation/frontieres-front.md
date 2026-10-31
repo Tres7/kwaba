@@ -25,11 +25,11 @@ Exemple complet : `client/src/features/favoris`. `client/src/features/carte` mon
 | hors de `app/`, un module s'importe par son index, jamais `@/features/x/fichier` | erreur |
 | `lib/` n'importe ni `features/` ni `components/` | erreur |
 | dates, prix et libellés publics par `useFormat` | erreur |
-| `import api from "@/lib/api"` dans `app/` et `components/` | avertissement, à retirer module par module |
+| `import api from "@/lib/api"` dans `app/` et `components/` | erreur |
 
-## Migrer un module
+## Écrire un module
 
-Une PR par module. L'affichage et l'API ne changent pas.
+Un nouveau module suit le même chemin : une PR, sans changer ni l'affichage ni l'API.
 
 1. **Appels.** Déplacer les appels à l'API dans `features/<module>/api.ts`, en fonctions nommées qui renvoient les données.
 2. **Requêtes.** Regrouper dans `hooks.ts` les `useQuery` répétés, avec une seule clé de cache. Une même clé déclarée dans deux pages est le signe qu'un hook manque.
@@ -39,11 +39,11 @@ Une PR par module. L'affichage et l'API ne changent pas.
 6. **Tests.** Un test de `api.ts` pour les chemins et les corps envoyés, plus les tests existants.
 7. **Avancement.** Mettre à jour le tableau ci-dessous.
 
-Les paiements, la réservation et la connexion passent en dernier, avec un essai complet sur un environnement de test : ce sont les parcours où une erreur coûte le plus.
+Sur la connexion, la réservation et les paiements, faire un essai complet sur un environnement de test : ce sont les parcours où une erreur coûte le plus.
 
 ## Avancement
 
-Fichiers avec un appel direct à l'API : `npm run lint`, règle `no-restricted-syntax`.
+Les 14 modules sont migrés : la règle sur les appels directs est passée en erreur.
 
 | Ordre | Module | Périmètre | État |
 |---|---|---|---|
@@ -60,4 +60,4 @@ Fichiers avec un appel direct à l'API : `npm run lint`, règle `no-restricted-s
 | 11 | locations | catalogue, réservation découpée, suivi, back-office | Migré |
 | 12 | hebergements | accueil, recherche, fiche, espace hôte, calendrier, types, alertes, ouverture | Migré |
 | 13 | reservations, paiements | réservation, paiement, annulation, revenus, profil de versement | Migré |
-| 14 | users, auth | | À faire |
+| 14 | users, auth | connexion, inscription, vérification, mot de passe, profil, comptes du back-office | Migré |

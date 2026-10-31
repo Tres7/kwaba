@@ -1,9 +1,9 @@
 "use client";
 
+import { modifierUtilisateurAdmin } from "../api";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import { isoDate } from "@/lib/utils";
 import Panneau, { Champ, Liste, Saisie, erreursApi } from "@/components/backoffice/Panneau";
 import type { AdminUser, ConditionsHote as Conditions } from "@/types/api/admin";
@@ -42,7 +42,7 @@ export default function ConditionsHote({ hote, onFermer }: { hote: AdminUser | n
         fondateur_debut: form.fondateur_debut || null,
         fondateur_fin: form.fondateur_fin || null,
       };
-      await api.patch(`/v1/admin/users/${hote.id}/`, { conditions });
+      await modifierUtilisateurAdmin(hote.id, { conditions });
       toast.success("Commission mise à jour");
       queryClient.invalidateQueries({ queryKey: ["admin"] });
       onFermer();

@@ -37,7 +37,12 @@ async function relayer(req: NextRequest, { params }: { params: Promise<{ chemin:
       cache: "no-store",
       signal: req.signal,
     } as RequestInit);
-  } catch {
+  } catch (erreur) {
+    // A visitor who left is not a failure. The first two segments only: the rest may be a personal link (contract signature)
+    if (!req.signal.aborted) {
+      const cause = (erreur as { cause?: { code?: string } }).cause?.code ?? String(erreur);
+      console.error("proxy-echec", JSON.stringify({ module: chemin.split("/").slice(0, 2).join("/"), cause }));
+    }
     return Response.json({ detail: "Service momentanément indisponible." }, { status: 502 });
   }
   return new Response(reponse.body, { status: reponse.status, headers: entetesVersNavigateur(reponse.headers) });

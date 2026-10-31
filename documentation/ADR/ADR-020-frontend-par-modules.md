@@ -22,12 +22,11 @@ Le frontend adopte la même découpe, dans `client/src/features/<module>/`, avec
 
 Pas de renommage de `lib/` en `shared/` : le mot change, pas le rôle, et le renommage toucherait des centaines d'imports en conflit avec le travail en cours.
 
-La migration se fait par PR, un module à la fois. Les frontières sont vérifiées par ESLint (`client/eslint.config.mjs`) : en erreur pour ce qui est déjà migré, en avertissement pour les appels restants dans `app/` et `components/`.
+La migration s'est faite par PR, un module à la fois, et s'est terminée en octobre 2026. Les frontières sont vérifiées par ESLint (`client/eslint.config.mjs`), en erreur.
 
 ## Conséquences
 
-- Le nombre d'avertissements `no-restricted-syntax` mesure ce qui reste à migrer.
-- Un nouveau code d'un domaine migré ne peut plus appeler l'API depuis une page sans avertissement.
-- Pendant la migration, les deux organisations coexistent.
+- Une page ou un composant partagé ne peut plus appeler l'API directement : `npm run lint` échoue.
+- Un composant d'affichage utilisé par plusieurs modules reste dans `components/`.
 
 Mode d'emploi et avancement : [frontieres-front.md](../frontieres-front.md).
