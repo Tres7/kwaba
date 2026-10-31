@@ -1369,7 +1369,18 @@
     "creerVoyage": "Créer ce voyage et inviter mes proches",
     "offres": "Offres Kwa-Ba proposées"
   },
+  "documents": {
+    "titre": "Documents :",
+    "erreur": "Le document n'a pas pu être téléchargé.",
+    "bon": "Bon",
+    "recu": "Reçu",
+    "facture": "Facture",
+    "don": "Reçu de don",
+    "telecharger": "Télécharger : {nom} (PDF)"
+  },
   "messages": {
+    "tropDeMessages": "Vous envoyez trop de messages. Réessayez dans un instant.",
+    "nonEnvoye": "Le message n'a pas pu être envoyé.",
     "titre": "Messages",
     "chargement": "Chargement…",
     "erreurChargement": "Impossible de charger vos conversations.",

@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { getApiBaseUrl } from "@/lib/api-url";
 import { fetchBackendUser } from "@/lib/api/auth/me";
+import { renouvelerUneFois } from "@/lib/api/auth/renouvellement";
 import { credentialsProvider } from "@/lib/providers/auth/credentials";
 import { emailCodeProvider } from "@/lib/providers/auth/email-code";
 import { googleProvider } from "@/lib/providers/auth/google";
@@ -71,7 +72,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (sessionFermee(token.refreshToken)) return null;
 
       if (token.refreshToken && Date.now() >= (token.accessTokenExpires ?? 0) - REFRESH_MARGIN_MS) {
-        token = await refreshAccessToken(token);
+        const avant = token;
+        token = await renouvelerUneFois(token.refreshToken, () => refreshAccessToken(avant), (t) => t !== avant);
       }
 
       // useSession().update() (new name, becoming a host): the profile is read again from the API instead of trusting

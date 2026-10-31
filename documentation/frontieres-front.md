@@ -27,6 +27,13 @@ Exemple complet : `client/src/features/favoris`. `client/src/features/carte` mon
 | dates, prix et libellés publics par `useFormat` | erreur |
 | `import api from "@/lib/api"` dans `app/` et `components/` | erreur |
 
+## Conventions
+
+- **Nommage** : le vocabulaire métier est en français et suit les modèles Django (`hebergement`, `reservation`, `voyageur`), le vocabulaire technique reste en anglais (`use…`, `Provider`). Le code ancien se renomme quand on y travaille, pas d'un coup.
+- **Textes** : tout texte visible va dans `client/messages/fr.json` et `en.json`. Deux exceptions : le back-office et l'espace agent, qui n'existent qu'en français, gardent leurs textes dans le code ; `lib/api.ts`, hors de React, garde ses messages d'erreur réseau.
+- **Tests** : un module a un `api.test.ts` pour ses chemins et ses corps, et un test à côté de chaque règle pure.
+- **Clés de cache** : une seule définition par module dans `hooks.ts`. Une clé écrite deux fois fait diverger le cache sans erreur visible.
+
 ## Écrire un module
 
 Un nouveau module suit le même chemin : une PR, sans changer ni l'affichage ni l'API.

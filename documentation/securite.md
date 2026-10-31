@@ -97,6 +97,8 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - les textes des hôtes et du web sont présentés au modèle comme des données, jamais comme des instructions.
 - **Liens externes** : une adresse reçue de l'API passe par `urlExterneSure` avant d'aller dans un `href` (http ou https uniquement, `site_web` compris côté API). Seules les pages de FedaPay et de PayPal peuvent recevoir le voyageur pour un paiement (`estPagePaiement`, `client/src/lib/url-sure.ts`) : un nouveau prestataire doit y être ajouté.
 - **Adresses** : l'email ne passe jamais dans une URL. Il reste dans `sessionStorage` entre l'inscription, le code et la connexion (`client/src/lib/email-en-cours.ts`). Le brouillon de transfert, qui contient un numéro de téléphone, expire après 30 minutes.
+- **Proxy** : un échec vers l'API écrit `proxy-echec` dans les journaux du client (`docker compose logs client | grep proxy-echec`), avec le module et la cause, jamais le chemin complet, qui peut contenir un jeton de signature.
+- **Renouvellement** : l'API refuse un jeton de rafraîchissement déjà utilisé. Le serveur Next.js partage donc la réponse entre les onglets pendant 30 secondes (`lib/api/auth/renouvellement.ts`), sinon le second onglet déconnecterait le visiteur.
 - **Journaux** : jamais de code, de mot de passe ni de jeton. Le jeton des liens de signature (`/contrat/…`) est masqué par nginx, gunicorn (`config/journal_gunicorn.py`) et les rapports de CSP. En développement seulement, le code de vérification est affiché pour tester sans SMTP.
 
 ### Points ouverts
