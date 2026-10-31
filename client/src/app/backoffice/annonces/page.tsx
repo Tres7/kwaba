@@ -11,7 +11,7 @@ import { FALLBACK_IMAGE, formatDate, formatPrice, TYPE_LABELS } from "@/lib/util
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
 import ConfirmDialog, { type Confirmation } from "@/components/backoffice/ConfirmDialog";
-import RatingBadge from "@/components/avis/RatingBadge";
+import RatingBadge from "@/components/ui/RatingBadge";
 import Select from "@/components/ui/Select";
 import type { AdminHebergement } from "@/types/api/admin";
 

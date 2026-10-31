@@ -16,7 +16,7 @@ import GuestsField from "@/components/ui/GuestsField";
 import PropertyCard from "@/components/hebergement/PropertyCard";
 import ChampDestination from "@/components/hebergement/ChampDestination";
 import Services from "@/components/accueil/Services";
-import AvisVoyageurs from "@/components/accueil/AvisVoyageurs";
+import { AvisVoyageurs } from "@/features/avis";
 import type { City, Hebergement, Paginated } from "@/types/api/models";
 import { useFormat } from "@/lib/format";
 

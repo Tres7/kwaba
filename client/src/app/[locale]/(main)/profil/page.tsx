@@ -8,8 +8,9 @@ import api from "@/lib/api";
 import { useReglagesSite, filtrerLiens } from "@/lib/site";
 import { FALLBACK_IMAGE, initials } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
+import { useSejoursAEvaluer } from "@/features/avis";
 import { useFavoris } from "@/features/favoris";
-import type { Me, Paginated, Reservation, SejourAEvaluer } from "@/types/api/models";
+import type { Me, Paginated, Reservation } from "@/types/api/models";
 import { useFormat } from "@/lib/format";
 
 export default function ProfilPage() {
@@ -26,10 +27,7 @@ export default function ProfilPage() {
     queryKey: ["reservations"],
     queryFn: async () => (await api.get<Paginated<Reservation>>("/v1/reservations/")).data.results,
   });
-  const { data: aEvaluer = [] } = useQuery({
-    queryKey: ["avis-a-laisser"],
-    queryFn: async () => (await api.get<Paginated<SejourAEvaluer>>("/v1/avis/a-laisser/")).data.results,
-  });
+  const { data: aEvaluer = [] } = useSejoursAEvaluer();
   const { data: favoris } = useFavoris();
 
   const fullName = me ? `${me.first_name} ${me.last_name}` : session?.user?.name ?? "";

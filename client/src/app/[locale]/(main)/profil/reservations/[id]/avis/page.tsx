@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
 import api, { firstErrorMessage } from "@/lib/api";
+import { publierAvis, useRafraichirAvis } from "@/features/avis";
 import { cn, FALLBACK_IMAGE } from "@/lib/utils";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { CritereAvis, Reservation } from "@/types/api/models";
@@ -49,6 +50,7 @@ export default function LaisserAvisPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const rafraichirAvis = useRafraichirAvis();
   const [note, setNote] = useState(0);
   const [criteres, setCriteres] = useState<Record<CritereAvis, number>>({ proprete: 0, conformite: 0, communication: 0, emplacement: 0, qualite_prix: 0 });
   const [commentaire, setCommentaire] = useState("");
@@ -94,10 +96,9 @@ export default function LaisserAvisPage() {
     setEnvoi(true);
     setErreur("");
     try {
-      await api.post("/v1/avis/", { reservation: reservation.id, note, ...criteres, commentaire: commentaire.trim() });
+      await publierAvis({ reservation: reservation.id, note, ...criteres, commentaire: commentaire.trim() });
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
-      queryClient.invalidateQueries({ queryKey: ["avis"] });
-      queryClient.invalidateQueries({ queryKey: ["avis-a-laisser"] });
+      rafraichirAvis();
       toast.success(t("merci"));
       router.push(`/hebergements/${h.id}#avis`);
     } catch (err) {
