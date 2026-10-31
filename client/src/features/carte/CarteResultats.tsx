@@ -9,12 +9,13 @@ import { Link } from "@/i18n/navigation";
 import { useFormat } from "@/lib/format";
 import { FALLBACK_IMAGE, SERVICE_FEE_RATE, cn, prixNuitFraisInclus } from "@/lib/utils";
 import type { Hebergement } from "@/types/api/models";
+import BoutonRelief from "./BoutonRelief";
 import { CENTRE_LOME, centreDeVille, regrouper } from "./geometrie";
 import { CadreCarte, useCarte } from "./useCarte";
 
 const PASTILLE = "block rounded-full px-2.5 py-1 text-[13px] font-bold whitespace-nowrap shadow-md transition-transform duration-150";
-// Size of a price on the map: two closer than this would overlap, they are gathered
-const TAILLE_PASTILLE = { largeur: 84, hauteur: 34 };
+// Size of the widest label on the map ("12 logements"): two closer than this would overlap, they are gathered
+const TAILLE_PASTILLE = { largeur: 104, hauteur: 34 };
 const ZOOM_MAX_CADRAGE = 14;
 const ZOOM_SANS_GROUPES = 15;
 // More room at the bottom: the preview and the Concierge button sit there
@@ -87,11 +88,11 @@ export default function CarteResultats({ logements, query, ville, survol }: {
       // Stops here: the map would take this click for a click beside the prices
       e.stopPropagation();
       if (seul) setChoisi(seul.id);
-      else instance.fitBounds(limitesDe(membres), { padding: MARGES, maxZoom: ZOOM_SANS_GROUPES, duration: 400 });
+      else instance.fitBounds(limitesDe(membres), { padding: MARGES, maxZoom: ZOOM_SANS_GROUPES, duration: 400, pitch: instance.getPitch(), bearing: instance.getBearing() });
     });
     pastilles.current.push({ element, ids: membres.map((m) => m.id), complet: membres.every((m) => m.complet), groupe: !seul });
-    const centre = limitesDe(membres).getCenter();
-    return new Marker({ element: bouton }).setLngLat(seul ? [seul.lng, seul.lat] : centre).addTo(instance);
+    // On its first listing: regrouper keeps these apart on screen, in a tilted view too, and the others are a few pixels away
+    return new Marker({ element: bouton }).setLngLat([membres[0].lng, membres[0].lat]).addTo(instance);
   }, [t]);
 
   useEffect(() => {
@@ -110,9 +111,12 @@ export default function CarteResultats({ logements, query, ville, survol }: {
       mettreEnAvant();
     };
     dessiner();
+    // Tilting moves the prices on the screen as much as zooming does
     carte.on("zoomend", dessiner);
+    carte.on("pitchend", dessiner);
     return () => {
       carte.off("zoomend", dessiner);
+      carte.off("pitchend", dessiner);
       retirer();
     };
   }, [carte, points, creerMarqueur, mettreEnAvant]);
@@ -127,7 +131,7 @@ export default function CarteResultats({ logements, query, ville, survol }: {
   useEffect(() => {
     if (!carte) return;
     const liste = JSON.parse(positions) as Pick<Point, "lat" | "lng">[];
-    if (liste.length) carte.fitBounds(limitesDe(liste), { padding: MARGES, maxZoom: ZOOM_MAX_CADRAGE, duration: 400 });
+    if (liste.length) carte.fitBounds(limitesDe(liste), { padding: MARGES, maxZoom: ZOOM_MAX_CADRAGE, duration: 400, pitch: carte.getPitch(), bearing: carte.getBearing() });
   }, [carte, positions]);
 
   useEffect(() => {
@@ -142,6 +146,7 @@ export default function CarteResultats({ logements, query, ville, survol }: {
 
   return (
     <CadreCarte conteneur={conteneur} charge={!!carte} panne={panne}>
+      {carte && !panne && <BoutonRelief carte={carte} />}
       {carte && !panne && (points.length === 0 || sansPosition > 0) && (
         <p className="absolute top-16 lg:top-3 left-3 right-14 sm:right-auto sm:max-w-xs rounded-xl bg-white/95 px-3 py-2 text-xs font-semibold text-dark shadow-md">
           {points.length === 0 ? t("aucunLogement") : t("sansPosition", { nombre: sansPosition })}

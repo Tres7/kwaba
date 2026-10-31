@@ -5,7 +5,7 @@ import { AttributionControl, Map as CarteGl, NavigationControl, setWorkerUrl, ty
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapPinOff } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { STYLE_CARTE, auxCouleursKwaBa } from "./style";
+import { STYLE_CARTE } from "./style";
 
 // A separate file in MapLibre 6: webpack publishes it with the site, so the CSP only needs 'self'
 setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).href);
@@ -60,7 +60,7 @@ export function useCarte(options: Omit<MapOptions, "container" | "style">) {
     instance.addControl(new NavigationControl({ showCompass: false }), "top-right");
     // On the left: required credits, and the Concierge button floats on the right
     instance.addControl(new AttributionControl({ compact: true }), "bottom-left");
-    instance.setStyle(STYLE_CARTE, { transformStyle: (_, suivant) => auxCouleursKwaBa(suivant) });
+    instance.setStyle(STYLE_CARTE);
     return () => {
       clearTimeout(delai);
       setCarte(null);

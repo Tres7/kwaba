@@ -401,6 +401,7 @@
     "ajouter": "Ajouter aux favoris"
   },
   "carte": {
+    "relief": "Vue 3D",
     "titre": "Carte des logements",
     "indisponible": "La carte est momentanément indisponible.",
     "voirLogement": "{nom}, {prix} par nuit",
