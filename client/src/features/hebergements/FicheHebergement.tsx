@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { useParams, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BadgeCheck, MapPin, ChevronDown, ChevronUp, Share2, Calendar, MessageCircle, Pencil, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Award, BadgeCheck, MapPin, ChevronDown, ChevronUp, Share2, Calendar, MessageCircle, Pencil, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import AlerteDisponibilite from "./AlerteDisponibilite";
 import EquipementsLogement from "./EquipementsLogement";
@@ -233,10 +233,19 @@ function HebergementContent() {
                 <div className="min-w-0">
                   <p className="text-sm text-muted">{t("hote")}</p>
                   <p className="font-heading font-bold text-dark truncate">{hebergement.host_name || t("hoteKwaba")}</p>
-                  {hebergement.hote_verifie && (
-                    <p className="flex items-center gap-1 text-xs font-bold text-green-700 mt-0.5" title={t("hoteVerifieAide")}>
-                      <ShieldCheck size={13} /> {t("hoteVerifie")}
-                    </p>
+                  {(hebergement.hote_verifie || hebergement.hote_fondateur) && (
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5">
+                      {hebergement.hote_verifie && (
+                        <p className="flex items-center gap-1 text-xs font-bold text-green-700" title={t("hoteVerifieAide")}>
+                          <ShieldCheck size={13} /> {t("hoteVerifie")}
+                        </p>
+                      )}
+                      {hebergement.hote_fondateur && (
+                        <p className="flex items-center gap-1 text-xs font-bold text-amber-700" title={t("hoteFondateurAide")}>
+                          <Award size={13} aria-hidden /> {t("hoteFondateur")}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

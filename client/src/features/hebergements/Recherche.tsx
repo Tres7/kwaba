@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { List, Map as IconeCarte, Search, SlidersHorizontal, X } from "lucide-react";
+import { BadgeCheck, List, Map as IconeCarte, Search, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Chargement from "@/components/ui/Chargement";
 import PropertyCard from "@/components/hebergement/PropertyCard";
@@ -256,12 +256,19 @@ function RechercheContent() {
               {isLoading ? (
                 <p className="text-muted text-sm">{t("rechercheEnCours")}</p>
               ) : (
+                <div>
                 <h1 className="text-dark font-medium">
                   <span className="font-heading font-bold text-2xl">{results.length}</span>{" "}
                   {t("hebergements", { nombre: results.length })}
                   {params.city && <span className="text-muted font-normal"> {t("aVille", { ville: params.city })}</span>}
                   {avecDates && <span className="text-muted font-normal text-sm"> · {t("disponiblesSurPeriode", { nombre: nbDisponibles, debut: formatDate(params.check_in, { day: "numeric", month: "numeric", year: "numeric" }), fin: formatDate(params.check_out, { day: "numeric", month: "numeric", year: "numeric" }) })}</span>}
                 </h1>
+                {results.length > 0 && (
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-green-700 mt-1">
+                    <BadgeCheck size={14} aria-hidden /> {t("tousVerifies")}
+                  </p>
+                )}
+                </div>
               )}
               <div className="flex items-center gap-2 flex-shrink-0">
                 {avecDates && (
