@@ -19,4 +19,7 @@ export interface Experience {
   prix: number | null;
   gratuit: boolean;
   image: string | null;
+  /** Author and licence of the photo, with a link to its source. Empty for a photo owned by Kwa-Ba. */
+  credit_photo: string;
+  credit_photo_url: string;
 }

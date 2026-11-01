@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Compass, MapPin, Search, ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -11,15 +11,17 @@ import { useFormat } from "@/lib/format";
 import { useExperiences } from "./hooks";
 import type { CategorieExperience, Experience } from "./types";
 
-type Category = CategorieExperience;
+// Restaurants stay in the back-office but are not on the site for now
+type Category = Exclude<CategorieExperience, "restaurants">;
 
 const TABS: { id: Category | "tout"; label: string }[] = [
   { id: "tout", label: "tout" },
-  { id: "activites", label: "activites" },
-  { id: "restaurants", label: "restaurants" },
-  { id: "loisirs", label: "loisirs" },
   { id: "sites", label: "sites" },
+  { id: "activites", label: "activites" },
+  { id: "loisirs", label: "loisirs" },
 ];
+
+const PAR_PAGE = 12;
 
 /** Texts in the visitor's language; an empty English text falls back to French. */
 function localiser(e: Experience, locale: string) {
@@ -41,6 +43,7 @@ export default function DecouvrirPage() {
   const [tab, setTab] = useState<Category | "tout">("tout");
   const [city, setCity] = useState("");
   const [q, setQ] = useState("");
+  const [limite, setLimite] = useState(PAR_PAGE);
   const { data: experiences, isLoading } = useExperiences();
   const cities = useMemo(() => Array.from(new Set((experiences ?? []).map((e) => e.ville))).sort((a, b) => a.localeCompare(b, locale)), [experiences, locale]);
 
@@ -53,6 +56,8 @@ export default function DecouvrirPage() {
         (!term || `${e.nom} ${e.description} ${e.etiquette} ${e.ville}`.toLowerCase().includes(term))
     );
   }, [experiences, tab, city, q, locale]);
+
+  useEffect(() => setLimite(PAR_PAGE), [tab, city, q]);
 
   return (
     <div className="min-h-screen bg-light">
@@ -109,11 +114,16 @@ export default function DecouvrirPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((e) => (
+            {filtered.slice(0, limite).map((e) => (
               <article key={e.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
                 <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
                   {e.image && <img src={e.image} alt={e.nom} loading="lazy" className="w-full h-full object-cover" />}
                   <span className="absolute top-4 left-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full text-white bg-primary shadow-sm">{e.etiquette}</span>
+                  {e.credit_photo && (
+                    <a href={e.credit_photo_url || undefined} target="_blank" rel="noopener noreferrer" className="absolute bottom-2 right-2 max-w-[85%] truncate rounded bg-black/55 px-1.5 py-0.5 text-[10px] text-white hover:underline">
+                      {t("creditPhoto", { credit: e.credit_photo })}
+                    </a>
+                  )}
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <h2 className="font-heading font-bold text-dark text-base leading-tight">{e.nom}</h2>
@@ -130,6 +140,13 @@ export default function DecouvrirPage() {
             ))}
           </div>
         )}
+
+        {filtered.length > limite && (
+          <button onClick={() => setLimite((n) => n + PAR_PAGE)} className="block mx-auto mt-8 px-6 py-3 rounded-xl bg-primary text-white text-sm font-bold">
+            {t("voirPlus")}
+          </button>
+        )}
+        <p className="mt-8 text-center text-xs text-gray-500">{t("avertissement")}</p>
       </div>
     </div>
   );
