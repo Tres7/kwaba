@@ -1,0 +1,32 @@
+# Never applied without the administrator: AllowUsers would then lock everybody out
+- name: Administrateur renseigné
+  ansible.builtin.assert:
+    that: systeme_admin | length > 0 and systeme_admin in systeme_ssh_utilisateurs
+    fail_msg: "systeme_admin doit être renseigné et figurer dans systeme_ssh_utilisateurs"
+
+# "00-": sshd keeps the first value it reads, before 50-cloud-init.conf which may re-enable passwords.
+# Checked with sshd -t before being put in place: a broken file never replaces the working one.
+- name: SSH par clé uniquement, root interdit, utilisateurs limités
+  ansible.builtin.template:
+    src: 00-kwaba-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/00-kwaba-hardening.conf
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Recharger SSH
+
+- name: Recharger SSH maintenant
+  ansible.builtin.meta: flush_handlers
+
+- name: Configuration SSH appliquée
+  ansible.builtin.command: sshd -T
+  register: systeme_sshd_effectif
+  changed_when: false
+  check_mode: false
+
+- name: Mots de passe et root bien refusés
+  ansible.builtin.assert:
+    that:
+      - "'permitrootlogin no' in systeme_sshd_effectif.stdout_lines"
+      - "'passwordauthentication no' in systeme_sshd_effectif.stdout_lines"
+      - "'kbdinteractiveauthentication no' in systeme_sshd_effectif.stdout_lines"
+    fail_msg: "La configuration SSH appliquée n'est pas celle attendue : vérifie /etc/ssh/sshd_config.d/ sans fermer ta session"

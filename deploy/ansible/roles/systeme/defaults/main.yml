@@ -1,0 +1,21 @@
+# What scripts/setup-server.sh does on the production server, part by part. Every part is on by default (production);
+# a shared server (the personal VPS of the preprod) switches off what would touch its other projects.
+systeme_paquets: true
+systeme_docker: true
+systeme_swap: true
+systeme_pare_feu: true
+systeme_fail2ban: true
+systeme_mises_a_jour: true
+systeme_ssh: true
+
+# Personal account of the administrator (sudo with a password): created by setup-server.sh, kept as it is here
+systeme_admin: ""
+# Only these users may open an SSH session
+systeme_ssh_utilisateurs: ["{{ systeme_admin }}", deploy]
+systeme_ssh_port: 22
+
+systeme_swap_taille: 2G
+systeme_swappiness: 10
+
+# After the 03:30 backup and the 04:00 token purge; containers restart on their own (restart: unless-stopped)
+systeme_redemarrage_heure: "04:30"

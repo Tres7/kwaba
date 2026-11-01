@@ -1,0 +1,12 @@
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+{% if kwaba_sauvegarde | bool %}
+# Daily database backup (local, plus an encrypted copy on R2 when configured)
+30 3 * * * {{ kwaba_utilisateur }} {{ kwaba_racine }}/scripts/backup.sh quotidienne >> {{ kwaba_racine }}/logs/backup.log 2>&1
+{% endif %}
+# Purge expired JWT tokens
+0 4 * * * {{ kwaba_utilisateur }} {{ kwaba_racine }}/scripts/maintenance.sh flush-tokens >> {{ kwaba_racine }}/logs/maintenance.log 2>&1
+{% if kwaba_renouvellement_certificats | bool %}
+# Let's Encrypt certificate renewal (no-op until they are close to expiry)
+17 2,14 * * * {{ kwaba_utilisateur }} {{ kwaba_racine }}/scripts/maintenance.sh renew-certs >> {{ kwaba_racine }}/logs/maintenance.log 2>&1
+{% endif %}

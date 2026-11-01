@@ -1,0 +1,11 @@
+# Reproduces the environment of the Kwa-Ba servers: the machine (role systeme), the reverse proxy shared by the
+# projects of a server (role proxy, personal VPS only) and what the application needs (role kwaba).
+# It never deploys the application: that stays the job of the deploy workflow and scripts/deploy.sh.
+# Each part of a role can be switched off per server in the inventory (kwa-ba-infra), see roles/*/defaults/main.yml.
+- name: Environnement des serveurs Kwa-Ba
+  hosts: all
+  become: true
+  roles:
+    - systeme
+    - proxy
+    - kwaba
