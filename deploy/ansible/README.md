@@ -42,6 +42,7 @@ Le but est **zéro changement**. Les différences suivantes sont possibles au pr
 - **Commentaires de `/etc/cron.d/kwaba`** : le serveur a été préparé le 13 octobre, avant la traduction des commentaires en anglais (26 octobre). Le fichier du serveur a sans doute des commentaires en français. Appliquer ne change que les commentaires.
 - **Règle SSH du pare-feu** : sans le module noyau `xt_recent`, `setup-server.sh` a remplacé `limit 22/tcp` par `allow 22/tcp`. Ansible voudrait alors ajouter la règle `limit` : regarder `sudo ufw status` avant d'appliquer.
 - **Paquets** : un paquet de base désinstallé à la main depuis serait réinstallé.
+- **Réglage fait à la main sur le serveur** : il doit être reporté dans l'inventaire, sinon Ansible l'annule. Exemple vécu au premier `--check` : le compte `fadel`, ajouté à la main dans `AllowUsers`, aurait été retiré, et Fadel n'aurait plus pu se connecter.
 
 Toute autre différence est à comprendre **avant** d'appliquer.
 

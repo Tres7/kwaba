@@ -11,10 +11,13 @@
     state: directory
     mode: "0755"
 
+# Pinned: a key that does not match is refused (fingerprint 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88).
+# Without a checksum, get_url also reports a change on every --check (HEAD request only).
 - name: Clé du dépôt Docker
   ansible.builtin.get_url:
     url: https://download.docker.com/linux/ubuntu/gpg
     dest: /etc/apt/keyrings/docker.asc
+    checksum: sha256:1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570
     mode: "0644"
 
 - name: Dépôt Docker
