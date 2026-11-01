@@ -85,9 +85,17 @@ jobs:
           openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=kwa-ba.com \
             -keyout "$certs/live/kwa-ba.com/privkey.pem" -out "$certs/live/kwa-ba.com/fullchain.pem" 2> /dev/null
           image=$(grep -m1 -oE 'nginx:[^ ]+' compose.yml)
-          # The image renders nginx/templates (R2_* variables only) before running nginx -t, as in production
+          # The image renders nginx/templates (R2_* and KWABA_* variables only) before running nginx -t, as in
+          # production (compose.yml: KWABA_DOMAIN is kwa-ba.com when set nowhere)
           docker run --rm --add-host api:127.0.0.1 --add-host client:127.0.0.1 \
-            -e NGINX_ENVSUBST_FILTER='^R2_' -e R2_PUBLIC_ORIGIN=https://example.com \
+            -e NGINX_ENVSUBST_FILTER='^(R2_|KWABA_)' -e R2_PUBLIC_ORIGIN=https://example.com \
+            -e KWABA_DOMAIN=kwa-ba.com \
             -v "$PWD/nginx/templates:/etc/nginx/templates:ro" -v "$PWD/nginx/snippets:/etc/nginx/snippets:ro" \
             -v "$certs:/etc/letsencrypt:ro" "$image" nginx -t
+      - name: nginx -t (configuration du premier certificat, scripts/init-tls.sh)
+        run: |
+          image=$(grep -m1 -oE 'nginx:[^ ]+' compose.yml)
+          # Same as the acme service of compose.yml: the bootstrap template alone, in an empty conf.d
+          docker run --rm -e NGINX_ENVSUBST_FILTER='^KWABA_' -e KWABA_DOMAIN=kwa-ba.com \
+            -v "$PWD/nginx/bootstrap:/etc/nginx/templates:ro" --tmpfs /etc/nginx/conf.d "$image" nginx -t
 
