@@ -26,11 +26,11 @@ networks:
 volumes:
   donnees:
     name: {{ proxy_volume_donnees }}
-{% if proxy_volume_donnees_externe %}
+{% if proxy_volume_donnees_externe | bool %}
     external: true
 {% endif %}
   config:
     name: {{ proxy_volume_config }}
-{% if proxy_volume_config_externe %}
+{% if proxy_volume_config_externe | bool %}
     external: true
 {% endif %}

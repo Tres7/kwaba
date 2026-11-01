@@ -8,14 +8,13 @@
 - name: Fichier de swap
   when: systeme_swap_actuelle.stdout | length == 0
   block:
+    # One step for the file and its rights (a --check also goes through, unlike fallocate followed by chmod).
+    # Not sparse: swap refuses files with holes.
     - name: Création de /swapfile
-      ansible.builtin.command: fallocate -l {{ systeme_swap_taille }} /swapfile
-      args:
-        creates: /swapfile
-
-    - name: Droits de /swapfile
-      ansible.builtin.file:
+      community.general.filesize:
         path: /swapfile
+        size: "{{ systeme_swap_taille }}"
+        sparse: false
         mode: "0600"
 
     - name: Formatage et activation

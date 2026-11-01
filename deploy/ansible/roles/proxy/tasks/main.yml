@@ -1,5 +1,5 @@
 - name: Caddy partagé
-  when: proxy_actif
+  when: proxy_actif | bool
   block:
     - name: Dossiers de Caddy
       ansible.builtin.file:
@@ -69,4 +69,4 @@
         chdir: "{{ proxy_racine }}"
       register: proxy_compose
       changed_when: proxy_compose.stderr is search('Created|Recreated|Started|Pulled')
-      when: proxy_demarre
+      when: proxy_demarre | bool

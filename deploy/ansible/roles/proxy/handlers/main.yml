@@ -5,4 +5,4 @@
     sh -c 'caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
     && caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile'
   changed_when: true
-  when: proxy_actif and proxy_demarre
+  when: proxy_actif | bool and proxy_demarre | bool
