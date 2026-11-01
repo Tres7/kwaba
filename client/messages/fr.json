@@ -9,8 +9,8 @@
         "description": "Villas, appartements, hôtels et auberges à Lomé, Cotonou, Ouagadougou et ailleurs. Comparez les prix par nuit et réservez en Mobile Money ou par carte."
       },
       "decouvrir": {
-        "titre": "Activités, restaurants et sites à découvrir au Togo",
-        "description": "Les meilleures activités, tables et visites près de votre logement Kwa-Ba."
+        "titre": "Sites touristiques, activités et loisirs au Togo",
+        "description": "Cascades, plages, marchés, randonnées et sites classés : nos idées de sorties au Togo, près de votre logement Kwa-Ba."
       },
       "transfert": {
         "titre": "Transfert aéroport avec chauffeur",
@@ -252,7 +252,7 @@
       },
       "experiences": {
         "titre": "Expériences",
-        "texte": "Cascades, plages, sites classés et bonnes tables autour de votre logement."
+        "texte": "Cascades, plages, sites classés et randonnées autour de votre logement."
       },
       "together": {
         "titre": "Voyager à plusieurs",
@@ -468,18 +468,20 @@
     "sousTitre": "Nos idées de sorties autour de vos hébergements. Les prix sont indicatifs.",
     "onglets": {
       "tout": "Tout",
+      "sites": "Sites touristiques",
       "activites": "Activités",
-      "restaurants": "Restaurants",
-      "loisirs": "Loisirs",
-      "sites": "Sites touristiques"
+      "loisirs": "Loisirs"
     },
     "ville": "Ville",
     "toutesVilles": "Toutes les villes",
-    "rechercher": "Rechercher une activité, un plat, un lieu…",
+    "rechercher": "Rechercher un site, une activité, un lieu…",
     "aucune": "Aucune idée de sortie ne correspond à ces critères.",
     "reinitialiser": "Réinitialiser les filtres",
     "dormirA": "Dormir à {ville}",
-    "gratuit": "Gratuit"
+    "gratuit": "Gratuit",
+    "voirPlus": "Voir plus d'idées",
+    "creditPhoto": "Photo : {credit}",
+    "avertissement": "Prix, horaires et conditions d'accès à confirmer sur place. Avant de partir vers le nord du pays, consultez les conseils aux voyageurs."
   },
   "recherche": {
     "typeLogement": "Type de logement",

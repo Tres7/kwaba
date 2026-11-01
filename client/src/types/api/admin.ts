@@ -121,8 +121,10 @@ export interface ExperienceAdmin {
   description_en: string;
   prix: number | null;
   gratuit: boolean;
-  /** Displayed photo (uploaded from the back-office, or external for the original guide). */
+  /** Displayed photo (uploaded from the back-office, or provided with the original guide). */
   photo: string | null;
+  credit_photo: string;
+  credit_photo_url: string;
   actif: boolean;
   ordre: number;
 }

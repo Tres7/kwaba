@@ -9,8 +9,8 @@
         "description": "Villas, apartments, hotels and guesthouses in Lomé, Cotonou, Ouagadougou and beyond. Compare nightly prices and book with Mobile Money or card."
       },
       "decouvrir": {
-        "titre": "Activities, restaurants and sights to discover in Togo",
-        "description": "The best experiences, places to eat and visits near your Kwa-Ba stay."
+        "titre": "Sights, activities and leisure in Togo",
+        "description": "Waterfalls, beaches, markets, hikes and heritage sites: ideas for things to do in Togo, near your Kwa-Ba stay."
       },
       "transfert": {
         "titre": "Airport transfer with a driver",
@@ -252,7 +252,7 @@
       },
       "experiences": {
         "titre": "Experiences",
-        "texte": "Waterfalls, beaches, heritage sites and good restaurants around your stay."
+        "texte": "Waterfalls, beaches, heritage sites and hikes around your stay."
       },
       "together": {
         "titre": "Travel as a group",
@@ -468,18 +468,20 @@
     "sousTitre": "Ideas for things to do near your stay. Prices are indicative.",
     "onglets": {
       "tout": "All",
+      "sites": "Sights",
       "activites": "Activities",
-      "restaurants": "Restaurants",
-      "loisirs": "Leisure",
-      "sites": "Sights"
+      "loisirs": "Leisure"
     },
     "ville": "City",
     "toutesVilles": "All cities",
-    "rechercher": "Search for an activity, a dish, a place…",
+    "rechercher": "Search for a sight, an activity, a place…",
     "aucune": "No ideas match these filters.",
     "reinitialiser": "Reset filters",
     "dormirA": "Stay in {ville}",
-    "gratuit": "Free"
+    "gratuit": "Free",
+    "voirPlus": "See more ideas",
+    "creditPhoto": "Photo: {credit}",
+    "avertissement": "Prices, opening hours and access conditions should be checked locally. Before heading to the north of the country, read your government's travel advice."
   },
   "recherche": {
     "typeLogement": "Type of place",

@@ -12,19 +12,20 @@ import { creerExperience, modifierExperience, supprimerExperience } from "../api
 import { useExperiencesAdmin, useRafraichirExperiencesAdmin } from "../hooks";
 
 export const CATEGORIES_EXPERIENCE: { value: CategorieExperience; label: string }[] = [
-  { value: "activites", label: "Activité" }, { value: "restaurants", label: "Restaurant" },
+  { value: "activites", label: "Activité" }, { value: "restaurants", label: "Restaurant (pas sur le site)" },
   { value: "loisirs", label: "Loisir" }, { value: "sites", label: "Site touristique" },
 ];
 
 type Formulaire = Omit<ExperienceAdmin, "id" | "photo" | "prix" | "ordre"> & { prix: string; ordre: string };
 const VIDE: Formulaire = {
   categorie: "activites", nom: "", nom_en: "", etiquette: "", etiquette_en: "", ville: "", pays: "", pays_en: "",
-  description: "", description_en: "", prix: "", gratuit: false, actif: true, ordre: "0",
+  description: "", description_en: "", prix: "", gratuit: false, credit_photo: "", credit_photo_url: "", actif: true, ordre: "0",
 };
 const versFormulaire = (e: ExperienceAdmin): Formulaire => ({
   categorie: e.categorie, nom: e.nom, nom_en: e.nom_en, etiquette: e.etiquette, etiquette_en: e.etiquette_en, ville: e.ville,
   pays: e.pays, pays_en: e.pays_en, description: e.description, description_en: e.description_en,
-  prix: e.prix === null ? "" : String(e.prix), gratuit: e.gratuit, actif: e.actif, ordre: String(e.ordre),
+  prix: e.prix === null ? "" : String(e.prix), gratuit: e.gratuit, credit_photo: e.credit_photo, credit_photo_url: e.credit_photo_url,
+  actif: e.actif, ordre: String(e.ordre),
 });
 
 export default function Experiences() {
@@ -84,6 +85,12 @@ export default function Experiences() {
     } catch (err) {
       toast.error(apiErrorMessage(err, "Suppression impossible."));
     }
+  };
+
+  // The credit belongs to the previous photo
+  const choisirPhoto = (fichier: File | null) => {
+    setPhoto(fichier);
+    if (fichier) setForm((f) => ({ ...f, credit_photo: "", credit_photo_url: "" }));
   };
 
   const liste = (experiences ?? []).filter((e) => !filtre || e.categorie === filtre);
@@ -161,9 +168,17 @@ export default function Experiences() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photoAffichee} alt="" className="w-full h-36 object-cover rounded-xl bg-gray-100" />
             )}
-            <input type="file" accept="image/jpeg,image/png,image/webp" className="text-sm" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="text-sm" onChange={(e) => choisirPhoto(e.target.files?.[0] ?? null)} />
           </div>
         </Champ>
+        <div className="grid grid-cols-2 gap-3">
+          <Champ label="Crédit photo" aide="Auteur et licence, vide pour une photo à Kwa-Ba" erreur={erreurs.credit_photo}>
+            <Saisie value={form.credit_photo} onChange={(e) => champ("credit_photo")(e.target.value)} maxLength={160} />
+          </Champ>
+          <Champ label="Lien du crédit" aide="Page d'origine de la photo" erreur={erreurs.credit_photo_url}>
+            <Saisie type="url" value={form.credit_photo_url} onChange={(e) => champ("credit_photo_url")(e.target.value)} />
+          </Champ>
+        </div>
 
         <p className="text-xs font-bold text-dark uppercase tracking-wide pt-2">Version anglaise (facultative)</p>
         <p className="text-xs text-muted -mt-1">Un champ vide affiche le texte français sur le site en anglais.</p>
