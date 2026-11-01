@@ -99,6 +99,21 @@ Relancer le workflow **deploy** avec un manifest antérieur (les images changent
 
 Journaux dans `/opt/kwaba/logs/` (rotation hebdomadaire).
 
+## Préprod (derrière le Caddy partagé du VPS personnel)
+
+La préprod utilise les mêmes images, le même `compose.yml` et le même `deploy.sh` que la prod. Ce qui la distingue vit sur son serveur, dans `env/deploy.conf` (généré par Ansible, rôle `kwaba`, jamais touché par le rsync) :
+
+```bash
+export COMPOSE_PROJECT_NAME=kwaba-preprod
+export COMPOSE_FILE=compose.yml:compose.preprod.yml
+export KWABA_DOMAIN=preprod.kwa-ba.com
+export KWABA_TLS_MODE=proxy
+```
+
+- **`KWABA_TLS_MODE=proxy`** : nginx sert le site en HTTP seulement (`nginx/templates/kwa-ba-proxy.inc.template`) ; le Caddy partagé du serveur fait le HTTPS et transmet `X-Forwarded-Proto: https`, repris tel quel vers Django et Auth.js. En prod (`nginx`, la valeur par défaut), nginx fait le HTTPS (`kwa-ba-nginx.inc.template`). Les deux modes partagent le corps du site (`kwa-ba-site.inc.template`).
+- **`compose.preprod.yml`** : nginx sans port publié, joint par Caddy sur le réseau Docker `proxy` (conteneur `kwaba-preprod-nginx`) ; `DJANGO_NUM_PROXIES=2` (Caddy puis nginx) ; Mailpit attrape tous les emails (interface : `ssh -L 8025:localhost:8025 <hôte>`, puis `http://localhost:8025`).
+- **`deploy.sh`** : pas de contrôle du certificat (c'est celui de Caddy) mais vérification que le réseau `proxy` existe ; test de santé depuis le conteneur nginx.
+
 ## Essai local de la pile de production
 
 Toute la chaîne se teste sur un poste avec Docker, sans VPS : images construites localement, secrets de test, certificat auto-signé, ports décalés.

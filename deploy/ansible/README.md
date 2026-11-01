@@ -11,7 +11,7 @@ Ansible décrit **ce qu'un serveur doit être** pour accueillir Kwa-Ba : la mach
 | --- | --- | --- |
 | `systeme` | Ce que fait `setup-server.sh` sur la machine : paquets de base, Docker, swap, pare-feu ufw, fail2ban, mises à jour automatiques avec redémarrage de nuit, SSH par clé uniquement | `systeme_paquets`, `systeme_docker`, `systeme_swap`, `systeme_pare_feu`, `systeme_fail2ban`, `systeme_mises_a_jour`, `systeme_ssh` |
 | `proxy` | Caddy partagé par tous les projets d'un serveur (VPS personnel seulement) : `/opt/proxy`, réseau Docker `proxy`, un fichier par site, rechargement sans coupure | `proxy_actif`, `proxy_demarre`, `proxy_sites`, `proxy_volume_*` |
-| `kwaba` | Ce dont l'application a besoin : utilisateur de déploiement (groupe `docker`, sans sudo), dossiers `env/` et `logs/`, tâches planifiées, rotation des journaux | `kwaba_nom`, `kwaba_racine`, `kwaba_utilisateur`, `kwaba_sauvegarde`, `kwaba_renouvellement_certificats` |
+| `kwaba` | Ce dont l'application a besoin : utilisateur de déploiement (groupe `docker`, sans sudo), dossiers `env/` et `logs/`, `env/deploy.conf` (ce qui distingue un environnement de la prod : domaine, mode TLS, fichiers compose), tâches planifiées, rotation des journaux | `kwaba_nom`, `kwaba_racine`, `kwaba_utilisateur`, `kwaba_deploy_conf`, `kwaba_sauvegarde`, `kwaba_renouvellement_certificats` |
 
 Avec les valeurs par défaut, chaque fichier écrit est **identique, octet pour octet**, à celui de `setup-server.sh` : sur la prod, Ansible ne doit rien changer.
 

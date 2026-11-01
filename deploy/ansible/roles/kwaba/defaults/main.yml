@@ -4,6 +4,10 @@ kwaba_racine: /opt/kwaba
 # Used only by the CI/CD (docker group, no sudo); its SSH key is added separately
 kwaba_utilisateur: deploy
 
+# What makes this environment different from the production, written to env/deploy.conf and read by the VPS scripts
+# (scripts/lib.sh): project name, compose files, domain, TLS mode. Empty in production: no file, the defaults apply.
+kwaba_deploy_conf: {}
+
 # Scheduled tasks (server time: UTC)
 kwaba_sauvegarde: true
 kwaba_renouvellement_certificats: true

@@ -1,0 +1,30 @@
+# Preprod, on top of compose.yml (COMPOSE_FILE=compose.yml:compose.preprod.yml, set by env/deploy.conf): same images
+# and services as the production, behind the shared Caddy of the server, which handles HTTPS.
+services:
+  nginx:
+    # No published port: Caddy reaches nginx by this name through the external network "proxy"
+    container_name: kwaba-preprod-nginx
+    ports: !reset []
+    networks: [edge, proxy]
+
+  api:
+    environment:
+      # Two proxies in front of the API (Caddy, then nginx): the visitor's address is the second one from the end of
+      # X-Forwarded-For. With 1, every visitor would have the address of Caddy (limits per IP shared by everybody).
+      DJANGO_NUM_PROXIES: '2'
+
+  # Catches every email of the preprod (EMAIL_HOST=mailpit in env/server.env): nothing reaches a real mailbox.
+  # Web interface on the server only: ssh -L 8025:localhost:8025 <host>, then http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.33.0@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231
+    ports: ['127.0.0.1:8025:8025']
+    # backend: reached by the workers that send the emails; edge: needed to publish the web interface port
+    networks: [backend, edge]
+    security_opt: ['no-new-privileges:true']
+    restart: unless-stopped
+    mem_limit: 64m
+
+networks:
+  proxy:
+    name: proxy
+    external: true

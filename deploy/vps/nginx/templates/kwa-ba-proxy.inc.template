@@ -1,0 +1,10 @@
+# KWABA_TLS_MODE=proxy (preprod): plain HTTP, behind the shared Caddy of the server, which handles HTTPS and the
+# certificate. No port is published: Caddy reaches this container through the Docker network "proxy".
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${KWABA_DOMAIN};
+    access_log /var/log/nginx/access.log journal;
+
+    include /etc/nginx/conf.d/kwa-ba-site.inc;
+}

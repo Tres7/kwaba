@@ -39,6 +39,15 @@
   loop_control:
     label: "{{ item.chemin }}"
 
+- name: Réglages propres à cet environnement (env/deploy.conf)
+  ansible.builtin.template:
+    src: deploy.conf.j2
+    dest: "{{ kwaba_racine }}/env/deploy.conf"
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+  when: kwaba_deploy_conf | length > 0
+
 - name: Tâches planifiées
   ansible.builtin.template:
     src: cron.j2
