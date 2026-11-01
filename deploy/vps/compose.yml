@@ -41,6 +41,8 @@ services:
       NGINX_ENVSUBST_FILTER: '^(R2_|KWABA_)'
       # Same variable as scripts/deploy.sh and init-tls.sh (production: kwa-ba.com, set nowhere)
       KWABA_DOMAIN: ${KWABA_DOMAIN:-kwa-ba.com}
+      # nginx: HTTPS handled here (production); proxy: plain HTTP behind a shared Caddy (preprod, compose.preprod.yml)
+      KWABA_TLS_MODE: ${KWABA_TLS_MODE:-nginx}
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./nginx/snippets:/etc/nginx/snippets:ro

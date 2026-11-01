@@ -1,6 +1,9 @@
 # ${KWABA_DOMAIN} (kwa-ba.com in production): Next.js front end and Django API behind a single domain (no CORS between
-# them). Template rendered by the nginx image at container start (envsubst, limited to R2_* and KWABA_* variables):
-# see compose.yml.
+# them). Templates rendered by the nginx image at container start (envsubst, limited to R2_* and KWABA_* variables):
+# see compose.yml. This file holds what both TLS modes share; the servers come from the file of the mode:
+#   KWABA_TLS_MODE=nginx (production)  kwa-ba-nginx.inc: nginx handles HTTPS (Let's Encrypt certificate)
+#   KWABA_TLS_MODE=proxy (preprod)     kwa-ba-proxy.inc: plain HTTP behind the shared Caddy of the server, which does TLS
+# Both include kwa-ba-site.inc, the body of the site. An unknown mode makes nginx -t fail (no such file).
 
 upstream kwaba_api    { server api:8000;    keepalive 16; }
 upstream kwaba_client { server client:3000; keepalive 16; }
@@ -33,105 +36,11 @@ gzip on;
 gzip_proxied any;
 gzip_types application/json text/css application/javascript image/svg+xml;
 
-# HTTP: Let's Encrypt challenge, otherwise redirect to HTTPS
-server {
-    listen 80;
-    listen [::]:80;
-    server_name ${KWABA_DOMAIN} www.${KWABA_DOMAIN};
-    access_log /var/log/nginx/access.log journal;
-
-    location /.well-known/acme-challenge/ { root /var/www/certbot; }
-    location / { return 301 https://${KWABA_DOMAIN}$request_uri; }
+# Protocol seen by the visitor, sent to Django and Auth.js (snippets/proxy.conf): the one announced by the shared Caddy
+# in proxy mode (the connection to nginx is plain HTTP there), the one of the connection otherwise.
+map $http_x_forwarded_proto $kwaba_proto {
+    default $scheme;
+    https   https;
 }
 
-# www.<domain> -> <domain>
-server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    http2 on;
-    server_name www.${KWABA_DOMAIN};
-    access_log /var/log/nginx/access.log journal;
-    ssl_certificate /etc/letsencrypt/live/${KWABA_DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${KWABA_DOMAIN}/privkey.pem;
-    include /etc/nginx/snippets/tls.conf;
-    return 301 https://${KWABA_DOMAIN}$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    http2 on;
-    server_name ${KWABA_DOMAIN};
-    access_log /var/log/nginx/access.log journal;
-    ssl_certificate /etc/letsencrypt/live/${KWABA_DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${KWABA_DOMAIN}/privkey.pem;
-    include /etc/nginx/snippets/tls.conf;
-
-    # Host photos: 10 MB max on the API side, plus some headroom for the multipart envelope
-    client_max_body_size 12m;
-
-    # A single HSTS header for the whole site (Django's is removed to avoid a duplicate). includeSubDomains: any subdomain
-    # opened in a browser must be served in HTTPS. No "preload": see documentation/securite.md.
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-    # Auth.js (NextAuth) is served by the client under /api/auth/. "^~" makes it win over the /api/ regex
-    # location below (otherwise nginx would send /api/auth/ to Django)
-    location ^~ /api/auth/ {
-        include /etc/nginx/snippets/proxy.conf;
-        proxy_pass http://kwaba_client;
-    }
-
-    # API calls of the browser: the client relays them to Django with the session's token (client/src/app/api/proxy).
-    # Direct calls to /api/ remain for what does not come from a browser (payment webhooks, health check).
-    location ^~ /api/proxy/ {
-        include /etc/nginx/snippets/proxy.conf;
-        proxy_pass http://kwaba_client;
-    }
-
-    # Browsers' CSP violation reports (client/src/app/api/csp-report)
-    location = /api/csp-report {
-        limit_except POST { deny all; }
-        limit_req zone=rapports_csp burst=20 nodelay;
-        limit_req_status 429;
-        client_max_body_size 32k;
-        include /etc/nginx/snippets/proxy.conf;
-        proxy_pass http://kwaba_client;
-    }
-
-    # Host photos, fetched from the public R2 bucket and cached locally (the r2.dev address is rate limited).
-    # The R2 host is resolved when the configuration loads; the container is recreated at every deployment.
-    location ^~ /photos/ {
-        limit_except GET { deny all; }
-        proxy_pass ${R2_PUBLIC_ORIGIN}/;
-        proxy_ssl_server_name on;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Cookie "";
-        proxy_hide_header Set-Cookie;
-        proxy_ignore_headers Cache-Control Expires Set-Cookie;
-        proxy_cache photos;
-        proxy_cache_valid 200 30d;
-        proxy_cache_valid 403 404 1m;
-        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
-        proxy_cache_lock on;
-        add_header Cache-Control "public, max-age=2592000, immutable" always;
-        add_header X-Cache-Status $upstream_cache_status always;
-        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-        add_header X-Content-Type-Options "nosniff" always;
-    }
-
-    # Django API, admin and its static files (WhiteNoise)
-    location ~ ^/(api|admin|static)/ {
-        include /etc/nginx/snippets/proxy.conf;
-        proxy_hide_header Strict-Transport-Security;
-        proxy_pass http://kwaba_api;
-    }
-
-    # Everything else: the site (Next.js)
-    location / {
-        include /etc/nginx/snippets/proxy.conf;
-        proxy_pass http://kwaba_client;
-    }
-}
+include /etc/nginx/conf.d/kwa-ba-${KWABA_TLS_MODE}.inc;

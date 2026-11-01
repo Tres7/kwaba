@@ -78,6 +78,9 @@ jobs:
         run: |
           for f in env/*.env.example; do cp "$f" "${f%.example}"; done
           SERVER_IMAGE=server CLIENT_IMAGE=client docker compose --profile tools config --quiet
+          # Preprod: compose.preprod.yml on top, as set by env/deploy.conf on that server
+          COMPOSE_FILE=compose.yml:compose.preprod.yml KWABA_TLS_MODE=proxy \
+            SERVER_IMAGE=server CLIENT_IMAGE=client docker compose --profile tools config --quiet
       - name: nginx -t (configuration de production générée depuis le template, certificat de test)
         run: |
           certs=$(mktemp -d)
@@ -89,9 +92,17 @@ jobs:
           # production (compose.yml: KWABA_DOMAIN is kwa-ba.com when set nowhere)
           docker run --rm --add-host api:127.0.0.1 --add-host client:127.0.0.1 \
             -e NGINX_ENVSUBST_FILTER='^(R2_|KWABA_)' -e R2_PUBLIC_ORIGIN=https://example.com \
-            -e KWABA_DOMAIN=kwa-ba.com \
+            -e KWABA_DOMAIN=kwa-ba.com -e KWABA_TLS_MODE=nginx \
             -v "$PWD/nginx/templates:/etc/nginx/templates:ro" -v "$PWD/nginx/snippets:/etc/nginx/snippets:ro" \
             -v "$certs:/etc/letsencrypt:ro" "$image" nginx -t
+      - name: nginx -t (préprod, derrière le Caddy partagé, sans certificat)
+        run: |
+          image=$(grep -m1 -oE 'nginx:[^ ]+' compose.yml)
+          docker run --rm --add-host api:127.0.0.1 --add-host client:127.0.0.1 \
+            -e NGINX_ENVSUBST_FILTER='^(R2_|KWABA_)' -e R2_PUBLIC_ORIGIN=https://example.com \
+            -e KWABA_DOMAIN=preprod.kwa-ba.com -e KWABA_TLS_MODE=proxy \
+            -v "$PWD/nginx/templates:/etc/nginx/templates:ro" -v "$PWD/nginx/snippets:/etc/nginx/snippets:ro" \
+            "$image" nginx -t
       - name: nginx -t (configuration du premier certificat, scripts/init-tls.sh)
         run: |
           image=$(grep -m1 -oE 'nginx:[^ ]+' compose.yml)

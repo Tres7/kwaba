@@ -5,6 +5,13 @@ set -euo pipefail
 KWABA_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$KWABA_DIR"
 
+# What makes another environment different from the production (absent there): project name, compose files, domain,
+# TLS mode. On the server only, like the secrets (rsync never touches env/); written by Ansible (role kwaba).
+if [ -f env/deploy.conf ]; then
+  # shellcheck source=/dev/null
+  source env/deploy.conf
+fi
+
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
 
 # docker compose with the images of the last deployment (.deploy.env, or KWABA_ENV_FILE during a deployment).
