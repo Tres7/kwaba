@@ -1,0 +1,21 @@
+# Caddy shared by every project of a server (TLS, one file per site). Off by default: the production keeps nginx + certbot.
+proxy_actif: false
+# false: files and network only, Caddy not started (switching over from another reverse proxy holding ports 80/443)
+proxy_demarre: true
+
+proxy_racine: /opt/proxy
+proxy_conteneur: proxy-caddy
+# External Docker network: each project connects only its entry service (never its database or workers)
+proxy_reseau: proxy
+proxy_image: caddy:2.11.4-alpine@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b
+# Account email for Let's Encrypt (expiry warnings); empty: none
+proxy_email: ""
+
+# Certificates (/data) and state (/config). An existing volume can be taken over (external): no new certificate request.
+proxy_volume_donnees: proxy_caddy_data
+proxy_volume_donnees_externe: false
+proxy_volume_config: proxy_caddy_config
+proxy_volume_config_externe: false
+
+# Sites served: name → Caddyfile block, written to sites/<name>.caddy. A site file not listed here is removed.
+proxy_sites: {}

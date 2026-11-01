@@ -10,6 +10,7 @@ Ansible décrit **ce qu'un serveur doit être** pour accueillir Kwa-Ba : la mach
 | Rôle | Contenu | Interrupteurs (`defaults/main.yml`) |
 | --- | --- | --- |
 | `systeme` | Ce que fait `setup-server.sh` sur la machine : paquets de base, Docker, swap, pare-feu ufw, fail2ban, mises à jour automatiques avec redémarrage de nuit, SSH par clé uniquement | `systeme_paquets`, `systeme_docker`, `systeme_swap`, `systeme_pare_feu`, `systeme_fail2ban`, `systeme_mises_a_jour`, `systeme_ssh` |
+| `proxy` | Caddy partagé par tous les projets d'un serveur (VPS personnel seulement) : `/opt/proxy`, réseau Docker `proxy`, un fichier par site, rechargement sans coupure | `proxy_actif`, `proxy_demarre`, `proxy_sites`, `proxy_volume_*` |
 | `kwaba` | Ce dont l'application a besoin : utilisateur de déploiement (groupe `docker`, sans sudo), dossiers `env/` et `logs/`, tâches planifiées, rotation des journaux | `kwaba_nom`, `kwaba_racine`, `kwaba_utilisateur`, `kwaba_sauvegarde`, `kwaba_renouvellement_certificats` |
 
 Avec les valeurs par défaut, chaque fichier écrit est **identique, octet pour octet**, à celui de `setup-server.sh` : sur la prod, Ansible ne doit rien changer.
@@ -46,9 +47,38 @@ Le but est **zéro changement**. Les différences suivantes sont possibles au pr
 
 Toute autre différence est à comprendre **avant** d'appliquer.
 
+## Caddy partagé du VPS personnel (rôle `proxy`)
+
+Un seul Caddy tient les ports 80 et 443 pour tous les projets du VPS. Il n'appartient à aucune application : déployer un projet ne le recrée jamais.
+
+- **Ajouter un site** : un bloc dans `proxy_sites` (inventaire), puis le playbook. Caddy valide la configuration puis la recharge sans couper les autres sites ; une configuration refusée fait échouer Ansible et Caddy garde l'ancienne.
+- **Raccorder un projet** : seul son service d'entrée rejoint le réseau externe `proxy` (jamais sa base ni ses workers), et le site le désigne par son **nom de conteneur**, unique sur le serveur.
+- **Retirer un site** : l'enlever de `proxy_sites`, son fichier est supprimé.
+
+### Bascule de TraderApp (une seule fois)
+
+Aujourd'hui, le Caddy de TraderApp (`traderapp-caddy`) tient les ports 80/443. Le Caddy partagé reprend ses volumes (`traderapp_caddy_data`, `traderapp_caddy_config`) : **ses certificats sont réutilisés**, rien n'est redemandé. Coupure de quelques secondes à l'étape 3.
+
+1. **Dépôt TraderApp** (PR prête mais pas encore déployée) : retirer le service `caddy` et `deploy/Caddyfile` ; ajouter le réseau externe `proxy` au service `server` (`networks: [default, proxy]`, avec `proxy: { external: true }`) ; retirer la recréation forcée de `caddy` dans `remote-deploy.sh` ; garder les déclarations de volumes `caddy_data` et `caddy_config` jusqu'au renommage (sinon un `docker compose down -v` pourrait les supprimer).
+2. **Préparer sans démarrer** (fichiers et réseau, Caddy partagé arrêté) :
+   ```bash
+   ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit vps_perso --check --diff -e proxy_demarre=false
+   ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit vps_perso --diff -e proxy_demarre=false
+   ```
+3. **Basculer** (sur le VPS, quelques secondes de coupure) :
+   ```bash
+   docker stop traderapp-caddy && docker rm traderapp-caddy
+   docker network connect proxy traderapp_server   # en attendant le déploiement de la PR de l'étape 1
+   docker compose -f /opt/proxy/compose.yml up -d
+   ```
+4. **Vérifier** : `https://217-154-19-172.sslip.io` répond, `/actuator/env` renvoie 404, et `docker logs proxy-caddy` ne montre aucune nouvelle demande de certificat.
+5. **Déployer la PR de TraderApp** de l'étape 1. Avant cela, un déploiement de l'ancienne version recréerait `traderapp-caddy`, qui échouerait faute de ports libres.
+6. Les playbooks suivants se lancent normalement (sans `-e proxy_demarre=false`).
+
+Retour arrière : `docker compose -f /opt/proxy/compose.yml down`, puis redéployer la version précédente de TraderApp (son Caddy reprend les mêmes volumes).
+
 ## Ce qui viendra ensuite
 
-- rôle `proxy` : le Caddy indépendant du VPS personnel (réseau Docker `proxy`, un fichier par site) ;
 - fichiers `env/*.env` et `deploy.conf` générés depuis le Vault ;
 - clé de déploiement restreinte (`restrict,command=…` : seuls `rsync` et `deploy.sh`), en prod comme en préprod.
 
