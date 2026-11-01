@@ -40,6 +40,7 @@ class HebergementSerializer(serializers.ModelSerializer):
     host_id = serializers.UUIDField(read_only=True)
     host_name = serializers.SerializerMethodField()
     hote_verifie = serializers.SerializerMethodField()
+    hote_fondateur = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
     motif_refus = serializers.SerializerMethodField()
     en_ligne = serializers.SerializerMethodField()
@@ -52,7 +53,7 @@ class HebergementSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'type', 'city', 'location', 'latitude', 'longitude', 'position',
             'price_per_night', 'rating', 'review_count', 'image_url', 'images',
-            'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie',
+            'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie', 'hote_fondateur',
             'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne',
             'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant',
@@ -93,6 +94,13 @@ class HebergementSerializer(serializers.ModelSerializer):
             verifies = hotes_verifies(ids)
             return {i: i in verifies for i in ids}
         return self._par_hote('_hotes_verifies', obj, charger)
+
+    def get_hote_fondateur(self, obj):
+        # "Founder host" badge: one of the first 50 individual hosts (Founders Programme)
+        def charger(ids):
+            fondateurs = paiements.hotes_fondateurs(ids)
+            return {i: i in fondateurs for i in ids}
+        return self._par_hote('_hotes_fondateurs', obj, charger)
 
     def get_position(self, obj):
         return positions.approchee(obj)

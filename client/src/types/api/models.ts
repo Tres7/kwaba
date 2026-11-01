@@ -73,6 +73,8 @@ export interface Hebergement {
   host_name: string;
   /** The host's identity document checked by Kwa-Ba ("Verified host" badge). */
   hote_verifie?: boolean;
+  /** One of the first 50 individual hosts (Founders Programme) */
+  hote_fondateur?: boolean;
   is_favorite: boolean;
   /** Inspection visit validated by Kwa-Ba (missing while the backend does not expose it). */
   est_verifie?: boolean;

@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation";
-import { BadgeCheck, CalendarX, Flame, MapPin } from "lucide-react";
+import { Award, BadgeCheck, CalendarX, Flame, MapPin } from "lucide-react";
 import type { Hebergement } from "@/types/api/models";
 import { FavoriteButton } from "@/features/favoris";
 import RatingBadge from "@/components/ui/RatingBadge";
@@ -73,6 +73,11 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
           <span className="text-xs truncate">{property.location ? `${property.location}, ` : ""}{property.city}</span>
         </div>
         {resume(property) && <p className="text-xs text-gray-600 mt-1 truncate">{resume(property)}</p>}
+        {property.hote_fondateur && (
+          <p className="self-start flex items-center gap-1 mt-2 bg-amber-50 text-amber-800 px-2 py-0.5 rounded-full text-[11px] font-bold" title={t("hoteFondateurAide")}>
+            <Award size={12} aria-hidden /> {t("hoteFondateur")}
+          </p>
+        )}
         {complet && (
           <p className="text-xs font-semibold text-dark mt-1.5">
             {dispo!.prochaine_date

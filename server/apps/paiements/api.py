@@ -72,6 +72,13 @@ def conditions_hote(hote_id) -> dict | None:
     return {'categorie': c.categorie, 'fondateur_debut': c.fondateur_debut, 'fondateur_fin': c.fondateur_fin}
 
 
+def hotes_fondateurs(hote_ids) -> set:
+    """Hosts of the Founders Programme (first 50 individual hosts): the title stays after their 6 months at 5 %."""
+    return set(ConditionsHoteModel.objects.filter(
+        hote_id__in=list(hote_ids), categorie='particulier', fondateur_debut__isnull=False,
+    ).values_list('hote_id', flat=True))
+
+
 def frais_reduits_sejour(prix_nuits: int) -> int:
     """Service fees of a stay at the reduced rate (loyal customer, Stay Pack + Driver)."""
     return tarifs.arrondi(Decimal(prix_nuits) * tarifs.FRAIS_REDUITS)
