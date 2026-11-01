@@ -1,0 +1,52 @@
+# The docker group is root-equivalent: only this user gets it, and its key is dedicated to the CI
+- name: Utilisateur de déploiement
+  ansible.builtin.user:
+    name: "{{ kwaba_utilisateur }}"
+    groups: [docker]
+    append: true
+    password: "!"
+    update_password: on_create
+
+- name: Dossier SSH de l'utilisateur de déploiement
+  ansible.builtin.file:
+    path: "/home/{{ kwaba_utilisateur }}/.ssh"
+    state: directory
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0700"
+
+# Created empty if missing, never overwritten: the CI key is added by hand
+- name: Clés autorisées de l'utilisateur de déploiement
+  ansible.builtin.copy:
+    dest: "/home/{{ kwaba_utilisateur }}/.ssh/authorized_keys"
+    content: ""
+    force: false
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+
+- name: Dossiers de l'application
+  ansible.builtin.file:
+    path: "{{ item.chemin }}"
+    state: directory
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "{{ item.droits }}"
+  loop:
+    - { chemin: "{{ kwaba_racine }}", droits: "0755" }
+    - { chemin: "{{ kwaba_racine }}/logs", droits: "0755" }
+    - { chemin: "{{ kwaba_racine }}/env", droits: "0700" }
+  loop_control:
+    label: "{{ item.chemin }}"
+
+- name: Tâches planifiées
+  ansible.builtin.template:
+    src: cron.j2
+    dest: "/etc/cron.d/{{ kwaba_nom }}"
+    mode: "0644"
+
+- name: Rotation des journaux
+  ansible.builtin.template:
+    src: logrotate.j2
+    dest: "/etc/logrotate.d/{{ kwaba_nom }}"
+    mode: "0644"

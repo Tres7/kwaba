@@ -1,0 +1,9 @@
+# Reproduces the environment of the Kwa-Ba servers: the machine (role systeme) and what the application needs on it
+# (role kwaba). It never deploys the application: that stays the job of the deploy workflow and scripts/deploy.sh.
+# Each part of a role can be switched off per server in the inventory (kwa-ba-infra), see roles/*/defaults/main.yml.
+- name: Environnement des serveurs Kwa-Ba
+  hosts: all
+  become: true
+  roles:
+    - systeme
+    - kwaba

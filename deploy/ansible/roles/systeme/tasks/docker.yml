@@ -1,0 +1,48 @@
+# Official Docker repository; upgraded by hand every month (apt upgrade)
+- name: Architecture des paquets
+  ansible.builtin.command: dpkg --print-architecture
+  register: systeme_architecture
+  changed_when: false
+  check_mode: false
+
+- name: Dossier des clés APT
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Clé du dépôt Docker
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+
+- name: Dépôt Docker
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/docker.list
+    content: >
+      deb [arch={{ systeme_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.asc]
+      https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable
+    mode: "0644"
+  register: systeme_depot_docker
+
+- name: Paquets Docker
+  ansible.builtin.apt:
+    name: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+    state: present
+    update_cache: "{{ systeme_depot_docker is changed }}"
+
+# live-restore: containers keep running while the Docker daemon itself is restarted or upgraded
+- name: Configuration du démon Docker
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      { "log-driver": "local", "log-opts": { "max-size": "10m", "max-file": "3" }, "live-restore": true }
+    mode: "0644"
+  notify: Redémarrer Docker
+
+- name: Docker démarré au boot
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: true
+    state: started

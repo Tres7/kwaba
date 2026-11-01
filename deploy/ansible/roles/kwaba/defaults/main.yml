@@ -1,0 +1,9 @@
+# Production values: the preprod changes them in its inventory (name, folder, user, scheduled tasks)
+kwaba_nom: kwaba
+kwaba_racine: /opt/kwaba
+# Used only by the CI/CD (docker group, no sudo); its SSH key is added separately
+kwaba_utilisateur: deploy
+
+# Scheduled tasks (server time: UTC)
+kwaba_sauvegarde: true
+kwaba_renouvellement_certificats: true

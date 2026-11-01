@@ -1,0 +1,15 @@
+- name: Mises à jour de sécurité chaque jour
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    mode: "0644"
+
+- name: Redémarrage la nuit si une mise à jour l'exige
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/52kwaba-unattended
+    content: |
+      Unattended-Upgrade::Automatic-Reboot "true";
+      Unattended-Upgrade::Automatic-Reboot-Time "{{ systeme_redemarrage_heure }}";
+    mode: "0644"

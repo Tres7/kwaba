@@ -1,0 +1,27 @@
+- name: Paquets de base
+  ansible.builtin.import_tasks: paquets.yml
+  when: systeme_paquets
+
+- name: Docker
+  ansible.builtin.import_tasks: docker.yml
+  when: systeme_docker
+
+- name: Swap
+  ansible.builtin.import_tasks: swap.yml
+  when: systeme_swap
+
+- name: Pare-feu
+  ansible.builtin.import_tasks: pare_feu.yml
+  when: systeme_pare_feu
+
+- name: fail2ban
+  ansible.builtin.import_tasks: fail2ban.yml
+  when: systeme_fail2ban
+
+- name: Mises à jour automatiques
+  ansible.builtin.import_tasks: mises_a_jour.yml
+  when: systeme_mises_a_jour
+
+- name: SSH
+  ansible.builtin.import_tasks: ssh.yml
+  when: systeme_ssh

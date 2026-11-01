@@ -1,0 +1,38 @@
+- name: Swap déjà active
+  ansible.builtin.command: swapon --show --noheadings
+  register: systeme_swap_actuelle
+  changed_when: false
+  check_mode: false
+
+# Only on a server without any swap: an existing one (another file, a partition) is never replaced
+- name: Fichier de swap
+  when: systeme_swap_actuelle.stdout | length == 0
+  block:
+    - name: Création de /swapfile
+      ansible.builtin.command: fallocate -l {{ systeme_swap_taille }} /swapfile
+      args:
+        creates: /swapfile
+
+    - name: Droits de /swapfile
+      ansible.builtin.file:
+        path: /swapfile
+        mode: "0600"
+
+    - name: Formatage et activation
+      ansible.builtin.shell: mkswap /swapfile > /dev/null && swapon /swapfile
+      changed_when: true
+
+- name: Swap montée au démarrage
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: '^/swapfile\s'
+    line: /swapfile none swap sw 0 0
+  when: systeme_swap_actuelle.stdout | length == 0 or '/swapfile' in systeme_swap_actuelle.stdout
+
+- name: Swap utilisée en dernier recours
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/90-kwaba.conf
+    content: |
+      vm.swappiness={{ systeme_swappiness }}
+    mode: "0644"
+  notify: Recharger sysctl
