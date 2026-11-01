@@ -1,5 +1,6 @@
-# kwa-ba.com: Next.js front end and Django API behind a single domain (no CORS between them).
-# Template rendered by the nginx image at container start (envsubst, limited to R2_* variables): see compose.yml.
+# ${KWABA_DOMAIN} (kwa-ba.com in production): Next.js front end and Django API behind a single domain (no CORS between
+# them). Template rendered by the nginx image at container start (envsubst, limited to R2_* and KWABA_* variables):
+# see compose.yml.
 
 upstream kwaba_api    { server api:8000;    keepalive 16; }
 upstream kwaba_client { server client:3000; keepalive 16; }
@@ -7,7 +8,7 @@ upstream kwaba_client { server client:3000; keepalive 16; }
 # The api and client names are resolved when the configuration loads: scripts/deploy.sh reloads nginx
 # (nginx -s reload) after recreating those containers.
 
-# Host photos are stored in R2 and served from https://kwa-ba.com/photos/: URLs saved in listings never depend
+# Host photos are stored in R2 and served from https://<domain>/photos/: URLs saved in listings never depend
 # on where the files live. File names are unique and never rewritten, so they can be cached for a long time.
 proxy_cache_path /var/cache/nginx/photos levels=1:2 keys_zone=photos:10m max_size=2g inactive=30d use_temp_path=off;
 
@@ -36,30 +37,34 @@ gzip_types application/json text/css application/javascript image/svg+xml;
 server {
     listen 80;
     listen [::]:80;
-    server_name kwa-ba.com www.kwa-ba.com;
+    server_name ${KWABA_DOMAIN} www.${KWABA_DOMAIN};
     access_log /var/log/nginx/access.log journal;
 
     location /.well-known/acme-challenge/ { root /var/www/certbot; }
-    location / { return 301 https://kwa-ba.com$request_uri; }
+    location / { return 301 https://${KWABA_DOMAIN}$request_uri; }
 }
 
-# www.kwa-ba.com -> kwa-ba.com
+# www.<domain> -> <domain>
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
     http2 on;
-    server_name www.kwa-ba.com;
+    server_name www.${KWABA_DOMAIN};
     access_log /var/log/nginx/access.log journal;
+    ssl_certificate /etc/letsencrypt/live/${KWABA_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${KWABA_DOMAIN}/privkey.pem;
     include /etc/nginx/snippets/tls.conf;
-    return 301 https://kwa-ba.com$request_uri;
+    return 301 https://${KWABA_DOMAIN}$request_uri;
 }
 
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
     http2 on;
-    server_name kwa-ba.com;
+    server_name ${KWABA_DOMAIN};
     access_log /var/log/nginx/access.log journal;
+    ssl_certificate /etc/letsencrypt/live/${KWABA_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${KWABA_DOMAIN}/privkey.pem;
     include /etc/nginx/snippets/tls.conf;
 
     # Host photos: 10 MB max on the API side, plus some headroom for the multipart envelope

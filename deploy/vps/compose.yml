@@ -34,10 +34,13 @@ services:
   nginx:
     image: nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de
     ports: ['${HTTP_PORT:-80}:80', '${HTTPS_PORT:-443}:443']
-    # nginx/templates/*.template are rendered into /etc/nginx/conf.d at start; only R2_* variables are substituted
+    # nginx/templates/*.template are rendered into /etc/nginx/conf.d at start; only R2_* and KWABA_* variables are
+    # substituted (nginx's own $variables stay as they are)
     env_file: [env/nginx.env]
     environment:
-      NGINX_ENVSUBST_FILTER: '^R2_'
+      NGINX_ENVSUBST_FILTER: '^(R2_|KWABA_)'
+      # Same variable as scripts/deploy.sh and init-tls.sh (production: kwa-ba.com, set nowhere)
+      KWABA_DOMAIN: ${KWABA_DOMAIN:-kwa-ba.com}
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./nginx/snippets:/etc/nginx/snippets:ro
@@ -136,9 +139,14 @@ services:
   acme:
     image: nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de
     ports: ['${HTTP_PORT:-80}:80']
+    environment:
+      NGINX_ENVSUBST_FILTER: '^KWABA_'
+      KWABA_DOMAIN: ${KWABA_DOMAIN:-kwa-ba.com}
     volumes:
-      - ./nginx/bootstrap:/etc/nginx/conf.d:ro
+      - ./nginx/bootstrap:/etc/nginx/templates:ro
       - certbot-www:/var/www/certbot:ro
+    # Empty conf.d: only the rendered bootstrap configuration is loaded, not the image's default.conf
+    tmpfs: [/etc/nginx/conf.d]
     profiles: [tools]
 
   # One-off tool (no long-running container): obtains and renews Let's Encrypt certificates

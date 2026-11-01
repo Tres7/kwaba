@@ -1,9 +1,9 @@
 # Temporary first-start configuration (scripts/init-tls.sh): plain HTTP while the Let's Encrypt certificate
-# is obtained. Replaced by conf.d/kwa-ba.conf afterwards.
+# is obtained. Replaced by conf.d/kwa-ba.conf afterwards. Template: ${KWABA_DOMAIN} is substituted at start.
 server {
     listen 80;
     listen [::]:80;
-    server_name kwa-ba.com www.kwa-ba.com;
+    server_name ${KWABA_DOMAIN} www.${KWABA_DOMAIN};
     location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 503; }
 }

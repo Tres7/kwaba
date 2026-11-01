@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# First Let's Encrypt certificate (once, with kwa-ba.com DNS already pointing to the VPS):
+# First Let's Encrypt certificate (once, with the DNS of the domain already pointing to the VPS; KWABA_DOMAIN, kwa-ba.com
+# by default):
 # scripts/init-tls.sh <Let's Encrypt contact email>
 source "$(dirname "$0")/lib.sh"
 
