@@ -31,7 +31,8 @@ Contrôles faits aussi par l'API :
   (`apps/paiements/operateurs.py`) ; les versements aux partenaires saisis dans le back-office gardent la liste complète ;
 - location sans chauffeur : devis et réservation refusés (`apps/locations/services.py`).
 
-Les expériences publiées sont limitées au Togo (`apps/experiences/views.py`), indépendamment de l'interrupteur.
+Les expériences publiées sont limitées au Togo, sans les restaurants (`apps/experiences/views.py`), indépendamment de
+l'interrupteur. Voir `documentation/modules/experiences.md`.
 
 ## Numéros légaux
 

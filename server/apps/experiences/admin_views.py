@@ -17,7 +17,7 @@ class ExperienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExperienceModel
         fields = ['id', 'categorie', 'nom', 'nom_en', 'etiquette', 'etiquette_en', 'ville', 'pays', 'pays_en', 'description',
-                  'description_en', 'prix', 'gratuit', 'image', 'photo', 'actif', 'ordre']
+                  'description_en', 'prix', 'gratuit', 'image', 'photo', 'credit_photo', 'credit_photo_url', 'actif', 'ordre']
 
     def get_photo(self, obj):
         return obj.photo(self.context.get('request'))

@@ -30,14 +30,36 @@ def _photo():
     return SimpleUploadedFile('sortie.png', tampon.getvalue(), content_type='image/png')
 
 
-def test_guide_repris_de_l_ancienne_page():
-    # The 12 entries of the guide stay in the database; only the Togo ones are published (audit no. 3)
-    assert ExperienceModel.objects.filter(actif=True).count() == 12
+def test_guide_du_togo():
+    # The 12 entries of the first guide stay in the database; only the Togo ones are published (audit no. 3)
+    assert ExperienceModel.objects.filter(actif=True).count() == 70
     reponse = APIClient().get(PUBLIC)
-    assert reponse.status_code == 200 and [e['ville'] for e in reponse.data] == ['Lomé']
-    fetiches = reponse.data[0]
-    assert fetiches['nom'] == 'Marché des fétiches' and fetiches['pays'] == 'Togo' and fetiches['prix'] == 3000
-    assert fetiches['image'].startswith('https://images.unsplash.com/')
+    assert reponse.status_code == 200 and len(reponse.data) == 59
+    assert {e['pays'] for e in reponse.data} == {'Togo'}
+    assert {e['categorie'] for e in reponse.data} == {'sites', 'activites', 'loisirs'}
+    # In both languages, with a photo served by the website and the credit its licence requires
+    assert all(e['nom_en'] and e['description_en'] and e['etiquette_en'] for e in reponse.data)
+    assert all(e['image'].startswith('/experiences/') and e['credit_photo'] and e['credit_photo_url'] for e in reponse.data)
+    assert len({e['image'] for e in reponse.data}) == 59
+
+    fetiches = next(e for e in reponse.data if e['nom'] == 'Marché des fétiches')
+    assert fetiches['prix'] == 3000 and fetiches['image'] == '/experiences/fetiches.jpg'
+
+
+def test_restaurants_gardes_au_back_office_mais_pas_sur_le_site(admin):
+    restaurant = ExperienceModel.objects.create(
+        categorie='restaurants', nom='Maquis de Bè', etiquette='Togolais', ville='Lomé', pays='Togo', description='Poisson braisé.',
+    )
+    assert all(e['id'] != restaurant.id for e in APIClient().get(PUBLIC).data)
+    assert any(e['id'] == restaurant.id for e in admin.get(ADMIN).data)
+
+
+def test_credit_de_la_photo(admin):
+    experience = ExperienceModel.objects.get(nom='Marché des fétiches')
+    credit = {'credit_photo': 'Kwa-Ba', 'credit_photo_url': 'https://kwa-ba.com/'}
+    assert admin.patch(f'{ADMIN}{experience.id}/', credit, format='json').status_code == 200
+    publiee = next(e for e in APIClient().get(PUBLIC).data if e['id'] == experience.id)
+    assert credit.items() <= publiee.items()
 
 
 def test_reserve_aux_admins(make_user, client_for):

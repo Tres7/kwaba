@@ -8,7 +8,8 @@ export default function ExperiencesPage() {
       <div>
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark">Expériences</h1>
         <p className="text-muted text-sm mt-1">
-          Activités, restaurants, loisirs et sites de la page Découvrir : ajout, photo, traduction anglaise, publication.
+          Sites, activités et loisirs de la page Découvrir : ajout, photo, traduction anglaise, publication. Seules les fiches du Togo sont
+          affichées, et les restaurants restent masqués sur le site pour le moment.
         </p>
       </div>
       <ExperiencesAdmin />
