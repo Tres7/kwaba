@@ -39,7 +39,10 @@ log "Images"
 if [ "${KWABA_SKIP_PULL:-0}" != "1" ]; then kwaba_compose pull api client; fi
 
 log "Base et broker"
-kwaba_compose up -d --wait postgres rabbitmq
+annexes=()
+# Preprod only (compose.preprod.yml): Mailpit catches every email
+if kwaba_compose config --services | grep -qx mailpit; then annexes+=(mailpit); fi
+kwaba_compose up -d --wait postgres rabbitmq "${annexes[@]}"
 
 log "Sauvegarde de la base avant migrations"
 scripts/backup.sh "avant-${manifest%.yaml}"
