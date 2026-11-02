@@ -8,6 +8,10 @@ kwaba_utilisateur: deploy
 # (scripts/lib.sh): project name, compose files, domain, TLS mode. Empty in production: no file, the defaults apply.
 kwaba_deploy_conf: {}
 
+# Secret files of the application: name → variables, written to env/<name>.env (values from the Vault of the inventory).
+# Empty in production: its files are still written by hand on the server, Ansible leaves them alone.
+kwaba_env: {}
+
 # Scheduled tasks (server time: UTC)
 kwaba_sauvegarde: true
 kwaba_renouvellement_certificats: true

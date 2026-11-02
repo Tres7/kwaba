@@ -11,7 +11,7 @@ Ansible décrit **ce qu'un serveur doit être** pour accueillir Kwa-Ba : la mach
 | --- | --- | --- |
 | `systeme` | Ce que fait `setup-server.sh` sur la machine : paquets de base, Docker, swap, pare-feu ufw, fail2ban, mises à jour automatiques avec redémarrage de nuit, SSH par clé uniquement | `systeme_paquets`, `systeme_docker`, `systeme_swap`, `systeme_pare_feu`, `systeme_fail2ban`, `systeme_mises_a_jour`, `systeme_ssh` |
 | `proxy` | Caddy partagé par tous les projets d'un serveur (VPS personnel seulement) : `/opt/proxy`, réseau Docker `proxy`, un fichier par site, rechargement sans coupure | `proxy_actif`, `proxy_demarre`, `proxy_sites`, `proxy_volume_*` |
-| `kwaba` | Ce dont l'application a besoin : utilisateur de déploiement (groupe `docker`, sans sudo), dossiers `env/` et `logs/`, `env/deploy.conf` (ce qui distingue un environnement de la prod : domaine, mode TLS, fichiers compose), tâches planifiées, rotation des journaux | `kwaba_nom`, `kwaba_racine`, `kwaba_utilisateur`, `kwaba_deploy_conf`, `kwaba_sauvegarde`, `kwaba_renouvellement_certificats` |
+| `kwaba` | Ce dont l'application a besoin : utilisateur de déploiement (groupe `docker`, sans sudo), dossiers `env/` et `logs/`, `env/deploy.conf` (ce qui distingue un environnement de la prod : domaine, mode TLS, fichiers compose), fichiers de secrets `env/*.env` (depuis le Vault), tâches planifiées, rotation des journaux | `kwaba_nom`, `kwaba_racine`, `kwaba_utilisateur`, `kwaba_deploy_conf`, `kwaba_env`, `kwaba_sauvegarde`, `kwaba_renouvellement_certificats` |
 
 Avec les valeurs par défaut, chaque fichier écrit est **identique, octet pour octet**, à celui de `setup-server.sh` : sur la prod, Ansible ne doit rien changer.
 
@@ -77,9 +77,25 @@ Aujourd'hui, le Caddy de TraderApp (`traderapp-caddy`) tient les ports 80/443. L
 
 Retour arrière : `docker compose -f /opt/proxy/compose.yml down`, puis redéployer la version précédente de TraderApp (son Caddy reprend les mêmes volumes).
 
+## Secrets de la préprod (Vault)
+
+Les fichiers `env/*.env` de la préprod sont générés par le rôle `kwaba` depuis `kwaba_env` (inventaire, `group_vars/vps_perso/main.yml`), dont les secrets viennent de `group_vars/vps_perso/vault.yml`, chiffré avec le vault-id `preprod` (mot de passe distinct de celui de la prod). En prod, `kwaba_env` est vide : ses fichiers restent écrits à la main et Ansible n'y touche pas.
+
+```bash
+# Modifier un secret (depuis kwa-ba-infra)
+EDITOR=nano ansible-vault edit --vault-id preprod@prompt inventory/group_vars/vps_perso/vault.yml
+# Appliquer (depuis deploy/ansible)
+ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit vps_perso --vault-id preprod@prompt --check --diff
+ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit vps_perso --vault-id preprod@prompt --diff
+```
+
+- Les fichiers de secrets n'affichent **jamais de diff** (il imprimerait les secrets) : seulement `changed`.
+- Chaque valeur est écrite entre apostrophes, prise telle quelle par compose (un `$` reste un `$`) ; une apostrophe ou un saut de ligne dans une valeur fait échouer le playbook.
+- Les conteneurs gardent les anciennes valeurs jusqu'au déploiement suivant (ou `docker compose up -d` dans `/opt/kwaba-preprod`).
+- Le site `preprod.kwa-ba.com` du Caddy partagé (`proxy_sites`) demande un mot de passe au navigateur (son hash bcrypt est dans le Vault), sauf pour le webhook FedaPay, envoie `X-Robots-Tag: noindex` et retire l'en-tête `Authorization` avant nginx.
+
 ## Ce qui viendra ensuite
 
-- fichiers `env/*.env` et `deploy.conf` générés depuis le Vault ;
 - clé de déploiement restreinte (`restrict,command=…` : seuls `rsync` et `deploy.sh`), en prod comme en préprod.
 
 Quand le `--check` sur la prod n'annonce plus aucun changement, `deploy/vps/scripts/setup-server.sh` peut être retiré : Ansible devient la seule description de la machine.
