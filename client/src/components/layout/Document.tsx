@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "@/app/globals.css";
 import Providers from "@/providers/Providers";
 import ConsentProvider from "@/providers/ConsentProvider";
@@ -15,15 +15,17 @@ import { getMessages, getTranslations } from "next-intl/server";
 import type { Langue } from "@/i18n/routing";
 import { IMAGE_PARTAGE, SITE_URL } from "@/lib/seo";
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+// Variable fonts, latin subset, kept in the repository (licences next to the files): the image build no longer
+// downloads them from Google Fonts, whose answers made it fail at random
+const montserrat = localFont({
+  src: "../../fonts/montserrat-latin-wght-normal.woff2",
+  weight: "100 900",
   variable: "--font-montserrat",
 });
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const inter = localFont({
+  src: "../../fonts/inter-latin-wght-normal.woff2",
+  weight: "100 900",
   variable: "--font-inter",
 });
 
