@@ -15,7 +15,7 @@
     group: "{{ kwaba_utilisateur }}"
     mode: "0700"
 
-# Created empty if missing, never overwritten: the CI key is added by hand
+# Without kwaba_cle_deploiement: created empty if missing, never overwritten, the CI key is added by hand
 - name: Clés autorisées de l'utilisateur de déploiement
   ansible.builtin.copy:
     dest: "/home/{{ kwaba_utilisateur }}/.ssh/authorized_keys"
@@ -24,6 +24,18 @@
     owner: "{{ kwaba_utilisateur }}"
     group: "{{ kwaba_utilisateur }}"
     mode: "0600"
+  when: kwaba_cle_deploiement | length == 0
+
+# The only key of the user, which can run nothing but the gate (no shell, forwarding, agent or pty)
+- name: Clé de déploiement restreinte à la porte de déploiement
+  ansible.builtin.copy:
+    dest: "/home/{{ kwaba_utilisateur }}/.ssh/authorized_keys"
+    content: |
+      restrict,command="/usr/local/bin/{{ kwaba_nom }}-deploy" {{ kwaba_cle_deploiement }}
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+  when: kwaba_cle_deploiement | length > 0
 
 - name: Dossiers de l'application
   ansible.builtin.file:
@@ -38,6 +50,22 @@
     - { chemin: "{{ kwaba_racine }}/env", droits: "0700" }
   loop_control:
     label: "{{ item.chemin }}"
+
+- name: Outils de la porte de déploiement
+  ansible.builtin.apt:
+    name: [git, rsync]
+    state: present
+  when: kwaba_cle_deploiement | length > 0
+
+# Owned by root: the deploy user runs it but can never change it (it sits outside the folder it updates)
+- name: Porte de déploiement
+  ansible.builtin.template:
+    src: deploy-gate.sh.j2
+    dest: "/usr/local/bin/{{ kwaba_nom }}-deploy"
+    owner: root
+    group: root
+    mode: "0755"
+  when: kwaba_cle_deploiement | length > 0
 
 - name: Réglages propres à cet environnement (env/deploy.conf)
   ansible.builtin.template:

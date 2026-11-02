@@ -11,7 +11,7 @@ Ansible décrit **ce qu'un serveur doit être** pour accueillir Kwa-Ba : la mach
 | --- | --- | --- |
 | `systeme` | Ce que fait `setup-server.sh` sur la machine : paquets de base, Docker, swap, pare-feu ufw, fail2ban, mises à jour automatiques avec redémarrage de nuit, SSH par clé uniquement | `systeme_paquets`, `systeme_docker`, `systeme_swap`, `systeme_pare_feu`, `systeme_fail2ban`, `systeme_mises_a_jour`, `systeme_ssh` |
 | `proxy` | Caddy partagé par tous les projets d'un serveur (VPS personnel seulement) : `/opt/proxy`, réseau Docker `proxy`, un fichier par site, rechargement sans coupure | `proxy_actif`, `proxy_demarre`, `proxy_sites`, `proxy_volume_*` |
-| `kwaba` | Ce dont l'application a besoin : utilisateur de déploiement (groupe `docker`, sans sudo), dossiers `env/` et `logs/`, `env/deploy.conf` (ce qui distingue un environnement de la prod : domaine, mode TLS, fichiers compose), fichiers de secrets `env/*.env` (depuis le Vault), tâches planifiées, rotation des journaux | `kwaba_nom`, `kwaba_racine`, `kwaba_utilisateur`, `kwaba_deploy_conf`, `kwaba_env`, `kwaba_sauvegarde`, `kwaba_renouvellement_certificats` |
+| `kwaba` | Ce dont l'application a besoin : utilisateur de déploiement (groupe `docker`, sans sudo), dossiers `env/` et `logs/`, `env/deploy.conf` (ce qui distingue un environnement de la prod : domaine, mode TLS, fichiers compose), fichiers de secrets `env/*.env` (depuis le Vault), clé de déploiement restreinte et porte de déploiement, tâches planifiées, rotation des journaux | `kwaba_nom`, `kwaba_racine`, `kwaba_utilisateur`, `kwaba_cle_deploiement`, `kwaba_manifest_client`, `kwaba_deploy_conf`, `kwaba_env`, `kwaba_sauvegarde`, `kwaba_renouvellement_certificats` |
 
 Avec les valeurs par défaut, chaque fichier écrit est **identique, octet pour octet**, à celui de `setup-server.sh` : sur la prod, Ansible ne doit rien changer.
 
@@ -95,8 +95,14 @@ ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit vps_perso -
 - Les conteneurs gardent les anciennes valeurs jusqu'au déploiement suivant (ou `docker compose up -d` dans `/opt/kwaba-preprod`).
 - Le site `preprod.kwa-ba.com` du Caddy partagé (`proxy_sites`) demande un mot de passe au navigateur (son hash bcrypt est dans le Vault), sauf pour le webhook FedaPay, envoie `X-Robots-Tag: noindex` et retire l'en-tête `Authorization` avant nginx.
 
-## Ce qui viendra ensuite
+## Clé de déploiement restreinte (le serveur tire)
 
-- clé de déploiement restreinte (`restrict,command=…` : seuls `rsync` et `deploy.sh`), en prod comme en préprod.
+Avec `kwaba_cle_deploiement` (clé publique du workflow deploy), le rôle `kwaba` :
+
+- écrit `authorized_keys` de l'utilisateur de déploiement avec cette seule clé, préfixée de `restrict,command="/usr/local/bin/<kwaba_nom>-deploy"` : ni shell, ni tunnel, ni agent, ni pty, ni copie de fichiers, quelle que soit la commande demandée ;
+- installe cette porte de déploiement (propriété de root, hors du dossier qu'elle met à jour) et `git`, `rsync` ;
+- la porte n'accepte que `deploy manifest-NNNN-xxxxxxx.yaml` : elle récupère `main` depuis GitHub (dépôt public, seulement `deploy/`), vérifie que le manifest y est, lit les images de `server` et de `kwaba_manifest_client` (`clientPreprod` en préprod), met à jour la configuration puis lance `scripts/deploy.sh`.
+
+Une clé volée ne peut donc que redéployer un manifest de `main`. Sans `kwaba_cle_deploiement` (la prod pour l'instant), `authorized_keys` reste tel quel. Pour passer la prod au même modèle : sa clé publique dans `group_vars/production.yml`, le playbook, puis `DEPLOY_PULL=true` dans l'environnement GitHub `production` (dans cet ordre : avant le playbook, la clé de prod n'est pas restreinte et le workflow pousse encore).
 
 Quand le `--check` sur la prod n'annonce plus aucun changement, `deploy/vps/scripts/setup-server.sh` peut être retiré : Ansible devient la seule description de la machine.

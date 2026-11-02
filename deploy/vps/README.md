@@ -50,15 +50,32 @@ Les images GHCR sont publiques (dépôt public) : aucune authentification sur le
 
 ## Déployer
 
-Workflow GitHub **deploy** (*Actions → Deploy → Run workflow*, sur `main`) : champ *manifest* vide pour le dernier, ou un nom de fichier de `deploy/manifests/`. Un seul déploiement à la fois, jamais annulé en cours. Il :
+Workflow GitHub **deploy** (*Actions → Deploy → Run workflow*, sur `main`) : environnement `preprod` (par défaut) ou `production`, champ *manifest* vide pour le dernier, ou un nom de fichier de `deploy/manifests/`. Un seul déploiement à la fois par environnement, jamais annulé en cours.
 
-1. vérifie le manifest (nom exact, images par digest) ;
-2. se connecte en SSH à `deploy` (empreinte du serveur imposée, jamais acceptée à la volée) ;
-3. copie `deploy/vps/` de `main` dans `/opt/kwaba` (`rsync --delete`, sans jamais toucher à `env/`, `backups/`, `logs/`, `.deploy.env*`, `deployments.log`) ;
-4. lance `scripts/deploy.sh` sur le VPS ;
-5. vérifie `/api/health/` et `/` depuis Internet.
+**Parcours attendu** : un manifest va d'abord en préprod, on teste, puis **le même manifest** va en prod (même image serveur, client construit depuis la même révision). La prod refuse un manifest qui n'a pas été déployé avec succès en préprod (artefact `preprod-<manifest>` du run, gardé 90 jours) ; pour un retour arrière ou une urgence, cocher `skip_preprod` (signalé dans le résumé du run).
 
-Environnement GitHub `production` (*Settings → Environments*) : branche `main` seulement ; secrets `DEPLOY_SSH_KEY` (clé privée `kwaba-deploy`) et `DEPLOY_SSH_KNOWN_HOSTS` (sortie de `ssh-keyscan -t ed25519 <ip>`) ; variable `DEPLOY_HOST` (IP du VPS). La variable du dépôt `PUBLIC_SITE_URL` sert au test de santé.
+Le workflow :
+
+1. vérifie le manifest (nom exact, images par digest) et prend l'image client de l'environnement (`client` ou `clientPreprod`) ;
+2. se connecte en SSH (empreinte du serveur imposée, jamais acceptée à la volée) ;
+3. deux modes, selon la variable `DEPLOY_PULL` de l'environnement :
+   - **le serveur tire** (`true`, la préprod) : la clé ne peut lancer que la porte de déploiement du serveur (`/usr/local/bin/<nom>-deploy`, installée par Ansible, propriété de root), avec pour seul argument le nom du manifest. Le serveur récupère lui-même `main` depuis GitHub, vérifie que le manifest y est, lit les images dedans, met à jour la configuration (`deploy/vps`) et lance `scripts/deploy.sh`. Une clé volée ne peut donc que redéployer un manifest de `main`, ni shell, ni copie de fichiers, ni tunnel ;
+   - **le workflow pousse** (la prod pour l'instant) : copie `deploy/vps/` de `main` dans `/opt/kwaba` (`rsync --delete`, sans jamais toucher à `env/`, `backups/`, `logs/`, `.deploy.env*`, `deployments.log`), puis lance `scripts/deploy.sh` ;
+4. vérifie `/api/health/` et `/` depuis Internet (en préprod, `/` doit répondre 401 : le mot de passe est bien demandé).
+
+Environnements GitHub (*Settings → Environments*), branche `main` seulement :
+
+| | `production` | `preprod` |
+| --- | --- | --- |
+| Secrets | `DEPLOY_SSH_KEY`, `DEPLOY_SSH_KNOWN_HOSTS` | les mêmes, avec la clé `kwaba-preprod-deploy` et `[217.154.19.172]:2222 ssh-ed25519 …` |
+| `DEPLOY_HOST` | IP du VPS | `217.154.19.172` |
+| `DEPLOY_PORT` | (22) | `2222` |
+| `DEPLOY_USER` | (`deploy`) | `deploy-kwaba` |
+| `DEPLOY_PATH` | (`/opt/kwaba`) | inutile (le serveur tire) |
+| `DEPLOY_PULL` | (vide) | `true` |
+| `DEPLOY_SITE_URL` | (variable du dépôt `PUBLIC_SITE_URL`) | `https://preprod.kwa-ba.com` |
+
+Entre parenthèses : la valeur par défaut, rien à créer.
 
 Sur le VPS, le workflow appelle :
 
@@ -70,7 +87,7 @@ Ordre fixe : sauvegarde de la base (vérifiée), images, migrations, serveur et 
 
 ## Revenir en arrière
 
-Relancer le workflow **deploy** avec un manifest antérieur (les images changent ; la configuration `deploy/vps` reste celle de `main`). Les migrations ne sont pas annulées : elles doivent rester rétro-compatibles (ajouter avant de supprimer), ce qui permet à l'ancien code de tourner sur le nouveau schéma.
+Relancer le workflow **deploy** avec un manifest antérieur (en prod, cocher `skip_preprod` s'il n'est jamais passé par la préprod ; un manifest antérieur à la préprod, sans `clientPreprod`, ne se déploie qu'en prod) (les images changent ; la configuration `deploy/vps` reste celle de `main`). Les migrations ne sont pas annulées : elles doivent rester rétro-compatibles (ajouter avant de supprimer), ce qui permet à l'ancien code de tourner sur le nouveau schéma.
 
 ## Sauvegardes et restauration
 
