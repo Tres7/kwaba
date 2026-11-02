@@ -3,6 +3,7 @@ from io import BytesIO, StringIO
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from PIL import Image
 
 from apps.hebergements.models import HebergementModel, HebergementPhotoModel
@@ -68,3 +69,42 @@ def test_seed_demo_is_idempotent(api_client, monkeypatch):
     response = api_client.post('/api/v1/auth/login/', {'email': host.email, 'password': 'Kwa-Ba2026!'},
                                format='json')
     assert response.status_code == 200
+
+
+def test_seed_demo_publishes_listings_and_creates_every_role(api_client):
+    call_command('seed_demo', stdout=StringIO())
+
+    assert HebergementModel.objects.publiees().count() == 12
+    roles = set(UserModel.objects.filter(email__contains='.demo@').values_list('role', flat=True))
+    assert roles == {code for code, _ in UserModel.ROLE_CHOICES}
+    response = api_client.post('/api/v1/auth/login/', {'email': 'agent.demo@kwa-ba.com', 'password': 'Kwa-Ba2026!'},
+                               format='json')
+    assert response.status_code == 200
+
+
+def test_seed_demo_publishes_listings_seeded_before_verification():
+    call_command('seed_demo', stdout=StringIO())
+    HebergementModel.objects.update(statut_verification='en_attente')
+
+    call_command('seed_demo', stdout=StringIO())
+
+    assert HebergementModel.objects.publiees().count() == 12
+
+
+@pytest.mark.parametrize('commande', ['seed_demo', 'seed_give_demo'])
+@pytest.mark.parametrize('site', ['https://kwa-ba.com', 'https://www.kwa-ba.com/'])
+def test_demo_data_refused_in_production(settings, commande, site):
+    settings.FRONTEND_URL = site
+
+    with pytest.raises(CommandError):
+        call_command(commande, stdout=StringIO())
+
+    assert not UserModel.objects.exists()
+
+
+def test_demo_data_allowed_on_the_preprod(settings):
+    settings.FRONTEND_URL = 'https://preprod.kwa-ba.com'
+
+    call_command('seed_demo', stdout=StringIO())
+
+    assert HebergementModel.objects.count() == 12

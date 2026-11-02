@@ -132,6 +132,7 @@ export KWABA_TLS_MODE=proxy
 - **Secrets** (`env/*.env`) : générés par Ansible depuis le Vault de `kwa-ba-infra` (voir `deploy/ansible/README.md`), jamais écrits à la main ; emails envoyés à Mailpit (`EMAIL_HOST=mailpit`, port 1025).
 - **Accès** : le Caddy partagé demande un mot de passe au navigateur sur tout le site (Mailpit compris) sauf le webhook FedaPay et `/api/health/`, et le garde hors des moteurs de recherche (`X-Robots-Tag: noindex`).
 - **`deploy.sh`** : pas de contrôle du certificat (c'est celui de Caddy) mais vérification que le réseau `proxy` existe ; test de santé depuis le conteneur nginx.
+- **Données de test** : la base démarre vide, à part ce que créent les migrations (contrats, expériences, aéroports, catégories de véhicules). `sudo -u deploy /opt/kwaba-preprod/scripts/maintenance.sh seed-demo` ajoute 12 annonces publiées, 4 ONG fictives et un compte par rôle (`hote.demo`, `voyageur.demo`, `agent.demo`, `admin.demo`, `@kwa-ba.com`), avec le mot de passe `DEMO_HOST_PASSWORD` de `env/server.env`, sinon celui de `seed_demo.py`. Relançable sans doublon, refusé en production (`FRONTEND_URL`). Pour que le contenu s'affiche, `kwaba_env` doit avoir `PRELANCEMENT=False` (sinon aucune annonce publique ni réservation) et les `MODULE_*` voulus à `True`.
 
 ## Essai local de la pile de production
 
