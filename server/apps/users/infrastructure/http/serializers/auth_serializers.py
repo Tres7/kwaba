@@ -10,10 +10,6 @@ from django.db import connection, transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from apps.users.domain.entities.User import UserRole
-
-# The admin role can never be chosen at public sign-up
-PUBLIC_ROLES = [UserRole.VOYAGEUR.value, UserRole.HOTE.value]
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -22,7 +18,6 @@ class RegisterSerializer(serializers.Serializer):
     last_name  = serializers.CharField(max_length=150)
     password   = serializers.CharField(min_length=8, write_only=True)
     password_confirm = serializers.CharField(min_length=8, write_only=True)
-    role       = serializers.ChoiceField(choices=PUBLIC_ROLES, default=UserRole.VOYAGEUR.value)
     phone      = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
 
     def validate_email(self, value):

@@ -32,11 +32,10 @@ class TestMe:
         make_user(phone='+22890000000')
         assert client_for(make_user()).patch(ME, {'phone': '+228 90 00 00 00'}, format='json').status_code == 400
 
-    def test_become_host_but_never_admin(self, client_for, make_user):
-        user = make_user()
-        client = client_for(user)
+    def test_role_never_changed_by_the_profile(self, client_for, make_user):
+        client = client_for(make_user())
         assert client.patch(ME, {'role': 'admin'}, format='json').data['role'] == 'voyageur'
-        assert client.patch(ME, {'role': 'hote'}, format='json').data['role'] == 'hote'
+        assert client.patch(ME, {'role': 'hote'}, format='json').data['role'] == 'voyageur'
 
     def test_delete_deactivates_account(self, api_client, make_user, password):
         user = make_user()

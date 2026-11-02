@@ -9,7 +9,7 @@ from . import disponibilites
 from . import occupations
 from .occupations import FournisseurReservations as FournisseurReservations
 from . import types_logement
-from .models import HebergementModel, TypeLogementModel
+from .models import BrouillonAnnonceModel, HebergementModel, TypeLogementModel
 from .serializers import HebergementSerializer
 
 
@@ -127,6 +127,14 @@ def ids_annonces_de(hote_id) -> set[uuid.UUID]:
 
 def ids_hotes_avec_annonce() -> set[uuid.UUID]:
     return set(HebergementModel.tous.values_list('host_id', flat=True).distinct())
+
+
+def ids_hotes_avec_annonce_validee() -> set[uuid.UUID]:
+    return set(HebergementModel.tous.filter(statut_verification='verifiee').values_list('host_id', flat=True).distinct())
+
+
+def ids_hotes_avec_brouillon() -> set[uuid.UUID]:
+    return set(BrouillonAnnonceModel.objects.values_list('host_id', flat=True).distinct())
 
 
 def hotes_des_annonces(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, uuid.UUID]:

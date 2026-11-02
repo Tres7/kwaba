@@ -111,7 +111,8 @@
     "mesReservations": "My bookings",
     "mesFavoris": "My favourites",
     "fermerMenu": "Close menu",
-    "location": "Car hire"
+    "location": "Car hire",
+    "maCandidature": "My application"
   },
   "logo": {
     "accueil": "Kwa-Ba, home"
@@ -309,13 +310,6 @@
     "serveurInjoignable": "Unable to reach the server. Check your connection.",
     "inscriptionTexte": "A few details to start your adventure.",
     "inscriptionGoogle": "Sign up with Google",
-    "jeSuis": "I am a",
-    "roles": {
-      "voyageur": "Traveller",
-      "hote": "Host"
-    },
-    "roleHoteTexte": "You can list your places and book stays too.",
-    "roleVoyageurTexte": "You can become a host later from your profile.",
     "prenom": "First name",
     "nom": "Last name",
     "cestVous": "Is that you?",
@@ -747,7 +741,9 @@
       "langue": "Language & region",
       "langueTexte": "English, FCFA",
       "aide": "Help & support",
-      "aideTexte": "FAQ, cancellation, contact"
+      "aideTexte": "FAQ, cancellation, contact",
+      "candidature": "My application",
+      "candidatureTexte": "Pick up where you left off"
     },
     "verifie": "Email confirmed",
     "membreDepuis": "Member since {date}",
@@ -1428,14 +1424,14 @@
         "texte": "Travellers pay online; your share is sent to your Mobile Money account 24 hours after their arrival."
       }
     },
-    "active": "Your host account is active!",
+    "active": "You're all set! Prepare your listing.",
     "acceder": "Go to my host space",
-    "activation": "Activating…",
-    "activer": "Activate my host account",
-    "creerCompte": "Create a host account",
+    "activation": "One moment…",
+    "activer": "Get started",
+    "creerCompte": "Create my account and get started",
     "titre": "Share your place with travellers from around the world",
     "sousTitre": "List your villa, apartment, hotel room or guesthouse on Kwa-Ba for free.",
-    "dejaInscrit": "Already registered? <lien>Log in</lien>, then activate your host account.",
+    "dejaInscrit": "Already registered? <lien>Log in</lien> to get started.",
     "commentCaMarche": "How does it work?",
     "etape": "Step {numero}",
     "ceQuIlFaut": "What you need",
@@ -1479,7 +1475,10 @@
       },
       "estimateurTitre": "Estimate your earnings",
       "estimateurTexte": "Choose your profile, enter the nightly price you want to receive before commission and the number of nights."
-    }
+    },
+    "bienvenue": "Your account is ready. You can get started!",
+    "reprendre": "Resume my application",
+    "refusee": "Your application was not accepted: {motif}"
   },
   "photos": {
     "envoiImpossible": "Upload failed.",
@@ -1496,7 +1495,6 @@
   },
   "espaceHote": {
     "erreurConversation": "Could not open the conversation.",
-    "bienvenue": "Welcome! List your first place.",
     "pasHote": "You're not a host yet",
     "devenirHote": "Become a host",
     "masquee": "Listing hidden from search",
@@ -1576,7 +1574,7 @@
     },
     "candidature": {
       "titre": "Becoming a Kwa-Ba host: {nombre} steps",
-      "texte": "For travellers' safety, every host is verified before publishing. Your listings stay hidden until these steps are complete.",
+      "texte": "For travellers' safety, every host is verified before publishing. You become a Kwa-Ba host as soon as an agent has validated your first place.",
       "telephoneTitre": "Your phone number",
       "telephoneTexte": "The Kwa-Ba agent will call you to arrange the visit.",
       "telephoneAction": "Add my number",
@@ -1596,7 +1594,8 @@
       "contratTelecharger": "View the contract",
       "annonceContrat": "Listing ready. An agent will call you for the visit once your identity is verified and your contract signed."
     },
-    "typesLogement": "Rooms and types"
+    "typesLogement": "Rooms and types",
+    "candidatureRefusee": "Your application was not accepted"
   },
   "annonce": {
     "types": {

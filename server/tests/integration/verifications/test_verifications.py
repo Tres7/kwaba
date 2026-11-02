@@ -328,4 +328,5 @@ def test_agent_role_cannot_be_chosen_at_registration(api_client):
         'email': 'faux.agent@example.tg', 'first_name': 'A', 'last_name': 'B', 'role': 'agent',
         'password': 'Kwaba-Test-2026!', 'password_confirm': 'Kwaba-Test-2026!',
     }, format='json')
-    assert response.status_code == 400
+    assert response.status_code == 201
+    assert response.data['role'] == 'voyageur'

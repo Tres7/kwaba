@@ -19,6 +19,7 @@ def _service() -> UserService:
 
 
 def _payload(result) -> dict:
+    compte = UserModel.objects.values('date_joined', 'candidature_hote', 'candidature_motif').get(id=result.id)
     return {
         'id': str(result.id),
         'email': str(result.email),
@@ -29,7 +30,9 @@ def _payload(result) -> dict:
         'avatar_url': result.avatar_url,
         'is_verified': result.is_verified,
         'is_active': result.is_active,
-        'date_joined': UserModel.objects.values_list('date_joined', flat=True).get(id=result.id),
+        'date_joined': compte['date_joined'],
+        'candidature_hote': compte['candidature_hote'],
+        'candidature_motif': compte['candidature_motif'],
     }
 
 
@@ -65,9 +68,6 @@ class MeView(APIView):
                 phone=PhoneNumber.of(raw_phone),
                 avatar_url=avatar_url,
             )
-            if request.data.get('role') == 'hote' and request.user.role == 'voyageur':
-                _service().become_host(request.user.id)
-                journaliser('role_modifie', request, utilisateur=request.user, avant='voyageur', apres='hote')
             result = _service().update_profile(request.user.id, dto)
             return Response(_payload(result))
         except UserNotFoundException as e:
@@ -87,3 +87,19 @@ class MeView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except UserNotFoundException as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CandidatureHoteView(APIView):
+    """POST: a traveller starts preparing their first listing. The role only changes once an agent has validated one."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        utilisateur = request.user
+        if utilisateur.candidature_hote == 'refusee':
+            return Response({'detail': "Votre candidature a été refusée. Contactez Kwa-Ba pour en savoir plus.",
+                             'code': 'candidature_refusee'}, status=status.HTTP_403_FORBIDDEN)
+        ouverte = UserModel.objects.filter(pk=utilisateur.pk, role='voyageur').exclude(candidature_hote='ouverte').update(
+            candidature_hote='ouverte')
+        if ouverte:
+            journaliser('candidature_ouverte', request, utilisateur=utilisateur)
+        return Response(_payload(_service().get_by_id(utilisateur.id)))

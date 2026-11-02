@@ -171,11 +171,10 @@ class TestProfil:
         response = client_for(make_user()).patch(ME, {'first_name': 'A' * 151}, format='json')
         assert response.status_code == 400
 
-    def test_becoming_host_is_audited(self, client_for, make_user):
+    def test_opening_a_candidature_is_audited(self, client_for, make_user):
         user = make_user()
-        client_for(user).patch(ME, {'role': 'hote'}, format='json')
-        entree = JournalAuditModel.objects.get(action='role_modifie', utilisateur_id=user.id)
-        assert entree.details == {'avant': 'voyageur', 'apres': 'hote'}
+        client_for(user).post(f'{ME}candidature/', format='json')
+        assert JournalAuditModel.objects.filter(action='candidature_ouverte', utilisateur_id=user.id).exists()
 
 
 class TestEntreesInvalides:

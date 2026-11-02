@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useRouter } from "@/i18n/navigation";
-import { Mail, Lock, User, Phone, Eye, EyeOff, Plane, Home } from "lucide-react";
+import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { firstErrorMessage } from "@/lib/api";
@@ -14,13 +14,7 @@ import FormField from "@/components/ui/FormField";
 import { retenirEmail } from "@/lib/email-en-cours";
 import { useTranslations } from "next-intl";
 
-type Role = "voyageur" | "hote";
 type FieldErrors = Partial<Record<"email" | "first_name" | "last_name" | "phone" | "password" | "password_confirm" | "role", string>>;
-
-const ROLES: { id: Role; label: string; icon: typeof Plane }[] = [
-  { id: "voyageur", label: "voyageur", icon: Plane },
-  { id: "hote", label: "hote", icon: Home },
-];
 
 function passwordStrength(pw: string): { score: number } {
   let score = 0;
@@ -36,7 +30,8 @@ function RegisterForm() {
   const router = useRouter();
   const t = useTranslations("auth");
   const searchParams = useSearchParams();
-  const [role, setRole] = useState<Role>(searchParams.get("role") === "hote" ? "hote" : "voyageur");
+  // Coming from "Become a host": back to that page once the address is confirmed
+  const versHote = searchParams.get("role") === "hote";
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", password: "", password_confirm: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -82,7 +77,7 @@ function RegisterForm() {
     const email = form.email.trim().toLowerCase();
 
     try {
-      const res = await inscrire({ ...form, email, role, phone: form.phone.trim() || null, captcha: captcha ?? "" });
+      const res = await inscrire({ ...form, email, phone: form.phone.trim() || null, captcha: captcha ?? "" });
 
       if (res.status >= 400) {
         const data = res.data;
@@ -112,7 +107,7 @@ function RegisterForm() {
     }
 
     retenirEmail(email);
-    router.push("/verify");
+    router.push(versHote ? "/verify?suite=hote" : "/verify");
   };
 
   return (
@@ -128,29 +123,6 @@ function RegisterForm() {
             {error}
           </div>
         )}
-
-        <fieldset>
-          <legend className="block text-xs font-bold text-dark uppercase tracking-wide mb-2">{t("jeSuis")}</legend>
-          <div className="grid grid-cols-2 gap-2">
-            {ROLES.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setRole(id)}
-                aria-pressed={role === id}
-                className={cn(
-                  "flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all",
-                  role === id ? "bg-primary text-white border-primary shadow-button" : "bg-white text-dark border-gray-200 hover:border-primary/40"
-                )}
-              >
-                <Icon size={15} /> {t(`roles.${label}`)}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-gray-400 mt-1.5 ml-1">
-            {role === "hote" ? t("roleHoteTexte") : t("roleVoyageurTexte")}
-          </p>
-        </fieldset>
 
         <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-3">
           <FormField label={t("prenom")} name="first_name" icon={User} value={form.first_name} onChange={update} placeholder="Ama" autoComplete="given-name" required error={fieldErrors.first_name} />

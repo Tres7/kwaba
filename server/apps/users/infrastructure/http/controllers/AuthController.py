@@ -135,7 +135,7 @@ class RegisterView(APIView):
             first_name=data['first_name'],
             last_name=data['last_name'],
             password_hash=make_password(data['password']),
-            role=UserRole(data['role']),
+            role=UserRole.VOYAGEUR,  # every account starts as a traveller: see CandidatureHoteView for hosts
             phone=data.get('phone'),
         )
 

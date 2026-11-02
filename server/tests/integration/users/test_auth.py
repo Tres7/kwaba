@@ -52,10 +52,11 @@ def test_email_already_taken_regardless_of_case(register, make_user):
     assert register(email='Ama.Kossi@Example.TG').status_code == 409
 
 
-def test_admin_role_rejected_at_registration(register):
-    response = register(role='admin')
-    assert response.status_code == 400
-    assert 'role' in response.data
+@pytest.mark.parametrize('role', ['admin', 'hote', 'agent'])
+def test_every_account_starts_as_a_traveller(register, role):
+    response = register(role=role)
+    assert response.status_code == 201
+    assert response.data['role'] == 'voyageur'
 
 
 def test_login_rejected_until_email_verified(api_client, make_user, password):

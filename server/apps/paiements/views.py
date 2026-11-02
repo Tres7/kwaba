@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.securite.audit import journaliser
+from apps.users import api as users
 
 from . import fedapay, paypal, services, tarifs
 from .models import ProfilVersementModel, VersementModel
@@ -82,7 +83,7 @@ class EstHote(IsAuthenticated):
     message = "Réservé aux hôtes."
 
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role in ('hote', 'admin')
+        return super().has_permission(request, view) and users.peut_gerer_annonces(request.user)
 
 
 def _valider_compte(data):

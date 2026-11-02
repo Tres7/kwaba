@@ -45,7 +45,7 @@ export const SECTIONS_EN = [
       // Not in the terms: how the site works
       { q: "I didn't receive my verification code", a: "Check your spam folder, then use “Resend code” on the verification page (a new code every 60 seconds). The code is valid for 10 minutes." },
       { q: "I forgot my password", a: "Click “Forgot password?” on the sign-in page: a code is emailed to you to choose a new password. Keep your login details confidential and tell Kwa-Ba in case of fraudulent use (terms of use, art. 4.3)." },
-      { q: "How do I become a host?", a: "From “Become a host”, activate your host account, then prepare your listing in the Host area. Only a registered partner who has accepted the terms that apply to them may publish (terms of use, art. 5.1). Before publication, Kwa-Ba checks your identity and documents and visits the place (art. 5.2). The listing must be accurate and contain no personal contact details (art. 5.3 and 5.4)." },
+      { q: "How do I become a host?", a: "From “Become a host”, click “Get started”, then prepare your listing. You become a host as soon as an agent has validated your first place. Only a registered partner who has accepted the terms that apply to them may publish (terms of use, art. 5.1). Before publication, Kwa-Ba checks your identity and documents and visits the place (art. 5.2). The listing must be accurate and contain no personal contact details (art. 5.3 and 5.4)." },
       { q: "How do I change the language?", a: "Use the FR / EN switch at the top of the page or in the footer, or go to Profile → Language & region; your choice is remembered on this device. The terms of sale are written in French, which prevails over any translation (terms of sale, art. 1.4)." },
     ],
   },

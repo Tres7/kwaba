@@ -16,6 +16,7 @@ import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
 import HebergementForm from "./HebergementForm";
 import RatingBadge from "@/components/ui/RatingBadge";
 import { RevenusHote } from "@/features/paiements";
+import { accesEspaceHote, useMoi } from "@/features/users";
 import CandidatureHote from "./CandidatureHote";
 import { PreinscriptionHote } from "@/features/contrats";
 import FenetreOuverture from "./FenetreOuverture";
@@ -64,7 +65,8 @@ function EspaceHoteContent() {
     }
   };
 
-  const isHost = session?.user?.role === "hote" || session?.user?.role === "admin";
+  const { data: me } = useMoi(status === "authenticated");
+  const isHost = !!me && accesEspaceHote(me);
 
   // Pre-launch: the window comes before any new listing, and once per session when the host space opens
   const nouvelle = () => (prelancement ? setFenetre(true) : setEditing("new"));
@@ -88,13 +90,6 @@ function EspaceHoteContent() {
     if (onglet === "revenus" || onglet === "reservations") setTab(onglet);
   }, [searchParams]);
 
-  useEffect(() => {
-    if (searchParams.get("bienvenue") === "1") {
-      toast.success(t("bienvenue"));
-      router.replace("/hote/espace");
-    }
-  }, [searchParams, router, t]);
-
   const { data: annonces = [], isLoading } = useQuery({
     queryKey: clesHebergements.mes,
     queryFn: listerMesHebergements,
@@ -109,13 +104,17 @@ function EspaceHoteContent() {
     enabled: isHost,
   });
 
-  if (status === "loading") return <div className="max-w-6xl mx-auto px-4 py-10"><div className="h-64 skeleton rounded-3xl" /></div>;
+  if (status === "loading" || (status === "authenticated" && !me)) return <div className="max-w-6xl mx-auto px-4 py-10"><div className="h-64 skeleton rounded-3xl" /></div>;
 
   if (!isHost) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center gap-4 px-6">
-        <p className="font-heading font-bold text-xl text-dark">{t("pasHote")}</p>
-        <Link href="/hote" className="bg-primary text-white font-bold px-6 py-3 rounded-xl">{t("devenirHote")}</Link>
+        <p className="font-heading font-bold text-xl text-dark">{t(me?.candidature_hote === "refusee" ? "candidatureRefusee" : "pasHote")}</p>
+        {me?.candidature_hote === "refusee" ? (
+          <p className="text-sm text-gray-600 max-w-md">{me.candidature_motif}</p>
+        ) : (
+          <Link href="/hote" className="bg-primary text-white font-bold px-6 py-3 rounded-xl">{t("devenirHote")}</Link>
+        )}
       </div>
     );
   }

@@ -76,7 +76,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token = await renouvelerUneFois(token.refreshToken, () => refreshAccessToken(avant), (t) => t !== avant);
       }
 
-      // useSession().update() (new name, becoming a host): the profile is read again from the API instead of trusting
+      // useSession().update() (new name): the profile is read again from the API instead of trusting
       // the values sent by the browser, which could otherwise give itself the "admin" role
       if (trigger === "update" && session && token.accessToken && !token.error) {
         const me = await fetchBackendUser(token.accessToken);

@@ -5,6 +5,7 @@ import { Search, Menu, ArrowRight, LogIn, UserPlus, MessageCircle, Heart, Calend
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { compterNonLus } from "@/features/messaging";
+import { accesEspaceHote, useMoi } from "@/features/users";
 import { usePolling } from "@/lib/usePolling";
 import { useTranslations } from "next-intl";
 import { cn, initials } from "@/lib/utils";
@@ -107,8 +108,12 @@ export default function Navbar() {
     setRechercheOuverte(false);
   }, [pathname]);
 
-  const roleLabel = tRoles(session?.user?.role ?? "voyageur");
-  const isHost = session?.user?.role === "hote" || session?.user?.role === "admin";
+  const { data: me } = useMoi(!!session);
+  const role = me?.role ?? session?.user?.role ?? "voyageur";
+  const roleLabel = tRoles(role);
+  const isHost = me ? accesEspaceHote(me) : role === "hote" || role === "admin";
+  // Still a traveller: a candidate sees their application, not a host space
+  const labelHote = me?.candidature_hote === "ouverte" ? t("maCandidature") : t("espaceHote");
   const isAdmin = session?.user?.role === "admin";
   // Field agents' space: open to agents and administrators (served outside the language routes)
   const isAgent = session?.user?.role === "agent" || isAdmin;
@@ -154,7 +159,7 @@ export default function Navbar() {
                 className={cn("text-sm font-medium transition-colors whitespace-nowrap", large && "hidden xl:inline",
                   pathname.startsWith(href) ? "text-primary" : "text-dark hover:text-primary")}
               >
-                {isHost && href === "/hote" ? t("espaceHote") : t(label)}
+                {isHost && href === "/hote" ? labelHote : t(label)}
               </Link>
             ))}
           </nav>
@@ -275,7 +280,7 @@ export default function Navbar() {
                   { href: "/profil", label: t("monProfil"), icon: User },
                 ]
               : []),
-            { href: isHost ? "/hote/espace" : "/hote", label: isHost ? t("espaceHote") : t("devenirHote"), icon: Home },
+            { href: isHost ? "/hote/espace" : "/hote", label: isHost ? labelHote : t("devenirHote"), icon: Home },
             ...(isAdmin ? [{ href: "/backoffice", label: "Back-office", icon: ShieldCheck }] : []),
           ]).map(({ href, label, icon: Icon }) => (
             <DrawerItem key={href + label}>

@@ -3,7 +3,7 @@
 import { Link, useRouter } from "@/i18n/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { Mail, RefreshCw } from "lucide-react";
 import { renvoyerCode } from "./api";
 import AuthShell from "./AuthShell";
@@ -70,8 +70,7 @@ function VerifyForm() {
     }
 
     oublierEmail();
-    const session = await getSession();
-    router.push(session?.user.role === "hote" ? "/hote/espace?bienvenue=1" : "/?bienvenue=1");
+    router.push(searchParams.get("suite") === "hote" ? "/hote?bienvenue=1" : "/?bienvenue=1");
     router.refresh();
   };
 

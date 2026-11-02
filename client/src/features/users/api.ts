@@ -12,8 +12,9 @@ export async function modifierMoi(champs: Partial<Pick<Me, "first_name" | "last_
   return (await api.patch<Me>(MOI, champs)).data;
 }
 
-export async function devenirHote() {
-  await api.patch(MOI, { role: "hote" });
+/** The role does not change: the account becomes a host once an agent has validated a first listing. */
+export async function ouvrirCandidature() {
+  return (await api.post<Me>(`${MOI}candidature/`)).data;
 }
 
 export async function fermerMonCompte() {

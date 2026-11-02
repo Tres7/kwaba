@@ -42,7 +42,7 @@ function Utilisateurs() {
 
   const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminUser>("users", { q: recherche, role, actif });
 
-  const modifier = async (u: AdminUser, patch: Partial<Pick<AdminUser, "is_active" | "role">>, succes: string) => {
+  const modifier = async (u: AdminUser, patch: Record<string, unknown>, succes: string) => {
     try {
       await modifierUtilisateurAdmin(u.id, patch);
       toast.success(succes);
@@ -70,7 +70,16 @@ function Utilisateurs() {
         </div>
       ),
     },
-    { titre: "Rôle", cellule: (u) => <Pill ton={u.role === "admin" || u.role === "agent" ? "bleu" : u.role === "hote" ? "orange" : "gris"}>{ROLE_LABELS[u.role]}</Pill> },
+    {
+      titre: "Rôle",
+      cellule: (u) => (
+        <span className="inline-flex flex-wrap gap-1">
+          <Pill ton={u.role === "admin" || u.role === "agent" ? "bleu" : u.role === "hote" ? "orange" : "gris"}>{ROLE_LABELS[u.role]}</Pill>
+          {u.candidature_hote === "ouverte" && <Pill ton="orange">Candidat hôte</Pill>}
+          {u.candidature_hote === "refusee" && <Pill ton="rouge">Candidature refusée</Pill>}
+        </span>
+      ),
+    },
     { titre: "Statut", cellule: (u) => <Pill ton={u.is_active ? "vert" : "rouge"}>{u.is_active ? "Actif" : "Désactivé"}</Pill> },
     {
       titre: "Commission", masquerMobile: true,
@@ -102,7 +111,21 @@ function Utilisateurs() {
             });
           }}
         />
-        {u.role === "hote" && <ActionButton onClick={() => setConditions(u)}>Commission</ActionButton>}
+        {(u.role === "hote" || u.candidature_hote === "ouverte") && <ActionButton onClick={() => setConditions(u)}>Commission</ActionButton>}
+        {u.candidature_hote === "ouverte" && (
+          <ActionButton danger onClick={() => setConfirmation({
+            titre: "Refuser la candidature",
+            message: <><strong>{nom(u)}</strong> ne pourra plus préparer d&apos;annonce et verra ce motif (10 caractères au moins).</>,
+            libelle: "Refuser", danger: true, motif: true,
+            action: (motif) => modifier(u, { candidature: "refusee", motif }, "Candidature refusée"),
+          })}>Refuser la candidature</ActionButton>
+        )}
+        {u.candidature_hote === "refusee" && (
+          <ActionButton onClick={() => setConfirmation({
+            titre: "Rouvrir la candidature", message: <><strong>{nom(u)}</strong> pourra de nouveau préparer une annonce.</>,
+            libelle: "Rouvrir", action: () => modifier(u, { candidature: "ouverte" }, "Candidature rouverte"),
+          })}>Rouvrir la candidature</ActionButton>
+        )}
         {u.is_active ? (
           <ActionButton danger onClick={() => setConfirmation({
             titre: "Désactiver le compte",
