@@ -2,17 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight, Check, CloudOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import Logo from "@/components/layout/Logo";
 import { useRouter } from "@/i18n/navigation";
+import { apiErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { lireConditions, soumettreBrouillon } from "../api";
 import type { DonneesAnnonce } from "../brouillons";
 import { clesHebergements } from "../hooks";
 import Decor from "./Decor";
 import { ECRANS } from "./Ecrans";
-import { ETAPES, etapeAffichee, peutContinuer, progressionPhases, type CleEtape, type Etape } from "./etapes";
+import { ETAPES, etapeAffichee, etapeVoisine, peutContinuer, progressionPhases, type CleEtape, type Etape } from "./etapes";
 import { useBrouillonAssistant, type EtatSauvegarde } from "./useBrouillonAssistant";
 
 function Sauvegarde({ etat }: { etat: EtatSauvegarde }) {
@@ -86,17 +89,24 @@ function Intro({ cle }: { cle: CleEtape }) {
   );
 }
 
-function Parcours({ id, etape, suivante, donnees, assistant }: {
-  id: string; etape: Etape; suivante?: Etape; donnees: DonneesAnnonce; assistant: ReturnType<typeof useBrouillonAssistant>;
+function Parcours({ id, etape, donnees, assistant }: {
+  id: string; etape: Etape; donnees: DonneesAnnonce; assistant: ReturnType<typeof useBrouillonAssistant>;
 }) {
   const t = useTranslations("assistantHote");
   const router = useRouter();
   const queryClient = useQueryClient();
   const [occupe, setOccupe] = useState(false);
   const [sens, setSens] = useState<"avant" | "arriere">("avant");
-  const indice = ETAPES.indexOf(etape);
+  const [envoi, setEnvoi] = useState(false);
+  // Read again while the host is on a screen that changes it: identity document sent, payout account saved…
+  const { data: conditions } = useQuery({
+    queryKey: clesHebergements.conditions(id), queryFn: () => lireConditions(id), enabled: etape.phase === 3 && !envoi,
+    refetchOnMount: "always", refetchInterval: etape.fait ? 3000 : false,
+  });
   const Ecran = ECRANS[etape.cle];
-  const pret = peutContinuer(etape, donnees, assistant.erreurs) && !occupe;
+  const suivante = etapeVoisine(etape, 1, conditions);
+  const precedente = etapeVoisine(etape, -1, conditions);
+  const pret = peutContinuer(etape, donnees, assistant.erreurs, conditions) && !occupe && !envoi;
 
   const aller = (cible: Etape, direction: "avant" | "arriere") => {
     setSens(direction);
@@ -112,8 +122,23 @@ function Parcours({ id, etape, suivante, donnees, assistant }: {
     router.push(destination);
   };
 
+  /** The API checks everything again: the wizard only guides the host up to here. */
+  const envoyer = async () => {
+    setEnvoi(true);
+    try {
+      await assistant.envoyer(etape.cle);
+      await soumettreBrouillon(id);
+      queryClient.removeQueries({ queryKey: clesHebergements.brouillons });
+      await queryClient.invalidateQueries({ queryKey: clesHebergements.mes });
+      router.replace("/hote/annonce/envoyee");
+    } catch (err) {
+      toast.error(apiErrorMessage(err));
+      setEnvoi(false);
+    }
+  };
+
   const continuer = () => {
-    if (etape.cle === "fin") void quitter(`/hote/espace?brouillon=${id}`);
+    if (etape.cle === "recapitulatif") void envoyer();
     else if (suivante) aller(suivante, "avant");
   };
 
@@ -125,7 +150,7 @@ function Parcours({ id, etape, suivante, donnees, assistant }: {
         etape.cle === "bienvenue" ? "h-[26dvh]" : etape.intro ? "h-[44dvh]" : etape.sansVisuelMobile ? "h-0 lg:h-full" : "h-[24dvh]",
       )}>
         <Decor src={etape.visuel} suivant={suivante?.visuel} grand={etape.intro} />
-        {etape.phase === 2 && <Apercu donnees={donnees} />}
+        {etape.phase >= 2 && <Apercu donnees={donnees} />}
       </aside>
 
       <div className={cn(
@@ -147,7 +172,7 @@ function Parcours({ id, etape, suivante, donnees, assistant }: {
         <main id="contenu" className="flex-1 lg:overflow-y-auto px-5 sm:px-10 py-5 lg:py-8">
           <div key={etape.cle} data-sens={sens} className="assistant-entree max-w-xl mx-auto">
             {Ecran
-              ? <Ecran donnees={donnees} modifier={assistant.modifier} erreurs={assistant.erreurs} onOccupe={setOccupe} />
+              ? <Ecran donnees={donnees} modifier={assistant.modifier} erreurs={assistant.erreurs} onOccupe={setOccupe} conditions={conditions} />
               : <Intro cle={etape.cle} />}
           </div>
         </main>
@@ -155,13 +180,13 @@ function Parcours({ id, etape, suivante, donnees, assistant }: {
         <footer className="sticky bottom-0 bg-white px-5 sm:px-10 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-gray-100">
           <Progression cle={etape.cle} />
           <div className="flex items-center justify-between gap-3 mt-3">
-            <button type="button" onClick={() => aller(ETAPES[indice - 1], "arriere")} disabled={indice === 0}
+            <button type="button" onClick={() => precedente && aller(precedente, "arriere")} disabled={!precedente}
               className="inline-flex items-center gap-1.5 px-2 py-3 text-sm font-semibold text-dark disabled:invisible">
               <ArrowLeft size={18} aria-hidden /> {t("retour")}
             </button>
             <button type="button" onClick={continuer} disabled={!pret}
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-primary text-white font-bold shadow-button transition-all hover:bg-primary-600 motion-safe:active:scale-[0.98] disabled:opacity-40 disabled:shadow-none">
-              {occupe ? t("envoiPhotos") : t(etape.cle === "bienvenue" ? "commencer" : etape.cle === "fin" ? "finir" : "suivant")}
+              className="inline-flex items-center gap-2 whitespace-nowrap px-5 sm:px-7 py-3.5 rounded-2xl bg-primary text-white font-bold shadow-button transition-all hover:bg-primary-600 motion-safe:active:scale-[0.98] disabled:opacity-40 disabled:shadow-none">
+              {occupe ? t("envoiPhotos") : envoi ? t("envoi") : t(etape.cle === "bienvenue" ? "commencer" : etape.cle === "recapitulatif" ? "envoyer" : "suivant")}
               <ArrowRight size={18} aria-hidden />
             </button>
           </div>
@@ -184,5 +209,5 @@ export default function AssistantHote({ id }: { id: string }) {
 
   if (!donnees) return <div className="min-h-dvh bg-light-muted" />;
   const etape = etapeAffichee(demandee ?? etapeEnregistree, donnees);
-  return <Parcours id={id} etape={etape} suivante={ETAPES[ETAPES.indexOf(etape) + 1]} donnees={donnees} assistant={assistant} />;
+  return <Parcours id={id} etape={etape} donnees={donnees} assistant={assistant} />;
 }

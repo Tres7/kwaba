@@ -7,19 +7,37 @@ export const MIN_DESCRIPTION = 30;
 export const MAX_DESCRIPTION = 2000;
 
 export type CleEtape = "bienvenue" | "phase-1" | "type" | "espace" | "adresse" | "position" | "capacite"
-  | "phase-2" | "equipements" | "photos" | "titre" | "description" | "fin";
+  | "phase-2" | "equipements" | "photos" | "titre" | "description"
+  | "phase-3" | "prix" | "regles" | "accueil" | "securite" | "telephone" | "identite" | "versement" | "contrat" | "recapitulatif";
+
+/** What the API says the host has done (GET brouillons/<id>/conditions/): it decides, the wizard only shows it. */
+export interface Conditions {
+  photos: boolean;
+  photos_du_compte: boolean;
+  attestation: boolean;
+  telephone: boolean;
+  identite: "absente" | "soumise" | "verifiee" | "refusee";
+  versement: boolean;
+  preinscription: boolean;
+  contrat_a_signer: boolean;
+  bloquants: string[];
+}
 
 export interface Etape {
   cle: CleEtape;
   /** 0: welcome screen, before the first phase */
-  phase: 0 | 1 | 2;
+  phase: 0 | 1 | 2 | 3;
   visuel: string;
   /** Large visual and short text, nothing to fill in */
   intro?: boolean;
   /** Screens that need the whole height on a phone (map, photos) show no visual there */
   sansVisuelMobile?: boolean;
-  /** Can the host go on? Screens without a rule can be skipped. */
+  /** Can the host go on, from their answers? Screens without a rule can be skipped. */
   pret?: (d: DonneesAnnonce) => boolean;
+  /** Can the host go on, from what the API knows: phone, identity document, payout account */
+  fait?: (c: Conditions) => boolean;
+  /** Nothing to do on this screen for this host */
+  sauter?: (c: Conditions) => boolean;
   /** Fields the API checks: while it refuses one of them, the host corrects it here rather than at the very end */
   champs?: (keyof DonneesAnnonce)[];
 }
@@ -28,7 +46,7 @@ const visuel = (nom: string) => `/hote/${nom}.webp`;
 const rempli = (texte?: string | null) => !!texte?.trim();
 const nombreLits = (d: DonneesAnnonce) => (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0);
 
-/** The wizard, in order. The cover photo and the price come from the same draft fields as the listing form. */
+/** The wizard, in order. */
 export const ETAPES: Etape[] = [
   { cle: "bienvenue", phase: 0, visuel: visuel("bienvenue"), intro: true },
   { cle: "phase-1", phase: 1, visuel: visuel("phase-1"), intro: true },
@@ -48,7 +66,18 @@ export const ETAPES: Etape[] = [
     pret: (d) => (d.name?.trim().length ?? 0) >= MIN_TITRE && (d.name?.length ?? 0) <= MAX_TITRE },
   { cle: "description", phase: 2, visuel: visuel("description"), champs: ["description"],
     pret: (d) => (d.description?.trim().length ?? 0) >= MIN_DESCRIPTION && (d.description?.length ?? 0) <= MAX_DESCRIPTION },
-  { cle: "fin", phase: 2, visuel: visuel("phase-3"), intro: true },
+  { cle: "phase-3", phase: 3, visuel: visuel("phase-3"), intro: true },
+  { cle: "prix", phase: 3, visuel: visuel("prix"), champs: ["price_per_night"], pret: (d) => (d.price_per_night ?? 0) > 0 },
+  { cle: "regles", phase: 3, visuel: visuel("regles") },
+  { cle: "accueil", phase: 3, visuel: visuel("espace-chambre"),
+    pret: (d) => !!d.petit_dejeuner && (d.petit_dejeuner !== "option" || (d.petit_dejeuner_prix ?? 0) > 0) },
+  { cle: "securite", phase: 3, visuel: visuel("securite"), pret: (d) => d.declarations?.attestation === true },
+  { cle: "telephone", phase: 3, visuel: visuel("telephone"), fait: (c) => c.telephone },
+  { cle: "identite", phase: 3, visuel: visuel("identite"), fait: (c) => c.identite === "soumise" || c.identite === "verifiee" },
+  { cle: "versement", phase: 3, visuel: visuel("versement"), fait: (c) => c.versement },
+  { cle: "contrat", phase: 3, visuel: visuel("contrat"), fait: (c) => c.preinscription,
+    sauter: (c) => c.preinscription && !c.contrat_a_signer },
+  { cle: "recapitulatif", phase: 3, visuel: visuel("envoyee"), fait: (c) => c.bloquants.length === 0 },
 ];
 
 /**
@@ -61,17 +90,26 @@ export function etapeAffichee(demandee: string | null | undefined, d: DonneesAnn
   return ETAPES.slice(0, fin).find((e) => e.pret && !e.pret(d)) ?? ETAPES[fin];
 }
 
-/** Can the host leave this screen? Answered, and nothing the API would refuse. */
-export function peutContinuer(etape: Etape, d: DonneesAnnonce, erreurs: Record<string, string[]>): boolean {
-  return (!etape.pret || etape.pret(d)) && !etape.champs?.some((champ) => erreurs[champ]?.length);
+/** The screen before or after this one, without those that do not concern this host. */
+export function etapeVoisine(etape: Etape, sens: 1 | -1, c?: Conditions): Etape | undefined {
+  let i = ETAPES.indexOf(etape) + sens;
+  while (ETAPES[i] && c && ETAPES[i].sauter?.(c)) i += sens;
+  return ETAPES[i];
 }
 
-/** Share of each of the three phases already done (0 to 1), for the progress bar. The third one comes with the form. */
+/** Can the host leave this screen? Answered, done, and nothing the API would refuse. */
+export function peutContinuer(etape: Etape, d: DonneesAnnonce, erreurs: Record<string, string[]>, c?: Conditions): boolean {
+  if (etape.pret && !etape.pret(d)) return false;
+  if (etape.fait && !(c && etape.fait(c))) return false;
+  return !etape.champs?.some((champ) => erreurs[champ]?.length);
+}
+
+/** Share of each of the three phases already done (0 to 1), for the progress bar. */
 export function progressionPhases(cle: CleEtape): [number, number, number] {
   const courante = ETAPES.findIndex((e) => e.cle === cle);
   const part = (phase: number) => {
     const etapes = ETAPES.filter((e) => e.phase === phase);
     return etapes.filter((e) => ETAPES.indexOf(e) < courante).length / etapes.length;
   };
-  return [part(1), part(2), 0];
+  return [part(1), part(2), part(3)];
 }

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .alertes import AlerteConfirmationView, AlerteCreateView, AlerteDesinscriptionView
-from .brouillons import BrouillonDetailView, BrouillonsView
+from .brouillons import BrouillonConditionsView, BrouillonDetailView, BrouillonSoumissionView, BrouillonsView
 from .lancement import InscriptionLancementView
 from .views import (
     HebergementListView, HebergementDetailView, MyHebergementsView, CityListView, SuggestionsView,
@@ -14,6 +14,8 @@ urlpatterns = [
     path('mine/', MyHebergementsView.as_view(), name='hebergement-mine'),
     path('brouillons/', BrouillonsView.as_view(), name='hebergement-brouillons'),
     path('brouillons/<uuid:pk>/', BrouillonDetailView.as_view(), name='hebergement-brouillon'),
+    path('brouillons/<uuid:pk>/conditions/', BrouillonConditionsView.as_view(), name='hebergement-brouillon-conditions'),
+    path('brouillons/<uuid:pk>/soumettre/', BrouillonSoumissionView.as_view(), name='hebergement-brouillon-soumettre'),
     path('villes/', CityListView.as_view(), name='hebergement-villes'),
     path('suggestions/', SuggestionsView.as_view(), name='hebergement-suggestions'),
     path('lancement/', InscriptionLancementView.as_view(), name='hebergement-lancement'),

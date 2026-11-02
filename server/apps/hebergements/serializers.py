@@ -34,6 +34,8 @@ REGLES = [
     ('fetes_autorisees', 'fetes_interdites'),
 ]
 AMENITIES += [valeur for paire in REGLES for valeur in paire]
+# What the host states before sending a listing; `attestation`: the information is true and they may rent this place out
+DECLARATIONS = ('cameras', 'animaux', 'travaux', 'attestation')
 
 
 class HebergementSerializer(serializers.ModelSerializer):
@@ -146,6 +148,7 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
             'amenities', 'is_available',
             'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant', 'politique_annulation',
+            'declarations',
         ]
         extra_kwargs = {
             'latitude': {'min_value': -85, 'max_value': 85},
@@ -237,6 +240,13 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         if not all(url_image_autorisee(u) for u in value):
             raise serializers.ValidationError(IMAGE_REFUSEE)
         return value[:10]
+
+    def validate_declarations(self, value):
+        if value is None:
+            return value
+        if not isinstance(value, dict) or set(value) - set(DECLARATIONS) or not all(isinstance(v, bool) for v in value.values()):
+            raise serializers.ValidationError("Déclarations invalides.")
+        return value
 
 
 class TypeLogementSerializer(serializers.ModelSerializer):

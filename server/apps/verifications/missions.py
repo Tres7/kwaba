@@ -1,4 +1,5 @@
 """Field missions of the verifications: listings to visit and identity documents to check remotely."""
+from apps.paiements import api as paiements
 from apps.terrain.api import TypeMission, nom
 
 from . import services as verifications
@@ -49,6 +50,8 @@ def _piece_detail(p: PieceIdentiteModel) -> dict:
             'hote': {'id': str(hote.id), 'nom': nom(hote), 'email': hote.email, 'telephone': hote.phone,
                      'inscrit_le': hote.date_joined},
             'nb_annonces': getattr(p, 'nb_annonces', None),
+            # Compared with the document: the money must go to the person checked
+            'titulaire_versement': paiements.titulaire_versement(hote.id),
         },
     }
 

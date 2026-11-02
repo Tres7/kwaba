@@ -101,15 +101,6 @@ function EspaceHoteContent() {
 
   const { data: brouillons = [] } = useBrouillons(isHost);
 
-  // End of the wizard: the price and the rules are still in the listing form
-  useEffect(() => {
-    const suite = brouillons.find((b) => b.id === searchParams.get("brouillon"));
-    if (!suite) return;
-    setReprise(suite);
-    setEditing("new");
-    router.replace("/hote/espace");
-  }, [brouillons, searchParams, router]);
-
   const { data: reservations = [], isLoading: resLoading } = useQuery({
     queryKey: ["reservations", "host"],
     queryFn: listerReservationsHote,

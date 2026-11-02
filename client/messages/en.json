@@ -2109,7 +2109,6 @@
     "retour": "Back",
     "suivant": "Next",
     "commencer": "Let's go",
-    "finir": "Set my price",
     "envoiPhotos": "Sending photos…",
     "progression": "Progress of your listing",
     "preparation": "Preparing your listing…",
@@ -2195,10 +2194,76 @@
       "exemple": "A quiet house five minutes from the beach, with a large shaded terrace…",
       "encore": "At least {nombre} more characters."
     },
-    "fin": {
-      "surtitre": "Well done",
-      "titre": "The hard part is over!",
-      "texte": "All that is left is to set your price and rules, then send your listing for checking."
+    "envoyer": "Send for checking",
+    "envoi": "Sending…",
+    "phase-3": {
+      "surtitre": "Phase 3",
+      "titre": "Finish and publish",
+      "texte": "Your price, your rules, then the checks that reassure travellers."
+    },
+    "prix": {
+      "titre": "What price per night?",
+      "texte": "You can change it at any time.",
+      "parNuit": "per night, in FCFA"
+    },
+    "regles": {
+      "titre": "What are your rules?",
+      "texte": "Travellers accept them before booking."
+    },
+    "accueil": {
+      "titre": "How do you welcome your travellers?"
+    },
+    "securite": {
+      "titre": "A few statements",
+      "texte": "Tick what applies to your place: travellers must know before booking.",
+      "cameras": "There are cameras outside the place",
+      "animaux": "Animals live on site",
+      "travaux": "Noisy works are under way or planned",
+      "attestation": "I certify that this information is accurate, that I am allowed to rent out this place and that the photos are mine, in line with the <cgu>terms of use</cgu>."
+    },
+    "telephone": {
+      "titre": "Your phone number",
+      "texte": "The Kwa-Ba agent will call you to arrange the visit. It is never shown to travellers.",
+      "libelle": "Phone number",
+      "enregistrer": "Save this number",
+      "envoi": "Saving…",
+      "fait": "Number saved"
+    },
+    "identite": {
+      "titre": "Your identity document",
+      "texte": "National ID card or passport. It is checked by Kwa-Ba, then deleted."
+    },
+    "versement": {
+      "titre": "Where should we send your earnings?",
+      "texte": "Your share is paid by Mobile Money, 24 hours after travellers arrive."
+    },
+    "contrat": {
+      "titre": "The terms to accept",
+      "accepte": "Terms accepted",
+      "aSigner": "Your host agreement will also need signing: you can do so from <lien>your host space</lien>."
+    },
+    "recapitulatif": {
+      "titre": "All set?",
+      "texte": "Here is your listing, as travellers will see it.",
+      "parNuit": "per night",
+      "voyageurs": "{nombre, plural, one {# traveller} other {# travellers}}",
+      "lignes": {
+        "annonce": "Complete listing",
+        "telephone": "Phone number",
+        "identite": "Identity document sent",
+        "versement": "Payout account"
+      },
+      "suite": "Your listing is not published yet: Kwa-Ba checks your identity, then an agent visits the place."
+    },
+    "envoyee": {
+      "titre": "Your listing has been sent!",
+      "texte": "Thank you. Here is what comes next: we will email you at each step.",
+      "espace": "Go to my space",
+      "suite": {
+        "identite": "Kwa-Ba checks your identity document.",
+        "visite": "An agent calls you and visits your place.",
+        "publication": "Your listing is published, and you become a Kwa-Ba host."
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ETAPES, etapeAffichee, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, peutContinuer, progressionPhases } from "./etapes";
+import { ETAPES, etapeAffichee, etapeVoisine, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, peutContinuer, progressionPhases, type Conditions } from "./etapes";
 import type { DonneesAnnonce } from "../brouillons";
 
 const PHASE_1: DonneesAnnonce = {
@@ -21,7 +21,7 @@ describe("etapeAffichee", () => {
 
   it("goes back to the first unanswered question", () => {
     expect(etapeAffichee("photos", { ...PHASE_1, city: "" }).cle).toBe("adresse");
-    expect(etapeAffichee("fin", {}).cle).toBe("type");
+    expect(etapeAffichee("recapitulatif", {}).cle).toBe("type");
   });
 
   it("does not block on the screen itself", () => {
@@ -83,6 +83,43 @@ describe("peutContinuer", () => {
   });
 });
 
+const CONDITIONS: Conditions = {
+  photos: true, photos_du_compte: true, attestation: true, telephone: true, identite: "soumise", versement: true,
+  preinscription: true, contrat_a_signer: false, bloquants: [],
+};
+const etape = (cle: string) => ETAPES.find((e) => e.cle === cle)!;
+
+describe("etapes qui dependent de l'API", () => {
+  it("waits for the API before going on", () => {
+    expect(peutContinuer(etape("telephone"), {}, {}, undefined)).toBe(false);
+    expect(peutContinuer(etape("telephone"), {}, {}, { ...CONDITIONS, telephone: false })).toBe(false);
+    expect(peutContinuer(etape("telephone"), {}, {}, CONDITIONS)).toBe(true);
+  });
+
+  it("accepts an identity document sent, not a refused one", () => {
+    expect(peutContinuer(etape("identite"), {}, {}, CONDITIONS)).toBe(true);
+    expect(peutContinuer(etape("identite"), {}, {}, { ...CONDITIONS, identite: "refusee" })).toBe(false);
+  });
+
+  it("refuses to send while something blocks", () => {
+    expect(peutContinuer(etape("recapitulatif"), {}, {}, { ...CONDITIONS, bloquants: ["versement"] })).toBe(false);
+    expect(peutContinuer(etape("recapitulatif"), {}, {}, CONDITIONS)).toBe(true);
+  });
+
+  it("skips the terms when there is nothing to accept or sign", () => {
+    expect(etapeVoisine(etape("versement"), 1, CONDITIONS)?.cle).toBe("recapitulatif");
+    expect(etapeVoisine(etape("recapitulatif"), -1, CONDITIONS)?.cle).toBe("versement");
+  });
+
+  it("shows the terms when the pre-registration is required", () => {
+    expect(etapeVoisine(etape("versement"), 1, { ...CONDITIONS, preinscription: false })?.cle).toBe("contrat");
+  });
+
+  it("shows the screen while the API has not answered", () => {
+    expect(etapeVoisine(etape("versement"), 1, undefined)?.cle).toBe("contrat");
+  });
+});
+
 describe("progressionPhases", () => {
   it("is empty at the start", () => {
     expect(progressionPhases("bienvenue")).toEqual([0, 0, 0]);
@@ -97,6 +134,10 @@ describe("progressionPhases", () => {
 
   it("has finished the first phase when the second one starts", () => {
     expect(progressionPhases("phase-2")[0]).toBe(1);
+  });
+
+  it("goes on through the third phase", () => {
+    expect(progressionPhases("versement")[2]).toBeGreaterThan(0.5);
   });
 });
 

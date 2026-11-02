@@ -13,6 +13,7 @@ export interface Piece {
   soumise_le: string;
   nb_annonces: number | null;
   hote: { id: string; nom: string; email: string; telephone: string | null; inscrit_le: string };
+  titulaire_versement?: string;
 }
 
 /** Remote check of an identity document: readable, valid, in the host's name. The document is deleted afterwards. */
@@ -57,6 +58,9 @@ export default function FichePiece({ piece, peutDecider, onTerminee }: {
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Document</h2>
         <p className="text-sm text-dark">{piece.type_libelle} · envoyé le {formatDate(piece.soumise_le)}</p>
+        {piece.titulaire_versement && (
+          <p className="text-sm text-gray-600">Compte de versement au nom de <strong className="text-dark">{piece.titulaire_versement}</strong> : à comparer au nom sur la pièce.</p>
+        )}
         <button type="button" onClick={() => ouvrirPiece(piece.hote.id)}
           className="w-full flex items-center justify-center gap-2 text-sm font-bold text-primary border border-primary/30 rounded-xl px-4 py-3 hover:bg-primary/5">
           <FileText size={16} aria-hidden /> Voir le document
