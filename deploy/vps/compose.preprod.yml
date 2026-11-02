@@ -14,12 +14,17 @@ services:
       DJANGO_NUM_PROXIES: '2'
 
   # Catches every email of the preprod (EMAIL_HOST=mailpit in env/server.env): nothing reaches a real mailbox.
-  # Web interface on the server only: ssh -L 8025:localhost:8025 <host>, then http://localhost:8025
+  # Web interface at https://<preprod domain>/mailpit/, behind the password of the shared Caddy (same as the site),
+  # or on the server: ssh -L 8025:localhost:8025 <host>, then http://localhost:8025/mailpit/
   mailpit:
     image: axllent/mailpit:v1.33.0@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231
+    container_name: kwaba-preprod-mailpit
+    environment:
+      MP_WEBROOT: mailpit
     ports: ['127.0.0.1:8025:8025']
-    # backend: reached by the workers that send the emails; edge: needed to publish the web interface port
-    networks: [backend, edge]
+    # backend: reached by the workers that send the emails; edge: needed to publish the web interface port;
+    # proxy: reached by Caddy by this container name
+    networks: [backend, edge, proxy]
     security_opt: ['no-new-privileges:true']
     restart: unless-stopped
     mem_limit: 64m

@@ -128,9 +128,9 @@ export KWABA_TLS_MODE=proxy
 ```
 
 - **`KWABA_TLS_MODE=proxy`** : nginx sert le site en HTTP seulement (`nginx/templates/kwa-ba-proxy.inc.template`) ; le Caddy partagé du serveur fait le HTTPS et transmet `X-Forwarded-Proto: https`, repris tel quel vers Django et Auth.js. En prod (`nginx`, la valeur par défaut), nginx fait le HTTPS (`kwa-ba-nginx.inc.template`). Les deux modes partagent le corps du site (`kwa-ba-site.inc.template`).
-- **`compose.preprod.yml`** : nginx sans port publié, joint par Caddy sur le réseau Docker `proxy` (conteneur `kwaba-preprod-nginx`) ; `DJANGO_NUM_PROXIES=2` (Caddy puis nginx) ; Mailpit attrape tous les emails (interface : `ssh -L 8025:localhost:8025 <hôte>`, puis `http://localhost:8025`).
+- **`compose.preprod.yml`** : nginx sans port publié, joint par Caddy sur le réseau Docker `proxy` (conteneur `kwaba-preprod-nginx`) ; `DJANGO_NUM_PROXIES=2` (Caddy puis nginx) ; Mailpit attrape tous les emails (interface : `https://preprod.kwa-ba.com/mailpit/`, derrière le même mot de passe que le site ; ou sur le serveur, `ssh -L 8025:localhost:8025 <hôte>` puis `http://localhost:8025/mailpit/`).
 - **Secrets** (`env/*.env`) : générés par Ansible depuis le Vault de `kwa-ba-infra` (voir `deploy/ansible/README.md`), jamais écrits à la main ; emails envoyés à Mailpit (`EMAIL_HOST=mailpit`, port 1025).
-- **Accès** : le Caddy partagé demande un mot de passe au navigateur sur tout le site sauf le webhook FedaPay, et le garde hors des moteurs de recherche (`X-Robots-Tag: noindex`).
+- **Accès** : le Caddy partagé demande un mot de passe au navigateur sur tout le site (Mailpit compris) sauf le webhook FedaPay et `/api/health/`, et le garde hors des moteurs de recherche (`X-Robots-Tag: noindex`).
 - **`deploy.sh`** : pas de contrôle du certificat (c'est celui de Caddy) mais vérification que le réseau `proxy` existe ; test de santé depuis le conteneur nginx.
 
 ## Essai local de la pile de production
