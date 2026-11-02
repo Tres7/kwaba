@@ -1,16 +1,16 @@
 {
   "meta": {
     "titre": "Kwa-Ba | L'Afrique vous accueille",
-    "description": "Plateforme de réservation d'hébergements en Afrique. Découvrez les meilleurs logements, activités et restaurants.",
+    "description": "Réservez un logement vérifié à Lomé, un transfert depuis l'aéroport ou une voiture avec chauffeur, et payez par Mobile Money ou carte.",
     "slogan": "Kwa-Ba. L'Afrique vous accueille.",
     "pages": {
       "recherche": {
-        "titre": "Hébergements en Afrique de l'Ouest",
+        "titre": "Hébergements à Lomé",
         "description": "Villas, appartements, hôtels et auberges à Lomé, Cotonou, Ouagadougou et ailleurs. Comparez les prix par nuit et réservez en Mobile Money ou par carte."
       },
       "decouvrir": {
-        "titre": "Activités, restaurants et sites à découvrir au Togo",
-        "description": "Les meilleures activités, tables et visites près de votre logement Kwa-Ba."
+        "titre": "Sites touristiques, activités et loisirs au Togo",
+        "description": "Cascades, plages, marchés, randonnées et sites classés : nos idées de sorties au Togo, près de votre logement Kwa-Ba."
       },
       "transfert": {
         "titre": "Transfert aéroport avec chauffeur",
@@ -117,7 +117,7 @@
     "accueil": "Kwa-Ba, accueil"
   },
   "pied": {
-    "accroche": "Réservez des hébergements authentiques en Afrique et payez par Mobile Money ou carte.",
+    "accroche": "Réservez des logements vérifiés à Lomé et payez par Mobile Money ou carte.",
     "droits": "Tous droits réservés.",
     "informationsLegales": "Informations légales",
     "titres": {
@@ -157,14 +157,14 @@
     "modifierAToutMoment": "Vous pouvez modifier ce choix à tout moment depuis le lien « Gérer les cookies » en bas de chaque page.",
     "necessaires": "Strictement nécessaires",
     "necessairesTexte": "Connexion à votre compte, sécurité, mémorisation de ce choix. Toujours actifs : le site ne peut pas fonctionner sans.",
-    "tiers": "Contenus de services tiers",
-    "tiersTexte": "Carte Google Maps sur la fiche des logements. Google peut alors déposer ses propres cookies et recevoir votre adresse IP.",
-    "aucuneMesure": "Kwa-Ba n'utilise aucun outil de mesure d'audience ni de publicité.",
+    "mesure": "Mesure d'audience",
+    "mesureTexte": "Google Analytics nous indique quelles pages sont consultées, pour améliorer le site. Google dépose alors ses propres cookies et reçoit votre adresse IP.",
+    "aucunePub": "Kwa-Ba n'utilise aucun cookie de publicité.",
     "politique": "Politique de cookies",
     "enregistrer": "Enregistrer mes choix",
     "choix": "Choix des cookies",
     "vosChoix": "Vos choix de confidentialité",
-    "bandeau": "Nous utilisons uniquement les cookies nécessaires au fonctionnement du site. Avec votre accord, nous affichons aussi la carte Google Maps des logements, qui dépose ses propres cookies. Aucun suivi publicitaire.",
+    "bandeau": "Nous utilisons les cookies nécessaires au fonctionnement du site. Avec votre accord, Google Analytics nous aide aussi à mesurer les visites pour améliorer le site. Aucun suivi publicitaire.",
     "enSavoirPlus": "En savoir plus sur les cookies",
     "toutRefuser": "Tout refuser",
     "toutAccepter": "Tout accepter",
@@ -194,7 +194,7 @@
     "voirMieuxNotes": "Voir tous les logements les mieux notés",
     "aucunHebergement": "Aucun hébergement publié pour le moment.",
     "pourquoi": "Pourquoi choisir Kwa-Ba ?",
-    "pourquoiTexte": "Nous rendons votre voyage en Afrique aussi simple et serein que possible.",
+    "pourquoiTexte": "Nous rendons votre séjour à Lomé aussi simple et serein que possible.",
     "atouts": {
       "paiement": {
         "titre": "Paiement flexible",
@@ -211,6 +211,24 @@
       "annulation": {
         "titre": "Annulation simple",
         "texte": "Annulez en un clic depuis votre espace réservations."
+      }
+    },
+    "garanties": {
+      "verifies": {
+        "titre": "Logements vérifiés par un agent Kwa-Ba",
+        "texte": "Chaque logement est visité par un agent Kwa-Ba avant d'être publié."
+      },
+      "garantie": {
+        "titre": "Garantie Kwa-Ba sur chaque séjour",
+        "texte": "Logement très différent de l'annonce ou annulé par l'hôte : relogement équivalent ou remboursement."
+      },
+      "equipe": {
+        "titre": "Équipe locale à Lomé",
+        "texte": "Une équipe sur place, qui vous répond par email."
+      },
+      "versement": {
+        "titre": "Votre hôte payé 24 h après votre arrivée",
+        "texte": "Vous avez le temps de signaler un problème avant que l'hôte ne soit payé."
       }
     },
     "devenezHote": "Devenez hôte Kwa-Ba",
@@ -234,7 +252,7 @@
       },
       "experiences": {
         "titre": "Expériences",
-        "texte": "Cascades, plages, sites classés et bonnes tables autour de votre logement."
+        "texte": "Cascades, plages, sites classés et randonnées autour de votre logement."
       },
       "together": {
         "titre": "Voyager à plusieurs",
@@ -267,6 +285,7 @@
     "nonVerifie": "Votre compte n'est pas encore vérifié.",
     "desactive": "Ce compte a été désactivé. Contactez le support.",
     "identifiantsIncorrects": "Email ou mot de passe incorrect.",
+    "tropDeTentatives": "Trop de tentatives. Réessayez dans quelques minutes.",
     "connexion": "Connexion",
     "connexionTexte": "Connectez-vous pour réserver et retrouver vos voyages.",
     "continuerGoogle": "Continuer avec Google",
@@ -281,7 +300,7 @@
     "seConnecter": "Se connecter",
     "pasDeCompte": "Pas encore de compte ?",
     "creerCompte": "Créer un compte",
-    "connexionVisuelTitre": "Découvrez des séjours authentiques en Afrique",
+    "connexionVisuelTitre": "Des séjours vérifiés à Lomé",
     "connexionVisuelTexte": "Villas, riads, appartements et auberges sélectionnés, avec paiement Mobile Money ou carte.",
     "mdpTropCourt": "Le mot de passe doit contenir au moins 8 caractères.",
     "mdpDifferents": "Les mots de passe ne correspondent pas.",
@@ -326,7 +345,7 @@
     "inscriptionVisuelTexte": "Réservez des hébergements vérifiés, sauvegardez vos coups de cœur et échangez directement avec les hôtes.",
     "googleIndisponible": "Google n'est pas disponible pour le moment. Réessayez dans un instant.",
     "googleJeton": "Impossible de récupérer le token Google.",
-    "googleSession": "Authentification Google réussie, mais ouverture de session impossible.",
+    "googleRefus": "Connexion Google impossible. Réessayez ou utilisez votre email.",
     "ouParEmail": "ou par e-mail",
     "codeInvalide": "Code invalide ou expiré.",
     "codeRenvoye": "Un nouveau code a été envoyé à votre adresse e-mail.",
@@ -365,6 +384,8 @@
   },
   "logement": {
     "verifie": "Logement vérifié",
+    "hoteFondateur": "Hôte fondateur",
+    "hoteFondateurAide": "Parmi les 50 premiers hôtes à avoir rejoint Kwa-Ba.",
     "parNuitFraisInclus": "/ nuit, frais de service inclus",
     "detailPrix": "Hébergement {prix} + frais de service {frais}",
     "completDates": "Complet à ces dates",
@@ -382,9 +403,30 @@
     "ajouter": "Ajouter aux favoris"
   },
   "carte": {
-    "avertissement": "La carte est fournie par <strong>Google Maps</strong>. En l'affichant, Google reçoit votre adresse IP et peut déposer des cookies.",
-    "afficher": "Afficher la carte",
-    "toujours": "Toujours afficher les cartes"
+    "relief": "Vue 3D",
+    "titre": "Carte des logements",
+    "indisponible": "La carte est momentanément indisponible.",
+    "voirLogement": "{nom}, {prix} par nuit",
+    "fermer": "Fermer",
+    "groupe": "{nombre} logements",
+    "zoomerGroupe": "Zoomer sur ces {nombre} logements",
+    "aucunLogement": "Aucun logement à afficher sur la carte.",
+    "sansPosition": "{nombre, plural, one {# logement n'apparaît pas sur la carte} other {# logements n'apparaissent pas sur la carte}}",
+    "zoomAvant": "Zoomer",
+    "zoomArriere": "Dézoomer",
+    "credits": "Afficher les crédits de la carte",
+    "gesteOrdinateur": "Ctrl + molette pour zoomer sur la carte",
+    "gesteMac": "⌘ + molette pour zoomer sur la carte",
+    "gesteTelephone": "Utilisez deux doigts pour déplacer la carte",
+    "choix": {
+      "aide": "Touchez la carte à l'endroit exact du logement, en zoomant pour être précis.",
+      "placee": "Position enregistrée : déplacez le repère pour la corriger.",
+      "prive": "Les voyageurs ne voient qu'une zone approximative ; la position exacte sert à l'agent Kwa-Ba pour la visite.",
+      "maPosition": "Utiliser ma position",
+      "recherche": "Recherche de votre position…",
+      "placerAuCentre": "Placer le repère au centre",
+      "refus": "Position indisponible. Autorisez la localisation dans votre navigateur, ou placez le repère à la main."
+    }
   },
   "dates": {
     "ajouter": "Ajouter",
@@ -426,18 +468,20 @@
     "sousTitre": "Nos idées de sorties autour de vos hébergements. Les prix sont indicatifs.",
     "onglets": {
       "tout": "Tout",
+      "sites": "Sites touristiques",
       "activites": "Activités",
-      "restaurants": "Restaurants",
-      "loisirs": "Loisirs",
-      "sites": "Sites touristiques"
+      "loisirs": "Loisirs"
     },
     "ville": "Ville",
     "toutesVilles": "Toutes les villes",
-    "rechercher": "Rechercher une activité, un plat, un lieu…",
+    "rechercher": "Rechercher un site, une activité, un lieu…",
     "aucune": "Aucune idée de sortie ne correspond à ces critères.",
     "reinitialiser": "Réinitialiser les filtres",
     "dormirA": "Dormir à {ville}",
-    "gratuit": "Gratuit"
+    "gratuit": "Gratuit",
+    "voirPlus": "Voir plus d'idées",
+    "creditPhoto": "Photo : {credit}",
+    "avertissement": "Prix, horaires et conditions d'accès à confirmer sur place. Avant de partir vers le nord du pays, consultez les conseils aux voyageurs."
   },
   "recherche": {
     "typeLogement": "Type de logement",
@@ -474,6 +518,7 @@
     "reessayer": "Réessayer",
     "aucunResultat": "Aucun résultat",
     "aucunResultatTexte": "Essayez une autre destination, d'autres dates ou retirez des filtres.",
+    "tousVerifies": "Tous les logements sont vérifiés sur place par Kwa-Ba",
     "voirTous": "Voir tous les hébergements",
     "fermer": "Fermer",
     "listeResultats": "Hébergements trouvés",
@@ -535,7 +580,10 @@
     "verifieAide": "Un agent Kwa-Ba a visité ce logement et contrôlé l'identité de l'hôte.",
     "hoteVerifie": "Hôte vérifié",
     "hoteVerifieAide": "Kwa-Ba a contrôlé la pièce d'identité de cet hôte.",
+    "hoteFondateur": "Hôte fondateur",
+    "hoteFondateurAide": "Parmi les 50 premiers hôtes à avoir rejoint Kwa-Ba.",
     "clientFidele": "Tarif Client fidèle : vous avez déjà séjourné chez cet hôte",
+    "prixIndisponible": "Le prix n'a pas pu être calculé. Réessayez dans un instant.",
     "parNuitFraisInclus": "/ nuit, frais de service inclus",
     "detailNuit": "Hébergement {prix} + frais de service Kwa-Ba {frais} ({taux} %)",
     "typeLogement": "Type de logement",
@@ -1329,7 +1377,18 @@
     "creerVoyage": "Créer ce voyage et inviter mes proches",
     "offres": "Offres Kwa-Ba proposées"
   },
+  "documents": {
+    "titre": "Documents :",
+    "erreur": "Le document n'a pas pu être téléchargé.",
+    "bon": "Bon",
+    "recu": "Reçu",
+    "facture": "Facture",
+    "don": "Reçu de don",
+    "telecharger": "Télécharger : {nom} (PDF)"
+  },
   "messages": {
+    "tropDeMessages": "Vous envoyez trop de messages. Réessayez dans un instant.",
+    "nonEnvoye": "Le message n'a pas pu être envoyé.",
     "titre": "Messages",
     "chargement": "Chargement…",
     "erreurChargement": "Impossible de charger vos conversations.",
@@ -1443,6 +1502,15 @@
     "masquee": "Annonce masquée des recherches",
     "visible": "Annonce de nouveau visible",
     "supprimerQuestion": "Supprimer « {nom} » ? L'annonce disparaîtra du site et de votre espace, et les réservations en attente de paiement seront annulées. L'historique de vos séjours est conservé.",
+    "brouillons": {
+      "titre": "Brouillons ({nombre})",
+      "sansTitre": "Annonce sans titre",
+      "modifie": "Modifié le {date}",
+      "reprendre": "Reprendre",
+      "supprimer": "Supprimer le brouillon « {nom} »",
+      "supprimerQuestion": "Supprimer le brouillon « {nom} » ? Les informations saisies seront perdues.",
+      "supprime": "Brouillon supprimé"
+    },
     "supprimee": "Annonce supprimée",
     "nouvelle": "Nouvelle annonce",
     "modifier": "Modifier l'annonce",
@@ -1540,6 +1608,7 @@
       "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)"
     },
     "erreurDroits": "Confirmez que vous détenez les droits sur les photos publiées.",
+    "erreurPosition": "Placez votre logement sur la carte.",
     "erreurPhotos": "Ajoutez au moins une photo : les annonces sans photo ne sont presque jamais réservées.",
     "erreurEnregistrement": "Enregistrement impossible. Vérifiez votre connexion.",
     "titre": "Titre de l'annonce",
@@ -1549,6 +1618,7 @@
     "capacite": "Capacité",
     "voyageursMax": "Voyageurs max.",
     "ville": "Ville",
+    "position": "Position sur la carte",
     "quartier": "Quartier / adresse",
     "prix": "Votre prix par nuit (FCFA)",
     "description": "Description",
@@ -1563,6 +1633,21 @@
     "enregistrement": "Enregistrement…",
     "enregistrerModifs": "Enregistrer les modifications",
     "publier": "Publier l'annonce",
+    "enregistrerBrouillon": "Enregistrer pour plus tard",
+    "brouillonEnregistre": "Brouillon enregistré : reprenez-le quand vous voulez depuis votre espace hôte.",
+    "erreurBrouillon": "Brouillon non enregistré. Vérifiez votre connexion.",
+    "completude": {
+      "avancement": "Votre annonce est complète à {pourcentage} %",
+      "reste": "Reste à renseigner : {liste}.",
+      "titre": "le titre",
+      "ville": "la ville",
+      "prix": "le prix par nuit",
+      "position": "la position sur la carte",
+      "surface": "la surface",
+      "lits": "au moins un lit",
+      "petitDejeuner": "le petit-déjeuner",
+      "photos": "au moins une photo"
+    },
     "detailsTitre": "Le logement en détail",
     "detailsAide": "Ces informations s'affichent sur votre annonce et rassurent les voyageurs.",
     "surface": "Surface (m²)",

@@ -1,16 +1,16 @@
 {
   "meta": {
     "titre": "Kwa-Ba | Africa welcomes you",
-    "description": "Book places to stay in Africa. Discover the best homes, experiences and restaurants.",
+    "description": "Book a verified place to stay in Lomé, an airport transfer or a car with a driver, and pay by Mobile Money or card.",
     "slogan": "Kwa-Ba. Africa welcomes you.",
     "pages": {
       "recherche": {
-        "titre": "Places to stay in West Africa",
+        "titre": "Places to stay in Lomé",
         "description": "Villas, apartments, hotels and guesthouses in Lomé, Cotonou, Ouagadougou and beyond. Compare nightly prices and book with Mobile Money or card."
       },
       "decouvrir": {
-        "titre": "Activities, restaurants and sights to discover in Togo",
-        "description": "The best experiences, places to eat and visits near your Kwa-Ba stay."
+        "titre": "Sights, activities and leisure in Togo",
+        "description": "Waterfalls, beaches, markets, hikes and heritage sites: ideas for things to do in Togo, near your Kwa-Ba stay."
       },
       "transfert": {
         "titre": "Airport transfer with a driver",
@@ -117,7 +117,7 @@
     "accueil": "Kwa-Ba, home"
   },
   "pied": {
-    "accroche": "Book authentic places to stay in Africa and pay by Mobile Money or card.",
+    "accroche": "Book verified places to stay in Lomé and pay by Mobile Money or card.",
     "droits": "All rights reserved.",
     "informationsLegales": "Legal information",
     "titres": {
@@ -157,14 +157,14 @@
     "modifierAToutMoment": "You can change this choice at any time with the “Manage cookies” link at the bottom of every page.",
     "necessaires": "Strictly necessary",
     "necessairesTexte": "Signing in, security and remembering this choice. Always on: the site cannot work without them.",
-    "tiers": "Third-party content",
-    "tiersTexte": "Google Maps on listing pages. Google may then set its own cookies and receive your IP address.",
-    "aucuneMesure": "Kwa-Ba uses no analytics or advertising tools.",
+    "mesure": "Audience measurement",
+    "mesureTexte": "Google Analytics tells us which pages are viewed, so we can improve the site. Google then sets its own cookies and receives your IP address.",
+    "aucunePub": "Kwa-Ba uses no advertising cookies.",
     "politique": "Cookie policy",
     "enregistrer": "Save my choices",
     "choix": "Cookie choices",
     "vosChoix": "Your privacy choices",
-    "bandeau": "We only use the cookies the site needs to work. With your consent, we also show Google Maps on listings, which sets its own cookies. No advertising tracking.",
+    "bandeau": "We use the cookies the site needs to work. With your consent, Google Analytics also helps us measure visits to improve the site. No advertising tracking.",
     "enSavoirPlus": "Learn more about cookies",
     "toutRefuser": "Reject all",
     "toutAccepter": "Accept all",
@@ -194,7 +194,7 @@
     "voirMieuxNotes": "See all top-rated stays",
     "aucunHebergement": "No stays published yet.",
     "pourquoi": "Why choose Kwa-Ba?",
-    "pourquoiTexte": "We make your trip to Africa as simple and stress-free as possible.",
+    "pourquoiTexte": "We make your stay in Lomé as simple and stress-free as possible.",
     "atouts": {
       "paiement": {
         "titre": "Flexible payment",
@@ -211,6 +211,24 @@
       "annulation": {
         "titre": "Easy cancellation",
         "texte": "Cancel in one click from your bookings."
+      }
+    },
+    "garanties": {
+      "verifies": {
+        "titre": "Places verified by a Kwa-Ba agent",
+        "texte": "Every place is visited by a Kwa-Ba agent before it is published."
+      },
+      "garantie": {
+        "titre": "Kwa-Ba Guarantee on every stay",
+        "texte": "Place very different from the listing or cancelled by the host: equivalent rehousing or a refund."
+      },
+      "equipe": {
+        "titre": "Local team in Lomé",
+        "texte": "A team on the ground that answers you by email."
+      },
+      "versement": {
+        "titre": "Your host is paid 24 h after you arrive",
+        "texte": "You have time to report a problem before the host is paid."
       }
     },
     "devenezHote": "Become a Kwa-Ba host",
@@ -234,7 +252,7 @@
       },
       "experiences": {
         "titre": "Experiences",
-        "texte": "Waterfalls, beaches, heritage sites and good restaurants around your stay."
+        "texte": "Waterfalls, beaches, heritage sites and hikes around your stay."
       },
       "together": {
         "titre": "Travel as a group",
@@ -267,6 +285,7 @@
     "nonVerifie": "Your account is not verified yet.",
     "desactive": "This account has been deactivated. Please contact support.",
     "identifiantsIncorrects": "Incorrect email or password.",
+    "tropDeTentatives": "Too many attempts. Please try again in a few minutes.",
     "connexion": "Log in",
     "connexionTexte": "Log in to book and find your trips.",
     "continuerGoogle": "Continue with Google",
@@ -281,7 +300,7 @@
     "seConnecter": "Log in",
     "pasDeCompte": "Don't have an account?",
     "creerCompte": "Create an account",
-    "connexionVisuelTitre": "Discover authentic stays in Africa",
+    "connexionVisuelTitre": "Verified stays in Lomé",
     "connexionVisuelTexte": "Hand-picked villas, riads, apartments and guesthouses, with Mobile Money or card payment.",
     "mdpTropCourt": "Your password must be at least 8 characters long.",
     "mdpDifferents": "Passwords do not match.",
@@ -326,7 +345,7 @@
     "inscriptionVisuelTexte": "Book verified stays, save your favourites and talk directly with hosts.",
     "googleIndisponible": "Google is not available right now. Please try again in a moment.",
     "googleJeton": "Could not get the Google token.",
-    "googleSession": "Google sign-in worked, but we could not start your session.",
+    "googleRefus": "Google sign-in failed. Try again or use your email.",
     "ouParEmail": "or with email",
     "codeInvalide": "Invalid or expired code.",
     "codeRenvoye": "A new code has been sent to your email address.",
@@ -365,6 +384,8 @@
   },
   "logement": {
     "verifie": "Verified place",
+    "hoteFondateur": "Founder host",
+    "hoteFondateurAide": "One of the first 50 hosts to join Kwa-Ba.",
     "parNuitFraisInclus": "/ night, service fee included",
     "detailPrix": "Accommodation {prix} + service fee {frais}",
     "completDates": "Full on these dates",
@@ -382,9 +403,30 @@
     "ajouter": "Add to favourites"
   },
   "carte": {
-    "avertissement": "The map is provided by <strong>Google Maps</strong>. When it is shown, Google receives your IP address and may set cookies.",
-    "afficher": "Show map",
-    "toujours": "Always show maps"
+    "relief": "3D view",
+    "titre": "Map of places to stay",
+    "indisponible": "The map is temporarily unavailable.",
+    "voirLogement": "{nom}, {prix} per night",
+    "fermer": "Close",
+    "groupe": "{nombre} places",
+    "zoomerGroupe": "Zoom in on these {nombre} places",
+    "aucunLogement": "No places to show on the map.",
+    "sansPosition": "{nombre, plural, one {# place is not on the map} other {# places are not on the map}}",
+    "zoomAvant": "Zoom in",
+    "zoomArriere": "Zoom out",
+    "credits": "Show map credits",
+    "gesteOrdinateur": "Ctrl + scroll to zoom the map",
+    "gesteMac": "⌘ + scroll to zoom the map",
+    "gesteTelephone": "Use two fingers to move the map",
+    "choix": {
+      "aide": "Tap the map at the exact spot of the place, zooming in to be precise.",
+      "placee": "Position saved: drag the pin to correct it.",
+      "prive": "Travellers only see an approximate zone; the exact position is for the Kwa-Ba agent's visit.",
+      "maPosition": "Use my location",
+      "recherche": "Finding your location…",
+      "placerAuCentre": "Drop the pin in the centre",
+      "refus": "Location unavailable. Allow location in your browser, or place the pin by hand."
+    }
   },
   "dates": {
     "ajouter": "Add",
@@ -426,18 +468,20 @@
     "sousTitre": "Ideas for things to do near your stay. Prices are indicative.",
     "onglets": {
       "tout": "All",
+      "sites": "Sights",
       "activites": "Activities",
-      "restaurants": "Restaurants",
-      "loisirs": "Leisure",
-      "sites": "Sights"
+      "loisirs": "Leisure"
     },
     "ville": "City",
     "toutesVilles": "All cities",
-    "rechercher": "Search for an activity, a dish, a place…",
+    "rechercher": "Search for a sight, an activity, a place…",
     "aucune": "No ideas match these filters.",
     "reinitialiser": "Reset filters",
     "dormirA": "Stay in {ville}",
-    "gratuit": "Free"
+    "gratuit": "Free",
+    "voirPlus": "See more ideas",
+    "creditPhoto": "Photo: {credit}",
+    "avertissement": "Prices, opening hours and access conditions should be checked locally. Before heading to the north of the country, read your government's travel advice."
   },
   "recherche": {
     "typeLogement": "Type of place",
@@ -474,6 +518,7 @@
     "reessayer": "Try again",
     "aucunResultat": "No results",
     "aucunResultatTexte": "Try another destination, other dates or remove some filters.",
+    "tousVerifies": "Every place is verified on site by Kwa-Ba",
     "voirTous": "See all stays",
     "fermer": "Close",
     "listeResultats": "Stays found",
@@ -535,7 +580,10 @@
     "verifieAide": "A Kwa-Ba agent visited this place and checked the host's identity.",
     "hoteVerifie": "Verified host",
     "hoteVerifieAide": "Kwa-Ba has checked this host's ID document.",
+    "hoteFondateur": "Founder host",
+    "hoteFondateurAide": "One of the first 50 hosts to join Kwa-Ba.",
     "clientFidele": "Loyal customer rate: you have already stayed with this host",
+    "prixIndisponible": "We could not calculate the price. Please try again in a moment.",
     "parNuitFraisInclus": "/ night, service fee included",
     "detailNuit": "Accommodation {prix} + Kwa-Ba service fee {frais} ({taux}%)",
     "typeLogement": "Room type",
@@ -1329,7 +1377,18 @@
     "creerVoyage": "Create this trip and invite friends",
     "offres": "Suggested Kwa-Ba offers"
   },
+  "documents": {
+    "titre": "Documents:",
+    "erreur": "The document could not be downloaded.",
+    "bon": "Voucher",
+    "recu": "Receipt",
+    "facture": "Invoice",
+    "don": "Donation receipt",
+    "telecharger": "Download {nom} (PDF)"
+  },
   "messages": {
+    "tropDeMessages": "You are sending too many messages. Please try again in a moment.",
+    "nonEnvoye": "The message could not be sent.",
     "titre": "Messages",
     "chargement": "Loading…",
     "erreurChargement": "Could not load your conversations.",
@@ -1443,6 +1502,15 @@
     "masquee": "Listing hidden from search",
     "visible": "Listing visible again",
     "supprimerQuestion": "Delete “{nom}”? The listing will disappear from the site and your space, and bookings awaiting payment will be cancelled. Your stay history is kept.",
+    "brouillons": {
+      "titre": "Drafts ({nombre})",
+      "sansTitre": "Untitled listing",
+      "modifie": "Edited on {date}",
+      "reprendre": "Resume",
+      "supprimer": "Delete the draft “{nom}”",
+      "supprimerQuestion": "Delete the draft “{nom}”? The information entered will be lost.",
+      "supprime": "Draft deleted"
+    },
     "supprimee": "Listing deleted",
     "nouvelle": "New listing",
     "modifier": "Edit listing",
@@ -1540,6 +1608,7 @@
       "residence": "Apartment or studio with hotel services (cleaning, reception)"
     },
     "erreurDroits": "Confirm that you hold the rights to the published photos.",
+    "erreurPosition": "Place your listing on the map.",
     "erreurPhotos": "Add at least one photo: listings without photos are almost never booked.",
     "erreurEnregistrement": "Could not save. Check your connection.",
     "titre": "Listing title",
@@ -1549,6 +1618,7 @@
     "capacite": "Capacity",
     "voyageursMax": "Max guests",
     "ville": "City",
+    "position": "Position on the map",
     "quartier": "Area / address",
     "prix": "Your price per night (FCFA)",
     "description": "Description",
@@ -1563,6 +1633,21 @@
     "enregistrement": "Saving…",
     "enregistrerModifs": "Save changes",
     "publier": "Publish listing",
+    "enregistrerBrouillon": "Save for later",
+    "brouillonEnregistre": "Draft saved: resume it whenever you like from your host space.",
+    "erreurBrouillon": "Draft not saved. Check your connection.",
+    "completude": {
+      "avancement": "Your listing is {pourcentage}% complete",
+      "reste": "Still to fill in: {liste}.",
+      "titre": "the title",
+      "ville": "the city",
+      "prix": "the price per night",
+      "position": "the position on the map",
+      "surface": "the floor area",
+      "lits": "at least one bed",
+      "petitDejeuner": "breakfast",
+      "photos": "at least one photo"
+    },
     "detailsTitre": "The place in detail",
     "detailsAide": "Shown on your listing: these details reassure travellers.",
     "surface": "Floor area (m²)",

@@ -1,0 +1,13 @@
+schemaVersion: 2
+manifestVersion: 115
+sourceRevision: d85d432be2fe5558d8e231cce2c238e8e46fc743
+createdAt: 2026-10-30T23:01:45Z
+services:
+  server:
+    kind: image
+    sourceRevision: 3fa932d8c8f8cf2ac7dfbec726a1717ca7b561b8
+    image: ghcr.io/tres7/kwaba-server@sha256:aa7612116fc75133f663a16ac9fbc0642a47c60cceb2fda515b45ffefc5b2f92
+  client:
+    kind: image
+    sourceRevision: 1e9d5b6d117d7040a8f0bf1e311e1b04571cdaaf
+    image: ghcr.io/tres7/kwaba-client@sha256:511a431ce27f94558b75fe593e52449037bc4aca6cd19f4b93098c5ab6bc8039

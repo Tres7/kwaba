@@ -34,6 +34,11 @@ export interface Hebergement {
   type: HebergementType;
   city: string;
   location: string;
+  /** Approximate position shown to travellers (the real one is within rayon_m); null for an older listing */
+  position: { lat: number; lng: number; rayon_m: number } | null;
+  /** Exact position: only sent to the listing's host */
+  latitude?: string | null;
+  longitude?: string | null;
   price_per_night: number;
   rating: number;
   review_count: number;
@@ -68,6 +73,8 @@ export interface Hebergement {
   host_name: string;
   /** The host's identity document checked by Kwa-Ba ("Verified host" badge). */
   hote_verifie?: boolean;
+  /** One of the first 50 individual hosts (Founders Programme) */
+  hote_fondateur?: boolean;
   is_favorite: boolean;
   /** Inspection visit validated by Kwa-Ba (missing while the backend does not expose it). */
   est_verifie?: boolean;

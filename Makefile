@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install lint test test-unit
+.PHONY: help install lint test test-unit test-client
 
 VENV := server/.venv
 PY := $(VENV)/bin/python
@@ -27,3 +27,6 @@ test-unit: ## Server unit tests (no container)
 
 test: ## All server tests (starts the test PostgreSQL if needed)
 	cd server && .venv/bin/python -m pytest
+
+test-client: ## Client tests (Vitest)
+	npm --prefix client test

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { CreditCard, Lock, Smartphone, Wallet } from "lucide-react";
 import SubPageHeader from "@/components/layout/SubPageHeader";
-import { useConfigPaiement, useOperateursMobileMoney } from "@/lib/paiement";
+import { useConfigPaiement, useOperateursMobileMoney } from "@/features/paiements";
 
 const METHODS = [
   { icon: Smartphone, id: "mobileMoney" },

@@ -26,7 +26,7 @@ gitleaks masque les valeurs dans les logs. Un faux positif vérifié s'ajoute à
 
 | Workflow | Déclencheur | Contenu |
 | --- | --- | --- |
-| `push_main.yml` | Push sur `main` (sauf documentation et manifests) | Plan par rapport au dernier manifest ; pour chaque service modifié (serveur, client) : build de l'image, smoke test, Trivy, push par digest (`sha-<commit>`) ; puis manifest de déploiement, commité par la CD App, et tags définitifs des images (`main`, `manifest-<N>`) |
+| `push_main.yml` | Push sur `main` (sauf documentation et manifests) | Plan par rapport au dernier manifest ; pour chaque service modifié (serveur, client, et client de préprod avec le client) : build de l'image, smoke test, Trivy, push par digest (`sha-<commit>`) ; puis manifest de déploiement, commité par la CD App, et tags définitifs des images (`main`, `manifest-<N>`) |
 | `nightly.yml` | Chaque nuit à 1 h UTC, ou à la main | Scan Trivy des images (serveur et client) du dernier manifest, `pip-audit`, `npm audit`, gitleaks sur tout l'historique (toutes branches) |
 | Dependabot | Chaque jour à 3 h (Paris), sur `main` uniquement | PR de mise à jour : actions, pip, npm, images Docker de base. Les versions majeures de `node` et les mineures de `python` sont ignorées : changement volontaire uniquement |
 
@@ -52,6 +52,10 @@ services:
     kind: image
     sourceRevision: <dernier commit touchant client/>
     image: ghcr.io/tres7/kwaba-client@sha256:<digest>
+  clientPreprod:                    # même révision que client, construite pour l'URL de la préprod
+    kind: image
+    sourceRevision: <dernier commit touchant client/>
+    image: ghcr.io/tres7/kwaba-client-preprod@sha256:<digest>
 ```
 
 Les manifests v1 (client déployé depuis Git, avant le passage au VPS) restent valides ; le premier manifest v2 reconstruit l'image du client.
@@ -59,7 +63,8 @@ Les manifests v1 (client déployé depuis Git, avant le passage au VPS) restent 
 - Les révisions sont celles du dernier commit qui touche `server/` ou `client/`, et non celles du manifest précédent : un run sauté ne fausse rien.
 - Une image n'est reconstruite que pour un service dont la révision diffère du dernier manifest ; sinon son digest est repris. Sans changement du serveur ni du client, aucun manifest n'est créé.
 - L'image du client fige au build les valeurs publiques, lues dans les variables du dépôt : `PUBLIC_SITE_URL` (obligatoire, ex. `https://kwa-ba.com`), `PUBLIC_GOOGLE_CLIENT_ID`, `PUBLIC_CONTACT_EMAIL`. L'API est attendue sur `<PUBLIC_SITE_URL>/api`.
-- Les scripts (`.github/scripts/manifest`, testés par `npm test`) : `plan.mjs`, `create.mjs`, `validate.mjs`, `latest.mjs`.
+- La préprod a donc sa propre image client (`kwaba-client-preprod`), construite en même temps que celle de la prod, à partir de la même révision, avec `PREPROD_PUBLIC_SITE_URL` (obligatoire, `https://preprod.kwa-ba.com`) et `PREPROD_PUBLIC_GOOGLE_CLIENT_ID`. Le serveur a la même image partout. Les manifests antérieurs (sans `clientPreprod`) restent valides et déployables en prod, pas en préprod ; le premier manifest qui suit reconstruit les deux images client.
+- Les scripts (`.github/scripts/manifest`, testés par `npm test`) : `plan.mjs`, `create.mjs`, `validate.mjs`, `latest.mjs`, `target.mjs` (`--environment production|preprod` choisit l'image client).
 - Le commit du manifest sur `main` (protégée) est fait par la **CD App**, seule autorisée à contourner le ruleset. Sans elle (variable `CD_APP_CLIENT_ID` absente), le manifest est produit en artefact du run, non commité.
 
 ### Configurer la CD App

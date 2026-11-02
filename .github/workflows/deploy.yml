@@ -1,19 +1,31 @@
 name: Deploy
 
-# Deploys a manifest (deploy/manifests) to the VPS: the latest one by default, or an older one to roll back.
+# Deploys a manifest (deploy/manifests) to an environment: the latest one by default, or an older one to roll back.
 # The VPS configuration (deploy/vps) always comes from main; the images come from the manifest.
+# Expected path: a manifest goes to the preprod first, then the same manifest to the production.
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: Environment
+        type: choice
+        options: [preprod, production]
+        default: preprod
       manifest:
         description: Manifest file (e.g. manifest-0008-2cf8427.yaml), empty for the latest
         type: string
         required: false
         default: ''
+      skip_preprod:
+        description: Production only, to roll back or in an emergency, deploy a manifest never deployed to the preprod
+        type: boolean
+        default: false
 
-# One deployment at a time, never cancelled halfway (migrations)
+run-name: Deploy ${{ inputs.environment }} ${{ inputs.manifest || '(latest manifest)' }}
+
+# One deployment at a time per environment, never cancelled halfway (migrations)
 concurrency:
-  group: production
+  group: deploy-${{ inputs.environment }}
   cancel-in-progress: false
 
 permissions:
@@ -21,14 +33,26 @@ permissions:
 
 jobs:
   deploy:
-    name: Production
+    name: ${{ inputs.environment }}
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # The environment only accepts main (branch policy) and holds the SSH secrets
+    permissions:
+      contents: read
+      actions: read # artifacts of the preprod deployments (production guard)
+    # The environment only accepts main (branch policy) and holds the SSH secrets and the server variables
     environment:
-      name: production
-      url: ${{ vars.PUBLIC_SITE_URL }}
+      name: ${{ inputs.environment }}
+      url: ${{ vars.DEPLOY_SITE_URL || vars.PUBLIC_SITE_URL }}
+    env:
+      # Environment variables, with the production values as defaults
+      HOST: ${{ vars.DEPLOY_HOST }}
+      PORT: ${{ vars.DEPLOY_PORT || '22' }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER || 'deploy' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/kwaba' }}
+      # true: the key can only run the deploy gate of the server, which fetches main itself (role kwaba of Ansible)
+      PULL: ${{ vars.DEPLOY_PULL == 'true' }}
+      SITE_URL: ${{ vars.DEPLOY_SITE_URL || vars.PUBLIC_SITE_URL }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -40,22 +64,41 @@ jobs:
         name: Manifest to deploy
         env:
           MANIFEST: ${{ inputs.manifest }}
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
           node .github/scripts/manifest/validate.mjs
-          node .github/scripts/manifest/target.mjs --manifest "$MANIFEST" | tee -a "$GITHUB_OUTPUT"
+          node .github/scripts/manifest/target.mjs --manifest "$MANIFEST" --environment "$ENVIRONMENT" | tee -a "$GITHUB_OUTPUT"
           {
-            echo "### Deploying \`$(grep '^file=' "$GITHUB_OUTPUT" | cut -d= -f2)\`"
+            echo "### Deploying \`$(grep '^file=' "$GITHUB_OUTPUT" | cut -d= -f2)\` to ${ENVIRONMENT}"
             grep -E '^(server|client)_image=' "$GITHUB_OUTPUT" | sed 's/^/- /'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: SSH access to the VPS
+      - name: Already deployed to the preprod
+        if: inputs.environment == 'production'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FILE: ${{ steps.target.outputs.file }}
+          SKIP_PREPROD: ${{ inputs.skip_preprod }}
+        run: |
+          deployed=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=preprod-${FILE}" \
+            --jq '[.artifacts[] | select(.expired | not)] | length')
+          if [ "$deployed" -gt 0 ]; then
+            echo "${FILE} was deployed to the preprod"
+          elif [ "$SKIP_PREPROD" = "true" ]; then
+            echo "::warning::${FILE} was never deployed to the preprod (skip_preprod)"
+            echo "**Not deployed to the preprod first** (skip_preprod)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error::${FILE} was never deployed to the preprod: deploy it there first (or tick skip_preprod to roll back)"
+            exit 1
+          fi
+
+      - name: SSH access to the server
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
-          HOST: ${{ vars.DEPLOY_HOST }}
         run: |
           if [ -z "$SSH_KEY" ] || [ -z "$KNOWN_HOSTS" ] || [ -z "$HOST" ]; then
-            echo "::error::Environment production: DEPLOY_SSH_KEY, DEPLOY_SSH_KNOWN_HOSTS (secrets) and DEPLOY_HOST (variable) are required"
+            echo "::error::Environment ${{ inputs.environment }}: DEPLOY_SSH_KEY, DEPLOY_SSH_KNOWN_HOSTS (secrets) and DEPLOY_HOST (variable) are required"
             exit 1
           fi
           install -d -m 700 ~/.ssh
@@ -64,40 +107,70 @@ jobs:
           cat > ~/.ssh/config <<EOF
           Host vps
             HostName ${HOST}
-            User deploy
+            Port ${PORT}
+            User ${DEPLOY_USER}
             IdentityFile ~/.ssh/deploy_key
             IdentitiesOnly yes
             StrictHostKeyChecking yes
             BatchMode yes
             ServerAliveInterval 30
           EOF
-          ssh vps true
+          # The deploy gate accepts nothing but a deployment: the first connection is the deployment itself
+          if [ "$PULL" != "true" ]; then ssh vps true; fi
 
       - name: VPS configuration (deploy/vps)
+        if: env.PULL != 'true'
         # Secrets, backups, logs and deployment state live only on the server: excluded, so never deleted
         run: |
           rsync -rlptz --delete \
             --exclude /env/ --exclude /backups/ --exclude /logs/ --exclude '/.deploy.env*' --exclude /deployments.log \
-            deploy/vps/ vps:/opt/kwaba/
+            deploy/vps/ "vps:${DEPLOY_PATH}/"
 
       - name: Deploy
         env:
           FILE: ${{ steps.target.outputs.file }}
           SERVER_IMAGE: ${{ steps.target.outputs.server_image }}
           CLIENT_IMAGE: ${{ steps.target.outputs.client_image }}
-        # Values already checked by target.mjs (file name, images by digest); quoted again for the remote shell
+        # Values already checked by target.mjs (file name, images by digest); quoted again for the remote shell.
+        # Pull mode: only the manifest name is sent, the server reads the images in the manifest of main itself.
         run: |
-          command=$(printf '/opt/kwaba/scripts/deploy.sh %q %q %q' "$FILE" "$SERVER_IMAGE" "$CLIENT_IMAGE")
+          if [ "$PULL" = "true" ]; then
+            command="deploy ${FILE}"
+          else
+            command=$(printf '%q/scripts/deploy.sh %q %q %q' "$DEPLOY_PATH" "$FILE" "$SERVER_IMAGE" "$CLIENT_IMAGE")
+          fi
           # shellcheck disable=SC2029 # expanded on the runner on purpose
           ssh vps "$command"
 
       - name: Public health check
         env:
-          SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        # The preprod asks for a password everywhere but the API health check: its home page must answer 401
         run: |
-          for path in /api/health/ /; do
-            curl -fsS --retry 5 --retry-delay 5 --retry-all-errors -o /dev/null -w "%{http_code} ${path}\n" "${SITE_URL%/}${path}"
-          done
+          site=${SITE_URL%/}
+          curl -fsS --retry 5 --retry-delay 5 --retry-all-errors -o /dev/null -w "%{http_code} /api/health/\n" "${site}/api/health/"
+          if [ "$ENVIRONMENT" = preprod ]; then
+            code=$(curl -sS -o /dev/null -w '%{http_code}' "${site}/")
+            echo "${code} / (password asked)"
+            [ "$code" = 401 ] || { echo "::error::The preprod answers ${code} without a password (expected: 401)"; exit 1; }
+          else
+            curl -fsS --retry 5 --retry-delay 5 --retry-all-errors -o /dev/null -w "%{http_code} /\n" "${site}/"
+          fi
+
+      # Read by the production guard above: this manifest went through the preprod
+      - name: Record the preprod deployment
+        if: inputs.environment == 'preprod'
+        env:
+          FILE: ${{ steps.target.outputs.file }}
+        run: |
+          mkdir -p "${RUNNER_TEMP}/preprod"
+          echo "${FILE} ${GITHUB_SHA} $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${RUNNER_TEMP}/preprod/deployed.txt"
+      - if: inputs.environment == 'preprod'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: preprod-${{ steps.target.outputs.file }}
+          path: ${{ runner.temp }}/preprod/deployed.txt
+          retention-days: 90
 
       - name: Remove the SSH key
         if: always()

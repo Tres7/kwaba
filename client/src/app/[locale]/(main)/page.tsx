@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { langueDe, metadataPage } from "@/lib/seo";
-import Accueil from "./Accueil";
+import Accueil from "@/features/hebergements/Accueil";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const locale = langueDe((await params).locale);

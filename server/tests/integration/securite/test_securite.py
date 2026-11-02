@@ -80,6 +80,37 @@ class TestLimitesParIP:
         assert self._inscrire(api_client, 10, HTTP_X_FORWARDED_FOR='9.9.9.9, 41.207.0.1').status_code == 429
         assert self._inscrire(api_client, 11, HTTP_X_FORWARDED_FOR='41.207.0.2').status_code == 201
 
+    def _connecter(self, client, n, **extra):
+        return client.post(LOGIN, {'email': f'inconnu{n}@example.tg', 'password': 'mauvais'}, format='json', **extra)
+
+    def test_sign_in_throttled_per_address_whatever_the_email(self, api_client):
+        statuts = [self._connecter(api_client, n).status_code for n in range(61)]
+        assert statuts == [401] * 60 + [429]
+
+    def test_sign_in_limit_applies_to_the_address_relayed_by_the_site(self, api_client, settings):
+        settings.NUM_PROXIES = 1
+        for n in range(60):
+            self._connecter(api_client, n, HTTP_X_FORWARDED_FOR='41.207.0.1')
+        assert self._connecter(api_client, 60, HTTP_X_FORWARDED_FOR='41.207.0.1').status_code == 429
+        assert self._connecter(api_client, 61, HTTP_X_FORWARDED_FOR='41.207.0.2').status_code == 401
+
+    def test_sign_in_audited_with_the_address_relayed_by_the_site(self, api_client, make_user, password, settings):
+        settings.NUM_PROXIES = 1
+        user = make_user()
+        api_client.post(LOGIN, {'email': user.email, 'password': password}, format='json',
+                        HTTP_X_FORWARDED_FOR='9.9.9.9, 41.207.0.1')
+        assert JournalAuditModel.objects.get(action='connexion', email=user.email).ip == '41.207.0.1'
+
+
+class TestHotePublic:
+    def test_absolute_addresses_use_the_host_sent_by_the_proxy(self, rf, settings):
+        settings.ALLOWED_HOSTS = ['kwa-ba.com', 'api']
+        requete = rf.get('/', HTTP_HOST='api:8000', HTTP_X_FORWARDED_HOST='kwa-ba.com')
+        assert requete.build_absolute_uri('/media/photo.jpg') == 'http://kwa-ba.com/media/photo.jpg'
+
+    def test_unknown_forwarded_host_refused(self, api_client):
+        assert api_client.get(ME, HTTP_X_FORWARDED_HOST='evil.example').status_code == 400
+
 
 class TestAdministration:
     URL = '/admin/login/'

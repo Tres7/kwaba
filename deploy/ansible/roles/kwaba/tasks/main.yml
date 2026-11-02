@@ -1,0 +1,113 @@
+# The docker group is root-equivalent: only this user gets it, and its key is dedicated to the CI
+- name: Utilisateur de déploiement
+  ansible.builtin.user:
+    name: "{{ kwaba_utilisateur }}"
+    groups: [docker]
+    append: true
+    password: "!"
+    update_password: on_create
+
+- name: Dossier SSH de l'utilisateur de déploiement
+  ansible.builtin.file:
+    path: "/home/{{ kwaba_utilisateur }}/.ssh"
+    state: directory
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0700"
+
+# Without kwaba_cle_deploiement: created empty if missing, never overwritten, the CI key is added by hand
+- name: Clés autorisées de l'utilisateur de déploiement
+  ansible.builtin.copy:
+    dest: "/home/{{ kwaba_utilisateur }}/.ssh/authorized_keys"
+    content: ""
+    force: false
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+  when: kwaba_cle_deploiement | length == 0
+
+# The only key of the user, which can run nothing but the gate (no shell, forwarding, agent or pty)
+- name: Clé de déploiement restreinte à la porte de déploiement
+  ansible.builtin.copy:
+    dest: "/home/{{ kwaba_utilisateur }}/.ssh/authorized_keys"
+    content: |
+      restrict,command="/usr/local/bin/{{ kwaba_nom }}-deploy" {{ kwaba_cle_deploiement }}
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+  when: kwaba_cle_deploiement | length > 0
+
+- name: Dossiers de l'application
+  ansible.builtin.file:
+    path: "{{ item.chemin }}"
+    state: directory
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "{{ item.droits }}"
+  loop:
+    - { chemin: "{{ kwaba_racine }}", droits: "0755" }
+    - { chemin: "{{ kwaba_racine }}/logs", droits: "0755" }
+    - { chemin: "{{ kwaba_racine }}/env", droits: "0700" }
+  loop_control:
+    label: "{{ item.chemin }}"
+
+- name: Outils de la porte de déploiement
+  ansible.builtin.apt:
+    name: [git, rsync]
+    state: present
+  when: kwaba_cle_deploiement | length > 0
+
+# Owned by root: the deploy user runs it but can never change it (it sits outside the folder it updates)
+- name: Porte de déploiement
+  ansible.builtin.template:
+    src: deploy-gate.sh.j2
+    dest: "/usr/local/bin/{{ kwaba_nom }}-deploy"
+    owner: root
+    group: root
+    mode: "0755"
+  when: kwaba_cle_deploiement | length > 0
+
+- name: Réglages propres à cet environnement (env/deploy.conf)
+  ansible.builtin.template:
+    src: deploy.conf.j2
+    dest: "{{ kwaba_racine }}/env/deploy.conf"
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+  when: kwaba_deploy_conf | length > 0
+
+# Each value is written on one line between single quotes (taken as is by compose, no $ interpolation)
+- name: Valeurs des fichiers de secrets écrites telles quelles
+  ansible.builtin.assert:
+    that: >-
+      kwaba_env | dict2items | map(attribute='value') | map('dict2items') | flatten
+      | map(attribute='value') | map('string') | select('search', "['\n]") | list | length == 0
+    fail_msg: Une valeur de kwaba_env contient une apostrophe ou un saut de ligne
+    quiet: true
+  when: kwaba_env | length > 0
+
+# No diff: it would print the secrets in the terminal. The running containers keep the old values until the next
+# deployment (or docker compose up -d in the folder).
+- name: Fichiers de secrets (env/*.env)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ kwaba_racine }}/env/{{ item.key }}.env"
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+  loop: "{{ kwaba_env | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}.env"
+  diff: false
+
+- name: Tâches planifiées
+  ansible.builtin.template:
+    src: cron.j2
+    dest: "/etc/cron.d/{{ kwaba_nom }}"
+    mode: "0644"
+
+- name: Rotation des journaux
+  ansible.builtin.template:
+    src: logrotate.j2
+    dest: "/etc/logrotate.d/{{ kwaba_nom }}"
+    mode: "0644"

@@ -1,0 +1,12 @@
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+AuthenticationMethods publickey
+AllowUsers {{ systeme_ssh_utilisateurs | join(' ') }}
+MaxAuthTries 3
+LoginGraceTime 20
+X11Forwarding no
+AllowAgentForwarding no
+{% if systeme_ssh_port | int != 22 %}
+Port {{ systeme_ssh_port }}
+{% endif %}

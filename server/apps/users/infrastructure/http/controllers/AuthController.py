@@ -43,11 +43,13 @@ FENETRE_CONNEXION = 15 * 60
 # time (otherwise the duration reveals which addresses have an account)
 _EMPREINTE_FACTICE = make_password('kwaba-compte-inexistant')
 
-# Routes called directly by the browser: limits per IP address
+# Limits per IP address. These routes are reached through the Next.js server, which forwards the visitor's address.
 LimiteInscription = limite_ip('inscription', 10, 3600)
 LimiteCodes = limite_ip('codes', 30, 3600)
 LimiteEnvoiCodes = limite_ip('envoi_codes', 10, 3600)
 LimiteGoogle = limite_ip('google', 30, 60)
+# Generous: mobile operators share one address between many customers, and each account already has its own limit
+LimiteConnexion = limite_ip('connexion', 60, 900)
 
 
 def _service() -> UserService:
@@ -152,6 +154,7 @@ class RegisterView(APIView):
 
 class LoginView(APIView):
     authentication_classes = []
+    throttle_classes = [LimiteConnexion]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)

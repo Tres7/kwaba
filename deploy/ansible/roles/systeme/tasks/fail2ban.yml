@@ -1,0 +1,17 @@
+- name: Prison SSH de fail2ban
+  ansible.builtin.copy:
+    dest: /etc/fail2ban/jail.local
+    content: |
+      [sshd]
+      enabled = true
+      backend = systemd
+      maxretry = 4
+      bantime = 1h
+    mode: "0644"
+  notify: Redémarrer fail2ban
+
+- name: fail2ban démarré au boot
+  ansible.builtin.systemd_service:
+    name: fail2ban
+    enabled: true
+    state: started

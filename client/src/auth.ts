@@ -2,11 +2,15 @@ import NextAuth from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { getApiBaseUrl } from "@/lib/api-url";
 import { fetchBackendUser } from "@/lib/api/auth/me";
+import { renouvelerUneFois } from "@/lib/api/auth/renouvellement";
 import { credentialsProvider } from "@/lib/providers/auth/credentials";
-import { backendSessionProvider } from "@/lib/providers/auth/backend-session";
+import { emailCodeProvider } from "@/lib/providers/auth/email-code";
+import { googleProvider } from "@/lib/providers/auth/google";
+import { fermerSession, sessionFermee } from "@/lib/sessions-fermees";
 
 // Renews the access token 30 s before it expires
 const REFRESH_MARGIN_MS = 30_000;
+const SESSION_MAX_AGE_S = 5 * 60;
 
 function decodeExpiry(accessToken?: string): number {
   if (!accessToken) return 0;
@@ -50,7 +54,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [credentialsProvider, backendSessionProvider],
+  providers: [credentialsProvider, googleProvider, emailCodeProvider],
   trustHost: true,
 
   callbacks: {
@@ -64,8 +68,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.error = undefined;
       }
 
+      // Returning null deletes the cookie, which a session read in flight during the sign-out may have put back
+      if (sessionFermee(token.refreshToken)) return null;
+
       if (token.refreshToken && Date.now() >= (token.accessTokenExpires ?? 0) - REFRESH_MARGIN_MS) {
-        token = await refreshAccessToken(token);
+        const avant = token;
+        token = await renouvelerUneFois(token.refreshToken, () => refreshAccessToken(avant), (t) => t !== avant);
       }
 
       // useSession().update() (new name, becoming a host): the profile is read again from the API instead of trusting
@@ -80,12 +88,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
+    // What the browser can read: never a token, they stay in the encrypted cookie (see app/api/proxy)
     async session({ session, token }) {
-      session.accessToken = token.accessToken ?? "";
       session.user.id = token.userId ?? "";
       session.user.role = token.role ?? "voyageur";
       session.error = token.error;
       return session;
+    },
+  },
+
+  events: {
+    // Deleting the cookie is not enough: the refresh token it holds would stay valid for a day. The sign-out waits for
+    // this call, hence the time limit; Auth.js logs a failure and closes the session anyway, and the API refusing a
+    // token that is already invalid changes nothing.
+    async signOut(message) {
+      if (!("token" in message) || !message.token?.refreshToken) return;
+      fermerSession(message.token.refreshToken, SESSION_MAX_AGE_S * 1000);
+      await fetch(`${getApiBaseUrl()}/v1/auth/logout/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh: message.token.refreshToken }),
+        signal: AbortSignal.timeout(3_000),
+      });
     },
   },
 
@@ -97,7 +121,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
     // 5 min after leaving the site (tab or browser closed), signing in again is needed: while a tab
     // is open, AuthProvider reads the session every minute and each read pushes the expiry back
-    maxAge: 5 * 60,
+    maxAge: SESSION_MAX_AGE_S,
   },
   cookies: {
     sessionToken: {

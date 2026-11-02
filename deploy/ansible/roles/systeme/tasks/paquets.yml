@@ -1,0 +1,14 @@
+# Installed, never upgraded here: unattended-upgrades applies the security updates every night
+- name: Paquets de base
+  ansible.builtin.apt:
+    name: [ca-certificates, curl, ufw, fail2ban, python3-systemd, unattended-upgrades, age, rsync]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Administrateur dans le groupe sudo
+  ansible.builtin.user:
+    name: "{{ systeme_admin }}"
+    groups: [sudo]
+    append: true
+  when: systeme_admin | length > 0

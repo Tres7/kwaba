@@ -210,6 +210,10 @@ REST_FRAMEWORK = {
 NUM_PROXIES = int(os.getenv('DJANGO_NUM_PROXIES', '0'))
 REST_FRAMEWORK['NUM_PROXIES'] = NUM_PROXIES
 
+# Absolute addresses (uploaded photos) use the public host, not the internal name of the API: the Next.js proxy and
+# nginx both set this header, and nginx replaces whatever a visitor sends. ALLOWED_HOSTS still applies to it.
+USE_X_FORWARDED_HOST = True
+
 # Rate and attempt limits (sign-in, sign-up, codes, administration…). Can be disabled for a load test
 # only; always active in production.
 LIMITES_ACTIVES = _env_bool('LIMITES_ACTIVES', 'True')
@@ -302,6 +306,11 @@ MENTIONS_LEGALES = {
     'commerce_electronique': _mention('SOCIETE_COMMERCE_ELECTRONIQUE'),  # decree no. 2018-062/PR
     'ipdcp': _mention('SOCIETE_IPDCP'),  # declaration to the IPDCP
 }
+# Company not registered yet: "SAS en formation" on the site, until the RCCM
+SOCIETE_EN_FORMATION = _env_bool('SOCIETE_EN_FORMATION', 'True')
+
+# Google Analytics measurement ID (G-…). Empty: no audience measurement and no cookie banner (config/site.py)
+GOOGLE_ANALYTICS_ID = _mention('GOOGLE_ANALYTICS_ID')
 
 # Reply-to address of the sent emails (users' replies arrive in this mailbox)
 EMAIL_REPLY_TO = os.getenv('EMAIL_REPLY_TO', '')
@@ -311,7 +320,8 @@ BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
 
 # Hosts displayed images may come from (avatars, listing photos): the API itself (uploaded photos),
 # the R2 public domain, Google avatars and the demo photos. A host starting with a dot
-# covers its subdomains. IMAGES_HOTES adds hosts (separated by commas).
+# covers its subdomains. IMAGES_HOTES adds hosts (separated by commas), to add as well to img-src in
+# client/next.config.ts: the browser refuses any other host.
 IMAGES_HOTES_AUTORISES = [
     h for h in {
         urlsplit(BACKEND_URL).hostname,

@@ -26,7 +26,21 @@ def test_reglages_du_lancement(lancement):
     }
     # Numbers not assigned yet: empty, the site shows "to be completed"
     assert reglages['mentions'] == {'rccm': '', 'nif': '', 'commerce_electronique': '', 'ipdcp': ''}
+    assert reglages['en_formation'] is True
     assert reglages['contact_email']
+    assert reglages['mesure_audience'] == ''
+
+
+@pytest.mark.parametrize(('valeur', 'attendu'), [
+    ('G-ABC123XYZ9', 'G-ABC123XYZ9'),
+    ('', ''),
+    ('UA-1234-1', ''),
+    ('G-ABC"><script>', ''),
+    ('G-ABC123\n', ''),
+])
+def test_mesure_audience_seulement_avec_un_identifiant_valide(settings, valeur, attendu):
+    settings.GOOGLE_ANALYTICS_ID = valeur
+    assert APIClient().get(SITE).json()['mesure_audience'] == attendu
 
 
 def test_un_module_se_rallume_par_l_environnement(lancement):
@@ -43,6 +57,12 @@ def test_numeros_legaux_depuis_l_environnement_puis_le_back_office(settings):
     assert mentions['rccm'] == 'TG-LFW-01-2026-B13-00001' and mentions['nif'] == '1000000001'
     settings.MENTIONS_LEGALES = {**settings.MENTIONS_LEGALES, 'rccm': 'RCCM-ENV'}
     assert APIClient().get(SITE).json()['mentions']['rccm'] == 'RCCM-ENV'
+
+
+def test_societe_immatriculee_par_l_environnement(settings):
+    # The day of the RCCM: SOCIETE_EN_FORMATION=False removes "en formation" from the site, without a code change
+    settings.SOCIETE_EN_FORMATION = False
+    assert APIClient().get(SITE).json()['en_formation'] is False
 
 
 def test_un_commentaire_lu_comme_valeur_compte_comme_vide(monkeypatch):

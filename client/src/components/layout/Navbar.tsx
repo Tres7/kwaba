@@ -4,7 +4,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Search, Menu, ArrowRight, LogIn, UserPlus, MessageCircle, Heart, CalendarCheck, User, LogOut, Home, ShieldCheck, Plane, Car, Users, Sparkles, HandHeart, ClipboardCheck } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import api from "@/lib/api";
+import { compterNonLus } from "@/features/messaging";
 import { usePolling } from "@/lib/usePolling";
 import { useTranslations } from "next-intl";
 import { cn, initials } from "@/lib/utils";
@@ -12,7 +12,7 @@ import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import SelecteurLangue from "@/components/layout/SelecteurLangue";
 import { MentionDevise, SelecteurDevise } from "@/components/layout/Devise";
-import ChampDestination from "@/components/hebergement/ChampDestination";
+import { ChampDestination } from "@/features/hebergements";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
 
 const UNREAD_POLL_INTERVAL_MS = 10_000;
@@ -86,8 +86,7 @@ export default function Navbar() {
 
   const [unread, setUnread] = useState(0);
   const fetchUnread = useCallback(async () => {
-    const res = await api.get<{ unread_count: number }>("/v1/messaging/unread-count/");
-    setUnread(res.data.unread_count);
+    setUnread(await compterNonLus());
   }, []);
 
   // Refreshed at every page change (the badge goes down as soon as a thread is read),

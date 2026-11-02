@@ -8,6 +8,7 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 ME = '/api/v1/users/me/'
 LOGIN = '/api/v1/auth/login/'
 REFRESH = '/api/v1/auth/refresh/'
+LOGOUT = '/api/v1/auth/logout/'
 
 
 def _login(api_client, user, password):
@@ -78,6 +79,29 @@ class TestRefresh:
 
         assert api_client.post(REFRESH, {'refresh': refresh}, format='json').status_code == 401
         assert api_client.post(REFRESH, {'refresh': new_refresh}, format='json').status_code == 200
+
+
+class TestLogout:
+    def test_refresh_token_refused_after_signing_out(self, api_client, make_user, password):
+        # No access token: it may already have expired when the user signs out
+        refresh = _login(api_client, make_user(), password)['refresh']
+        assert api_client.post(LOGOUT, {'refresh': refresh}, format='json').status_code == 200
+        assert api_client.post(REFRESH, {'refresh': refresh}, format='json').status_code == 401
+
+    def test_other_sessions_stay_open(self, api_client, make_user, password):
+        user = make_user()
+        ici, ailleurs = _login(api_client, user, password), _login(api_client, user, password)
+        api_client.post(LOGOUT, {'refresh': ici['refresh']}, format='json')
+        assert api_client.post(REFRESH, {'refresh': ailleurs['refresh']}, format='json').status_code == 200
+
+    def test_old_token_cannot_reopen_the_session_during_the_grace_period(self, api_client, make_user, password):
+        refresh = _login(api_client, make_user(), password)['refresh']
+        new_refresh = api_client.post(REFRESH, {'refresh': refresh}, format='json').data['refresh']
+        api_client.post(LOGOUT, {'refresh': new_refresh}, format='json')
+        assert api_client.post(REFRESH, {'refresh': refresh}, format='json').status_code == 401
+
+    def test_invalid_token_refused(self, api_client):
+        assert api_client.post(LOGOUT, {'refresh': 'pas-un-jeton'}, format='json').status_code == 401
 
 
 @pytest.mark.django_db(transaction=True)

@@ -1,11 +1,12 @@
 "use client";
 
+import { traiterAlerteFraude } from "@/features/messaging";
 import { useState } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
@@ -67,7 +68,7 @@ export default function AntiFraudePage() {
       libelle: "Marquer traitée", motif: true,
       action: async (note) => {
         try {
-          await api.post(`/v1/admin/anti-fraude/${a.id}/traiter/`, { note });
+          await traiterAlerteFraude(a.id, note);
           toast.success("Alerte traitée");
           queryClient.invalidateQueries({ queryKey: ["admin", "anti-fraude"] });
         } catch (err) {

@@ -1,0 +1,29 @@
+# Docker bypasses ufw for published ports: only the front end (nginx or Caddy) publishes 80 and 443
+- name: Entrées refusées par défaut
+  community.general.ufw:
+    default: deny
+    direction: incoming
+
+- name: Sorties autorisées par défaut
+  community.general.ufw:
+    default: allow
+    direction: outgoing
+
+# Rate limited. Without the kernel's xt_recent module, ufw silently skips "limit": setup-server.sh then used "allow"
+- name: SSH limité en débit
+  community.general.ufw:
+    rule: limit
+    port: "{{ systeme_ssh_port | string }}"
+    proto: tcp
+
+- name: HTTP et HTTPS
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: ["80", "443"]
+
+# Never enabled before the SSH rule above: that would lock us out
+- name: Pare-feu actif
+  community.general.ufw:
+    state: enabled

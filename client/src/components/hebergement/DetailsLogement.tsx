@@ -1,7 +1,7 @@
 import { BathtubIcon, BedIcon, ClockIcon, CoffeeIcon, DoorOpenIcon, RulerIcon, type Icon } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
-import { formatPrice } from "@/lib/utils";
 import type { Hebergement } from "@/types/api/models";
+import { useFormat } from "@/lib/format";
 
 type Details = Pick<Hebergement, "surface_m2" | "chambres" | "salles_de_bain" | "lits_doubles" | "lits_simples" | "canapes_lits"
   | "petit_dejeuner" | "petit_dejeuner_prix" | "arrivee_a_partir" | "depart_avant">;
@@ -40,6 +40,7 @@ function Ligne({ Icone, titre, texte }: { Icone: Icon; titre: string; texte: str
 
 /** The listing in detail (page): area, bedrooms, beds, bathrooms, breakfast, times. Nothing for a listing without details. */
 export default function DetailsLogement({ h }: { h: Details }) {
+  const { formatPrice } = useFormat();
   const t = useTranslations("details");
   const lits = [
     h.lits_doubles ? t("litsDoubles", { nombre: h.lits_doubles }) : null,

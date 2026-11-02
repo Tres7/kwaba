@@ -13,6 +13,12 @@ export interface PaysPaiement {
 
 export type MoyenPaiement = "mobile_money" | "carte" | "paypal";
 
+export interface DevisSejour {
+  prix_nuits: number;
+  frais_service: number;
+  total: number;
+}
+
 export interface ConfigPaiement {
   actif: boolean;
   /** Offered methods: mobile_money and carte go through FedaPay, paypal is charged in euros. */

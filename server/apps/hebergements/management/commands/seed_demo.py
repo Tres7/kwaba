@@ -55,6 +55,22 @@ DEMO = [
 ]
 
 
+# Exact position of each demo listing (latitude, longitude)
+POSITIONS = {
+    "Villa Hibiscus": (5.1278, -3.2867),
+    "Riad Jasmin": (31.6295, -7.9811),
+    "Loft Plateau": (14.6697, -17.4351),
+    "Suite Océan": (14.744, -17.5126),
+    "Résidence Lagune": (6.159, 1.252),
+    "Hôtel Sarakawa View": (6.1247, 1.2514),
+    "Villa Cocody": (5.366, -3.955),
+    "Studio Plateau Business": (5.326, -4.019),
+    "Auberge Ganvié": (6.354, 2.361),
+    "Maison de Pierre": (-1.948, 30.062),
+    "Bungalow Lagon": (-6.265, 39.537),
+    "Accra Skyline Apartment": (5.602, -0.18),
+}
+
 # Typical details per listing type (area, bedrooms, beds, breakfast)
 DETAILS = {
     'villa': {'surface_m2': 180, 'chambres': 4, 'salles_de_bain': 3, 'lits_doubles': 3, 'lits_simples': 2,
@@ -82,11 +98,13 @@ class Command(BaseCommand):
         added = 0
         for name, type_, city, location, price, _rating, _reviews, guests, photo, amenities, desc in DEMO:
             cover = f"{U}{photo}{Q}"
+            latitude, longitude = POSITIONS[name]
             _, was_created = HebergementModel.objects.get_or_create(
                 name=name,
                 host_id=host.pk,
                 defaults={
                     'type': type_, 'city': city, 'location': location,
+                    'latitude': latitude, 'longitude': longitude,
                     'price_per_night': price,
                     'max_guests': guests, 'image_url': cover,
                     'images': [cover, *INTERIORS], 'amenities': amenities,

@@ -40,7 +40,7 @@ class HebergementModel(models.Model):
         ('refusee', 'Refusée'),
     ]
     # Changing one of these fields after the visit puts the listing back into verification (what the agent checked)
-    CHAMPS_VERIFIES = ('city', 'location', 'image_url', 'images')
+    CHAMPS_VERIFIES = ('city', 'location', 'latitude', 'longitude', 'image_url', 'images')
 
     TYPE_CHOICES = [
         ('hotel', 'Hôtel'),
@@ -57,6 +57,9 @@ class HebergementModel(models.Model):
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='hotel')
     city = models.CharField(max_length=100)
     location = models.CharField(max_length=200, blank=True)
+    # Exact position placed by the host, for the agent's visit: travellers only get positions.approchee()
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
     rating = models.FloatField(default=0.0)
     review_count = models.IntegerField(default=0)
@@ -210,6 +213,25 @@ class InscriptionLancementModel(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class BrouillonAnnonceModel(models.Model):
+    """New listing being filled in by its host, resumed later. Never a listing: no unit type, no visit, invisible to
+    travellers and agents. Submitting it creates the listing (full checks) and deletes it."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    host_id = models.UUIDField(db_index=True)
+    # Fields of the listing form as entered, incomplete (see brouillons.CHAMPS)
+    donnees = models.JSONField(default=dict, blank=True)
+    cree_le = models.DateTimeField(auto_now_add=True)
+    modifie_le = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = 'hebergements'
+        ordering = ['-modifie_le']
+        verbose_name = "Brouillon d'annonce"
+
+    def __str__(self):
+        return f"Brouillon {self.donnees.get('name') or self.pk}"
 
 
 def _jeton_alerte() -> str:

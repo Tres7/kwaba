@@ -1,0 +1,72 @@
+- name: Caddy partagé
+  when: proxy_actif | bool
+  block:
+    - name: Dossiers de Caddy
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ proxy_racine }}"
+        - "{{ proxy_racine }}/caddy"
+        - "{{ proxy_racine }}/caddy/sites"
+
+    # With the docker command itself: no Docker SDK for Python needed on the server
+    - name: Réseau partagé déjà créé
+      ansible.builtin.command: docker network inspect {{ proxy_reseau }}
+      register: proxy_reseau_existant
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Réseau partagé
+      ansible.builtin.command: docker network create {{ proxy_reseau }}
+      when: proxy_reseau_existant.rc != 0
+      changed_when: true
+
+    - name: Stack de Caddy
+      ansible.builtin.template:
+        src: compose.yml.j2
+        dest: "{{ proxy_racine }}/compose.yml"
+        mode: "0644"
+
+    - name: Configuration générale de Caddy
+      ansible.builtin.template:
+        src: Caddyfile.j2
+        dest: "{{ proxy_racine }}/caddy/Caddyfile"
+        mode: "0644"
+      notify: Recharger Caddy
+
+    - name: Sites servis
+      ansible.builtin.copy:
+        dest: "{{ proxy_racine }}/caddy/sites/{{ item.key }}.caddy"
+        content: "{{ item.value }}"
+        mode: "0644"
+      loop: "{{ proxy_sites | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+      notify: Recharger Caddy
+
+    - name: Fichiers de site présents
+      ansible.builtin.find:
+        paths: "{{ proxy_racine }}/caddy/sites"
+        patterns: "*.caddy"
+      register: proxy_fichiers_sites
+
+    - name: Sites retirés de l'inventaire
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ proxy_fichiers_sites.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+      when: (item.path | basename | regex_replace('\.caddy$', '')) not in proxy_sites
+      notify: Recharger Caddy
+
+    - name: Caddy démarré
+      ansible.builtin.command: docker compose up -d
+      args:
+        chdir: "{{ proxy_racine }}"
+      register: proxy_compose
+      changed_when: proxy_compose.stderr is search('Created|Recreated|Started|Pulled')
+      when: proxy_demarre | bool

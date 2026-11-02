@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
+import { politiqueCsp } from "@/lib/csp";
 import { moduleDuChemin, type ReglagesSite } from "@/lib/modules";
 
 // Pages reserved for signed-in users (the help centre stays public)
@@ -49,8 +50,27 @@ async function modulesAffiches(): Promise<ReglagesSite["modules"] | null> {
   return valeur;
 }
 
+/**
+ * CSP with a nonce of its own for each response. Next.js reads the nonce in the CSP of the request and puts it on its
+ * scripts; x-nonce gives it to the components (Document.tsx).
+ */
+function requeteAvecCsp(req: NextRequest) {
+  const nonce = btoa(crypto.randomUUID());
+  const csp = politiqueCsp(nonce);
+  const headers = new Headers(req.headers);
+  headers.set("x-nonce", nonce);
+  headers.set("Content-Security-Policy", csp);
+  return { csp, headers };
+}
+
+function avecCsp(reponse: NextResponse, csp: string) {
+  reponse.headers.set("Content-Security-Policy", csp);
+  return reponse;
+}
+
 export default async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
+  const { csp, headers } = requeteAvecCsp(req);
   const token = await getToken({ req, secret: process.env.AUTH_SECRET, secureCookie });
   const isLoggedIn = !!token && !token.error;
   const { chemin, prefixe } = sansLangue(pathname);
@@ -83,7 +103,7 @@ export default async function middleware(req: NextRequest) {
     if (isLoggedIn && token?.role !== "admin") {
       return NextResponse.redirect(new URL(prefixe || "/", req.nextUrl.origin));
     }
-    return NextResponse.next();
+    return avecCsp(NextResponse.next({ request: { headers } }), csp);
   }
 
   // Field agents' space (listing verification), in French. Display comfort only:
@@ -92,14 +112,14 @@ export default async function middleware(req: NextRequest) {
     if (isLoggedIn && token?.role !== "agent" && token?.role !== "admin") {
       return NextResponse.redirect(new URL(prefixe || "/", req.nextUrl.origin));
     }
-    return NextResponse.next();
+    return avecCsp(NextResponse.next({ request: { headers } }), csp);
   }
 
   if (isLoggedIn && GUEST_ONLY.includes(chemin)) {
     return NextResponse.redirect(new URL(prefixe || "/", req.nextUrl.origin));
   }
 
-  return intl(req);
+  return avecCsp(intl(new NextRequest(req, { headers })), csp);
 }
 
 export const config = {

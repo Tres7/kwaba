@@ -6,7 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
+import { supprimerAvisAdmin } from "@/features/avis";
 import { cn, formatDate } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import { ActionButton, Pagination, SearchInput } from "@/components/backoffice/AdminTable";
@@ -35,7 +36,7 @@ function Avis() {
     libelle: "Supprimer l'avis", danger: true, motif: true,
     action: async (motif) => {
       try {
-        await api.delete(`/v1/admin/avis/${a.id}/`, { params: { motif } });
+        await supprimerAvisAdmin(a.id, motif);
         toast.success("Avis supprimé");
         queryClient.invalidateQueries({ queryKey: ["admin"] });
       } catch (err) {

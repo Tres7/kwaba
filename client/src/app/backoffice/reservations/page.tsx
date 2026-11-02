@@ -1,15 +1,16 @@
 "use client";
 
+import { annulerReservationAdmin } from "@/features/reservations";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import api, { apiErrorMessage } from "@/lib/api";
+import { apiErrorMessage } from "@/lib/api";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
 import ConfirmDialog, { type Confirmation } from "@/components/backoffice/ConfirmDialog";
-import BoutonFacture from "@/components/backoffice/documents/BoutonFacture";
+import BoutonFacture from "@/features/documents/admin/BoutonFacture";
 import DateRangeField from "@/components/ui/DateRangeField";
 import Select from "@/components/ui/Select";
 import type { AdminReservation } from "@/types/api/admin";
@@ -67,7 +68,7 @@ function Reservations() {
         libelle: "Annuler la réservation", danger: true, motif: true,
         action: async (motif) => {
           try {
-            await api.post(`/v1/admin/reservations/${r.id}/annuler/`, { motif });
+            await annulerReservationAdmin(r.id, motif);
             toast.success("Réservation annulée");
             queryClient.invalidateQueries({ queryKey: ["admin"] });
           } catch (err) {

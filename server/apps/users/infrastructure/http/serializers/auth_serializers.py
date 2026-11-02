@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import connection, transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from apps.users.domain.entities.User import UserRole
 
 # The admin role can never be chosen at public sign-up
@@ -105,6 +106,8 @@ class RefreshWithGracePeriodSerializer(TokenRefreshSerializer):
                 cursor.execute('SELECT pg_advisory_xact_lock(%s)', [int.from_bytes(empreinte[:8], 'big', signed=True)])
             deja_renouvele = cache.get(cle)
             if deja_renouvele is not None:
+                # Reading the new token fails if it is blacklisted: a session closed in the meantime stays closed
+                RefreshToken(deja_renouvele['refresh'])
                 return deja_renouvele
             data = super().validate(attrs)
             cache.set(cle, data, timeout=settings.JWT_REFRESH_GRACE_SECONDS)

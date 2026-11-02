@@ -1,0 +1,32 @@
+# ADR-020 : frontend organisé par modules métier
+
+## Statut
+
+Accepté
+
+## Contexte
+
+Le frontend range le code par nature (`app/`, `components/`, `lib/`). Les pages appellent directement l'API : 84 fichiers de `app/` et `components/` contiennent des appels HTTP. La règle métier d'un domaine est donc dispersée entre plusieurs pages, et un changement d'API touche des fichiers sans lien apparent.
+
+Le backend a résolu le même problème par un monolithe modulaire migré module par module ([ADR-019](ADR-019-monolithe-modulaire-strict.md)).
+
+## Décision
+
+Le frontend adopte la même découpe, dans `client/src/features/<module>/`, avec les mêmes noms de modules que le backend quand ils existent.
+
+- Un module expose une interface, `index.ts`, que le reste du code importe. Une page importe directement l'écran de son module : webpack ne retire pas d'un index les composants client qu'il exporte, et tout l'index partirait avec chaque page (mesuré à 249 Ko sur toutes les pages en octobre 2026).
+- Les appels HTTP d'un module sont dans `api.ts`, et les requêtes TanStack Query dans `hooks.ts`.
+- `app/` reste la couche de composition : une page assemble des modules, sans appel HTTP.
+- `lib/` reste la couche partagée et ne dépend d'aucun module. `components/ui` et `components/layout` restent les composants partagés.
+- Tous les appels du navigateur passent par `lib/api.ts`. Seul le flux du Concierge utilise `fetch`, car axios ne lit pas un flux dans le navigateur.
+
+Pas de renommage de `lib/` en `shared/` : le mot change, pas le rôle, et le renommage toucherait des centaines d'imports en conflit avec le travail en cours.
+
+La migration s'est faite par PR, un module à la fois, et s'est terminée en octobre 2026. Les frontières sont vérifiées par ESLint (`client/eslint.config.mjs`), en erreur.
+
+## Conséquences
+
+- Une page ou un composant partagé ne peut plus appeler l'API directement : `npm run lint` échoue.
+- Un composant d'affichage utilisé par plusieurs modules reste dans `components/`.
+
+Mode d'emploi et avancement : [frontieres-front.md](../frontieres-front.md).

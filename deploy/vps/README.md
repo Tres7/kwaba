@@ -10,7 +10,7 @@ Tout tourne sur un seul VPS (Ubuntu 24.04), en Docker Compose, dans `/opt/kwaba`
 | `consumer`, `relay`, `payments` | Emails (RabbitMQ), relais de la messagerie, worker des paiements (même image que l'API) | non |
 | `postgres`, `rabbitmq` | Base et broker, volumes persistants, sur un réseau interne sans accès à Internet | non |
 
-Les photos sont stockées sur Cloudflare R2 et servies par nginx sous `https://kwa-ba.com/photos/` : nginx les récupère à l'adresse publique `r2.dev` du bucket et les garde en cache (30 jours). Les URL enregistrées dans les annonces ne dépendent donc pas de l'hébergement des fichiers. La configuration nginx est un template (`nginx/templates/`), complété au démarrage avec `R2_PUBLIC_ORIGIN` (`env/nginx.env`).
+Les photos sont stockées sur Cloudflare R2 et servies par nginx sous `https://kwa-ba.com/photos/` : nginx les récupère à l'adresse publique `r2.dev` du bucket et les garde en cache (30 jours). Les URL enregistrées dans les annonces ne dépendent donc pas de l'hébergement des fichiers. La configuration nginx est un template (`nginx/templates/`), complété au démarrage avec `R2_PUBLIC_ORIGIN` (`env/nginx.env`) et le domaine `KWABA_DOMAIN`. Ce dernier vaut `kwa-ba.com` s'il n'est défini nulle part (la prod) ; il est aussi lu par `deploy.sh` et `init-tls.sh`, pour qu'un autre environnement (la préprod) serve son propre domaine sans toucher au code.
 
 Les images GHCR sont publiques (dépôt public) : aucune authentification sur le VPS.
 
@@ -50,15 +50,32 @@ Les images GHCR sont publiques (dépôt public) : aucune authentification sur le
 
 ## Déployer
 
-Workflow GitHub **deploy** (*Actions → Deploy → Run workflow*, sur `main`) : champ *manifest* vide pour le dernier, ou un nom de fichier de `deploy/manifests/`. Un seul déploiement à la fois, jamais annulé en cours. Il :
+Workflow GitHub **deploy** (*Actions → Deploy → Run workflow*, sur `main`) : environnement `preprod` (par défaut) ou `production`, champ *manifest* vide pour le dernier, ou un nom de fichier de `deploy/manifests/`. Un seul déploiement à la fois par environnement, jamais annulé en cours.
 
-1. vérifie le manifest (nom exact, images par digest) ;
-2. se connecte en SSH à `deploy` (empreinte du serveur imposée, jamais acceptée à la volée) ;
-3. copie `deploy/vps/` de `main` dans `/opt/kwaba` (`rsync --delete`, sans jamais toucher à `env/`, `backups/`, `logs/`, `.deploy.env*`, `deployments.log`) ;
-4. lance `scripts/deploy.sh` sur le VPS ;
-5. vérifie `/api/health/` et `/` depuis Internet.
+**Parcours attendu** : un manifest va d'abord en préprod, on teste, puis **le même manifest** va en prod (même image serveur, client construit depuis la même révision). La prod refuse un manifest qui n'a pas été déployé avec succès en préprod (artefact `preprod-<manifest>` du run, gardé 90 jours) ; pour un retour arrière ou une urgence, cocher `skip_preprod` (signalé dans le résumé du run).
 
-Environnement GitHub `production` (*Settings → Environments*) : branche `main` seulement ; secrets `DEPLOY_SSH_KEY` (clé privée `kwaba-deploy`) et `DEPLOY_SSH_KNOWN_HOSTS` (sortie de `ssh-keyscan -t ed25519 <ip>`) ; variable `DEPLOY_HOST` (IP du VPS). La variable du dépôt `PUBLIC_SITE_URL` sert au test de santé.
+Le workflow :
+
+1. vérifie le manifest (nom exact, images par digest) et prend l'image client de l'environnement (`client` ou `clientPreprod`) ;
+2. se connecte en SSH (empreinte du serveur imposée, jamais acceptée à la volée) ;
+3. deux modes, selon la variable `DEPLOY_PULL` de l'environnement :
+   - **le serveur tire** (`true`, la préprod) : la clé ne peut lancer que la porte de déploiement du serveur (`/usr/local/bin/<nom>-deploy`, installée par Ansible, propriété de root), avec pour seul argument le nom du manifest. Le serveur récupère lui-même `main` depuis GitHub, vérifie que le manifest y est, lit les images dedans, met à jour la configuration (`deploy/vps`) et lance `scripts/deploy.sh`. Une clé volée ne peut donc que redéployer un manifest de `main`, ni shell, ni copie de fichiers, ni tunnel ;
+   - **le workflow pousse** (la prod pour l'instant) : copie `deploy/vps/` de `main` dans `/opt/kwaba` (`rsync --delete`, sans jamais toucher à `env/`, `backups/`, `logs/`, `.deploy.env*`, `deployments.log`), puis lance `scripts/deploy.sh` ;
+4. vérifie `/api/health/` et `/` depuis Internet (en préprod, `/` doit répondre 401 : le mot de passe est bien demandé).
+
+Environnements GitHub (*Settings → Environments*), branche `main` seulement :
+
+| | `production` | `preprod` |
+| --- | --- | --- |
+| Secrets | `DEPLOY_SSH_KEY`, `DEPLOY_SSH_KNOWN_HOSTS` | les mêmes, avec la clé `kwaba-preprod-deploy` et `[217.154.19.172]:2222 ssh-ed25519 …` |
+| `DEPLOY_HOST` | IP du VPS | `217.154.19.172` |
+| `DEPLOY_PORT` | (22) | `2222` |
+| `DEPLOY_USER` | (`deploy`) | `deploy-kwaba` |
+| `DEPLOY_PATH` | (`/opt/kwaba`) | inutile (le serveur tire) |
+| `DEPLOY_PULL` | (vide) | `true` |
+| `DEPLOY_SITE_URL` | (variable du dépôt `PUBLIC_SITE_URL`) | `https://preprod.kwa-ba.com` |
+
+Entre parenthèses : la valeur par défaut, rien à créer.
 
 Sur le VPS, le workflow appelle :
 
@@ -70,7 +87,7 @@ Ordre fixe : sauvegarde de la base (vérifiée), images, migrations, serveur et 
 
 ## Revenir en arrière
 
-Relancer le workflow **deploy** avec un manifest antérieur (les images changent ; la configuration `deploy/vps` reste celle de `main`). Les migrations ne sont pas annulées : elles doivent rester rétro-compatibles (ajouter avant de supprimer), ce qui permet à l'ancien code de tourner sur le nouveau schéma.
+Relancer le workflow **deploy** avec un manifest antérieur (en prod, cocher `skip_preprod` s'il n'est jamais passé par la préprod ; un manifest antérieur à la préprod, sans `clientPreprod`, ne se déploie qu'en prod) (les images changent ; la configuration `deploy/vps` reste celle de `main`). Les migrations ne sont pas annulées : elles doivent rester rétro-compatibles (ajouter avant de supprimer), ce qui permet à l'ancien code de tourner sur le nouveau schéma.
 
 ## Sauvegardes et restauration
 
@@ -98,6 +115,23 @@ Relancer le workflow **deploy** avec un manifest antérieur (les images changent
 | 02:17 et 14:17 | `scripts/maintenance.sh renew-certs` |
 
 Journaux dans `/opt/kwaba/logs/` (rotation hebdomadaire).
+
+## Préprod (derrière le Caddy partagé du VPS personnel)
+
+La préprod utilise les mêmes images, le même `compose.yml` et le même `deploy.sh` que la prod. Ce qui la distingue vit sur son serveur, dans `env/deploy.conf` (généré par Ansible, rôle `kwaba`, jamais touché par le rsync) :
+
+```bash
+export COMPOSE_PROJECT_NAME=kwaba-preprod
+export COMPOSE_FILE=compose.yml:compose.preprod.yml
+export KWABA_DOMAIN=preprod.kwa-ba.com
+export KWABA_TLS_MODE=proxy
+```
+
+- **`KWABA_TLS_MODE=proxy`** : nginx sert le site en HTTP seulement (`nginx/templates/kwa-ba-proxy.inc.template`) ; le Caddy partagé du serveur fait le HTTPS et transmet `X-Forwarded-Proto: https`, repris tel quel vers Django et Auth.js. En prod (`nginx`, la valeur par défaut), nginx fait le HTTPS (`kwa-ba-nginx.inc.template`). Les deux modes partagent le corps du site (`kwa-ba-site.inc.template`).
+- **`compose.preprod.yml`** : nginx sans port publié, joint par Caddy sur le réseau Docker `proxy` (conteneur `kwaba-preprod-nginx`) ; `DJANGO_NUM_PROXIES=2` (Caddy puis nginx) ; Mailpit attrape tous les emails (interface : `https://preprod.kwa-ba.com/mailpit/`, derrière le même mot de passe que le site ; ou sur le serveur, `ssh -L 8025:localhost:8025 <hôte>` puis `http://localhost:8025/mailpit/`).
+- **Secrets** (`env/*.env`) : générés par Ansible depuis le Vault de `kwa-ba-infra` (voir `deploy/ansible/README.md`), jamais écrits à la main ; emails envoyés à Mailpit (`EMAIL_HOST=mailpit`, port 1025).
+- **Accès** : le Caddy partagé demande un mot de passe au navigateur sur tout le site (Mailpit compris) sauf le webhook FedaPay et `/api/health/`, et le garde hors des moteurs de recherche (`X-Robots-Tag: noindex`).
+- **`deploy.sh`** : pas de contrôle du certificat (c'est celui de Caddy) mais vérification que le réseau `proxy` existe ; test de santé depuis le conteneur nginx.
 
 ## Essai local de la pile de production
 

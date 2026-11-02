@@ -23,8 +23,12 @@ class ExperienceModel(models.Model):
     prix = models.PositiveIntegerField(null=True, blank=True, help_text='FCFA, indicatif. Vide : pas de prix affiché')
     gratuit = models.BooleanField(default=False)
     image = models.ImageField(upload_to='experiences/', blank=True)
-    # External photo of the experiences taken from the old guide; a photo uploaded from the back-office replaces it
+    # Photo of the seeded guide (external address, or path served by the website); a photo uploaded from the
+    # back-office replaces it
     image_url = models.URLField(max_length=500, blank=True)
+    # Required by the Creative Commons licences of the seeded photos: author and licence, link to the source
+    credit_photo = models.CharField(max_length=160, blank=True, help_text='Auteur et licence, si la photo n\'est pas à Kwa-Ba')
+    credit_photo_url = models.URLField(max_length=500, blank=True)
     actif = models.BooleanField(default=True, help_text='Affichée sur la page Découvrir')
     ordre = models.PositiveSmallIntegerField(default=0)
     cree_le = models.DateTimeField(auto_now_add=True)

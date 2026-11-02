@@ -1,36 +1,27 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
 import { ChevronRight, User, CalendarCheck, Heart, CreditCard, Bell, Globe, HelpCircle, LogOut, Home, MessageCircle, BadgeCheck, Star, ShieldCheck, Plane, Users, Sparkles, HandHeart } from "lucide-react";
-import api from "@/lib/api";
 import { useReglagesSite, filtrerLiens } from "@/lib/site";
-import { FALLBACK_IMAGE, formatDate, initials, ROLE_LABELS } from "@/lib/utils";
+import { FALLBACK_IMAGE, initials } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
-import type { Favori, Me, Paginated, Reservation, SejourAEvaluer } from "@/types/api/models";
+import { useSejoursAEvaluer } from "@/features/avis";
+import { useFavoris } from "@/features/favoris";
+import { useMoi } from "@/features/users";
+import { useMesReservations } from "@/features/reservations";
+import { useFormat } from "@/lib/format";
 
 export default function ProfilPage() {
+  const { ROLE_LABELS, formatDate } = useFormat();
   const t = useTranslations("profil");
   const locale = useLocale();
   const { data: session } = useSession();
 
-  const { data: me } = useQuery({
-    queryKey: ["me"],
-    queryFn: async () => (await api.get<Me>("/v1/users/me/")).data,
-  });
-  const { data: reservations } = useQuery({
-    queryKey: ["reservations"],
-    queryFn: async () => (await api.get<Paginated<Reservation>>("/v1/reservations/")).data.results,
-  });
-  const { data: aEvaluer = [] } = useQuery({
-    queryKey: ["avis-a-laisser"],
-    queryFn: async () => (await api.get<Paginated<SejourAEvaluer>>("/v1/avis/a-laisser/")).data.results,
-  });
-  const { data: favoris } = useQuery({
-    queryKey: ["favoris"],
-    queryFn: async () => (await api.get<Paginated<Favori>>("/v1/favoris/")).data.results,
-  });
+  const { data: me } = useMoi();
+  const { data: reservations } = useMesReservations();
+  const { data: aEvaluer = [] } = useSejoursAEvaluer();
+  const { data: favoris } = useFavoris();
 
   const fullName = me ? `${me.first_name} ${me.last_name}` : session?.user?.name ?? "";
   const role = me?.role ?? session?.user?.role ?? "voyageur";

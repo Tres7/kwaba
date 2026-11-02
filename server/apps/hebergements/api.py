@@ -88,7 +88,8 @@ def annonces_en_attente(hote_ids: Iterable[uuid.UUID], ville: str = '') -> list[
     qs = HebergementModel.objects.filter(statut_verification='en_attente', host_id__in=list(hote_ids))
     if ville:
         qs = qs.filter(city__icontains=ville)
-    return [_fiche(h) for h in qs.order_by('created_at')]
+    # With the exact position: the agent goes there
+    return [{**_fiche(h), 'latitude': h.latitude, 'longitude': h.longitude} for h in qs.order_by('created_at')]
 
 
 def nb_annonces_non_verifiees(hote_id: uuid.UUID) -> int:

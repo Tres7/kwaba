@@ -13,6 +13,10 @@ export function useReglagesSite() {
   });
 }
 
+export async function envoyerReclamation(reclamation: FormData) {
+  await api.post("/v1/site/reclamation/", reclamation, { headers: { "Content-Type": "multipart/form-data" } });
+}
+
 /** Module displayed? False while the settings are not read: a hidden module never shows, not even for an instant. */
 export function useModule(nom: Module): boolean {
   return useReglagesSite().data?.modules[nom] === true;

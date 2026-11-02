@@ -8,8 +8,7 @@ import { ArrowLeft, CalendarCheck, Car, ClipboardCheck, Compass, FileText, HandH
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import { cn } from "@/lib/utils";
-import { useCompteursVerification } from "@/lib/useCompteursVerification";
-import AlerteVerifications from "@/components/verifications/AlerteVerifications";
+import { AlerteVerifications, useCompteursVerification } from "@/features/verifications";
 
 const NAV: { href: string; label: string; icon: typeof Users; compteur?: boolean }[] = [
   { href: "/backoffice", label: "Tableau de bord", icon: LayoutDashboard },

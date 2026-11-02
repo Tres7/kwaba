@@ -16,7 +16,7 @@ RESERVATIONS = '/api/v1/reservations/'
 
 
 def _annonce(**extra):
-    return {'name': 'Hôtel du Golfe', 'city': 'Lomé', 'type': 'hotel', 'price_per_night': 30000, 'max_guests': 2,
+    return {'name': 'Hôtel du Golfe', 'city': 'Lomé', 'latitude': 6.13, 'longitude': 1.22, 'type': 'hotel', 'price_per_night': 30000, 'max_guests': 2,
             'surface_m2': 25, 'chambres': 1, 'lits_doubles': 1, 'lits_simples': 0, 'petit_dejeuner': 'non', **extra}
 
 

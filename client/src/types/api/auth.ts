@@ -16,5 +16,3 @@ export type BackendAuthResponse  = {
   user: AuthUser;
 };
 
-export type LoginResponse = BackendAuthResponse;
-export type GoogleAuthResponse = BackendAuthResponse;

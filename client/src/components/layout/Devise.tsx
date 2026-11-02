@@ -3,7 +3,8 @@
 import { createContext, Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { cn, definirDevise, formatFcfa, type Devise } from "@/lib/utils";
+import { cn, definirDevise, type Devise } from "@/lib/utils";
+import { useFormat } from "@/lib/format";
 
 const CLE = "kwaba_devise";
 // Back-office and agents: always in FCFA (actual amounts, payouts, invoices)
@@ -72,6 +73,7 @@ export function MentionDevise({ className }: { className?: string }) {
 
 /** Under a total displayed in euros: the amount actually charged, in FCFA (Mobile Money and card). */
 export function MontantDebite({ montant }: { montant: number }) {
+  const { formatFcfa } = useFormat();
   const t = useTranslations("devise");
   const { devise } = useDevise();
   if (devise === "XOF") return null;

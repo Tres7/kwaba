@@ -1,0 +1,25 @@
+# Production values: the preprod changes them in its inventory (name, folder, user, scheduled tasks)
+kwaba_nom: kwaba
+kwaba_racine: /opt/kwaba
+# Used only by the CI/CD (docker group, no sudo); its SSH key is added separately
+kwaba_utilisateur: deploy
+
+# Public key of the deploy workflow. It can only run the deploy gate (/usr/local/bin/<kwaba_nom>-deploy): the server
+# fetches main from GitHub itself and deploys one of its manifests, so a stolen key can only deploy what main holds.
+# Empty: authorized_keys is left as it is (key added by hand, unrestricted: the production for now).
+kwaba_cle_deploiement: ''
+kwaba_depot: https://github.com/Tres7/kwaba.git
+# Client image of this environment in the manifests (services.<name>): client in production, clientPreprod in preprod
+kwaba_manifest_client: client
+
+# What makes this environment different from the production, written to env/deploy.conf and read by the VPS scripts
+# (scripts/lib.sh): project name, compose files, domain, TLS mode. Empty in production: no file, the defaults apply.
+kwaba_deploy_conf: {}
+
+# Secret files of the application: name → variables, written to env/<name>.env (values from the Vault of the inventory).
+# Empty in production: its files are still written by hand on the server, Ansible leaves them alone.
+kwaba_env: {}
+
+# Scheduled tasks (server time: UTC)
+kwaba_sauvegarde: true
+kwaba_renouvellement_certificats: true

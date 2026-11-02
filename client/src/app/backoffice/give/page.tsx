@@ -3,14 +3,14 @@
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Organisations from "@/components/backoffice/give/Organisations";
-import Reversements from "@/components/backoffice/give/Reversements";
-import Dons from "@/components/backoffice/give/Dons";
+import DonsAdmin from "@/features/give/admin/Dons";
+import OrganisationsAdmin from "@/features/give/admin/Organisations";
+import ReversementsAdmin from "@/features/give/admin/Reversements";
 
 const ONGLETS = [
-  { id: "ong", label: "ONG et projets", Composant: Organisations },
-  { id: "reversements", label: "Reversements", Composant: Reversements },
-  { id: "dons", label: "Dons", Composant: Dons },
+  { id: "ong", label: "ONG et projets", Composant: OrganisationsAdmin },
+  { id: "reversements", label: "Reversements", Composant: ReversementsAdmin },
+  { id: "dons", label: "Dons", Composant: DonsAdmin },
 ];
 
 function Give() {
