@@ -1,5 +1,6 @@
 export type HebergementType = "hotel" | "villa" | "maison" | "appartement" | "residence" | "auberge";
 export type PolitiqueAnnulation = "souple" | "moderee" | "ferme";
+export type EspaceLogement = "entier" | "chambre_privee";
 
 /** What a traveller books in an establishment: a unit type and its stock (a hotel's "Double standard", a house). */
 export interface TypeLogement {
@@ -32,6 +33,7 @@ export interface Hebergement {
   name: string;
   description: string;
   type: HebergementType;
+  espace: EspaceLogement;
   city: string;
   location: string;
   /** Approximate position shown to travellers (the real one is within rayon_m); null for an older listing */

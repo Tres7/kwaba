@@ -51,7 +51,7 @@ class HebergementSerializer(serializers.ModelSerializer):
     class Meta:
         model = HebergementModel
         fields = [
-            'id', 'name', 'description', 'type', 'city', 'location', 'latitude', 'longitude', 'position',
+            'id', 'name', 'description', 'type', 'espace', 'city', 'location', 'latitude', 'longitude', 'position',
             'price_per_night', 'rating', 'review_count', 'image_url', 'images',
             'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie', 'hote_fondateur',
             'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne',
@@ -141,7 +141,7 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = HebergementModel
         fields = [
-            'name', 'description', 'type', 'city', 'location', 'latitude', 'longitude',
+            'name', 'description', 'type', 'espace', 'city', 'location', 'latitude', 'longitude',
             'price_per_night', 'image_url', 'images', 'max_guests',
             'amenities', 'is_available',
             'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',

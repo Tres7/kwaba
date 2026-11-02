@@ -104,6 +104,10 @@ class HebergementListView(APIView):
         if type_:
             qs = qs.filter(type=type_)
 
+        espace = request.query_params.get('espace')
+        if espace:
+            qs = qs.filter(espace=espace)
+
         if 'price_min' in filtres:
             qs = qs.filter(price_per_night__gte=filtres['price_min'])
         if 'price_max' in filtres:

@@ -15,7 +15,7 @@ import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
 import { cn } from "@/lib/utils";
-import type { Hebergement, HebergementType, PolitiqueAnnulation } from "@/types/api/models";
+import type { EspaceLogement, Hebergement, HebergementType, PolitiqueAnnulation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useFormat } from "@/lib/format";
@@ -48,6 +48,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
   const [form, setForm] = useState({
     name: source?.name ?? "",
     type: source?.type ?? "appartement",
+    espace: source?.espace ?? "entier",
     city: source?.city ?? "",
     location: source?.location ?? "",
     price_per_night: source?.price_per_night ? String(source.price_per_night) : "",
@@ -101,6 +102,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
   const donnees = (): DonneesAnnonce => ({
     name: form.name.trim(),
     type: form.type,
+    espace: form.espace,
     city: form.city.trim(),
     location: form.location.trim(),
     ...(position ? { latitude: position.lat, longitude: position.lng } : {}),
@@ -206,6 +208,14 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
             id="h-type" label={t("typeLogement")} value={form.type}
             onChange={(v) => setForm((prev) => ({ ...prev, type: v }))}
             options={(Object.keys(TYPE_LABELS) as HebergementType[]).map((id) => ({ value: id, label: TYPE_LABELS[id], hint: t(`types.${id}`) }))}
+          />
+        </div>
+        <div>
+          <label className={labelClass} htmlFor="h-espace">{t("espace")}</label>
+          <Select
+            id="h-espace" label={t("espace")} value={form.espace}
+            onChange={(v) => setForm((prev) => ({ ...prev, espace: v as EspaceLogement }))}
+            options={(["entier", "chambre_privee"] as const).map((id) => ({ value: id, label: t(`espaces.${id}`) }))}
           />
         </div>
         <div>

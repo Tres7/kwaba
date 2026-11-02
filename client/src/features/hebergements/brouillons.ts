@@ -2,7 +2,7 @@ import type { Hebergement } from "@/types/api/models";
 
 /** Fields of the listing form, as sent to the API; incomplete in a draft. */
 export type DonneesAnnonce = Partial<Pick<Hebergement,
-  "name" | "type" | "city" | "location" | "max_guests" | "description" | "image_url" | "images" | "amenities"
+  "name" | "type" | "espace" | "city" | "location" | "max_guests" | "description" | "image_url" | "images" | "amenities"
   | "surface_m2" | "chambres" | "salles_de_bain" | "lits_doubles" | "lits_simples" | "canapes_lits"
   | "petit_dejeuner" | "petit_dejeuner_prix" | "arrivee_a_partir" | "depart_avant" | "politique_annulation">> & {
   latitude?: number | string | null;
@@ -13,8 +13,15 @@ export type DonneesAnnonce = Partial<Pick<Hebergement,
 export interface BrouillonAnnonce {
   id: string;
   donnees: DonneesAnnonce;
+  /** Wizard: screen to resume from (assistant/etapes.ts) */
+  etape: string;
   cree_le: string;
   modifie_le: string;
+}
+
+/** Id of an uploaded photo, read from its address: hebergements/<host>/<id>.jpg (see _photo_upload_path on the API). */
+export function photoDepuisUrl(url: string): string | null {
+  return url.match(/\/hebergements\/[^/]+\/([0-9a-f-]{36})\.jpg/)?.[1] ?? null;
 }
 
 /** What the API requires to accept a new listing (HebergementCreateSerializer): messages annonce.completude.<cle>. */

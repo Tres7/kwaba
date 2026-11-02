@@ -588,7 +588,8 @@
     "similaires": "Vous aimerez aussi",
     "reglesMaison": "Règles de la maison",
     "voirTousEquipements": "Afficher les {nombre} équipements",
-    "voirMoinsEquipements": "Afficher moins"
+    "voirMoinsEquipements": "Afficher moins",
+    "chambrePrivee": "chambre privée"
   },
   "avis": {
     "repondre": "Répondre publiquement",
@@ -1491,7 +1492,8 @@
     "gauche": "Déplacer à gauche",
     "droite": "Déplacer à droite",
     "definirCouverture": "Définir comme couverture",
-    "retirer": "Retirer la photo"
+    "retirer": "Retirer la photo",
+    "reessayer": "Réessayer"
   },
   "espaceHote": {
     "erreurConversation": "Impossible d'ouvrir la conversation.",
@@ -1668,7 +1670,12 @@
     "politiqueAide": "Affichée sur votre annonce et acceptée par le voyageur avant le paiement. En plus, une réservation annulée dans les 48 heures, au moins 7 jours avant l'arrivée, est toujours remboursée.",
     "reglesMaison": "Règles de la maison",
     "reglesAide": "Elles s'affichent sur votre annonce : les voyageurs savent à quoi s'attendre avant de réserver.",
-    "nonPrecise": "Non précisé"
+    "nonPrecise": "Non précisé",
+    "espace": "Ce que réservent les voyageurs",
+    "espaces": {
+      "entier": "Le logement entier",
+      "chambre_privee": "Une chambre privée"
+    }
   },
   "revenus": {
     "statuts": {
@@ -2095,5 +2102,103 @@
     "terminee": "Cette alerte pour {hebergement} (du {debut} au {fin}) est déjà terminée.",
     "voirLogement": "Voir le logement",
     "lienInvalide": "Ce lien n’est plus valable."
+  },
+  "assistantHote": {
+    "meta": "Votre annonce",
+    "quitter": "Enregistrer et quitter",
+    "retour": "Retour",
+    "suivant": "Suivant",
+    "commencer": "C'est parti",
+    "finir": "Fixer mon prix",
+    "envoiPhotos": "Envoi des photos…",
+    "progression": "Avancement de votre annonce",
+    "preparation": "Préparation de votre annonce…",
+    "retourEspace": "Retour à mon espace",
+    "etat": {
+      "enCours": "Enregistrement…",
+      "enregistre": "Enregistré",
+      "horsLigne": "Hors ligne : envoi au retour du réseau"
+    },
+    "phases": {
+      "1": {
+        "titre": "Parlez-nous de votre logement",
+        "texte": "Type de bien, adresse et capacité."
+      },
+      "2": {
+        "titre": "Faites-le sortir du lot",
+        "texte": "Équipements, photos, titre et description."
+      },
+      "3": {
+        "titre": "Terminez et publiez",
+        "texte": "Prix, règles, puis vérification par Kwa-Ba."
+      }
+    },
+    "bienvenue": {
+      "titre": "Publiez votre logement, étape par étape",
+      "texte": "Comptez une dizaine de minutes. Vos réponses sont enregistrées au fur et à mesure : vous pouvez arrêter et reprendre quand vous voulez."
+    },
+    "phase-1": {
+      "surtitre": "Phase 1",
+      "titre": "Parlez-nous de votre logement",
+      "texte": "Quelques questions simples pour le situer et savoir combien de voyageurs il peut accueillir."
+    },
+    "type": {
+      "titre": "Quel type de logement proposez-vous ?"
+    },
+    "espace": {
+      "titre": "Que réservent les voyageurs ?",
+      "entier": {
+        "titre": "Le logement entier",
+        "texte": "Les voyageurs ont le logement pour eux seuls."
+      },
+      "chambre": {
+        "titre": "Une chambre privée",
+        "texte": "Une chambre rien que pour eux, le reste est partagé."
+      }
+    },
+    "adresse": {
+      "titre": "Où se trouve votre logement ?",
+      "texte": "L'agent Kwa-Ba s'y rendra pour la visite."
+    },
+    "position": {
+      "titre": "Placez votre logement sur la carte",
+      "texte": "Touchez la carte à l'endroit exact, ou utilisez votre position si vous êtes sur place."
+    },
+    "capacite": {
+      "titre": "Combien de voyageurs pouvez-vous accueillir ?",
+      "texte": "Vous pourrez ajuster ces informations plus tard."
+    },
+    "phase-2": {
+      "surtitre": "Phase 2",
+      "titre": "Faites-le sortir du lot",
+      "texte": "Ce sont les équipements et les photos qui donnent envie de réserver."
+    },
+    "equipements": {
+      "titre": "Qu'est-ce que votre logement propose ?",
+      "texte": "Touchez tout ce qui est disponible. L'agent le vérifiera lors de sa visite."
+    },
+    "photos": {
+      "titre": "Ajoutez des photos de votre logement",
+      "texte": "La première sera la photo de couverture.",
+      "conseilJour": "Photographiez de jour, rideaux ouverts.",
+      "conseilPieces": "Montrez chaque pièce, y compris la salle de bain.",
+      "compteur": "{nombre} sur {min} photos minimum"
+    },
+    "titre": {
+      "titre": "Donnez un titre à votre annonce",
+      "texte": "Court et précis : ce qui rend votre logement unique.",
+      "exemple": "Villa avec piscine à Baguida"
+    },
+    "description": {
+      "titre": "Décrivez votre logement",
+      "texte": "Le quartier, l'ambiance, ce que les voyageurs vont aimer. Pas de téléphone ni d'email : ils vous écriront par la messagerie Kwa-Ba.",
+      "exemple": "Une maison calme à cinq minutes de la plage, avec une grande terrasse ombragée…",
+      "encore": "Encore {nombre} caractères au moins."
+    },
+    "fin": {
+      "surtitre": "Bravo",
+      "titre": "Le plus dur est fait !",
+      "texte": "Il reste à fixer votre prix et vos règles, puis à envoyer votre annonce pour vérification."
+    }
   }
 }

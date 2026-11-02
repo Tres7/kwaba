@@ -588,7 +588,8 @@
     "similaires": "You may also like",
     "reglesMaison": "House rules",
     "voirTousEquipements": "Show all {nombre} amenities",
-    "voirMoinsEquipements": "Show less"
+    "voirMoinsEquipements": "Show less",
+    "chambrePrivee": "private room"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -1491,7 +1492,8 @@
     "gauche": "Move left",
     "droite": "Move right",
     "definirCouverture": "Set as cover",
-    "retirer": "Remove photo"
+    "retirer": "Remove photo",
+    "reessayer": "Try again"
   },
   "espaceHote": {
     "erreurConversation": "Could not open the conversation.",
@@ -1668,7 +1670,12 @@
     "politiqueAide": "Shown on your listing and accepted by the traveller before payment. In addition, a booking cancelled within 48 hours, at least 7 days before arrival, is always refunded.",
     "reglesMaison": "House rules",
     "reglesAide": "Shown on your listing: travellers know what to expect before booking.",
-    "nonPrecise": "Not specified"
+    "nonPrecise": "Not specified",
+    "espace": "What travellers book",
+    "espaces": {
+      "entier": "The entire place",
+      "chambre_privee": "A private room"
+    }
   },
   "revenus": {
     "statuts": {
@@ -2095,5 +2102,103 @@
     "terminee": "This alert for {hebergement} ({debut} to {fin}) is already over.",
     "voirLogement": "See the place",
     "lienInvalide": "This link is no longer valid."
+  },
+  "assistantHote": {
+    "meta": "Your listing",
+    "quitter": "Save and exit",
+    "retour": "Back",
+    "suivant": "Next",
+    "commencer": "Let's go",
+    "finir": "Set my price",
+    "envoiPhotos": "Sending photos…",
+    "progression": "Progress of your listing",
+    "preparation": "Preparing your listing…",
+    "retourEspace": "Back to my space",
+    "etat": {
+      "enCours": "Saving…",
+      "enregistre": "Saved",
+      "horsLigne": "Offline: will be sent when the network is back"
+    },
+    "phases": {
+      "1": {
+        "titre": "Tell us about your place",
+        "texte": "Type of property, address and capacity."
+      },
+      "2": {
+        "titre": "Make it stand out",
+        "texte": "Amenities, photos, title and description."
+      },
+      "3": {
+        "titre": "Finish and publish",
+        "texte": "Price, rules, then a check by Kwa-Ba."
+      }
+    },
+    "bienvenue": {
+      "titre": "List your place, step by step",
+      "texte": "Allow about ten minutes. Your answers are saved as you go: you can stop and pick up again whenever you like."
+    },
+    "phase-1": {
+      "surtitre": "Phase 1",
+      "titre": "Tell us about your place",
+      "texte": "A few simple questions to locate it and find out how many travellers it can host."
+    },
+    "type": {
+      "titre": "What kind of place are you offering?"
+    },
+    "espace": {
+      "titre": "What do travellers book?",
+      "entier": {
+        "titre": "The entire place",
+        "texte": "Travellers have the place to themselves."
+      },
+      "chambre": {
+        "titre": "A private room",
+        "texte": "A room of their own, the rest is shared."
+      }
+    },
+    "adresse": {
+      "titre": "Where is your place?",
+      "texte": "The Kwa-Ba agent will go there for the visit."
+    },
+    "position": {
+      "titre": "Place it on the map",
+      "texte": "Tap the exact spot on the map, or use your position if you are there."
+    },
+    "capacite": {
+      "titre": "How many travellers can you host?",
+      "texte": "You can adjust this later."
+    },
+    "phase-2": {
+      "surtitre": "Phase 2",
+      "titre": "Make it stand out",
+      "texte": "Amenities and photos are what make people want to book."
+    },
+    "equipements": {
+      "titre": "What does your place offer?",
+      "texte": "Tap everything available. The agent will check it during the visit."
+    },
+    "photos": {
+      "titre": "Add photos of your place",
+      "texte": "The first one will be the cover photo.",
+      "conseilJour": "Take photos by day, with the curtains open.",
+      "conseilPieces": "Show every room, including the bathroom.",
+      "compteur": "{nombre} of {min} photos minimum"
+    },
+    "titre": {
+      "titre": "Give your listing a title",
+      "texte": "Short and precise: what makes your place unique.",
+      "exemple": "Villa with a pool in Baguida"
+    },
+    "description": {
+      "titre": "Describe your place",
+      "texte": "The neighbourhood, the atmosphere, what travellers will love. No phone number or email: they will write to you through Kwa-Ba messaging.",
+      "exemple": "A quiet house five minutes from the beach, with a large shaded terrace…",
+      "encore": "At least {nombre} more characters."
+    },
+    "fin": {
+      "surtitre": "Well done",
+      "titre": "The hard part is over!",
+      "texte": "All that is left is to set your price and rules, then send your listing for checking."
+    }
   }
 }

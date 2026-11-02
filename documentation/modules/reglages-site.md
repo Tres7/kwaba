@@ -14,6 +14,7 @@ Aucun déploiement de code n'est nécessaire. Le site lit ces réglages sur `GET
 | `MODULE_CONCIERGE` | Concierge IA | masqué |
 | `MODULE_LOCATION_SANS_CHAUFFEUR` | Formule « Je conduis » de la location | masquée |
 | `MODULE_PAIEMENTS_NON_OUVERTS` | MTN, Orange Money, Celtiis, Airtel, PayPal | masqués |
+| `MODULE_ASSISTANT_HOTE` | [Assistant de création d'annonce](assistant-hote.md) | masqué (formulaire) |
 
 `True` affiche le module, toute autre valeur (ou l'absence de la variable) le masque.
 

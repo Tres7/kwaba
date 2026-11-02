@@ -39,6 +39,16 @@ export async function creerBrouillon(donnees: DonneesAnnonce) {
   return (await api.post<BrouillonAnnonce>(`${HEBERGEMENTS}/brouillons/`, { donnees })).data;
 }
 
+export async function lireBrouillon(id: string) {
+  return (await api.get<BrouillonAnnonce>(`${HEBERGEMENTS}/brouillons/${id}/`)).data;
+}
+
+/** Wizard: adds the answers of a screen to the draft. `erreurs`: what the API would refuse, never a refused save. */
+export async function enregistrerEtape(id: string, donnees: DonneesAnnonce, etape?: string) {
+  const corps = { donnees, ...(etape ? { etape } : {}) };
+  return (await api.patch<BrouillonAnnonce & { erreurs: Record<string, string[]> }>(`${HEBERGEMENTS}/brouillons/${id}/`, corps)).data;
+}
+
 export async function modifierBrouillon(id: string, donnees: DonneesAnnonce) {
   return (await api.put<BrouillonAnnonce>(`${HEBERGEMENTS}/brouillons/${id}/`, { donnees })).data;
 }

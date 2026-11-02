@@ -1,5 +1,5 @@
 /** Modules masquables (interrupteurs MODULE_… de l'environnement de l'API, voir server/config/site.py). */
-export type Module = "experiences" | "together" | "give" | "concierge" | "location_sans_chauffeur" | "paiements_non_ouverts";
+export type Module = "experiences" | "together" | "give" | "concierge" | "location_sans_chauffeur" | "paiements_non_ouverts" | "assistant_hote";
 
 export interface ReglagesSite {
   modules: Record<Module, boolean>;
@@ -21,6 +21,7 @@ export const PAGES_MODULES: Record<string, Module> = {
   "/together": "together",
   "/give": "give",
   "/concierge": "concierge",
+  "/hote/annonce": "assistant_hote",
 };
 
 export function moduleDuChemin(chemin: string): Module | null {

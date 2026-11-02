@@ -103,3 +103,69 @@ class TestSubmission:
 
     def test_invalid_id_has_no_effect(self, host):
         assert host.post(HEBERGEMENTS, _listing(brouillon='pas-un-uuid'), format='json').status_code == 201
+
+
+class TestAssistant:
+    @pytest.fixture
+    def brouillon(self, host):
+        return host.post(BROUILLONS, {'donnees': {'city': 'Lomé', 'max_guests': 2}}, format='json').data
+
+    def test_answers_of_a_screen_are_added_to_the_others(self, host, brouillon):
+        reponse = host.patch(f"{BROUILLONS}{brouillon['id']}/", {'donnees': {'location': 'Agoè'}, 'etape': 'adresse'}, format='json')
+
+        assert reponse.status_code == 200
+        assert reponse.data['donnees'] == {'city': 'Lomé', 'max_guests': 2, 'location': 'Agoè'}
+        assert reponse.data['etape'] == 'adresse'
+        assert not HebergementModel.objects.exists()
+
+    def test_screen_saved_alone(self, host, brouillon):
+        reponse = host.patch(f"{BROUILLONS}{brouillon['id']}/", {'etape': 'photos'}, format='json')
+        assert (reponse.data['etape'], reponse.data['donnees']['city']) == ('photos', 'Lomé')
+
+    def test_answers_the_api_would_refuse_are_saved_and_reported(self, host, brouillon):
+        reponse = host.patch(f"{BROUILLONS}{brouillon['id']}/", {'donnees': {'description': 'Appelez-moi au 90 00 00 01'}}, format='json')
+
+        assert reponse.status_code == 200
+        assert reponse.data['donnees']['description'] == 'Appelez-moi au 90 00 00 01'
+        assert 'description' in reponse.data['erreurs']
+
+    def test_incomplete_draft_is_not_an_error(self, host, brouillon):
+        assert host.patch(f"{BROUILLONS}{brouillon['id']}/", {'donnees': {'name': 'Villa'}}, format='json').data['erreurs'] == {}
+
+    def test_unknown_fields_and_values_refused(self, host, brouillon):
+        adresse = f"{BROUILLONS}{brouillon['id']}/"
+        assert 'host_id' not in host.patch(adresse, {'donnees': {'host_id': 'x'}}, format='json').data['donnees']
+        assert host.patch(adresse, {'donnees': 'texte'}, format='json').status_code == 400
+        assert host.patch(adresse, {'etape': '../admin'}, format='json').status_code == 400
+
+    def test_other_host_cannot_change_a_draft(self, brouillon, client_for, make_user):
+        autre = client_for(make_user(role='hote'))
+        assert autre.patch(f"{BROUILLONS}{brouillon['id']}/", {'donnees': {'name': 'Pirate'}}, format='json').status_code == 404
+        assert BrouillonAnnonceModel.objects.get(pk=brouillon['id']).donnees.get('name') is None
+
+    def test_candidate_can_start_a_draft(self, client_for, make_user):
+        candidat = client_for(make_user(candidature_hote='ouverte'))
+        assert candidat.post(BROUILLONS, {'donnees': {}}, format='json').status_code == 201
+
+
+class TestEspace:
+    def test_kept_from_the_draft_to_the_listing(self, host):
+        reponse = host.post(HEBERGEMENTS, _listing(espace='chambre_privee'), format='json')
+
+        assert reponse.data['espace'] == 'chambre_privee'
+        annonce = HebergementModel.objects.get()
+        assert annonce.types.get().nom == 'Chambre privée'
+
+    def test_whole_place_by_default(self, host):
+        assert host.post(HEBERGEMENTS, _listing(), format='json').data['espace'] == 'entier'
+
+    def test_unknown_value_refused(self, host):
+        assert host.post(HEBERGEMENTS, _listing(espace='tente'), format='json').status_code == 400
+
+    def test_search_filter(self, api_client, make_hebergement):
+        make_hebergement(espace='entier')
+        chambre = make_hebergement(espace='chambre_privee')
+
+        resultats = api_client.get(HEBERGEMENTS, {'espace': 'chambre_privee'}).data['results']
+
+        assert [r['id'] for r in resultats] == [str(chambre.pk)]
