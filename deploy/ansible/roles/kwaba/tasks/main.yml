@@ -48,6 +48,30 @@
     mode: "0600"
   when: kwaba_deploy_conf | length > 0
 
+# Each value is written on one line between single quotes (taken as is by compose, no $ interpolation)
+- name: Valeurs des fichiers de secrets écrites telles quelles
+  ansible.builtin.assert:
+    that: >-
+      kwaba_env | dict2items | map(attribute='value') | map('dict2items') | flatten
+      | map(attribute='value') | map('string') | select('search', "['\n]") | list | length == 0
+    fail_msg: Une valeur de kwaba_env contient une apostrophe ou un saut de ligne
+    quiet: true
+  when: kwaba_env | length > 0
+
+# No diff: it would print the secrets in the terminal. The running containers keep the old values until the next
+# deployment (or docker compose up -d in the folder).
+- name: Fichiers de secrets (env/*.env)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ kwaba_racine }}/env/{{ item.key }}.env"
+    owner: "{{ kwaba_utilisateur }}"
+    group: "{{ kwaba_utilisateur }}"
+    mode: "0600"
+  loop: "{{ kwaba_env | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}.env"
+  diff: false
+
 - name: Tâches planifiées
   ansible.builtin.template:
     src: cron.j2
