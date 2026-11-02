@@ -1572,7 +1572,8 @@
       "envoi": "Sending…",
       "envoyee": "ID document sent",
       "choisirFichier": "Choose a file.",
-      "confidentialite": "Only Kwa-Ba agents can see this document, never travellers."
+      "confidentialite": "Only Kwa-Ba agents can see this document, never travellers.",
+      "corriger": "Fix my listing"
     },
     "candidature": {
       "titre": "Becoming a Kwa-Ba host: {nombre} steps",

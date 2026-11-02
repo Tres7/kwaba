@@ -22,6 +22,8 @@ Badges : « Email confirmé » sur le profil (code reçu par email, rien de plus
 
 ## Cycle d'une annonce
 
+L'espace hôte montre un seul statut, `statut_annonce`, calculé par l'API et réservé au propriétaire : `en_verification`, `refusee`, `validee` (contrôlée par un agent, mais pas encore en ligne : pré-lancement ou contrat à signer), `publiee`, `masquee`.
+
 | Statut (`statut_verification`) | Visible des voyageurs | Quand |
 |---|---|---|
 | `en_attente` | non | À la création ; après une modification de la ville, de l'adresse, de la position sur la carte ou des photos ; après une modification d'une annonce refusée |

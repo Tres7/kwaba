@@ -23,6 +23,11 @@ const ROLES: { value: "" | Role; label: string }[] = [
   { value: "agent", label: "Agents de terrain" },
   { value: "admin", label: "Administrateurs" },
 ];
+const CANDIDATURES = [
+  { value: "", label: "Toutes les candidatures" },
+  { value: "ouverte", label: "Candidats hôtes" },
+  { value: "refusee", label: "Candidatures refusées" },
+];
 const STATUTS = [
   { value: "", label: "Tous les statuts" },
   { value: "true", label: "Actifs" },
@@ -36,11 +41,12 @@ function Utilisateurs() {
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [role, setRole] = useState<"" | Role>((searchParams.get("role") as Role) ?? "");
   const [actif, setActif] = useState(searchParams.get("actif") ?? "");
+  const [candidature, setCandidature] = useState(searchParams.get("candidature") ?? "");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [conditions, setConditions] = useState<AdminUser | null>(null);
   const recherche = useDebounced(q);
 
-  const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminUser>("users", { q: recherche, role, actif });
+  const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminUser>("users", { q: recherche, role, actif, candidature });
 
   const modifier = async (u: AdminUser, patch: Record<string, unknown>, succes: string) => {
     try {
@@ -154,6 +160,7 @@ function Utilisateurs() {
         <SearchInput value={q} onChange={setQ} placeholder="Nom, email ou téléphone" />
         <Select label="Rôle" value={role} onChange={setRole} options={ROLES} className="sm:w-48" />
         <Select label="Statut" value={actif} onChange={setActif} options={STATUTS} className="sm:w-48" />
+        <Select label="Candidature" value={candidature} onChange={setCandidature} options={CANDIDATURES} className="sm:w-56" />
       </div>
 
       <AdminTable

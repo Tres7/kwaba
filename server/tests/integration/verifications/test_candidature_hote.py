@@ -197,3 +197,47 @@ class TestMigrationDesHotes:
         call_command('migrer_hotes', '--appliquer', stdout=StringIO())
         call_command('migrer_hotes', '--appliquer', stdout=StringIO())
         assert JournalAuditModel.objects.filter(action='role_modifie').count() == 5
+
+
+class TestBackOffice:
+    def test_candidates_found_by_status(self, client_for, admin, candidat, make_user):
+        refuse = make_user(candidature_hote='refusee')
+        make_user()
+        client = client_for(admin)
+
+        ouvertes = client.get(ADMIN_USERS, {'candidature': 'ouverte'}).data['results']
+        refusees = client.get(ADMIN_USERS, {'candidature': 'refusee'}).data['results']
+
+        assert [u['id'] for u in ouvertes] == [str(candidat.pk)]
+        assert [u['id'] for u in refusees] == [str(refuse.pk)]
+
+    def test_unknown_filter_ignored(self, client_for, admin, candidat):
+        assert client_for(admin).get(ADMIN_USERS, {'candidature': 'x'}).status_code == 200
+
+
+class TestStatutAnnonce:
+    MES_ANNONCES = '/api/v1/hebergements/mine/'
+
+    def _statut(self, client_for, hote):
+        return client_for(hote).get(self.MES_ANNONCES).data['results'][0]['statut_annonce']
+
+    @pytest.mark.parametrize(('champs', 'attendu'), [
+        ({'statut_verification': 'en_attente'}, 'en_verification'),
+        ({'statut_verification': 'refusee'}, 'refusee'),
+        ({'statut_verification': 'verifiee'}, 'publiee'),
+        ({'statut_verification': 'verifiee', 'is_available': False}, 'masquee'),
+    ])
+    def test_for_each_state(self, client_for, make_user, make_hebergement, champs, attendu):
+        hote = make_user(role='hote')
+        make_hebergement(host=hote, **champs)
+        assert self._statut(client_for, hote) == attendu
+
+    def test_validated_but_waiting_for_the_opening(self, client_for, make_user, make_hebergement, settings):
+        settings.PRELANCEMENT = True
+        hote = make_user(role='hote')
+        make_hebergement(host=hote)
+        assert self._statut(client_for, hote) == 'validee'
+
+    def test_never_shown_to_travellers(self, api_client, make_hebergement):
+        annonce = make_hebergement()
+        assert api_client.get(f'{HEBERGEMENTS}{annonce.pk}/').data['statut_annonce'] is None
