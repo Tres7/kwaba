@@ -1572,7 +1572,8 @@
       "envoi": "Envoi…",
       "envoyee": "Pièce d'identité envoyée",
       "choisirFichier": "Choisissez un fichier.",
-      "confidentialite": "Document visible uniquement par les agents Kwa-Ba, jamais par les voyageurs."
+      "confidentialite": "Document visible uniquement par les agents Kwa-Ba, jamais par les voyageurs.",
+      "corriger": "Corriger mon annonce"
     },
     "candidature": {
       "titre": "Devenir hôte Kwa-Ba : {nombre} étapes",

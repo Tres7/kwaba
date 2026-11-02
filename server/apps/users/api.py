@@ -152,6 +152,7 @@ def statistiques(depuis: datetime) -> dict:
         total=Count('id'),
         nouveaux_30j=Count('id', filter=Q(date_joined__gte=depuis)),
         hotes=Count('id', filter=Q(role='hote')),
+        candidats=Count('id', filter=Q(candidature_hote='ouverte')),
         desactives=Count('id', filter=Q(is_active=False)),
     )
 

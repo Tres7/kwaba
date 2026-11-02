@@ -1,6 +1,8 @@
 export type HebergementType = "hotel" | "villa" | "maison" | "appartement" | "residence" | "auberge";
 export type PolitiqueAnnulation = "souple" | "moderee" | "ferme";
 export type EspaceLogement = "entier" | "chambre_privee";
+/** The one status shown to the host (HebergementModel.statut_annonce on the API). */
+export type StatutAnnonce = "en_verification" | "refusee" | "validee" | "publiee" | "masquee";
 
 /** What a traveller books in an establishment: a unit type and its stock (a hotel's "Double standard", a house). */
 export interface TypeLogement {
@@ -34,6 +36,8 @@ export interface Hebergement {
   description: string;
   type: HebergementType;
   espace: EspaceLogement;
+  /** Sent to the host only */
+  statut_annonce?: StatutAnnonce | null;
   city: string;
   location: string;
   /** Approximate position shown to travellers (the real one is within rayon_m); null for an older listing */

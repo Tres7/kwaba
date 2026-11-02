@@ -46,6 +46,7 @@ class HebergementSerializer(serializers.ModelSerializer):
     is_favorite = serializers.SerializerMethodField()
     motif_refus = serializers.SerializerMethodField()
     en_ligne = serializers.SerializerMethodField()
+    statut_annonce = serializers.SerializerMethodField()
     frais_voyageur = serializers.SerializerMethodField()
     types = serializers.SerializerMethodField()
     position = serializers.SerializerMethodField()
@@ -56,7 +57,7 @@ class HebergementSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'type', 'espace', 'city', 'location', 'latitude', 'longitude', 'position',
             'price_per_night', 'rating', 'review_count', 'image_url', 'images',
             'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie', 'hote_fondateur',
-            'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne',
+            'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne', 'statut_annonce',
             'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant',
             'politique_annulation', 'frais_voyageur', 'types',
@@ -114,6 +115,9 @@ class HebergementSerializer(serializers.ModelSerializer):
     def get_en_ligne(self, obj):
         # For the host only: is the listing actually public (verified, not hidden, opening done, agreement signed)?
         return obj.est_publiee if self.context.get('proprietaire') else None
+
+    def get_statut_annonce(self, obj):
+        return obj.statut_annonce if self.context.get('proprietaire') else None
 
     def get_frais_voyageur(self, obj):
         """Service fee rate for the visitor: 6 %, or 3 % if they already stayed with this host (loyal customer)."""

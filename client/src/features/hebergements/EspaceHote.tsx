@@ -247,7 +247,7 @@ function EspaceHoteContent() {
             {annonces.map((h) => (
               <article key={h.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col sm:flex-row">
                 <Link href={`/hebergements/${h.id}`} className="sm:w-48 h-40 sm:h-auto flex-shrink-0 relative">
-                  <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className={cn("w-full h-full object-cover", (!h.is_available || h.statut_verification !== "verifiee") && "grayscale opacity-60")} />
+                  <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className={cn("w-full h-full object-cover", h.statut_annonce !== "publiee" && "grayscale opacity-60")} />
                   {!h.is_available && <span className="absolute top-3 left-3 bg-dark text-white text-[10px] font-bold uppercase px-2 py-1 rounded-full">{t("masqueeBadge")}</span>}
                 </Link>
                 <div className="flex-1 p-5 min-w-0 flex flex-col">
@@ -264,7 +264,7 @@ function EspaceHoteContent() {
                       <AlertTriangle size={14} className="flex-shrink-0 mt-px" /> {tAnnonce("detailsManquants")}
                     </button>
                   )}
-                  {h.statut_verification === "verifiee" && prelancement ? (
+                  {h.statut_annonce === "validee" && prelancement ? (
                     <div className="mt-3 text-sm bg-primary/5 text-primary rounded-xl px-3 py-2">
                       <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span className="flex items-center gap-1.5 text-xs font-bold text-green-700"><ShieldCheck size={14} aria-hidden /> {tVerif("verifiee")}</span>
@@ -274,18 +274,21 @@ function EspaceHoteContent() {
                       </p>
                       <p className="mt-1 text-xs text-gray-600">{tPre("badgeAide")}</p>
                     </div>
-                  ) : h.statut_verification === "verifiee" && h.en_ligne === false && h.is_available ? (
+                  ) : h.statut_annonce === "validee" ? (
                     <div className="mt-3 text-sm bg-amber-50 text-amber-900 rounded-xl px-3 py-2">
                       <p className="flex items-center gap-1.5 font-bold"><AlertTriangle size={14} aria-hidden /> {tPre("contratRequis")}</p>
                       <Link href="/hote/espace/contrat" className="inline-block mt-1 text-xs font-bold underline">{tPre("signerContrat")}</Link>
                     </div>
-                  ) : h.statut_verification === "verifiee" ? (
+                  ) : h.statut_annonce === "publiee" || h.statut_annonce === "masquee" ? (
                     <p className="flex items-center gap-1.5 text-xs font-bold text-green-700 mt-2"><ShieldCheck size={14} /> {tVerif("verifiee")}</p>
-                  ) : h.statut_verification === "refusee" ? (
+                  ) : h.statut_annonce === "refusee" ? (
                     <div role="alert" className="mt-3 text-sm bg-red-50 text-red-800 rounded-xl px-3 py-2">
                       <p className="flex items-center gap-1.5 font-bold"><AlertTriangle size={14} /> {tVerif("refusee")}</p>
                       {h.motif_refus && <p className="mt-1">« {h.motif_refus} »</p>}
                       <p className="mt-1 text-xs">{tVerif("refuseeAide")}</p>
+                      <button type="button" onClick={() => setEditing(h)} className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold underline">
+                        <Pencil size={13} aria-hidden /> {tVerif("corriger")}
+                      </button>
                     </div>
                   ) : (
                     <div className="mt-3 text-sm bg-amber-50 text-amber-900 rounded-xl px-3 py-2">

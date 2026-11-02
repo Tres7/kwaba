@@ -69,6 +69,8 @@ class UtilisateurListView(VueAdmin):
             qs = qs.filter(role=role)
         if (actif := _booleen(params.get('actif'))) is not None:
             qs = qs.filter(is_active=actif)
+        if (candidature := params.get('candidature')) in ('ouverte', 'refusee'):
+            qs = qs.filter(candidature_hote=candidature)
         return _paginer(request, qs, _utilisateurs_json, en_lot=True)
 
 

@@ -50,7 +50,7 @@ export default function TableauDeBord() {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <Tuile titre="Utilisateurs" valeur={s.utilisateurs.total.toLocaleString("fr-FR")} detail={`+${s.utilisateurs.nouveaux_30j} en 30 j · ${s.utilisateurs.hotes} hôtes`} icone={Users} href="/backoffice/utilisateurs" />
+            <Tuile titre="Utilisateurs" valeur={s.utilisateurs.total.toLocaleString("fr-FR")} detail={`+${s.utilisateurs.nouveaux_30j} en 30 j · ${s.utilisateurs.hotes} hôtes · ${s.utilisateurs.candidats} candidats`} icone={Users} href="/backoffice/utilisateurs" />
             <Tuile titre="Annonces" valeur={s.annonces.visibles.toLocaleString("fr-FR")} detail={`visibles sur ${s.annonces.total} · ${s.annonces.verifiees} vérifiées`} icone={Home} href="/backoffice/annonces" />
             <Tuile titre="Réservations (30 j)" valeur={s.reservations.confirmees_30j.toLocaleString("fr-FR")} detail={`${s.reservations.annulees_30j} annulée${s.reservations.annulees_30j > 1 ? "s" : ""}`} icone={CalendarCheck} href="/backoffice/reservations" />
             <Tuile
