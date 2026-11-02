@@ -185,7 +185,7 @@ function HebergementContent() {
               <span className="text-muted">·</span>
               <span className="flex items-center gap-1 text-muted"><MapPin size={14} />{hebergement.location ? `${hebergement.location}, ` : ""}{hebergement.city}</span>
               <span className="text-muted">·</span>
-              <span className="text-muted">{TYPE_LABELS[hebergement.type]} · {t("jusquA", { nombre: hebergement.max_guests })}</span>
+              <span className="text-muted">{TYPE_LABELS[hebergement.type]}{hebergement.espace === "chambre_privee" && ` · ${t("chambrePrivee")}`} · {t("jusquA", { nombre: hebergement.max_guests })}</span>
               {hebergement.statut_verification === "verifiee" && (
                 <>
                   <span className="text-muted">·</span>

@@ -24,7 +24,7 @@ export const PAGES_PUBLIQUES = [
  * /login?callbackUrl=… was reported as a duplicate page without a canonical URL.
  */
 export const CHEMINS_PRIVES = [
-  "/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/give/don", "/together/", "/transfert/", "/location/",
+  "/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/hote/annonce", "/give/don", "/together/", "/transfert/", "/location/",
   "/backoffice", "/agent", "/alertes", "/api/",
 ] as const;
 

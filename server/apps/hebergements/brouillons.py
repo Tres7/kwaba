@@ -17,10 +17,20 @@ MAX_BROUILLONS = 10
 TAILLE_MAX = 50_000  # characters of JSON: a full form is far below
 
 
+def erreurs(donnees: dict) -> dict:
+    """What the API would refuse among the answers already given: shown early, never a reason not to save them."""
+    remplis = {cle: valeur for cle, valeur in donnees.items() if valeur not in (None, '')}
+    controle = HebergementCreateSerializer(data=remplis, partial=True)
+    controle.is_valid()
+    return controle.errors
+
+
 class BrouillonSerializer(serializers.ModelSerializer):
+    etape = serializers.RegexField(r'^[a-z0-9-]*$', max_length=30, required=False, allow_blank=True)
+
     class Meta:
         model = BrouillonAnnonceModel
-        fields = ['id', 'donnees', 'cree_le', 'modifie_le']
+        fields = ['id', 'donnees', 'etape', 'cree_le', 'modifie_le']
         read_only_fields = ['id', 'cree_le', 'modifie_le']
 
     def validate_donnees(self, value):
@@ -53,7 +63,8 @@ class BrouillonsView(APIView):
 
 
 class BrouillonDetailView(APIView):
-    """GET, PUT {donnees} (replaces the saved fields), DELETE. Only the draft's host."""
+    """GET, PUT {donnees} (replaces the saved fields), PATCH {donnees?, etape?} (wizard: merges the answers of a
+    screen and returns `erreurs`), DELETE. Only the draft's host."""
     permission_classes = [IsAuthenticated]
 
     def _brouillon(self, request, pk):
@@ -73,6 +84,21 @@ class BrouillonDetailView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    def patch(self, request, pk):
+        brouillon = self._brouillon(request, pk)
+        if not brouillon:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        reponses = request.data.get('donnees', {})
+        if not isinstance(reponses, dict):
+            return Response({'donnees': ["Objet attendu."]}, status=status.HTTP_400_BAD_REQUEST)
+        modifications = {'donnees': {**brouillon.donnees, **reponses}}
+        if 'etape' in request.data:
+            modifications['etape'] = request.data['etape']
+        serializer = BrouillonSerializer(brouillon, data=modifications, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({**serializer.data, 'erreurs': erreurs(serializer.instance.donnees)})
 
     def delete(self, request, pk):
         brouillon = self._brouillon(request, pk)

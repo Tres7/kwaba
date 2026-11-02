@@ -55,6 +55,9 @@ class HebergementModel(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='hotel')
+    # What the traveller gets: the whole place, or a private room in a place the host shares
+    ESPACES = [('entier', 'Logement entier'), ('chambre_privee', 'Chambre privée')]
+    espace = models.CharField(max_length=20, choices=ESPACES, default='entier', db_default='entier')
     city = models.CharField(max_length=100)
     location = models.CharField(max_length=200, blank=True)
     # Exact position placed by the host, for the agent's visit: travellers only get positions.approchee()
@@ -222,6 +225,8 @@ class BrouillonAnnonceModel(models.Model):
     host_id = models.UUIDField(db_index=True)
     # Fields of the listing form as entered, incomplete (see brouillons.CHAMPS)
     donnees = models.JSONField(default=dict, blank=True)
+    # Wizard: key of the screen to resume from (client/src/features/hebergements/assistant/etapes.ts)
+    etape = models.CharField(max_length=30, blank=True, default='', db_default='')
     cree_le = models.DateTimeField(auto_now_add=True)
     modifie_le = models.DateTimeField(auto_now=True)
 

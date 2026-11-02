@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Car, CheckCircle, Home, MessageCircle, Wallet } from "lucide-react";
 import { CONTACT_EMAIL } from "@/lib/contact";
+import { useReglagesSite } from "@/lib/site";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api";
 import { useTranslations } from "next-intl";
@@ -28,6 +29,7 @@ export default function DevenirHotePage() {
   const { data: me } = useMoi(status === "authenticated");
   const [loading, setLoading] = useState(false);
   const acces = !!me && accesEspaceHote(me);
+  const assistant = useReglagesSite().data?.modules.assistant_hote === true;
 
   // Coming back from sign-up: the account exists, the candidature starts with the button below.
   // Read from the address, not useSearchParams: this public page must stay rendered on the server
@@ -43,7 +45,7 @@ export default function DevenirHotePage() {
       await ouvrirCandidature();
       await queryClient.invalidateQueries({ queryKey: CLE_MOI });
       toast.success(t("active"));
-      router.push("/hote/espace");
+      router.push(assistant ? "/hote/annonce/nouvelle" : "/hote/espace");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setLoading(false);

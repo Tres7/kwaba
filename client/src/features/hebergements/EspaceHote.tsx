@@ -25,6 +25,7 @@ import type { Hebergement, Reservation } from "@/types/api/models";
 import { contacterVoyageur as conversationAvecVoyageur } from "@/features/messaging";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { useReglagesSite } from "@/lib/site";
 
 type Tab = "annonces" | "reservations" | "revenus";
 
@@ -69,11 +70,13 @@ function EspaceHoteContent() {
   const isHost = !!me && accesEspaceHote(me);
 
   // Pre-launch: the window comes before any new listing, and once per session when the host space opens
-  const nouvelle = () => (prelancement ? setFenetre(true) : setEditing("new"));
+  const assistant = useReglagesSite().data?.modules.assistant_hote === true;
+  const ouvrirNouvelle = () => (assistant ? router.push("/hote/annonce/nouvelle") : setEditing("new"));
+  const nouvelle = () => (prelancement ? setFenetre(true) : ouvrirNouvelle());
   const fermerFenetre = useCallback(() => setFenetre(false), []);
   const creerDepuisFenetre = () => {
     setFenetre(false);
-    setEditing("new");
+    ouvrirNouvelle();
   };
 
   useEffect(() => {
@@ -97,6 +100,15 @@ function EspaceHoteContent() {
   });
 
   const { data: brouillons = [] } = useBrouillons(isHost);
+
+  // End of the wizard: the price and the rules are still in the listing form
+  useEffect(() => {
+    const suite = brouillons.find((b) => b.id === searchParams.get("brouillon"));
+    if (!suite) return;
+    setReprise(suite);
+    setEditing("new");
+    router.replace("/hote/espace");
+  }, [brouillons, searchParams, router]);
 
   const { data: reservations = [], isLoading: resLoading } = useQuery({
     queryKey: ["reservations", "host"],
