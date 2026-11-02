@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 
 from apps.hebergements.models import HebergementModel
 from apps.users import api as users
+from config.demo import refuser_en_production
 
 U = "https://images.unsplash.com/"
 Q = "?q=80&w=1200&auto=format&fit=crop"
@@ -82,11 +83,19 @@ DETAILS = {
 }
 HORAIRES = {'arrivee_a_partir': '14:00', 'depart_avant': '11:00'}
 
+# The other roles, with the password of the demo host
+COMPTES = [
+    ('voyageur.demo@kwa-ba.com', 'Ama', 'Koffi', 'voyageur'),
+    ('agent.demo@kwa-ba.com', 'Yao', 'Agbeko', 'agent'),
+    ('admin.demo@kwa-ba.com', 'Afi', 'Lawson', 'admin'),
+]
+
 
 class Command(BaseCommand):
-    help = "Crée un hôte de démonstration et des hébergements réalistes (idempotent)."
+    help = "Crée un compte de démonstration par rôle et des hébergements réalistes publiés (idempotent, hors production)."
 
     def handle(self, *args, **options):
+        refuser_en_production()
         email = os.getenv('DEMO_HOST_EMAIL', 'hote.demo@kwa-ba.com')
         password = os.getenv('DEMO_HOST_PASSWORD', 'Kwa-Ba2026!')
 
@@ -95,20 +104,29 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(f"Hôte démo créé : {email} / {password}")
 
+        for adresse, prenom, nom, role in COMPTES:
+            _, created = users.compte_demo(adresse, password, first_name=prenom, last_name=nom, role=role,
+                                           is_verified=True)
+            if created:
+                self.stdout.write(f"Compte démo créé : {adresse} / {password}")
+
         added = 0
         for name, type_, city, location, price, _rating, _reviews, guests, photo, amenities, desc in DEMO:
             cover = f"{U}{photo}{Q}"
             latitude, longitude = POSITIONS[name]
-            _, was_created = HebergementModel.objects.get_or_create(
+            # Public only once verified: a demo listing skips the agent's visit, even if seeded before this rule
+            _, was_created = HebergementModel.objects.update_or_create(
                 name=name,
                 host_id=host.pk,
-                defaults={
+                defaults={'statut_verification': 'verifiee'},
+                create_defaults={
                     'type': type_, 'city': city, 'location': location,
                     'latitude': latitude, 'longitude': longitude,
                     'price_per_night': price,
                     'max_guests': guests, 'image_url': cover,
                     'images': [cover, *INTERIORS], 'amenities': amenities,
                     'description': desc, **DETAILS[type_], **HORAIRES,
+                    'statut_verification': 'verifiee',
                 },
             )
             added += was_created
