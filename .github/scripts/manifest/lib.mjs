@@ -53,6 +53,13 @@ export function imageRepository(owner, service) {
 }
 
 /**
+ * Client images of each environment: Next.js bakes the public URL into the image at build time, so the preprod has
+ * its own client image, built from the same revision as the production one. The server image is the same everywhere.
+ */
+export const CLIENT_SERVICES = { production: 'client', preprod: 'clientPreprod' };
+export const ENVIRONMENTS = Object.keys(CLIENT_SERVICES);
+
+/**
  * Must a service be rebuilt? Yes if it changed, if the previous manifest had no image for it (v1), or if its image
  * is not in the expected repository (afristay-* → kwaba-* rename: both images switch at once).
  */
@@ -63,12 +70,13 @@ function needsImage(previousService, revision, repository) {
 
 /**
  * Compares the state of main with the latest manifest: an image is rebuilt only for a service that changed;
- * without any change, no manifest is created.
+ * without any change, no manifest is created. Both client images are always built together (same revision).
  */
 export function plan({ previous, serverRevision, clientRevision, repositories = {} }) {
   const services = previous?.data.services;
   const buildServer = needsImage(services?.server, serverRevision, repositories.server);
-  const buildClient = needsImage(services?.client, clientRevision, repositories.client);
+  const buildClient = needsImage(services?.client, clientRevision, repositories.client)
+    || needsImage(services?.clientPreprod, clientRevision, repositories.clientPreprod);
   return { buildServer, buildClient, changed: buildServer || buildClient };
 }
 
@@ -86,7 +94,10 @@ function service(name, { image, revision, previous }) {
 }
 
 export function buildManifest({ previous, version, sourceRevision, createdAt, serverImage, serverRevision,
-  clientImage, clientRevision }) {
+  clientImage, clientPreprodImage, clientRevision }) {
+  if (Boolean(clientImage) !== Boolean(clientPreprodImage)) {
+    throw new Error('Les deux images client (production et préprod) sont construites ensemble : une seule est fournie');
+  }
   return {
     schemaVersion: SCHEMA_VERSION,
     manifestVersion: version,
@@ -95,6 +106,7 @@ export function buildManifest({ previous, version, sourceRevision, createdAt, se
     services: {
       server: service('server', { image: serverImage, revision: serverRevision, previous }),
       client: service('client', { image: clientImage, revision: clientRevision, previous }),
+      clientPreprod: service('clientPreprod', { image: clientPreprodImage, revision: clientRevision, previous }),
     },
   };
 }
@@ -127,6 +139,10 @@ export function validateAll(dir, validate) {
     if (manifestVersion <= previousVersion) {
       errors.push(`${where} : manifestVersion ${manifestVersion} doit être strictement supérieure à ${previousVersion}`);
     }
+    const { client, clientPreprod } = manifest.data.services;
+    if (clientPreprod && clientPreprod.sourceRevision !== client.sourceRevision) {
+      errors.push(`${where} : les images client de production et de préprod viennent de révisions différentes`);
+    }
     previousVersion = Math.max(previousVersion, manifestVersion);
   }
   return errors;
@@ -134,9 +150,13 @@ export function validateAll(dir, validate) {
 
 /**
  * Manifest to deploy: the given file name, or the latest one when empty. Only a strict file name is accepted
- * (no path), and both services must be images: the result is passed to a remote shell on the VPS.
+ * (no path), and both services must be images: the result is passed to a remote shell on the VPS. The client image
+ * is the one of the environment (manifests older than the preprod have none for it).
  */
-export function deployTarget(dir, name = '') {
+export function deployTarget(dir, name = '', environment = 'production') {
+  if (!ENVIRONMENTS.includes(environment)) {
+    throw new Error(`Environnement inconnu : « ${environment} » (attendu : ${ENVIRONMENTS.join(', ')})`);
+  }
   const manifests = readManifests(dir);
   if (name && !FILE_PATTERN.test(name)) {
     throw new Error(`Nom de manifest invalide : « ${name} » (attendu : manifest-0008-2cf8427.yaml)`);
@@ -144,14 +164,16 @@ export function deployTarget(dir, name = '') {
   const manifest = name ? manifests.find((m) => m.file === name) : manifests.at(-1);
   if (!manifest) throw new Error(name ? `Manifest introuvable : ${name}` : `Aucun manifest dans ${dir}`);
   const images = {};
-  for (const service of ['server', 'client']) {
+  for (const service of ['server', CLIENT_SERVICES[environment]]) {
     const entry = manifest.data.services?.[service];
     if (entry?.kind !== 'image' || !IMAGE_PATTERN.test(entry.image ?? '')) {
-      throw new Error(`${manifest.file} : pas d'image ${service} par digest (manifest v1, non déployable sur le VPS)`);
+      throw new Error(service === 'clientPreprod'
+        ? `${manifest.file} : pas d'image client de préprod (manifest antérieur à la préprod)`
+        : `${manifest.file} : pas d'image ${service} par digest (manifest v1, non déployable sur le VPS)`);
     }
     images[service] = entry.image;
   }
-  return { file: manifest.file, serverImage: images.server, clientImage: images.client };
+  return { file: manifest.file, serverImage: images.server, clientImage: images[CLIENT_SERVICES[environment]] };
 }
 
 const IMAGE_PATTERN = /^ghcr\.io\/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$/;
