@@ -89,6 +89,7 @@ ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit vps_perso -
 ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit vps_perso --vault-id preprod@prompt --diff
 ```
 
+- Les commandes sur la prod n'ont pas besoin de `--vault-id` : le Vault de la préprod n'est lu que pour `vps_perso`.
 - Les fichiers de secrets n'affichent **jamais de diff** (il imprimerait les secrets) : seulement `changed`.
 - Chaque valeur est écrite entre apostrophes, prise telle quelle par compose (un `$` reste un `$`) ; une apostrophe ou un saut de ligne dans une valeur fait échouer le playbook.
 - Les conteneurs gardent les anciennes valeurs jusqu'au déploiement suivant (ou `docker compose up -d` dans `/opt/kwaba-preprod`).
