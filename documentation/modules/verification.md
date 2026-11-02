@@ -1,9 +1,16 @@
 # Vérification des hôtes et des logements
 
-N'importe qui peut créer un compte hôte. Pour protéger les voyageurs, une annonce n'est publiée qu'après la visite d'un **agent de terrain** Kwa-Ba, et une visite n'est demandée qu'une fois l'identité de l'hôte contrôlée à distance.
-Code : `server/apps/verifications/` (contrôles), `server/apps/terrain/` (espace agent : file commune des missions), `client/src/app/agent/` et `client/src/components/agent/` (espace agent), `client/src/components/hote/CandidatureHote.tsx` et `VerificationIdentite.tsx` (espace hôte).
+Tout compte commence voyageur. **On devient hôte à la première annonce validée par un agent** : avant, on est candidat. Pour protéger les voyageurs, une annonce n'est publiée qu'après la visite d'un **agent de terrain** Kwa-Ba, et une visite n'est demandée qu'une fois l'identité de l'hôte contrôlée à distance.
+Code : `server/apps/verifications/` (contrôles), `server/apps/terrain/` (espace agent : file commune des missions), `client/src/app/agent/` et `client/src/components/agent/` (espace agent), `client/src/features/hebergements/CandidatureHote.tsx` et `client/src/features/verifications/VerificationIdentite.tsx` (espace hôte).
 
 ## Candidature de l'hôte
+
+- **Ouverture** : le bouton « Commencer » de `/hote` appelle `POST /api/v1/users/me/candidature/`. Le compte reste `voyageur`, avec `candidature_hote = ouverte`. L'inscription ne propose plus de rôle, et `PATCH /users/me/` ne le change jamais.
+- **Droits du candidat** (`users.api.peut_gerer_annonces`) : brouillons, photos, annonces, pièce d'identité, compte de versement, pré-inscription et contrat, comme un hôte.
+- **Passage à hôte** : quand un agent valide une première annonce (`services.decider`), le rôle passe à `hote` dans la même transaction, journalisé (`role_modifie`). Le profil affiche alors « Hôte ».
+- **Refus** : Back-office → Utilisateurs → « Refuser la candidature », avec un motif affiché au candidat. Il ne peut plus préparer d'annonce, ses annonces sortent de la file des agents et ne peuvent plus être validées. L'équipe peut rouvrir la candidature.
+
+Comptes `hote` créés avant cette règle : `python manage.py migrer_hotes` affiche ce qui changerait, `--appliquer` l'écrit. Un compte sans annonce validée repasse voyageur, avec une candidature ouverte s'il avait commencé (annonce, brouillon, pièce ou pré-inscription). Relançable sans effet supplémentaire.
 
 L'espace hôte affiche 3 étapes tant que l'identité n'est pas vérifiée :
 
@@ -12,8 +19,6 @@ L'espace hôte affiche 3 étapes tant que l'identité n'est pas vérifiée :
 3. **Logement** : l'annonce reste en `en_attente`. Tant que l'identité n'est pas vérifiée, un hôte a au plus **3 annonces non vérifiées** (`MAX_ANNONCES_HOTE_NON_VERIFIE`), contre les comptes qui inondent les agents.
 
 Badges : « Email confirmé » sur le profil (code reçu par email, rien de plus) ; « Hôte vérifié » sur la fiche d'un logement quand la pièce de l'hôte est vérifiée (`hote_verifie` dans l'API) ; « Vérifié par Kwa-Ba » sur une annonce visitée.
-
-Refuser une candidature : dans le back-office, repasser le compte en voyageur (ou le désactiver).
 
 ## Cycle d'une annonce
 

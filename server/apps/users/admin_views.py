@@ -9,13 +9,31 @@ from apps.reservations import api as reservations
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import VueAdmin, booleen as _booleen, introuvable as _introuvable, paginer as _paginer
 
-from .api import ROLES, revoquer_jetons
+from .api import ROLES, hote_ou_candidat, revoquer_jetons
 from .infrastructure.persistence.models import UserModel
+
+MIN_MOTIF = 10  # characters, like the refusal of a listing
 
 
 def _conditions(u) -> dict | None:
     """Host's commission: category, Founders Programme and rate applied today."""
-    return paiements.conditions_commission(u) if u.role == 'hote' else None
+    return paiements.conditions_commission(u) if hote_ou_candidat(u) else None
+
+
+def _modifier_candidature(request, cible, valeur, motif) -> str | None:
+    """Refuses an ongoing candidature, or reopens a refused one. Returns an error message, or None."""
+    motif = str(motif or '').strip()
+    if valeur == 'refusee' and cible.candidature_hote == 'ouverte':
+        if len(motif) < MIN_MOTIF:
+            return f"Expliquez le motif du refus ({MIN_MOTIF} caractères au moins)."
+        cible.candidature_hote, cible.candidature_motif = 'refusee', motif
+        journaliser('candidature_refusee', request, utilisateur=request.user, cible_id=str(cible.pk), motif=motif)
+    elif valeur == 'ouverte' and cible.candidature_hote == 'refusee':
+        cible.candidature_hote, cible.candidature_motif = 'ouverte', ''
+        journaliser('candidature_ouverte', request, utilisateur=request.user, cible_id=str(cible.pk))
+    else:
+        return "Cette candidature ne peut pas être modifiée ainsi."
+    return None
 
 
 def _utilisateurs_json(liste) -> list[dict]:
@@ -33,6 +51,7 @@ def _utilisateur(u, nb_reservations: int, nb_annonces: int) -> dict:
         'date_joined': u.date_joined, 'last_login': u.last_login,
         'nb_reservations': nb_reservations, 'nb_annonces': nb_annonces,
         'conditions': _conditions(u),
+        'candidature_hote': u.candidature_hote, 'candidature_motif': u.candidature_motif,
     }
 
 
@@ -70,9 +89,15 @@ class UtilisateurDetailView(VueAdmin):
             return Response({'is_active': ['Valeur booléenne attendue.']}, status=status.HTTP_400_BAD_REQUEST)
 
         trace = {'cible_id': str(cible.pk), 'cible_email': cible.email}
+        if 'candidature' in donnees:
+            erreur = _modifier_candidature(request, cible, donnees.get('candidature'), donnees.get('motif'))
+            if erreur:
+                return Response({'candidature': [erreur]}, status=status.HTTP_400_BAD_REQUEST)
         if 'role' in donnees and role != cible.role:
             journaliser('role_modifie', request, utilisateur=request.user, avant=cible.role, apres=role, **trace)
             cible.role = role
+            if role != 'voyageur':
+                cible.candidature_hote, cible.candidature_motif = '', ''
         if 'is_active' in donnees and actif != cible.is_active:
             cible.is_active = actif
             journaliser('compte_desactive' if not actif else 'compte_reactive', request, utilisateur=request.user, **trace)
@@ -82,7 +107,7 @@ class UtilisateurDetailView(VueAdmin):
                 return Response({'conditions': [erreur]}, status=status.HTTP_400_BAD_REQUEST)
             journaliser('backoffice_modification', request, utilisateur=request.user, objet='conditions_hote',
                         id=str(cible.pk), champs=['categorie', 'fondateur_debut', 'fondateur_fin'])
-        cible.save(update_fields=['role', 'is_active'])
+        cible.save(update_fields=['role', 'is_active', 'candidature_hote', 'candidature_motif'])
         if not cible.is_active:
             # Closes their sessions: without a valid refresh token, they are signed out at the latest when the access token expires
             revoquer_jetons(cible.pk)

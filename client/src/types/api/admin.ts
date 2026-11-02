@@ -34,7 +34,9 @@ export interface AdminUser {
   last_login: string | null;
   nb_reservations: number;
   nb_annonces: number;
-  /** Hosts only: commission set by the team. */
+  candidature_hote: "" | "ouverte" | "refusee";
+  candidature_motif: string;
+  /** Hosts and candidates only: commission set by the team. */
   conditions: ConditionsHote | null;
 }
 

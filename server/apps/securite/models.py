@@ -49,6 +49,9 @@ class JournalAuditModel(models.Model):
         ('backoffice_modification', 'Modification depuis le back-office'),
         ('backoffice_suppression', 'Suppression depuis le back-office'),
         ('contrat_signe', 'Contrat signé électroniquement'),
+        ('candidature_ouverte', 'Candidature hôte ouverte'),
+        ('candidature_refusee', 'Candidature hôte refusée'),
+        ('roles_hotes_migres', 'Rôles des hôtes existants révisés'),
     ]
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)

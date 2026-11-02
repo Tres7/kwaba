@@ -1,2 +1,2 @@
-export { devenirHote, fermerMonCompte, lireMoi, lireStatsAdmin, modifierMoi, modifierUtilisateurAdmin } from "./api";
-export { CLE_MOI, useMoi } from "./hooks";
+export { fermerMonCompte, lireMoi, lireStatsAdmin, modifierMoi, modifierUtilisateurAdmin, ouvrirCandidature } from "./api";
+export { accesEspaceHote, CLE_MOI, useMoi } from "./hooks";

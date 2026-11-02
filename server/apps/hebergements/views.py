@@ -28,9 +28,9 @@ from .serializers import (
 from apps.contrats import api as contrats
 from apps.paiements import api as paiements
 from apps.favoris import api as favoris
+from apps.users import api as users
 from apps.verifications import api as verifications
 
-HOST_ROLES = ('hote', 'admin')
 MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
 MAX_NUITS = 90  # same limit as a booking
 MAX_RESULTATS = 200
@@ -160,7 +160,7 @@ class HebergementListView(APIView):
         return Response({'results': donnees, 'count': len(donnees)})
 
     def post(self, request):
-        if request.user.role not in HOST_ROLES:
+        if not users.peut_gerer_annonces(request.user):
             return Response(
                 {'detail': 'Seuls les hôtes peuvent publier un hébergement.'},
                 status=status.HTTP_403_FORBIDDEN,
@@ -323,7 +323,7 @@ class PhotoUploadView(APIView):
     throttle_scope = 'hebergement_photo_upload'
 
     def post(self, request):
-        if request.user.role not in HOST_ROLES:
+        if not users.peut_gerer_annonces(request.user):
             return Response({'detail': 'Seuls les hôtes peuvent envoyer des photos.'}, status=status.HTTP_403_FORBIDDEN)
 
         uploaded = request.FILES.get('file')

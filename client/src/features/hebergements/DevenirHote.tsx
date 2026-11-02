@@ -1,9 +1,10 @@
 "use client";
 
-import { devenirHote } from "@/features/users";
+import { accesEspaceHote, CLE_MOI, ouvrirCandidature, useMoi } from "@/features/users";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Car, CheckCircle, Home, MessageCircle, Wallet } from "lucide-react";
 import { CONTACT_EMAIL } from "@/lib/contact";
 import { toast } from "sonner";
@@ -22,16 +23,25 @@ const STEPS = [
 export default function DevenirHotePage() {
   const t = useTranslations("devenirHote");
   const router = useRouter();
-  const { data: session, status, update } = useSession();
+  const queryClient = useQueryClient();
+  const { status } = useSession();
+  const { data: me } = useMoi(status === "authenticated");
   const [loading, setLoading] = useState(false);
-  const role = session?.user?.role;
-  const isHost = role === "hote" || role === "admin";
+  const acces = !!me && accesEspaceHote(me);
 
-  const becomeHost = async () => {
+  // Coming back from sign-up: the account exists, the candidature starts with the button below.
+  // Read from the address, not useSearchParams: this public page must stay rendered on the server
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("bienvenue") !== "1") return;
+    toast.success(t("bienvenue"));
+    router.replace("/hote");
+  }, [router, t]);
+
+  const commencer = async () => {
     setLoading(true);
     try {
-      await devenirHote();
-      await update({ role: "hote" });
+      await ouvrirCandidature();
+      await queryClient.invalidateQueries({ queryKey: CLE_MOI });
       toast.success(t("active"));
       router.push("/hote/espace");
     } catch (err) {
@@ -41,10 +51,12 @@ export default function DevenirHotePage() {
   };
 
   const cta =
-    status === "loading" ? null : isHost ? (
-      <Link href="/hote/espace" className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50">{t("acceder")}</Link>
+    status === "loading" || (status === "authenticated" && !me) ? null : acces ? (
+      <Link href="/hote/espace" className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50">{t(me?.candidature_hote === "ouverte" ? "reprendre" : "acceder")}</Link>
+    ) : me?.candidature_hote === "refusee" ? (
+      <p className="max-w-xl mx-auto bg-white/10 rounded-2xl px-5 py-4 text-sm text-white">{t("refusee", { motif: me.candidature_motif })}</p>
     ) : status === "authenticated" ? (
-      <button onClick={becomeHost} disabled={loading} className="bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 disabled:opacity-60">
+      <button onClick={commencer} disabled={loading} className="bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 disabled:opacity-60">
         {loading ? t("activation") : t("activer")}
       </button>
     ) : (

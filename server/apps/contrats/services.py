@@ -325,7 +325,8 @@ def hotes_a_inviter():
     """Active hosts who pre-registered or created a listing and have not signed their agreement yet."""
     candidats = set(PreinscriptionModel.objects.values_list('hote_id', flat=True)) | hebergements.ids_hotes_avec_annonce()
     signes = set(ContratModel.objects.filter(statut='signe', hote_id__in=candidats).values_list('hote_id', flat=True))
-    return users.comptes_actifs(['hote'], ids=candidats - signes)
+    # Candidates are travellers until their first listing is validated
+    return users.comptes_actifs(['hote', 'voyageur'], ids=candidats - signes)
 
 
 def inviter_hotes_a_signer() -> int:

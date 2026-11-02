@@ -20,6 +20,10 @@ def hotes_ayant_signe(hote_ids: Iterable[uuid.UUID], types: tuple[str, ...] = ('
                .values_list('hote_id', flat=True))
 
 
+def ids_preinscrits() -> set[uuid.UUID]:
+    return preinscription.ids_preinscrits()
+
+
 def preinscription_requise(utilisateur) -> bool:
     return preinscription.requise(utilisateur)
 

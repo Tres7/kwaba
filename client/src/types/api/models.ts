@@ -155,6 +155,9 @@ export interface Me {
   is_verified: boolean;
   is_active: boolean;
   date_joined: string;
+  /** Traveller preparing their first listing; they become a host once an agent has validated one. */
+  candidature_hote: "" | "ouverte" | "refusee";
+  candidature_motif: string;
 }
 
 export type CritereAvis = "proprete" | "conformite" | "communication" | "emplacement" | "qualite_prix";

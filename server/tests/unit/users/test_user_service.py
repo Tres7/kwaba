@@ -1,5 +1,4 @@
 import dataclasses
-import uuid
 
 import pytest
 
@@ -7,7 +6,6 @@ from apps.users.application.dto.dto import GoogleAuthDTO, UpdateProfileDTO
 from apps.users.application.ports.GoogleTokenVerifier import GoogleTokenVerifier, GoogleUserInfo
 from apps.users.application.service.UserService import UserService
 from apps.users.domain.entities.User import User, UserRole
-from apps.users.domain.exceptions import UserNotFoundException
 from apps.users.domain.repositories.UserRepository import UserRepository
 from apps.users.domain.value_objects import Email, PasswordHash, PhoneNumber
 
@@ -81,21 +79,6 @@ def _google(email='ama@example.tg', google_id='g-123', **fields):
     return GoogleAuthDTO(id_token='token'), FakeGoogleVerifier(
         GoogleUserInfo(google_id=google_id, email=email, first_name='Ama', last_name='Kossi', **fields)
     )
-
-
-class TestBecomeHost:
-    def test_guest_becomes_host(self, service, add_user):
-        user = add_user()
-        assert service.become_host(user.id).role == 'hote'
-
-    @pytest.mark.parametrize('role', [UserRole.HOTE, UserRole.ADMIN])
-    def test_host_and_admin_unchanged(self, service, add_user, role):
-        user = add_user(role=role)
-        assert service.become_host(user.id).role == role.value
-
-    def test_unknown_user(self, service):
-        with pytest.raises(UserNotFoundException):
-            service.become_host(uuid.uuid4())
 
 
 class TestProfile:

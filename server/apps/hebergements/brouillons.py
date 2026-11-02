@@ -6,9 +6,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.users import api as users
+
 from .models import BrouillonAnnonceModel
 from .serializers import HebergementCreateSerializer
-from .views import HOST_ROLES
 
 # Only the fields of the listing form are kept, checked for real when the draft is submitted
 CHAMPS = frozenset(HebergementCreateSerializer.Meta.fields)
@@ -40,7 +41,7 @@ class BrouillonsView(APIView):
         return Response({'results': BrouillonSerializer(brouillons, many=True).data})
 
     def post(self, request):
-        if request.user.role not in HOST_ROLES:
+        if not users.peut_gerer_annonces(request.user):
             return Response({'detail': 'Seuls les hôtes peuvent créer une annonce.'}, status=status.HTTP_403_FORBIDDEN)
         if BrouillonAnnonceModel.objects.filter(host_id=request.user.pk).count() >= MAX_BROUILLONS:
             return Response({'detail': f"{MAX_BROUILLONS} brouillons au plus : terminez ou supprimez-en un."},

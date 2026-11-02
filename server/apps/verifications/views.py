@@ -18,8 +18,6 @@ from . import services
 from .fichiers import FichierInvalide, piece_identite
 from .models import PieceIdentiteModel, VisiteModel
 
-ROLES_HOTE = ('hote', 'admin')
-
 
 class EstVerificateur(IsAuthenticated):
     """Field agents and administrators: role read from the database at every request."""
@@ -51,7 +49,7 @@ class MaPieceIdentiteView(APIView):
         return Response(_piece_json(PieceIdentiteModel.objects.filter(hote_id=request.user.pk).first()))
 
     def post(self, request):
-        if request.user.role not in ROLES_HOTE:
+        if not users.peut_gerer_annonces(request.user):
             return Response({'detail': 'Réservé aux hôtes.'}, status=status.HTTP_403_FORBIDDEN)
         type_piece = request.data.get('type_piece')
         if type_piece not in dict(PieceIdentiteModel.TYPES):

@@ -111,7 +111,8 @@
     "mesReservations": "Mes réservations",
     "mesFavoris": "Mes favoris",
     "fermerMenu": "Fermer le menu",
-    "location": "Location de voiture"
+    "location": "Location de voiture",
+    "maCandidature": "Ma candidature"
   },
   "logo": {
     "accueil": "Kwa-Ba, accueil"
@@ -309,13 +310,6 @@
     "serveurInjoignable": "Impossible de contacter le serveur. Vérifiez votre connexion.",
     "inscriptionTexte": "Quelques informations pour commencer votre aventure.",
     "inscriptionGoogle": "S'inscrire avec Google",
-    "jeSuis": "Je suis",
-    "roles": {
-      "voyageur": "Voyageur",
-      "hote": "Hôte"
-    },
-    "roleHoteTexte": "Vous pourrez publier vos logements et aussi réserver.",
-    "roleVoyageurTexte": "Vous pourrez devenir hôte plus tard depuis votre profil.",
     "prenom": "Prénom",
     "nom": "Nom",
     "cestVous": "C'est vous ?",
@@ -747,7 +741,9 @@
       "langue": "Langue & région",
       "langueTexte": "Français, FCFA",
       "aide": "Aide & support",
-      "aideTexte": "FAQ, annulation, contact"
+      "aideTexte": "FAQ, annulation, contact",
+      "candidature": "Ma candidature",
+      "candidatureTexte": "Reprenez là où vous en étiez"
     },
     "verifie": "Email confirmé",
     "membreDepuis": "Membre depuis {date}",
@@ -1428,14 +1424,14 @@
         "texte": "Les voyageurs paient en ligne ; votre part vous est versée par Mobile Money 24 h après leur arrivée."
       }
     },
-    "active": "Votre compte hôte est activé !",
+    "active": "C'est parti ! Préparez votre annonce.",
     "acceder": "Accéder à mon espace hôte",
-    "activation": "Activation…",
-    "activer": "Activer mon compte hôte",
-    "creerCompte": "Créer un compte hôte",
+    "activation": "Un instant…",
+    "activer": "Commencer",
+    "creerCompte": "Créer mon compte et commencer",
     "titre": "Partagez votre logement avec des voyageurs du monde entier",
     "sousTitre": "Publiez gratuitement votre villa, appartement, chambre d'hôtel ou auberge sur Kwa-Ba.",
-    "dejaInscrit": "Déjà inscrit ? <lien>Connectez-vous</lien> puis activez votre compte hôte.",
+    "dejaInscrit": "Déjà inscrit ? <lien>Connectez-vous</lien> pour commencer.",
     "commentCaMarche": "Comment ça marche ?",
     "etape": "Étape {numero}",
     "ceQuIlFaut": "Ce qu'il vous faut",
@@ -1479,7 +1475,10 @@
       },
       "estimateurTitre": "Estimez vos revenus",
       "estimateurTexte": "Choisissez votre profil, saisissez le prix par nuit que vous souhaitez recevoir avant commission et le nombre de nuits."
-    }
+    },
+    "bienvenue": "Votre compte est créé. Vous pouvez commencer !",
+    "reprendre": "Reprendre ma candidature",
+    "refusee": "Votre candidature n'a pas été retenue : {motif}"
   },
   "photos": {
     "envoiImpossible": "Envoi impossible.",
@@ -1496,7 +1495,6 @@
   },
   "espaceHote": {
     "erreurConversation": "Impossible d'ouvrir la conversation.",
-    "bienvenue": "Bienvenue ! Publiez votre premier logement.",
     "pasHote": "Vous n'êtes pas encore hôte",
     "devenirHote": "Devenir hôte",
     "masquee": "Annonce masquée des recherches",
@@ -1576,7 +1574,7 @@
     },
     "candidature": {
       "titre": "Devenir hôte Kwa-Ba : {nombre} étapes",
-      "texte": "Pour la sécurité des voyageurs, chaque hôte est vérifié avant de publier. Vos annonces restent invisibles jusqu'à la fin des étapes.",
+      "texte": "Pour la sécurité des voyageurs, chaque hôte est vérifié avant de publier. Vous devenez hôte Kwa-Ba dès qu'un agent a validé votre premier logement.",
       "telephoneTitre": "Votre numéro de téléphone",
       "telephoneTexte": "L'agent Kwa-Ba vous appellera pour organiser la visite.",
       "telephoneAction": "Ajouter mon numéro",
@@ -1596,7 +1594,8 @@
       "contratTelecharger": "Voir le contrat",
       "annonceContrat": "Annonce prête. Un agent vous appellera pour la visite dès que votre identité sera vérifiée et votre contrat signé."
     },
-    "typesLogement": "Chambres et types"
+    "typesLogement": "Chambres et types",
+    "candidatureRefusee": "Votre candidature n'a pas été retenue"
   },
   "annonce": {
     "types": {

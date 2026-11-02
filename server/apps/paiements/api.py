@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+from apps.users import api as users
+
 from . import notifications, tarifs
 from .documents import recu_paiement
 from .models import ConditionsHoteModel, PaiementModel, RemboursementModel
@@ -203,7 +205,7 @@ def modifier_conditions_hote(hote, valeurs, par) -> str | None:
     Returns an error message, or None once saved."""
     from django.utils.dateparse import parse_date
 
-    if hote.role != 'hote' or not isinstance(valeurs, dict):
+    if not users.hote_ou_candidat(hote) or not isinstance(valeurs, dict):
         return "Seul un hôte a des conditions de commission."
     categorie = valeurs.get('categorie', 'particulier')
     if categorie not in dict(ConditionsHoteModel.CATEGORIES):

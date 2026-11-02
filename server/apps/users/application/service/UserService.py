@@ -98,15 +98,6 @@ class UserService:
         user.verify()
         self._repository.update(user)
 
-    def become_host(self, user_id: uuid.UUID) -> UserResponseDTO:
-        user = self._repository.find_by_id(user_id)
-        if not user:
-            raise UserNotFoundException(str(user_id))
-        if user.role == UserRole.VOYAGEUR:
-            user.change_role(UserRole.HOTE)
-            user = self._repository.update(user)
-        return UserResponseDTO.from_entity(user)
-
     def deactivate(self, user_id: uuid.UUID) -> None:
         user = self._repository.find_by_id(user_id)
         if not user:
