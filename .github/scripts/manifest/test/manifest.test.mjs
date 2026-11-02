@@ -14,10 +14,15 @@ const SCHEMA = join(SCRIPTS, '..', '..', '..', 'deploy', 'manifests', 'schema.js
 const SHA = (c) => c.repeat(40);
 const IMAGE = `ghcr.io/tres7/kwaba-server@sha256:${'0'.repeat(64)}`;
 const CLIENT_IMAGE = `ghcr.io/tres7/kwaba-client@sha256:${'1'.repeat(64)}`;
+const CLIENT_PREPROD_IMAGE = `ghcr.io/tres7/kwaba-client-preprod@sha256:${'9'.repeat(64)}`;
 // Image names before the AfriStay → Kwa-Ba rename, still found in older manifests
 const OLD_IMAGE = IMAGE.replace('kwaba-', 'afristay-');
 const OLD_CLIENT_IMAGE = CLIENT_IMAGE.replace('kwaba-', 'afristay-');
-const REPOSITORIES = { server: imageRepository('Tres7', 'server'), client: imageRepository('Tres7', 'client') };
+const REPOSITORIES = {
+  server: imageRepository('Tres7', 'server'),
+  client: imageRepository('Tres7', 'client'),
+  clientPreprod: imageRepository('Tres7', 'client-preprod'),
+};
 
 function manifest(version, overrides = {}) {
   return {
@@ -28,6 +33,7 @@ function manifest(version, overrides = {}) {
     services: {
       server: { kind: 'image', sourceRevision: SHA('b'), image: IMAGE },
       client: { kind: 'image', sourceRevision: SHA('c'), image: CLIENT_IMAGE },
+      clientPreprod: { kind: 'image', sourceRevision: SHA('c'), image: CLIENT_PREPROD_IMAGE },
     },
     ...overrides,
   };
@@ -37,6 +43,14 @@ function manifest(version, overrides = {}) {
 function legacyManifest(version) {
   const m = manifest(version, { schemaVersion: 1 });
   m.services.client = { kind: 'git', sourceRevision: SHA('c') };
+  delete m.services.clientPreprod;
+  return m;
+}
+
+/** Manifest committed before the preprod: no preprod client image. */
+function prePreprodManifest(version) {
+  const m = manifest(version);
+  delete m.services.clientPreprod;
   return m;
 }
 
@@ -88,6 +102,11 @@ describe('plan', () => {
       { buildServer: false, buildClient: false, changed: false });
   });
 
+  test('previous manifest without a preprod client image: both client images are built', () => {
+    assert.deepEqual(plan({ previous: { data: prePreprodManifest(1) }, serverRevision: SHA('b'), clientRevision: SHA('c'),
+      repositories: REPOSITORIES }), { buildServer: false, buildClient: true, changed: true });
+  });
+
   test('images still under the old name: both are rebuilt, even if unchanged', () => {
     const renamed = manifest(1);
     renamed.services.server.image = OLD_IMAGE;
@@ -100,7 +119,8 @@ describe('plan', () => {
 describe('buildManifest', () => {
   const base = { version: 2, sourceRevision: SHA('f'), createdAt: '2026-10-11T09:00:00Z', clientRevision: SHA('d') };
 
-  const newClient = { clientImage: CLIENT_IMAGE.replace(/1/g, '2'), clientRevision: SHA('d') };
+  const newClient = { clientImage: CLIENT_IMAGE.replace(/1/g, '2'), clientPreprodImage: CLIENT_PREPROD_IMAGE.replace(/9/g, '4'),
+    clientRevision: SHA('d') };
 
   test('reuses the previous server image when the server did not change', () => {
     const built = buildManifest({ ...base, ...newClient, previous: { data: manifest(1) }, serverImage: '',
@@ -108,7 +128,27 @@ describe('buildManifest', () => {
     assert.equal(built.schemaVersion, 2);
     assert.deepEqual(built.services.server, manifest(1).services.server);
     assert.deepEqual(built.services.client, { kind: 'image', sourceRevision: SHA('d'), image: newClient.clientImage });
+    assert.deepEqual(built.services.clientPreprod,
+      { kind: 'image', sourceRevision: SHA('d'), image: newClient.clientPreprodImage });
     assert.ok(validate(built));
+  });
+
+  test('reuses both client images when the client did not change', () => {
+    const built = buildManifest({ ...base, previous: { data: manifest(1) }, serverImage: IMAGE.replace(/0/g, '4'),
+      serverRevision: SHA('e'), clientImage: '', clientPreprodImage: '', clientRevision: SHA('c') });
+    assert.deepEqual(built.services.clientPreprod, manifest(1).services.clientPreprod);
+    assert.ok(validate(built));
+  });
+
+  test('refuses a single client image: the production and preprod ones are built together', () => {
+    assert.throws(() => buildManifest({ ...base, ...newClient, clientPreprodImage: '', previous: { data: manifest(1) },
+      serverImage: '', serverRevision: SHA('b') }), /construites ensemble/);
+  });
+
+  test('refuses to reuse a missing preprod client image', () => {
+    assert.throws(() => buildManifest({ ...base, previous: { data: prePreprodManifest(1) }, serverImage: IMAGE,
+      serverRevision: SHA('e'), clientImage: '', clientPreprodImage: '', clientRevision: SHA('c') }),
+    /Aucune image clientPreprod/);
   });
 
   test('refuses to reuse an image when its service changed', () => {
@@ -141,6 +181,22 @@ describe('validateAll', () => {
     const dir = manifestsDir(['manifest-0001-aaaaaaa.yaml', gitClient], ['manifest-0002-aaaaaaa.yaml', swapped]);
     const errors = validateAll(dir, validate).join('\n');
     assert.match(errors, /manifest-0001.*must have required property 'image'|manifest-0001.*must be equal to constant/);
+    assert.match(errors, /manifest-0002.*must match pattern/);
+  });
+
+  test('accepts manifests without a preprod client image (before the preprod)', () => {
+    const dir = manifestsDir(['manifest-0001-aaaaaaa.yaml', prePreprodManifest(1)]);
+    assert.deepEqual(validateAll(dir, validate), []);
+  });
+
+  test('rejects a preprod client image from another revision, or under the production client name', () => {
+    const otherRevision = manifest(1);
+    otherRevision.services.clientPreprod.sourceRevision = SHA('d');
+    const productionName = manifest(2);
+    productionName.services.clientPreprod.image = CLIENT_IMAGE;
+    const dir = manifestsDir(['manifest-0001-aaaaaaa.yaml', otherRevision], ['manifest-0002-aaaaaaa.yaml', productionName]);
+    const errors = validateAll(dir, validate).join('\n');
+    assert.match(errors, /manifest-0001.*révisions différentes/);
     assert.match(errors, /manifest-0002.*must match pattern/);
   });
 
@@ -186,8 +242,8 @@ describe('validateAll', () => {
 });
 
 describe('deployTarget', () => {
-  const dir = manifestsDir(['manifest-0001-aaaaaaa.yaml', legacyManifest(1)], ['manifest-0002-aaaaaaa.yaml', manifest(2)],
-    ['manifest-0003-aaaaaaa.yaml', manifest(3)]);
+  const dir = manifestsDir(['manifest-0001-aaaaaaa.yaml', legacyManifest(1)], ['manifest-0002-aaaaaaa.yaml',
+    prePreprodManifest(2)], ['manifest-0003-aaaaaaa.yaml', manifest(3)]);
 
   test('defaults to the latest manifest', () => {
     assert.deepEqual(deployTarget(dir), { file: 'manifest-0003-aaaaaaa.yaml', serverImage: IMAGE, clientImage: CLIENT_IMAGE });
@@ -209,6 +265,20 @@ describe('deployTarget', () => {
 
   test('rejects a v1 manifest whose client is deployed from Git', () => {
     assert.throws(() => deployTarget(dir, 'manifest-0001-aaaaaaa.yaml'), /pas d'image client/);
+  });
+
+  test('preprod: same server image, preprod client image', () => {
+    assert.deepEqual(deployTarget(dir, '', 'preprod'),
+      { file: 'manifest-0003-aaaaaaa.yaml', serverImage: IMAGE, clientImage: CLIENT_PREPROD_IMAGE });
+  });
+
+  test('preprod: rejects a manifest older than the preprod, still deployable to production', () => {
+    assert.throws(() => deployTarget(dir, 'manifest-0002-aaaaaaa.yaml', 'preprod'), /pas d'image client de préprod/);
+    assert.equal(deployTarget(dir, 'manifest-0002-aaaaaaa.yaml').clientImage, CLIENT_IMAGE);
+  });
+
+  test('rejects an unknown environment', () => {
+    assert.throws(() => deployTarget(dir, '', 'staging'), /Environnement inconnu/);
   });
 });
 
@@ -241,7 +311,8 @@ describe('command line, on a real git history', () => {
     let planned = run(repo, 'plan.mjs');
     assert.deepEqual([planned.build_server, planned.build_client], ['true', 'true']);
     let created = run(repo, 'create.mjs', '--source-revision', head, '--server-revision', planned.server_revision,
-      '--client-revision', planned.client_revision, '--server-image', IMAGE, '--client-image', CLIENT_IMAGE);
+      '--client-revision', planned.client_revision, '--server-image', IMAGE, '--client-image', CLIENT_IMAGE,
+      '--client-preprod-image', CLIENT_PREPROD_IMAGE);
     assert.equal(created.version, '1');
     assert.equal(planned.server_revision, serverRev);
     git(repo, 'add', '-A');
@@ -252,12 +323,15 @@ describe('command line, on a real git history', () => {
     assert.deepEqual([planned.changed, planned.build_server, planned.build_client, planned.previous_version],
       ['true', 'false', 'true', '1']);
     created = run(repo, 'create.mjs', '--source-revision', head, '--server-revision', planned.server_revision,
-      '--client-revision', planned.client_revision, '--client-image', CLIENT_IMAGE.replace(/1/g, '3'));
+      '--client-revision', planned.client_revision, '--client-image', CLIENT_IMAGE.replace(/1/g, '3'),
+      '--client-preprod-image', CLIENT_PREPROD_IMAGE.replace(/9/g, '4'));
     assert.equal(created.file, `deploy/manifests/manifest-0002-${head.slice(0, 7)}.yaml`);
 
     const latestImage = execFileSync('node', [join(SCRIPTS, 'latest.mjs'), '--field', 'services.server.image'],
       { cwd: repo, encoding: 'utf8' }).trim();
     assert.equal(latestImage, IMAGE);
+    const target = run(repo, 'target.mjs', '--environment', 'preprod');
+    assert.equal(target.client_image, CLIENT_PREPROD_IMAGE.replace(/9/g, '4'));
     assert.match(execFileSync('node', [join(SCRIPTS, 'validate.mjs')], { cwd: repo, encoding: 'utf8' }), /2 manifest/);
   });
 });
