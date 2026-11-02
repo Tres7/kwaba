@@ -1,15 +1,20 @@
 """Drafts of new listings: the host saves the form at any time and resumes it later (host space)."""
 import json
 
+from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.securite import fraude
 from apps.users import api as users
+from apps.verifications import api as verifications
 
-from .models import BrouillonAnnonceModel
-from .serializers import HebergementCreateSerializer
+from . import soumission
+from .models import BrouillonAnnonceModel, HebergementPhotoModel
+from .serializers import HebergementCreateSerializer, HebergementSerializer
 
 # Only the fields of the listing form are kept, checked for real when the draft is submitted
 CHAMPS = frozenset(HebergementCreateSerializer.Meta.fields)
@@ -107,3 +112,54 @@ class BrouillonDetailView(APIView):
         brouillon.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class BrouillonConditionsView(APIView):
+    """GET: what the host has done and what is left before sending this draft (see soumission.conditions)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        brouillon = BrouillonAnnonceModel.objects.filter(pk=pk, host_id=request.user.pk).first()
+        if not brouillon:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        etat = soumission.conditions(request.user, brouillon.donnees)
+        return Response({**etat, 'bloquants': soumission.bloquants(etat)})
+
+
+class BrouillonSoumissionView(APIView):
+    """POST: sends the draft for verification. Everything is checked again here, in one transaction: the listing is
+    created, its photos attached to it and the draft deleted, or nothing happens."""
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request, pk):
+        if not users.peut_gerer_annonces(request.user):
+            return Response({'detail': 'Seuls les hôtes peuvent créer une annonce.'}, status=status.HTTP_403_FORBIDDEN)
+        # Locked: a double click cannot create the listing twice
+        brouillon = BrouillonAnnonceModel.objects.select_for_update().filter(pk=pk, host_id=request.user.pk).first()
+        if not brouillon:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        bloquants = soumission.bloquants(soumission.conditions(request.user, brouillon.donnees))
+        if bloquants:
+            return Response({'detail': "Il reste des étapes à terminer.", 'code': 'conditions', 'bloquants': bloquants},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            verifications.verifier_limite_annonces(request.user)
+        except verifications.VerificationErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = HebergementCreateSerializer(data=brouillon.donnees)
+        if not serializer.is_valid():
+            trouvailles = getattr(serializer, 'trouvailles', None)
+            if trouvailles:
+                fraude.signaler(request.user.id, 'annonce', 'nouvelle', trouvailles)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        hebergement = serializer.save(host_id=request.user.pk, attestation_le=timezone.now())
+        HebergementPhotoModel.objects.filter(
+            owner_id=request.user.pk, pk__in=soumission.ids_photos(brouillon.donnees['images']),
+        ).update(hebergement_id=hebergement.pk)
+        brouillon.delete()
+        verifications.visite_a_planifier(hebergement.id)
+        return Response(HebergementSerializer(hebergement, context={'request': request, 'proprietaire': True}).data,
+                        status=status.HTTP_201_CREATED)

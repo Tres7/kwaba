@@ -12,7 +12,8 @@ import type { HebergementType } from "@/types/api/models";
 import { useEquipements } from "../AmenityBadge";
 import type { DonneesAnnonce } from "../brouillons";
 import PhotoUploader from "../PhotoUploader";
-import { MAX_DESCRIPTION, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, type CleEtape } from "./etapes";
+import { EcranAccueil, EcranContrat, EcranIdentite, EcranPrix, EcranRecapitulatif, EcranRegles, EcranSecurite, EcranTelephone, EcranVersement } from "./EcransFin";
+import { MAX_DESCRIPTION, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, type CleEtape, type Conditions } from "./etapes";
 
 export interface EcranProps {
   donnees: DonneesAnnonce;
@@ -20,14 +21,15 @@ export interface EcranProps {
   erreurs: Record<string, string[]>;
   /** Photos being sent: the host waits before going on */
   onOccupe: (occupe: boolean) => void;
+  conditions?: Conditions;
 }
 
 const TYPES: HebergementType[] = ["maison", "appartement", "villa", "hotel", "residence", "auberge"];
 const VILLES = ["Lomé", "Kpalimé", "Aného", "Atakpamé", "Sokodé", "Kara"];
-const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
-const libelleClass = "block text-sm font-semibold text-dark mb-2";
+export const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+export const libelleClass = "block text-sm font-semibold text-dark mb-2";
 
-function Question({ cle, children }: { cle: string; children?: React.ReactNode }) {
+export function Question({ cle, children }: { cle: string; children?: React.ReactNode }) {
   const t = useTranslations("assistantHote");
   return (
     <>
@@ -38,7 +40,7 @@ function Question({ cle, children }: { cle: string; children?: React.ReactNode }
   );
 }
 
-function Erreur({ messages }: { messages?: string[] }) {
+export function Erreur({ messages }: { messages?: string[] }) {
   return messages?.length ? <p role="alert" className="text-sm text-red-700 mt-2">{messages[0]}</p> : null;
 }
 
@@ -261,4 +263,6 @@ function EcranDescription({ donnees, modifier, erreurs }: EcranProps) {
 export const ECRANS: Partial<Record<CleEtape, ComponentType<EcranProps>>> = {
   type: EcranType, espace: EcranEspace, adresse: EcranAdresse, position: EcranPosition, capacite: EcranCapacite,
   equipements: EcranEquipements, photos: EcranPhotos, titre: EcranTitre, description: EcranDescription,
+  prix: EcranPrix, regles: EcranRegles, accueil: EcranAccueil, securite: EcranSecurite, telephone: EcranTelephone,
+  identite: EcranIdentite, versement: EcranVersement, contrat: EcranContrat, recapitulatif: EcranRecapitulatif,
 };

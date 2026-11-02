@@ -4,7 +4,7 @@ from apps.users import api as users
 
 from . import notifications, tarifs
 from .documents import recu_paiement
-from .models import ConditionsHoteModel, PaiementModel, RemboursementModel
+from .models import ConditionsHoteModel, PaiementModel, ProfilVersementModel, RemboursementModel
 from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES, operateurs_du_pays
 from .paypal import FCFA_PAR_EURO
 from .registre import ProduitPaye, Relance, enregistrer as enregistrer_produit
@@ -17,7 +17,7 @@ from .services import (
 from .views import CompteRemboursementSerializer
 
 __all__ = [
-    'FONDATEURS_MAX', 'conditions_commission', 'modifier_conditions_hote', 'operateurs_du_pays', 'ProduitPaye', 'Relance', 'enregistrer_produit', 'autre_paiement_reussi', 'etats_paiement', 'etats_pour_serializer',
+    'a_profil_versement', 'titulaire_versement', 'FONDATEURS_MAX', 'conditions_commission', 'modifier_conditions_hote', 'operateurs_du_pays', 'ProduitPaye', 'Relance', 'enregistrer_produit', 'autre_paiement_reussi', 'etats_paiement', 'etats_pour_serializer',
     'ids_paiements_echoues', 'numero_remboursement_requis', 'synchroniser_dernier_paiement',
     'synchroniser_paiements_en_attente', 'CompteRemboursementSerializer', 'annuler_paiement_reservation', 'planifier_versement_hote', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
     'PaiementErreur', 'alerte_admin', 'date_fr', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
@@ -223,3 +223,12 @@ def modifier_conditions_hote(hote, valeurs, par) -> str | None:
     ConditionsHoteModel.objects.update_or_create(hote_id=hote.pk, defaults={
         'categorie': categorie, 'fondateur_debut': debut, 'fondateur_fin': fin, 'mis_a_jour_par_id': getattr(par, 'pk', None)})
     return None
+
+
+def a_profil_versement(hote_id) -> bool:
+    return ProfilVersementModel.objects.filter(hote_id=hote_id).exists()
+
+
+def titulaire_versement(hote_id) -> str:
+    """Name on the host's Mobile Money account: the agent compares it with the identity document."""
+    return ProfilVersementModel.objects.filter(hote_id=hote_id).values_list('titulaire', flat=True).first() or ''

@@ -87,7 +87,7 @@ export default function RevenusHote() {
   );
 }
 
-function ProfilVersementForm({ manquant }: { manquant: boolean }) {
+export function ProfilVersementForm({ manquant }: { manquant: boolean }) {
   const PAYS = useNomsPays();
   const t = useTranslations("revenus");
   const tD = useTranslations("remboursementDialog");

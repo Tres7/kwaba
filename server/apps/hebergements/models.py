@@ -90,6 +90,9 @@ class HebergementModel(models.Model):
     statut_verification = models.CharField(max_length=20, choices=STATUTS_VERIFICATION, default='en_attente', db_index=True)
     verifiee_le = models.DateTimeField(null=True, blank=True)
     motif_refus = models.TextField(blank=True)
+    # Statements of the host when sending the listing (cameras, animals, works), and when they certified it
+    declarations = models.JSONField(null=True, blank=True)
+    attestation_le = models.DateTimeField(null=True, blank=True)
     host_id = models.UUIDField(db_index=True)
     archivee_le = models.DateTimeField(null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -129,6 +132,8 @@ class HebergementPhotoModel(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_id = models.UUIDField(db_index=True)
+    # Filled when a wizard draft is sent; empty for the photos of a draft and for the older listings
+    hebergement_id = models.UUIDField(null=True, blank=True, db_index=True)
     image = models.ImageField(upload_to=_photo_upload_path)
     width = models.PositiveIntegerField()
     height = models.PositiveIntegerField()

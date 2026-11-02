@@ -2109,7 +2109,6 @@
     "retour": "Retour",
     "suivant": "Suivant",
     "commencer": "C'est parti",
-    "finir": "Fixer mon prix",
     "envoiPhotos": "Envoi des photos…",
     "progression": "Avancement de votre annonce",
     "preparation": "Préparation de votre annonce…",
@@ -2195,10 +2194,76 @@
       "exemple": "Une maison calme à cinq minutes de la plage, avec une grande terrasse ombragée…",
       "encore": "Encore {nombre} caractères au moins."
     },
-    "fin": {
-      "surtitre": "Bravo",
-      "titre": "Le plus dur est fait !",
-      "texte": "Il reste à fixer votre prix et vos règles, puis à envoyer votre annonce pour vérification."
+    "envoyer": "Envoyer pour vérification",
+    "envoi": "Envoi…",
+    "phase-3": {
+      "surtitre": "Phase 3",
+      "titre": "Terminez et publiez",
+      "texte": "Votre prix, vos règles, puis les vérifications qui rassurent les voyageurs."
+    },
+    "prix": {
+      "titre": "Quel prix pour une nuit ?",
+      "texte": "Vous pourrez le modifier à tout moment.",
+      "parNuit": "par nuit, en FCFA"
+    },
+    "regles": {
+      "titre": "Quelles sont vos règles ?",
+      "texte": "Les voyageurs les acceptent avant de réserver."
+    },
+    "accueil": {
+      "titre": "Comment accueillez-vous vos voyageurs ?"
+    },
+    "securite": {
+      "titre": "Quelques déclarations",
+      "texte": "Cochez ce qui concerne votre logement : les voyageurs doivent le savoir avant de réserver.",
+      "cameras": "Il y a des caméras à l'extérieur du logement",
+      "animaux": "Des animaux vivent sur place",
+      "travaux": "Des travaux bruyants sont en cours ou prévus",
+      "attestation": "Je certifie que ces informations sont exactes, que j'ai le droit de louer ce logement et que les photos m'appartiennent, conformément aux <cgu>conditions d'utilisation</cgu>."
+    },
+    "telephone": {
+      "titre": "Votre numéro de téléphone",
+      "texte": "L'agent Kwa-Ba vous appellera pour organiser la visite. Il n'est jamais montré aux voyageurs.",
+      "libelle": "Numéro de téléphone",
+      "enregistrer": "Enregistrer ce numéro",
+      "envoi": "Enregistrement…",
+      "fait": "Numéro enregistré"
+    },
+    "identite": {
+      "titre": "Votre pièce d'identité",
+      "texte": "Carte d'identité ou passeport. Elle est contrôlée par Kwa-Ba, puis supprimée."
+    },
+    "versement": {
+      "titre": "Où recevoir vos revenus ?",
+      "texte": "Votre part vous est versée par Mobile Money, 24 h après l'arrivée des voyageurs."
+    },
+    "contrat": {
+      "titre": "Les conditions à accepter",
+      "accepte": "Conditions acceptées",
+      "aSigner": "Votre contrat hôte sera aussi à signer : vous pourrez le faire depuis <lien>votre espace hôte</lien>."
+    },
+    "recapitulatif": {
+      "titre": "Tout est prêt ?",
+      "texte": "Voici votre annonce, telle que les voyageurs la verront.",
+      "parNuit": "par nuit",
+      "voyageurs": "{nombre, plural, one {# voyageur} other {# voyageurs}}",
+      "lignes": {
+        "annonce": "Annonce complète",
+        "telephone": "Numéro de téléphone",
+        "identite": "Pièce d'identité envoyée",
+        "versement": "Compte de versement"
+      },
+      "suite": "Votre annonce n'est pas encore publiée : Kwa-Ba contrôle votre identité, puis un agent visite le logement."
+    },
+    "envoyee": {
+      "titre": "Votre annonce est envoyée !",
+      "texte": "Merci. Voici la suite, nous vous prévenons par email à chaque étape.",
+      "espace": "Voir mon espace",
+      "suite": {
+        "identite": "Kwa-Ba contrôle votre pièce d'identité.",
+        "visite": "Un agent vous appelle et visite votre logement.",
+        "publication": "Votre annonce est publiée, et vous devenez hôte Kwa-Ba."
+      }
     }
   }
 }

@@ -50,4 +50,5 @@ def _http_test_client(settings):
 @pytest.fixture(autouse=True)
 def _modules_affiches(settings):
     # A module's tests assume it is displayed; the hidden launch state has its own tests (tests/integration/site)
-    settings.MODULES = {nom: True for nom in settings.MODULES}
+    # The host wizard is the exception: it closes the direct creation of listings that other tests use
+    settings.MODULES = {nom: nom != 'assistant_hote' for nom in settings.MODULES}

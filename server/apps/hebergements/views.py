@@ -30,6 +30,7 @@ from apps.paiements import api as paiements
 from apps.favoris import api as favoris
 from apps.users import api as users
 from apps.verifications import api as verifications
+from config.site import module_actif
 
 MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
 MAX_NUITS = 90  # same limit as a booking
@@ -167,6 +168,13 @@ class HebergementListView(APIView):
         if not users.peut_gerer_annonces(request.user):
             return Response(
                 {'detail': 'Seuls les hôtes peuvent publier un hébergement.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # With the wizard, a listing is sent through its checks (brouillons.BrouillonSoumissionView): not around them
+        if module_actif('assistant_hote') and request.user.role != 'admin':
+            return Response(
+                {'detail': "Créez votre annonce avec l'assistant.", 'code': 'assistant_requis'},
                 status=status.HTTP_403_FORBIDDEN,
             )
 

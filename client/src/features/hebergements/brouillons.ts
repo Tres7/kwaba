@@ -8,6 +8,8 @@ export type DonneesAnnonce = Partial<Pick<Hebergement,
   latitude?: number | string | null;
   longitude?: number | string | null;
   price_per_night?: number | null;
+  /** Statements of the host, kept with the listing; `attestation`: the information is true */
+  declarations?: { cameras?: boolean; animaux?: boolean; travaux?: boolean; attestation?: boolean } | null;
 };
 
 export interface BrouillonAnnonce {

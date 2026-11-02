@@ -4,4 +4,4 @@ export {
   allerPayer, enEuros, minutesRestantes, payerLocation, payerTransfert, useConfigPaiement, useDevisSejour, useOperateursMobileMoney,
   useRevenus, versPagePaiement,
 } from "./paiement";
-export { default as RevenusHote } from "./RevenusHote";
+export { default as RevenusHote, ProfilVersementForm } from "./RevenusHote";
