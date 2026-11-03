@@ -24,6 +24,9 @@ x-server: &server
   restart: unless-stopped
   logging: *logging
   security_opt: *security
+  # Private files (identity documents, signed contracts, invoices, visit photos) while R2_PRIVE_BUCKET is not set: in a
+  # volume shared by the API and the workers. In the container itself, every deployment deleted them.
+  volumes: [prive-data:/app/prive]
   # backend: PostgreSQL and RabbitMQ; edge: Internet (SMTP, Google, payment providers, R2) and the client
   networks: [backend, edge]
   depends_on:
@@ -168,6 +171,7 @@ networks:
 volumes:
   nginx-cache:
   postgres-data:
+  prive-data:
   rabbitmq-data:
   letsencrypt:
   certbot-www:

@@ -106,6 +106,14 @@ Relancer le workflow **deploy** avec un manifest antérieur (en prod, cocher `sk
   docker compose --env-file .deploy.env up -d --wait api consumer relay payments
   ```
 
+## Fichiers privés
+
+Pièces d'identité des hôtes, contrats signés et leurs PDF, factures, signature du représentant, photos des visites : jamais servis directement, lus seulement par l'API après contrôle du rôle.
+
+- Sans `R2_PRIVE_BUCKET` (`env/server.env`), ils sont sur le disque du VPS, dans le volume Docker `prive-data` (monté sur `/app/prive` de l'API et des workers). Avant ce volume, ils étaient dans le conteneur lui-même, et chaque déploiement les effaçait ; `deploy.sh` recopie dans le volume ceux des conteneurs en place avant de les remplacer.
+- Les sauvegardes de la nuit ne contiennent que la base : ce volume n'est pas encore sauvegardé.
+- Pour savoir quels fichiers la base cite sans qu'ils existent : `sudo -u deploy bash -c 'source /opt/kwaba/scripts/lib.sh; kwaba_compose exec api python manage.py fichiers_prives'`. Une pièce d'identité perdue se refuse avec un motif qui demande de la renvoyer : l'hôte est prévenu par email.
+
 ## Tâches planifiées (`/etc/cron.d/kwaba`)
 
 | Heure (UTC) | Tâche |
