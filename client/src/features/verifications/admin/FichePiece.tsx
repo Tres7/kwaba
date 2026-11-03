@@ -16,7 +16,8 @@ export interface Piece {
   titulaire_versement?: string;
 }
 
-/** Remote check of an identity document: readable, valid, in the host's name. The document is deleted afterwards. */
+/** Remote check of an identity document: readable, valid, in the host's name. Kept if verified (shown again at the
+ * visit), deleted if refused. */
 export default function FichePiece({ piece, peutDecider, onTerminee }: {
   piece: Piece;
   peutDecider: boolean;

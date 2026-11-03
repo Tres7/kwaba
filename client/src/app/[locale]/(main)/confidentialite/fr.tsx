@@ -9,7 +9,7 @@ export default function ContenuFr() {
   return (
     <LegalPage
       titre="Politique de confidentialité"
-      miseAJour="31 octobre 2026"
+      miseAJour="3 novembre 2026"
       intro={
         <>
           <p>
@@ -131,7 +131,7 @@ export default function ContenuFr() {
               <li>Compte inactif : 3 ans après la dernière activité, puis suppression ou anonymisation.</li>
               <li>Réservations et contrats conclus en ligne (acceptations, contrats signés) : 5 ans après leur exécution (<Link href="/cgv#preuve">CGV, art. 22.2</Link>).</li>
               <li>Paiements, versements, remboursements, factures, dons et reversements aux ONG : 10 ans (pièces comptables).</li>
-              <li>Justificatifs des partenaires (papiers du véhicule, permis, casier judiciaire, contrats) : pendant la relation, puis 5 ans. La copie de la pièce d&apos;identité d&apos;un hôte est supprimée dès que l&apos;agent a vérifié l&apos;identité (seuls le type de pièce et le résultat du contrôle sont conservés).</li>
+              <li>Justificatifs des partenaires (papiers du véhicule, permis, casier judiciaire, contrats) : pendant la relation, puis 5 ans. Il en va de même pour la copie de la pièce d&apos;identité d&apos;un hôte vérifiée par un agent ; une pièce refusée est supprimée dès le refus (seuls le type de pièce et le motif sont conservés).</li>
               <li>Compte rendu et photos de la visite d&apos;un logement : tant que l&apos;annonce est publiée, puis 3 ans.</li>
               <li>Conversations avec le Concierge IA : jusqu&apos;à ce que vous les supprimiez (bouton dans la conversation), et au plus 12 mois après le dernier message.</li>
               <li>Messages : 3 ans après le dernier message de la conversation.</li>

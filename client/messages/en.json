@@ -1438,7 +1438,7 @@
     "ceQuIlFaut": "What you need",
     "besoins": {
       "compte": "Kwa-Ba account and a phone number",
-      "identite": "An ID document (checked by Kwa-Ba, then deleted)",
+      "identite": "An ID document, checked by Kwa-Ba",
       "photos": "Photos of your place",
       "prix": "A nightly price in FCFA",
       "capacite": "Capacity and amenities"
@@ -1555,7 +1555,7 @@
       "refuseeAide": "Fix this, then save the listing: it will be checked again.",
       "verifiee": "Verified",
       "identiteTitre": "Identity check",
-      "identiteAide": "To protect travellers, every host is verified. Send an ID document: a Kwa-Ba agent checks it remotely, then it is deleted. During the visit, the agent will confirm it is really you.",
+      "identiteAide": "To protect travellers, every host is verified. Send an ID document: a Kwa-Ba agent checks it remotely. During the visit, the agent will confirm it is really you. Only Kwa-Ba agents can see it, never travellers.",
       "identiteSoumise": "ID document received: a Kwa-Ba agent is checking it, usually within 48 hours.",
       "identiteVerifiee": "Identity verified",
       "identiteRefusee": "ID document declined: {motif}",
@@ -2232,7 +2232,7 @@
     },
     "identite": {
       "titre": "Your identity document",
-      "texte": "National ID card or passport. It is checked by Kwa-Ba, then deleted."
+      "texte": "National ID card or passport. Only Kwa-Ba agents can see it: they check it, then confirm on site that it is really you."
     },
     "versement": {
       "titre": "Where should we send your earnings?",

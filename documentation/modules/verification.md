@@ -40,7 +40,9 @@ Les annonces existantes au moment de la mise en place ont été marquées `verif
 - Stockée dans un espace **privé** (`STORAGES['prive']`) : bucket R2 sans domaine public (`R2_PRIVE_BUCKET`), sinon le dossier `PRIVE_ROOT` (par défaut `server/prive/`), jamais servi par le serveur web.
 - Lue uniquement par l'API (`GET /api/v1/verifications/identite/<hote>/fichier/`), pour un agent ou un administrateur. Chaque lecture est inscrite au journal d'audit (`piece_consultee`).
 - Son envoi prévient les agents (« Pièce d'identité à contrôler »). Dans l'espace agent, la mission **Pièce d'identité** permet de voir le document, puis `POST /api/v1/verifications/identites/<hote>/decision/` avec `verifiee`, ou `refusee` et un motif (10 caractères au moins) envoyé à l'hôte.
-- **Supprimée dès la décision** : seuls le type de pièce et le résultat du contrôle sont conservés. Une pièce refusée peut être renvoyée.
+- **Gardée si elle est vérifiée**, pendant la relation avec l'hôte puis 5 ans (politique de confidentialité, « Durées de conservation ») : l'agent la revoit pendant la visite pour la comparer à la personne rencontrée. Une fois vérifiée, l'hôte ne peut plus la remplacer.
+- **Supprimée si elle est refusée**, à distance ou à la visite : seuls le type de pièce et le motif sont conservés. L'hôte peut en renvoyer une.
+- Les pièces vérifiées avant ce changement (novembre 2026) n'ont plus de copie (`copie: false` dans l'API) : l'agent demande l'original sur place.
 - Identité vérifiée : les annonces en attente de l'hôte sont aussitôt envoyées aux agents pour une visite (journal : `identite_verifiee` / `identite_refusee`).
 
 ## Visite de l'agent
@@ -53,7 +55,7 @@ Les annonces existantes au moment de la mise en place ont été marquées `verif
    - les photos correspondent au logement ;
    - les équipements annoncés sont présents.
 
-   Il peut ajouter jusqu'à 10 photos (stockage privé) et un commentaire.
+   Il peut ajouter jusqu'à 10 photos (stockage privé) et un commentaire. La pièce vérifiée de l'hôte s'ouvre depuis la fiche (« Voir »), pour le premier point.
 4. **Valider** n'est possible que si tous les points sont cochés et que l'identité de l'hôte est vérifiée. Si la personne rencontrée ne correspond pas à la pièce (case décochée, refus), la pièce repasse en `refusee`. L'annonce est alors publiée et l'hôte reçoit un email ; la fiche affiche « Vérifié par Kwa-Ba ».
 5. **Refuser** exige un motif d'au moins 10 caractères, envoyé à l'hôte et affiché dans son espace. L'hôte corrige l'annonce et l'enregistre : elle repart en vérification.
 
