@@ -141,8 +141,8 @@ describe("progressionPhases", () => {
   });
 });
 
-describe("visuels", () => {
-  it("every screen has its image", () => {
-    for (const etape of ETAPES) expect(etape.visuel).toMatch(/^\/hote\/[a-z0-9-]+\.webp$/);
+describe("pictogrammes", () => {
+  it("changes on every screen, so that the host sees the step move on", () => {
+    ETAPES.slice(1).forEach((etape, i) => expect(etape.picto, etape.cle).not.toBe(ETAPES[i].picto));
   });
 });

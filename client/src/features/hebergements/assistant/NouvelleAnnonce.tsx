@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { House } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { apiErrorMessage, estErreurApi } from "@/lib/api";
 import { creerBrouillon } from "../api";
+import { TuileFlottante } from "./Decor";
 
 const DEPART = { max_guests: 2, chambres: 1, salles_de_bain: 1, lits_doubles: 1 };
 
@@ -29,7 +31,7 @@ export default function NouvelleAnnonce() {
 
   return (
     <div className="min-h-dvh bg-light-muted flex flex-col items-center justify-center gap-4 px-6 text-center">
-      <img src="/hote/bienvenue.webp" alt="" width={800} height={800} className="assistant-flotte w-56 h-56 object-contain mix-blend-multiply" />
+      <TuileFlottante picto={House} phase={1} className="w-28 h-28 mb-4" />
       {erreur ? (
         <>
           <p role="alert" className="text-dark font-semibold max-w-sm">{erreur}</p>

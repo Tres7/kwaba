@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 import { lireConditions, soumettreBrouillon } from "../api";
 import type { DonneesAnnonce } from "../brouillons";
 import { clesHebergements } from "../hooks";
-import Decor from "./Decor";
+import Decor, { Tuile } from "./Decor";
 import { ECRANS } from "./Ecrans";
-import { ETAPES, etapeAffichee, etapeVoisine, peutContinuer, progressionPhases, type CleEtape, type Etape } from "./etapes";
+import { PICTOS_PHASES, etapeAffichee, etapeVoisine, peutContinuer, progressionPhases, type CleEtape, type Etape } from "./etapes";
 import { useBrouillonAssistant, type EtatSauvegarde } from "./useBrouillonAssistant";
 
 function Sauvegarde({ etat }: { etat: EtatSauvegarde }) {
@@ -67,9 +67,9 @@ function Intro({ cle }: { cle: CleEtape }) {
         <h1 className="font-heading font-bold text-dark text-3xl sm:text-4xl leading-tight">{t("bienvenue.titre")}</h1>
         <p className="text-gray-600 mt-3">{t("bienvenue.texte")}</p>
         <ol className="mt-7 space-y-5">
-          {(["1", "2", "3"] as const).map((phase) => (
+          {([1, 2, 3] as const).map((phase) => (
             <li key={phase} className="flex items-center gap-4">
-              <img src={`/hote/phase-${phase}.webp`} alt="" width={800} height={800} className="w-16 h-16 rounded-2xl bg-light-muted object-cover flex-shrink-0" />
+              <Tuile picto={PICTOS_PHASES[phase]} phase={phase} className="w-14 h-14 flex-shrink-0 shadow-none" />
               <div>
                 <p className="font-heading font-bold text-dark">{phase}. {t(`phases.${phase}.titre`)}</p>
                 <p className="text-sm text-gray-500">{t(`phases.${phase}.texte`)}</p>
@@ -149,7 +149,7 @@ function Parcours({ id, etape, donnees, assistant }: {
         // The welcome screen has the three phases to show below its image
         etape.cle === "bienvenue" ? "h-[26dvh]" : etape.intro ? "h-[44dvh]" : etape.sansVisuelMobile ? "h-0 lg:h-full" : "h-[24dvh]",
       )}>
-        <Decor src={etape.visuel} suivant={suivante?.visuel} grand={etape.intro} />
+        <Decor key={etape.cle} picto={etape.picto} phase={etape.phase} grand={etape.intro} />
         {etape.phase >= 2 && <Apercu donnees={donnees} />}
       </aside>
 

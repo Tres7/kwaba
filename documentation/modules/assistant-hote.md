@@ -1,6 +1,6 @@
 # Assistant « Devenir hôte »
 
-Parcours guidé pour créer une annonce : une question par écran, enregistrée au fur et à mesure, avec une miniature 3D par écran. Il remplace le long formulaire pour les **nouvelles annonces** ; `HebergementForm` reste pour modifier une annonce.
+Parcours guidé pour créer une annonce : une question par écran, enregistrée au fur et à mesure, avec un pictogramme par écran. Il remplace le long formulaire pour les **nouvelles annonces** ; `HebergementForm` reste pour modifier une annonce.
 
 Quand il est activé, `POST /api/v1/hebergements/` est réservé aux administrateurs (`403 assistant_requis`) : sinon, cette route permettrait de contourner les contrôles de l'envoi.
 
@@ -46,9 +46,8 @@ Les déclarations (`cameras`, `animaux`, `travaux`) sont conservées avec l'anno
 
 ## Écrans et visuels
 
-- **Disposition** : sur ordinateur, la miniature à gauche et la question à droite ; sur téléphone, la miniature en haut et une feuille blanche par-dessus. La carte et les photos ont besoin de place : pas de visuel sur téléphone.
-- **Mouvement** : la miniature flotte doucement et l'écran entre sur le côté (classes `assistant-*` de `globals.css`). Tout s'arrête avec `prefers-reduced-motion`.
-- **Données** : 27 images WebP, 343 Ko au total. L'image suivante est préchargée, et aucune n'est chargée si le navigateur est en économie de données.
-- **Source** : miniatures générées avec Figma AI (fichier « Kwa-Ba - Visuels 3D assistant hôte »). Pour en ajouter une, garder le même style : « 3D rendered miniature, soft clay style, warm light, plain solid cream background, no text ».
+- **Disposition** : sur ordinateur, le pictogramme à gauche et la question à droite ; sur téléphone, le pictogramme en haut et une feuille blanche par-dessus. La carte et les photos ont besoin de place : pas de visuel sur téléphone.
+- **Visuels** : un pictogramme de la bibliothèque du site (lucide) sur une tuile à la couleur de la phase (vert, orange, vert foncé), devant un motif géométrique discret dessiné en SVG (`Decor.tsx`). Rien à télécharger. Les images 3D générées par IA du début ont été retirées : elles se reconnaissaient comme telles, ce qui coûte de la confiance dans un parcours où l'hôte confie sa pièce d'identité. Pas d'image générée dans ce parcours.
+- **Mouvement** : la tuile flotte doucement et l'écran entre sur le côté (classes `assistant-*` de `globals.css`). Tout s'arrête avec `prefers-reduced-motion`.
 
 `espace` (`entier`, `chambre_privee`) est un nouveau champ de l'annonce : il s'affiche sur la fiche et se filtre avec `?espace=` sur `GET /api/v1/hebergements/`.
