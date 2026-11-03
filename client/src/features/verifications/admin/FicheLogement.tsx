@@ -15,6 +15,8 @@ export interface Logement {
   type: string;
   city: string;
   location: string;
+  /** How to find the place ("Derrière le CHU…") */
+  point_repere: string;
   /** Exact position placed by the host, for the visit */
   position: { lat: number; lng: number } | null;
   description: string;
@@ -106,6 +108,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Annonce à comparer au logement</h2>
         <p className="text-sm text-dark">{libelleType(logement.type, "fr")} · {logement.max_guests} voyageurs · {formatPrice(logement.price_per_night)} / nuit</p>
         <p className="text-sm text-gray-600">{logement.location ? `${logement.location}, ` : ""}{logement.city}</p>
+        {logement.point_repere && <p className="text-sm text-dark">Point de repère : {logement.point_repere}</p>}
         {logement.amenities.length > 0 && <p className="text-sm text-gray-600">Équipements annoncés : {logement.amenities.join(", ")}</p>}
         {logement.description && <p className="text-sm text-gray-600 whitespace-pre-line">{logement.description}</p>}
         <div className="flex gap-2 overflow-x-auto pb-1">

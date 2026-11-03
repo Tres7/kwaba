@@ -15,7 +15,7 @@ LATITUDE, LONGITUDE = Decimal('6.137500'), Decimal('1.212300')
 def _annonce(**extra):
     return {
         'name': 'Villa Océane', 'type': 'villa', 'city': 'Lomé', 'location': 'Baguida', 'price_per_night': 85000,
-        'max_guests': 6, 'surface_m2': 140, 'chambres': 3, 'lits_doubles': 2, 'petit_dejeuner': 'non',
+        'max_guests': 6, 'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 3, 'lits_doubles': 2, 'petit_dejeuner': 'non',
         'latitude': '6.1375', 'longitude': '1.2123', **extra,
     }
 

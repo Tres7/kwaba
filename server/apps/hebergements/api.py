@@ -28,6 +28,10 @@ def cartes(hebergement_ids: Iterable[uuid.UUID], request=None, publiees_seulemen
     return {uuid.UUID(carte['id']): carte for carte in donnees}
 
 
+# Codes of the listing types (Kwa-Ba taxonomy)
+TYPES = [code for code, _ in HebergementModel.TYPE_CHOICES]
+
+
 def resumes(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, dict]:
     ids = list(hebergement_ids)
     publiees = set(HebergementModel.objects.publiees().filter(pk__in=ids).values_list('pk', flat=True))
@@ -88,8 +92,14 @@ def annonces_en_attente(hote_ids: Iterable[uuid.UUID], ville: str = '') -> list[
     qs = HebergementModel.objects.filter(statut_verification='en_attente', host_id__in=list(hote_ids))
     if ville:
         qs = qs.filter(city__icontains=ville)
-    # With the exact position: the agent goes there
-    return [{**_fiche(h), 'latitude': h.latitude, 'longitude': h.longitude} for h in qs.order_by('created_at')]
+    # With the exact position and the landmark: the agent goes there
+    return [{**_fiche(h), 'latitude': h.latitude, 'longitude': h.longitude, 'point_repere': h.point_repere}
+            for h in qs.order_by('created_at')]
+
+
+def points_repere(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """Landmarks of these listings, for the travellers whose booking is paid."""
+    return dict(HebergementModel.tous.filter(pk__in=list(hebergement_ids)).values_list('pk', 'point_repere'))
 
 
 def nb_annonces_non_verifiees(hote_id: uuid.UUID) -> int:

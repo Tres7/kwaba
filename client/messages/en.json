@@ -185,12 +185,6 @@
     "voirTout": "See all",
     "villeResume": "{nombre, plural, one {# stay} other {# stays}} · from {prix}",
     "typesHebergement": "Types of stay",
-    "types": {
-      "hotels": "Hotels",
-      "appartements": "Apartments",
-      "villas": "Villas",
-      "auberges": "Guesthouses"
-    },
     "mieuxNotes": "Top rated",
     "voirMieuxNotes": "See all top-rated stays",
     "aucunHebergement": "No stays published yet.",
@@ -480,13 +474,7 @@
   "recherche": {
     "typeLogement": "Type of place",
     "types": {
-      "tous": "All",
-      "hotels": "Hotels",
-      "villas": "Villas",
-      "appartements": "Apartments",
-      "auberges": "Guesthouses",
-      "maisons": "Houses",
-      "residences": "Aparthotels"
+      "tous": "All"
     },
     "trierPar": "Sort by",
     "tris": {
@@ -588,8 +576,7 @@
     "similaires": "You may also like",
     "reglesMaison": "House rules",
     "voirTousEquipements": "Show all {nombre} amenities",
-    "voirMoinsEquipements": "Show less",
-    "chambrePrivee": "private room"
+    "voirMoinsEquipements": "Show less"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -652,7 +639,8 @@
     "payer": "Pay {montant}",
     "confirmerReservation": "Confirm booking",
     "accepterPaiement": "I accept the <cgu>terms of sale</cgu>, the listing rules and the <annulation>cancellation policy</annulation>.",
-    "accepterConfirmation": "I accept the <cgu>terms of sale</cgu>, the listing rules and the <annulation>cancellation policy</annulation>."
+    "accepterConfirmation": "I accept the <cgu>terms of sale</cgu>, the listing rules and the <annulation>cancellation policy</annulation>.",
+    "pointRepere": "Landmark: {repere}"
   },
   "paiement": {
     "paiementNonDemarre": "The payment could not start.",
@@ -857,7 +845,8 @@
     "annulation": "Cancelling…",
     "annuler": "Cancel",
     "numeroEnregistre": "Number saved: your refund is on its way.",
-    "recommande": "Recommended for your next trip"
+    "recommande": "Recommended for your next trip",
+    "pointRepere": "Landmark: {repere}"
   },
   "avisDepot": {
     "notes": {
@@ -1602,12 +1591,14 @@
   },
   "annonce": {
     "types": {
-      "hotel": "Room in a property with services",
-      "villa": "Entire house, often with a garden or pool",
-      "appartement": "Entire home in a building",
+      "villa": "Large house, often with a garden or a pool",
+      "appartement": "Entire home in a building, with one or more bedrooms",
       "auberge": "Simple, friendly place on a small budget",
-      "maison": "Entire house, in town or in a village",
-      "residence": "Apartment or studio with hotel services (cleaning, reception)"
+      "residence": "Apartment or studio with hotel services (cleaning, reception)",
+      "chambre_privee": "A room just for the travellers, the rest of the home is shared",
+      "studio": "A single living room with a kitchenette and a bathroom",
+      "maison_entiere": "Entire house, in town or in a village",
+      "chambre_hotel": "Room in a hotel, which takes care of the cleaning"
     },
     "erreurDroits": "Confirm that you hold the rights to the published photos.",
     "erreurPosition": "Place your listing on the map.",
@@ -1645,14 +1636,14 @@
       "ville": "the city",
       "prix": "the price per night",
       "position": "the position on the map",
-      "surface": "the floor area",
       "lits": "at least one bed",
       "petitDejeuner": "breakfast",
-      "photos": "at least one photo"
+      "photos": "at least one photo",
+      "pointRepere": "the landmark",
+      "sallesDeBain": "the bathrooms"
     },
     "detailsTitre": "The place in detail",
     "detailsAide": "Shown on your listing: these details reassure travellers.",
-    "surface": "Floor area (m²)",
     "chambres": "Bedrooms",
     "sallesDeBain": "Bathrooms",
     "lits": "Beds",
@@ -1672,11 +1663,11 @@
     "reglesMaison": "House rules",
     "reglesAide": "Shown on your listing: travellers know what to expect before booking.",
     "nonPrecise": "Not specified",
-    "espace": "What travellers book",
-    "espaces": {
-      "entier": "The entire place",
-      "chambre_privee": "A private room"
-    }
+    "pointRepere": "Landmark",
+    "pointRepereExemple": "Behind the CHU Sylvanus Olympio, Tokoin",
+    "pointRepereAide": "How people find the place in Lomé. Only the Kwa-Ba agent and the travellers who paid their booking can see it.",
+    "chambresAide": "0 for a studio.",
+    "litsRequis": "Add at least one bed to continue."
   },
   "revenus": {
     "statuts": {
@@ -1888,8 +1879,6 @@
   },
   "details": {
     "titre": "The place in detail",
-    "surfaceTitre": "Floor area",
-    "surface": "{m2} m²",
     "chambresTitre": "Bedrooms",
     "chambres": "{nombre, plural, =1 {1 bedroom} other {# bedrooms}}",
     "litsTitre": "{nombre, plural, =1 {1 bed} other {# beds}}",
@@ -2144,17 +2133,6 @@
     },
     "type": {
       "titre": "What kind of place are you offering?"
-    },
-    "espace": {
-      "titre": "What do travellers book?",
-      "entier": {
-        "titre": "The entire place",
-        "texte": "Travellers have the place to themselves."
-      },
-      "chambre": {
-        "titre": "A private room",
-        "texte": "A room of their own, the rest is shared."
-      }
     },
     "adresse": {
       "titre": "Where is your place?",

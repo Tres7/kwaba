@@ -18,7 +18,7 @@ def _paiement_hors_ligne(settings):
 
 @pytest.fixture
 def hotel(make_hebergement):
-    h = make_hebergement(type='hotel', price_per_night=30000, max_guests=2)
+    h = make_hebergement(type='chambre_hotel', price_per_night=30000, max_guests=2)
     h.types.update(nom='Double standard', quantite=3)
     return h
 

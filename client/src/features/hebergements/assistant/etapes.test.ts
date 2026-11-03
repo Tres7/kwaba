@@ -3,8 +3,8 @@ import { ETAPES, etapeAffichee, etapeVoisine, MAX_TITRE, MIN_DESCRIPTION, MIN_PH
 import type { DonneesAnnonce } from "../brouillons";
 
 const PHASE_1: DonneesAnnonce = {
-  type: "villa", espace: "entier", city: "Lomé", location: "Baguida", latitude: 6.13, longitude: 1.22,
-  max_guests: 4, surface_m2: 90, lits_doubles: 2,
+  type: "villa", city: "Lomé", location: "Baguida", point_repere: "Derrière la pharmacie", latitude: 6.13, longitude: 1.22,
+  max_guests: 4, chambres: 2, salles_de_bain: 1, lits_doubles: 2,
 };
 const photos = (n: number) => Array.from({ length: n }, (_, i) => `https://kwa-ba.com/photos/${i}.jpg`);
 const pret = (cle: string, d: DonneesAnnonce) => ETAPES.find((e) => e.cle === cle)!.pret!(d);
@@ -30,9 +30,10 @@ describe("etapeAffichee", () => {
 });
 
 describe("conditions pour continuer", () => {
-  it("needs the city and the district", () => {
-    expect(pret("adresse", { city: "Lomé", location: "  " })).toBe(false);
-    expect(pret("adresse", { city: "Lomé", location: "Agoè" })).toBe(true);
+  it("needs the city, the district and a landmark", () => {
+    expect(pret("adresse", { city: "Lomé", location: "  ", point_repere: "Derrière le CHU" })).toBe(false);
+    expect(pret("adresse", { city: "Lomé", location: "Agoè" })).toBe(false);
+    expect(pret("adresse", { city: "Lomé", location: "Agoè", point_repere: "Derrière le CHU" })).toBe(true);
   });
 
   it("needs a position on the map", () => {
@@ -40,9 +41,12 @@ describe("conditions pour continuer", () => {
     expect(pret("position", { latitude: 6.13, longitude: 1.22 })).toBe(true);
   });
 
-  it("needs at least one bed and a surface", () => {
-    expect(pret("capacite", { max_guests: 2, surface_m2: 40 })).toBe(false);
-    expect(pret("capacite", { max_guests: 2, surface_m2: 40, canapes_lits: 1 })).toBe(true);
+  it("needs bedrooms, a bathroom and at least one bed, but no surface", () => {
+    const studio = { max_guests: 2, chambres: 0, salles_de_bain: 1 };
+    expect(pret("capacite", studio)).toBe(false);
+    expect(pret("capacite", { ...studio, canapes_lits: 1 })).toBe(true);
+    expect(pret("capacite", { ...studio, canapes_lits: 1, salles_de_bain: 0 })).toBe(false);
+    expect(pret("capacite", { ...studio, canapes_lits: 1, max_guests: 21 })).toBe(false);
   });
 
   it(`needs ${MIN_PHOTOS} photos`, () => {

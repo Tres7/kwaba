@@ -2,8 +2,8 @@ import type { Hebergement } from "@/types/api/models";
 
 /** Fields of the listing form, as sent to the API; incomplete in a draft. */
 export type DonneesAnnonce = Partial<Pick<Hebergement,
-  "name" | "type" | "espace" | "city" | "location" | "max_guests" | "description" | "image_url" | "images" | "amenities"
-  | "surface_m2" | "chambres" | "salles_de_bain" | "lits_doubles" | "lits_simples" | "canapes_lits"
+  "name" | "type" | "city" | "location" | "point_repere" | "max_guests" | "description" | "image_url" | "images" | "amenities"
+  | "chambres" | "salles_de_bain" | "lits_doubles" | "lits_simples" | "canapes_lits"
   | "petit_dejeuner" | "petit_dejeuner_prix" | "arrivee_a_partir" | "depart_avant" | "politique_annulation">> & {
   latitude?: number | string | null;
   longitude?: number | string | null;
@@ -32,7 +32,8 @@ const CRITERES: [string, (d: DonneesAnnonce) => boolean][] = [
   ["ville", (d) => !!d.city?.trim()],
   ["prix", (d) => (d.price_per_night ?? 0) > 0],
   ["position", (d) => d.latitude != null && d.longitude != null],
-  ["surface", (d) => (d.surface_m2 ?? 0) > 0],
+  ["pointRepere", (d) => !!d.point_repere?.trim()],
+  ["sallesDeBain", (d) => (d.salles_de_bain ?? 0) >= 1],
   ["lits", (d) => (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0) > 0],
   ["petitDejeuner", (d) => !!d.petit_dejeuner && (d.petit_dejeuner !== "option" || (d.petit_dejeuner_prix ?? 0) > 0)],
   ["photos", (d) => (d.images?.length ?? 0) > 0],

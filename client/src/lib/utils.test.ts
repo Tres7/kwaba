@@ -39,10 +39,10 @@ describe("formats", () => {
 
   it("libellés traduits, code rendu tel quel s'il est inconnu, liste des codes conservée", () => {
     const { TYPE_LABELS, ROLE_LABELS } = formats("en");
-    expect(TYPE_LABELS.maison).toBe("House");
+    expect(TYPE_LABELS.maison_entiere).toBe("Entire house");
     expect(TYPE_LABELS.inconnu).toBe("inconnu");
     expect(ROLE_LABELS.voyageur).toBe("Traveller");
-    expect(Object.keys(TYPE_LABELS)).toContain("hotel");
+    expect(Object.keys(TYPE_LABELS)).toContain("chambre_hotel");
   });
 });
 

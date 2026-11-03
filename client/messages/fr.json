@@ -185,12 +185,6 @@
     "voirTout": "Voir tout",
     "villeResume": "{nombre, plural, one {# hébergement} other {# hébergements}} · dès {prix}",
     "typesHebergement": "Types d'hébergement",
-    "types": {
-      "hotels": "Hôtels",
-      "appartements": "Appartements",
-      "villas": "Villas",
-      "auberges": "Auberges"
-    },
     "mieuxNotes": "Les mieux notés",
     "voirMieuxNotes": "Voir tous les logements les mieux notés",
     "aucunHebergement": "Aucun hébergement publié pour le moment.",
@@ -480,13 +474,7 @@
   "recherche": {
     "typeLogement": "Type de logement",
     "types": {
-      "tous": "Tous",
-      "hotels": "Hôtels",
-      "villas": "Villas",
-      "appartements": "Appartements",
-      "auberges": "Auberges",
-      "maisons": "Maisons",
-      "residences": "Résidences"
+      "tous": "Tous"
     },
     "trierPar": "Trier par",
     "tris": {
@@ -588,8 +576,7 @@
     "similaires": "Vous aimerez aussi",
     "reglesMaison": "Règles de la maison",
     "voirTousEquipements": "Afficher les {nombre} équipements",
-    "voirMoinsEquipements": "Afficher moins",
-    "chambrePrivee": "chambre privée"
+    "voirMoinsEquipements": "Afficher moins"
   },
   "avis": {
     "repondre": "Répondre publiquement",
@@ -652,7 +639,8 @@
     "payer": "Payer {montant}",
     "confirmerReservation": "Confirmer la réservation",
     "accepterPaiement": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>.",
-    "accepterConfirmation": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>."
+    "accepterConfirmation": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>.",
+    "pointRepere": "Point de repère : {repere}"
   },
   "paiement": {
     "paiementNonDemarre": "Le paiement n'a pas pu démarrer.",
@@ -857,7 +845,8 @@
     "annulation": "Annulation…",
     "annuler": "Annuler",
     "numeroEnregistre": "Numéro enregistré : votre remboursement est en route.",
-    "recommande": "Recommandé pour votre prochain voyage"
+    "recommande": "Recommandé pour votre prochain voyage",
+    "pointRepere": "Point de repère : {repere}"
   },
   "avisDepot": {
     "notes": {
@@ -1602,12 +1591,14 @@
   },
   "annonce": {
     "types": {
-      "hotel": "Chambre dans un établissement avec services",
-      "villa": "Maison entière, souvent avec jardin ou piscine",
-      "appartement": "Logement entier dans un immeuble",
+      "villa": "Grande maison, souvent avec jardin ou piscine",
+      "appartement": "Logement entier dans un immeuble, avec une ou plusieurs chambres",
       "auberge": "Hébergement simple et convivial, petit budget",
-      "maison": "Maison entière, en ville ou au village",
-      "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)"
+      "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)",
+      "chambre_privee": "Une chambre rien que pour les voyageurs, le reste du logement est partagé",
+      "studio": "Une seule pièce à vivre avec coin cuisine et salle de bain",
+      "maison_entiere": "Maison entière, en ville ou au village",
+      "chambre_hotel": "Chambre dans un hôtel, qui s'occupe du ménage"
     },
     "erreurDroits": "Confirmez que vous détenez les droits sur les photos publiées.",
     "erreurPosition": "Placez votre logement sur la carte.",
@@ -1645,14 +1636,14 @@
       "ville": "la ville",
       "prix": "le prix par nuit",
       "position": "la position sur la carte",
-      "surface": "la surface",
       "lits": "au moins un lit",
       "petitDejeuner": "le petit-déjeuner",
-      "photos": "au moins une photo"
+      "photos": "au moins une photo",
+      "pointRepere": "le point de repère",
+      "sallesDeBain": "les salles de bain"
     },
     "detailsTitre": "Le logement en détail",
     "detailsAide": "Ces informations s'affichent sur votre annonce et rassurent les voyageurs.",
-    "surface": "Surface (m²)",
     "chambres": "Chambres",
     "sallesDeBain": "Salles de bain",
     "lits": "Lits",
@@ -1672,11 +1663,11 @@
     "reglesMaison": "Règles de la maison",
     "reglesAide": "Elles s'affichent sur votre annonce : les voyageurs savent à quoi s'attendre avant de réserver.",
     "nonPrecise": "Non précisé",
-    "espace": "Ce que réservent les voyageurs",
-    "espaces": {
-      "entier": "Le logement entier",
-      "chambre_privee": "Une chambre privée"
-    }
+    "pointRepere": "Point de repère",
+    "pointRepereExemple": "Derrière le CHU Sylvanus Olympio, Tokoin",
+    "pointRepereAide": "Comment on trouve le logement à Lomé. Seuls l'agent Kwa-Ba et les voyageurs qui ont payé leur réservation le voient.",
+    "chambresAide": "0 pour un studio.",
+    "litsRequis": "Ajoutez au moins un lit pour continuer."
   },
   "revenus": {
     "statuts": {
@@ -1888,8 +1879,6 @@
   },
   "details": {
     "titre": "Le logement en détail",
-    "surfaceTitre": "Surface",
-    "surface": "{m2} m²",
     "chambresTitre": "Chambres",
     "chambres": "{nombre, plural, =1 {1 chambre} other {# chambres}}",
     "litsTitre": "{nombre, plural, =1 {1 lit} other {# lits}}",
@@ -2144,17 +2133,6 @@
     },
     "type": {
       "titre": "Quel type de logement proposez-vous ?"
-    },
-    "espace": {
-      "titre": "Que réservent les voyageurs ?",
-      "entier": {
-        "titre": "Le logement entier",
-        "texte": "Les voyageurs ont le logement pour eux seuls."
-      },
-      "chambre": {
-        "titre": "Une chambre privée",
-        "texte": "Une chambre rien que pour eux, le reste est partagé."
-      }
     },
     "adresse": {
       "titre": "Où se trouve votre logement ?",

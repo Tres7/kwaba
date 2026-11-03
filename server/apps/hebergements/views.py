@@ -103,7 +103,7 @@ class HebergementListView(APIView):
 
         type_ = request.query_params.get('type')
         if type_:
-            qs = qs.filter(type=type_)
+            qs = qs.filter(type=HebergementModel.ANCIENS_TYPES.get(type_, type_))
 
         espace = request.query_params.get('espace')
         if espace:

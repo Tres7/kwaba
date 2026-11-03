@@ -13,7 +13,7 @@ def _listing(**overrides):
         'latitude': 6.13, 'longitude': 1.22,
         'price_per_night': 45000,
         'max_guests': 4,
-        'surface_m2': 70, 'chambres': 2, 'lits_doubles': 1, 'lits_simples': 1, 'petit_dejeuner': 'non',
+        'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 2, 'lits_doubles': 1, 'lits_simples': 1, 'petit_dejeuner': 'non',
         **overrides,
     }
 

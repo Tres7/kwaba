@@ -58,7 +58,7 @@ class HebergementSerializer(serializers.ModelSerializer):
             'price_per_night', 'rating', 'review_count', 'image_url', 'images',
             'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie', 'hote_fondateur',
             'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne', 'statut_annonce',
-            'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
+            'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits', 'point_repere',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant',
             'politique_annulation', 'frais_voyageur', 'types',
         ]
@@ -71,8 +71,8 @@ class HebergementSerializer(serializers.ModelSerializer):
             for champ in ('name', 'description', 'location'):
                 if donnees.get(champ):
                     donnees[champ] = coordonnees.analyser(donnees[champ])[0]
-            # Anti-bypass: the exact position would lead to the host without booking
-            del donnees['latitude'], donnees['longitude']
+            # Anti-bypass: the exact position and the landmark would lead to the host without booking
+            del donnees['latitude'], donnees['longitude'], donnees['point_repere']
         return donnees
 
     def _par_hote(self, cle: str, obj, charger):
@@ -147,19 +147,19 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = HebergementModel
         fields = [
-            'name', 'description', 'type', 'espace', 'city', 'location', 'latitude', 'longitude',
+            'name', 'description', 'type', 'city', 'location', 'point_repere', 'latitude', 'longitude',
             'price_per_night', 'image_url', 'images', 'max_guests',
             'amenities', 'is_available',
-            'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
+            'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant', 'politique_annulation',
             'declarations',
         ]
         extra_kwargs = {
             'latitude': {'min_value': -85, 'max_value': 85},
             'longitude': {'min_value': -180, 'max_value': 180},
-            'surface_m2': {'min_value': 5, 'max_value': 100000},
+            'max_guests': {'max_value': 20},
             'chambres': {'max_value': 200},
-            'salles_de_bain': {'max_value': 200},
+            'salles_de_bain': {'min_value': 1, 'max_value': 200},
             'lits_doubles': {'max_value': 200},
             'lits_simples': {'max_value': 200},
             'canapes_lits': {'max_value': 200},
@@ -170,8 +170,9 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
     POSITION_MANQUANTE = "Placez votre logement sur la carte."
     DETAILS_OBLIGATOIRES = {
         'latitude': POSITION_MANQUANTE,
-        'surface_m2': "Indiquez la surface en m².",
-        'chambres': "Indiquez le nombre de chambres.",
+        'point_repere': "Indiquez un point de repère pour trouver le logement.",
+        'chambres': "Indiquez le nombre de chambres (0 pour un studio).",
+        'salles_de_bain': "Indiquez le nombre de salles de bain.",
         'petit_dejeuner': "Indiquez si le petit-déjeuner est inclus, en option ou non proposé.",
     }
 
@@ -213,6 +214,9 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
 
     def validate_location(self, value):
         return self._sans_coordonnees(value)
+
+    def validate_point_repere(self, value):
+        return self._sans_coordonnees(value.strip())
 
     def validate_price_per_night(self, value):
         if value <= 0:

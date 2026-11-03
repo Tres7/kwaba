@@ -259,7 +259,7 @@ function EspaceHoteContent() {
                     <p className="font-heading font-bold text-primary whitespace-nowrap">{formatPrice(h.price_per_night)}<span className="text-xs text-gray-400 font-normal">/nuit</span></p>
                   </div>
                   <RatingBadge rating={h.rating} count={h.review_count} variant="full" className="mt-2" />
-                  {h.surface_m2 == null && (
+                  {(h.chambres == null || h.salles_de_bain == null || !h.point_repere) && (
                     <button type="button" onClick={() => setEditing(h)} className="relative zone-tactile flex items-start gap-1.5 text-left text-xs font-semibold text-amber-800 mt-2 hover:underline">
                       <AlertTriangle size={14} className="flex-shrink-0 mt-px" /> {tAnnonce("detailsManquants")}
                     </button>

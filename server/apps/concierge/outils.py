@@ -13,7 +13,7 @@ from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 from apps.transferts import api as transferts
 
-TYPES = ['hotel', 'villa', 'appartement', 'auberge']
+TYPES = hebergements.TYPES
 
 
 def _outil(name: str, description: str, proprietes: dict, requis: list[str]) -> dict:

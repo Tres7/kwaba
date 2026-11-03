@@ -8,18 +8,18 @@ from .models import HebergementModel, TypeLogementModel
 
 # Name of the default type, by kind of establishment
 NOMS_PAR_DEFAUT = {
-    'hotel': 'Chambre',
-    'auberge': 'Chambre',
-    'residence': 'Appartement',
+    'chambre_privee': 'Chambre privée',
+    'studio': 'Studio',
     'appartement': 'Appartement entier',
-    'villa': 'Logement entier',
-    'maison': 'Logement entier',
+    'maison_entiere': 'Maison entière',
+    'villa': 'Villa entière',
+    'chambre_hotel': 'Chambre',
+    'residence': 'Appartement',
+    'auberge': 'Chambre',
 }
 
 
 def nom_par_defaut(hebergement: HebergementModel) -> str:
-    if hebergement.espace == 'chambre_privee':
-        return 'Chambre privée'
     return NOMS_PAR_DEFAUT.get(hebergement.type, 'Logement entier')
 
 

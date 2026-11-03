@@ -13,7 +13,7 @@ Code : `client/src/features/hebergements/assistant/` et `client/src/app/[locale]
 | Phase | Écrans |
 |---|---|
 | Accueil | `bienvenue` |
-| 1. Parlez-nous de votre logement | `phase-1`, `type`, `espace`, `adresse`, `position`, `capacite` |
+| 1. Parlez-nous de votre logement | `phase-1`, `type`, `adresse`, `position`, `capacite` |
 | 2. Faites-le sortir du lot | `phase-2`, `equipements`, `photos`, `titre`, `description` |
 | 3. Terminez et publiez | `phase-3`, `prix`, `regles`, `accueil`, `securite`, `telephone`, `identite`, `versement`, `contrat`, `recapitulatif` |
 
@@ -50,4 +50,10 @@ Les déclarations (`cameras`, `animaux`, `travaux`) sont conservées avec l'anno
 - **Visuels** : un pictogramme de la bibliothèque du site (lucide) sur une tuile à la couleur de la phase (vert, orange, vert foncé), devant un motif géométrique discret dessiné en SVG (`Decor.tsx`). Rien à télécharger. Les images 3D générées par IA du début ont été retirées : elles se reconnaissaient comme telles, ce qui coûte de la confiance dans un parcours où l'hôte confie sa pièce d'identité. Pas d'image générée dans ce parcours.
 - **Mouvement** : la tuile flotte doucement et l'écran entre sur le côté (classes `assistant-*` de `globals.css`). Tout s'arrête avec `prefers-reduced-motion`.
 
-`espace` (`entier`, `chambre_privee`) est un nouveau champ de l'annonce : il s'affiche sur la fiche et se filtre avec `?espace=` sur `GET /api/v1/hebergements/`.
+## Types de logement et capacité
+
+Taxonomie Kwa-Ba (brief AN-TAX du 3 novembre 2026), les mots employés à Lomé, sans T1/T2 ni surface : `chambre_privee`, `studio`, `appartement`, `maison_entiere`, `villa`, `chambre_hotel`, plus `residence` et `auberge`, gardés par l'équipe. Les anciens `maison` et `hotel` sont devenus `maison_entiere` et `chambre_hotel` (migration `hebergements.0018`) ; `?type=hotel` et `?type=maison` marchent encore dans la recherche. Libellés et pictogrammes : `client/src/components/hebergement/TypeLogement.tsx`. Sur une carte et sur la fiche, le nom de la langue de la page est en grand et l'autre dans un petit badge (« Appartement » + « Apartment »).
+
+- `espace` (`entier`, `chambre_privee`) suit le type (`HebergementModel.save()`) : plus de question à part. Il se filtre encore avec `?espace=`.
+- **Obligatoires pour une nouvelle annonce** : voyageurs (1 à 20), chambres (0 pour un studio), salles de bain (1 au moins), un lit au moins et le **point de repère** (« Derrière le CHU Sylvanus Olympio, Tokoin », 200 caractères, sans coordonnées). La surface n'est plus demandée ni affichée (colonne `surface_m2` gardée jusqu'à une prochaine version).
+- **Point de repère** : presque l'adresse exacte, donc jamais sur l'annonce publique. L'agent le voit pour la visite, le voyageur dans sa réservation une fois payée (`point_repere` de `GET /api/v1/reservations/`).

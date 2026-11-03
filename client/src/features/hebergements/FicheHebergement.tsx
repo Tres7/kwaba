@@ -29,6 +29,7 @@ import { useDevisSejour } from "@/features/paiements";
 import { contacterHote } from "@/features/messaging";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { LibelleType } from "@/components/hebergement/TypeLogement";
 
 /**
  * Place of photo i in the 4 × 2 desktop mosaic, so that it is always full whatever the number of photos:
@@ -45,7 +46,7 @@ function celluleMosaique(i: number, nombre: number) {
 }
 
 function HebergementContent() {
-  const { TYPE_LABELS, formatDate, formatPrice } = useFormat();
+  const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("fiche");
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
@@ -185,7 +186,9 @@ function HebergementContent() {
               <span className="text-muted">·</span>
               <span className="flex items-center gap-1 text-muted"><MapPin size={14} />{hebergement.location ? `${hebergement.location}, ` : ""}{hebergement.city}</span>
               <span className="text-muted">·</span>
-              <span className="text-muted">{TYPE_LABELS[hebergement.type]}{hebergement.espace === "chambre_privee" && ` · ${t("chambrePrivee")}`} · {t("jusquA", { nombre: hebergement.max_guests })}</span>
+              <LibelleType type={hebergement.type} className="text-muted" />
+              <span className="text-muted">·</span>
+              <span className="text-muted">{t("jusquA", { nombre: hebergement.max_guests })}</span>
               {hebergement.statut_verification === "verifiee" && (
                 <>
                   <span className="text-muted">·</span>

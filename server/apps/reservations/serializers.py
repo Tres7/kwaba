@@ -27,6 +27,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     remboursement = serializers.SerializerMethodField()
 
     type_logement_nom = serializers.SerializerMethodField()
+    point_repere = serializers.SerializerMethodField()
 
     class Meta:
         model = ReservationModel
@@ -35,7 +36,7 @@ class ReservationSerializer(serializers.ModelSerializer):
             'check_in', 'check_out',
             'guests_count', 'total_price', 'status', 'payment_method',
             'message', 'nights', 'reference', 'guest_name', 'avis_id', 'peut_evaluer', 'created_at',
-            'montants', 'paiement', 'remboursement', 'expire_le', 'annule_par',
+            'montants', 'paiement', 'remboursement', 'expire_le', 'annule_par', 'point_repere',
         ]
         read_only_fields = ['id', 'status', 'created_at']
 
@@ -49,6 +50,14 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     def get_hebergement_detail(self, obj):
         return self._cartes().get(obj.hebergement_id)
+
+    def get_point_repere(self, obj):
+        # Almost the exact address: only once the booking is paid
+        if obj.status != 'confirmed':
+            return None
+        if '_reperes' not in self.context:
+            self.context['_reperes'] = hebergements.points_repere({r.hebergement_id for r in _liste(self)})
+        return self.context['_reperes'].get(obj.hebergement_id) or None
 
     def get_type_logement_nom(self, obj):
         self._cartes()
