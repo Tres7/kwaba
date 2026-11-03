@@ -1,3 +1,7 @@
+import {
+  Banknote, Building2, Camera, ClipboardCheck, Coffee, DoorOpen, FilePen, House, IdCard, Images, KeyRound, ListChecks,
+  Map as Carte, MapPin, NotebookPen, ScrollText, ShieldCheck, Signpost, Smartphone, Users, Wallet, Wifi, type LucideIcon,
+} from "lucide-react";
 import type { DonneesAnnonce } from "../brouillons";
 
 export const MIN_PHOTOS = 5;
@@ -27,8 +31,8 @@ export interface Etape {
   cle: CleEtape;
   /** 0: welcome screen, before the first phase */
   phase: 0 | 1 | 2 | 3;
-  visuel: string;
-  /** Large visual and short text, nothing to fill in */
+  picto: LucideIcon;
+  /** Large pictogram and short text, nothing to fill in */
   intro?: boolean;
   /** Screens that need the whole height on a phone (map, photos) show no visual there */
   sansVisuelMobile?: boolean;
@@ -42,42 +46,43 @@ export interface Etape {
   champs?: (keyof DonneesAnnonce)[];
 }
 
-const visuel = (nom: string) => `/hote/${nom}.webp`;
+/** Pictogram of each phase: on its first screen and in the list of the welcome screen. */
+export const PICTOS_PHASES = { 1: House, 2: Camera, 3: ClipboardCheck } as const;
 const rempli = (texte?: string | null) => !!texte?.trim();
 const nombreLits = (d: DonneesAnnonce) => (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0);
 
 /** The wizard, in order. */
 export const ETAPES: Etape[] = [
-  { cle: "bienvenue", phase: 0, visuel: visuel("bienvenue"), intro: true },
-  { cle: "phase-1", phase: 1, visuel: visuel("phase-1"), intro: true },
-  { cle: "type", phase: 1, visuel: visuel("type-maison"), pret: (d) => !!d.type },
-  { cle: "espace", phase: 1, visuel: visuel("espace-entier"), pret: (d) => !!d.espace },
-  { cle: "adresse", phase: 1, visuel: visuel("adresse"), champs: ["city", "location"],
+  { cle: "bienvenue", phase: 0, picto: KeyRound, intro: true },
+  { cle: "phase-1", phase: 1, picto: PICTOS_PHASES[1], intro: true },
+  { cle: "type", phase: 1, picto: Building2, pret: (d) => !!d.type },
+  { cle: "espace", phase: 1, picto: DoorOpen, pret: (d) => !!d.espace },
+  { cle: "adresse", phase: 1, picto: MapPin, champs: ["city", "location"],
     pret: (d) => rempli(d.city) && rempli(d.location) },
-  { cle: "position", phase: 1, visuel: visuel("position"), sansVisuelMobile: true,
+  { cle: "position", phase: 1, picto: Carte, sansVisuelMobile: true,
     pret: (d) => d.latitude != null && d.longitude != null },
-  { cle: "capacite", phase: 1, visuel: visuel("capacite"),
+  { cle: "capacite", phase: 1, picto: Users,
     pret: (d) => (d.max_guests ?? 0) >= 1 && (d.surface_m2 ?? 0) >= 5 && nombreLits(d) > 0 },
-  { cle: "phase-2", phase: 2, visuel: visuel("phase-2"), intro: true },
-  { cle: "equipements", phase: 2, visuel: visuel("equipements") },
-  { cle: "photos", phase: 2, visuel: visuel("photos"), sansVisuelMobile: true,
+  { cle: "phase-2", phase: 2, picto: PICTOS_PHASES[2], intro: true },
+  { cle: "equipements", phase: 2, picto: Wifi },
+  { cle: "photos", phase: 2, picto: Images, sansVisuelMobile: true,
     pret: (d) => (d.images?.length ?? 0) >= MIN_PHOTOS },
-  { cle: "titre", phase: 2, visuel: visuel("titre"), champs: ["name"],
+  { cle: "titre", phase: 2, picto: Signpost, champs: ["name"],
     pret: (d) => (d.name?.trim().length ?? 0) >= MIN_TITRE && (d.name?.length ?? 0) <= MAX_TITRE },
-  { cle: "description", phase: 2, visuel: visuel("description"), champs: ["description"],
+  { cle: "description", phase: 2, picto: NotebookPen, champs: ["description"],
     pret: (d) => (d.description?.trim().length ?? 0) >= MIN_DESCRIPTION && (d.description?.length ?? 0) <= MAX_DESCRIPTION },
-  { cle: "phase-3", phase: 3, visuel: visuel("phase-3"), intro: true },
-  { cle: "prix", phase: 3, visuel: visuel("prix"), champs: ["price_per_night"], pret: (d) => (d.price_per_night ?? 0) > 0 },
-  { cle: "regles", phase: 3, visuel: visuel("regles") },
-  { cle: "accueil", phase: 3, visuel: visuel("espace-chambre"),
+  { cle: "phase-3", phase: 3, picto: PICTOS_PHASES[3], intro: true },
+  { cle: "prix", phase: 3, picto: Banknote, champs: ["price_per_night"], pret: (d) => (d.price_per_night ?? 0) > 0 },
+  { cle: "regles", phase: 3, picto: ScrollText },
+  { cle: "accueil", phase: 3, picto: Coffee,
     pret: (d) => !!d.petit_dejeuner && (d.petit_dejeuner !== "option" || (d.petit_dejeuner_prix ?? 0) > 0) },
-  { cle: "securite", phase: 3, visuel: visuel("securite"), pret: (d) => d.declarations?.attestation === true },
-  { cle: "telephone", phase: 3, visuel: visuel("telephone"), fait: (c) => c.telephone },
-  { cle: "identite", phase: 3, visuel: visuel("identite"), fait: (c) => c.identite === "soumise" || c.identite === "verifiee" },
-  { cle: "versement", phase: 3, visuel: visuel("versement"), fait: (c) => c.versement },
-  { cle: "contrat", phase: 3, visuel: visuel("contrat"), fait: (c) => c.preinscription,
+  { cle: "securite", phase: 3, picto: ShieldCheck, pret: (d) => d.declarations?.attestation === true },
+  { cle: "telephone", phase: 3, picto: Smartphone, fait: (c) => c.telephone },
+  { cle: "identite", phase: 3, picto: IdCard, fait: (c) => c.identite === "soumise" || c.identite === "verifiee" },
+  { cle: "versement", phase: 3, picto: Wallet, fait: (c) => c.versement },
+  { cle: "contrat", phase: 3, picto: FilePen, fait: (c) => c.preinscription,
     sauter: (c) => c.preinscription && !c.contrat_a_signer },
-  { cle: "recapitulatif", phase: 3, visuel: visuel("envoyee"), fait: (c) => c.bloquants.length === 0 },
+  { cle: "recapitulatif", phase: 3, picto: ListChecks, fait: (c) => c.bloquants.length === 0 },
 ];
 
 /**

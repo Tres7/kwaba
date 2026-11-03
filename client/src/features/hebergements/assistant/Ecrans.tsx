@@ -2,7 +2,7 @@
 
 import { useCallback, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
-import { Camera, Check, Sun } from "lucide-react";
+import { Backpack, BedDouble, Building, Building2, Camera, Check, Hotel, House, Sun, TreePalm, type LucideIcon } from "lucide-react";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Stepper from "@/components/ui/Stepper";
 import { useFormat } from "@/lib/format";
@@ -24,7 +24,9 @@ export interface EcranProps {
   conditions?: Conditions;
 }
 
-const TYPES: HebergementType[] = ["maison", "appartement", "villa", "hotel", "residence", "auberge"];
+const TYPES: Record<HebergementType, LucideIcon> = {
+  maison: House, appartement: Building2, villa: TreePalm, hotel: Hotel, residence: Building, auberge: Backpack,
+};
 const VILLES = ["Lomé", "Kpalimé", "Aného", "Atakpamé", "Sokodé", "Kara"];
 export const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 export const libelleClass = "block text-sm font-semibold text-dark mb-2";
@@ -48,9 +50,9 @@ function Compteur({ valeur, max }: { valeur: number; max: number }) {
   return <p className={cn("text-xs text-right mt-1.5", valeur > max ? "text-red-700 font-semibold" : "text-gray-500")}>{valeur} / {max}</p>;
 }
 
-/** Big illustrated choice, one per option: the question is answered with one touch. */
-function CarteChoix({ image, titre, texte, choisi, onChoisir }: {
-  image: string; titre: string; texte: string; choisi: boolean; onChoisir: () => void;
+/** Big choice with its pictogram, one per option: the question is answered with one touch. */
+function CarteChoix({ picto: Picto, titre, texte, choisi, onChoisir }: {
+  picto: LucideIcon; titre: string; texte: string; choisi: boolean; onChoisir: () => void;
 }) {
   return (
     <button
@@ -61,16 +63,16 @@ function CarteChoix({ image, titre, texte, choisi, onChoisir }: {
         choisi ? "border-primary bg-primary-50 shadow-md" : "border-gray-100 bg-white hover:border-primary/40 hover:shadow-md",
       )}
     >
-      <span className="block rounded-2xl overflow-hidden bg-light-muted">
-        <img src={image} alt="" width={400} height={400} loading="lazy"
-          className="w-full aspect-[4/3] object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" />
+      <span className={cn("flex items-center justify-center h-20 sm:h-24 rounded-2xl transition-colors duration-200",
+        choisi ? "bg-primary text-light" : "bg-light-muted text-primary group-hover:bg-primary-50")}>
+        <Picto size={34} strokeWidth={1.5} aria-hidden className="transition-transform duration-300 motion-safe:group-hover:scale-110" />
       </span>
       <span className="block px-2 pt-2.5 pb-2">
         <span className="block font-heading font-bold text-dark text-sm sm:text-base">{titre}</span>
         <span className="block text-xs text-gray-500 mt-0.5 leading-snug">{texte}</span>
       </span>
       {choisi && (
-        <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow">
+        <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-white text-primary flex items-center justify-center shadow">
           <Check size={16} aria-hidden />
         </span>
       )}
@@ -85,8 +87,8 @@ function EcranType({ donnees, modifier }: EcranProps) {
   return (
     <Question cle="type">
       <div role="radiogroup" aria-label={t("type.titre")} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {TYPES.map((type) => (
-          <CarteChoix key={type} image={`/hote/type-${type}.webp`} titre={TYPE_LABELS[type]} texte={tAnnonce(`types.${type}`)}
+        {(Object.entries(TYPES) as [HebergementType, LucideIcon][]).map(([type, picto]) => (
+          <CarteChoix key={type} picto={picto} titre={TYPE_LABELS[type]} texte={tAnnonce(`types.${type}`)}
             choisi={donnees.type === type} onChoisir={() => modifier({ type })} />
         ))}
       </div>
@@ -99,9 +101,9 @@ function EcranEspace({ donnees, modifier }: EcranProps) {
   return (
     <Question cle="espace">
       <div role="radiogroup" aria-label={t("espace.titre")} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <CarteChoix image="/hote/espace-entier.webp" titre={t("espace.entier.titre")} texte={t("espace.entier.texte")}
+        <CarteChoix picto={House} titre={t("espace.entier.titre")} texte={t("espace.entier.texte")}
           choisi={donnees.espace === "entier"} onChoisir={() => modifier({ espace: "entier" })} />
-        <CarteChoix image="/hote/espace-chambre.webp" titre={t("espace.chambre.titre")} texte={t("espace.chambre.texte")}
+        <CarteChoix picto={BedDouble} titre={t("espace.chambre.titre")} texte={t("espace.chambre.texte")}
           choisi={donnees.espace === "chambre_privee"} onChoisir={() => modifier({ espace: "chambre_privee" })} />
       </div>
     </Question>
