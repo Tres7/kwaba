@@ -50,6 +50,19 @@ scripts/backup.sh "avant-${manifest%.yaml}"
 log "Migrations"
 kwaba_compose run --rm --no-deps api python manage.py migrate --noinput
 
+# Private files written before the prive-data volume existed are still in the running containers, which are about to be
+# replaced: they are copied into the volume first (a file already there is never overwritten).
+for service in api consumer relay payments; do
+  conteneur=$(kwaba_compose ps -q "$service")
+  [ -n "$conteneur" ] || continue
+  montages=$(docker inspect -f '{{range .Mounts}}{{println .Destination}}{{end}}' "$conteneur")
+  if ! grep -qx /app/prive <<< "$montages"; then
+    log "Fichiers privés de ${service} copiés dans le volume prive-data"
+    kwaba_compose exec -T "$service" tar -C /app/prive -cf - . \
+      | kwaba_compose run --rm --no-deps -T --entrypoint tar api -C /app/prive -xf - --skip-old-files
+  fi
+done
+
 log "Serveur et workers"
 kwaba_compose up -d --wait api consumer relay payments
 

@@ -1,11 +1,12 @@
 """Verification of listings by a field agent: publication, identity document, visit, rights."""
 import json
-from io import BytesIO
+from io import BytesIO, StringIO
 
 import pytest
 from django.core import mail
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from PIL import Image
 
 from apps.hebergements.models import HebergementModel
@@ -179,6 +180,31 @@ class TestPieceIdentite:
         assert response['Cache-Control'] == 'no-store'
         assert 'sandbox' in response['Content-Security-Policy']
         assert JournalAuditModel.objects.filter(action='piece_consultee', utilisateur_id=agent.id).exists()
+
+
+    def test_lost_file_explained_to_the_agent(self, client_for, hote, agent, stockage_temporaire):
+        _envoyer_piece(client_for(hote))
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
+        (stockage_temporaire / piece.fichier.name).unlink()
+
+        response = client_for(agent).get(f'{IDENTITE}{hote.id}/fichier/')
+
+        assert response.status_code == 410
+        assert 'renvoyer' in response.data['detail']
+
+    def test_lost_files_listed(self, client_for, hote, stockage_temporaire):
+        _envoyer_piece(client_for(hote))
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
+        sortie = StringIO()
+        call_command('fichiers_prives', stdout=sortie)
+        assert '0 fichier(s) introuvable(s)' in sortie.getvalue()
+
+        (stockage_temporaire / piece.fichier.name).unlink()
+        sortie = StringIO()
+        call_command('fichiers_prives', stdout=sortie)
+
+        assert 'verifications.PieceIdentiteModel.fichier : 1 fichier(s), 1 introuvable(s)' in sortie.getvalue()
+        assert str(piece.pk) in sortie.getvalue()
 
 
 class TestVisite:
