@@ -33,7 +33,7 @@ export const VILLES: readonly Ville[] = [
   { nom: "Kara", quartiers: ["Belle-Ville", "Chaminade", "Kara Sud", "Lama-Feing", "Tchaloudè", "Tchintchinda", "Tomdè", "Yèou"] },
 ];
 
-const sansAccents = (texte: string) => texte.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+const sansAccents = (texte: string) => texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 
 /** Districts of a city typed by hand ("lome" → those of Lomé); none for a city that is not in the list. */
 export function quartiersDe(ville: string): readonly string[] {
