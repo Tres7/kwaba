@@ -32,6 +32,13 @@ const COLUMNS = [
     ],
   },
   {
+    // Travel guides, one per country
+    title: "guides",
+    links: [
+      { href: "/preparer-voyage/togo", label: "preparerTogo" },
+    ],
+  },
+  {
     title: "assistance",
     links: [
       { href: "/profil/aide", label: "aide" },
@@ -54,7 +61,7 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Logo />
             <p className="text-gray-600 text-sm mt-3 max-w-xs leading-relaxed">{t("accroche")}</p>

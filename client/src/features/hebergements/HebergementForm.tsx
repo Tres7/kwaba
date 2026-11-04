@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiErrorMessage, firstErrorMessage } from "@/lib/api";
-import { completude, type BrouillonAnnonce, type DonneesAnnonce } from "./brouillons";
+import { completude, estEtablissement, type BrouillonAnnonce, type DonneesAnnonce } from "./brouillons";
 import { clesHebergements } from "./hooks";
 import { useEquipements } from "./AmenityBadge";
 import PhotoUploader from "./PhotoUploader";
@@ -335,7 +335,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         <PhotoUploader value={photos} onChange={onPhotosChange} onBusyChange={setUploading}
           error={errors.photos ?? errors.image_url ?? errors.images ?? errors.legendes_photos}
           legendes={legendes} onLegende={(url, piece) => setLegendes((prev) => ({ ...prev, [url]: piece }))}
-          chambres={form.chambres} sallesDeBain={form.salles_de_bain} />
+          chambres={form.chambres} sallesDeBain={form.salles_de_bain} etablissement={estEtablissement(form.type)} />
         <div className="flex items-start gap-2 mt-4">
           <input
             type="checkbox" id="h-droits" checked={droitsPhotos} onChange={(e) => setDroitsPhotos(e.target.checked)}

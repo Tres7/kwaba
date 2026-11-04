@@ -1,8 +1,8 @@
 """Stock of the unit types (TypeLogementModel), night by night.
 
 A type is available over [debut, fin) for `nb` units if, FOR EACH NIGHT from debut to fin - 1 (the departure day is
-excluded), its quantity minus the units held by active bookings covering that night is at least `nb`, and no
-closure covers that night (a closure without a type closes the whole establishment).
+excluded), its quantity minus the units held by active bookings and by partial closures covering that night is at
+least `nb`, and no full closure covers that night (a closure without a type closes the whole establishment).
 
 Active bookings: confirmed, or waiting for a payment that has not expired (given by the reservations module). A booking
 without a unit type (data written before the types) counts against every type of its establishment: never too few.
@@ -47,11 +47,15 @@ class Occupation:
                     self.prises[type_id][nuit] += r['nb_unites'] or 1
 
         blocages = BlocageModel.objects.filter(hebergement_id__in=etablissements, debut__lt=fin, fin__gt=debut)
-        for b in blocages.only('hebergement_id', 'type_logement_id', 'debut', 'fin'):
+        for b in blocages.only('hebergement_id', 'type_logement_id', 'debut', 'fin', 'quantite'):
             concernes = [b.type_logement_id] if b.type_logement_id else par_etablissement[b.hebergement_id]
             for nuit in nuits(max(b.debut, debut), min(b.fin, fin)):
                 for type_id in concernes:
-                    if type_id in self.types:
+                    if type_id not in self.types:
+                        continue
+                    if b.quantite and b.type_logement_id:
+                        self.prises[type_id][nuit] += b.quantite  # some rooms closed, like booked ones
+                    else:
                         self.fermees[type_id].add(nuit)
 
     def restantes_nuit(self, type_id, nuit: date) -> int:

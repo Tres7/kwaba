@@ -55,6 +55,8 @@ class HebergementModel(models.Model):
     ]
     # Former values, still found in old links (?type=hotel)
     ANCIENS_TYPES = {'maison': 'maison_entiere', 'hotel': 'chambre_hotel'}
+    # Rooms by type with their stock (TypeLogementModel), not the bedrooms and beds of a house
+    ETABLISSEMENTS = ('chambre_hotel', 'residence', 'auberge')
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
@@ -225,6 +227,9 @@ class BlocageModel(models.Model):
                                       related_name='blocages')
     debut = models.DateField()
     fin = models.DateField()
+    # Some units of the type only (a hotel's rooms sold elsewhere): they count as taken, the others stay bookable.
+    # Empty: the whole type (or the whole establishment without a type) is closed
+    quantite = models.PositiveSmallIntegerField(null=True, blank=True)
     motif = models.CharField(max_length=120, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

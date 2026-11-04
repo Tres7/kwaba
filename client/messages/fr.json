@@ -124,7 +124,8 @@
     "titres": {
       "decouvrir": "Découvrir",
       "hotes": "Hôtes",
-      "assistance": "Assistance"
+      "assistance": "Assistance",
+      "guides": "Guides"
     },
     "liens": {
       "hebergements": "Hébergements",
@@ -138,7 +139,8 @@
       "espaceHote": "Espace hôte",
       "aide": "Centre d'aide",
       "remboursement": "Annulation et remboursement",
-      "location": "Location de voiture"
+      "location": "Location de voiture",
+      "preparerTogo": "Préparer votre voyage au Togo"
     },
     "legal": {
       "mentions": "Mentions légales",
@@ -1734,7 +1736,10 @@
     "toutEtablissement": "Tout l’établissement",
     "aideType": "Seul le type « {nom} » sera fermé.",
     "aideEtablissement": "Tous les types de logement seront fermés.",
-    "unitesNombre": "{nombre, plural, one {# logement} other {# logements}}"
+    "unitesNombre": "{nombre, plural, one {# logement} other {# logements}}",
+    "quantiteFermer": "Nombre de chambres à fermer",
+    "toutes": "Toutes ({nombre})",
+    "quantiteAide": "Pour les chambres vendues ailleurs (réception, autres sites) : les autres restent réservables sur Kwa-Ba. Vide : tout le type est fermé."
   },
   "location": {
     "titre": "Voitures et chauffeurs",
@@ -2251,6 +2256,20 @@
         "visite": "Un agent vous appelle et visite votre logement.",
         "publication": "Votre annonce est publiée, et vous devenez hôte Kwa-Ba."
       }
+    },
+    "chambres": {
+      "titre": "Quelles chambres proposez-vous ?",
+      "texte": "Un type par ligne : les chambres identiques ensemble, avec leur nombre. Inutile d'en créer une par chambre.",
+      "typeNumero": "Type de chambre {numero}",
+      "nom": "Type de chambre",
+      "nomExemple": "Chambre double standard",
+      "prix": "Prix par nuit (F CFA)",
+      "quantite": "Nombre de chambres",
+      "capacite": "Personnes par chambre",
+      "ajouter": "Ajouter un type de chambre",
+      "retirer": "Retirer ce type",
+      "resume": "{total, plural, one {# chambre} other {# chambres}} au total, à partir de {prix} la nuit.",
+      "aide": "Depuis votre espace hôte, vous pourrez ajouter des photos à chaque type et fermer les chambres vendues ailleurs (réception, autres sites)."
     }
   },
   "pieces": {
@@ -2271,6 +2290,13 @@
     "parking": "Parking",
     "autre": "Autre",
     "titre": "Les pièces en photos",
-    "sansPiece": "Autres photos"
+    "sansPiece": "Autres photos",
+    "reception": "Réception",
+    "chambres": "Chambres",
+    "salles_de_bain": "Salles de bain",
+    "restaurant": "Restaurant",
+    "bar": "Bar",
+    "salle_de_sport": "Salle de sport",
+    "salle_de_reunion": "Salle de réunion"
   }
 }

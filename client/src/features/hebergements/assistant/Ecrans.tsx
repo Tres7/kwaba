@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
-import { Camera, Check, Sun, type LucideIcon } from "lucide-react";
+import { Camera, Check, Plus, Sun, Trash2, type LucideIcon } from "lucide-react";
 import { ICONES_TYPES, TYPES_LOGEMENT } from "@/components/hebergement/TypeLogement";
 import { useConfigPaiement } from "@/features/paiements";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
@@ -11,11 +11,11 @@ import { useFormat } from "@/lib/format";
 import { QUARTIERS_LOME } from "@/lib/quartiers";
 import { cn } from "@/lib/utils";
 import { useEquipements } from "../AmenityBadge";
-import type { DonneesAnnonce } from "../brouillons";
+import { estEtablissement, type DonneesAnnonce } from "../brouillons";
 import PhotoUploader from "../PhotoUploader";
 import FraisMenageType from "../FraisMenageType";
 import { EcranAccueil, EcranContrat, EcranIdentite, EcranPrix, EcranRecapitulatif, EcranRegles, EcranSecurite, EcranTelephone, EcranVersement } from "./EcransFin";
-import { MAX_DESCRIPTION, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, type CleEtape, type Conditions } from "./etapes";
+import { MAX_DESCRIPTION, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, typeComplet, type CleEtape, type Conditions } from "./etapes";
 
 export interface EcranProps {
   donnees: DonneesAnnonce;
@@ -190,6 +190,87 @@ function EcranCapacite({ donnees, modifier, erreurs }: EcranProps) {
   );
 }
 
+type TypeChambre = NonNullable<DonneesAnnonce["types_chambres"]>[number];
+const NOUVEAU_TYPE: TypeChambre = { nom: "", prix_nuit: 0, quantite: 1, capacite: 2 };
+
+/** The listing's price and capacity follow its room types: the cheapest price ("from"), the largest room. */
+function avecTypes(types: TypeChambre[]): DonneesAnnonce {
+  const complets = types.filter(typeComplet);
+  return {
+    types_chambres: types,
+    ...(complets.length ? {
+      price_per_night: Math.min(...complets.map((u) => u.prix_nuit)),
+      max_guests: Math.min(20, Math.max(...complets.map((u) => u.capacite))),
+    } : {}),
+  };
+}
+
+/** A hotel, an aparthotel or a guesthouse: its room types and how many of each, instead of the beds of a house. */
+function EcranChambres({ donnees, modifier, erreurs }: EcranProps) {
+  const t = useTranslations("assistantHote.chambres");
+  const { formatPrice } = useFormat();
+  const types = donnees.types_chambres ?? [];
+  useEffect(() => {
+    if (!donnees.types_chambres?.length) modifier(avecTypes([NOUVEAU_TYPE]));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const changer = (i: number, champs: Partial<TypeChambre>) => modifier(avecTypes(types.map((u, j) => (j === i ? { ...u, ...champs } : u))));
+  const nombre = (valeur: string) => (valeur ? Number(valeur) : 0);
+  const total = types.reduce((somme, u) => somme + (u.quantite || 0), 0);
+  const complets = types.filter(typeComplet);
+  return (
+    <Question cle="chambres">
+      <div className="space-y-4">
+        {types.map((u, i) => (
+          <fieldset key={i} className="rounded-2xl border border-gray-200 bg-white p-4 space-y-3">
+            <legend className="sr-only">{t("typeNumero", { numero: i + 1 })}</legend>
+            <div className="flex items-start gap-2">
+              <label className="flex-1">
+                <span className={libelleClass}>{t("nom")}</span>
+                <input className={champClass} value={u.nom} maxLength={120} placeholder={t("nomExemple")}
+                  onChange={(e) => changer(i, { nom: e.target.value })} />
+              </label>
+              {types.length > 1 && (
+                <button type="button" onClick={() => modifier(avecTypes(types.filter((_, j) => j !== i)))} aria-label={t("retirer")}
+                  className="mt-7 w-11 h-11 flex-shrink-0 rounded-full text-red-600 hover:bg-red-50 flex items-center justify-center">
+                  <Trash2 size={18} aria-hidden />
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label>
+                <span className={libelleClass}>{t("prix")}</span>
+                <input className={champClass} type="number" inputMode="numeric" min={1} placeholder="25000"
+                  value={u.prix_nuit || ""} onChange={(e) => changer(i, { prix_nuit: nombre(e.target.value) })} />
+              </label>
+              <label>
+                <span className={libelleClass}>{t("quantite")}</span>
+                <input className={champClass} type="number" inputMode="numeric" min={1} max={500}
+                  value={u.quantite || ""} onChange={(e) => changer(i, { quantite: nombre(e.target.value) })} />
+              </label>
+              <label>
+                <span className={libelleClass}>{t("capacite")}</span>
+                <input className={champClass} type="number" inputMode="numeric" min={1} max={50}
+                  value={u.capacite || ""} onChange={(e) => changer(i, { capacite: nombre(e.target.value) })} />
+              </label>
+            </div>
+          </fieldset>
+        ))}
+        <button type="button" onClick={() => modifier(avecTypes([...types, NOUVEAU_TYPE]))} disabled={types.length >= 30}
+          className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-300 py-3.5 text-sm font-semibold text-primary hover:border-primary/50 disabled:opacity-50">
+          <Plus size={18} aria-hidden /> {t("ajouter")}
+        </button>
+        {complets.length > 0 && (
+          <p className="text-sm font-semibold text-primary">
+            {t("resume", { total, prix: formatPrice(Math.min(...complets.map((u) => u.prix_nuit))) })}
+          </p>
+        )}
+        <p className="text-xs text-gray-500">{t("aide")}</p>
+        <Erreur messages={erreurs.types_chambres} />
+      </div>
+    </Question>
+  );
+}
+
 function EcranEquipements({ donnees, modifier }: EcranProps) {
   const { CATEGORIES_EQUIPEMENTS } = useEquipements();
   const choisis = donnees.amenities ?? [];
@@ -235,6 +316,7 @@ function EcranPhotos({ donnees, modifier, erreurs, onOccupe }: EcranProps) {
       <PhotoUploader value={donnees.images ?? []} onChange={enregistrer} onBusyChange={onOccupe} fichiersDuBrouillon
         error={erreurs.images?.[0] ?? erreurs.image_url?.[0] ?? erreurs.legendes_photos?.[0]}
         legendes={donnees.legendes_photos ?? {}} chambres={donnees.chambres} sallesDeBain={donnees.salles_de_bain}
+        etablissement={estEtablissement(donnees.type)}
         onLegende={(url, piece) => modifier({ legendes_photos: { ...donnees.legendes_photos, [url]: piece } })} />
       <p className={cn("text-sm font-semibold mt-3", nombre >= MIN_PHOTOS ? "text-primary" : "text-dark")}>
         {t("photos.compteur", { nombre, min: MIN_PHOTOS })}
@@ -277,7 +359,7 @@ function EcranDescription({ donnees, modifier, erreurs }: EcranProps) {
 }
 
 export const ECRANS: Partial<Record<CleEtape, ComponentType<EcranProps>>> = {
-  type: EcranType, adresse: EcranAdresse, position: EcranPosition, capacite: EcranCapacite,
+  type: EcranType, adresse: EcranAdresse, chambres: EcranChambres, position: EcranPosition, capacite: EcranCapacite,
   equipements: EcranEquipements, photos: EcranPhotos, titre: EcranTitre, description: EcranDescription,
   prix: EcranPrix, regles: EcranRegles, accueil: EcranAccueil, securite: EcranSecurite, telephone: EcranTelephone,
   identite: EcranIdentite, versement: EcranVersement, contrat: EcranContrat, recapitulatif: EcranRecapitulatif,
