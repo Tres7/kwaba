@@ -57,3 +57,11 @@ Taxonomie Kwa-Ba (brief AN-TAX du 3 novembre 2026), les mots employés à Lomé,
 - `espace` (`entier`, `chambre_privee`) suit le type (`HebergementModel.save()`) : plus de question à part. Il se filtre encore avec `?espace=`.
 - **Obligatoires pour une nouvelle annonce** : voyageurs (1 à 20), chambres (0 pour un studio), salles de bain (1 au moins), un lit au moins et le **point de repère** (« Derrière le CHU Sylvanus Olympio, Tokoin », 200 caractères, sans coordonnées). La surface n'est plus demandée ni affichée (colonne `surface_m2` gardée jusqu'à une prochaine version).
 - **Point de repère** : presque l'adresse exacte, donc jamais sur l'annonce publique. L'agent le voit pour la visite, le voyageur dans sa réservation une fois payée (`point_repere` de `GET /api/v1/reservations/`).
+
+## Pièce de chaque photo
+
+Sous chaque photo, l'hôte choisit la pièce : Chambre 1, Chambre 2… (selon son nombre de chambres ; « Pièce principale » pour un studio), Salon, Cuisine, Salle à manger, Salle de bain 1…, Toilettes, Terrasse, Balcon, Jardin ou cour, Piscine, Extérieur, Entrée, Vue, Parking, Autre. Codes et ordre : `client/src/features/hebergements/pieces.ts`, liste acceptée par l'API : `PIECES` de `server/apps/hebergements/serializers.py`.
+
+- `legendes_photos` (`{url: code}`) : **obligatoire pour chaque photo** d'une nouvelle annonce (`400` sinon) ; l'écran Photos de l'assistant attend que chaque photo ait sa pièce. Les pièces des photos retirées sont oubliées.
+- Les annonces plus anciennes s'affichent sans pièces (`{}`) et se modifient sans les donner.
+- **Voyageurs** : la pièce s'affiche sur chaque photo de la galerie, et la section « Les pièces en photos » montre toutes les photos rangées par pièce. **Agent** : sous chaque photo de la fiche de visite.

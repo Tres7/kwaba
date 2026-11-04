@@ -52,6 +52,8 @@ export interface Hebergement {
   review_count: number;
   image_url: string;
   images: string[];
+  /** Room shown by each photo, {url: "chambre_1" | "salon"…} (features/hebergements/pieces.ts); {} for older listings */
+  legendes_photos?: Record<string, string>;
   max_guests: number;
   amenities: string[];
   is_available: boolean;
@@ -131,6 +133,8 @@ export interface Reservation {
     total: number;
     commission_hote: number;
     montant_hote: number;
+    /** Cleaning fee, included in total and in montant_hote */
+    frais_menage: number;
   };
   /** Last online payment: null if the booking was made without online payment. */
   paiement: "en_attente" | "reussi" | "echoue" | "annule" | null;

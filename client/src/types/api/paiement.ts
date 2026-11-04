@@ -16,6 +16,8 @@ export type MoyenPaiement = "mobile_money" | "carte" | "paypal";
 export interface DevisSejour {
   prix_nuits: number;
   frais_service: number;
+  /** Cleaning fee of the listing type, once per stay (0 for a hotel room) */
+  frais_menage: number;
   total: number;
 }
 
@@ -31,6 +33,8 @@ export interface ConfigPaiement {
   commission_hote: number;
   /** Commission by partner type (price grid). */
   commissions: { particulier: number; hotel: number; fondateur: number };
+  /** Cleaning fee by listing type (FCFA), paid back to the host in full */
+  frais_menage: Record<string, number>;
   delai_paiement_minutes: number;
   pays: PaysPaiement[];
 }

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ConditionsHoteModel, PaiementModel, ProfilVersementModel, RemboursementModel, VersementModel
+from .models import ConditionsHoteModel, FraisMenageModel, PaiementModel, ProfilVersementModel, RemboursementModel, VersementModel
 
 
 @admin.register(PaiementModel)
@@ -29,6 +29,12 @@ class RemboursementAdmin(admin.ModelAdmin):
 class ProfilVersementAdmin(admin.ModelAdmin):
     list_display = ['hote_id', 'pays', 'operateur', 'numero', 'titulaire', 'mis_a_jour_le']
     list_filter = ['pays', 'operateur']
+
+
+@admin.register(FraisMenageModel)
+class FraisMenageAdmin(admin.ModelAdmin):
+    list_display = ['type_logement', 'montant', 'mis_a_jour_le']
+    list_editable = ['montant']
 
 
 @admin.register(ConditionsHoteModel)

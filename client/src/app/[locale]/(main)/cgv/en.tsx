@@ -14,7 +14,7 @@ export default function ContenuEn() {
   return (
     <LegalPage
       titre="Terms of sale"
-      miseAJour="30 October 2026"
+      miseAJour="4 November 2026"
       intro={
         <>
           <VersionFrancaiseFaitFoi />
@@ -123,7 +123,8 @@ export default function ContenuEn() {
               <table>
                 <thead><tr><th>Item</th><th>Amount</th></tr></thead>
                 <tbody>
-                  <tr><td>Price of nights, any cleaning fee</td><td>Set by the host or hotel, displayed before booking</td></tr>
+                  <tr><td>Price of nights</td><td>Set by the host or hotel, displayed before booking</td></tr>
+                  <tr><td>Cleaning fee</td><td>Once per stay, by type of property (KWA-BA scale, from 0 to 15,000 CFA francs), paid back in full to the host, displayed before booking</td></tr>
                   <tr><td>Customer service fee</td><td><strong>6%</strong> of the price of nights</td></tr>
                   <tr><td>Stay + Driver Pack (accommodation booked with a car with driver)</td><td>3% on the accommodation</td></tr>
                   <tr><td>Customer under a corporate framework agreement</td><td>4%</td></tr>

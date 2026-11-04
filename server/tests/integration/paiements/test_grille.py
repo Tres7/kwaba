@@ -109,7 +109,7 @@ def test_prix_modifie_entre_le_recapitulatif_et_la_reservation(client_for, make_
     resa = ReservationModel.objects.get(pk=r.data['id'])
     assert (resa.prix_nuits, resa.frais_service, resa.commission_hote, resa.total_price) == (120000, 7200, 9600, 127200)
     assert r.data['montants'] == {'prix_nuits': 120000, 'frais_service': 7200, 'taux_frais': 6, 'total': 127200,
-                                  'commission_hote': 9600, 'montant_hote': 110400}
+                                  'commission_hote': 9600, 'montant_hote': 110400, 'frais_menage': 0}
 
 
 def test_type_de_partenaire_et_taux_affiches_a_l_hote(client_for, make_user, api_client):

@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import AlerteDisponibilite from "./AlerteDisponibilite";
 import EquipementsLogement from "./EquipementsLogement";
 import DetailsLogement from "@/components/hebergement/DetailsLogement";
+import PhotosParPiece from "./PhotosParPiece";
+import { libellePiece } from "./pieces";
 import PolitiqueAnnulation from "@/components/hebergement/PolitiqueAnnulation";
 import { FavoriteButton } from "@/features/favoris";
 import RatingBadge from "@/components/ui/RatingBadge";
@@ -48,6 +50,7 @@ function celluleMosaique(i: number, nombre: number) {
 function HebergementContent() {
   const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("fiche");
+  const tPieces = useTranslations("pieces");
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -213,6 +216,7 @@ function HebergementContent() {
             <div key={img + i} className="snap-center flex-shrink-0 w-full px-4">
               <div className="relative">
                 <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-64 object-cover rounded-2xl" />
+                {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-white/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
                 <span className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">{i + 1}/{photos.length}</span>
               </div>
             </div>
@@ -220,8 +224,9 @@ function HebergementContent() {
         </div>
         <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 h-[420px] lg:h-[480px] rounded-3xl overflow-hidden mb-12 shadow-card">
           {photos.slice(0, 5).map((img, i) => (
-            <div key={img + i} className={cn("overflow-hidden", celluleMosaique(i, Math.min(photos.length, 5)))}>
+            <div key={img + i} className={cn("relative overflow-hidden", celluleMosaique(i, Math.min(photos.length, 5)))}>
               <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+              {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-white/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
             </div>
           ))}
         </div>
@@ -278,6 +283,7 @@ function HebergementContent() {
             </section>
 
             <DetailsLogement h={hebergement} />
+            <PhotosParPiece photos={gallery} legendes={hebergement.legendes_photos} nom={hebergement.name} />
 
             <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("equipements")}</h2>
@@ -391,6 +397,12 @@ function HebergementContent() {
                     </span>
                     <span className="text-dark">{devis ? formatPrice(devis.frais_service) : <Chargement />}</span>
                   </div>
+                  {devis && devis.frais_menage > 0 && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-gray-600">{t("fraisMenage")}</span>
+                      <span className="text-dark">{formatPrice(devis.frais_menage)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-heading font-bold pt-3 border-t border-gray-100 text-lg">
                     <span className="text-dark">{t("total")}</span>
                     <span className="text-primary">{devis ? formatPrice(devis.total) : <Chargement />}</span>

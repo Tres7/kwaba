@@ -576,7 +576,8 @@
     "similaires": "Vous aimerez aussi",
     "reglesMaison": "Règles de la maison",
     "voirTousEquipements": "Afficher les {nombre} équipements",
-    "voirMoinsEquipements": "Afficher moins"
+    "voirMoinsEquipements": "Afficher moins",
+    "fraisMenage": "Frais de ménage"
   },
   "avis": {
     "repondre": "Répondre publiquement",
@@ -1482,7 +1483,9 @@
     "droite": "Déplacer à droite",
     "definirCouverture": "Définir comme couverture",
     "retirer": "Retirer la photo",
-    "reessayer": "Réessayer"
+    "reessayer": "Réessayer",
+    "quellePiece": "Quelle pièce ?",
+    "pieceDeLaPhoto": "Pièce de la photo {numero}"
   },
   "espaceHote": {
     "erreurConversation": "Impossible d'ouvrir la conversation.",
@@ -1587,7 +1590,8 @@
       "annonceContrat": "Annonce prête. Un agent vous appellera pour la visite dès que votre identité sera vérifiée et votre contrat signé."
     },
     "typesLogement": "Chambres et types",
-    "candidatureRefusee": "Votre candidature n'a pas été retenue"
+    "candidatureRefusee": "Votre candidature n'a pas été retenue",
+    "dontMenage": "dont {montant} de ménage"
   },
   "annonce": {
     "types": {
@@ -1640,7 +1644,8 @@
       "petitDejeuner": "le petit-déjeuner",
       "photos": "au moins une photo",
       "pointRepere": "le point de repère",
-      "sallesDeBain": "les salles de bain"
+      "sallesDeBain": "les salles de bain",
+      "legendes": "la pièce de chaque photo"
     },
     "detailsTitre": "Le logement en détail",
     "detailsAide": "Ces informations s'affichent sur votre annonce et rassurent les voyageurs.",
@@ -1667,7 +1672,12 @@
     "pointRepereExemple": "Derrière le CHU Sylvanus Olympio, Tokoin",
     "pointRepereAide": "Comment on trouve le logement à Lomé. Seuls l'agent Kwa-Ba et les voyageurs qui ont payé leur réservation le voient.",
     "chambresAide": "0 pour un studio.",
-    "litsRequis": "Ajoutez au moins un lit pour continuer."
+    "litsRequis": "Ajoutez au moins un lit pour continuer.",
+    "fraisMenage": "Frais de ménage : {montant}.",
+    "fraisMenageAide": "Ils s'ajoutent au prix du séjour, une fois, et vous sont reversés en entier.",
+    "fraisMenageZero": "Pas de frais de ménage pour ce type : l'établissement s'en occupe.",
+    "menageCarte": "Ménage : {montant}",
+    "menageCarteZero": "Sans frais de ménage"
   },
   "revenus": {
     "statuts": {
@@ -2160,7 +2170,8 @@
       "texte": "La première sera la photo de couverture.",
       "conseilJour": "Photographiez de jour, rideaux ouverts.",
       "conseilPieces": "Montrez chaque pièce, y compris la salle de bain.",
-      "compteur": "{nombre} sur {min} photos minimum"
+      "compteur": "{nombre} sur {min} photos minimum",
+      "pieces": "{nombre, plural, one {Indiquez la pièce de la photo restante.} other {Indiquez la pièce des # photos restantes.}}"
     },
     "titre": {
       "titre": "Donnez un titre à votre annonce",
@@ -2244,5 +2255,25 @@
         "publication": "Votre annonce est publiée, et vous devenez hôte Kwa-Ba."
       }
     }
+  },
+  "pieces": {
+    "chambre": "Chambre {numero}",
+    "salle_de_bain": "Salle de bain {numero}",
+    "piece_principale": "Pièce principale",
+    "salon": "Salon",
+    "cuisine": "Cuisine",
+    "salle_a_manger": "Salle à manger",
+    "toilettes": "Toilettes",
+    "terrasse": "Terrasse",
+    "balcon": "Balcon",
+    "jardin": "Jardin ou cour",
+    "piscine": "Piscine",
+    "exterieur": "Extérieur",
+    "entree": "Entrée",
+    "vue": "Vue",
+    "parking": "Parking",
+    "autre": "Autre",
+    "titre": "Les pièces en photos",
+    "sansPiece": "Autres photos"
   }
 }

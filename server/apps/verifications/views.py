@@ -91,7 +91,7 @@ def visites_json(annonces: list[dict]) -> list[dict]:
             'city': a['city'], 'location': a['location'], 'point_repere': a['point_repere'], 'description': a['description'],
             'position': {'lat': float(a['latitude']), 'lng': float(a['longitude'])} if a['latitude'] is not None else None,
             'price_per_night': float(a['price_per_night']), 'max_guests': a['max_guests'], 'amenities': a['amenities'],
-            'photos': [u for u in [a['image_url'], *a['images']] if u],
+            'photos': [u for u in [a['image_url'], *a['images']] if u], 'legendes_photos': a['legendes_photos'],
             'modifiee_apres_verification': a['id'] in deja_validees,
             'cree_le': a['created_at'],
             'hote': {

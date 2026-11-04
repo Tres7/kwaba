@@ -576,7 +576,8 @@
     "similaires": "You may also like",
     "reglesMaison": "House rules",
     "voirTousEquipements": "Show all {nombre} amenities",
-    "voirMoinsEquipements": "Show less"
+    "voirMoinsEquipements": "Show less",
+    "fraisMenage": "Cleaning fee"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -1482,7 +1483,9 @@
     "droite": "Move right",
     "definirCouverture": "Set as cover",
     "retirer": "Remove photo",
-    "reessayer": "Try again"
+    "reessayer": "Try again",
+    "quellePiece": "Which room?",
+    "pieceDeLaPhoto": "Room of photo {numero}"
   },
   "espaceHote": {
     "erreurConversation": "Could not open the conversation.",
@@ -1587,7 +1590,8 @@
       "annonceContrat": "Listing ready. An agent will call you for the visit once your identity is verified and your contract signed."
     },
     "typesLogement": "Rooms and types",
-    "candidatureRefusee": "Your application was not accepted"
+    "candidatureRefusee": "Your application was not accepted",
+    "dontMenage": "including {montant} for cleaning"
   },
   "annonce": {
     "types": {
@@ -1640,7 +1644,8 @@
       "petitDejeuner": "breakfast",
       "photos": "at least one photo",
       "pointRepere": "the landmark",
-      "sallesDeBain": "the bathrooms"
+      "sallesDeBain": "the bathrooms",
+      "legendes": "the room of each photo"
     },
     "detailsTitre": "The place in detail",
     "detailsAide": "Shown on your listing: these details reassure travellers.",
@@ -1667,7 +1672,12 @@
     "pointRepereExemple": "Behind the CHU Sylvanus Olympio, Tokoin",
     "pointRepereAide": "How people find the place in Lomé. Only the Kwa-Ba agent and the travellers who paid their booking can see it.",
     "chambresAide": "0 for a studio.",
-    "litsRequis": "Add at least one bed to continue."
+    "litsRequis": "Add at least one bed to continue.",
+    "fraisMenage": "Cleaning fee: {montant}.",
+    "fraisMenageAide": "It is added once to the price of the stay and paid back to you in full.",
+    "fraisMenageZero": "No cleaning fee for this type: the property takes care of it.",
+    "menageCarte": "Cleaning: {montant}",
+    "menageCarteZero": "No cleaning fee"
   },
   "revenus": {
     "statuts": {
@@ -2160,7 +2170,8 @@
       "texte": "The first one will be the cover photo.",
       "conseilJour": "Take photos by day, with the curtains open.",
       "conseilPieces": "Show every room, including the bathroom.",
-      "compteur": "{nombre} of {min} photos minimum"
+      "compteur": "{nombre} of {min} photos minimum",
+      "pieces": "{nombre, plural, one {Choose the room of the last photo.} other {Choose the room of the # remaining photos.}}"
     },
     "titre": {
       "titre": "Give your listing a title",
@@ -2244,5 +2255,25 @@
         "publication": "Your listing is published, and you become a Kwa-Ba host."
       }
     }
+  },
+  "pieces": {
+    "chambre": "Bedroom {numero}",
+    "salle_de_bain": "Bathroom {numero}",
+    "piece_principale": "Main room",
+    "salon": "Living room",
+    "cuisine": "Kitchen",
+    "salle_a_manger": "Dining room",
+    "toilettes": "Toilet",
+    "terrasse": "Terrace",
+    "balcon": "Balcony",
+    "jardin": "Garden or yard",
+    "piscine": "Pool",
+    "exterieur": "Outside",
+    "entree": "Entrance",
+    "vue": "View",
+    "parking": "Parking",
+    "autre": "Other",
+    "titre": "The rooms in photos",
+    "sansPiece": "Other photos"
   }
 }
