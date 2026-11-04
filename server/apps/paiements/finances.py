@@ -37,12 +37,19 @@ def _jour(valeur) -> date | None:
     return timezone.localtime(valeur).date() if isinstance(valeur, datetime) else valeur
 
 
+def _reference(type_objet: str, objet_id) -> str:
+    """Reference of a paid object as its module writes it (RES-AF2026-3A43), through the registry."""
+    produit = PRODUITS.get(type_objet)
+    description = produit.decrire(objet_id) if produit and produit.decrire else None
+    return (description or {}).get('reference', '')
+
+
 def _versements_hotes(a, b) -> list[dict]:
     qs = list(VersementModel.objects.filter(Q(envoye_le__gte=a, envoye_le__lt=b) | Q(statut__in=A_VERSER)))
     hotes = users.comptes({v.hote_id for v in qs})
     nom = lambda u: (f"{u.first_name} {u.last_name}".strip() or u.email) if u else ''  # noqa: E731
     return [{
-        'categorie': 'Hôte', 'beneficiaire': nom(hotes.get(v.hote_id)), 'objet': f"RES-{str(v.reservation_id)[:8].upper()}",
+        'categorie': 'Hôte', 'beneficiaire': nom(hotes.get(v.hote_id)), 'objet': _reference('reservation', v.reservation_id),
         'montant': v.montant, 'commission': v.commission, 'statut': v.statut, 'date_prevue': v.date_prevue,
         'envoye_le': v.envoye_le,
     } for v in qs]
