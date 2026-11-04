@@ -126,7 +126,7 @@ export default function ContenuEn({ taux }: { taux: TauxCgv }) {
                 <thead><tr><th>Item</th><th>Amount</th></tr></thead>
                 <tbody>
                   <tr><td>Price of nights</td><td>Set by the host or hotel, displayed before booking</td></tr>
-                  <tr><td>Cleaning fee</td><td>Once per stay, by type of property (KWA-BA scale, from 0 to 15,000 CFA francs), paid back in full to the host, displayed before booking</td></tr>
+                  <tr><td>Cleaning fee</td><td>Once per stay, by type of property (KWA-BA scale, from 3,000 to 15,000 CFA francs), paid back in full to the host, displayed before booking</td></tr>
                   <tr><td>Customer service fee</td><td><strong>{taux.voyageur}</strong> of the price of nights</td></tr>
                   <tr><td>Stay + Driver Pack (accommodation booked with a car with driver)</td><td>{taux.reduits} on the accommodation</td></tr>
                   <tr><td>Customer under a corporate framework agreement</td><td>4%</td></tr>

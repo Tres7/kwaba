@@ -1886,8 +1886,9 @@
     "villes": "Cities",
     "logements": "Stays",
     "logementsDispo": "{nombre, plural, =1 {1 stay} other {# stays}}",
-    "quartiers": "Lomé neighbourhoods",
-    "quartierLome": "Lomé neighbourhood"
+    "quartiers": "Neighbourhoods",
+    "quartiersLome": "Lomé neighbourhoods",
+    "quartierDe": "Neighbourhood · {ville}"
   },
   "details": {
     "titre": "The place in detail",

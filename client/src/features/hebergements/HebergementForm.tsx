@@ -16,6 +16,7 @@ import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
 import { cn } from "@/lib/utils";
+import { quartiersDe } from "@/lib/quartiers";
 import type { Hebergement, HebergementType, PolitiqueAnnulation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -228,7 +229,8 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         </div>
         <div>
           <label className={labelClass} htmlFor="h-location">{t("quartier")}</label>
-          <input id="h-location" className={inputClass} value={form.location} onChange={set("location")} placeholder="Bè Kpota" maxLength={200} />
+          <input id="h-location" className={inputClass} value={form.location} onChange={set("location")} placeholder="Bè Kpota" maxLength={200} list="h-quartiers" />
+          <datalist id="h-quartiers">{quartiersDe(form.city).map((q) => <option key={q} value={q} />)}</datalist>
         </div>
         <div className="sm:col-span-2">
           <label className={labelClass} htmlFor="h-repere">{t("pointRepere")}</label>

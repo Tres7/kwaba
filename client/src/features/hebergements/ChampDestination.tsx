@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useDebounced } from "@/lib/useAdminList";
 import { cn } from "@/lib/utils";
-import { QUARTIERS_LOME, quartiersCorrespondants } from "@/lib/quartiers";
+import { quartiersCorrespondants, quartiersDe } from "@/lib/quartiers";
 
 export interface Suggestions {
   villes: { city: string; count: number }[];
@@ -18,7 +18,7 @@ export interface Suggestions {
 
 type Option =
   | { type: "ville"; city: string; count: number }
-  | { type: "quartier"; nom: string }
+  | { type: "quartier"; nom: string; ville: string }
   | { type: "logement"; id: string; name: string; city: string; image_url: string };
 
 interface ChampDestinationProps {
@@ -38,7 +38,7 @@ interface ChampDestinationProps {
   listeClassName?: string;
 }
 
-/** "Destination" field with suggestions while typing: cities ("lome" finds "Lomé"), Lomé districts, then listings. */
+/** "Destination" field with suggestions while typing: cities ("lome" finds "Lomé"), districts, then listings. */
 export default function ChampDestination({
   value, onChange, onVille, onLogement, placeholder, ariaLabel, type = "text", inputRef, className, inputClassName, listeClassName,
 }: ChampDestinationProps) {
@@ -62,12 +62,12 @@ export default function ChampDestination({
   const options: Option[] = value.trim()
     ? [
         ...(trouvees?.villes ?? []).map((v) => ({ type: "ville" as const, ...v })),
-        ...quartiersCorrespondants(value).slice(0, 6).map((nom) => ({ type: "quartier" as const, nom })),
+        ...quartiersCorrespondants(value).slice(0, 6).map((q) => ({ type: "quartier" as const, ...q })),
         ...(trouvees?.logements ?? []).map((l) => ({ type: "logement" as const, ...l })),
       ]
     : [
         ...populaires.slice(0, 6).map((v) => ({ type: "ville" as const, city: v.city, count: v.count })),
-        ...QUARTIERS_LOME.slice(0, 8).map((nom) => ({ type: "quartier" as const, nom })),
+        ...quartiersDe("Lomé").slice(0, 8).map((nom) => ({ type: "quartier" as const, nom, ville: "Lomé" })),
       ];
   const visible = ouvert && options.length > 0;
 
@@ -105,7 +105,7 @@ export default function ChampDestination({
     }
   };
 
-  const titres = { ville: value.trim() ? t("villes") : t("populaires"), quartier: t("quartiers"), logement: t("logements") };
+  const titres = { ville: value.trim() ? t("villes") : t("populaires"), quartier: value.trim() ? t("quartiers") : t("quartiersLome"), logement: t("logements") };
   const titre = (texte: string) => <li role="presentation" className="px-4 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-400">{texte}</li>;
 
   return (
@@ -138,7 +138,7 @@ export default function ChampDestination({
           className={cn("absolute top-full z-50 mt-3 max-h-[70vh] overflow-y-auto rounded-2xl border border-gray-100 bg-white pb-2 text-left shadow-card", listeClassName ?? "left-0 w-full min-w-[18rem]")}
         >
           {options.map((option, index) => (
-            <Fragment key={option.type === "ville" ? `v-${option.city}` : option.type === "quartier" ? `q-${option.nom}` : `l-${option.id}`}>
+            <Fragment key={option.type === "ville" ? `v-${option.city}` : option.type === "quartier" ? `q-${option.ville}-${option.nom}` : `l-${option.id}`}>
               {options[index - 1]?.type !== option.type && titre(titres[option.type])}
               <li
                 id={`${id}-${index}`}
@@ -161,7 +161,7 @@ export default function ChampDestination({
                     <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-primary"><MapPin size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-dark">{option.nom}</span>
-                      <span className="block text-xs text-gray-500">{t("quartierLome")}</span>
+                      <span className="block text-xs text-gray-500">{t("quartierDe", { ville: option.ville })}</span>
                     </span>
                   </>
                 ) : (
