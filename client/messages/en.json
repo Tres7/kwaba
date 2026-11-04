@@ -1737,7 +1737,10 @@
     "toutEtablissement": "Whole property",
     "aideType": "Only the “{nom}” type will be closed.",
     "aideEtablissement": "All room types will be closed.",
-    "unitesNombre": "{nombre, plural, one {# unit} other {# units}}"
+    "unitesNombre": "{nombre, plural, one {# unit} other {# units}}",
+    "quantiteFermer": "Number of rooms to close",
+    "toutes": "All ({nombre})",
+    "quantiteAide": "For the rooms sold elsewhere (reception, other sites): the others stay bookable on Kwa-Ba. Empty: the whole type is closed."
   },
   "location": {
     "titre": "Cars and drivers",
@@ -2254,6 +2257,20 @@
         "visite": "An agent calls you and visits your place.",
         "publication": "Your listing is published, and you become a Kwa-Ba host."
       }
+    },
+    "chambres": {
+      "titre": "Which rooms do you offer?",
+      "texte": "One type per line: identical rooms together, with how many. No need to create one per room.",
+      "typeNumero": "Room type {numero}",
+      "nom": "Room type",
+      "nomExemple": "Standard double room",
+      "prix": "Price per night (CFA francs)",
+      "quantite": "Number of rooms",
+      "capacite": "Guests per room",
+      "ajouter": "Add a room type",
+      "retirer": "Remove this type",
+      "resume": "{total, plural, one {# room} other {# rooms}} in all, from {prix} a night.",
+      "aide": "From your host space, you will be able to add photos to each type and close the rooms sold elsewhere (reception, other sites)."
     }
   },
   "pieces": {
@@ -2274,6 +2291,13 @@
     "parking": "Parking",
     "autre": "Other",
     "titre": "The rooms in photos",
-    "sansPiece": "Other photos"
+    "sansPiece": "Other photos",
+    "reception": "Reception",
+    "chambres": "Rooms",
+    "salles_de_bain": "Bathrooms",
+    "restaurant": "Restaurant",
+    "bar": "Bar",
+    "salle_de_sport": "Gym",
+    "salle_de_reunion": "Meeting room"
   }
 }

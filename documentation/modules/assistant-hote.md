@@ -58,6 +58,19 @@ Taxonomie Kwa-Ba (brief AN-TAX du 3 novembre 2026), les mots employés à Lomé,
 - **Obligatoires pour une nouvelle annonce** : voyageurs (1 à 20), chambres (0 pour un studio), salles de bain (1 au moins), un lit au moins et le **point de repère** (« Derrière le CHU Sylvanus Olympio, Tokoin », 200 caractères, sans coordonnées). La surface n'est plus demandée ni affichée (colonne `surface_m2` gardée jusqu'à une prochaine version).
 - **Point de repère** : presque l'adresse exacte, donc jamais sur l'annonce publique. L'agent le voit pour la visite, le voyageur dans sa réservation une fois payée (`point_repere` de `GET /api/v1/reservations/`).
 
+## Hôtels, résidences et auberges
+
+Pour `chambre_hotel`, `residence` et `auberge` (`HebergementModel.ETABLISSEMENTS`), l'assistant suit un autre chemin (`pour` dans `etapes.ts`) :
+
+- **Écran « Vos chambres »** (`chambres`) à la place de « Capacité » : une ligne par type de chambre (nom, prix par nuit, nombre de chambres identiques jusqu'à 500, personnes par chambre). Un hôtel de 200 chambres se décrit en quelques lignes.
+- **Pas d'écran de prix** : chaque type a le sien. L'annonce affiche le moins cher (« à partir de ») et la plus grande capacité.
+- **Pièces des photos** : les espaces de l'établissement (Réception, Chambres, Restaurant, Bar, Piscine, Salle de sport, Salle de réunion…), pas « Chambre 1, Chambre 2 ». Les photos de chaque type s'ajoutent ensuite dans l'espace hôte, « Types de chambres ».
+- **API** : `types_chambres` (écriture seule) crée les `TypeLogementModel` avec l'annonce ; chambres, salles de bain et lits ne sont pas demandés. Sans `types_chambres`, l'annonce garde un seul type « Chambre ». Une maison ignore `types_chambres`.
+
+## Chambres vendues ailleurs
+
+Un hôtel vend aussi ses chambres à la réception ou sur d'autres sites. Dans son calendrier, il ferme un type entier ou **seulement quelques chambres** d'un type sur des dates (`quantite` d'un `BlocageModel`) : elles comptent comme prises, les autres restent réservables. Une fermeture partielle est possible à côté de réservations, dans la limite des chambres encore libres chaque nuit (`409` sinon), et plusieurs fermetures partielles s'additionnent.
+
 ## Pièce de chaque photo
 
 Sous chaque photo, l'hôte choisit la pièce : Chambre 1, Chambre 2… (selon son nombre de chambres ; « Pièce principale » pour un studio), Salon, Cuisine, Salle à manger, Salle de bain 1…, Toilettes, Terrasse, Balcon, Jardin ou cour, Piscine, Extérieur, Entrée, Vue, Parking, Autre. Codes et ordre : `client/src/features/hebergements/pieces.ts`, liste acceptée par l'API : `PIECES` de `server/apps/hebergements/serializers.py`.

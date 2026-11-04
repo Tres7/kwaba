@@ -33,15 +33,17 @@ interface PhotoUploaderProps {
   /** Numbers of bedrooms and bathrooms, for the rooms offered */
   chambres?: number | null;
   sallesDeBain?: number | null;
+  /** A hotel: its spaces (reception, restaurant…) rather than numbered bedrooms */
+  etablissement?: boolean;
 }
 
 let keySeq = 0;
 const nextKey = () => `p${++keySeq}`;
 
-export default function PhotoUploader({ value, onChange, onBusyChange, error, fichiersDuBrouillon, legendes, onLegende, chambres, sallesDeBain }: PhotoUploaderProps) {
+export default function PhotoUploader({ value, onChange, onBusyChange, error, fichiersDuBrouillon, legendes, onLegende, chambres, sallesDeBain, etablissement }: PhotoUploaderProps) {
   const t = useTranslations("photos");
   const tPieces = useTranslations("pieces");
-  const pieces = codesPieces(chambres, sallesDeBain);
+  const pieces = codesPieces(chambres, sallesDeBain, etablissement);
   const [items, setItems] = useState<Item[]>(() => value.map((url) => ({ key: nextKey(), status: "done", url })));
   const [dragOver, setDragOver] = useState(false);
   const [notice, setNotice] = useState("");

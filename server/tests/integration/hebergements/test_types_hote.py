@@ -125,6 +125,33 @@ class TestClosuresPerType:
         assert client.post(self.url(hotel), {**dates, 'type_logement': str(chambre.id)}, format='json').status_code == 409
         assert client.post(self.url(hotel), {**dates, 'type_logement': str(suite.id)}, format='json').status_code == 201
 
+    def test_some_rooms_only_sold_elsewhere(self, client_for, make_user, hotel):
+        client = client_for(hotel.host)
+        client.post(_types_url(hotel), _suite(quantite=10), format='json')
+        suite = hotel.types.get(nom='Suite')
+        ReservationModel.objects.create(hebergement_id=hotel.id, type_logement_id=suite.id, guest_id=make_user().pk,
+                                        check_in=_jour(10), check_out=_jour(12), total_price=0, status='confirmed', nb_unites=2)
+        dates = {'debut': _jour(10).isoformat(), 'fin': _jour(12).isoformat(), 'type_logement': str(suite.id)}
+        # 10 suites, 2 booked on Kwa-Ba: 5 sold at the reception can be closed, next to the booking
+        reponse = client.post(self.url(hotel), {**dates, 'quantite': 5}, format='json')
+        assert reponse.status_code == 201 and reponse.data['quantite'] == 5
+        assert stock.restantes(suite, _jour(10), _jour(12)) == 3
+        # Partial closures add up, within the rooms still free
+        assert client.post(self.url(hotel), {**dates, 'quantite': 4}, format='json').status_code == 409
+        assert client.post(self.url(hotel), {**dates, 'quantite': 3}, format='json').status_code == 201
+        assert stock.restantes(suite, _jour(10), _jour(12)) == 0
+        # The host's calendar says how many
+        periodes = client.get(f'{HEBERGEMENTS}{hotel.id}/disponibilites/', {'debut': _jour(9).isoformat(), 'fin': _jour(13).isoformat()}).data['periodes']
+        assert sorted(p['nb_unites'] for p in periodes if p['type'] == 'blocage') == [3, 5]
+
+    @pytest.mark.parametrize('extra, champ', [({}, 'quantite'), ({'type': True, 'quantite': 3}, 'quantite')])
+    def test_partial_closure_needs_a_type_and_enough_rooms(self, client_for, hotel, extra, champ):
+        dates = {'debut': _jour(10).isoformat(), 'fin': _jour(12).isoformat(), 'quantite': extra.get('quantite', 1)}
+        if extra.get('type'):
+            dates['type_logement'] = str(hotel.types.get().id)  # 1 room only
+        reponse = client_for(hotel.host).post(self.url(hotel), dates, format='json')
+        assert reponse.status_code == 400 and champ in reponse.data
+
     def test_type_of_another_establishment(self, client_for, hotel, make_hebergement):
         autre = make_hebergement().types.get()
         reponse = client_for(hotel.host).post(self.url(hotel), {'debut': _jour(10).isoformat(), 'fin': _jour(12).isoformat(),
@@ -158,3 +185,52 @@ def test_host_calendar_of_one_type(client_for, make_user, hotel):
     assert periodes() == [('reservation', 'Chambre'), ('blocage', 'Suite'), ('blocage', None)]
     assert periodes(type_logement=suite.id) == [('blocage', 'Suite'), ('blocage', None)]
     assert periodes(type_logement=chambre.id) == [('reservation', 'Chambre'), ('blocage', None)]
+
+
+class TestHotelCreatedWithItsRooms:
+    """A hotel gives its room types when it creates its listing (wizard): no bedrooms or beds of a house."""
+
+    def _hotel(self, **extra):
+        return {
+            'name': 'Hôtel du Golfe', 'type': 'chambre_hotel', 'city': 'Lomé', 'location': 'Bè', 'latitude': 6.13,
+            'longitude': 1.22, 'point_repere': 'Face au port', 'price_per_night': 1, 'max_guests': 2, 'amenities': [],
+            'petit_dejeuner': 'inclus', 'types_chambres': [
+                {'nom': 'Double standard', 'prix_nuit': 35000, 'quantite': 80, 'capacite': 2},
+                {'nom': 'Suite', 'prix_nuit': 90000, 'quantite': 10, 'capacite': 4},
+            ], **extra,
+        }
+
+    def test_hundreds_of_rooms_in_a_few_types(self, client_for, make_user):
+        reponse = client_for(make_user(role='hote')).post(HEBERGEMENTS, self._hotel(), format='json')
+        assert reponse.status_code == 201, reponse.data
+        hotel = HebergementModel.objects.get()
+        assert [(t.nom, t.quantite, t.capacite, t.prix_nuit) for t in hotel.types.all()] == [
+            ('Double standard', 80, 2, Decimal('35000')), ('Suite', 10, 4, Decimal('90000'))]
+        # The listing shows the cheapest room and the largest one
+        assert (hotel.price_per_night, hotel.max_guests) == (Decimal('35000'), 4)
+        assert hotel.chambres is None and hotel.lits_doubles == 0
+
+    def test_every_type_complete(self, client_for, make_user):
+        types = [{'nom': 'Double', 'prix_nuit': 35000, 'quantite': 0, 'capacite': 2}]
+        reponse = client_for(make_user(role='hote')).post(HEBERGEMENTS, self._hotel(types_chambres=types), format='json')
+        assert reponse.status_code == 400 and 'types_chambres' in reponse.data
+        types = [{'nom': 'Double', 'prix_nuit': 35000, 'quantite': 501, 'capacite': 2}]
+        assert client_for(make_user(role='hote')).post(HEBERGEMENTS, self._hotel(types_chambres=types), format='json').status_code == 400
+
+    def test_no_contact_details_in_a_type_name(self, client_for, make_user):
+        types = [{'nom': 'Double, appelez le 90 00 00 01', 'prix_nuit': 35000, 'quantite': 5, 'capacite': 2}]
+        reponse = client_for(make_user(role='hote')).post(HEBERGEMENTS, self._hotel(types_chambres=types), format='json')
+        assert reponse.status_code == 400 and 'types_chambres' in reponse.data
+
+    def test_without_types_the_default_room(self, client_for, make_user):
+        corps = self._hotel(price_per_night=30000)
+        del corps['types_chambres']
+        reponse = client_for(make_user(role='hote')).post(HEBERGEMENTS, corps, format='json')
+        assert reponse.status_code == 201, reponse.data
+        assert HebergementModel.objects.get().types.get().nom == 'Chambre'
+
+    def test_a_house_ignores_room_types(self, client_for, make_user):
+        corps = self._hotel(type='villa', price_per_night=50000, chambres=3, salles_de_bain=2, lits_doubles=3)
+        reponse = client_for(make_user(role='hote')).post(HEBERGEMENTS, corps, format='json')
+        assert reponse.status_code == 201, reponse.data
+        assert HebergementModel.objects.get().types.count() == 1
