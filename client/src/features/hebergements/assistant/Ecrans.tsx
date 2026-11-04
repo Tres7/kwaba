@@ -4,6 +4,7 @@ import { useCallback, useEffect, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
 import { Camera, Check, Sun, type LucideIcon } from "lucide-react";
 import { ICONES_TYPES, TYPES_LOGEMENT } from "@/components/hebergement/TypeLogement";
+import { useConfigPaiement } from "@/features/paiements";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Stepper from "@/components/ui/Stepper";
 import { useFormat } from "@/lib/format";
@@ -49,8 +50,8 @@ function Compteur({ valeur, max }: { valeur: number; max: number }) {
 }
 
 /** Big choice with its pictogram, one per option: the question is answered with one touch. */
-function CarteChoix({ picto: Picto, titre, texte, choisi, onChoisir }: {
-  picto: LucideIcon; titre: string; texte: string; choisi: boolean; onChoisir: () => void;
+function CarteChoix({ picto: Picto, titre, texte, note, choisi, onChoisir }: {
+  picto: LucideIcon; titre: string; texte: string; note?: string; choisi: boolean; onChoisir: () => void;
 }) {
   return (
     <button
@@ -68,6 +69,7 @@ function CarteChoix({ picto: Picto, titre, texte, choisi, onChoisir }: {
       <span className="block px-2 pt-2.5 pb-2">
         <span className="block font-heading font-bold text-dark text-sm sm:text-base">{titre}</span>
         <span className="block text-xs text-gray-500 mt-0.5 leading-snug">{texte}</span>
+        {note && <span className="block text-xs font-semibold text-primary mt-1.5">{note}</span>}
       </span>
       {choisi && (
         <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-white text-primary flex items-center justify-center shadow">
@@ -79,7 +81,9 @@ function CarteChoix({ picto: Picto, titre, texte, choisi, onChoisir }: {
 }
 
 function EcranType({ donnees, modifier }: EcranProps) {
-  const { TYPE_LABELS } = useFormat();
+  const { TYPE_LABELS, formatPrice } = useFormat();
+  // Cleaning fee of each type (Kwa-Ba scale), seen before choosing
+  const menage = useConfigPaiement().data?.frais_menage;
   const t = useTranslations("assistantHote");
   const tAnnonce = useTranslations("annonce");
   return (
@@ -87,6 +91,8 @@ function EcranType({ donnees, modifier }: EcranProps) {
       <div role="radiogroup" aria-label={t("type.titre")} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {TYPES_LOGEMENT.map((type) => (
           <CarteChoix key={type} picto={ICONES_TYPES[type]} titre={TYPE_LABELS[type]} texte={tAnnonce(`types.${type}`)}
+            note={menage?.[type] == null ? undefined
+              : menage[type] > 0 ? tAnnonce("menageCarte", { montant: formatPrice(menage[type]) }) : tAnnonce("menageCarteZero")}
             choisi={donnees.type === type}
             // A studio has no separate bedroom
             onChoisir={() => modifier(type === "studio" && donnees.chambres == null ? { type, chambres: 0 } : { type })} />

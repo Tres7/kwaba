@@ -1675,7 +1675,9 @@
     "litsRequis": "Ajoutez au moins un lit pour continuer.",
     "fraisMenage": "Frais de ménage : {montant}.",
     "fraisMenageAide": "Ils s'ajoutent au prix du séjour, une fois, et vous sont reversés en entier.",
-    "fraisMenageZero": "Pas de frais de ménage pour ce type : l'établissement s'en occupe."
+    "fraisMenageZero": "Pas de frais de ménage pour ce type : l'établissement s'en occupe.",
+    "menageCarte": "Ménage : {montant}",
+    "menageCarteZero": "Sans frais de ménage"
   },
   "revenus": {
     "statuts": {

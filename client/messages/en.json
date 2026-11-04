@@ -1675,7 +1675,9 @@
     "litsRequis": "Add at least one bed to continue.",
     "fraisMenage": "Cleaning fee: {montant}.",
     "fraisMenageAide": "It is added once to the price of the stay and paid back to you in full.",
-    "fraisMenageZero": "No cleaning fee for this type: the property takes care of it."
+    "fraisMenageZero": "No cleaning fee for this type: the property takes care of it.",
+    "menageCarte": "Cleaning: {montant}",
+    "menageCarteZero": "No cleaning fee"
   },
   "revenus": {
     "statuts": {
