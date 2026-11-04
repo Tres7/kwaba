@@ -9,7 +9,7 @@ export default function ContenuEn() {
   return (
     <LegalPage
       titre="Privacy policy"
-      miseAJour="31 October 2026"
+      miseAJour="3 November 2026"
       intro={
         <>
           <p>
@@ -130,7 +130,7 @@ export default function ContenuEn() {
               <li>Inactive account: 3 years after the last activity, then deleted or anonymised.</li>
               <li>Bookings and contracts concluded online (acceptances, signed contracts): 5 years after their performance (<Link href="/cgv#preuve">terms of sale, art. 22.2</Link>).</li>
               <li>Payments, payouts, refunds, invoices, donations and payouts to NGOs: 10 years (accounting records).</li>
-              <li>Partners&apos; supporting documents (vehicle papers, licence, criminal record, contracts): for the duration of the relationship, then 5 years. The copy of a host&apos;s ID document is deleted as soon as the agent has checked the identity (only the document type and the result of the check are kept).</li>
+              <li>Partners&apos; supporting documents (vehicle papers, licence, criminal record, contracts): for the duration of the relationship, then 5 years. The same applies to the copy of a host&apos;s ID document verified by an agent; a refused document is deleted as soon as it is refused (only the document type and the reason are kept).</li>
               <li>Report and photos of a visit: as long as the listing is published, then 3 years.</li>
               <li>AI Concierge conversations: until you delete them (button in the conversation), and at most 12 months after the last message.</li>
               <li>Messages: 3 years after the last message in the conversation.</li>

@@ -33,6 +33,8 @@ def _piece_json(piece: PieceIdentiteModel | None) -> dict:
     return {
         'statut': piece.statut, 'type_piece': piece.type_piece, 'type_libelle': piece.get_type_piece_display(),
         'soumise_le': piece.soumise_le, 'verifiee_le': piece.verifiee_le, 'motif_refus': piece.motif_refus,
+        # False for the documents verified before they were kept (deleted then): the agent asks for the original
+        'copie': bool(piece.fichier),
     }
 
 
@@ -216,9 +218,13 @@ class FichierPieceView(APIView):
         if not piece or not piece.fichier:
             raise Http404
         if not piece.fichier.storage.exists(piece.fichier.name):
-            # Lost (private files deleted by a deployment before the prive-data volume): the host has to send it again
-            return Response({'detail': "Ce fichier est perdu. Refusez la pièce avec un motif qui demande à l'hôte de la "
-                                       "renvoyer : il sera prévenu par email."}, status=status.HTTP_410_GONE)
+            # Lost (private files deleted by a deployment before the prive-data volume)
+            if piece.statut == 'verifiee':
+                detail = "Ce fichier est perdu. Lors de la visite, demandez à l'hôte de vous montrer l'original."
+            else:
+                detail = ("Ce fichier est perdu. Refusez la pièce avec un motif qui demande à l'hôte de la renvoyer : "
+                          "il sera prévenu par email.")
+            return Response({'detail': detail}, status=status.HTTP_410_GONE)
         journaliser('piece_consultee', request, utilisateur=request.user, hote=str(piece.hote_id))
         pdf = piece.type_contenu == 'application/pdf'
         reponse = FileResponse(piece.fichier.open('rb'), content_type=piece.type_contenu or 'application/octet-stream',

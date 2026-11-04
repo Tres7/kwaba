@@ -146,8 +146,8 @@ def piece_a_controler(piece) -> None:
 
 @transaction.atomic
 def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> PieceIdentiteModel:
-    """Remote check of the identity document. Verified: the document is deleted (only the result is kept)
-    and the host's pending listings are sent to the agents for a visit."""
+    """Remote check of the identity document. Verified: the document is kept (the agent compares it with the person
+    met at the visit) and the host's pending listings are sent to the agents for a visit. Refused: it is deleted."""
     piece = PieceIdentiteModel.objects.select_for_update().filter(hote_id=hote.pk).first()
     if not piece or piece.statut != 'soumise':
         raise VerificationErreur("Aucune pièce d'identité à contrôler pour cet hôte.")
@@ -157,8 +157,6 @@ def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> Piec
     if decision == 'verifiee':
         piece.statut, piece.verifiee_le, piece.verifiee_par_id, piece.motif_refus = (
             'verifiee', timezone.now(), verificateur.pk, '')
-        if piece.fichier:
-            piece.fichier.delete(save=False)
         piece.save()
         annonces = hebergements.annonces_en_attente([hote.pk])
         for annonce in annonces:
@@ -216,9 +214,12 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
         photo.save()
 
     if piece and decision == 'refusee' and not controles['identite']:
-        # The person met does not match the document: the host will have to prove their identity again
+        # The person met does not match the document: the host will have to prove their identity again. Only verified
+        # documents are kept
         piece.statut, piece.motif_refus = 'refusee', commentaire
-        piece.save(update_fields=['statut', 'motif_refus'])
+        if piece.fichier:
+            piece.fichier.delete(save=False)
+        piece.save(update_fields=['statut', 'motif_refus', 'fichier'])
 
     contexte = {'prenom': hote.first_name, 'hebergement': annonce['name'],
                 'url_espace': f"{settings.FRONTEND_URL}/hote/espace",

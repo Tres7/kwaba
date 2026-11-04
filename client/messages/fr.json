@@ -1428,7 +1428,7 @@
     "ceQuIlFaut": "Ce qu'il vous faut",
     "besoins": {
       "compte": "Un compte Kwa-Ba et un numéro de téléphone",
-      "identite": "Une pièce d'identité (contrôlée par Kwa-Ba, puis supprimée)",
+      "identite": "Une pièce d'identité, contrôlée par Kwa-Ba",
       "photos": "Des photos de votre logement",
       "prix": "Un prix par nuit en FCFA",
       "capacite": "La capacité d'accueil et les équipements"
@@ -1547,7 +1547,7 @@
       "refuseeAide": "Corrigez ce point puis enregistrez l'annonce : elle repassera en vérification.",
       "verifiee": "Vérifiée",
       "identiteTitre": "Vérification de votre identité",
-      "identiteAide": "Pour protéger les voyageurs, chaque hôte est vérifié. Envoyez une pièce d'identité : un agent Kwa-Ba la contrôle à distance, puis elle est supprimée. Lors de la visite, il vérifiera que c'est bien vous.",
+      "identiteAide": "Pour protéger les voyageurs, chaque hôte est vérifié. Envoyez une pièce d'identité : un agent Kwa-Ba la contrôle à distance. Lors de la visite, il vérifiera que c'est bien vous. Seuls les agents Kwa-Ba la voient, jamais les voyageurs.",
       "identiteSoumise": "Pièce d'identité reçue : un agent Kwa-Ba la contrôle, en général sous 48 heures.",
       "identiteVerifiee": "Identité vérifiée",
       "identiteRefusee": "Pièce d'identité refusée : {motif}",
@@ -2221,7 +2221,7 @@
     },
     "identite": {
       "titre": "Votre pièce d'identité",
-      "texte": "Carte d'identité ou passeport. Elle est contrôlée par Kwa-Ba, puis supprimée."
+      "texte": "Carte d'identité ou passeport. Seuls les agents Kwa-Ba la voient : ils la contrôlent, puis vérifient sur place que c'est bien vous."
     },
     "versement": {
       "titre": "Où recevoir vos revenus ?",

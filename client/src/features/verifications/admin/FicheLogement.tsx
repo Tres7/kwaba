@@ -35,7 +35,8 @@ export interface Logement {
     nom: string;
     email: string;
     telephone: string | null;
-    piece: { statut: "absente" | "soumise" | "verifiee" | "refusee"; type_libelle?: string; motif_refus?: string };
+    /** copie: false for the documents verified before they were kept */
+    piece: { statut: "absente" | "soumise" | "verifiee" | "refusee"; type_libelle?: string; motif_refus?: string; copie?: boolean };
   };
 }
 
@@ -62,6 +63,8 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
   const tPieces = useTranslations("pieces");
   const toutCoche = Object.keys(controlesLibelles).every((cle) => controles[cle]);
   const piece = PIECE[logement.hote.piece.statut];
+  // Verified: shown again at the visit, to compare with the person met
+  const pieceVisible = logement.hote.piece.copie && ["soumise", "verifiee"].includes(logement.hote.piece.statut);
   const telephone = logement.hote.telephone?.replace(/[^\d+]/g, "");
   const destination = logement.position ? `${logement.position.lat},${logement.position.lng}` : `${logement.location}, ${logement.city}`;
   const carte = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
@@ -103,10 +106,17 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         </div>
         <div className={cn("flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm", piece.classe)}>
           <span>{piece.libelle}{logement.hote.piece.type_libelle ? ` (${logement.hote.piece.type_libelle})` : ""}</span>
-          {logement.hote.piece.statut === "soumise" && (
+          {pieceVisible && (
             <button onClick={() => ouvrirPiece(logement.hote.id)} className="flex items-center gap-1 font-bold underline"><FileText size={15} aria-hidden /> Voir</button>
           )}
         </div>
+        {logement.hote.piece.statut === "verifiee" && (
+          <p className="text-xs text-gray-500">
+            {pieceVisible
+              ? "Sur place, comparez la personne rencontrée à cette pièce."
+              : "Pas de copie de la pièce (vérifiée quand Kwa-Ba ne les gardait pas) : demandez à voir l'original sur place."}
+          </p>
+        )}
       </section>
 
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-2">

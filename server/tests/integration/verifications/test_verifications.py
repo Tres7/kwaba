@@ -193,6 +193,10 @@ class TestPieceIdentite:
         assert response.status_code == 410
         assert 'renvoyer' in response.data['detail']
 
+        _identite_verifiee(hote)
+        response = client_for(agent).get(f'{IDENTITE}{hote.id}/fichier/')
+        assert response.status_code == 410 and "l'original" in response.data['detail']
+
     def test_lost_files_listed(self, client_for, hote, stockage_temporaire):
         _envoyer_piece(client_for(hote))
         piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
@@ -235,13 +239,18 @@ class TestVisite:
         assert visite.controles == TOUT_CONFORME and visite.photos.count() == 2
         assert mail.outbox[-1].to == [hote.email] and 'vérifié' in mail.outbox[-1].subject
 
-    def test_identity_mismatch_at_the_visit_refuses_the_identity(self, client_for, agent, hote, en_attente):
-        _identite_verifiee(hote)
+    def test_identity_mismatch_at_the_visit_refuses_the_identity(self, client_for, agent, hote, en_attente,
+                                                                  stockage_temporaire):
+        _envoyer_piece(client_for(hote))
+        fichier = _identite_verifiee(hote).fichier.name
         response = _decider(client_for(agent), en_attente, decision='refusee',
                             commentaire="La personne rencontrée n'est pas celle de la pièce.",
                             controles={**TOUT_CONFORME, 'identite': False})
         assert response.status_code == 201
-        assert PieceIdentiteModel.objects.get(hote_id=hote.pk).statut == 'refusee'
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
+        # Only verified documents are kept
+        assert piece.statut == 'refusee' and not piece.fichier
+        assert not (stockage_temporaire / fichier).exists()
 
     def test_cannot_validate_without_every_check_or_identity(self, client_for, agent, hote, en_attente):
         client = client_for(agent)
@@ -292,7 +301,7 @@ class TestControleIdentite:
         assert data['count'] == 1
         assert data['results'][0]['hote']['email'] == hote.email
 
-    def test_verified_identity_deletes_the_document_and_requests_the_visits(
+    def test_verified_identity_keeps_the_document_and_requests_the_visits(
             self, client_for, hote, agent, en_attente, stockage_temporaire, django_capture_on_commit_callbacks):
         _envoyer_piece(client_for(hote))
         fichier = PieceIdentiteModel.objects.get(hote_id=hote.pk).fichier.name
@@ -301,8 +310,11 @@ class TestControleIdentite:
             response = client_for(agent).post(url, {'decision': 'verifiee'}, format='json')
         assert response.status_code == 200 and response.data['statut'] == 'verifiee'
         piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
-        assert piece.verifiee_par_id == agent.id and not piece.fichier
-        assert not (stockage_temporaire / fichier).exists()
+        # Kept for the visit: the agent compares it with the person met
+        assert piece.verifiee_par_id == agent.id and piece.fichier.name == fichier
+        assert (stockage_temporaire / fichier).exists()
+        assert client_for(agent).get(VISITES).data['results'][0]['hote']['piece']['copie'] is True
+        assert client_for(agent).get(f'{IDENTITE}{hote.id}/fichier/').status_code == 200
         sujets = [m.subject for m in mail.outbox]
         assert any('Visite à planifier' in sujet for sujet in sujets)
         assert any('identité est vérifiée' in sujet for sujet in sujets)
