@@ -26,12 +26,15 @@ def bon(r) -> bytes:
         ('Logement', h['name']), ('Adresse', ', '.join(x for x in (h['location'], h['city']) if x)),
         ('Arrivée', f"{date(r.check_in, 'l j F Y')}" + (f", à partir de {_heure(h['arrivee_a_partir'])}" if h['arrivee_a_partir'] else '')),
         ('Départ', f"{date(r.check_out, 'l j F Y')}" + (f", avant {_heure(h['depart_avant'])}" if h['depart_avant'] else '')),
+        *([('Point de repère', h['point_repere'])] if h.get('point_repere') else []),
         ('Durée', f"{r.nights} nuit(s)"), ('Voyageurs', str(r.guests_count)),
         ('Hôte', _nom(hote) + ', contact par la messagerie Kwa-Ba'),
     ])
     lignes = []
     if r.prix_nuits is not None:
         lignes.append((f"Hébergement, {r.nights} nuit(s)", str(r.nights), fcfa(r.prix_nuits // max(r.nights, 1)), fcfa(r.prix_nuits)))
+        if r.frais_menage:
+            lignes.append(('Frais de ménage', '1', fcfa(r.frais_menage), fcfa(r.frais_menage)))
         lignes.append(('Frais de service Kwa-Ba', '1', fcfa(r.frais_service or 0), fcfa(r.frais_service or 0)))
     else:
         lignes.append(('Séjour', '1', fcfa(r.total_price), fcfa(r.total_price)))
@@ -52,6 +55,8 @@ def lignes_facture(r) -> list[dict]:
     reste = r.prix_nuits - lignes[0]['quantite'] * lignes[0]['prix_unitaire']
     if reste:
         lignes.append({'libelle': 'Arrondi', 'quantite': 1, 'prix_unitaire': reste})
+    if r.frais_menage:
+        lignes.append({'libelle': 'Frais de ménage', 'quantite': 1, 'prix_unitaire': r.frais_menage})
     lignes.append({'libelle': 'Frais de service Kwa-Ba', 'quantite': 1, 'prix_unitaire': r.frais_service or 0})
     return lignes
 

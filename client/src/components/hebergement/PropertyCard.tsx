@@ -6,6 +6,7 @@ import RatingBadge from "@/components/ui/RatingBadge";
 import { FALLBACK_IMAGE, SERVICE_FEE_RATE, cn, prixNuitFraisInclus } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useResumeDetails } from "@/components/hebergement/DetailsLogement";
+import { LibelleType } from "@/components/hebergement/TypeLogement";
 import { useFormat } from "@/lib/format";
 
 /** "Only N left" from this number of units (hotels and other multi-unit establishments). */
@@ -18,7 +19,7 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property, query = "", onFavoriteChange }: PropertyCardProps) {
-  const { TYPE_LABELS, formatDate, formatPrice } = useFormat();
+  const { formatDate, formatPrice } = useFormat();
   const resume = useResumeDetails();
   const t = useTranslations("logement");
   const prix = Number(property.price_per_night);
@@ -50,7 +51,7 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
           </span>
         )}
         <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full text-dark shadow-sm">
-          {TYPE_LABELS[property.type] ?? property.type}
+          <LibelleType type={property.type} />
         </span>
         <FavoriteButton
           hebergementId={property.id}

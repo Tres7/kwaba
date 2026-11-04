@@ -6,7 +6,7 @@ import { clesReservations, useMesReservations } from "./hooks";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Calendar, MapPin, CheckCircle, Clock, XCircle, Users, Star, CreditCard } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, CheckCircle, Clock, XCircle, Users, Star, CreditCard, Signpost } from "lucide-react";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api";
 import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
@@ -131,6 +131,9 @@ export default function ReservationsPage() {
                       <div className="min-w-0">
                         <h2 className="font-heading font-bold text-lg text-dark truncate">{res.hebergement_detail.name}</h2>
                         <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-primary flex-shrink-0" />{res.hebergement_detail.city}</p>
+                        {res.point_repere && (
+                          <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-primary flex-shrink-0 mt-0.5" />{t("pointRepere", { repere: res.point_repere })}</p>
+                        )}
                       </div>
                       <span className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0", status.className)}>
                         <status.icon size={12} /> {t(`statuts.${status.label}`)}

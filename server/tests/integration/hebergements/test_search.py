@@ -22,7 +22,7 @@ def listings(make_user, make_hebergement):
         'appart': make_hebergement(host=host, name='Appart Kpalimé', city='Kpalimé', location='Centre',
                                    type='appartement', price_per_night=15000, max_guests=2, rating=4.1),
         'hotel': make_hebergement(host=host, name='Hôtel du Golfe', city='Lomé', location='Bè',
-                                  type='hotel', price_per_night=30000, max_guests=2, rating=3.5),
+                                  type='chambre_hotel', price_per_night=30000, max_guests=2, rating=3.5),
         'hidden': make_hebergement(host=host, name='Masqué', city='Lomé', is_available=False),
     }
 
@@ -35,6 +35,8 @@ def test_only_available_listings(api_client, listings):
     ({'city': 'lomé'}, {'Villa Lomé', 'Hôtel du Golfe'}),
     ({'city': 'Bè'}, {'Hôtel du Golfe'}),
     ({'type': 'appartement'}, {'Appart Kpalimé'}),
+    # Former value, still in old links
+    ({'type': 'hotel'}, {'Hôtel du Golfe'}),
     ({'price_min': 20000, 'price_max': 40000}, {'Hôtel du Golfe'}),
     ({'guests': 4}, {'Villa Lomé'}),
     ({'q': 'golfe'}, {'Hôtel du Golfe'}),

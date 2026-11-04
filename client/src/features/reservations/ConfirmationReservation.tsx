@@ -5,7 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckCircle, Calendar, MapPin, Users, ArrowRight, MessageCircle, Plane } from "lucide-react";
+import { CheckCircle, Calendar, MapPin, Users, ArrowRight, MessageCircle, Plane, Signpost } from "lucide-react";
 import { FALLBACK_IMAGE } from "@/lib/utils";
 import { Documents } from "@/features/documents";
 import { useTranslations } from "next-intl";
@@ -75,6 +75,9 @@ export default function ConfirmationPage() {
                 <div className="min-w-0">
                   <h2 className="font-heading font-bold text-dark text-xl">{h.name}</h2>
                   <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-primary flex-shrink-0" />{h.location ? `${h.location}, ` : ""}{h.city}</p>
+                  {reservation.point_repere && (
+                    <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-primary flex-shrink-0 mt-0.5" />{tRes("pointRepere", { repere: reservation.point_repere })}</p>
+                  )}
                 </div>
                 <span className={reservation.status === "cancelled" ? "bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-full" : "bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full"}>
                   {reservation.status === "cancelled" ? t("statutAnnulee") : reservation.status === "pending" ? t("statutEnAttente") : t("statutConfirmee")}

@@ -1,17 +1,19 @@
 "use client";
 
-import { useCallback, type ComponentType } from "react";
+import { useCallback, useEffect, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
-import { Backpack, BedDouble, Building, Building2, Camera, Check, Hotel, House, Sun, TreePalm, type LucideIcon } from "lucide-react";
+import { Camera, Check, Sun, type LucideIcon } from "lucide-react";
+import { ICONES_TYPES, TYPES_LOGEMENT } from "@/components/hebergement/TypeLogement";
+import { useConfigPaiement } from "@/features/paiements";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Stepper from "@/components/ui/Stepper";
 import { useFormat } from "@/lib/format";
 import { QUARTIERS_LOME } from "@/lib/quartiers";
 import { cn } from "@/lib/utils";
-import type { HebergementType } from "@/types/api/models";
 import { useEquipements } from "../AmenityBadge";
 import type { DonneesAnnonce } from "../brouillons";
 import PhotoUploader from "../PhotoUploader";
+import FraisMenageType from "../FraisMenageType";
 import { EcranAccueil, EcranContrat, EcranIdentite, EcranPrix, EcranRecapitulatif, EcranRegles, EcranSecurite, EcranTelephone, EcranVersement } from "./EcransFin";
 import { MAX_DESCRIPTION, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, type CleEtape, type Conditions } from "./etapes";
 
@@ -24,9 +26,6 @@ export interface EcranProps {
   conditions?: Conditions;
 }
 
-const TYPES: Record<HebergementType, LucideIcon> = {
-  maison: House, appartement: Building2, villa: TreePalm, hotel: Hotel, residence: Building, auberge: Backpack,
-};
 const VILLES = ["Lomé", "Kpalimé", "Aného", "Atakpamé", "Sokodé", "Kara"];
 export const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 export const libelleClass = "block text-sm font-semibold text-dark mb-2";
@@ -51,8 +50,8 @@ function Compteur({ valeur, max }: { valeur: number; max: number }) {
 }
 
 /** Big choice with its pictogram, one per option: the question is answered with one touch. */
-function CarteChoix({ picto: Picto, titre, texte, choisi, onChoisir }: {
-  picto: LucideIcon; titre: string; texte: string; choisi: boolean; onChoisir: () => void;
+function CarteChoix({ picto: Picto, titre, texte, note, choisi, onChoisir }: {
+  picto: LucideIcon; titre: string; texte: string; note?: string; choisi: boolean; onChoisir: () => void;
 }) {
   return (
     <button
@@ -70,6 +69,7 @@ function CarteChoix({ picto: Picto, titre, texte, choisi, onChoisir }: {
       <span className="block px-2 pt-2.5 pb-2">
         <span className="block font-heading font-bold text-dark text-sm sm:text-base">{titre}</span>
         <span className="block text-xs text-gray-500 mt-0.5 leading-snug">{texte}</span>
+        {note && <span className="block text-xs font-semibold text-primary mt-1.5">{note}</span>}
       </span>
       {choisi && (
         <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-white text-primary flex items-center justify-center shadow">
@@ -81,31 +81,24 @@ function CarteChoix({ picto: Picto, titre, texte, choisi, onChoisir }: {
 }
 
 function EcranType({ donnees, modifier }: EcranProps) {
-  const { TYPE_LABELS } = useFormat();
+  const { TYPE_LABELS, formatPrice } = useFormat();
+  // Cleaning fee of each type (Kwa-Ba scale), seen before choosing
+  const menage = useConfigPaiement().data?.frais_menage;
   const t = useTranslations("assistantHote");
   const tAnnonce = useTranslations("annonce");
   return (
     <Question cle="type">
       <div role="radiogroup" aria-label={t("type.titre")} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {(Object.entries(TYPES) as [HebergementType, LucideIcon][]).map(([type, picto]) => (
-          <CarteChoix key={type} picto={picto} titre={TYPE_LABELS[type]} texte={tAnnonce(`types.${type}`)}
-            choisi={donnees.type === type} onChoisir={() => modifier({ type })} />
+        {TYPES_LOGEMENT.map((type) => (
+          <CarteChoix key={type} picto={ICONES_TYPES[type]} titre={TYPE_LABELS[type]} texte={tAnnonce(`types.${type}`)}
+            note={menage?.[type] == null ? undefined
+              : menage[type] > 0 ? tAnnonce("menageCarte", { montant: formatPrice(menage[type]) }) : tAnnonce("menageCarteZero")}
+            choisi={donnees.type === type}
+            // A studio has no separate bedroom
+            onChoisir={() => modifier(type === "studio" && donnees.chambres == null ? { type, chambres: 0 } : { type })} />
         ))}
       </div>
-    </Question>
-  );
-}
-
-function EcranEspace({ donnees, modifier }: EcranProps) {
-  const t = useTranslations("assistantHote");
-  return (
-    <Question cle="espace">
-      <div role="radiogroup" aria-label={t("espace.titre")} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <CarteChoix picto={House} titre={t("espace.entier.titre")} texte={t("espace.entier.texte")}
-          choisi={donnees.espace === "entier"} onChoisir={() => modifier({ espace: "entier" })} />
-        <CarteChoix picto={BedDouble} titre={t("espace.chambre.titre")} texte={t("espace.chambre.texte")}
-          choisi={donnees.espace === "chambre_privee"} onChoisir={() => modifier({ espace: "chambre_privee" })} />
-      </div>
+      <FraisMenageType type={donnees.type} className="mt-4" />
     </Question>
   );
 }
@@ -137,6 +130,13 @@ function EcranAdresse({ donnees, modifier, erreurs }: EcranProps) {
           {donnees.city === "Lomé" && <datalist id="a-quartiers">{QUARTIERS_LOME.map((q) => <option key={q} value={q} />)}</datalist>}
           <Erreur messages={erreurs.location} />
         </div>
+        <div>
+          <label className={libelleClass} htmlFor="a-repere">{t("pointRepere")}</label>
+          <input id="a-repere" className={champClass} value={donnees.point_repere ?? ""} maxLength={200}
+            onChange={(e) => modifier({ point_repere: e.target.value })} placeholder={t("pointRepereExemple")} />
+          <p className="text-xs text-gray-500 mt-1.5">{t("pointRepereAide")}</p>
+          <Erreur messages={erreurs.point_repere} />
+        </div>
       </div>
     </Question>
   );
@@ -157,13 +157,25 @@ function EcranPosition({ donnees, modifier, erreurs }: EcranProps) {
 function EcranCapacite({ donnees, modifier, erreurs }: EcranProps) {
   const t = useTranslations("annonce");
   const ligne = "py-3.5 border-b border-gray-100";
+  const lits = (donnees.lits_doubles ?? 0) + (donnees.lits_simples ?? 0) + (donnees.canapes_lits ?? 0);
+  // The counters show a value from the start: it is saved too, so "Next" is never greyed out by an untouched counter
+  const manquants = donnees.max_guests == null || donnees.chambres == null || donnees.salles_de_bain == null;
+  useEffect(() => {
+    if (manquants) {
+      modifier({
+        max_guests: donnees.max_guests ?? 2, chambres: donnees.chambres ?? (donnees.type === "studio" ? 0 : 1),
+        salles_de_bain: donnees.salles_de_bain ?? 1,
+      });
+    }
+  }, [manquants]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <Question cle="capacite">
-      <Stepper className={ligne} label={t("voyageursMax")} value={donnees.max_guests ?? 2} min={1} max={50}
+      <Stepper className={ligne} label={t("voyageursMax")} value={donnees.max_guests ?? 2} min={1} max={20}
         onChange={(n) => modifier({ max_guests: n })} />
       <Stepper className={ligne} label={t("chambres")} value={donnees.chambres ?? 1} min={0} max={50}
         onChange={(n) => modifier({ chambres: n })} />
-      <Stepper className={ligne} label={t("sallesDeBain")} value={donnees.salles_de_bain ?? 1} min={0} max={50}
+      <p className="text-xs text-gray-500 pt-1.5">{t("chambresAide")}</p>
+      <Stepper className={ligne} label={t("sallesDeBain")} value={donnees.salles_de_bain ?? 1} min={1} max={50}
         onChange={(n) => modifier({ salles_de_bain: n })} />
       <Stepper className={ligne} label={t("litsDoubles")} value={donnees.lits_doubles ?? 0} min={0} max={50}
         onChange={(n) => modifier({ lits_doubles: n })} />
@@ -171,12 +183,9 @@ function EcranCapacite({ donnees, modifier, erreurs }: EcranProps) {
         onChange={(n) => modifier({ lits_simples: n })} />
       <Stepper className={ligne} label={t("canapesLits")} value={donnees.canapes_lits ?? 0} min={0} max={50}
         onChange={(n) => modifier({ canapes_lits: n })} />
-      <div className="mt-5">
-        <label className={libelleClass} htmlFor="a-surface">{t("surface")}</label>
-        <input id="a-surface" type="number" min={5} step={1} inputMode="numeric" className={champClass} placeholder="80"
-          value={donnees.surface_m2 ?? ""} onChange={(e) => modifier({ surface_m2: e.target.value ? Number(e.target.value) : null })} />
-        <Erreur messages={erreurs.surface_m2} />
-      </div>
+      {/* Says why "Next" waits, instead of a greyed-out button without explanation */}
+      {lits === 0 && <p role="status" className="text-sm text-secondary font-semibold mt-3">{t("litsRequis")}</p>}
+      <Erreur messages={erreurs.lits ?? erreurs.max_guests ?? erreurs.salles_de_bain} />
     </Question>
   );
 }
@@ -216,6 +225,7 @@ function EcranPhotos({ donnees, modifier, erreurs, onOccupe }: EcranProps) {
   const enregistrer = useCallback((images: string[]) => {
     if (images.join() !== (donnees.images ?? []).join()) modifier({ images, image_url: images[0] ?? "" });
   }, [donnees.images, modifier]);
+  const sansPiece = (donnees.images ?? []).filter((url) => !donnees.legendes_photos?.[url]).length;
   return (
     <Question cle="photos">
       <ul className="grid gap-2 mb-5 text-sm text-gray-600">
@@ -223,10 +233,14 @@ function EcranPhotos({ donnees, modifier, erreurs, onOccupe }: EcranProps) {
         <li className="flex items-start gap-2"><Camera size={18} className="text-primary flex-shrink-0" aria-hidden /> {t("photos.conseilPieces")}</li>
       </ul>
       <PhotoUploader value={donnees.images ?? []} onChange={enregistrer} onBusyChange={onOccupe} fichiersDuBrouillon
-        error={erreurs.images?.[0] ?? erreurs.image_url?.[0]} />
+        error={erreurs.images?.[0] ?? erreurs.image_url?.[0] ?? erreurs.legendes_photos?.[0]}
+        legendes={donnees.legendes_photos ?? {}} chambres={donnees.chambres} sallesDeBain={donnees.salles_de_bain}
+        onLegende={(url, piece) => modifier({ legendes_photos: { ...donnees.legendes_photos, [url]: piece } })} />
       <p className={cn("text-sm font-semibold mt-3", nombre >= MIN_PHOTOS ? "text-primary" : "text-dark")}>
         {t("photos.compteur", { nombre, min: MIN_PHOTOS })}
       </p>
+      {/* Says why "Next" waits */}
+      {sansPiece > 0 && <p role="status" className="text-sm text-secondary font-semibold mt-1">{t("photos.pieces", { nombre: sansPiece })}</p>}
     </Question>
   );
 }
@@ -263,7 +277,7 @@ function EcranDescription({ donnees, modifier, erreurs }: EcranProps) {
 }
 
 export const ECRANS: Partial<Record<CleEtape, ComponentType<EcranProps>>> = {
-  type: EcranType, espace: EcranEspace, adresse: EcranAdresse, position: EcranPosition, capacite: EcranCapacite,
+  type: EcranType, adresse: EcranAdresse, position: EcranPosition, capacite: EcranCapacite,
   equipements: EcranEquipements, photos: EcranPhotos, titre: EcranTitre, description: EcranDescription,
   prix: EcranPrix, regles: EcranRegles, accueil: EcranAccueil, securite: EcranSecurite, telephone: EcranTelephone,
   identite: EcranIdentite, versement: EcranVersement, contrat: EcranContrat, recapitulatif: EcranRecapitulatif,

@@ -259,7 +259,7 @@ function EspaceHoteContent() {
                     <p className="font-heading font-bold text-primary whitespace-nowrap">{formatPrice(h.price_per_night)}<span className="text-xs text-gray-400 font-normal">/nuit</span></p>
                   </div>
                   <RatingBadge rating={h.rating} count={h.review_count} variant="full" className="mt-2" />
-                  {h.surface_m2 == null && (
+                  {(h.chambres == null || h.salles_de_bain == null || !h.point_repere) && (
                     <button type="button" onClick={() => setEditing(h)} className="relative zone-tactile flex items-start gap-1.5 text-left text-xs font-semibold text-amber-800 mt-2 hover:underline">
                       <AlertTriangle size={14} className="flex-shrink-0 mt-px" /> {tAnnonce("detailsManquants")}
                     </button>
@@ -330,6 +330,9 @@ function EspaceHoteContent() {
               <div className="flex items-center justify-between md:flex-col md:items-end gap-1">
                 <span className="font-heading font-bold text-dark" title={t("montantHoteAide")}>
                   {formatPrice(r.montants.montant_hote)} <span className="text-xs font-normal text-gray-600">{t("pourVous")}</span>
+                  {r.montants.frais_menage > 0 && (
+                    <span className="block text-xs font-normal text-gray-600 md:text-right">{t("dontMenage", { montant: formatPrice(r.montants.frais_menage) })}</span>
+                  )}
                 </span>
                 <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full",
                   r.status === "cancelled" ? "bg-red-100 text-red-700" : r.status === "pending" ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-700")}>

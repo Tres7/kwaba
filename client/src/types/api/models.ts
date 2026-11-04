@@ -1,4 +1,6 @@
-export type HebergementType = "hotel" | "villa" | "maison" | "appartement" | "residence" | "auberge";
+/** Kwa-Ba taxonomy (brief AN-TAX of 2026-11-03), plus the aparthotels and guesthouses kept by the team. */
+export type HebergementType = "chambre_privee" | "studio" | "appartement" | "maison_entiere" | "villa" | "chambre_hotel"
+  | "residence" | "auberge";
 export type PolitiqueAnnulation = "souple" | "moderee" | "ferme";
 export type EspaceLogement = "entier" | "chambre_privee";
 /** The one status shown to the host (HebergementModel.statut_annonce on the API). */
@@ -50,16 +52,19 @@ export interface Hebergement {
   review_count: number;
   image_url: string;
   images: string[];
+  /** Room shown by each photo, {url: "chambre_1" | "salon"…} (features/hebergements/pieces.ts); {} for older listings */
+  legendes_photos?: Record<string, string>;
   max_guests: number;
   amenities: string[];
   is_available: boolean;
   /** Details (null for listings published before they were added) */
-  surface_m2: number | null;
   chambres: number | null;
   salles_de_bain: number | null;
   lits_doubles: number;
   lits_simples: number;
   canapes_lits: number;
+  /** How to find the place ("Derrière le CHU…"): only sent to the listing's host */
+  point_repere?: string;
   petit_dejeuner: "" | "non" | "inclus" | "option";
   petit_dejeuner_prix: number | null;
   arrivee_a_partir: string | null;
@@ -128,11 +133,15 @@ export interface Reservation {
     total: number;
     commission_hote: number;
     montant_hote: number;
+    /** Cleaning fee, included in total and in montant_hote */
+    frais_menage: number;
   };
   /** Last online payment: null if the booking was made without online payment. */
   paiement: "en_attente" | "reussi" | "echoue" | "annule" | null;
   /** attente_numero: the traveller must give their Mobile Money account to be refunded. */
   remboursement: { montant: number; statut: "attente_numero" | "en_cours" | "envoye" } | null;
+  /** Landmark of the place, once the booking is paid (null before) */
+  point_repere?: string | null;
   /** End of the payment period (booking waiting for payment). */
   expire_le: string | null;
   annule_par: "" | "voyageur" | "hote" | "plateforme" | "expiration";

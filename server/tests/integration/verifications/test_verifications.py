@@ -40,8 +40,9 @@ def _annonce(**extra):
         'name': 'Villa des cocotiers', 'type': 'villa', 'city': 'Lomé', 'location': 'Bè Kpota',
         'latitude': 6.13, 'longitude': 1.22,
         'price_per_night': 35000, 'max_guests': 4, 'amenities': ['wifi'],
-        'surface_m2': 90, 'chambres': 2, 'lits_doubles': 2, 'petit_dejeuner': 'inclus',
+        'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 2, 'lits_doubles': 2, 'petit_dejeuner': 'inclus',
         'image_url': 'https://images.unsplash.com/photo-1.jpg', 'images': ['https://images.unsplash.com/photo-1.jpg'],
+        'legendes_photos': {'https://images.unsplash.com/photo-1.jpg': 'salon'},
         **extra,
     }
 
@@ -306,6 +307,8 @@ class TestControleIdentite:
         assert any('Visite à planifier' in sujet for sujet in sujets)
         assert any('identité est vérifiée' in sujet for sujet in sujets)
         assert client_for(agent).get(VISITES).data['count'] == 1
+        # The agent gets the landmark to find the place
+        assert client_for(agent).get(VISITES).data['results'][0]['point_repere'] == ''
         assert client_for(agent).get(IDENTITES).data['count'] == 0
         assert JournalAuditModel.objects.filter(action='identite_verifiee').exists()
         # Already checked: no decision possible anymore

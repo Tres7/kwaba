@@ -18,7 +18,7 @@ def _jour(n):
 
 @pytest.fixture
 def hotel(make_hebergement):
-    return make_hebergement(type='hotel', price_per_night=30000, max_guests=2)
+    return make_hebergement(type='chambre_hotel', price_per_night=30000, max_guests=2)
 
 
 def _types_url(h):

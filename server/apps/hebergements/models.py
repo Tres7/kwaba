@@ -42,24 +42,33 @@ class HebergementModel(models.Model):
     # Changing one of these fields after the visit puts the listing back into verification (what the agent checked)
     CHAMPS_VERIFIES = ('city', 'location', 'latitude', 'longitude', 'image_url', 'images')
 
+    # Kwa-Ba taxonomy (brief AN-TAX of 2026-11-03): the words used in Lomé, no T1/T2 and no surface
     TYPE_CHOICES = [
-        ('hotel', 'Hôtel'),
-        ('villa', 'Villa'),
-        ('maison', 'Maison'),
+        ('chambre_privee', 'Chambre privée'),
+        ('studio', 'Studio'),
         ('appartement', 'Appartement'),
+        ('maison_entiere', 'Maison entière'),
+        ('villa', 'Villa'),
+        ('chambre_hotel', "Chambre d'hôtel"),
         ('residence', 'Résidence hôtelière'),
         ('auberge', 'Auberge'),
     ]
+    # Former values, still found in old links (?type=hotel)
+    ANCIENS_TYPES = {'maison': 'maison_entiere', 'hotel': 'chambre_hotel'}
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='hotel')
-    # What the traveller gets: the whole place, or a private room in a place the host shares
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='chambre_hotel')
+    # What the traveller gets: the whole place, or a private room in a place the host shares. Follows the type
+    # since the type "chambre_privee" exists (save())
     ESPACES = [('entier', 'Logement entier'), ('chambre_privee', 'Chambre privée')]
     espace = models.CharField(max_length=20, choices=ESPACES, default='entier', db_default='entier')
     city = models.CharField(max_length=100)
     location = models.CharField(max_length=200, blank=True)
+    # How people find the place in Lomé ("Derrière le CHU Sylvanus Olympio, Tokoin"): almost the exact address, so
+    # only for the agent and for travellers once their booking is paid (never on the public listing)
+    point_repere = models.CharField(max_length=200, blank=True, default='', db_default='')
     # Exact position placed by the host, for the agent's visit: travellers only get positions.approchee()
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -68,8 +77,12 @@ class HebergementModel(models.Model):
     review_count = models.IntegerField(default=0)
     image_url = models.URLField(blank=True)
     images = models.JSONField(default=list, blank=True)
+    # Room shown by each photo, {url: code} ("chambre_1", "salon"…, see serializers.PIECES): travellers know what
+    # they look at. Null for the listings published before
+    legendes_photos = models.JSONField(null=True, blank=True)
     max_guests = models.PositiveIntegerField(default=4)
-    # Details shown on the page; required for a new listing, empty for the oldest ones
+    # Details shown on the page; required for a new listing, empty for the oldest ones. surface_m2 is no longer
+    # used (not a local practice): column kept until a later release drops it
     surface_m2 = models.PositiveIntegerField(null=True, blank=True)
     chambres = models.PositiveSmallIntegerField(null=True, blank=True)
     salles_de_bain = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -107,6 +120,12 @@ class HebergementModel(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.city})"
+
+    def save(self, *args, **kwargs):
+        self.espace = 'chambre_privee' if self.type == 'chambre_privee' else 'entier'
+        if kwargs.get('update_fields') is not None and 'type' in kwargs['update_fields']:
+            kwargs['update_fields'] = {*kwargs['update_fields'], 'espace'}
+        super().save(*args, **kwargs)
 
     @cached_property
     def host(self):

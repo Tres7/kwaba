@@ -25,10 +25,10 @@ def _photos(hote, nombre=5):
 
 def _donnees(urls, **extra):
     return {
-        'name': 'Villa des cocotiers', 'type': 'villa', 'espace': 'entier', 'city': 'Lomé', 'location': 'Baguida',
-        'latitude': 6.13, 'longitude': 1.22, 'price_per_night': 35000, 'max_guests': 4, 'surface_m2': 90, 'chambres': 2,
+        'name': 'Villa des cocotiers', 'type': 'villa', 'city': 'Lomé', 'location': 'Baguida',
+        'latitude': 6.13, 'longitude': 1.22, 'price_per_night': 35000, 'max_guests': 4, 'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 2,
         'lits_doubles': 2, 'petit_dejeuner': 'inclus', 'amenities': ['wifi'], 'description': 'Une villa calme près de la plage.',
-        'image_url': urls[0], 'images': urls, 'declarations': {'cameras': False, 'attestation': True}, **extra,
+        'image_url': urls[0], 'images': urls, 'legendes_photos': {url: 'salon' for url in urls}, 'declarations': {'cameras': False, 'attestation': True}, **extra,
     }
 
 

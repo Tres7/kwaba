@@ -24,12 +24,12 @@ class TestDevis:
     def test_montants_d_un_visiteur(self, api_client, annonce):
         r = _devis(api_client, annonce, nuits=2)
         assert r.status_code == 200
-        assert r.data == {'prix_nuits': 50000, 'frais_service': 3000, 'total': 53000}
+        assert r.data == {'prix_nuits': 50000, 'frais_service': 3000, 'frais_menage': 0, 'total': 53000}
 
     def test_type_et_nombre_d_unites(self, api_client, annonce):
         suite = TypeLogementModel.objects.create(hebergement=annonce, nom='Suite', prix_nuit=40000, quantite=3, capacite=2)
         r = _devis(api_client, annonce, nuits=2, type_logement=str(suite.id), nb_unites=3)
-        assert r.data == {'prix_nuits': 240000, 'frais_service': 14400, 'total': 254400}
+        assert r.data == {'prix_nuits': 240000, 'frais_service': 14400, 'frais_menage': 0, 'total': 254400}
 
     def test_le_total_est_accepte_par_la_reservation(self, client_for, make_user, annonce):
         voyageur = client_for(make_user())
@@ -46,7 +46,7 @@ class TestDevis:
         voyageur = make_user()
         monkeypatch.setattr('apps.paiements.tarifs.hotes_deja_visites', lambda v: {annonce.host_id} if v == voyageur else set())
         r = _devis(client_for(voyageur), annonce, nuits=2)
-        assert r.data == {'prix_nuits': 50000, 'frais_service': 1500, 'total': 51500}
+        assert r.data == {'prix_nuits': 50000, 'frais_service': 1500, 'frais_menage': 0, 'total': 51500}
 
     @pytest.mark.parametrize('params', [
         {}, {'nuits': 0}, {'nuits': 91}, {'nuits': 'x'},

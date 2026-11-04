@@ -11,7 +11,7 @@ HEBERGEMENTS = '/api/v1/hebergements/'
 def _listing(**extra):
     return {
         'name': 'Villa Océane', 'type': 'villa', 'city': 'Lomé', 'location': 'Baguida', 'price_per_night': 85000,
-        'max_guests': 6, 'surface_m2': 140, 'chambres': 3, 'lits_doubles': 2, 'petit_dejeuner': 'non',
+        'max_guests': 6, 'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 3, 'lits_doubles': 2, 'petit_dejeuner': 'non',
         'latitude': '6.1375', 'longitude': '1.2123', **extra,
     }
 
@@ -89,7 +89,7 @@ class TestSubmission:
     def test_draft_kept_when_the_listing_is_refused(self, host):
         cree = host.post(BROUILLONS, {'donnees': {'name': 'Villa Océane'}}, format='json').data
         incomplete = _listing(brouillon=cree['id'])
-        del incomplete['surface_m2']
+        del incomplete['point_repere']
 
         assert host.post(HEBERGEMENTS, incomplete, format='json').status_code == 400
         assert BrouillonAnnonceModel.objects.filter(pk=cree['id']).exists()
@@ -149,22 +149,22 @@ class TestAssistant:
 
 
 class TestEspace:
-    def test_kept_from_the_draft_to_the_listing(self, host):
-        reponse = host.post(HEBERGEMENTS, _listing(espace='chambre_privee'), format='json')
+    def test_follows_the_private_room_type(self, host):
+        reponse = host.post(HEBERGEMENTS, _listing(type='chambre_privee', espace='entier'), format='json')
 
         assert reponse.data['espace'] == 'chambre_privee'
         annonce = HebergementModel.objects.get()
         assert annonce.types.get().nom == 'Chambre privée'
 
-    def test_whole_place_by_default(self, host):
-        assert host.post(HEBERGEMENTS, _listing(), format='json').data['espace'] == 'entier'
+    def test_whole_place_for_the_other_types(self, host):
+        assert host.post(HEBERGEMENTS, _listing(espace='chambre_privee'), format='json').data['espace'] == 'entier'
 
-    def test_unknown_value_refused(self, host):
-        assert host.post(HEBERGEMENTS, _listing(espace='tente'), format='json').status_code == 400
+    def test_former_types_refused(self, host):
+        assert host.post(HEBERGEMENTS, _listing(type='maison'), format='json').status_code == 400
 
     def test_search_filter(self, api_client, make_hebergement):
-        make_hebergement(espace='entier')
-        chambre = make_hebergement(espace='chambre_privee')
+        make_hebergement(type='villa')
+        chambre = make_hebergement(type='chambre_privee')
 
         resultats = api_client.get(HEBERGEMENTS, {'espace': 'chambre_privee'}).data['results']
 

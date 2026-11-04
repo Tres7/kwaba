@@ -24,7 +24,7 @@ ADMIN_USERS = '/api/v1/admin/users/'
 TOUT_CONFORME = {'identite': True, 'adresse': True, 'photos': True, 'equipements': True}
 ANNONCE = {
     'name': 'Villa des cocotiers', 'type': 'villa', 'city': 'Lomé', 'location': 'Bè Kpota', 'latitude': 6.13,
-    'longitude': 1.22, 'price_per_night': 35000, 'max_guests': 4, 'amenities': ['wifi'], 'surface_m2': 90,
+    'longitude': 1.22, 'price_per_night': 35000, 'max_guests': 4, 'amenities': ['wifi'], 'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 
     'chambres': 2, 'lits_doubles': 2, 'petit_dejeuner': 'inclus',
 }
 

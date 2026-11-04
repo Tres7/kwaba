@@ -16,8 +16,8 @@ RESERVATIONS = '/api/v1/reservations/'
 
 
 def _annonce(**extra):
-    return {'name': 'Hôtel du Golfe', 'city': 'Lomé', 'latitude': 6.13, 'longitude': 1.22, 'type': 'hotel', 'price_per_night': 30000, 'max_guests': 2,
-            'surface_m2': 25, 'chambres': 1, 'lits_doubles': 1, 'lits_simples': 0, 'petit_dejeuner': 'non', **extra}
+    return {'name': 'Hôtel du Golfe', 'city': 'Lomé', 'latitude': 6.13, 'longitude': 1.22, 'type': 'chambre_hotel', 'price_per_night': 30000, 'max_guests': 2,
+            'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 1, 'lits_doubles': 1, 'lits_simples': 0, 'petit_dejeuner': 'non', **extra}
 
 
 class TestDefaultType:
@@ -27,8 +27,9 @@ class TestDefaultType:
         (seul,) = TypeLogementModel.objects.filter(hebergement_id=reponse.data['id'])
         assert (seul.nom, seul.quantite, seul.capacite, seul.prix_nuit) == ('Chambre', 1, 2, Decimal('30000'))
 
-    @pytest.mark.parametrize('type_etablissement, nom', [('villa', 'Logement entier'), ('maison', 'Logement entier'),
-                                                         ('residence', 'Appartement'), ('appartement', 'Appartement entier')])
+    @pytest.mark.parametrize('type_etablissement, nom', [
+        ('villa', 'Villa entière'), ('maison_entiere', 'Maison entière'), ('studio', 'Studio'),
+        ('chambre_privee', 'Chambre privée'), ('residence', 'Appartement'), ('appartement', 'Appartement entier')])
     def test_default_name_follows_the_kind_of_establishment(self, client_for, make_user, type_etablissement, nom):
         reponse = client_for(make_user(role='hote')).post(HEBERGEMENTS, _annonce(type=type_etablissement), format='json')
         assert TypeLogementModel.objects.get(hebergement_id=reponse.data['id']).nom == nom
@@ -78,7 +79,7 @@ class TestDataMigration:
         annonce = make_hebergement(type='villa', price_per_night=40000, max_guests=6)
         reservation = make_reservation(annonce)
         TypeLogementModel.objects.all().delete()  # as before the migration
-        HebergementModel.objects.filter(pk=annonce.pk).update(type='hotel')
+        HebergementModel.objects.filter(pk=annonce.pk).update(type='hotel')  # value of the time of migration 0010
 
         importlib.import_module('apps.hebergements.migrations.0010_types_par_defaut').creer_types_par_defaut(registre, None)
         importlib.import_module('apps.reservations.migrations.0006_rattacher_type_logement').rattacher(registre, None)
@@ -95,7 +96,7 @@ class TestDataMigration:
 
 
 def test_the_listing_page_shows_its_unit_types_and_lists_do_not(api_client, make_hebergement):
-    annonce = make_hebergement(type='hotel', price_per_night=30000, max_guests=2)
+    annonce = make_hebergement(type='chambre_hotel', price_per_night=30000, max_guests=2)
     TypeLogementModel.objects.create(hebergement=annonce, nom='Suite', capacite=4, prix_nuit=80000, quantite=2, ordre=1)
     TypeLogementModel.objects.create(hebergement=annonce, nom='Fermée', capacite=2, prix_nuit=9000, quantite=1, actif=False)
     types = api_client.get(f'{HEBERGEMENTS}{annonce.id}/').data['types']

@@ -3,14 +3,15 @@ import { completude, photoDepuisUrl, type DonneesAnnonce } from "./brouillons";
 
 const COMPLETE: DonneesAnnonce = {
   name: "Villa Océane", city: "Lomé", price_per_night: 85000, latitude: 6.1375, longitude: 1.2123,
-  surface_m2: 140, lits_doubles: 2, petit_dejeuner: "non", images: ["https://kwa-ba.com/photos/a.jpg"],
+  point_repere: "Derrière la pharmacie", salles_de_bain: 1, lits_doubles: 2, petit_dejeuner: "non", images: ["https://kwa-ba.com/photos/a.jpg"],
+  legendes_photos: { "https://kwa-ba.com/photos/a.jpg": "salon" },
 };
 
 describe("completude", () => {
   it("empty draft: nothing filled in, everything missing", () => {
     expect(completude({})).toEqual({
       pourcentage: 0,
-      manquants: ["titre", "ville", "prix", "position", "surface", "lits", "petitDejeuner", "photos"],
+      manquants: ["titre", "ville", "prix", "position", "pointRepere", "sallesDeBain", "lits", "petitDejeuner", "photos", "legendes"],
     });
   });
 
@@ -19,8 +20,12 @@ describe("completude", () => {
   });
 
   it("rounds the share of the criteria filled in", () => {
-    expect(completude({ ...COMPLETE, images: [], surface_m2: null })).toEqual({ pourcentage: 75, manquants: ["surface", "photos"] });
-    expect(completude({ name: "Studio" }).pourcentage).toBe(13);
+    expect(completude({ ...COMPLETE, images: [], point_repere: " " })).toEqual({ pourcentage: 70, manquants: ["pointRepere", "photos", "legendes"] });
+    expect(completude({ name: "Studio" }).pourcentage).toBe(10);
+  });
+
+  it("needs the room of every photo", () => {
+    expect(completude({ ...COMPLETE, images: [...COMPLETE.images!, "https://kwa-ba.com/photos/b.jpg"] }).manquants).toEqual(["legendes"]);
   });
 
   it("blank title, zero price and a single coordinate count as missing", () => {

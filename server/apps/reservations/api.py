@@ -61,7 +61,7 @@ def reduire_frais_pack_sejour(reservation_id: uuid.UUID, voyageur_id: uuid.UUID)
     ecart = r.frais_service - nouveaux_frais
     if ecart <= 0:
         return 0, ''
-    r.frais_service, r.total_price = nouveaux_frais, r.prix_nuits + nouveaux_frais
+    r.frais_service, r.total_price = nouveaux_frais, r.prix_nuits + nouveaux_frais + (r.frais_menage or 0)
     r.save(update_fields=['frais_service', 'total_price'])
     return ecart, r.reference
 
@@ -82,7 +82,7 @@ def _objet(r: ReservationModel) -> SimpleNamespace:
         guest=r.guest, guest_id=r.guest_id, check_in=r.check_in, check_out=r.check_out, nights=r.nights,
         guests_count=r.guests_count, message=r.message, status=r.status, payment_method=r.payment_method,
         total_price=r.total_price, prix_nuits=r.prix_nuits, frais_service=r.frais_service,
-        commission_hote=r.commission_hote, created_at=r.created_at, expire_le=r.expire_le, annule_par=r.annule_par,
+        commission_hote=r.commission_hote, frais_menage=r.frais_menage, created_at=r.created_at, expire_le=r.expire_le, annule_par=r.annule_par,
     )
 
 

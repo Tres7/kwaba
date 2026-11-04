@@ -185,12 +185,6 @@
     "voirTout": "Voir tout",
     "villeResume": "{nombre, plural, one {# hébergement} other {# hébergements}} · dès {prix}",
     "typesHebergement": "Types d'hébergement",
-    "types": {
-      "hotels": "Hôtels",
-      "appartements": "Appartements",
-      "villas": "Villas",
-      "auberges": "Auberges"
-    },
     "mieuxNotes": "Les mieux notés",
     "voirMieuxNotes": "Voir tous les logements les mieux notés",
     "aucunHebergement": "Aucun hébergement publié pour le moment.",
@@ -480,13 +474,7 @@
   "recherche": {
     "typeLogement": "Type de logement",
     "types": {
-      "tous": "Tous",
-      "hotels": "Hôtels",
-      "villas": "Villas",
-      "appartements": "Appartements",
-      "auberges": "Auberges",
-      "maisons": "Maisons",
-      "residences": "Résidences"
+      "tous": "Tous"
     },
     "trierPar": "Trier par",
     "tris": {
@@ -589,7 +577,7 @@
     "reglesMaison": "Règles de la maison",
     "voirTousEquipements": "Afficher les {nombre} équipements",
     "voirMoinsEquipements": "Afficher moins",
-    "chambrePrivee": "chambre privée"
+    "fraisMenage": "Frais de ménage"
   },
   "avis": {
     "repondre": "Répondre publiquement",
@@ -652,7 +640,8 @@
     "payer": "Payer {montant}",
     "confirmerReservation": "Confirmer la réservation",
     "accepterPaiement": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>.",
-    "accepterConfirmation": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>."
+    "accepterConfirmation": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>.",
+    "pointRepere": "Point de repère : {repere}"
   },
   "paiement": {
     "paiementNonDemarre": "Le paiement n'a pas pu démarrer.",
@@ -857,7 +846,8 @@
     "annulation": "Annulation…",
     "annuler": "Annuler",
     "numeroEnregistre": "Numéro enregistré : votre remboursement est en route.",
-    "recommande": "Recommandé pour votre prochain voyage"
+    "recommande": "Recommandé pour votre prochain voyage",
+    "pointRepere": "Point de repère : {repere}"
   },
   "avisDepot": {
     "notes": {
@@ -1493,7 +1483,9 @@
     "droite": "Déplacer à droite",
     "definirCouverture": "Définir comme couverture",
     "retirer": "Retirer la photo",
-    "reessayer": "Réessayer"
+    "reessayer": "Réessayer",
+    "quellePiece": "Quelle pièce ?",
+    "pieceDeLaPhoto": "Pièce de la photo {numero}"
   },
   "espaceHote": {
     "erreurConversation": "Impossible d'ouvrir la conversation.",
@@ -1598,16 +1590,19 @@
       "annonceContrat": "Annonce prête. Un agent vous appellera pour la visite dès que votre identité sera vérifiée et votre contrat signé."
     },
     "typesLogement": "Chambres et types",
-    "candidatureRefusee": "Votre candidature n'a pas été retenue"
+    "candidatureRefusee": "Votre candidature n'a pas été retenue",
+    "dontMenage": "dont {montant} de ménage"
   },
   "annonce": {
     "types": {
-      "hotel": "Chambre dans un établissement avec services",
-      "villa": "Maison entière, souvent avec jardin ou piscine",
-      "appartement": "Logement entier dans un immeuble",
+      "villa": "Grande maison, souvent avec jardin ou piscine",
+      "appartement": "Logement entier dans un immeuble, avec une ou plusieurs chambres",
       "auberge": "Hébergement simple et convivial, petit budget",
-      "maison": "Maison entière, en ville ou au village",
-      "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)"
+      "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)",
+      "chambre_privee": "Une chambre rien que pour les voyageurs, le reste du logement est partagé",
+      "studio": "Une seule pièce à vivre avec coin cuisine et salle de bain",
+      "maison_entiere": "Maison entière, en ville ou au village",
+      "chambre_hotel": "Chambre dans un hôtel, qui s'occupe du ménage"
     },
     "erreurDroits": "Confirmez que vous détenez les droits sur les photos publiées.",
     "erreurPosition": "Placez votre logement sur la carte.",
@@ -1645,14 +1640,15 @@
       "ville": "la ville",
       "prix": "le prix par nuit",
       "position": "la position sur la carte",
-      "surface": "la surface",
       "lits": "au moins un lit",
       "petitDejeuner": "le petit-déjeuner",
-      "photos": "au moins une photo"
+      "photos": "au moins une photo",
+      "pointRepere": "le point de repère",
+      "sallesDeBain": "les salles de bain",
+      "legendes": "la pièce de chaque photo"
     },
     "detailsTitre": "Le logement en détail",
     "detailsAide": "Ces informations s'affichent sur votre annonce et rassurent les voyageurs.",
-    "surface": "Surface (m²)",
     "chambres": "Chambres",
     "sallesDeBain": "Salles de bain",
     "lits": "Lits",
@@ -1672,11 +1668,16 @@
     "reglesMaison": "Règles de la maison",
     "reglesAide": "Elles s'affichent sur votre annonce : les voyageurs savent à quoi s'attendre avant de réserver.",
     "nonPrecise": "Non précisé",
-    "espace": "Ce que réservent les voyageurs",
-    "espaces": {
-      "entier": "Le logement entier",
-      "chambre_privee": "Une chambre privée"
-    }
+    "pointRepere": "Point de repère",
+    "pointRepereExemple": "Derrière le CHU Sylvanus Olympio, Tokoin",
+    "pointRepereAide": "Comment on trouve le logement à Lomé. Seuls l'agent Kwa-Ba et les voyageurs qui ont payé leur réservation le voient.",
+    "chambresAide": "0 pour un studio.",
+    "litsRequis": "Ajoutez au moins un lit pour continuer.",
+    "fraisMenage": "Frais de ménage : {montant}.",
+    "fraisMenageAide": "Ils s'ajoutent au prix du séjour, une fois, et vous sont reversés en entier.",
+    "fraisMenageZero": "Pas de frais de ménage pour ce type : l'établissement s'en occupe.",
+    "menageCarte": "Ménage : {montant}",
+    "menageCarteZero": "Sans frais de ménage"
   },
   "revenus": {
     "statuts": {
@@ -1888,8 +1889,6 @@
   },
   "details": {
     "titre": "Le logement en détail",
-    "surfaceTitre": "Surface",
-    "surface": "{m2} m²",
     "chambresTitre": "Chambres",
     "chambres": "{nombre, plural, =1 {1 chambre} other {# chambres}}",
     "litsTitre": "{nombre, plural, =1 {1 lit} other {# lits}}",
@@ -2145,17 +2144,6 @@
     "type": {
       "titre": "Quel type de logement proposez-vous ?"
     },
-    "espace": {
-      "titre": "Que réservent les voyageurs ?",
-      "entier": {
-        "titre": "Le logement entier",
-        "texte": "Les voyageurs ont le logement pour eux seuls."
-      },
-      "chambre": {
-        "titre": "Une chambre privée",
-        "texte": "Une chambre rien que pour eux, le reste est partagé."
-      }
-    },
     "adresse": {
       "titre": "Où se trouve votre logement ?",
       "texte": "L'agent Kwa-Ba s'y rendra pour la visite."
@@ -2182,7 +2170,8 @@
       "texte": "La première sera la photo de couverture.",
       "conseilJour": "Photographiez de jour, rideaux ouverts.",
       "conseilPieces": "Montrez chaque pièce, y compris la salle de bain.",
-      "compteur": "{nombre} sur {min} photos minimum"
+      "compteur": "{nombre} sur {min} photos minimum",
+      "pieces": "{nombre, plural, one {Indiquez la pièce de la photo restante.} other {Indiquez la pièce des # photos restantes.}}"
     },
     "titre": {
       "titre": "Donnez un titre à votre annonce",
@@ -2266,5 +2255,25 @@
         "publication": "Votre annonce est publiée, et vous devenez hôte Kwa-Ba."
       }
     }
+  },
+  "pieces": {
+    "chambre": "Chambre {numero}",
+    "salle_de_bain": "Salle de bain {numero}",
+    "piece_principale": "Pièce principale",
+    "salon": "Salon",
+    "cuisine": "Cuisine",
+    "salle_a_manger": "Salle à manger",
+    "toilettes": "Toilettes",
+    "terrasse": "Terrasse",
+    "balcon": "Balcon",
+    "jardin": "Jardin ou cour",
+    "piscine": "Piscine",
+    "exterieur": "Extérieur",
+    "entree": "Entrée",
+    "vue": "Vue",
+    "parking": "Parking",
+    "autre": "Autre",
+    "titre": "Les pièces en photos",
+    "sansPiece": "Autres photos"
   }
 }

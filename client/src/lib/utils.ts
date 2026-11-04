@@ -30,11 +30,14 @@ export function selon<T>(textes: { fr: T; en: T }): T {
   return textes[langueCourante];
 }
 
+// Kwa-Ba taxonomy, in the order of the search filters (components/hebergement/TypeLogement.tsx)
 const TYPES: Record<string, { fr: string; en: string }> = {
-  hotel: { fr: "Hôtel", en: "Hotel" },
-  villa: { fr: "Villa", en: "Villa" },
-  maison: { fr: "Maison", en: "House" },
+  chambre_privee: { fr: "Chambre privée", en: "Private room" },
+  studio: { fr: "Studio", en: "Studio" },
   appartement: { fr: "Appartement", en: "Apartment" },
+  maison_entiere: { fr: "Maison entière", en: "Entire house" },
+  villa: { fr: "Villa", en: "Villa" },
+  chambre_hotel: { fr: "Chambre d'hôtel", en: "Hotel room" },
   residence: { fr: "Résidence hôtelière", en: "Aparthotel" },
   auberge: { fr: "Auberge", en: "Guesthouse" },
 };
