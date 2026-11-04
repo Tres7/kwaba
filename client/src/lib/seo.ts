@@ -11,7 +11,7 @@ export const IMAGE_PARTAGE = "/brand/kwaba-partage-1200x630.png";
 /** Indexable public pages (without language prefix). Listing and organisation pages are added to them. */
 export const PAGES_PUBLIQUES = [
   "/", "/recherche", "/decouvrir", "/transfert", "/location", "/together", "/concierge", "/hote",
-  "/give", "/give/impact", "/profil/aide",
+  "/give", "/give/impact", "/profil/aide", "/preparer-voyage/togo",
   "/cgu", "/cgv", "/confidentialite", "/cookies", "/mentions-legales", "/remboursement",
 ] as const;
 
