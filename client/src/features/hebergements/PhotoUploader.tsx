@@ -8,6 +8,7 @@ import { photoDepuisUrl } from "./brouillons";
 import { compressImage } from "@/lib/compressImage";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { codesPieces, libellePiece } from "./pieces";
 
 export const MAX_PHOTOS = 10;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
@@ -26,13 +27,21 @@ interface PhotoUploaderProps {
   /** Photos of a draft: no listing uses them, removing one also deletes its file. A published listing keeps its
    *  files until the change is saved. */
   fichiersDuBrouillon?: boolean;
+  /** Room of each photo ({url: code}): a choice under every photo when given */
+  legendes?: Record<string, string>;
+  onLegende?: (url: string, piece: string) => void;
+  /** Numbers of bedrooms and bathrooms, for the rooms offered */
+  chambres?: number | null;
+  sallesDeBain?: number | null;
 }
 
 let keySeq = 0;
 const nextKey = () => `p${++keySeq}`;
 
-export default function PhotoUploader({ value, onChange, onBusyChange, error, fichiersDuBrouillon }: PhotoUploaderProps) {
+export default function PhotoUploader({ value, onChange, onBusyChange, error, fichiersDuBrouillon, legendes, onLegende, chambres, sallesDeBain }: PhotoUploaderProps) {
   const t = useTranslations("photos");
+  const tPieces = useTranslations("pieces");
+  const pieces = codesPieces(chambres, sallesDeBain);
   const [items, setItems] = useState<Item[]>(() => value.map((url) => ({ key: nextKey(), status: "done", url })));
   const [dragOver, setDragOver] = useState(false);
   const [notice, setNotice] = useState("");
@@ -159,7 +168,8 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
           {items.map((item, index) => {
             const src = item.status === "done" ? item.url : item.preview;
             return (
-              <li key={item.key} className={cn("relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 group", index === 0 && item.status === "done" && "ring-2 ring-primary")}>
+              <li key={item.key} className="space-y-1.5">
+              <div className={cn("relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 group", index === 0 && item.status === "done" && "ring-2 ring-primary")}>
                 <img src={src} alt={`Photo ${index + 1}`} className={cn("w-full h-full object-cover", item.status !== "done" && "opacity-60")} />
 
                 {index === 0 && item.status === "done" && (
@@ -203,6 +213,16 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
                     <button type="button" onClick={() => remove(item)} aria-label={t("retirer")} className="w-7 h-7 rounded-full bg-white/90 text-red-600 flex items-center justify-center"><Trash2 size={14} /></button>
                   </div>
                 )}
+              </div>
+              {onLegende && item.status === "done" && (
+                <select value={legendes?.[item.url] ?? ""} onChange={(e) => onLegende(item.url, e.target.value)}
+                  aria-label={t("pieceDeLaPhoto", { numero: index + 1 })}
+                  className={cn("w-full rounded-lg border px-2 py-2 text-sm bg-white text-dark focus:outline-none focus:ring-2 focus:ring-primary/20",
+                    legendes?.[item.url] ? "border-gray-200" : "border-secondary/60 text-gray-500")}>
+                  <option value="" disabled>{t("quellePiece")}</option>
+                  {pieces.map((code) => <option key={code} value={code}>{libellePiece(code, tPieces)}</option>)}
+                </select>
+              )}
               </li>
             );
           })}

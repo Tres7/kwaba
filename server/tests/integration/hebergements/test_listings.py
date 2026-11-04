@@ -56,7 +56,7 @@ class TestCreate:
 
     def test_images_truncated_to_ten(self, client_for, make_user):
         images = [f'https://images.unsplash.com/photo-{i}.jpg' for i in range(12)]
-        response = client_for(make_user(role='hote')).post(HEBERGEMENTS, _listing(images=images), format='json')
+        response = client_for(make_user(role='hote')).post(HEBERGEMENTS, _listing(images=images, legendes_photos={u: 'salon' for u in images}), format='json')
         assert len(HebergementModel.objects.get(pk=response.data['id']).images) == 10
 
     @pytest.mark.parametrize('url', [

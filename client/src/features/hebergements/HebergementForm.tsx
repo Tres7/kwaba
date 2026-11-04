@@ -83,6 +83,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
   // Copyright and image rights: the host certifies they own the rights to the published photos
   const [droitsPhotos, setDroitsPhotos] = useState(!!initial);
   const onPhotosChange = useCallback((urls: string[]) => setPhotos(urls), []);
+  const [legendes, setLegendes] = useState<Record<string, string>>(() => source?.legendes_photos ?? {});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -111,6 +112,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
     description: form.description.trim(),
     image_url: photos[0],
     images: photos,
+    legendes_photos: Object.fromEntries(photos.filter((url) => legendes[url]).map((url) => [url, legendes[url]])),
     amenities: form.amenities,
     chambres: form.chambres,
     salles_de_bain: form.salles_de_bain,
@@ -330,7 +332,10 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
       <div>
         <p className={labelClass}>{t("photos")}</p>
         <p className="text-xs text-gray-500 -mt-1 mb-3">{t("photosAide")}</p>
-        <PhotoUploader value={photos} onChange={onPhotosChange} onBusyChange={setUploading} error={errors.photos ?? errors.image_url ?? errors.images} />
+        <PhotoUploader value={photos} onChange={onPhotosChange} onBusyChange={setUploading}
+          error={errors.photos ?? errors.image_url ?? errors.images ?? errors.legendes_photos}
+          legendes={legendes} onLegende={(url, piece) => setLegendes((prev) => ({ ...prev, [url]: piece }))}
+          chambres={form.chambres} sallesDeBain={form.salles_de_bain} />
         <div className="flex items-start gap-2 mt-4">
           <input
             type="checkbox" id="h-droits" checked={droitsPhotos} onChange={(e) => setDroitsPhotos(e.target.checked)}

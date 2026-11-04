@@ -42,6 +42,7 @@ def _annonce(**extra):
         'price_per_night': 35000, 'max_guests': 4, 'amenities': ['wifi'],
         'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 2, 'lits_doubles': 2, 'petit_dejeuner': 'inclus',
         'image_url': 'https://images.unsplash.com/photo-1.jpg', 'images': ['https://images.unsplash.com/photo-1.jpg'],
+        'legendes_photos': {'https://images.unsplash.com/photo-1.jpg': 'salon'},
         **extra,
     }
 

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import re
 from datetime import timedelta
 
 from django.utils import timezone
@@ -34,6 +35,11 @@ REGLES = [
     ('fetes_autorisees', 'fetes_interdites'),
 ]
 AMENITIES += [valeur for paire in REGLES for valeur in paire]
+# Room of a photo: numbered for the bedrooms and bathrooms ("chambre_2"), otherwise one of these
+PIECES = ('piece_principale', 'salon', 'cuisine', 'salle_a_manger', 'toilettes', 'terrasse', 'balcon', 'jardin', 'piscine',
+          'exterieur', 'entree', 'vue', 'parking', 'autre')
+PIECE_NUMEROTEE = re.compile(r'^(chambre|salle_de_bain)_([1-9]|[1-4][0-9]|50)$')
+LEGENDE_MANQUANTE = "Indiquez la pièce de chaque photo (chambre 1, salon…)."
 # What the host states before sending a listing; `attestation`: the information is true and they may rent this place out
 DECLARATIONS = ('cameras', 'animaux', 'travaux', 'attestation')
 
@@ -55,7 +61,7 @@ class HebergementSerializer(serializers.ModelSerializer):
         model = HebergementModel
         fields = [
             'id', 'name', 'description', 'type', 'espace', 'city', 'location', 'latitude', 'longitude', 'position',
-            'price_per_night', 'rating', 'review_count', 'image_url', 'images',
+            'price_per_night', 'rating', 'review_count', 'image_url', 'images', 'legendes_photos',
             'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie', 'hote_fondateur',
             'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne', 'statut_annonce',
             'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits', 'point_repere',
@@ -66,6 +72,7 @@ class HebergementSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         donnees = super().to_representation(instance)
+        donnees['legendes_photos'] = donnees.get('legendes_photos') or {}
         # Listings published before the filtering: contact details hidden from travellers (the host sees their text)
         if not self.context.get('proprietaire'):
             for champ in ('name', 'description', 'location'):
@@ -148,7 +155,7 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         model = HebergementModel
         fields = [
             'name', 'description', 'type', 'city', 'location', 'point_repere', 'latitude', 'longitude',
-            'price_per_night', 'image_url', 'images', 'max_guests',
+            'price_per_night', 'image_url', 'images', 'legendes_photos', 'max_guests',
             'amenities', 'is_available',
             'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant', 'politique_annulation',
@@ -192,7 +199,19 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'petit_dejeuner_prix': ["Indiquez le prix du petit-déjeuner par personne."]})
         if formule != 'option' and 'petit_dejeuner' in data:
             data['petit_dejeuner_prix'] = None
+        self._legendes(data)
         return data
+
+    def _legendes(self, data):
+        """Keeps the room of the listing's photos only, and of all of them for a new listing."""
+        if not ({'images', 'image_url', 'legendes_photos'} & data.keys()) and self.partial:
+            return
+        photos = set(data.get('images', getattr(self.instance, 'images', None)) or [])
+        photos |= {data.get('image_url', getattr(self.instance, 'image_url', ''))} - {''}
+        legendes = data.get('legendes_photos', getattr(self.instance, 'legendes_photos', None)) or {}
+        data['legendes_photos'] = {url: piece for url, piece in legendes.items() if url in photos}
+        if not self.partial and photos - data['legendes_photos'].keys():
+            raise serializers.ValidationError({'legendes_photos': [LEGENDE_MANQUANTE]})
 
     COORDONNEES_REFUSEES = ("Les coordonnées (téléphone, email, site, réseaux sociaux) ne sont pas autorisées dans l'annonce : "
                             "les voyageurs vous écrivent par la messagerie Kwa-Ba.")
@@ -248,6 +267,15 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         if not all(url_image_autorisee(u) for u in value):
             raise serializers.ValidationError(IMAGE_REFUSEE)
         return value[:10]
+
+    def validate_legendes_photos(self, value):
+        if value is None:
+            return {}
+        if not isinstance(value, dict) or len(value) > 20 or not all(
+                isinstance(url, str) and isinstance(piece, str) and (piece in PIECES or PIECE_NUMEROTEE.match(piece))
+                for url, piece in value.items()):
+            raise serializers.ValidationError("Pièces des photos invalides.")
+        return value
 
     def validate_declarations(self, value):
         if value is None:

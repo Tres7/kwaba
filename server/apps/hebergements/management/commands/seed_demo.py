@@ -88,6 +88,8 @@ POINTS_REPERE = {
     "Hôtel Sarakawa View": "Face à la plage, après le rond-point du port",
 }
 HORAIRES = {'arrivee_a_partir': '14:00', 'depart_avant': '11:00'}
+# Room of the cover and of the interior photos
+LEGENDES_DEMO = ['exterieur', 'salon', 'chambre_1', 'salle_de_bain_1', 'chambre_1']
 
 # The other roles, with the password of the demo host
 COMPTES = [
@@ -131,6 +133,7 @@ class Command(BaseCommand):
                     'price_per_night': price,
                     'max_guests': guests, 'image_url': cover,
                     'images': [cover, *INTERIORS], 'amenities': amenities,
+                    'legendes_photos': dict(zip([cover, *INTERIORS], LEGENDES_DEMO)),
                     'description': desc, **DETAILS[type_], **HORAIRES,
                     'statut_verification': 'verifiee',
                 },

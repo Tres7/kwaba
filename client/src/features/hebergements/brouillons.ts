@@ -2,7 +2,8 @@ import type { Hebergement } from "@/types/api/models";
 
 /** Fields of the listing form, as sent to the API; incomplete in a draft. */
 export type DonneesAnnonce = Partial<Pick<Hebergement,
-  "name" | "type" | "city" | "location" | "point_repere" | "max_guests" | "description" | "image_url" | "images" | "amenities"
+  "name" | "type" | "city" | "location" | "point_repere" | "max_guests" | "description" | "image_url" | "images" | "legendes_photos"
+  | "amenities"
   | "chambres" | "salles_de_bain" | "lits_doubles" | "lits_simples" | "canapes_lits"
   | "petit_dejeuner" | "petit_dejeuner_prix" | "arrivee_a_partir" | "depart_avant" | "politique_annulation">> & {
   latitude?: number | string | null;
@@ -37,6 +38,7 @@ const CRITERES: [string, (d: DonneesAnnonce) => boolean][] = [
   ["lits", (d) => (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0) > 0],
   ["petitDejeuner", (d) => !!d.petit_dejeuner && (d.petit_dejeuner !== "option" || (d.petit_dejeuner_prix ?? 0) > 0)],
   ["photos", (d) => (d.images?.length ?? 0) > 0],
+  ["legendes", (d) => (d.images?.length ?? 0) > 0 && (d.images ?? []).every((url) => !!d.legendes_photos?.[url])],
 ];
 
 /** Share of the required information filled in (100: the listing can be submitted) and the keys still missing. */
