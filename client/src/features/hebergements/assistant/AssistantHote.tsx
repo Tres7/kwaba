@@ -104,8 +104,8 @@ function Parcours({ id, etape, donnees, assistant }: {
     refetchOnMount: "always", refetchInterval: etape.fait ? 3000 : false,
   });
   const Ecran = ECRANS[etape.cle];
-  const suivante = etapeVoisine(etape, 1, conditions);
-  const precedente = etapeVoisine(etape, -1, conditions);
+  const suivante = etapeVoisine(etape, 1, conditions, donnees);
+  const precedente = etapeVoisine(etape, -1, conditions, donnees);
   const pret = peutContinuer(etape, donnees, assistant.erreurs, conditions) && !occupe && !envoi;
 
   const aller = (cible: Etape, direction: "avant" | "arriere") => {

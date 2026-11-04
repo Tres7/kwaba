@@ -16,6 +16,12 @@ describe("codesPieces", () => {
     expect(codes[0]).toBe("piece_principale");
     expect(codes.filter((c) => c.startsWith("salle_de_bain"))).toEqual(["salle_de_bain_1"]);
   });
+
+  it("gives a hotel its spaces rather than numbered bedrooms", () => {
+    const codes = codesPieces(120, 120, true);
+    expect(codes).toContain("reception");
+    expect(codes.some((c) => c.startsWith("chambre_"))).toBe(false);
+  });
 });
 
 describe("libellePiece", () => {

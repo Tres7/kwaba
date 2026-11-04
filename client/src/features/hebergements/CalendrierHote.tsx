@@ -30,19 +30,25 @@ export default function CalendrierHotePage() {
   const [envoi, setEnvoi] = useState(false);
   // Unit type shown and closed ("": the whole establishment)
   const [typeChoisi, setTypeChoisi] = useState("");
+  // Rooms of the type to close ("": all of them), for the ones sold elsewhere (reception, other sites)
+  const [quantite, setQuantite] = useState("");
 
   const { data: hebergement } = useHebergementHote(id);
   const types = hebergement?.types ?? [];
   const { data: periodes = [], isLoading } = useDisponibilites(id, 540, typeChoisi || undefined);
   const nomType = types.find((u) => u.id === typeChoisi)?.nom;
+  // The type concerned by a closure: the one shown, or the only one of the establishment
+  const typeFerme = typeChoisi || (types.length === 1 ? types[0].id : "");
+  const unitesType = types.find((u) => u.id === typeFerme)?.quantite ?? 1;
+  const plusieursUnites = unitesType > 1;
 
   const choisirType = (valeur: string) => {
     setTypeChoisi(valeur);
-    setDebut(""); setFin("");
+    setDebut(""); setFin(""); setQuantite("");
   };
   // "Closed · Suite", "Booked · Awa K. · 2 rooms"
   const precision = (p: PeriodeIndispo) => [p.type_logement ?? (p.type === "blocage" && types.length > 1 ? t("toutEtablissement") : null),
-    p.nb_unites && p.nb_unites > 1 ? t("unitesNombre", { nombre: p.nb_unites }) : null].filter(Boolean).join(" · ");
+    p.nb_unites && (p.nb_unites > 1 || p.type === "blocage") ? t("unitesNombre", { nombre: p.nb_unites }) : null].filter(Boolean).join(" · ");
 
   // For each booked night: the period covering it (booking or closure)
   const parNuit = useMemo(() => {
@@ -51,13 +57,22 @@ export default function CalendrierHotePage() {
     return m;
   }, [periodes]);
 
+  // Several rooms of the type: a night with bookings or some rooms closed can still be closed in part (the API checks
+  // the rooms left); only a full closure stops it
+  const nuitsFermees = useMemo(() => {
+    const s = new Set<string>();
+    for (const p of periodes) if (p.type === "blocage" && !p.nb_unites) for (let d = p.debut; d < p.fin; d = addDays(d, 1)) s.add(d);
+    return s;
+  }, [periodes]);
+  const bloquee = (iso: string) => (plusieursUnites ? nuitsFermees.has(iso) : parNuit.has(iso));
+
   const selectionLibre = (a: string, b: string) => {
-    for (let d = a; d <= b; d = addDays(d, 1)) if (parNuit.has(d)) return false;
+    for (let d = a; d <= b; d = addDays(d, 1)) if (bloquee(d)) return false;
     return true;
   };
 
   const clic = (iso: string) => {
-    if (parNuit.has(iso) || iso < today) return;
+    if (bloquee(iso) || iso < today) return;
     if (!debut || fin || iso < debut) {
       setDebut(iso);
       setFin("");
@@ -75,7 +90,7 @@ export default function CalendrierHotePage() {
     const passe = iso < today;
     const selectionne = !!debut && iso >= debut && iso <= finSel;
     return {
-      disabled: passe || !!p,
+      disabled: passe || bloquee(iso),
       title: p ? [p.type === "reservation" ? `${t("reserve")} · ${p.voyageur}` : `${t("ferme")}${p.motif ? ` · ${p.motif}` : ""}`, precision(p)]
         .filter(Boolean).join(" · ") : undefined,
       className: cn(
@@ -95,9 +110,13 @@ export default function CalendrierHotePage() {
     if (!debut) return;
     setEnvoi(true);
     try {
-      await fermerDates(id, { debut, fin: addDays(finSel, 1), motif: motif.trim(), ...(typeChoisi ? { type_logement: typeChoisi } : {}) });
+      const partielle = plusieursUnites && Number(quantite) > 0;
+      await fermerDates(id, {
+        debut, fin: addDays(finSel, 1), motif: motif.trim(),
+        ...(partielle ? { type_logement: typeFerme, quantite: Number(quantite) } : typeChoisi ? { type_logement: typeChoisi } : {}),
+      });
       toast.success(t("datesFermees"));
-      setDebut(""); setFin(""); setMotif("");
+      setDebut(""); setFin(""); setMotif(""); setQuantite("");
       rafraichir();
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -125,12 +144,12 @@ export default function CalendrierHotePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-3xl shadow-card p-4 sm:p-6">
-          {types.length > 1 && (
+          {(types.length > 1 || plusieursUnites) && (
             <label className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
               <span className="text-sm font-medium text-dark">{t("typeAffiche")}</span>
               <select value={typeChoisi} onChange={(e) => choisirType(e.target.value)}
                 className="border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-none focus:border-primary bg-white">
-                <option value="">{t("toutEtablissement")}</option>
+                {types.length > 1 && <option value="">{t("toutEtablissement")}</option>}
                 {types.map((u) => <option key={u.id} value={u.id}>{u.nom}</option>)}
               </select>
             </label>
@@ -158,6 +177,15 @@ export default function CalendrierHotePage() {
                 </p>
                 {types.length > 1 && <p className="text-xs font-semibold text-dark">{nomType ?? t("toutEtablissement")}</p>}
                 {!fin && <p className="text-xs text-muted">{t("etendre")}</p>}
+                {plusieursUnites && (
+                  <label className="block">
+                    <span className="text-sm font-medium text-dark">{t("quantiteFermer")}</span>
+                    <input type="number" inputMode="numeric" min={1} max={unitesType} value={quantite} onChange={(e) => setQuantite(e.target.value)}
+                      placeholder={t("toutes", { nombre: unitesType })}
+                      className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-none focus:border-primary" />
+                    <span className="block text-xs text-muted mt-1">{t("quantiteAide")}</span>
+                  </label>
+                )}
                 <input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={120} placeholder={t("motif")}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-none focus:border-primary" />
                 <div className="flex gap-2">

@@ -490,6 +490,15 @@ class BlocageCreateView(APIView):
             # reads the establishment), so the two never deadlock. A simultaneous booking cannot take these nights.
             verrouiller_types(hebergement.types.values_list('pk', flat=True))
             verrouiller(hebergement.id)
+            quantite = serializer.validated_data.get('quantite')
+            if quantite:
+                # Some rooms only (sold elsewhere): possible next to bookings, within the rooms still free every night
+                libres = stock.Occupation([type_logement], debut, fin).restantes(type_logement.id)
+                if libres < quantite:
+                    return Response({'quantite': [f"Il ne reste que {libres} unité(s) libre(s) de ce type sur ces dates."]},
+                                    status=status.HTTP_409_CONFLICT)
+                blocage = serializer.save(hebergement=hebergement)
+                return Response(BlocageSerializer(blocage).data, status=status.HTTP_201_CREATED)
             # Nights already booked are not closed: the host must first handle the booking
             if a_des_reservations(hebergement.id, debut, fin, type_logement=type_logement):
                 return Response(
