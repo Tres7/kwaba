@@ -77,6 +77,9 @@ class HebergementModel(models.Model):
     review_count = models.IntegerField(default=0)
     image_url = models.URLField(blank=True)
     images = models.JSONField(default=list, blank=True)
+    # Room shown by each photo, {url: code} ("chambre_1", "salon"…, see serializers.PIECES): travellers know what
+    # they look at. Null for the listings published before
+    legendes_photos = models.JSONField(null=True, blank=True)
     max_guests = models.PositiveIntegerField(default=4)
     # Details shown on the page; required for a new listing, empty for the oldest ones. surface_m2 is no longer
     # used (not a local practice): column kept until a later release drops it

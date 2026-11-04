@@ -13,7 +13,7 @@ def _annonce():
     return {
         'latitude': 6.13, 'longitude': 1.22,
         'name': 'Villa Océane', 'type': 'villa', 'city': 'Lomé', 'location': 'Baguida', 'price_per_night': 85000,
-        'max_guests': 6, 'amenities': ['wifi'], 'image_url': 'https://images.unsplash.com/photo-1.jpg',
+        'max_guests': 6, 'amenities': ['wifi'], 'image_url': 'https://images.unsplash.com/photo-1.jpg', 'legendes_photos': {'https://images.unsplash.com/photo-1.jpg': 'salon'},
         'point_repere': 'Derrière la pharmacie', 'chambres': 3, 'salles_de_bain': 2, 'lits_doubles': 2, 'lits_simples': 2, 'canapes_lits': 0,
         'petit_dejeuner': 'inclus', 'arrivee_a_partir': '14:00', 'depart_avant': '11:00',
     }

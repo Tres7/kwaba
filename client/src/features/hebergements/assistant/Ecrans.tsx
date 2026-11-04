@@ -219,6 +219,7 @@ function EcranPhotos({ donnees, modifier, erreurs, onOccupe }: EcranProps) {
   const enregistrer = useCallback((images: string[]) => {
     if (images.join() !== (donnees.images ?? []).join()) modifier({ images, image_url: images[0] ?? "" });
   }, [donnees.images, modifier]);
+  const sansPiece = (donnees.images ?? []).filter((url) => !donnees.legendes_photos?.[url]).length;
   return (
     <Question cle="photos">
       <ul className="grid gap-2 mb-5 text-sm text-gray-600">
@@ -226,10 +227,14 @@ function EcranPhotos({ donnees, modifier, erreurs, onOccupe }: EcranProps) {
         <li className="flex items-start gap-2"><Camera size={18} className="text-primary flex-shrink-0" aria-hidden /> {t("photos.conseilPieces")}</li>
       </ul>
       <PhotoUploader value={donnees.images ?? []} onChange={enregistrer} onBusyChange={onOccupe} fichiersDuBrouillon
-        error={erreurs.images?.[0] ?? erreurs.image_url?.[0]} />
+        error={erreurs.images?.[0] ?? erreurs.image_url?.[0] ?? erreurs.legendes_photos?.[0]}
+        legendes={donnees.legendes_photos ?? {}} chambres={donnees.chambres} sallesDeBain={donnees.salles_de_bain}
+        onLegende={(url, piece) => modifier({ legendes_photos: { ...donnees.legendes_photos, [url]: piece } })} />
       <p className={cn("text-sm font-semibold mt-3", nombre >= MIN_PHOTOS ? "text-primary" : "text-dark")}>
         {t("photos.compteur", { nombre, min: MIN_PHOTOS })}
       </p>
+      {/* Says why "Next" waits */}
+      {sansPiece > 0 && <p role="status" className="text-sm text-secondary font-semibold mt-1">{t("photos.pieces", { nombre: sansPiece })}</p>}
     </Question>
   );
 }

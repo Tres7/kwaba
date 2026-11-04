@@ -75,6 +75,7 @@ def _fiche(h: HebergementModel) -> dict:
         'id': h.id, 'name': h.name, 'type': h.type, 'type_libelle': h.get_type_display(), 'city': h.city,
         'location': h.location, 'description': h.description, 'price_per_night': h.price_per_night,
         'max_guests': h.max_guests, 'amenities': h.amenities, 'image_url': h.image_url, 'images': h.images,
+        'legendes_photos': h.legendes_photos or {},
         'created_at': h.created_at, 'host_id': h.host_id, 'statut_verification': h.statut_verification,
         'politique_annulation': h.politique_annulation, 'arrivee_a_partir': h.arrivee_a_partir,
         'depart_avant': h.depart_avant, 'point_repere': h.point_repere,

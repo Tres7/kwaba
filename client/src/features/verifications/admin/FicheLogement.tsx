@@ -8,6 +8,8 @@ import { deciderVisite } from "../api";
 import { cn, formatPrice, libelleType } from "@/lib/utils";
 import { urlExterneSure } from "@/lib/url-sure";
 import { ouvrirPiece } from "./documents";
+import { useTranslations } from "next-intl";
+import { libellePiece } from "@/features/hebergements";
 
 export interface Logement {
   id: string;
@@ -24,6 +26,8 @@ export interface Logement {
   max_guests: number;
   amenities: string[];
   photos: string[];
+  /** Room of each photo, to compare with the place */
+  legendes_photos?: Record<string, string>;
   modifiee_apres_verification: boolean;
   cree_le: string;
   hote: {
@@ -55,6 +59,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
   const [photos, setPhotos] = useState<File[]>([]);
   const [envoi, setEnvoi] = useState<"validee" | "refusee" | null>(null);
 
+  const tPieces = useTranslations("pieces");
   const toutCoche = Object.keys(controlesLibelles).every((cle) => controles[cle]);
   const piece = PIECE[logement.hote.piece.statut];
   const telephone = logement.hote.telephone?.replace(/[^\d+]/g, "");
@@ -116,6 +121,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
           {Array.from(new Set(logement.photos)).map((url) => (
             <a key={url} href={urlExterneSure(url)} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
               <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg" />
+              {logement.legendes_photos?.[url] && <span className="block text-xs text-gray-600 mt-1">{libellePiece(logement.legendes_photos[url], tPieces)}</span>}
             </a>
           ))}
         </div>

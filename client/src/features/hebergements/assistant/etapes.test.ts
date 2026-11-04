@@ -50,8 +50,11 @@ describe("conditions pour continuer", () => {
   });
 
   it(`needs ${MIN_PHOTOS} photos`, () => {
-    expect(pret("photos", { images: photos(MIN_PHOTOS - 1) })).toBe(false);
-    expect(pret("photos", { images: photos(MIN_PHOTOS) })).toBe(true);
+    const pieces = (urls: string[]) => Object.fromEntries(urls.map((url) => [url, "salon"]));
+    expect(pret("photos", { images: photos(MIN_PHOTOS - 1), legendes_photos: pieces(photos(MIN_PHOTOS - 1)) })).toBe(false);
+    expect(pret("photos", { images: photos(MIN_PHOTOS), legendes_photos: pieces(photos(MIN_PHOTOS)) })).toBe(true);
+    // Every photo needs its room
+    expect(pret("photos", { images: photos(MIN_PHOTOS), legendes_photos: pieces(photos(MIN_PHOTOS - 1)) })).toBe(false);
   });
 
   it("keeps the title short", () => {

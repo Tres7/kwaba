@@ -52,6 +52,8 @@ export interface Hebergement {
   review_count: number;
   image_url: string;
   images: string[];
+  /** Room shown by each photo, {url: "chambre_1" | "salon"…} (features/hebergements/pieces.ts); {} for older listings */
+  legendes_photos?: Record<string, string>;
   max_guests: number;
   amenities: string[];
   is_available: boolean;
