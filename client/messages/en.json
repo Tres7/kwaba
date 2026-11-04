@@ -124,7 +124,8 @@
     "titres": {
       "decouvrir": "Discover",
       "hotes": "Hosts",
-      "assistance": "Help"
+      "assistance": "Help",
+      "guides": "Guides"
     },
     "liens": {
       "hebergements": "Stays",
@@ -138,7 +139,8 @@
       "espaceHote": "Host space",
       "aide": "Help centre",
       "remboursement": "Cancellation and refunds",
-      "location": "Car hire"
+      "location": "Car hire",
+      "preparerTogo": "Prepare your trip to Togo"
     },
     "legal": {
       "mentions": "Legal notice",

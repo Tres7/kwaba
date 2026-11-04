@@ -124,7 +124,8 @@
     "titres": {
       "decouvrir": "Découvrir",
       "hotes": "Hôtes",
-      "assistance": "Assistance"
+      "assistance": "Assistance",
+      "guides": "Guides"
     },
     "liens": {
       "hebergements": "Hébergements",
@@ -138,7 +139,8 @@
       "espaceHote": "Espace hôte",
       "aide": "Centre d'aide",
       "remboursement": "Annulation et remboursement",
-      "location": "Location de voiture"
+      "location": "Location de voiture",
+      "preparerTogo": "Préparer votre voyage au Togo"
     },
     "legal": {
       "mentions": "Mentions légales",
