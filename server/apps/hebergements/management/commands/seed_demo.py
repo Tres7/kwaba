@@ -89,7 +89,7 @@ POINTS_REPERE = {
 }
 HORAIRES = {'arrivee_a_partir': '14:00', 'depart_avant': '11:00'}
 # Room of the cover and of the interior photos
-LEGENDES_DEMO = ['exterieur', 'salon', 'chambre_1', 'salle_de_bain_1', 'cuisine']
+LEGENDES_DEMO = ['exterieur', 'salon', 'chambre_1', 'salle_de_bain_1', 'chambre_1']
 
 # The other roles, with the password of the demo host
 COMPTES = [
