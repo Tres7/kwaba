@@ -153,3 +153,27 @@ describe("pictogrammes", () => {
     ETAPES.slice(1).forEach((etape, i) => expect(etape.picto, etape.cle).not.toBe(ETAPES[i].picto));
   });
 });
+
+describe("hotels, aparthotels and guesthouses", () => {
+  const HOTEL: DonneesAnnonce = { ...PHASE_1, type: "chambre_hotel" };
+  const etape = (cle: string) => ETAPES.find((e) => e.cle === cle)!;
+  const double = { nom: "Double standard", prix_nuit: 35000, quantite: 80, capacite: 2 };
+
+  it("give their room types instead of the beds of a house, and no separate price", () => {
+    expect(etapeVoisine(etape("position"), 1, undefined, HOTEL)?.cle).toBe("chambres");
+    expect(etapeVoisine(etape("chambres"), 1, undefined, HOTEL)?.cle).toBe("phase-2");
+    expect(etapeVoisine(etape("phase-3"), 1, undefined, HOTEL)?.cle).toBe("regles");
+    expect(etapeVoisine(etape("position"), 1, undefined, PHASE_1)?.cle).toBe("capacite");
+  });
+
+  it("need every room type complete", () => {
+    expect(pret("chambres", { ...HOTEL, types_chambres: [] })).toBe(false);
+    expect(pret("chambres", { ...HOTEL, types_chambres: [double, { ...double, nom: " " }] })).toBe(false);
+    expect(pret("chambres", { ...HOTEL, types_chambres: [double, { ...double, nom: "Suite", quantite: 10 }] })).toBe(true);
+  });
+
+  it("come back to their rooms, never to the beds of a house", () => {
+    expect(etapeAffichee("capacite", HOTEL).cle).toBe("chambres");
+    expect(etapeAffichee("photos", { ...HOTEL, types_chambres: [double] }).cle).toBe("photos");
+  });
+});

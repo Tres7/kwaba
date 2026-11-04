@@ -9,6 +9,8 @@ export type DonneesAnnonce = Partial<Pick<Hebergement,
   latitude?: number | string | null;
   longitude?: number | string | null;
   price_per_night?: number | null;
+  /** A hotel's room types, created with the listing (written only) */
+  types_chambres?: { nom: string; prix_nuit: number; quantite: number; capacite: number }[];
   /** Statements of the host, kept with the listing; `attestation`: the information is true */
   declarations?: { cameras?: boolean; animaux?: boolean; travaux?: boolean; attestation?: boolean } | null;
 };
@@ -22,6 +24,10 @@ export interface BrouillonAnnonce {
   modifie_le: string;
 }
 
+/** Hotels, aparthotels and guesthouses: rooms by type with their stock, no beds of a house to describe. */
+export const TYPES_ETABLISSEMENTS = ["chambre_hotel", "residence", "auberge"];
+export const estEtablissement = (type?: string | null) => !!type && TYPES_ETABLISSEMENTS.includes(type);
+
 /** Id of an uploaded photo, read from its address: hebergements/<host>/<id>.jpg (see _photo_upload_path on the API). */
 export function photoDepuisUrl(url: string): string | null {
   return url.match(/\/hebergements\/[^/]+\/([0-9a-f-]{36})\.jpg/)?.[1] ?? null;
@@ -34,8 +40,8 @@ const CRITERES: [string, (d: DonneesAnnonce) => boolean][] = [
   ["prix", (d) => (d.price_per_night ?? 0) > 0],
   ["position", (d) => d.latitude != null && d.longitude != null],
   ["pointRepere", (d) => !!d.point_repere?.trim()],
-  ["sallesDeBain", (d) => (d.salles_de_bain ?? 0) >= 1],
-  ["lits", (d) => (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0) > 0],
+  ["sallesDeBain", (d) => estEtablissement(d.type) || (d.salles_de_bain ?? 0) >= 1],
+  ["lits", (d) => estEtablissement(d.type) || (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0) > 0],
   ["petitDejeuner", (d) => !!d.petit_dejeuner && (d.petit_dejeuner !== "option" || (d.petit_dejeuner_prix ?? 0) > 0)],
   ["photos", (d) => (d.images?.length ?? 0) > 0],
   ["legendes", (d) => (d.images?.length ?? 0) > 0 && (d.images ?? []).every((url) => !!d.legendes_photos?.[url])],
