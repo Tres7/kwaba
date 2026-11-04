@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useEquipements } from "../AmenityBadge";
 import type { DonneesAnnonce } from "../brouillons";
 import PhotoUploader from "../PhotoUploader";
+import FraisMenageType from "../FraisMenageType";
 import { EcranAccueil, EcranContrat, EcranIdentite, EcranPrix, EcranRecapitulatif, EcranRegles, EcranSecurite, EcranTelephone, EcranVersement } from "./EcransFin";
 import { MAX_DESCRIPTION, MAX_TITRE, MIN_DESCRIPTION, MIN_PHOTOS, type CleEtape, type Conditions } from "./etapes";
 
@@ -91,6 +92,7 @@ function EcranType({ donnees, modifier }: EcranProps) {
             onChoisir={() => modifier(type === "studio" && donnees.chambres == null ? { type, chambres: 0 } : { type })} />
         ))}
       </div>
+      <FraisMenageType type={donnees.type} className="mt-4" />
     </Question>
   );
 }

@@ -57,7 +57,7 @@ def budget(hebergement, voyage) -> dict | None:
     """Cost of the listing for the trip dates, service fees included, and everyone's share."""
     if not voyage.nuits:
         return None
-    total = paiements.total_sejour(hebergement['price_per_night'], voyage.nuits)
+    total = paiements.total_sejour(hebergement['price_per_night'], voyage.nuits, hebergement.get('type'))
     personnes = max(1, voyage.nb_voyageurs)
     return {'nuits': voyage.nuits, 'total': total, 'par_personne': math.ceil(total / personnes), 'personnes': personnes}
 

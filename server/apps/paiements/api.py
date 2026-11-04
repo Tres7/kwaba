@@ -36,8 +36,9 @@ documents_joints = notifications._documents
 alerte_admin = notifications.alerte_admin
 
 
-def total_sejour(prix_par_nuit: Decimal, nuits: int) -> int:
-    return tarifs.calculer(prix_par_nuit, nuits).total
+def total_sejour(prix_par_nuit: Decimal, nuits: int, type_annonce: str | None = None) -> int:
+    """Standard total of a stay (6 % fees), with the cleaning fee of the listing's type."""
+    return tarifs.calculer(prix_par_nuit, nuits, menage=tarifs.frais_menage(type_annonce)).total
 
 
 def _paiement_reussi(type_objet: str, objet_id) -> PaiementModel | None:
@@ -104,9 +105,14 @@ def hotes_deja_visites(voyageur) -> set:
     return tarifs.hotes_deja_visites(voyageur)
 
 
-def devis_sejour(prix_par_nuit, hote_id, nuits: int, voyageur=None, nb_unites: int = 1) -> tarifs.Montants:
-    """Amounts of a stay with the rates of this host and this traveller."""
-    return tarifs.devis(prix_par_nuit, hote_id, nuits, voyageur=voyageur, nb_unites=nb_unites)
+def devis_sejour(prix_par_nuit, hote_id, nuits: int, voyageur=None, nb_unites: int = 1,
+                 type_annonce: str | None = None) -> tarifs.Montants:
+    """Amounts of a stay with the rates of this host and this traveller, and the cleaning fee of the listing's type."""
+    return tarifs.devis(prix_par_nuit, hote_id, nuits, voyageur=voyageur, nb_unites=nb_unites, type_annonce=type_annonce)
+
+
+def frais_menage(type_annonce: str | None) -> int:
+    return tarifs.frais_menage(type_annonce)
 
 
 def montants_de(reservation, prix_par_nuit=None) -> tarifs.Montants:

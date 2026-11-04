@@ -131,6 +131,8 @@ export interface Reservation {
     total: number;
     commission_hote: number;
     montant_hote: number;
+    /** Cleaning fee, included in total and in montant_hote */
+    frais_menage: number;
   };
   /** Last online payment: null if the booking was made without online payment. */
   paiement: "en_attente" | "reussi" | "echoue" | "annule" | null;

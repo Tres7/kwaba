@@ -576,7 +576,8 @@
     "similaires": "You may also like",
     "reglesMaison": "House rules",
     "voirTousEquipements": "Show all {nombre} amenities",
-    "voirMoinsEquipements": "Show less"
+    "voirMoinsEquipements": "Show less",
+    "fraisMenage": "Cleaning fee"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -1587,7 +1588,8 @@
       "annonceContrat": "Listing ready. An agent will call you for the visit once your identity is verified and your contract signed."
     },
     "typesLogement": "Rooms and types",
-    "candidatureRefusee": "Your application was not accepted"
+    "candidatureRefusee": "Your application was not accepted",
+    "dontMenage": "including {montant} for cleaning"
   },
   "annonce": {
     "types": {
@@ -1667,7 +1669,10 @@
     "pointRepereExemple": "Behind the CHU Sylvanus Olympio, Tokoin",
     "pointRepereAide": "How people find the place in Lomé. Only the Kwa-Ba agent and the travellers who paid their booking can see it.",
     "chambresAide": "0 for a studio.",
-    "litsRequis": "Add at least one bed to continue."
+    "litsRequis": "Add at least one bed to continue.",
+    "fraisMenage": "Cleaning fee: {montant}.",
+    "fraisMenageAide": "It is added once to the price of the stay and paid back to you in full.",
+    "fraisMenageZero": "No cleaning fee for this type: the property takes care of it."
   },
   "revenus": {
     "statuts": {

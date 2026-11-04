@@ -330,6 +330,9 @@ function EspaceHoteContent() {
               <div className="flex items-center justify-between md:flex-col md:items-end gap-1">
                 <span className="font-heading font-bold text-dark" title={t("montantHoteAide")}>
                   {formatPrice(r.montants.montant_hote)} <span className="text-xs font-normal text-gray-600">{t("pourVous")}</span>
+                  {r.montants.frais_menage > 0 && (
+                    <span className="block text-xs font-normal text-gray-600 md:text-right">{t("dontMenage", { montant: formatPrice(r.montants.frais_menage) })}</span>
+                  )}
                 </span>
                 <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full",
                   r.status === "cancelled" ? "bg-red-100 text-red-700" : r.status === "pending" ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-700")}>

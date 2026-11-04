@@ -47,6 +47,8 @@ class ReservationModel(models.Model):
     prix_nuits = models.PositiveIntegerField(null=True, blank=True)
     frais_service = models.PositiveIntegerField(null=True, blank=True)
     commission_hote = models.PositiveIntegerField(null=True, blank=True)
+    # Cleaning fee of the listing type at booking time, for the host in full (null before it existed)
+    frais_menage = models.PositiveIntegerField(null=True, blank=True)
 
     # Booking waiting for payment: the dates are held until this deadline
     expire_le = models.DateTimeField(null=True, blank=True)
@@ -75,7 +77,7 @@ class ReservationModel(models.Model):
     def montant_hote(self):
         if self.prix_nuits is None or self.commission_hote is None:
             return None
-        return self.prix_nuits - self.commission_hote
+        return self.prix_nuits - self.commission_hote + (self.frais_menage or 0)
 
     @property
     def reference(self):

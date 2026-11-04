@@ -11,6 +11,7 @@ import { clesHebergements } from "./hooks";
 import { useEquipements } from "./AmenityBadge";
 import PhotoUploader from "./PhotoUploader";
 import EstimateurRevenus from "./EstimateurRevenus";
+import FraisMenageType from "./FraisMenageType";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
@@ -207,6 +208,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
             onChange={(v) => setForm((prev) => ({ ...prev, type: v }))}
             options={(Object.keys(TYPE_LABELS) as HebergementType[]).map((id) => ({ value: id, label: TYPE_LABELS[id], hint: t(`types.${id}`) }))}
           />
+          <FraisMenageType type={form.type} className="mt-2" />
         </div>
         <div>
           <p className={labelClass}>{t("capacite")}</p>

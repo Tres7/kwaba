@@ -258,6 +258,12 @@ function ReservationContent() {
                       </span>
                       <span className="font-medium text-dark">{devis ? formatPrice(devis.frais_service) : <Chargement />}</span>
                     </div>
+                    {devis && devis.frais_menage > 0 && (
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-600">{tFiche("fraisMenage")}</span>
+                        <span className="font-medium text-dark">{formatPrice(devis.frais_menage)}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-5 flex justify-between items-center mb-5">

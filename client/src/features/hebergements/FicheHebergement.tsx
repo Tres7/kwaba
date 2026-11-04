@@ -391,6 +391,12 @@ function HebergementContent() {
                     </span>
                     <span className="text-dark">{devis ? formatPrice(devis.frais_service) : <Chargement />}</span>
                   </div>
+                  {devis && devis.frais_menage > 0 && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-gray-600">{t("fraisMenage")}</span>
+                      <span className="text-dark">{formatPrice(devis.frais_menage)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-heading font-bold pt-3 border-t border-gray-100 text-lg">
                     <span className="text-dark">{t("total")}</span>
                     <span className="text-primary">{devis ? formatPrice(devis.total) : <Chargement />}</span>

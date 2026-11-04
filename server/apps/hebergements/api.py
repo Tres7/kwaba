@@ -77,7 +77,7 @@ def _fiche(h: HebergementModel) -> dict:
         'max_guests': h.max_guests, 'amenities': h.amenities, 'image_url': h.image_url, 'images': h.images,
         'created_at': h.created_at, 'host_id': h.host_id, 'statut_verification': h.statut_verification,
         'politique_annulation': h.politique_annulation, 'arrivee_a_partir': h.arrivee_a_partir,
-        'depart_avant': h.depart_avant,
+        'depart_avant': h.depart_avant, 'point_repere': h.point_repere,
     }
 
 
@@ -92,9 +92,8 @@ def annonces_en_attente(hote_ids: Iterable[uuid.UUID], ville: str = '') -> list[
     qs = HebergementModel.objects.filter(statut_verification='en_attente', host_id__in=list(hote_ids))
     if ville:
         qs = qs.filter(city__icontains=ville)
-    # With the exact position and the landmark: the agent goes there
-    return [{**_fiche(h), 'latitude': h.latitude, 'longitude': h.longitude, 'point_repere': h.point_repere}
-            for h in qs.order_by('created_at')]
+    # With the exact position: the agent goes there
+    return [{**_fiche(h), 'latitude': h.latitude, 'longitude': h.longitude} for h in qs.order_by('created_at')]
 
 
 def points_repere(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
