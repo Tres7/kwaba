@@ -49,6 +49,23 @@ class ConditionsHoteModel(models.Model):
                     and self.fondateur_debut <= jour <= self.fondateur_fin)
 
 
+class FraisMenageModel(models.Model):
+    """Cleaning fee of a listing type (Kwa-Ba scale, brief AN-TAX), set by the team. Added once per stay and per unit,
+    paid back in full to the host (no service fee nor commission on it), refunded if the traveller does not come."""
+    type_logement = models.CharField(max_length=50, unique=True, help_text="Code du type d'annonce (chambre_privee, studio…)")
+    montant = models.PositiveIntegerField(help_text='FCFA, par séjour et par logement')
+    mis_a_jour_le = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = 'paiements'
+        ordering = ['montant', 'type_logement']
+        verbose_name = 'Frais de ménage'
+        verbose_name_plural = 'Frais de ménage'
+
+    def __str__(self):
+        return f"{self.type_logement} · {self.montant} FCFA"
+
+
 class ObjetPayeMixin:
     """What is paid: a listing booking, an airport transfer, a car rental or a donation, described by its module
     (paiements.registre)."""

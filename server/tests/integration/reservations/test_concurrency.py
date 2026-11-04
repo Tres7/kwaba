@@ -95,7 +95,7 @@ def test_host_closing_dates_while_guest_books_them_only_one_succeeds(make_user, 
 
 
 def _hotel(make_hebergement, chambres):
-    hotel = make_hebergement(type='hotel', max_guests=2)
+    hotel = make_hebergement(type='chambre_hotel', max_guests=2)
     hotel.types.update(nom='Double standard', quantite=chambres)
     return hotel
 

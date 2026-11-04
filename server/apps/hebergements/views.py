@@ -103,7 +103,7 @@ class HebergementListView(APIView):
 
         type_ = request.query_params.get('type')
         if type_:
-            qs = qs.filter(type=type_)
+            qs = qs.filter(type=HebergementModel.ANCIENS_TYPES.get(type_, type_))
 
         espace = request.query_params.get('espace')
         if espace:
@@ -428,8 +428,10 @@ class DevisView(APIView):
             return Response({'detail': 'Type de logement inconnu.'}, status=status.HTTP_400_BAD_REQUEST)
         if nb_unites is None or not 1 <= nb_unites <= type_logement.quantite:
             return Response({'detail': "Nombre d'unités invalide."}, status=status.HTTP_400_BAD_REQUEST)
-        montants = paiements.devis_sejour(type_logement.prix_nuit, hebergement.host_id, nuits, voyageur=request.user, nb_unites=nb_unites)
-        return Response({'prix_nuits': montants.prix_nuits, 'frais_service': montants.frais_service, 'total': montants.total})
+        montants = paiements.devis_sejour(type_logement.prix_nuit, hebergement.host_id, nuits, voyageur=request.user,
+                                          nb_unites=nb_unites, type_annonce=hebergement.type)
+        return Response({'prix_nuits': montants.prix_nuits, 'frais_service': montants.frais_service,
+                         'frais_menage': montants.frais_menage, 'total': montants.total})
 
 
 class DisponibiliteView(APIView):

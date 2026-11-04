@@ -38,6 +38,8 @@ class ConfigView(APIView):
             'commission_hote': float(tarifs.COMMISSION_HOTE),
             'commissions': {'particulier': float(tarifs.COMMISSION_PARTICULIER), 'hotel': float(tarifs.COMMISSION_HOTEL),
                             'fondateur': float(tarifs.COMMISSION_FONDATEUR)},
+            # Cleaning fee by listing type, paid back to the host in full
+            'frais_menage': tarifs.grille_menage(),
             'delai_paiement_minutes': settings.FEDAPAY['EXPIRATION_MINUTES'],
             'pays': [
                 {'code': code, 'nom': p['nom'], 'indicatif': p['indicatif'], 'chiffres': p['chiffres'],

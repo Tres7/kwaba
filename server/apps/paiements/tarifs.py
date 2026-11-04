@@ -4,6 +4,8 @@ All amounts are integers in FCFA (the CFA franc has no subunit).
 Example for 2.5 nights at 25,000 FCFA (62,500 FCFA) with an individual host:
     traveller's service fees 6 % = 3,750 → the traveller pays 66,250;
     host commission 8 % = 5,000 → the host receives 57,500; Kwa-Ba keeps 8,750 (before FedaPay fees).
+The cleaning fee of the listing type (a studio: 5,000) is added to what the traveller pays and to what the host
+receives, with no fee nor commission on it.
 """
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
@@ -20,6 +22,12 @@ COMMISSION_PARTICULIER = Decimal('0.08')
 COMMISSION_HOTEL = Decimal('0.12')
 COMMISSION_FONDATEUR = Decimal('0.05')
 COMMISSION_HOTE = COMMISSION_PARTICULIER  # rate displayed by default
+
+# Cleaning fee by listing type (brief AN-TAX), when the team has not set it (FraisMenageModel)
+GRILLE_MENAGE = {
+    'chambre_privee': 3000, 'studio': 5000, 'appartement': 7500, 'maison_entiere': 10000, 'villa': 15000,
+    'chambre_hotel': 0, 'residence': 0, 'auberge': 0,
+}
 
 # Reference arrival time for the deadlines (cancellation scale, payout to the host)
 HEURE_ARRIVEE = time(14, 0)
@@ -45,14 +53,16 @@ class Montants:
     prix_nuits: int
     frais_service: int
     commission_hote: int
+    frais_menage: int = 0
 
     @property
     def total(self) -> int:
-        return self.prix_nuits + self.frais_service
+        return self.prix_nuits + self.frais_service + self.frais_menage
 
     @property
     def montant_hote(self) -> int:
-        return self.prix_nuits - self.commission_hote
+        # The cleaning fee goes to the host in full
+        return self.prix_nuits - self.commission_hote + self.frais_menage
 
     @property
     def revenu_kwaba(self) -> int:
@@ -65,9 +75,9 @@ class Montants:
         return round(self.frais_service * 100 / self.prix_nuits) if self.prix_nuits else 0
 
 
-def calculer(prix_par_nuit, nuits: int, frais=FRAIS_VOYAGEUR, commission=COMMISSION_PARTICULIER) -> Montants:
+def calculer(prix_par_nuit, nuits: int, frais=FRAIS_VOYAGEUR, commission=COMMISSION_PARTICULIER, menage: int = 0) -> Montants:
     """Traveller's fees and host's commission: two separate deductions on the price of the nights, rounded to the
-    franc (to the nearest, half up, like formatFcfa on the site)."""
+    franc (to the nearest, half up, like formatFcfa on the site). `menage`: cleaning fee of the stay, untouched."""
     if Decimal(prix_par_nuit) <= 0:
         raise ValueError('Le prix par nuit doit être positif.')
     if int(nuits) != nuits or nuits < 1:
@@ -77,7 +87,24 @@ def calculer(prix_par_nuit, nuits: int, frais=FRAIS_VOYAGEUR, commission=COMMISS
         prix_nuits=prix_nuits,
         frais_service=arrondi(prix_nuits * Decimal(frais)),
         commission_hote=arrondi(prix_nuits * Decimal(commission)),
+        frais_menage=int(menage),
     )
+
+
+def grille_menage() -> dict[str, int]:
+    """Cleaning fee of every listing type: the team's values (FraisMenageModel) over the default scale."""
+    from .models import FraisMenageModel
+
+    return {**GRILLE_MENAGE, **dict(FraisMenageModel.objects.values_list('type_logement', 'montant'))}
+
+
+def frais_menage(type_annonce: str | None) -> int:
+    from .models import FraisMenageModel
+
+    if not type_annonce:
+        return 0
+    trouve = FraisMenageModel.objects.filter(type_logement=type_annonce).values_list('montant', flat=True).first()
+    return trouve if trouve is not None else GRILLE_MENAGE.get(type_annonce, 0)
 
 
 # --- Rates by host and traveller -------------------------------------------------------------
@@ -110,10 +137,12 @@ def taux_frais(voyageur, hote_id) -> Decimal:
     return FRAIS_REDUITS if hote_id in hotes_deja_visites(voyageur) else FRAIS_VOYAGEUR
 
 
-def devis(prix_par_nuit, hote_id, nuits: int, voyageur=None, jour=None, nb_unites: int = 1) -> Montants:
-    """Amounts of a stay with the rates of this host and this traveller: `nb_unites` units at `prix_par_nuit`."""
+def devis(prix_par_nuit, hote_id, nuits: int, voyageur=None, jour=None, nb_unites: int = 1,
+          type_annonce: str | None = None) -> Montants:
+    """Amounts of a stay with the rates of this host and this traveller: `nb_unites` units at `prix_par_nuit`, each
+    with the cleaning fee of the listing's type."""
     return calculer(prix_par_nuit * nb_unites, nuits, frais=taux_frais(voyageur, hote_id),
-                    commission=taux_commission(hote_id, jour))
+                    commission=taux_commission(hote_id, jour), menage=frais_menage(type_annonce) * nb_unites)
 
 
 def _annonce(reservation) -> dict:
@@ -126,7 +155,8 @@ def montants_de(reservation, prix_par_nuit=None) -> Montants:
     """Frozen amounts of a booking (computed again for bookings older than online payment, from `prix_par_nuit` or
     the listing's current price)."""
     if reservation.prix_nuits is not None:
-        return Montants(reservation.prix_nuits, reservation.frais_service, reservation.commission_hote)
+        return Montants(reservation.prix_nuits, reservation.frais_service, reservation.commission_hote,
+                        getattr(reservation, 'frais_menage', None) or 0)
     return calculer(prix_par_nuit if prix_par_nuit is not None else _annonce(reservation)['price_per_night'],
                     reservation.nights)
 
@@ -153,10 +183,11 @@ class Annulation:
 
 
 def _retenue(montants: Montants, nuits_retenues: int, frais_rendus: bool = False) -> Annulation:
-    """The traveller loses `nuits_retenues` (and the service fees, unless `frais_rendus`)."""
+    """The traveller loses `nuits_retenues` (and the service fees, unless `frais_rendus`). The cleaning fee is always
+    given back: the traveller has not come (terms of sale, appendix 1)."""
     nuits_retenues = max(0, min(nuits_retenues, montants.prix_nuits))
     commission = arrondi(Decimal(nuits_retenues) * montants.commission_hote / montants.prix_nuits) if montants.prix_nuits else 0
-    rendu = montants.prix_nuits - nuits_retenues + (montants.frais_service if frais_rendus else 0)
+    rendu = montants.prix_nuits - nuits_retenues + (montants.frais_service if frais_rendus else 0) + montants.frais_menage
     return Annulation(rembourse_voyageur=rendu, nuits_retenues=nuits_retenues, commission_hote=commission)
 
 

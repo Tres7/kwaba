@@ -65,3 +65,13 @@ def test_can_review_flag(client_for, make_hebergement, make_reservation):
     [row] = response.data['results']
     assert row['peut_evaluer'] is True
     assert row['avis_id'] is None
+
+
+def test_landmark_only_once_the_booking_is_paid(client_for, make_hebergement, make_reservation):
+    hebergement = make_hebergement(point_repere='Derrière la pharmacie de Bè Kpota')
+    payee = make_reservation(hebergement)
+    en_attente = make_reservation(hebergement, starts_in=30, status='pending')
+    client = client_for(payee.guest)
+
+    assert client.get(f'{RESERVATIONS}{payee.id}/').data['point_repere'] == 'Derrière la pharmacie de Bè Kpota'
+    assert client_for(en_attente.guest).get(f'{RESERVATIONS}{en_attente.id}/').data['point_repere'] is None

@@ -20,6 +20,7 @@ import ChampDestination from "./ChampDestination";
 import { EQUIPEMENTS_PRINCIPAUX, IDS_EQUIPEMENTS, estRegle, useEquipements } from "./AmenityBadge";
 import { CarteResultats } from "@/features/carte";
 import { useFormat } from "@/lib/format";
+import { ICONES_TYPES, TYPES_LOGEMENT } from "@/components/hebergement/TypeLogement";
 
 const SORTS = [
   { id: "", label: "pertinence" },
@@ -28,15 +29,6 @@ const SORTS = [
   { id: "note", label: "meilleuresNotes" },
 ];
 
-const TYPES = [
-  { id: "", label: "tous" },
-  { id: "hotel", label: "hotels" },
-  { id: "villa", label: "villas" },
-  { id: "appartement", label: "appartements" },
-  { id: "auberge", label: "auberges" },
-  { id: "maison", label: "maisons" },
-  { id: "residence", label: "residences" },
-];
 
 // Behind « more amenities »: every other amenity, and the house rules a traveller looks for
 const REGLES_RECHERCHEES = ["animaux_acceptes", "non_fumeur", "fumeur_autorise", "fetes_autorisees"];
@@ -47,7 +39,7 @@ const FILTER_KEYS = ["city", "check_in", "check_out", "guests", "type", "sort", 
 
 function RechercheContent() {
   const { AMENITIES } = useEquipements();
-  const { formatDate } = useFormat();
+  const { formatDate, TYPE_LABELS } = useFormat();
   const t = useTranslations("recherche");
   const aucunLogement = useAucunLogement();
   const router = useRouter();
@@ -129,16 +121,20 @@ function RechercheContent() {
 
   const typesChips = (
     <div className="flex flex-wrap gap-2">
-      {TYPES.map((o) => (
-        <button
-          key={o.id}
-          onClick={() => pushParams({ type: o.id })}
-          aria-pressed={params.type === o.id}
-          className={cn("px-3 py-2 rounded-full text-sm border transition-colors", params.type === o.id ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}
-        >
-          {t(`types.${o.label}`)}
-        </button>
-      ))}
+      {["", ...TYPES_LOGEMENT].map((id) => {
+        const Icone = id ? ICONES_TYPES[id as keyof typeof ICONES_TYPES] : null;
+        return (
+          <button
+            key={id}
+            onClick={() => pushParams({ type: id })}
+            aria-pressed={params.type === id}
+            className={cn("flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors", params.type === id ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}
+          >
+            {Icone && <Icone size={15} aria-hidden />}
+            {id ? TYPE_LABELS[id] : t("types.tous")}
+          </button>
+        );
+      })}
     </div>
   );
 

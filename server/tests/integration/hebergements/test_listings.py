@@ -13,7 +13,7 @@ def _listing(**overrides):
         'latitude': 6.13, 'longitude': 1.22,
         'price_per_night': 45000,
         'max_guests': 4,
-        'surface_m2': 70, 'chambres': 2, 'lits_doubles': 1, 'lits_simples': 1, 'petit_dejeuner': 'non',
+        'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 2, 'lits_doubles': 1, 'lits_simples': 1, 'petit_dejeuner': 'non',
         **overrides,
     }
 
@@ -56,7 +56,7 @@ class TestCreate:
 
     def test_images_truncated_to_ten(self, client_for, make_user):
         images = [f'https://images.unsplash.com/photo-{i}.jpg' for i in range(12)]
-        response = client_for(make_user(role='hote')).post(HEBERGEMENTS, _listing(images=images), format='json')
+        response = client_for(make_user(role='hote')).post(HEBERGEMENTS, _listing(images=images, legendes_photos={u: 'salon' for u in images}), format='json')
         assert len(HebergementModel.objects.get(pk=response.data['id']).images) == 10
 
     @pytest.mark.parametrize('url', [

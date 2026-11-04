@@ -14,7 +14,7 @@ export default function ContenuFr() {
   return (
     <LegalPage
       titre="Conditions générales de vente"
-      miseAJour="30 octobre 2026"
+      miseAJour="4 novembre 2026"
       intro={
         <>
           <p>
@@ -122,7 +122,8 @@ export default function ContenuFr() {
               <table>
                 <thead><tr><th>Élément</th><th>Montant</th></tr></thead>
                 <tbody>
-                  <tr><td>Prix des nuits, frais de ménage éventuels</td><td>Fixés par l’hôte ou l’hôtel, affichés avant la réservation</td></tr>
+                  <tr><td>Prix des nuits</td><td>Fixé par l’hôte ou l’hôtel, affiché avant la réservation</td></tr>
+                  <tr><td>Frais de ménage</td><td>Une fois par séjour, selon le type de logement (barème KWA-BA, de 0 à 15 000 F CFA), reversés en totalité à l’hôte, affichés avant la réservation</td></tr>
                   <tr><td>Frais de service du client</td><td><strong>6 %</strong> du prix des nuits</td></tr>
                   <tr><td>Pack Séjour + Chauffeur (logement réservé avec une voiture avec chauffeur)</td><td>3 % sur le logement</td></tr>
                   <tr><td>Client sous contrat cadre entreprise</td><td>4 %</td></tr>

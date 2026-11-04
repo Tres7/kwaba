@@ -197,7 +197,7 @@ def planifier_versement_hote(reservation):
         reservation_id=reservation.id,
         defaults={
             'hote_id': tarifs._annonce(reservation)['host_id'],
-            'montant_brut': montants.prix_nuits,
+            'montant_brut': montants.prix_nuits + montants.frais_menage,
             'commission': montants.commission_hote,
             'montant': montants.montant_hote,
             'date_prevue': tarifs.date_versement(reservation),

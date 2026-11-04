@@ -111,7 +111,7 @@ def test_admins_prevenus_au_troisieme_signalement(client_for, guest, thread, mak
 def test_annonce_sans_coordonnees(client_for, make_user, make_hebergement, listing):
     hote = make_user(role='hote')
     donnees = {'name': 'Villa Lomé', 'description': 'Belle villa. Réservez au 90 12 34 56 !', 'type': 'villa', 'city': 'Lomé',
-               'location': 'Bè', 'latitude': 6.13, 'longitude': 1.22, 'price_per_night': 30000, 'max_guests': 4, 'amenities': [], 'surface_m2': 90, 'chambres': 2,
+               'location': 'Bè', 'latitude': 6.13, 'longitude': 1.22, 'price_per_night': 30000, 'max_guests': 4, 'amenities': [], 'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 2,
                'lits_doubles': 2, 'petit_dejeuner': 'non'}
     reponse = client_for(hote).post('/api/v1/hebergements/', donnees, format='json')
     assert reponse.status_code == 400 and 'messagerie Kwa-Ba' in str(reponse.data['description'])

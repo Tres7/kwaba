@@ -1,5 +1,5 @@
 import {
-  Banknote, Building2, Camera, ClipboardCheck, Coffee, DoorOpen, FilePen, House, IdCard, Images, KeyRound, ListChecks,
+  Banknote, Building2, Camera, ClipboardCheck, Coffee, FilePen, House, IdCard, Images, KeyRound, ListChecks,
   Map as Carte, MapPin, NotebookPen, ScrollText, ShieldCheck, Signpost, Smartphone, Users, Wallet, Wifi, type LucideIcon,
 } from "lucide-react";
 import type { DonneesAnnonce } from "../brouillons";
@@ -10,7 +10,7 @@ export const MIN_TITRE = 8;
 export const MIN_DESCRIPTION = 30;
 export const MAX_DESCRIPTION = 2000;
 
-export type CleEtape = "bienvenue" | "phase-1" | "type" | "espace" | "adresse" | "position" | "capacite"
+export type CleEtape = "bienvenue" | "phase-1" | "type" | "adresse" | "position" | "capacite"
   | "phase-2" | "equipements" | "photos" | "titre" | "description"
   | "phase-3" | "prix" | "regles" | "accueil" | "securite" | "telephone" | "identite" | "versement" | "contrat" | "recapitulatif";
 
@@ -56,17 +56,18 @@ export const ETAPES: Etape[] = [
   { cle: "bienvenue", phase: 0, picto: KeyRound, intro: true },
   { cle: "phase-1", phase: 1, picto: PICTOS_PHASES[1], intro: true },
   { cle: "type", phase: 1, picto: Building2, pret: (d) => !!d.type },
-  { cle: "espace", phase: 1, picto: DoorOpen, pret: (d) => !!d.espace },
-  { cle: "adresse", phase: 1, picto: MapPin, champs: ["city", "location"],
-    pret: (d) => rempli(d.city) && rempli(d.location) },
+  { cle: "adresse", phase: 1, picto: MapPin, champs: ["city", "location", "point_repere"],
+    pret: (d) => rempli(d.city) && rempli(d.location) && rempli(d.point_repere) },
   { cle: "position", phase: 1, picto: Carte, sansVisuelMobile: true,
     pret: (d) => d.latitude != null && d.longitude != null },
   { cle: "capacite", phase: 1, picto: Users,
-    pret: (d) => (d.max_guests ?? 0) >= 1 && (d.surface_m2 ?? 0) >= 5 && nombreLits(d) > 0 },
+    champs: ["max_guests", "chambres", "salles_de_bain"],
+    pret: (d) => (d.max_guests ?? 0) >= 1 && (d.max_guests ?? 0) <= 20 && d.chambres != null && (d.salles_de_bain ?? 0) >= 1
+      && nombreLits(d) > 0 },
   { cle: "phase-2", phase: 2, picto: PICTOS_PHASES[2], intro: true },
   { cle: "equipements", phase: 2, picto: Wifi },
-  { cle: "photos", phase: 2, picto: Images, sansVisuelMobile: true,
-    pret: (d) => (d.images?.length ?? 0) >= MIN_PHOTOS },
+  { cle: "photos", phase: 2, picto: Images, sansVisuelMobile: true, champs: ["images", "legendes_photos"],
+    pret: (d) => (d.images?.length ?? 0) >= MIN_PHOTOS && (d.images ?? []).every((url) => !!d.legendes_photos?.[url]) },
   { cle: "titre", phase: 2, picto: Signpost, champs: ["name"],
     pret: (d) => (d.name?.trim().length ?? 0) >= MIN_TITRE && (d.name?.length ?? 0) <= MAX_TITRE },
   { cle: "description", phase: 2, picto: NotebookPen, champs: ["description"],
