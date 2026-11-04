@@ -103,16 +103,16 @@ HOTE = PREAMBULE + """
 L'Hôte confie à KWA-BA la publication et la commercialisation de son logement meublé pour des séjours de courte durée, dans les conditions du présent contrat. Il déclare être propriétaire du logement, mandataire du propriétaire (mandat écrit remis à KWA-BA) ou locataire autorisé à sous-louer (accord écrit remis à KWA-BA).
 
 ## Article 2 – Commission et versements
-– Commission de KWA-BA : 8 % du prix des nuits (hors frais de service payés par le client).
-– Programme Fondateurs (50 premiers hôtes) : 5 % pendant 6 mois ; {{ partie.fondateur }}.
+– Commission de KWA-BA : {{ tarifs.commission_hote }} du prix des nuits (hors frais de service et frais de ménage payés par le client).
+– Programme Fondateurs (50 premiers hôtes) : {{ tarifs.commission_fondateur }} pendant 6 mois ; {{ partie.fondateur }}.
 – Lien Kwa-Ba Direct (propres clients de l'Hôte, dès son ouverture) : 5 %, sans frais de service pour le client.
-– Frais de service du client (6 %, 3 % en Pack Séjour ou en Client fidèle, 4 % entreprises) : payés par le client, ils ne réduisent pas le revenu de l'Hôte.
+– Frais de service du client ({{ tarifs.frais_voyageur }}, {{ tarifs.frais_reduits }} en Pack Séjour ou en Client fidèle, 4 % entreprises) : payés par le client, ils ne réduisent pas le revenu de l'Hôte.
 – Versement : 24 heures après l'arrivée du client, par Mobile Money, commission déduite, sur le compte au nom de l'Hôte indiqué dans son espace hôte.
 – Forfaits facultatifs commandés par l'Hôte : photos de l'annonce, 5 000 F CFA ; accueil des voyageurs, 3 000 F CFA par arrivée ; déduits des versements.
 La part reversée au démarcheur qui a apporté l'Hôte (20 % du revenu de KWA-BA pendant 12 mois) est payée par KWA-BA et ne coûte rien à l'Hôte.
 
 ## Article 3 – Annonce
-3.1. L'Hôte fixe librement son prix par nuit et ses frais de ménage éventuels.
+3.1. L'Hôte fixe librement son prix par nuit. Les frais de ménage suivent le barème de KWA-BA selon le type de logement ({{ tarifs.frais_menage }}) : payés par le client, ils sont reversés en totalité à l'Hôte, sans commission.
 3.2. Il choisit, pour chaque annonce, sa politique d'annulation : Souple, Modérée ou Ferme (définies dans les CGV).
 3.3. Il indique ses règles : heures d'arrivée et de départ, nombre maximal de personnes, animaux, tabac, fêtes (interdites sauf autorisation), visiteurs, barème du départ tardif (dans la limite d'une nuit).
 3.4. Dépôt de garantie (facultatif) : dans la limite d'une nuit et de 50 000 F CFA. Il est indiqué sur l'annonce, remis à l'arrivée contre un reçu et restitué au départ, ou au plus tard sous 48 heures. Seul le montant d'un dommage déclaré selon l'article 5 peut être conservé, jusqu'à l'avis de KWA-BA.
@@ -149,9 +149,9 @@ HOTEL = PREAMBULE + """
 L'Établissement confie à KWA-BA la commercialisation de ses chambres ou appartements sur la Plateforme, dans les conditions du présent contrat. Il déclare détenir la licence d'exploitation délivrée par le ministère chargé du tourisme, dont il remet copie à KWA-BA.
 
 ## Article 2 – Commission et versements
-– Commission de KWA-BA : 12 % du prix de l'hébergement, hors taxe de séjour éventuelle.
+– Commission de KWA-BA : {{ tarifs.commission_hotel }} du prix de l'hébergement, hors taxe de séjour éventuelle.
 – Lien Kwa-Ba Direct (réservations apportées par l'Établissement, dès son ouverture) : 6 %.
-– Frais de service du client (6 %, 3 % en Pack Séjour ou en Client fidèle, 4 % entreprises) : payés par le client, ils ne réduisent pas le revenu de l'Établissement.
+– Frais de service du client ({{ tarifs.frais_voyageur }}, {{ tarifs.frais_reduits }} en Pack Séjour ou en Client fidèle, 4 % entreprises) : payés par le client, ils ne réduisent pas le revenu de l'Établissement.
 – Versement : 24 heures après l'arrivée du client, commission déduite, sur le compte de l'Établissement indiqué dans son espace ; relevé et facture de commission mensuels.
 – Taxe de séjour ou taxe locale éventuelle : indiquée sur l'annonce, incluse dans le prix total, collectée et déclarée par l'Établissement.
 

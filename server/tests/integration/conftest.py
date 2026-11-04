@@ -87,6 +87,16 @@ def code_envoye():
     return _lire
 
 
+@pytest.fixture(autouse=True)
+def tarifs_relus():
+    """The rates kept in memory by a previous test (rolled back since) are read again."""
+    from apps.paiements import tarifs
+
+    tarifs.oublier()
+    yield
+    tarifs.oublier()
+
+
 @pytest.fixture
 def make_hebergement(make_user):
     def _make(host=None, **fields):

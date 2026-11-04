@@ -121,8 +121,14 @@ def _decrire_relance(r) -> dict:
                     f"du {formats.date_format(r.check_in, 'j F')} au {formats.date_format(r.check_out, 'j F Y')}"}
 
 
+def _revenu(ids) -> dict:
+    return {r.id: (r.frais_service or 0) + (r.commission_hote or 0)
+            for r in ReservationModel.objects.filter(pk__in=list(ids)).only('frais_service', 'commission_hote')}
+
+
 PRODUIT_PAYE = ProduitPaye(
     type='reservation',
+    revenu=_revenu,
     decrire=decrire,
     paiement_recu=paiement_recu,
     passe=passe,

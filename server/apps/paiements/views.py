@@ -27,17 +27,20 @@ class ConfigView(APIView):
     authentication_classes = []
 
     def get(self, request):
+        taux = tarifs.reglages()
         return Response({
             'actif': services.paiement_actif(),
             # Methods offered to the traveller: mobile_money and carte (FedaPay), paypal (in euros)
             'moyens': services.moyens_actifs(),
             'fcfa_par_euro': float(paypal.FCFA_PAR_EURO),
             'environnement': settings.FEDAPAY['ENV'],
-            'frais_voyageur': float(tarifs.FRAIS_VOYAGEUR),
-            'frais_reduits': float(tarifs.FRAIS_REDUITS),
-            'commission_hote': float(tarifs.COMMISSION_HOTE),
-            'commissions': {'particulier': float(tarifs.COMMISSION_PARTICULIER), 'hotel': float(tarifs.COMMISSION_HOTEL),
-                            'fondateur': float(tarifs.COMMISSION_FONDATEUR)},
+            # Rates set by the team in the back-office: every page that shows a rate reads it here
+            'frais_voyageur': float(taux.frais_voyageur),
+            'frais_reduits': float(taux.frais_reduits),
+            'commission_hote': float(taux.commission_particulier),
+            'commissions': {'particulier': float(taux.commission_particulier), 'hotel': float(taux.commission_hotel),
+                            'fondateur': float(taux.commission_fondateur)},
+            'commission_transfert': float(taux.commission_transfert),
             # Cleaning fee by listing type, paid back to the host in full
             'frais_menage': tarifs.grille_menage(),
             'delai_paiement_minutes': settings.FEDAPAY['EXPIRATION_MINUTES'],
@@ -200,7 +203,7 @@ class RevenusView(APIView):
             'commission_pourcent': float(tarifs.taux_commission(request.user) * 100),
             # Partner type saved by the team (never editable by the host) and traveller's fee rate
             'partenaire': _type_partenaire(request.user),
-            'frais_voyageur_pourcent': float(tarifs.FRAIS_VOYAGEUR * 100),
+            'frais_voyageur_pourcent': float(tarifs.reglages().frais_voyageur * 100),
             'versements': [
                 {
                     'id': str(v.id),

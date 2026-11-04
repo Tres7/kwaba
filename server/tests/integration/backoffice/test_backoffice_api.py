@@ -218,3 +218,38 @@ class TestAvis:
         logement.refresh_from_db()
         assert (logement.rating, logement.review_count) == (5.0, 1)
         assert JournalAuditModel.objects.get(action='avis_supprime').details['note'] == 1
+
+
+class TestDetailReservation:
+    """AN-B3: a booking opened in the back-office shows how its price splits and where the money went."""
+
+    def test_amounts_and_money_movements(self, api_admin, make_hebergement, make_user):
+        from apps.paiements.models import PaiementModel, VersementModel
+
+        studio = make_hebergement(type='studio', price_per_night=25000)
+        debut = timezone.localdate() + timedelta(days=20)
+        resa = ReservationModel.objects.create(
+            hebergement_id=studio.id, guest_id=make_user().pk, check_in=debut, check_out=debut + timedelta(days=2),
+            total_price=58000, status='confirmed', prix_nuits=50000, frais_service=3000, commission_hote=4000, frais_menage=5000,
+        )
+        PaiementModel.objects.create(reservation_id=resa.id, montant=58000, prestataire='fedapay', statut='reussi')
+        VersementModel.objects.create(reservation_id=resa.id, hote_id=studio.host_id, montant_brut=55000, commission=4000,
+                                      montant=51000, date_prevue=timezone.now() + timedelta(days=21))
+        # The host raised the price after the booking: the booking keeps its own
+        HebergementModel.objects.filter(pk=studio.pk).update(price_per_night=40000)
+
+        d = api_admin.get(f'{ADMIN}reservations/{resa.id}/').data
+
+        assert d['montants'] == {'prix_nuits': 50000, 'frais_service': 3000, 'taux_frais': 6, 'frais_menage': 5000,
+                                 'total': 58000, 'commission_hote': 4000, 'taux_commission': 8, 'montant_hote': 51000,
+                                 'revenu_kwaba': 7000}
+        assert (d['prix_nuit_reserve'], d['prix_nuit_actuel']) == (25000, 40000)
+        assert [p['montant'] for p in d['paiements']] == [58000] and d['remboursements'] == []
+        assert d['versement']['montant'] == 51000 and d['versement']['statut'] == 'planifie'
+
+    def test_unknown_booking(self, api_admin):
+        assert api_admin.get(f'{ADMIN}reservations/00000000-0000-0000-0000-000000000000/').status_code == 404
+
+    def test_admins_only(self, client_for, make_user, make_hebergement, make_reservation):
+        resa = make_reservation(make_hebergement())
+        assert client_for(make_user(role='agent')).get(f'{ADMIN}reservations/{resa.id}/').status_code == 403

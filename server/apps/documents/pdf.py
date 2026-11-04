@@ -84,6 +84,19 @@ class Document:
         self.elements.append(Spacer(0, 4 * mm))
         self.elements.append(tableau)
 
+    def tableau(self, titre: str, entetes: list[str], lignes: list[list[str]], largeurs: list[float] | None = None):
+        """Table with a header row; the columns after the first one are right-aligned (amounts)."""
+        self.elements.append(_p(titre, 'section'))
+        largeurs = largeurs or [170 / len(entetes)] * len(entetes)
+        corps = [[_p(c, 'base' if i == 0 else 'droite') for i, c in enumerate(ligne)] for ligne in lignes]
+        tableau = Table([[_p(e, 'gras') for e in entetes], *corps], colWidths=[w * mm for w in largeurs], repeatRows=1)
+        tableau.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), CREME), ('LINEBELOW', (0, 0), (-1, 0), 0.6, VERT),
+            ('LINEBELOW', (0, 1), (-1, -1), 0.3, colors.HexColor('#E5E7EB')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'), ('TOPPADDING', (0, 0), (-1, -1), 4), ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        self.elements.append(tableau)
+
     def ajouter(self, *elements):
         """Any ReportLab elements (tables, images, page breaks…)."""
         self.elements.extend(elements)

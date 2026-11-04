@@ -63,6 +63,35 @@ class ReservationListView(VueAdmin):
         return _paginer(request, qs, _reservations_json, en_lot=True)
 
 
+class ReservationDetailView(VueAdmin):
+    """One booking with its money: amounts frozen at booking, payments, refunds, the host's payout."""
+
+    def get(self, request, pk):
+        r = _reservations().filter(pk=pk).first()
+        if not r:
+            return _introuvable('Réservation')
+        annonce = hebergements.fiche(r.hebergement_id, archivees=True) or {}
+        m = paiements.montants_de(r)
+        unites = r.nb_unites or 1
+        return Response({
+            **_reservation(r),
+            'type_logement_nom': hebergements.noms_types({r.type_logement_id}).get(r.type_logement_id),
+            'nb_unites': unites,
+            # Price of one night at booking time, and the listing's price today: they differ when the host changed it
+            'prix_nuit_reserve': m.prix_nuits // max(1, r.nights * unites),
+            'prix_nuit_actuel': int(annonce['price_per_night']) if annonce.get('price_per_night') is not None else None,
+            'montants': {
+                'prix_nuits': m.prix_nuits, 'frais_service': m.frais_service, 'taux_frais': m.taux_frais,
+                'frais_menage': m.frais_menage, 'total': m.total, 'commission_hote': m.commission_hote,
+                'taux_commission': round(m.commission_hote * 100 / m.prix_nuits) if m.prix_nuits else 0,
+                'montant_hote': m.montant_hote, 'revenu_kwaba': m.revenu_kwaba,
+            },
+            'montants_figes': r.prix_nuits is not None,
+            **paiements.mouvements('reservation', r.id),
+            'annule_par': r.annule_par, 'annule_le': r.annule_le,
+        })
+
+
 class ReservationAnnulerView(VueAdmin):
     def post(self, request, pk):
         motif, erreur = _motif(request.data.get('motif'))

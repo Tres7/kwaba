@@ -159,6 +159,11 @@ class TestPieceIdentite:
         faux = SimpleUploadedFile('piece.jpg', contenu, content_type='image/jpeg')
         assert _envoyer_piece(client_for(hote), faux).status_code == 400
 
+    def test_voter_card_accepted(self, client_for, hote):
+        # AN-H5: the voter card is a common identity document in Togo
+        reponse = _envoyer_piece(client_for(hote), type_piece='electeur')
+        assert reponse.status_code == 201 and reponse.data['type_libelle'] == "Carte d'électeur"
+
     def test_only_hosts_send_one(self, client_for, make_user):
         assert _envoyer_piece(client_for(make_user())).status_code == 403
 

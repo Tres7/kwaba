@@ -60,11 +60,11 @@ def texte_politique(reservation) -> str:
 
 
 def frais_voyageur() -> Decimal:
-    return tarifs.FRAIS_VOYAGEUR
+    return tarifs.reglages().frais_voyageur
 
 
 def commission_hote() -> Decimal:
-    return tarifs.COMMISSION_HOTE
+    return tarifs.reglages().commission_particulier
 
 
 def conditions_hote(hote_id) -> dict | None:
@@ -84,7 +84,7 @@ def hotes_fondateurs(hote_ids) -> set:
 
 def frais_reduits_sejour(prix_nuits: int) -> int:
     """Service fees of a stay at the reduced rate (loyal customer, Stay Pack + Driver)."""
-    return tarifs.arrondi(Decimal(prix_nuits) * tarifs.FRAIS_REDUITS)
+    return tarifs.arrondi(Decimal(prix_nuits) * tarifs.reglages().frais_reduits)
 
 
 def rembourser_en_partie(type_objet: str, objet_id, montant: int, motif: str) -> bool:
@@ -97,7 +97,7 @@ def rembourser_en_partie(type_objet: str, objet_id, montant: int, motif: str) ->
 
 
 def frais_reduits() -> Decimal:
-    return tarifs.FRAIS_REDUITS
+    return tarifs.reglages().frais_reduits
 
 
 def hotes_deja_visites(voyageur) -> set:
@@ -122,6 +122,46 @@ def montants_de(reservation, prix_par_nuit=None) -> tarifs.Montants:
 
 def _par_objet(type_objet: str, objet_ids) -> dict:
     return {f'{type_objet}_id__in': list(objet_ids)}
+
+
+def commission_hotel() -> Decimal:
+    return tarifs.reglages().commission_hotel
+
+
+def commission_fondateur() -> Decimal:
+    return tarifs.reglages().commission_fondateur
+
+
+def grille_menage() -> dict[str, int]:
+    """Cleaning fee of every listing type (FCFA)."""
+    return tarifs.grille_menage()
+
+
+def commission_transfert() -> Decimal:
+    """Share of an airport transfer kept by Kwa-Ba, set by the team."""
+    return tarifs.reglages().commission_transfert
+
+
+def mouvements(type_objet: str, objet_id) -> dict:
+    """Every money movement of one object (back-office detail): payments, refunds and, for a stay, the host's payout."""
+    from .models import VersementModel
+
+    filtre = _par_objet(type_objet, [objet_id])
+    paiements = [{
+        'id': str(p.id), 'reference': p.reference, 'montant': p.montant, 'prestataire': p.prestataire, 'mode': p.mode,
+        'statut': p.statut, 'cree_le': p.cree_le,
+    } for p in PaiementModel.objects.filter(**filtre).order_by('cree_le')]
+    remboursements = [{
+        'id': str(r.id), 'montant': r.montant, 'motif': r.motif, 'statut': r.statut, 'cree_le': r.cree_le,
+        'envoye_le': r.envoye_le,
+    } for r in RemboursementModel.objects.filter(**filtre).order_by('cree_le')]
+    versement = None
+    if type_objet == 'reservation':
+        v = VersementModel.objects.filter(reservation_id=objet_id).first()
+        if v:
+            versement = {'montant_brut': v.montant_brut, 'commission': v.commission, 'montant': v.montant,
+                         'statut': v.statut, 'date_prevue': v.date_prevue, 'envoye_le': v.envoye_le}
+    return {'paiements': paiements, 'remboursements': remboursements, 'versement': versement}
 
 
 def etats_paiement(type_objet: str, objet_ids) -> dict:

@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from functools import cached_property
 
 from django.db import models
@@ -47,6 +48,45 @@ class ConditionsHoteModel(models.Model):
     def fondateur_le(self, jour) -> bool:
         return bool(self.categorie == 'particulier' and self.fondateur_debut and self.fondateur_fin
                     and self.fondateur_debut <= jour <= self.fondateur_fin)
+
+
+class ReglagesTarifsModel(models.Model):
+    """Kwa-Ba's rates, changed by the team in the back-office without a new deployment (EX-11, EX-42). A single row.
+    A new rate applies to the bookings made afterwards: the amounts of a booking are frozen when it is made."""
+    frais_voyageur = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal('0.06'))
+    # Loyal customer and Stay Pack + Driver
+    frais_reduits = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal('0.03'))
+    commission_particulier = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal('0.08'))
+    # Hotel or aparthotel (ConditionsHoteModel.categorie)
+    commission_hotel = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal('0.12'))
+    # Founders Programme (ConditionsHoteModel dates)
+    commission_fondateur = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal('0.05'))
+    # Airport transfers: share of the price kept by Kwa-Ba, the rest goes to the driver
+    commission_transfert = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal('0.15'))
+    mis_a_jour_le = models.DateTimeField(auto_now=True)
+    mis_a_jour_par_id = models.UUIDField(null=True, blank=True)
+
+    TAUX = ('frais_voyageur', 'frais_reduits', 'commission_particulier', 'commission_hotel', 'commission_fondateur',
+            'commission_transfert')
+
+    class Meta:
+        app_label = 'paiements'
+        verbose_name = 'Tarifs Kwa-Ba'
+        verbose_name_plural = 'Tarifs Kwa-Ba'
+
+    def __str__(self):
+        return 'Tarifs Kwa-Ba'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        from .tarifs import oublier  # the next read takes the new rates
+
+        oublier()
+
+    @classmethod
+    def actuels(cls) -> 'ReglagesTarifsModel':
+        """The rates in force (the defaults before the row is written)."""
+        return cls.objects.order_by('pk').first() or cls()
 
 
 class FraisMenageModel(models.Model):

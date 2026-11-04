@@ -11,6 +11,7 @@ import { useReglagesSite } from "@/lib/site";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import { useTaux } from "@/features/paiements";
 import EstimateurRevenus from "./EstimateurRevenus";
 
 const TAUX = ["particulier", "hotel", "fondateur", "voyageur"] as const;
@@ -23,6 +24,8 @@ const STEPS = [
 
 export default function DevenirHotePage() {
   const t = useTranslations("devenirHote");
+  // Rates set in the back-office
+  const { texte: texteTaux } = useTaux();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { status } = useSession();
@@ -106,7 +109,7 @@ export default function DevenirHotePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {TAUX.map((cle) => (
               <div key={cle} className="bg-white rounded-3xl p-5 border border-gray-100 text-center">
-                <p className="font-heading font-bold text-primary text-3xl">{t(`tarifs.taux.${cle}.valeur`)}</p>
+                <p className="font-heading font-bold text-primary text-3xl">{texteTaux[cle]}</p>
                 <p className="font-semibold text-dark text-sm mt-1">{t(`tarifs.taux.${cle}.titre`)}</p>
                 <p className="text-gray-500 text-xs mt-1 leading-relaxed">{t(`tarifs.taux.${cle}.texte`)}</p>
               </div>

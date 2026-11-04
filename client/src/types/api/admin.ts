@@ -84,6 +84,26 @@ export interface AdminReservation {
   created_at: string;
 }
 
+/** One booking opened in the back-office: how its price splits and where the money went (AN-B3). */
+export interface AdminReservationDetail extends AdminReservation {
+  type_logement_nom: string | null;
+  nb_unites: number;
+  /** Price of one night at booking time, and the listing's price today (they differ if the host changed it) */
+  prix_nuit_reserve: number;
+  prix_nuit_actuel: number | null;
+  montants: {
+    prix_nuits: number; frais_service: number; taux_frais: number; frais_menage: number; total: number;
+    commission_hote: number; taux_commission: number; montant_hote: number; revenu_kwaba: number;
+  };
+  /** False: booking older than online payment, amounts computed again */
+  montants_figes: boolean;
+  paiements: { id: string; reference: string; montant: number; prestataire: string; mode: string; statut: string; cree_le: string }[];
+  remboursements: { id: string; montant: number; motif: string; statut: string; cree_le: string; envoye_le: string | null }[];
+  versement: { montant_brut: number; commission: number; montant: number; statut: string; date_prevue: string; envoye_le: string | null } | null;
+  annule_par: string;
+  annule_le: string | null;
+}
+
 export interface AdminAvis {
   id: string;
   note: number;

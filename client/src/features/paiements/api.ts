@@ -46,3 +46,44 @@ export async function lireProfilVersement() {
 export async function enregistrerProfilVersement(profil: ProfilVersement) {
   return (await api.put<ProfilVersement>(`${PAIEMENTS}/profil-versement/`, profil)).data;
 }
+
+// --- Back-office: rates (AN-B1) and finances of a period (AN-B2)
+
+export interface TarifsAdmin {
+  /** In %: 6 means 6 % */
+  taux: Record<"frais_voyageur" | "frais_reduits" | "commission_particulier" | "commission_hotel" | "commission_fondateur"
+    | "commission_transfert", number>;
+  /** FCFA per stay, by listing type */
+  frais_menage: Record<string, number>;
+  mis_a_jour_le: string | null;
+}
+
+export async function lireTarifsAdmin() {
+  return (await api.get<TarifsAdmin>("/v1/admin/paiements/tarifs/")).data;
+}
+
+export async function modifierTarifsAdmin(tarifs: Pick<TarifsAdmin, "taux" | "frais_menage">) {
+  return (await api.put<TarifsAdmin>("/v1/admin/paiements/tarifs/", tarifs)).data;
+}
+
+export interface VersementFinances {
+  categorie: string; beneficiaire: string; objet: string; montant: number; commission: number; statut: string;
+  date_prevue: string; envoye_le: string | null;
+}
+
+export interface Finances {
+  debut: string;
+  fin: string;
+  totaux: { encaisse: number; nb_paiements: number; rembourse: number; rembourse_en_attente: number; verse: number;
+    du_partenaires: number; revenu_kwaba: number };
+  par_produit: Record<string, number>;
+  par_prestataire: Record<string, number>;
+  jours: { date: string; nb_paiements: number; encaisse: number; rembourse: number; verse: number; solde: number }[];
+  versements: VersementFinances[];
+}
+
+export const URL_EXPORT_FINANCES = "/v1/admin/paiements/finances/";
+
+export async function lireFinances(debut: string, fin: string) {
+  return (await api.get<Finances>(URL_EXPORT_FINANCES, { params: { debut, fin } })).data;
+}

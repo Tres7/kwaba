@@ -4,6 +4,8 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.utils import formats
 
+from django.db.models import Q
+
 from apps.paiements.api import ProduitPaye, Relance
 
 from . import services
@@ -26,8 +28,23 @@ def _decrire_paiement(transfert_id) -> dict | None:
             'moyen': t.moyen}
 
 
+def _a_regarder(qs, debut, fin):
+    """Payouts sent in [debut, fin), or not sent yet (due)."""
+    return qs.filter(Q(envoye_le__gte=debut, envoye_le__lt=fin) | Q(statut__in=('planifie', 'en_cours', 'echoue')))
+
+
+def _versements_periode(debut, fin) -> list[dict]:
+    return [{
+        'categorie': 'Chauffeur (transfert)', 'beneficiaire': str(v.chauffeur), 'objet': v.transfert.reference,
+        'montant': v.montant, 'commission': v.commission, 'statut': v.statut, 'date_prevue': v.date_prevue,
+        'envoye_le': v.envoye_le,
+    } for v in _a_regarder(VersementChauffeurModel.objects.select_related('chauffeur', 'transfert'), debut, fin)]
+
+
 PRODUIT_PAYE = ProduitPaye(
     type='transfert',
+    revenu=lambda ids: dict(TransfertModel.objects.filter(pk__in=list(ids)).values_list('pk', 'commission')),
+    versements_periode=_versements_periode,
     decrire=_decrire_paiement,
     paiement_recu=services.paiement_recu,
     passe=services.passe,

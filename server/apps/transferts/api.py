@@ -45,7 +45,7 @@ def chauffeurs(q: str = '', limite: int = 30) -> list[dict]:
 
 
 def commission_chauffeur() -> Decimal:
-    return tarifs.COMMISSION_CHAUFFEUR
+    return tarifs.commission_chauffeur()
 
 
 def _fiche(c: ChauffeurModel) -> dict:

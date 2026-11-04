@@ -15,7 +15,13 @@ CATEGORIES = {
 CATEGORIE_CHOICES = [(code, c['nom']) for code, c in CATEGORIES.items()]
 
 # Share of the price kept by Kwa-Ba, the rest goes to the partner driver (grid of 18 October 2026)
-COMMISSION_CHAUFFEUR = Decimal('0.15')
+COMMISSION_CHAUFFEUR = Decimal('0.15')  # default: the rate in force is set by the team (commission_chauffeur())
+
+
+def commission_chauffeur() -> Decimal:
+    from apps.paiements import api as paiements  # local import: paiements registers the transfers
+
+    return paiements.commission_transfert()
 
 # Assigning a driver takes time: booking at the latest 6 h before arrival
 DELAI_MIN_RESERVATION = timedelta(hours=6)
@@ -40,7 +46,7 @@ class Prix:
 def calculer(prix_base: int) -> Prix:
     """Same price by day and by night (the night surcharge was removed on 23 October 2026)."""
     prix = int(prix_base)
-    commission = int((Decimal(prix) * COMMISSION_CHAUFFEUR).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+    commission = int((Decimal(prix) * commission_chauffeur()).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
     return Prix(prix=prix, commission=commission)
 
 

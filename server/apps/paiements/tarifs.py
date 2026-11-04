@@ -7,21 +7,47 @@ Example for 2.5 nights at 25,000 FCFA (62,500 FCFA) with an individual host:
 The cleaning fee of the listing type (a studio: 5,000) is added to what the traveller pays and to what the host
 receives, with no fee nor commission on it.
 """
+import threading
+import time as horloge
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.core.signals import request_finished, request_started
 from django.utils import timezone
 
-# Service fees paid by the traveller
+# Rates of the price grid of 18 October 2026: the defaults. The rates in force are set by the team in the back-office
+# (ReglagesTarifsModel, reglages() below).
 FRAIS_VOYAGEUR = Decimal('0.06')
 FRAIS_REDUITS = Decimal('0.03')  # Loyal customer and Stay Pack + Driver
-
-# Commission paid by the host (set by the team, see ConditionsHoteModel)
 COMMISSION_PARTICULIER = Decimal('0.08')
 COMMISSION_HOTEL = Decimal('0.12')
 COMMISSION_FONDATEUR = Decimal('0.05')
-COMMISSION_HOTE = COMMISSION_PARTICULIER  # rate displayed by default
+
+
+# Rates read once per request (a list of 20 listings shows 20 fee rates), and at most every 30 seconds outside a
+# request (workers); forgotten as soon as the team saves new ones
+_memoire = threading.local()
+DUREE_MEMOIRE = 30
+
+
+def reglages():
+    """The rates in force: service fees, reduced fees, commissions (individual, hotel, founder, transfers)."""
+    from .models import ReglagesTarifsModel
+
+    taux = getattr(_memoire, 'taux', None)
+    if taux is None or horloge.monotonic() - _memoire.lu_le > DUREE_MEMOIRE:
+        taux = ReglagesTarifsModel.actuels()
+        _memoire.taux, _memoire.lu_le = taux, horloge.monotonic()
+    return taux
+
+
+def oublier(**kwargs) -> None:
+    _memoire.taux = None
+
+
+request_started.connect(oublier, dispatch_uid='paiements.tarifs.debut_requete')
+request_finished.connect(oublier, dispatch_uid='paiements.tarifs.fin_requete')
 
 # Cleaning fee by listing type (brief AN-TAX), when the team has not set it (FraisMenageModel)
 GRILLE_MENAGE = {
@@ -75,13 +101,17 @@ class Montants:
         return round(self.frais_service * 100 / self.prix_nuits) if self.prix_nuits else 0
 
 
-def calculer(prix_par_nuit, nuits: int, frais=FRAIS_VOYAGEUR, commission=COMMISSION_PARTICULIER, menage: int = 0) -> Montants:
+def calculer(prix_par_nuit, nuits: int, frais=None, commission=None, menage: int = 0) -> Montants:
     """Traveller's fees and host's commission: two separate deductions on the price of the nights, rounded to the
     franc (to the nearest, half up, like formatFcfa on the site). `menage`: cleaning fee of the stay, untouched."""
     if Decimal(prix_par_nuit) <= 0:
         raise ValueError('Le prix par nuit doit être positif.')
     if int(nuits) != nuits or nuits < 1:
         raise ValueError('Le nombre de nuits doit être un entier au moins égal à 1.')
+    if frais is None or commission is None:
+        taux = reglages()
+        frais = taux.frais_voyageur if frais is None else frais
+        commission = taux.commission_particulier if commission is None else commission
     prix_nuits = arrondi(Decimal(prix_par_nuit) * nuits)
     return Montants(
         prix_nuits=prix_nuits,
@@ -117,12 +147,12 @@ def conditions(hote):
 
 def taux_commission(hote, jour=None) -> Decimal:
     """8 % (individual), 12 % (hotel), 5 % during the Founders Programme."""
-    c = conditions(hote)
+    c, taux = conditions(hote), reglages()
     if not c:
-        return COMMISSION_PARTICULIER
+        return taux.commission_particulier
     if c.categorie == 'hotel':
-        return COMMISSION_HOTEL
-    return COMMISSION_FONDATEUR if c.fondateur_le(jour or timezone.localdate()) else COMMISSION_PARTICULIER
+        return taux.commission_hotel
+    return taux.commission_fondateur if c.fondateur_le(jour or timezone.localdate()) else taux.commission_particulier
 
 
 def hotes_deja_visites(voyageur) -> set:
@@ -134,7 +164,8 @@ def hotes_deja_visites(voyageur) -> set:
 
 def taux_frais(voyageur, hote_id) -> Decimal:
     """6 %; 3 % for a loyal customer (new stay with the same host through Kwa-Ba)."""
-    return FRAIS_REDUITS if hote_id in hotes_deja_visites(voyageur) else FRAIS_VOYAGEUR
+    taux = reglages()
+    return taux.frais_reduits if hote_id in hotes_deja_visites(voyageur) else taux.frais_voyageur
 
 
 def devis(prix_par_nuit, hote_id, nuits: int, voyageur=None, jour=None, nb_unites: int = 1,

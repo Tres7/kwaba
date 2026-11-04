@@ -1440,22 +1440,18 @@
       "intro": "Publier est gratuit. Kwa-Ba prélève une commission seulement quand vous êtes payé.",
       "taux": {
         "particulier": {
-          "valeur": "8 %",
           "titre": "Hôte particulier",
           "texte": "du prix des nuits, prélevés sur votre versement"
         },
         "hotel": {
-          "valeur": "12 %",
           "titre": "Hôtel ou résidence hôtelière",
           "texte": "du prix des nuits, prélevés sur votre versement"
         },
         "fondateur": {
-          "valeur": "5 %",
           "titre": "Hôte fondateur",
           "texte": "pendant 6 mois pour les 50 premiers hôtes"
         },
         "voyageur": {
-          "valeur": "6 %",
           "titre": "Frais du voyageur",
           "texte": "payés par le voyageur, ils ne réduisent pas votre revenu"
         }
@@ -1556,6 +1552,7 @@
       "typePiece": "Type de pièce",
       "types": {
         "cni": "Carte nationale d'identité",
+        "electeur": "Carte d'électeur",
         "passeport": "Passeport",
         "permis": "Permis de conduire",
         "sejour": "Titre de séjour"
@@ -1876,7 +1873,7 @@
     "monChauffeurAide": "Retrouvez un chauffeur qui vous a déjà conduit : nous le contactons en priorité.",
     "sejour": "Associer à mon séjour Kwa-Ba",
     "sejourAucun": "Aucun séjour",
-    "packSejour": "Pack Séjour + Chauffeur : les frais de service de ce séjour passent à 3 %, la différence vous est remboursée.",
+    "packSejour": "Pack Séjour + Chauffeur : les frais de service de ce séjour passent à {taux}, la différence vous est remboursée.",
     "precisionsAideChauffeur": "Votre véhicule (marque, modèle, boîte), trajets prévus, horaires… Le chauffeur s'organise en conséquence.",
     "devisChauffeur": "Chauffeur, {nombre, plural, one {# jour} other {# jours}}",
     "devisPrimes": "Primes de déplacement du chauffeur",
@@ -2037,7 +2034,7 @@
       },
       "fondateur": {
         "titre": "Hôte fondateur",
-        "texte": "{taux} pendant 6 mois (50 premiers hôtes), puis 8 %"
+        "texte": "{taux} pendant 6 mois (50 premiers hôtes), puis {apres}"
       },
       "hotel": {
         "titre": "Hôtel ou résidence",
@@ -2226,7 +2223,7 @@
     },
     "identite": {
       "titre": "Votre pièce d'identité",
-      "texte": "Carte d'identité ou passeport. Seuls les agents Kwa-Ba la voient : ils la contrôlent, puis vérifient sur place que c'est bien vous."
+      "texte": "Carte d'identité, carte d'électeur ou passeport. Seuls les agents Kwa-Ba la voient : ils la contrôlent, puis vérifient sur place que c'est bien vous."
     },
     "versement": {
       "titre": "Où recevoir vos revenus ?",

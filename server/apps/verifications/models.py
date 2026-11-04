@@ -25,6 +25,7 @@ class PieceIdentiteModel(models.Model):
     """
     TYPES = [
         ('cni', "Carte nationale d'identité"),
+        ('electeur', "Carte d'électeur"),
         ('passeport', 'Passeport'),
         ('permis', 'Permis de conduire'),
         ('sejour', 'Titre de séjour'),
