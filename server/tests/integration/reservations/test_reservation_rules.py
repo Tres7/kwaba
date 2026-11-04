@@ -70,7 +70,8 @@ def test_booking_list_query_count_does_not_grow(client_for, make_user, make_hebe
     voyageur = make_user()
     client = client_for(voyageur)
     make_reservation(make_hebergement(), guest=voyageur, starts_in=-10)
-    with django_assert_max_num_queries(12) as une:
+    # 13: the rates (paiements.tarifs) are read once per request
+    with django_assert_max_num_queries(13) as une:
         client.get(RESERVATIONS)
     for i in range(5):
         make_reservation(make_hebergement(), guest=voyageur, starts_in=-20 - i * 5)

@@ -40,7 +40,7 @@ def annonce_sans_base(monkeypatch):
     monkeypatch.setattr(tarifs, '_annonce', lambda r: {'politique_annulation': getattr(r, 'politique_annulation', '')})
 
 
-M = tarifs.calculer(20000, 3)  # 60 000 + 3 600 de frais ; commission 4 800
+M = tarifs.calculer(20000, 3, frais=tarifs.FRAIS_VOYAGEUR, commission=tarifs.COMMISSION_PARTICULIER)  # 60 000 + 3 600 de frais ; commission 4 800
 
 
 @pytest.mark.parametrize('politique, jours, rembourse, retenu', [

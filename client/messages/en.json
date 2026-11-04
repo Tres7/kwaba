@@ -1438,22 +1438,18 @@
       "intro": "Listing is free. Kwa-Ba only takes a commission when you get paid.",
       "taux": {
         "particulier": {
-          "valeur": "8%",
           "titre": "Private host",
           "texte": "of the price of nights, deducted from your payout"
         },
         "hotel": {
-          "valeur": "12%",
           "titre": "Hotel or serviced residence",
           "texte": "of the price of the nights, deducted from your payout"
         },
         "fondateur": {
-          "valeur": "5%",
           "titre": "Founding host",
           "texte": "for 6 months for the first 50 hosts"
         },
         "voyageur": {
-          "valeur": "6%",
           "titre": "Traveller fee",
           "texte": "paid by the traveller, it does not reduce your income"
         }
@@ -1554,6 +1550,7 @@
       "typePiece": "Document type",
       "types": {
         "cni": "National ID card",
+        "electeur": "Voter card",
         "passeport": "Passport",
         "permis": "Driving licence",
         "sejour": "Residence permit"
@@ -1871,7 +1868,7 @@
     "monChauffeurAide": "Book a driver who has already driven you again: we contact them first.",
     "sejour": "Link to my Kwa-Ba stay",
     "sejourAucun": "No stay",
-    "packSejour": "Stay + Driver Pack: the service fee for this stay drops to 3%, the difference is refunded to you.",
+    "packSejour": "Stay + Driver Pack: the service fee for this stay drops to {taux}, the difference is refunded to you.",
     "precisionsAideChauffeur": "Your vehicle (make, model, gearbox), planned trips, times… The driver plans accordingly.",
     "devisChauffeur": "Driver, {nombre, plural, one {# day} other {# days}}",
     "devisPrimes": "Driver travel allowances",
@@ -2032,7 +2029,7 @@
       },
       "fondateur": {
         "titre": "Founding host",
-        "texte": "{taux} for 6 months (first 50 hosts), then 8%"
+        "texte": "{taux} for 6 months (first 50 hosts), then {apres}"
       },
       "hotel": {
         "titre": "Hotel or residence",
@@ -2221,7 +2218,7 @@
     },
     "identite": {
       "titre": "Your identity document",
-      "texte": "National ID card or passport. Only Kwa-Ba agents can see it: they check it, then confirm on site that it is really you."
+      "texte": "National ID card, voter card or passport. Only Kwa-Ba agents can see it: they check it, then confirm on site that it is really you."
     },
     "versement": {
       "titre": "Where should we send your earnings?",

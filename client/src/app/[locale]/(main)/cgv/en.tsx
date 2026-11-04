@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import LienContact from "@/components/legal/LienContact";
 import FormeSociete from "@/components/legal/FormeSociete";
 import MentionSociete from "@/components/legal/MentionSociete";
+import type { TauxCgv } from "./taux";
 import LegalPage, { AC, VersionFrancaiseFaitFoi } from "@/components/legal/LegalPage";
 
 /** Numbered paragraph of an article (“6.1. …”). */
@@ -10,7 +11,8 @@ function N({ n, children }: { n: string; children: React.ReactNode }) {
 }
 
 /** English version (the French version prevails). */
-export default function ContenuEn() {
+/** `taux`: the traveller's fee rates set in the back-office ("6%", "3%"). */
+export default function ContenuEn({ taux }: { taux: TauxCgv }) {
   return (
     <LegalPage
       titre="Terms of sale"
@@ -125,10 +127,10 @@ export default function ContenuEn() {
                 <tbody>
                   <tr><td>Price of nights</td><td>Set by the host or hotel, displayed before booking</td></tr>
                   <tr><td>Cleaning fee</td><td>Once per stay, by type of property (KWA-BA scale, from 0 to 15,000 CFA francs), paid back in full to the host, displayed before booking</td></tr>
-                  <tr><td>Customer service fee</td><td><strong>6%</strong> of the price of nights</td></tr>
-                  <tr><td>Stay + Driver Pack (accommodation booked with a car with driver)</td><td>3% on the accommodation</td></tr>
+                  <tr><td>Customer service fee</td><td><strong>{taux.voyageur}</strong> of the price of nights</td></tr>
+                  <tr><td>Stay + Driver Pack (accommodation booked with a car with driver)</td><td>{taux.reduits} on the accommodation</td></tr>
                   <tr><td>Customer under a corporate framework agreement</td><td>4%</td></tr>
-                  <tr><td>Loyal customer (new stay with the same host through the Platform)</td><td>3%</td></tr>
+                  <tr><td>Loyal customer (new stay with the same host through the Platform)</td><td>{taux.reduits}</td></tr>
                   <tr><td>Tourist or local tax, if applicable</td><td>Shown on the listing and included in the total price</td></tr>
                 </tbody>
               </table>
@@ -284,7 +286,7 @@ export default function ContenuEn() {
           titre: "Booking through the Platform",
           contenu: (
             <>
-              <N n="16.1">For a new stay or rental with a provider discovered on the Platform, the customer books again through the Platform. They then benefit from the Loyal customer rate (3%) or the “My driver” feature, and keep the Kwa-Ba Guarantee. The “My driver” feature lets the customer ask again for a driver they have already had through the Platform: that driver then receives 6,500 CFA francs per day instead of 6,000, and KWA-BA keeps 500 CFA francs instead of 1,000. The price paid by the customer does not change.</N>
+              <N n="16.1">For a new stay or rental with a provider discovered on the Platform, the customer books again through the Platform. They then benefit from the Loyal customer rate ({taux.reduits}) or the “My driver” feature, and keep the Kwa-Ba Guarantee. The “My driver” feature lets the customer ask again for a driver they have already had through the Platform: that driver then receives 6,500 CFA francs per day instead of 6,000, and KWA-BA keeps 500 CFA francs instead of 1,000. The price paid by the customer does not change.</N>
               <N n="16.2">A customer who receives an offer to pay or book outside the Platform may report it to KWA-BA. A verified report is rewarded with 5,000 F CFA.</N>
             </>
           ),
@@ -409,7 +411,7 @@ export default function ContenuEn() {
             <table>
               <thead><tr><th>Service</th><th>What the customer pays</th></tr></thead>
               <tbody>
-                <tr><td>Short stay</td><td>Price of nights + 6% (3% with the Stay Pack or as a Loyal customer, 4% for companies under a framework agreement)</td></tr>
+                <tr><td>Short stay</td><td>Price of nights + {taux.voyageur} ({taux.reduits} with the Stay Pack or as a Loyal customer, 4% for companies under a framework agreement)</td></tr>
                 <tr><td>Car</td><td>Price set by the owner, no service fee</td></tr>
                 <tr><td>Airport transfer</td><td>Flat price per trip, driver included</td></tr>
                 <tr><td>Driver</td><td>7,000 F CFA per day + any allowances (1,500 or 2,000 F CFA per day) + overtime (1,000 F CFA)</td></tr>

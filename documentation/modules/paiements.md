@@ -121,6 +121,24 @@ Sans aucune clé :
 
 Webhook à déclarer dans le tableau de bord FedaPay : `https://<domaine-api>/api/v1/paiements/webhooks/fedapay/`, événements `transaction.*` et `payout.*`. En local, FedaPay ne peut pas joindre `localhost` : la page de retour et le worker suffisent.
 
+## Tarifs (back-office → Tarifs)
+
+Les taux ne sont plus écrits dans le code : `paiements.ReglagesTarifsModel` (une seule ligne) garde les frais de service voyageur (6 %), les frais réduits (3 %, client fidèle et Pack Séjour), les commissions hôte particulier (8 %), hôtel ou résidence (12 %), Programme Fondateurs (5 %) et transferts (15 %). La grille des frais de ménage est dans `FraisMenageModel`. La commission de la location de véhicules reste dans « Location → Règles ».
+
+- **Back-office → Tarifs** (`GET` et `PUT /api/v1/admin/paiements/tarifs/`, en %) : entre 0 et 30 %, frais réduits jamais au-dessus des frais normaux ; chaque changement va au journal d'audit (`tarifs_modifies`, avant et après).
+- **Effet** : sur les réservations faites ensuite, les montants d'une réservation étant figés. Le site (fiche, récapitulatif, Devenir hôte, estimateur, aide), les CGV et les contrats B1 et B2 (variables `{{ tarifs.… }}`) lisent les taux en vigueur. Les CGV (art. 23.1) demandent d'annoncer une modification importante aux clients 30 jours à l'avance.
+- **Lecture** : une fois par requête (`tarifs.reglages()`), au plus toutes les 30 secondes hors requête (workers), relue dès qu'un nouveau taux est enregistré.
+
+## Finances (back-office → Finances)
+
+`GET /api/v1/admin/paiements/finances/?debut=&fin=` (un an au plus, ce mois par défaut), et les exports `finances/csv/` (chaque mouvement, séparateur `;`, pour un tableur) et `finances/pdf/` (synthèse, encaissé par produit, rapprochement jour par jour, dû aux partenaires), inscrits au journal d'audit (`finances_exportees`).
+
+- **Encaissé** : paiements réussis de la période. **Remboursé** : remboursements envoyés (et ceux en attente).
+- **Versé et dû aux partenaires** : versements aux hôtes, chauffeurs (transferts et locations), propriétaires de véhicules et ONG, envoyés dans la période ou encore à envoyer. Chaque produit donne les siens par le registre (`ProduitPaye.versements_periode`).
+- **Revenu Kwa-Ba** : frais de service et commissions des paiements encaissés (`ProduitPaye.revenu`).
+- **Rapprochement** : pour chaque jour, encaissé − remboursé − versé.
+- **Détail d'une réservation** (back-office → Réservations → Détail, `GET /api/v1/admin/reservations/<id>/`) : ventilation du prix figé à la réservation, prix actuel de l'annonce s'il a changé, paiements, versement à l'hôte, remboursements.
+
 ## Suivi et opérations
 
 L'admin Django (`/admin/`) liste les paiements, versements, remboursements et profils de versement. À surveiller :

@@ -25,7 +25,7 @@ export const SECTIONS_EN = [
       { q: "When am I charged?", a: "When you book, on FedaPay's secure page; Kwa-Ba does not keep your full card details (terms of sale, art. 7.1). The booking is firm once payment is confirmed; the confirmation is sent immediately, and within five days at the latest (art. 5.3). The price cannot be increased afterwards (art. 6.2)." },
       { q: "When is the host paid?", a: "Kwa-Ba keeps the price until 24 hours after your arrival, then pays it to the host (terms of sale, art. 8.1). This gives you time to report a problem before the host is paid (art. 8.3)." },
       { q: "How am I refunded?", a: "To the original payment method, within seven business days; failing that, to a Mobile Money account in your name, with your agreement (terms of sale, art. 11.5). The amount depends on the listing's cancellation policy (annex 1). If the provider cancels, you are refunded in full, service fee included (art. 11.3)." },
-      { q: "What does the service fee cover?", a: "It pays for Kwa-Ba's booking service and support (terms of sale, art. 2 and 3.3). It is 6% of the price of the nights; 3% for a loyal customer returning to the same host or for a Stay + Driver Pack (art. 6.4). Reductions are not cumulative, and the breakdown is shown before payment (art. 5.1)." },
+      { q: "What does the service fee cover?", a: "It pays for Kwa-Ba's booking service and support (terms of sale, art. 2 and 3.3). It is {fraisVoyageur} of the price of the nights; {fraisReduits} for a loyal customer returning to the same host or for a Stay + Driver Pack (art. 6.4). Reductions are not cumulative, and the breakdown is shown before payment (art. 5.1)." },
     ],
   },
   {

@@ -10,7 +10,7 @@ import { useSession } from "next-auth/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Info, Smartphone, CreditCard, Wallet, MapPin, Lock } from "lucide-react";
 import { apiErrorMessage } from "@/lib/api";
-import { allerPayer, enEuros, useConfigPaiement, useDevisSejour, useOperateursMobileMoney } from "@/features/paiements";
+import { allerPayer, enEuros, useConfigPaiement, useDevisSejour, useOperateursMobileMoney, useTaux } from "@/features/paiements";
 import RatingBadge from "@/components/ui/RatingBadge";
 import Chargement from "@/components/ui/Chargement";
 import { MontantDebite } from "@/components/layout/Devise";
@@ -27,6 +27,7 @@ const PAYMENT_METHODS = [
 
 function ReservationContent() {
   const { formatDate, formatFcfa, formatPrice } = useFormat();
+  const { taux } = useTaux();
   const t = useTranslations("reservation");
   const tFiche = useTranslations("fiche");
   const tVoy = useTranslations("voyageurs");
@@ -83,6 +84,8 @@ function ReservationContent() {
   const prixUnite = Number(typeLogement?.prix_nuit ?? hebergement.price_per_night);
   // Visitor's rate: 6 %, or 3 % if they already stayed with this host
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
+  // The rate in force: a lower one is the loyal customer's
+  const tauxNormal = taux.voyageur;
   const total = devis?.total ?? 0;
   const backToListing = `/hebergements/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${guestsCount}`
     + (typeLogement ? `&type=${typeLogement.id}&unites=${nbUnites}` : "");
@@ -253,8 +256,8 @@ function ReservationContent() {
                     </div>
                     <div className="flex justify-between gap-2">
                       <span className="text-gray-600">
-                        {tFiche("fraisService", { taux: Math.round(tauxFrais * 100) })}
-                        {tauxFrais < SERVICE_FEE_RATE && <span className="block text-xs text-secondary font-semibold">{tFiche("clientFidele")}</span>}
+                        {tFiche("fraisService", { taux: Number((tauxFrais * 100).toFixed(2)) })}
+                        {tauxFrais < tauxNormal && <span className="block text-xs text-secondary font-semibold">{tFiche("clientFidele")}</span>}
                       </span>
                       <span className="font-medium text-dark">{devis ? formatPrice(devis.frais_service) : <Chargement />}</span>
                     </div>

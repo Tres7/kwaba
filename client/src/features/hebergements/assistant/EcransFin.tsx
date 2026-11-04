@@ -197,7 +197,7 @@ export function EcranTelephone({ conditions }: EcranProps) {
 export function EcranIdentite() {
   return (
     <Question cle="identite">
-      <VerificationIdentite types={["cni", "passeport"]} />
+      <VerificationIdentite types={["cni", "electeur", "passeport"]} />
     </Question>
   );
 }

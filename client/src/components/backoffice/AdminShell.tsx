@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CalendarCheck, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, LayoutDashboard, Menu, Plane, ShieldAlert, Star, Users } from "lucide-react";
+import { ArrowLeft, CalendarCheck, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,8 @@ const NAV: { href: string; label: string; icon: typeof Users; compteur?: boolean
   { href: "/backoffice/experiences", label: "Expériences", icon: Compass },
   { href: "/backoffice/give", label: "Kwa-Ba Give", icon: HandHeart },
   { href: "/backoffice/documents", label: "Documents", icon: FileText },
+  { href: "/backoffice/finances", label: "Finances", icon: Landmark },
+  { href: "/backoffice/tarifs", label: "Tarifs", icon: Percent },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

@@ -27,7 +27,7 @@ import { nuitsIndisponibles, useDisponibilites } from "./disponibilites";
 import DateRangeCalendar from "@/components/calendrier/DateRangeCalendar";
 import Stepper from "@/components/ui/Stepper";
 import Chargement from "@/components/ui/Chargement";
-import { useDevisSejour } from "@/features/paiements";
+import { useDevisSejour, useTaux } from "@/features/paiements";
 import { contacterHote } from "@/features/messaging";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
@@ -49,6 +49,7 @@ function celluleMosaique(i: number, nombre: number) {
 
 function HebergementContent() {
   const { formatDate, formatPrice } = useFormat();
+  const { taux } = useTaux();
   const t = useTranslations("fiche");
   const tPieces = useTranslations("pieces");
   const params = useParams<{ id: string }>();
@@ -113,6 +114,8 @@ function HebergementContent() {
   const capacite = (typeLogement?.capacite ?? hebergement.max_guests) * nbUnites;
   // Visitor's rate: 6 %, or 3 % if they already stayed with this host (loyal customer)
   const tauxFrais = hebergement.frais_voyageur ?? SERVICE_FEE_RATE;
+  // The rate in force: a lower one is the loyal customer's
+  const tauxNormal = taux.voyageur;
   // Displayed headline price: the night with service fees included, details just below
   // Price of one unit of the chosen type (the establishment's "from" price otherwise)
   const nuitTtc = prixNuitFraisInclus(prixUnite, tauxFrais);
@@ -392,8 +395,8 @@ function HebergementContent() {
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-gray-600">
-                      {t("fraisService", { taux: Math.round(tauxFrais * 100) })}
-                      {tauxFrais < SERVICE_FEE_RATE && <span className="block text-xs text-secondary font-semibold">{t("clientFidele")}</span>}
+                      {t("fraisService", { taux: Number((tauxFrais * 100).toFixed(2)) })}
+                      {tauxFrais < tauxNormal && <span className="block text-xs text-secondary font-semibold">{t("clientFidele")}</span>}
                     </span>
                     <span className="text-dark">{devis ? formatPrice(devis.frais_service) : <Chargement />}</span>
                   </div>

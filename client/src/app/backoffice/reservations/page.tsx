@@ -1,6 +1,6 @@
 "use client";
 
-import { annulerReservationAdmin } from "@/features/reservations";
+import { annulerReservationAdmin, DetailReservationAdmin } from "@/features/reservations";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,6 +36,8 @@ function Reservations() {
   const [debut, setDebut] = useState("");
   const [fin, setFin] = useState("");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  // Booking opened to see how its price splits and where the money went
+  const [detail, setDetail] = useState<string | null>(null);
   const recherche = useDebounced(q);
 
   const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminReservation>(
@@ -58,10 +60,11 @@ function Reservations() {
     { titre: "Statut", cellule: (r) => <Pill ton={STATUT_PILL[r.status].ton}>{STATUT_PILL[r.status].label}</Pill> },
   ];
 
-  const actions = (r: AdminReservation) =>
-    r.status === "cancelled" ? null : (
+  const actions = (r: AdminReservation) => (
       <>
+      <ActionButton onClick={() => setDetail(r.id)}>Détail</ActionButton>
       {r.status === "confirmed" && <BoutonFacture objet="reservation" id={r.id} />}
+      {r.status !== "cancelled" && (
       <ActionButton danger onClick={() => setConfirmation({
         titre: "Annuler la réservation",
         message: <>Annuler <strong>{r.reference}</strong> ({r.voyageur.nom}, {r.hebergement.name}) ? Le voyageur et l&apos;hôte ne pourront pas la rétablir.</>,
@@ -77,6 +80,7 @@ function Reservations() {
           }
         },
       })}>Annuler</ActionButton>
+      )}
       </>
     );
 
@@ -101,6 +105,7 @@ function Reservations() {
       />
       {data && <Pagination page={page} count={data.count} pageSize={PAGE_SIZE} onChange={setPage} />}
       <ConfirmDialog confirmation={confirmation} onClose={() => setConfirmation(null)} />
+      <DetailReservationAdmin id={detail} onFermer={() => setDetail(null)} />
     </div>
   );
 }

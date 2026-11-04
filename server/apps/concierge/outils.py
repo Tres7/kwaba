@@ -162,7 +162,9 @@ def rechercher_logements(entree: dict):
     if not resultats:
         return {'resultats': [], 'message': "Aucun logement Kwa-Ba ne correspond. Propose d'élargir les critères "
                                              "(budget, dates, quartier) ; ne recommande pas de logement extérieur."}, []
-    return {'resultats': resultats, 'frais_service': '6 % inclus dans cout_total_sejour_fcfa (3 % pour un voyageur qui revient chez le même hôte), '
+    pourcent = lambda taux: f"{taux * 100:.2f}".rstrip('0').rstrip('.').replace('.', ',')  # noqa: E731 - "6", "3,5"
+    return {'resultats': resultats, 'frais_service': f"{pourcent(paiements.frais_voyageur())} % inclus dans cout_total_sejour_fcfa "
+                                                     f"({pourcent(paiements.frais_reduits())} % pour un voyageur qui revient chez le même hôte), "
                                                      'ainsi que les frais de ménage du type de logement'}, cartes
 
 

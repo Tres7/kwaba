@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 import { envoyerMaPiece } from "./api";
 import { CLE_MA_PIECE, useMaPiece } from "./hooks";
 
-type TypePiece = "cni" | "passeport" | "permis" | "sejour";
-const TYPES: TypePiece[] = ["cni", "passeport", "permis", "sejour"];
+type TypePiece = "cni" | "electeur" | "passeport" | "permis" | "sejour";
+const TYPES: TypePiece[] = ["cni", "electeur", "passeport", "permis", "sejour"];
 
 interface PieceIdentite {
   statut: "absente" | "soumise" | "verifiee" | "refusee";

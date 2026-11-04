@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useTaux } from "@/features/paiements";
 import { toast } from "sonner";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { apiErrorMessage } from "@/lib/api";
@@ -32,6 +33,7 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
 }) {
   const { formatDate, formatPrice } = useFormat();
   const t = useTranslations("location");
+  const { texte: texteTaux } = useTaux();
   const router = useRouter();
   const pathname = usePathname();
   const { status } = useSession();
@@ -199,7 +201,7 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
           <p className={labelClass}>{t("sejour")}</p>
           <Select label={t("sejour")} value={sejour} onChange={setSejour}
             options={[{ value: "", label: t("sejourAucun") }, ...sejours.data.map((r) => ({ value: r.id, label: `${r.hebergement_detail.name} · ${formatDate(r.check_in)}` }))]} />
-          {avecChauffeur && <p className="text-xs text-secondary font-semibold mt-1.5">{t("packSejour")}</p>}
+          {avecChauffeur && <p className="text-xs text-secondary font-semibold mt-1.5">{t("packSejour", { taux: texteTaux.reduits })}</p>}
         </div>
       )}
 
