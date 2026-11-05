@@ -49,7 +49,8 @@
         "titre": "Location de voiture avec chauffeur, ou votre chauffeur pour votre propre voiture",
         "description": "Louez une citadine, une berline, un SUV, un 4x4 ou un minibus avec chauffeur, ou un chauffeur pour votre propre voiture, à l'aéroport ou à votre adresse. Prix par jour connu à l'avance, paiement en ligne."
       }
-    }
+    },
+    "titreAccueil": "Kwa-Ba · Logements vérifiés à Lomé et partout au Togo"
   },
   "commun": {
     "allerAuContenu": "Aller au contenu principal",
@@ -125,7 +126,7 @@
       "decouvrir": "Découvrir",
       "hotes": "Hôtes",
       "assistance": "Assistance",
-      "guides": "Guides"
+      "destinations": "Destinations"
     },
     "liens": {
       "hebergements": "Hébergements",
@@ -140,7 +141,8 @@
       "aide": "Centre d'aide",
       "remboursement": "Annulation et remboursement",
       "location": "Location de voiture",
-      "preparerTogo": "Préparer votre voyage au Togo"
+      "preparerTogo": "Préparer votre voyage au Togo",
+      "logementsTogo": "Logements au Togo"
     },
     "legal": {
       "mentions": "Mentions légales",
@@ -2299,5 +2301,46 @@
     "bar": "Bar",
     "salle_de_sport": "Salle de sport",
     "salle_de_reunion": "Salle de réunion"
+  },
+  "destinations": {
+    "accueil": "Accueil",
+    "filAriane": "Fil d'Ariane",
+    "pays": {
+      "tg": {
+        "nom": "Togo",
+        "dans": "au Togo",
+        "intro": "Des plages de Lomé aux collines de Kpalimé et aux montagnes du nord : des logements visités par nos agents, réservés et payés en ligne.",
+        "guide": "Préparer votre voyage au Togo"
+      }
+    },
+    "villes": {
+      "lome": "La capitale du Togo, au bord du golfe de Guinée : plages, Grand Marché, quartiers animés, et l'aéroport international tout proche du centre.",
+      "kpalime": "À environ 120 km au nord-ouest de Lomé, dans la région des Plateaux : cascades, randonnées sur le mont Kloto, forêts et artisanat.",
+      "aneho": "Ancienne capitale du Togo, à environ 45 km à l'est de Lomé, entre l'océan et la lagune. À Glidji, la fête Epe Ekpe rassemble chaque année le peuple guin.",
+      "atakpame": "Ville de collines au cœur de la région des Plateaux, à environ 160 km au nord de Lomé, sur la route du nord.",
+      "sokode": "Chef-lieu de la région Centrale, à environ 340 km au nord de Lomé, connue pour la fête des couteaux (Adossa-Gadao).",
+      "kara": "Chef-lieu de la région de la Kara, dans le nord du pays : luttes traditionnelles Evala en juillet et, non loin, le Koutammakou, inscrit au patrimoine mondial de l'UNESCO."
+    },
+    "titreVilles": "Villes",
+    "titre": "Logements vérifiés {lieu}",
+    "dansVille": "à {ville}, {pays}",
+    "dansQuartier": "à {quartier}, {ville}",
+    "introQuartier": "Les logements Kwa-Ba du quartier {quartier}, à {ville} : visités par un agent avant leur publication, réservés et payés en ligne.",
+    "description": "{nombre, plural, one {# logement vérifié} other {# logements vérifiés}} {lieu}, dès {prix} la nuit. Chaque logement est visité par un agent Kwa-Ba ; paiement en Mobile Money ou par carte.",
+    "descriptionVide": "Logements vérifiés {lieu} : chaque logement est visité par un agent Kwa-Ba avant sa publication. Les premiers arrivent bientôt.",
+    "nombre": "{nombre, plural, =0 {Premiers logements bientôt} one {# logement vérifié} other {# logements vérifiés}}",
+    "nombreCourt": "{nombre, plural, =0 {bientôt} one {# logement} other {# logements}}",
+    "quartiers": "Quartiers",
+    "autresQuartiers": "Autres quartiers de {ville}",
+    "logements": "Logements {lieu}",
+    "filtrer": "Choisir des dates et filtrer",
+    "vide": "Pas encore de logement publié {lieu}.",
+    "videTexte": "Nos agents visitent les premiers logements avant leur mise en ligne. En attendant, voyez tous nos logements, ou proposez le vôtre.",
+    "voirTous": "Voir tous les logements",
+    "proposer": "Proposer mon logement",
+    "confiance": "Chaque logement est visité par un agent Kwa-Ba avant sa publication. Le point de repère pour le trouver vous est donné une fois la réservation payée.",
+    "aFaire": "À voir et à faire autour de {ville}",
+    "voirExperiences": "Toutes les idées de sorties à {ville}",
+    "autresVilles": "Ailleurs {dans}"
   }
 }

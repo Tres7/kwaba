@@ -35,13 +35,14 @@ function localiser(e: Experience, locale: string) {
   };
 }
 
-export default function DecouvrirPage() {
+/** villeInitiale: city chosen by the link of a destination page (/decouvrir?ville=Kpalimé). */
+export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: string }) {
   const { formatPrice } = useFormat();
   const t = useTranslations("decouvrir");
   const tNav = useTranslations("nav");
   const locale = useLocale();
   const [tab, setTab] = useState<Category | "tout">("tout");
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState(villeInitiale);
   const [q, setQ] = useState("");
   const [limite, setLimite] = useState(PAR_PAGE);
   const { data: experiences, isLoading } = useExperiences();
