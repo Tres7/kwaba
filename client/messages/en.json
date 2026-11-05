@@ -49,7 +49,8 @@
         "titre": "Car hire with a driver, or your driver for your own car",
         "description": "Hire a small car, saloon, SUV, 4x4 or minibus with a driver, or a driver for your own car, at the airport or at your address. Daily price known in advance, paid online."
       }
-    }
+    },
+    "titreAccueil": "Kwa-Ba · Verified places to stay in Lomé and across Togo"
   },
   "commun": {
     "allerAuContenu": "Skip to main content",
@@ -125,7 +126,7 @@
       "decouvrir": "Discover",
       "hotes": "Hosts",
       "assistance": "Help",
-      "guides": "Guides"
+      "destinations": "Destinations"
     },
     "liens": {
       "hebergements": "Stays",
@@ -140,7 +141,8 @@
       "aide": "Help centre",
       "remboursement": "Cancellation and refunds",
       "location": "Car hire",
-      "preparerTogo": "Prepare your trip to Togo"
+      "preparerTogo": "Prepare your trip to Togo",
+      "logementsTogo": "Places to stay in Togo"
     },
     "legal": {
       "mentions": "Legal notice",
@@ -1886,8 +1888,9 @@
     "villes": "Cities",
     "logements": "Stays",
     "logementsDispo": "{nombre, plural, =1 {1 stay} other {# stays}}",
-    "quartiers": "Lomé neighbourhoods",
-    "quartierLome": "Lomé neighbourhood"
+    "quartiers": "Neighbourhoods",
+    "quartiersLome": "Lomé neighbourhoods",
+    "quartierDe": "Neighbourhood · {ville}"
   },
   "details": {
     "titre": "The place in detail",
@@ -2298,5 +2301,46 @@
     "bar": "Bar",
     "salle_de_sport": "Gym",
     "salle_de_reunion": "Meeting room"
+  },
+  "destinations": {
+    "accueil": "Home",
+    "filAriane": "Breadcrumb",
+    "pays": {
+      "tg": {
+        "nom": "Togo",
+        "dans": "in Togo",
+        "intro": "From the beaches of Lomé to the hills of Kpalimé and the mountains of the north: places to stay visited by our agents, booked and paid online.",
+        "guide": "Prepare your trip to Togo"
+      }
+    },
+    "villes": {
+      "lome": "The capital of Togo, on the Gulf of Guinea: beaches, the Grand Market, lively neighbourhoods, and the international airport close to the centre.",
+      "kpalime": "About 120 km north-west of Lomé, in the Plateaux region: waterfalls, hikes on Mount Kloto, forests and crafts.",
+      "aneho": "A former capital of Togo, about 45 km east of Lomé, between the ocean and the lagoon. In Glidji, the Epe Ekpe festival gathers the Guin people every year.",
+      "atakpame": "A hill town in the heart of the Plateaux region, about 160 km north of Lomé, on the road to the north.",
+      "sokode": "Capital of the Centrale region, about 340 km north of Lomé, known for its knife festival (Adossa-Gadao).",
+      "kara": "Capital of the Kara region, in the north of the country: traditional Evala wrestling in July and, not far away, Koutammakou, a UNESCO World Heritage site."
+    },
+    "titreVilles": "Cities",
+    "titre": "Verified places to stay {lieu}",
+    "dansVille": "in {ville}, {pays}",
+    "dansQuartier": "in {quartier}, {ville}",
+    "introQuartier": "Kwa-Ba places to stay in the {quartier} neighbourhood of {ville}: visited by an agent before going online, booked and paid online.",
+    "description": "{nombre, plural, one {# verified place to stay} other {# verified places to stay}} {lieu}, from {prix} a night. Every place is visited by a Kwa-Ba agent; pay with Mobile Money or card.",
+    "descriptionVide": "Verified places to stay {lieu}: every place is visited by a Kwa-Ba agent before going online. The first ones are coming soon.",
+    "nombre": "{nombre, plural, =0 {First places coming soon} one {# verified place} other {# verified places}}",
+    "nombreCourt": "{nombre, plural, =0 {soon} one {# place} other {# places}}",
+    "quartiers": "Neighbourhoods",
+    "autresQuartiers": "Other neighbourhoods in {ville}",
+    "logements": "Places to stay {lieu}",
+    "filtrer": "Pick dates and filter",
+    "vide": "No place to stay published {lieu} yet.",
+    "videTexte": "Our agents are visiting the first places before they go online. Meanwhile, see all our places to stay, or list yours.",
+    "voirTous": "See all places to stay",
+    "proposer": "List my place",
+    "confiance": "Every place is visited by a Kwa-Ba agent before going online. The landmark to find it is given to you once your booking is paid.",
+    "aFaire": "Things to see and do around {ville}",
+    "voirExperiences": "All ideas of things to do in {ville}",
+    "autresVilles": "Elsewhere {dans}"
   }
 }

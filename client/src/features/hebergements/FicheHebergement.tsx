@@ -32,6 +32,7 @@ import { contacterHote } from "@/features/messaging";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 import { LibelleType } from "@/components/hebergement/TypeLogement";
+import { cheminQuartier, cheminVille, quartierDeAdresse, villeDuNom } from "@/lib/destinations";
 
 /**
  * Place of photo i in the 4 × 2 desktop mosaic, so that it is always full whatever the number of photos:
@@ -45,6 +46,19 @@ function celluleMosaique(i: number, nombre: number) {
   // 4 photos: two small ones on top, a wide one under them
   if (nombre === 4 && i === 3) return "col-span-2";
   return "";
+}
+
+/** "Tokoin, Lomé", with links to the destination pages of the district and of the city when they exist. */
+function Lieu({ city, location }: { city: string; location: string }) {
+  const ville = villeDuNom(city);
+  const quartier = ville && quartierDeAdresse(ville, location);
+  const lien = "hover:text-primary hover:underline";
+  return (
+    <>
+      {location && <>{ville && quartier ? <Link href={cheminQuartier(ville, quartier)} className={lien}>{location}</Link> : location}, </>}
+      {ville ? <Link href={cheminVille(ville)} className={lien}>{city}</Link> : city}
+    </>
+  );
 }
 
 function HebergementContent() {
@@ -190,7 +204,7 @@ function HebergementContent() {
                 <RatingBadge rating={hebergement.rating} count={hebergement.review_count} variant="full" />
               </a>
               <span className="text-muted">·</span>
-              <span className="flex items-center gap-1 text-muted"><MapPin size={14} />{hebergement.location ? `${hebergement.location}, ` : ""}{hebergement.city}</span>
+              <span className="flex items-center gap-1 text-muted"><MapPin size={14} /><span><Lieu city={hebergement.city} location={hebergement.location} /></span></span>
               <span className="text-muted">·</span>
               <LibelleType type={hebergement.type} className="text-muted" />
               <span className="text-muted">·</span>
@@ -304,7 +318,7 @@ function HebergementContent() {
                   <CarteLogement key={hebergement.id} position={hebergement.position} />
                 </div>
               )}
-              <p className="text-sm font-semibold text-dark">{hebergement.location ? `${hebergement.location}, ` : ""}{hebergement.city}</p>
+              <p className="text-sm font-semibold text-dark"><Lieu city={hebergement.city} location={hebergement.location} /></p>
               <p className="text-sm text-muted mt-0.5">{t("adresseApres")}</p>
             </section>
           </div>

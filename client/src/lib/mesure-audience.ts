@@ -15,8 +15,8 @@ const DUREE_COOKIES_S = 395 * 24 * 60 * 60; // 13 months, the limit advised by t
 
 const PAGES_EQUIPE = /^\/(backoffice|agent)(\/|$)/;
 
-// Pages with an identifier in their address, which may be a secret (contract link, group invitation). Listing and
-// project pages are public and keep theirs. A new dynamic page must be added here: mesure-audience.test.ts checks them all.
+// Pages with an identifier in their address, which may be a secret (contract link, group invitation). Listing,
+// project and destination pages (/tg/lome/tokoin) are public and keep theirs. A new dynamic page must be added here: mesure-audience.test.ts checks them all.
 const PAGES_PRIVEES =
   /^((?:\/en)?\/(?:contrat|give\/don|hote\/espace\/calendrier|hote\/espace\/types|location|messages|profil\/reservations|reservation(?:\/confirmation|\/paiement)?|together(?:\/rejoindre)?|transfert))\/[^/]+/;
 

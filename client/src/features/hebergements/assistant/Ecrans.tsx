@@ -8,7 +8,7 @@ import { useConfigPaiement } from "@/features/paiements";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Stepper from "@/components/ui/Stepper";
 import { useFormat } from "@/lib/format";
-import { QUARTIERS_LOME } from "@/lib/quartiers";
+import { quartiersDe, VILLES } from "@/lib/quartiers";
 import { cn } from "@/lib/utils";
 import { useEquipements } from "../AmenityBadge";
 import { estEtablissement, type DonneesAnnonce } from "../brouillons";
@@ -26,7 +26,6 @@ export interface EcranProps {
   conditions?: Conditions;
 }
 
-const VILLES = ["Lomé", "Kpalimé", "Aného", "Atakpamé", "Sokodé", "Kara"];
 export const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 export const libelleClass = "block text-sm font-semibold text-dark mb-2";
 
@@ -113,7 +112,7 @@ function EcranAdresse({ donnees, modifier, erreurs }: EcranProps) {
           <input id="a-ville" className={champClass} value={donnees.city ?? ""} maxLength={100} autoComplete="address-level2"
             onChange={(e) => modifier({ city: e.target.value })} placeholder="Lomé" />
           <div className="flex flex-wrap gap-2 mt-3">
-            {VILLES.map((ville) => (
+            {VILLES.map(({ nom: ville }) => (
               <button key={ville} type="button" aria-pressed={donnees.city === ville} onClick={() => modifier({ city: ville })}
                 className={cn("px-3.5 py-1.5 rounded-full text-sm border transition-colors",
                   donnees.city === ville ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}>
@@ -127,7 +126,7 @@ function EcranAdresse({ donnees, modifier, erreurs }: EcranProps) {
           <label className={libelleClass} htmlFor="a-quartier">{t("quartier")}</label>
           <input id="a-quartier" className={champClass} value={donnees.location ?? ""} maxLength={200} list="a-quartiers"
             onChange={(e) => modifier({ location: e.target.value })} placeholder="Bè Kpota" />
-          {donnees.city === "Lomé" && <datalist id="a-quartiers">{QUARTIERS_LOME.map((q) => <option key={q} value={q} />)}</datalist>}
+          <datalist id="a-quartiers">{quartiersDe(donnees.city ?? "").map((q) => <option key={q} value={q} />)}</datalist>
           <Erreur messages={erreurs.location} />
         </div>
         <div>
