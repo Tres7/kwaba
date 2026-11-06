@@ -38,6 +38,18 @@ export interface AdminUser {
   candidature_motif: string;
   /** Hosts and candidates only: commission set by the team. */
   conditions: ConditionsHote | null;
+  /** Managed on the server only: nobody can change this account from the back-office. */
+  est_super_admin: boolean;
+  /** Admins only. null: every section. */
+  admin_sections: string[] | null;
+  /** Temporary admin: end of the rights, then back to the previous role. */
+  admin_expire_le: string | null;
+}
+
+export interface DroitsAdmin {
+  est_super_admin: boolean;
+  sections: string[];
+  sections_disponibles: { code: string; libelle: string }[];
 }
 
 export interface ConditionsHote {

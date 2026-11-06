@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "@/lib/api";
-import { fermerMonCompte, lireMoi, lireStatsAdmin, modifierMoi, modifierUtilisateurAdmin, ouvrirCandidature } from "./api";
+import { fermerMonCompte, lireDroitsAdmin, lireMoi, lireStatsAdmin, modifierMoi, modifierUtilisateurAdmin, ouvrirCandidature } from "./api";
 
 vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), patch: vi.fn(), post: vi.fn(), delete: vi.fn() } }));
 
@@ -27,6 +27,8 @@ describe("users", () => {
 
   it("gère les comptes depuis le back-office", async () => {
     await modifierUtilisateurAdmin("u1", { is_active: false });
+    await lireDroitsAdmin();
+    expect(api.get).toHaveBeenCalledWith("/v1/admin/droits/");
     expect(api.patch).toHaveBeenLastCalledWith("/v1/admin/users/u1/", { is_active: false });
     await lireStatsAdmin();
     expect(api.get).toHaveBeenLastCalledWith("/v1/admin/stats/");

@@ -85,6 +85,17 @@ scripts/deploy.sh <manifest> <image serveur> <image client>
 
 Ordre fixe : sauvegarde de la base (vérifiée), images, migrations, serveur et workers, client, nginx (configuration testée dans un conteneur jetable, puis conteneur recréé), test de santé (`/api/health/` et `/`). Si la configuration nginx est invalide, le déploiement s'arrête avant de toucher au nginx en service. L'état déployé est dans `.deploy.env` (le précédent dans `.deploy.env.previous`), l'historique dans `deployments.log`.
 
+## Super admins
+
+Les super admins (les deux directeurs) gèrent les comptes administrateurs depuis le back-office. Ils se nomment uniquement ici, sur un compte déjà créé (rien ne le permet depuis le site : un compte piraté ne peut ni en créer, ni en évincer un) :
+
+```bash
+cd /opt/kwaba
+sudo -u deploy bash -c 'source scripts/lib.sh && kwaba_compose exec api python manage.py super_admin <email>'
+```
+
+`--retirer` enlève le statut ; le dernier super admin ne peut pas être retiré. En préprod : `/opt/kwaba-preprod` et `deploy-kwaba`.
+
 ## Revenir en arrière
 
 Relancer le workflow **deploy** avec un manifest antérieur (en prod, cocher `skip_preprod` s'il n'est jamais passé par la préprod ; un manifest antérieur à la préprod, sans `clientPreprod`, ne se déploie qu'en prod) (les images changent ; la configuration `deploy/vps` reste celle de `main`). Les migrations ne sont pas annulées : elles doivent rester rétro-compatibles (ajouter avant de supprimer), ce qui permet à l'ancien code de tourner sur le nouveau schéma.
