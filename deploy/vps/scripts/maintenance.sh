@@ -9,6 +9,8 @@ case "${1:-}" in
     [ -f .deploy.env ] || { log "Pas encore déployé"; exit 0; }
     kwaba_compose run --rm --no-deps api python manage.py flushexpiredtokens
     log "Jetons expirés purgés"
+    # Temporary admins who no longer sign in: those who do lose their rights at their next request
+    kwaba_compose run --rm --no-deps api python manage.py retirer_admins_expires
     ;;
   renew-certs)
     kwaba_compose --profile tools run --rm certbot renew --webroot -w /var/www/certbot --quiet
