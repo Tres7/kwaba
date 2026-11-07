@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { AdminStats, AdminUser } from "@/types/api/admin";
+import type { AdminStats, AdminUser, DroitsAdmin } from "@/types/api/admin";
 import type { Me } from "@/types/api/models";
 
 const MOI = "/v1/users/me/";
@@ -23,6 +23,10 @@ export async function fermerMonCompte() {
 
 export async function modifierUtilisateurAdmin(id: AdminUser["id"], champs: Record<string, unknown>) {
   await api.patch(`/v1/admin/users/${id}/`, champs);
+}
+
+export async function lireDroitsAdmin() {
+  return (await api.get<DroitsAdmin>("/v1/admin/droits/")).data;
 }
 
 export async function lireStatsAdmin() {

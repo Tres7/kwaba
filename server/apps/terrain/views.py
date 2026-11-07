@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.securite.audit import journaliser
+from apps.securite.permissions import a_acces_section
 from apps.users import api as users
 
 from . import services
@@ -20,7 +21,9 @@ class EstAgent(IsAuthenticated):
     message = "Réservé aux agents de terrain."
 
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role in services.ROLES_AGENTS
+        if not (super().has_permission(request, view) and request.user.role in services.ROLES_AGENTS):
+            return False
+        return request.user.role != 'admin' or a_acces_section(request.user, 'verifications')
 
 
 def _personne(utilisateur) -> dict | None:
