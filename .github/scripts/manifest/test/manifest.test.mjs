@@ -224,6 +224,19 @@ describe('validateAll', () => {
     assert.deepEqual(validateAll(dir, validate), []);
   });
 
+  test('accepts images under the kwa-ba organisation, after older ones under the personal account', () => {
+    const organisation = manifest(2, { sourceRevision: SHA('b') });
+    for (const service of Object.values(organisation.services)) service.image = service.image.replace('/tres7/', '/kwa-ba/');
+    const dir = manifestsDir(['manifest-0001-aaaaaaa.yaml', manifest(1)], ['manifest-0002-bbbbbbb.yaml', organisation]);
+    assert.deepEqual(validateAll(dir, validate), []);
+  });
+
+  test('rejects an image under another owner', () => {
+    const autre = manifest(1);
+    autre.services.server.image = IMAGE.replace('/tres7/', '/kwaba/');
+    assert.match(validateAll(manifestsDir(['manifest-0001-aaaaaaa.yaml', autre]), validate).join(), /must match pattern/);
+  });
+
   test('rejects an image outside the project registry or not pinned by digest', () => {
     for (const image of ['docker.io/library/nginx@sha256:' + '0'.repeat(64), 'ghcr.io/tres7/kwaba-server:main']) {
       const bad = manifest(1);

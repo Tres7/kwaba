@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$comment": "v1 : client déployé par Git (Vercel). v2 : client en image, comme le serveur (tout sur le VPS) ; clientPreprod (à partir de la préprod) : image client construite pour la préprod, même révision que client.",
+  "$comment": "v1 : client déployé par Git (Vercel). v2 : client en image, comme le serveur (tout sur le VPS) ; clientPreprod (à partir de la préprod) : image client construite pour la préprod, même révision que client. Images sous tres7 (compte personnel, manifests antérieurs) ou kwa-ba (organisation).",
   "type": "object",
   "required": ["schemaVersion", "manifestVersion", "sourceRevision", "createdAt", "services"],
   "additionalProperties": false,
@@ -32,7 +32,7 @@
       "properties": {
         "kind": { "const": "image" },
         "sourceRevision": { "$ref": "#/$defs/sha" },
-        "image": { "type": "string", "pattern": "^ghcr\\.io/tres7/(afristay|kwaba)-server@sha256:[a-f0-9]{64}$" }
+        "image": { "type": "string", "pattern": "^ghcr\\.io/(tres7|kwa-ba)/(afristay|kwaba)-server@sha256:[a-f0-9]{64}$" }
       }
     },
     "clientImage": {
@@ -42,7 +42,7 @@
       "properties": {
         "kind": { "const": "image" },
         "sourceRevision": { "$ref": "#/$defs/sha" },
-        "image": { "type": "string", "pattern": "^ghcr\\.io/tres7/(afristay|kwaba)-client@sha256:[a-f0-9]{64}$" }
+        "image": { "type": "string", "pattern": "^ghcr\\.io/(tres7|kwa-ba)/(afristay|kwaba)-client@sha256:[a-f0-9]{64}$" }
       }
     },
     "clientPreprodImage": {
@@ -52,7 +52,7 @@
       "properties": {
         "kind": { "const": "image" },
         "sourceRevision": { "$ref": "#/$defs/sha" },
-        "image": { "type": "string", "pattern": "^ghcr\\.io/tres7/kwaba-client-preprod@sha256:[a-f0-9]{64}$" }
+        "image": { "type": "string", "pattern": "^ghcr\\.io/(tres7|kwa-ba)/kwaba-client-preprod@sha256:[a-f0-9]{64}$" }
       }
     },
     "gitService": {

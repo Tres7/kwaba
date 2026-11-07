@@ -32,7 +32,8 @@ echo "main : $(git -C "$source" rev-parse --short HEAD)"
 fichier="${source}/deploy/manifests/${manifest}"
 [ -f "$fichier" ] || { echo "Manifest absent de main : ${manifest}" >&2; exit 1; }
 
-# Image of services.<name> (format written by .github/scripts/manifest), pinned by digest in the expected repository
+# Image of services.<name> (format written by .github/scripts/manifest), pinned by digest in the expected repository:
+# under tres7 (personal account, older manifests, kept for rollbacks) or kwa-ba (organisation)
 image() {
   awk -v service="  $1:" '$0 == service { dedans = 1; next } dedans && /^    image: / { print $2; exit } /^  [^ ]/ { dedans = 0 }' "$fichier"
 }
@@ -40,9 +41,9 @@ server_image=$(image server)
 client_image=$(image "$service_client")
 depot_client=kwaba-client
 [ "$service_client" = clientPreprod ] && depot_client=kwaba-client-preprod
-[[ $server_image =~ ^ghcr\.io/tres7/kwaba-server@sha256:[a-f0-9]{64}$ ]] \
+[[ $server_image =~ ^ghcr\.io/(tres7|kwa-ba)/kwaba-server@sha256:[a-f0-9]{64}$ ]] \
   || { echo "${manifest} : pas d'image serveur par digest" >&2; exit 1; }
-[[ $client_image =~ ^ghcr\.io/tres7/${depot_client}@sha256:[a-f0-9]{64}$ ]] \
+[[ $client_image =~ ^ghcr\.io/(tres7|kwa-ba)/${depot_client}@sha256:[a-f0-9]{64}$ ]] \
   || { echo "${manifest} : pas d'image ${service_client} par digest (manifest antérieur à cet environnement ?)" >&2; exit 1; }
 
 # Same exclusions as the deploy workflow: secrets, backups, logs and deployment state stay on the server
