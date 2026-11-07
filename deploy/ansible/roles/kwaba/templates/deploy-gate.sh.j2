@@ -46,8 +46,9 @@ depot_client=kwaba-client
 [[ $client_image =~ ^ghcr\.io/(tres7|kwa-ba)/${depot_client}@sha256:[a-f0-9]{64}$ ]] \
   || { echo "${manifest} : pas d'image ${service_client} par digest (manifest antérieur à cet environnement ?)" >&2; exit 1; }
 
-# Same exclusions as the deploy workflow: secrets, backups, logs and deployment state stay on the server
-rsync -rlpt --delete \
+# Same exclusions as the deploy workflow: secrets, backups, logs and deployment state stay on the server.
+# --chmod: no group or other write, as set by Ansible, whatever the permissions of the checkout (0775 with umask 002)
+rsync -rlpt --delete --chmod=go-w \
   --exclude /env/ --exclude /backups/ --exclude /logs/ --exclude '/.deploy.env*' --exclude /deployments.log \
   --exclude /source/ --exclude /.deploy.lock \
   "${source}/deploy/vps/" "${racine}/"
