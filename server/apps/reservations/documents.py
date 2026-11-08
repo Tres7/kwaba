@@ -17,6 +17,14 @@ def _annonce(r) -> dict:
     return hebergements.fiche(r.hebergement_id, archivees=True)
 
 
+def _petit_dejeuner(r) -> str:
+    if r.petit_dejeuner == 'inclus':
+        return 'inclus'
+    if r.petit_dejeuner == 'option':
+        return f"en option, {fcfa(r.petit_dejeuner_prix)} par personne et par jour" if r.petit_dejeuner_prix else 'en option'
+    return ''
+
+
 def bon(r) -> bytes:
     h = _annonce(r)
     hote = users.compte(h['host_id'])
@@ -24,8 +32,10 @@ def bon(r) -> bytes:
                    destinataire=[_nom(r.guest), r.guest.email])
     doc.bloc('Votre séjour', [
         ('Logement', h['name']), ('Adresse', ', '.join(x for x in (h['location'], h['city']) if x)),
-        ('Arrivée', f"{date(r.check_in, 'l j F Y')}" + (f", à partir de {_heure(h['arrivee_a_partir'])}" if h['arrivee_a_partir'] else '')),
-        ('Départ', f"{date(r.check_out, 'l j F Y')}" + (f", avant {_heure(h['depart_avant'])}" if h['depart_avant'] else '')),
+        # Hours and breakfast as accepted at booking (frozen on the booking), whatever the listing says now
+        ('Arrivée', f"{date(r.check_in, 'l j F Y')}" + (f", à partir de {_heure(r.arrivee_a_partir)}" if r.arrivee_a_partir else '')),
+        ('Départ', f"{date(r.check_out, 'l j F Y')}" + (f", avant {_heure(r.depart_avant)}" if r.depart_avant else '')),
+        *([('Petit-déjeuner', _petit_dejeuner(r))] if _petit_dejeuner(r) else []),
         *([('Point de repère', h['point_repere'])] if h.get('point_repere') else []),
         ('Durée', f"{r.nights} nuit(s)"), ('Voyageurs', str(r.guests_count)),
         ('Hôte', _nom(hote) + ', contact par la messagerie Kwa-Ba'),
