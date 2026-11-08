@@ -61,6 +61,11 @@ describe("voyages", () => {
     expect(api.post).toHaveBeenLastCalledWith("/v1/voyages/invitations/CODE/");
   });
 
+  it("garde le code d'invitation de l'adresse dans un seul segment", async () => {
+    await voyages.rejoindre("../../admin/lancement?");
+    expect(api.post).toHaveBeenLastCalledWith("/v1/voyages/invitations/..%2F..%2Fadmin%2Flancement%3F/");
+  });
+
   it("cherche des logements pour le groupe", async () => {
     await voyages.chercherLogements({ q: "Lomé", limit: 12 });
     expect(api.get).toHaveBeenLastCalledWith("/v1/hebergements/", { params: { q: "Lomé", limit: 12 } });
