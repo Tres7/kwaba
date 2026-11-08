@@ -4,7 +4,13 @@ from .models import ReservationModel
 from apps.avis import api as avis
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
+from apps.securite import coordonnees, fraude
 from apps.users import api as users
+
+# Bookings waiting for payment one traveller can hold at the same time: each one holds its dates for 30 minutes
+MAX_EN_ATTENTE = 3
+# Name shown to the host while the booking is not paid, as in the messaging
+VOYAGEUR_ANONYME = 'Voyageur'
 
 
 def _liste(serializer) -> list:
@@ -20,6 +26,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     nights = serializers.IntegerField(read_only=True)
     reference = serializers.CharField(read_only=True)
     guest_name = serializers.SerializerMethodField()
+    message = serializers.SerializerMethodField()
     avis_id = serializers.SerializerMethodField()
     peut_evaluer = serializers.SerializerMethodField()
     montants = serializers.SerializerMethodField()
@@ -95,8 +102,20 @@ class ReservationSerializer(serializers.ModelSerializer):
         sejour = {'voyageur_id': obj.guest_id, 'statut': obj.status, 'check_out': obj.check_out}
         return avis.motif_refus(sejour, request.user.id, obj.pk in self._avis()) is None
 
+    def _anonyme(self, obj) -> bool:
+        """Host's list (context vue_hote): a traveller who has not paid stays anonymous, as in the messaging, so that
+        the host cannot reach them outside the platform."""
+        if not self.context.get('vue_hote') or obj.status == 'confirmed':
+            return False
+        return paiements.etats_pour_serializer(self, 'reservation')[obj.pk]['paiement'] != 'reussi'
+
     def get_guest_name(self, obj):
+        if self._anonyme(obj):
+            return VOYAGEUR_ANONYME
         return obj.guest.get_full_name() if obj.guest else ''
+
+    def get_message(self, obj):
+        return '' if self._anonyme(obj) else obj.message
 
 
 # Units of one type in a single booking (a group); beyond that, several bookings
@@ -120,12 +139,22 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             'guests_count', 'payment_method', 'message', 'total_attendu',
         ]
 
+    def validate_message(self, valeur):
+        # Same rule as the messaging: contact details are hidden, and reported to the anti-fraud team after creation
+        texte, self._trouvailles = coordonnees.analyser(valeur)
+        return texte if coordonnees.masquees(self._trouvailles) else valeur
+
     def validate(self, data):
         hebergement = hebergements.fiche(data['hebergement_id'])
         if not hebergement:
             raise serializers.ValidationError({'hebergement': "Hébergement introuvable."})
         check_in, check_out = data['check_in'], data['check_out']
         request = self.context.get('request')
+        if request and ReservationModel.objects.filter(
+                guest_id=request.user.id, status='pending', expire_le__gt=timezone.now()).count() >= MAX_EN_ATTENTE:
+            raise serializers.ValidationError(
+                f"Vous avez déjà {MAX_EN_ATTENTE} réservations en attente de paiement : payez-en une, ou attendez "
+                "qu'elles expirent (30 minutes après leur création).")
 
         if check_in < timezone.localdate():
             raise serializers.ValidationError({'check_in': "La date d'arrivée ne peut pas être dans le passé."})
@@ -183,12 +212,20 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             etat = {'status': 'pending', 'expire_le': timezone.now() + paiements.delai_paiement()}
         else:
             etat = {'status': 'confirmed'}
-        return ReservationModel.objects.create(
+        reservation = ReservationModel.objects.create(
             total_price=montants.total,
             prix_nuits=montants.prix_nuits,
             frais_service=montants.frais_service,
             commission_hote=montants.commission_hote,
             frais_menage=montants.frais_menage,
+            # Terms of the listing as the traveller accepts them now
+            politique_annulation=hebergement['politique_annulation'] or '',
+            arrivee_a_partir=hebergement['arrivee_a_partir'],
+            depart_avant=hebergement['depart_avant'],
+            petit_dejeuner=hebergement['petit_dejeuner'] or '',
+            petit_dejeuner_prix=hebergement['petit_dejeuner_prix'],
             **etat,
             **validated_data,
         )
+        fraude.signaler(reservation.guest_id, 'reservation', reservation.pk, getattr(self, '_trouvailles', []))
+        return reservation

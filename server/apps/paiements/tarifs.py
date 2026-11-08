@@ -223,7 +223,9 @@ def _retenue(montants: Montants, nuits_retenues: int, frais_rendus: bool = False
 
 
 def politique(reservation) -> str:
-    return _annonce(reservation).get('politique_annulation') or POLITIQUE_PAR_DEFAUT
+    """Policy accepted at booking (frozen on the booking), not the listing's current one."""
+    return (getattr(reservation, 'politique_annulation', '') or _annonce(reservation).get('politique_annulation')
+            or POLITIQUE_PAR_DEFAUT)
 
 
 REGLES_POLITIQUES = {
