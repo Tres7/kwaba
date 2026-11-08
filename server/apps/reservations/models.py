@@ -50,6 +50,14 @@ class ReservationModel(models.Model):
     # Cleaning fee of the listing type at booking time, for the host in full (null before it existed)
     frais_menage = models.PositiveIntegerField(null=True, blank=True)
 
+    # Stay terms frozen at booking, as the traveller accepted them: the host may change the listing afterwards.
+    # The bookings made before were given the listing's values of the day (migration 0010).
+    politique_annulation = models.CharField(max_length=10, blank=True, default='', db_default='')
+    arrivee_a_partir = models.TimeField(null=True, blank=True)
+    depart_avant = models.TimeField(null=True, blank=True)
+    petit_dejeuner = models.CharField(max_length=10, blank=True, default='', db_default='')
+    petit_dejeuner_prix = models.PositiveIntegerField(null=True, blank=True)
+
     # Booking waiting for payment: the dates are held until this deadline
     expire_le = models.DateTimeField(null=True, blank=True)
     annule_par = models.CharField(max_length=20, blank=True, choices=ANNULE_PAR_CHOICES)
