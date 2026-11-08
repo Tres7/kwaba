@@ -16,4 +16,9 @@ urlpatterns = [
     path('<uuid:pk>/etapes/<int:etape_id>/', views.EtapeView.as_view(), name='voyage-etape'),
     path('<uuid:pk>/reservations/', views.ReservationsPartageesView.as_view(), name='voyage-reservations'),
     path('<uuid:pk>/reservations/<int:lien_id>/', views.ReservationPartageeView.as_view(), name='voyage-reservation'),
+    # Payment by a third party: a member pays the booking in the booker's place
+    path('<uuid:pk>/reservations/<int:lien_id>/demande-paiement/', views.DemandePaiementGroupeView.as_view(),
+         name='voyage-reservation-demande-paiement'),
+    path('<uuid:pk>/reservations/<int:lien_id>/paiement/', views.PaiementGroupeView.as_view(),
+         name='voyage-reservation-paiement'),
 ]

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
-import { modifierVoyage, partagerReservation, retirerReservation } from "./api";
+import { demanderAuGroupe, modifierVoyage, neplusDemanderAuGroupe, partagerReservation, retirerReservation } from "./api";
 import { messageErreur } from "./erreurs";
 import type { SectionVoyage } from "./types";
 
@@ -20,6 +20,15 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
   const { data: mesReservations = [] } = useMesReservations();
   const partagees = new Set(v.reservations.map((r) => r.reservation_id));
   const aPartager = mesReservations.filter((r) => r.status !== "cancelled" && !partagees.has(r.id));
+
+  const agir = async (action: () => Promise<SectionVoyage["v"]>, succes?: string) => {
+    try {
+      appliquer(await action());
+      if (succes) toast.success(succes);
+    } catch (err) {
+      toast.error(messageErreur(err, t("actionImpossible")));
+    }
+  };
 
   const enregistrerNotes = async () => {
     setSauvegarde(true);
@@ -50,6 +59,25 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
               </span>
             </div>
             <p className="text-sm text-dark mt-2">{formatDate(r.check_in)} → {formatDate(r.check_out)} · {tVoy("voyageurs", { nombre: r.voyageurs })} · {formatPrice(r.total)}</p>
+            {r.paiement_groupe && !r.est_a_moi && (
+              <div className="mt-3 rounded-xl bg-secondary/5 border border-secondary/20 p-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm text-dark">{t("paiementDemande", { nom: r.reserve_par })}</p>
+                <Link href={`/together/${v.id}/payer?r=${r.id}`} className="px-4 py-2 rounded-full bg-secondary text-white text-sm font-bold">{t("payerPourLeGroupe")}</Link>
+              </div>
+            )}
+            {r.est_a_moi && (r.peut_demander_paiement || r.paiement_groupe) && (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {r.paiement_groupe ? (
+                  <>
+                    <p className="text-xs text-gray-600">{t("paiementDemandeAuGroupe")}</p>
+                    <button onClick={() => agir(() => neplusDemanderAuGroupe(v.id, r.id))} className="text-xs text-gray-600 underline hover:text-dark">{t("neplusDemander")}</button>
+                  </>
+                ) : (
+                  <button onClick={() => agir(() => demanderAuGroupe(v.id, r.id), t("paiementDemandeToast"))}
+                    className="px-3 py-1.5 rounded-full border border-primary/40 text-primary text-xs font-bold hover:bg-primary/5">{t("demanderAuGroupe")}</button>
+                )}
+              </div>
+            )}
             <div className="flex items-center justify-between mt-2">
               <p className="text-xs text-gray-600">{t("reservePar", { nom: r.reserve_par })} · <span className="font-mono">{r.reference}</span></p>
               {r.peut_retirer && (

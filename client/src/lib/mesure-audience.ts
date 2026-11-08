@@ -15,10 +15,11 @@ const DUREE_COOKIES_S = 395 * 24 * 60 * 60; // 13 months, the limit advised by t
 
 const PAGES_EQUIPE = /^\/(backoffice|agent)(\/|$)/;
 
-// Pages with an identifier in their address, which may be a secret (contract link, group invitation). Listing,
+// Pages with an identifier in their address, which may be a secret (contract link, group invitation, link to pay a
+// stay for someone else). Listing,
 // project and destination pages (/tg/lome/tokoin) are public and keep theirs. A new dynamic page must be added here: mesure-audience.test.ts checks them all.
 const PAGES_PRIVEES =
-  /^((?:\/en)?\/(?:contrat|give\/don|hote\/espace\/calendrier|hote\/espace\/types|location|messages|profil\/reservations|reservation(?:\/confirmation|\/paiement)?|together(?:\/rejoindre)?|transfert))\/[^/]+/;
+  /^((?:\/en)?\/(?:contrat|give\/don|hote\/espace\/calendrier|hote\/espace\/types|location|messages|payer(?:\/retour)?|profil\/reservations|reservation(?:\/confirmation|\/paiement)?|together(?:\/rejoindre)?|transfert))\/[^/]+/;
 
 /** Path sent to Google, null when the page is not measured. */
 export function cheminMesurable(chemin: string): string | null {

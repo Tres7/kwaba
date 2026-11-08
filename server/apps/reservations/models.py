@@ -90,3 +90,29 @@ class ReservationModel(models.Model):
     @property
     def reference(self):
         return f"RES-AF{self.created_at.year}-{str(self.id)[:4].upper()}"
+
+
+class DemandePaiementModel(models.Model):
+    """The traveller asks someone else to pay their booking in full (payment by a third party).
+
+    A secret link, valid 24 hours, that the traveller sends to whoever they want, and that can also be opened to the
+    members of a Together trip the booking is shared with. Only the fingerprint of the link is kept: like a password,
+    it cannot be read again, a new link replaces the previous one. One request at a time per booking.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    reservation = models.ForeignKey(ReservationModel, on_delete=models.CASCADE, related_name='demandes_paiement')
+    empreinte_jeton = models.CharField(max_length=64, unique=True, help_text='SHA-256 du lien secret')
+    # Together trip whose members may pay without the link (the booking is shared with it)
+    voyage_id = models.UUIDField(null=True, blank=True, db_index=True)
+    cree_le = models.DateTimeField(auto_now_add=True)
+    expire_le = models.DateTimeField()
+    revoquee_le = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        app_label = 'reservations'
+        ordering = ['-cree_le']
+        verbose_name = 'Demande de paiement par un tiers'
+        verbose_name_plural = 'Demandes de paiement par un tiers'
+
+    def __str__(self):
+        return f"Paiement par un tiers · {self.reservation.reference}"

@@ -21,23 +21,29 @@ def _annonce(r) -> dict:
     return hebergements.fiche(r.hebergement_id, archivees=True)
 
 
-def demarrer_paiement(reservation, moyen: str = 'mobile_money') -> str:
-    """Payment of a listing booking: returns the address of the payment page."""
+def demarrer_paiement(reservation, moyen: str = 'mobile_money', *, payeur=None, url_retour: str = '') -> str:
+    """Payment of a listing booking: returns the address of the payment page.
+
+    `payeur`: someone else than the traveller (payment by a third party, already checked by tiers.verifier, which
+    also accepts a booking released for lack of payment whose dates are still free).
+    """
     if moyen not in paiements.moyens_actifs():
         raise paiements.PaiementErreur("Ce moyen de paiement n'est pas disponible.")
-    if reservation.status != 'pending':
-        raise paiements.PaiementErreur("Cette réservation n'attend pas de paiement.")
-    if reservation.expire_le and reservation.expire_le <= timezone.now():
-        raise paiements.PaiementErreur("Le délai de paiement est dépassé : les dates ont été libérées. Refaites la réservation.")
+    if payeur is None:
+        if reservation.status != 'pending':
+            raise paiements.PaiementErreur("Cette réservation n'attend pas de paiement.")
+        if reservation.expire_le and reservation.expire_le <= timezone.now():
+            raise paiements.PaiementErreur("Le délai de paiement est dépassé : les dates ont été libérées. Refaites la réservation.")
 
     if reservation.payment_method != moyen:
+        # Last method used: a refund by card is then sent by hand (paiements.services._par_carte)
         reservation.payment_method = moyen
         reservation.save(update_fields=['payment_method'])
     return paiements.creer_paiement(
         type_objet='reservation', objet_id=reservation.id, montant=paiements.montants_de(reservation).total,
-        moyen=moyen, voyageur=reservation.guest,
+        moyen=moyen, voyageur=payeur or reservation.guest, payeur=payeur,
         description=f"Kwa-Ba {reservation.reference}, {_annonce(reservation)['name']}",
-        url_retour=f"{settings.FRONTEND_URL}/reservation/paiement/{reservation.id}",
+        url_retour=url_retour or f"{settings.FRONTEND_URL}/reservation/paiement/{reservation.id}",
     )
 
 
@@ -114,11 +120,17 @@ def decrire(reservation_id) -> dict | None:
 
 
 def _decrire_relance(r) -> dict:
+    from .models import DemandePaiementModel
+
     annonce = _annonce(r)
+    # A link given to a third party, still valid: their payment can confirm the stay if the dates are still free
+    lien = (DemandePaiementModel.objects.filter(reservation=r, revoquee_le__isnull=True, expire_le__gt=timezone.now())
+            .values_list('expire_le', flat=True).first())
     return {'voyageur': r.guest, 'montant': int(r.total_price),
             'url': f"{settings.FRONTEND_URL}/reservation/paiement/{r.id}",
             'quoi': f"votre séjour « {annonce['name']} » ({annonce['city']}), "
-                    f"du {formats.date_format(r.check_in, 'j F')} au {formats.date_format(r.check_out, 'j F Y')}"}
+                    f"du {formats.date_format(r.check_in, 'j F')} au {formats.date_format(r.check_out, 'j F Y')}",
+            'lien_tiers': formats.date_format(timezone.localtime(lien), 'j F à H\\hi') if lien else ''}
 
 
 def _revenu(ids) -> dict:

@@ -74,15 +74,34 @@ def _reservation(reservation_id):
     return reservations.objet(reservation_id)
 
 
+def nom_court(compte) -> str:
+    """First name and initial of the surname ("Kofi M."), as the members of a group see each other."""
+    if not compte:
+        return ''
+    return f"{compte.first_name} {compte.last_name[:1]}.".strip() if compte.last_name else compte.first_name
+
+
 def reservation_payee_voyageur(paiement: PaiementModel):
     r = _reservation(paiement.reservation_id)
     voyageur = r.guest
     _envoyer('reservation_payee_voyageur', f"Séjour confirmé : {tarifs._annonce(r)['name']}", [voyageur.email], {
         **_sejour(r), 'prenom': voyageur.first_name, 'montant': _fcfa(paiement.montant),
+        'paye_par': nom_court(paiement.payeur) if paiement.payeur_id else '',
         'url': f"{settings.FRONTEND_URL}/reservation/confirmation/{r.id}",
         'url_remboursement': f"{settings.FRONTEND_URL}/remboursement",
         'politique': tarifs.texte_politique(r),
     }, pieces_jointes=_pieces('reservation', r.id))
+
+
+def paiement_tiers_recu(paiement: PaiementModel):
+    """Receipt of the third party who paid a stay in the traveller's place: the stay, never its address nor the host."""
+    from .documents import recu_paiement  # local import: documents loads the documents app
+
+    r = _reservation(paiement.reservation_id)
+    payeur = paiement.payeur
+    _envoyer('paiement_tiers_recu', f"Paiement reçu : séjour de {r.guest.first_name}", [payeur.email], {
+        **_sejour(r), 'prenom': payeur.first_name, 'voyageur': r.guest.first_name, 'montant': _fcfa(paiement.montant),
+    }, pieces_jointes=[(f"recu-{r.reference}.pdf", recu_paiement(paiement), 'application/pdf')])
 
 
 def reservation_payee_hote(paiement: PaiementModel):
@@ -157,10 +176,13 @@ def envoyer_notifications() -> int:
     from apps.reservations import api as reservations  # local import: reservations depends on paiements
 
     a_notifier = (PaiementModel.objects.filter(statut='reussi', reservation_id__isnull=False)
-                  .filter(Q(notifie=False) | Q(notifie_hote=False)).values_list('reservation_id', flat=True))
+                  .filter(Q(notifie=False) | Q(notifie_hote=False) | Q(payeur_id__isnull=False, notifie_payeur=False))
+                  .values_list('reservation_id', flat=True))
     payes = PaiementModel.objects.filter(statut='reussi', reservation_id__in=reservations.ids_confirmees(a_notifier))
     total = _traiter(payes.filter(notifie=False), reservation_payee_voyageur)
     total += _traiter(payes.filter(notifie_hote=False), reservation_payee_hote, drapeau='notifie_hote')
+    total += _traiter(payes.filter(payeur_id__isnull=False, notifie_payeur=False), paiement_tiers_recu,
+                      drapeau='notifie_payeur')
     total += _traiter(
         VersementModel.objects.filter(statut='envoye', notifie=False),
         versement_envoye,
