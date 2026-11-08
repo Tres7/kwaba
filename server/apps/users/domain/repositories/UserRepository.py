@@ -1,6 +1,7 @@
 # this repository defines how user can be saved
 # it defines methods without body. Infrastructure will make the body
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from typing import Optional
 import uuid
 
@@ -26,8 +27,13 @@ class UserRepository(ABC):
         pass
 
     @abstractmethod
-    def update(self, user: User) -> User:
-        pass
+    def update(self, user: User, champs: Iterable[str] | None = None) -> User:
+        """Writes the user's `champs` (all the fields when None). Naming them keeps the others as they are in the
+        database: a change made meanwhile (an administrator who changes the role) is not overwritten."""
+
+    @abstractmethod
+    def oublier_mot_de_passe(self, user_id: uuid.UUID) -> None:
+        """The account can no longer sign in with a password, and all its sessions are closed."""
 
     @abstractmethod
     def find_by_google_id(self, google_id: str) -> Optional[User]:

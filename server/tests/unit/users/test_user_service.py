@@ -33,8 +33,11 @@ class FakeUserRepository(UserRepository):
         self.rows[user.id] = dataclasses.replace(user)
         return dataclasses.replace(user)
 
-    def update(self, user):
+    def update(self, user, champs=None):
         return self.save(user)
+
+    def oublier_mot_de_passe(self, user_id):
+        self.rows[user_id] = dataclasses.replace(self.rows[user_id], password_hash=None)
 
     def delete(self, user_id):
         self.rows.pop(user_id, None)
