@@ -70,11 +70,11 @@ export async function nouveauLien(id: string) {
 }
 
 export async function lireInvitation(code: string) {
-  return (await api.get<ApercuInvitation>(`${VOYAGES}/invitations/${code}/`)).data;
+  return (await api.get<ApercuInvitation>(`${VOYAGES}/invitations/${encodeURIComponent(code)}/`)).data;
 }
 
 export async function rejoindre(code: string) {
-  return (await api.post<{ id: string }>(`${VOYAGES}/invitations/${code}/`)).data;
+  return (await api.post<{ id: string }>(`${VOYAGES}/invitations/${encodeURIComponent(code)}/`)).data;
 }
 
 /** Listings that can be suggested to the group. */

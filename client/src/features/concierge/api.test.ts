@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import api from "@/lib/api";
-import { creerConversation, creerVoyageDeGroupe, lireMessages, lireStatut, listerConversations, posterMessage, supprimerConversation } from "./api";
+import { creerConversation, creerVoyageDeGroupe, idConversation, lireMessages, lireStatut, listerConversations, posterMessage, supprimerConversation } from "./api";
 import type { CarteTogether } from "./types";
 
 vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }));
@@ -42,6 +42,19 @@ describe("concierge", () => {
       headers: { "Content-Type": "application/json", "Accept-Language": "en" },
       body: JSON.stringify({ texte: "Bonjour" }),
     });
+  });
+
+  it("ne garde de l'adresse qu'un id de conversation", () => {
+    expect(idConversation("1F0C2D7E-1a2b-4c3d-8e9f-0a1b2c3d4e5f")).toBe("1F0C2D7E-1a2b-4c3d-8e9f-0a1b2c3d4e5f");
+    expect(idConversation("../../voyages/invitations/CODE/?")).toBeNull();
+    expect(idConversation(null)).toBeNull();
+  });
+
+  it("garde l'id de conversation dans un seul segment", async () => {
+    const envoi = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", envoi);
+    await posterMessage("../../voyages/invitations/CODE/?", "Bonjour", "fr", "Erreur");
+    expect(envoi.mock.calls[0][0]).toBe("/api/proxy/v1/concierge/conversations/..%2F..%2Fvoyages%2Finvitations%2FCODE%2F%3F/messages");
   });
 
   it.each([
