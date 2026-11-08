@@ -3,7 +3,7 @@
 Ansible décrit **ce qu'un serveur doit être** pour accueillir Kwa-Ba : la machine et ce dont l'application a besoin dessus. Il **ne déploie jamais l'application** : c'est le rôle du workflow `deploy` et de `deploy/vps/scripts/deploy.sh`.
 
 - Ce dossier (dépôt public) contient les rôles, **sans aucun secret**.
-- L'inventaire, les valeurs propres à chaque serveur et le Vault vivent dans le dépôt privé `Tres7/kwa-ba-infra`, cloné à côté de celui-ci (`../kwa-ba-infra`).
+- L'inventaire, les valeurs propres à chaque serveur et le Vault vivent dans le dépôt privé `kwa-ba/kwa-ba-infra`, cloné à côté de celui-ci (`../kwa-ba-infra`).
 
 ## Les rôles
 
@@ -15,7 +15,7 @@ Ansible décrit **ce qu'un serveur doit être** pour accueillir Kwa-Ba : la mach
 
 Avec les valeurs par défaut, chaque fichier écrit est **identique, octet pour octet**, à celui de `setup-server.sh` : sur la prod, Ansible ne doit rien changer.
 
-Sur le VPS personnel (plusieurs projets, SSH sur le port 2222), seul le swap du rôle `systeme` est appliqué : le pare-feu, la configuration SSH, le redémarrage automatique et le redémarrage de Docker toucheraient les autres projets.
+Sur le VPS personnel (plusieurs projets, SSH sur un port non standard), seul le swap du rôle `systeme` est appliqué : le pare-feu, la configuration SSH, le redémarrage automatique et le redémarrage de Docker toucheraient les autres projets.
 
 Ni le mot de passe sudo de l'administrateur, ni les clés SSH autorisées ne sont gérés ici : `authorized_keys` de l'utilisateur de déploiement est créé vide s'il manque, jamais réécrit.
 
@@ -71,7 +71,7 @@ Aujourd'hui, le Caddy de TraderApp (`traderapp-caddy`) tient les ports 80/443. L
    docker network connect proxy traderapp_server   # en attendant le déploiement de la PR de l'étape 1
    docker compose -f /opt/proxy/compose.yml up -d
    ```
-4. **Vérifier** : `https://217-154-19-172.sslip.io` répond, `/actuator/env` renvoie 404, et `docker logs proxy-caddy` ne montre aucune nouvelle demande de certificat.
+4. **Vérifier** : l'adresse de TraderApp répond, `/actuator/env` renvoie 404, et `docker logs proxy-caddy` ne montre aucune nouvelle demande de certificat.
 5. **Déployer la PR de TraderApp** de l'étape 1. Avant cela, un déploiement de l'ancienne version recréerait `traderapp-caddy`, qui échouerait faute de ports libres.
 6. Les playbooks suivants se lancent normalement (sans `-e proxy_demarre=false`).
 
