@@ -25,6 +25,8 @@ if [ ! -d "${source}/.git" ]; then
   git clone --quiet --filter=blob:none --no-checkout "$depot" "$source"
   git -C "$source" sparse-checkout set deploy
 fi
+# The address can change (repository transferred): the existing checkout follows the inventory
+git -C "$source" remote set-url origin "$depot"
 git -C "$source" fetch --quiet --depth=1 origin main
 git -C "$source" checkout --quiet --force --detach FETCH_HEAD
 echo "main : $(git -C "$source" rev-parse --short HEAD)"
