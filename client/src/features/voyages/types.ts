@@ -77,6 +77,11 @@ export interface ReservationPartagee {
   total: number;
   reserve_par: string;
   peut_retirer: boolean;
+  /** My own booking. */
+  est_a_moi: boolean;
+  /** The booker asks the group to pay it: a member may pay it in their place. */
+  paiement_groupe: boolean;
+  peut_demander_paiement: boolean;
 }
 
 export interface Voyage {

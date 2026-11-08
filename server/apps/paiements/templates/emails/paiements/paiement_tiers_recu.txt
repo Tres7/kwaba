@@ -1,0 +1,15 @@
+{% autoescape off %}Bonjour {{ prenom }},
+
+Votre paiement de {{ montant }} est bien reçu : le séjour de {{ voyageur }} est confirmé.
+
+  {{ hebergement }} ({{ ville }})
+  Du {{ arrivee }} au {{ depart }} · {{ voyageurs }} voyageur{{ voyageurs|pluralize }}
+  Référence : {{ reference }}
+
+Votre reçu de paiement est joint à cet email. {{ voyageur }} reçoit la confirmation du séjour et échange avec l'hôte par la messagerie Kwa-Ba.
+
+Si le séjour est annulé, le remboursement prévu par les conditions d'annulation vous revient, sur le moyen de paiement que vous avez utilisé.
+
+Merci,
+L'équipe Kwa-Ba
+{% endautoescape %}

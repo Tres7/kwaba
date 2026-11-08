@@ -202,6 +202,7 @@ REST_FRAMEWORK = {
         'verification_piece': '20/hour',
         'reclamation': '5/hour',
         'reservation_creation': '20/hour',
+        'paiement_tiers': '30/hour',
     },
 }
 

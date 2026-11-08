@@ -48,6 +48,10 @@
       "location": {
         "titre": "Location de voiture avec chauffeur, ou votre chauffeur pour votre propre voiture",
         "description": "Louez une citadine, une berline, un SUV, un 4x4 ou un minibus avec chauffeur, ou un chauffeur pour votre propre voiture, à l'aéroport ou à votre adresse. Prix par jour connu à l'avance, paiement en ligne."
+      },
+      "payer": {
+        "titre": "Payer un séjour pour un proche",
+        "description": "Payez en toute sécurité le séjour Kwa-Ba d'un proche, à sa place."
       }
     },
     "titreAccueil": "Kwa-Ba · Logements vérifiés à Lomé et partout au Togo"
@@ -1227,7 +1231,13 @@
     "misAJour": "Voyage mis à jour",
     "majImpossible": "Mise à jour impossible.",
     "supprimerQuestion": "Supprimer définitivement « {nom} » pour tous les membres ?",
-    "supprimerVoyage": "Supprimer le voyage"
+    "supprimerVoyage": "Supprimer le voyage",
+    "paiementDemande": "{nom} demande au groupe de payer cette réservation.",
+    "payerPourLeGroupe": "Payer pour le groupe",
+    "paiementDemandeAuGroupe": "Les membres du voyage peuvent payer cette réservation à votre place.",
+    "neplusDemander": "Ne plus demander",
+    "demanderAuGroupe": "Demander au groupe de payer",
+    "paiementDemandeToast": "Les membres du voyage peuvent maintenant payer cette réservation."
   },
   "transfert": {
     "erreurReservation": "Le transfert n'a pas pu être réservé.",
@@ -2342,5 +2352,44 @@
     "aFaire": "À voir et à faire autour de {ville}",
     "voirExperiences": "Toutes les idées de sorties à {ville}",
     "autresVilles": "Ailleurs {dans}"
+  },
+  "paiementTiers": {
+    "titre": "Payer le séjour de {voyageur}",
+    "sousTitre": "{voyageur} vous demande de payer sa réservation sur Kwa-Ba.",
+    "voyageurs": "{nombre, plural, one {# voyageur} other {# voyageurs}}",
+    "payerAvec": "Payer avec",
+    "paiementNonDemarre": "Le paiement n'a pas pu démarrer. Réessayez dans un instant.",
+    "redirection": "Redirection vers la page de paiement…",
+    "securisePar": "Paiement sécurisé par {prestataire}",
+    "garantieRemboursement": "Si le séjour est annulé, le remboursement vous revient, sur le moyen de paiement utilisé.",
+    "garantieRecu": "Vous recevez votre reçu de paiement par email.",
+    "garantieConfidentialite": "Vous ne voyez ni l'adresse du logement ni les coordonnées de {voyageur} ou de l'hôte : tout passe par Kwa-Ba.",
+    "introuvable": "Lien de paiement introuvable",
+    "introuvableTexte": "Ce lien n'existe pas ou a été remplacé. Demandez un nouveau lien à la personne qui a réservé.",
+    "accueil": "Retour à l'accueil",
+    "verification": "Vérification du paiement…",
+    "merci": "Merci, paiement reçu !",
+    "merciTexte": "Le séjour de {voyageur} est confirmé. Votre reçu arrive par email.",
+    "nonAbouti": "Le paiement n'a pas abouti",
+    "nonAboutiTexte": "Aucun montant n'a été prélevé. Rouvrez le lien de paiement pour réessayer.",
+    "attenteLongue": "Paiement en cours de confirmation",
+    "attenteLongueTexte": "La confirmation prend plus de temps que prévu. Vous recevrez un email dès qu'elle arrivera.",
+    "fairePayer": "Faire payer par quelqu'un d'autre",
+    "explication": "Envoyez un lien à un proche, à un parent ou à votre entreprise : la personne paie le séjour à votre place, avec son compte Kwa-Ba. Elle voit le logement, les dates et le montant, pas vos coordonnées. Si le séjour est annulé, le remboursement lui revient. Vos dates restent bloquées 30 minutes ; ensuite, son paiement est accepté si elles sont encore libres.",
+    "lienPaiement": "Lien de paiement",
+    "copier": "Copier",
+    "copie": "Copié",
+    "copieImpossible": "Copie impossible : sélectionnez le lien et copiez-le.",
+    "messageWhatsapp": "Bonjour ! Peux-tu payer mon séjour sur Kwa-Ba ? Voici le lien de paiement sécurisé : {lien}",
+    "whatsapp": "Envoyer par WhatsApp",
+    "nouvelOnglet": "nouvel onglet",
+    "lienUneFois": "Copiez ce lien maintenant : il ne s'affiche qu'une fois. Vous pourrez en créer un nouveau, l'ancien ne marchera alors plus.",
+    "lienActif": "Un lien de paiement est actif jusqu'au {date}. Pour le renvoyer, créez-en un nouveau : l'ancien ne marchera plus.",
+    "validite": "Lien valable jusqu'au {date}.",
+    "creerLien": "Créer le lien de paiement",
+    "nouveauLien": "Créer un nouveau lien",
+    "desactiver": "Désactiver le lien",
+    "lienDesactive": "Lien de paiement désactivé.",
+    "lienImpossible": "Action impossible pour le moment. Réessayez."
   }
 }

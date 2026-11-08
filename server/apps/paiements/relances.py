@@ -34,6 +34,7 @@ def _email(etape: int, ligne, decrire) -> None:
     contexte = {'prenom': voyageur.first_name, 'quoi': objet['quoi'], 'montant': _fcfa(objet['montant']),
                 'url': objet['url']}
     if etape == ANNULATION:
+        contexte['lien_tiers'] = objet.get('lien_tiers', '')
         _envoyer('paiement_expire', "Réservation annulée : paiement non reçu", [voyageur.email], contexte)
         return
     contexte['avant'] = _heure(ligne.expire_le)

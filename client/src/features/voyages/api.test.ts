@@ -56,6 +56,18 @@ describe("voyages", () => {
     expect(api.post).toHaveBeenLastCalledWith("/v1/voyages/v1/nouveau-lien/");
   });
 
+  it("demande au groupe de payer une réservation, qu'un membre paie", async () => {
+    await voyages.demanderAuGroupe("v1", 3);
+    expect(api.post).toHaveBeenLastCalledWith("/v1/voyages/v1/reservations/3/demande-paiement/");
+    await voyages.neplusDemanderAuGroupe("v1", 3);
+    expect(api.delete).toHaveBeenLastCalledWith("/v1/voyages/v1/reservations/3/demande-paiement/");
+    await voyages.lireApercuGroupe("v1", 3);
+    expect(api.get).toHaveBeenLastCalledWith("/v1/voyages/v1/reservations/3/paiement/");
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { url: "https://pay" } });
+    await expect(voyages.demarrerPaiementGroupe("v1", 3, "carte")).resolves.toBe("https://pay");
+    expect(api.post).toHaveBeenLastCalledWith("/v1/voyages/v1/reservations/3/paiement/", { moyen: "carte" });
+  });
+
   it("rejoint un voyage par son invitation", async () => {
     await expect(voyages.rejoindre("CODE")).resolves.toMatchObject({ id: "v1" });
     expect(api.post).toHaveBeenLastCalledWith("/v1/voyages/invitations/CODE/");

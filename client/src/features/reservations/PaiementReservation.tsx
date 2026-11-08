@@ -14,6 +14,7 @@ import { MontantDebite } from "@/components/layout/Devise";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { FairePayerParUnTiers } from "@/features/paiement-tiers";
 
 const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = [
   { id: "mobile_money", label: "mobileMoney", icon: Smartphone },
@@ -37,6 +38,8 @@ function PaiementContent() {
   const [moyen, setMoyen] = useState<MoyenPaiement | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState(searchParams.get("erreur") || "");
+  // A link given to someone else is open: the page follows the booking, which their payment can confirm
+  const [lienTiers, setLienTiers] = useState(false);
   const annuleParVoyageur = searchParams.get("annule") === "1";
 
   const { data: reservation } = useReservation(params.id);
@@ -47,7 +50,8 @@ function PaiementContent() {
     refetchInterval: (q) => {
       const s = q.state.data;
       const enAttente = s?.reservation === "pending" && s.paiement === "en_attente" && !annuleParVoyageur;
-      return enAttente && Date.now() - debut < ATTENTE_MAX_MS ? 3000 : false;
+      if (enAttente && Date.now() - debut < ATTENTE_MAX_MS) return 3000;
+      return lienTiers && s?.reservation === "pending" ? 15000 : false;
     },
     retry: false,
   });
@@ -176,6 +180,7 @@ function PaiementContent() {
               <p className="flex items-center justify-center gap-1.5 text-xs text-gray-600 mt-3">
                 <Lock size={12} /> {t("securisePar", { prestataire: moyenChoisi === "paypal" ? "PayPal" : "FedaPay" })}
               </p>
+              <FairePayerParUnTiers reservationId={params.id} onActif={setLienTiers} />
             </>
           )}
         </div>

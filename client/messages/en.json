@@ -48,6 +48,10 @@
       "location": {
         "titre": "Car hire with a driver, or your driver for your own car",
         "description": "Hire a small car, saloon, SUV, 4x4 or minibus with a driver, or a driver for your own car, at the airport or at your address. Daily price known in advance, paid online."
+      },
+      "payer": {
+        "titre": "Pay a stay for someone",
+        "description": "Securely pay a Kwa-Ba stay in someone else's place."
       }
     },
     "titreAccueil": "Kwa-Ba · Verified places to stay in Lomé and across Togo"
@@ -1227,7 +1231,13 @@
     "misAJour": "Trip updated",
     "majImpossible": "Could not update.",
     "supprimerQuestion": "Permanently delete “{nom}” for all members?",
-    "supprimerVoyage": "Delete the trip"
+    "supprimerVoyage": "Delete the trip",
+    "paiementDemande": "{nom} is asking the group to pay this booking.",
+    "payerPourLeGroupe": "Pay for the group",
+    "paiementDemandeAuGroupe": "The trip's members can pay this booking in your place.",
+    "neplusDemander": "Stop asking",
+    "demanderAuGroupe": "Ask the group to pay",
+    "paiementDemandeToast": "The trip's members can now pay this booking."
   },
   "transfert": {
     "erreurReservation": "The transfer could not be booked.",
@@ -2342,5 +2352,44 @@
     "aFaire": "Things to see and do around {ville}",
     "voirExperiences": "All ideas of things to do in {ville}",
     "autresVilles": "Elsewhere {dans}"
+  },
+  "paiementTiers": {
+    "titre": "Pay {voyageur}'s stay",
+    "sousTitre": "{voyageur} is asking you to pay their booking on Kwa-Ba.",
+    "voyageurs": "{nombre, plural, one {# guest} other {# guests}}",
+    "payerAvec": "Pay with",
+    "paiementNonDemarre": "The payment could not start. Please try again in a moment.",
+    "redirection": "Redirecting to the payment page…",
+    "securisePar": "Payment secured by {prestataire}",
+    "garantieRemboursement": "If the stay is cancelled, the refund comes back to you, on the payment method you used.",
+    "garantieRecu": "You receive your payment receipt by email.",
+    "garantieConfidentialite": "You see neither the address of the place nor the contact details of {voyageur} or the host: everything goes through Kwa-Ba.",
+    "introuvable": "Payment link not found",
+    "introuvableTexte": "This link does not exist or has been replaced. Ask the person who booked for a new link.",
+    "accueil": "Back to the home page",
+    "verification": "Checking the payment…",
+    "merci": "Thank you, payment received!",
+    "merciTexte": "{voyageur}'s stay is confirmed. Your receipt is on its way by email.",
+    "nonAbouti": "The payment did not go through",
+    "nonAboutiTexte": "Nothing was charged. Open the payment link again to retry.",
+    "attenteLongue": "Payment being confirmed",
+    "attenteLongueTexte": "The confirmation is taking longer than expected. You will get an email as soon as it arrives.",
+    "fairePayer": "Have someone else pay",
+    "explication": "Send a link to a friend, a relative or your company: they pay the stay in your place, with their Kwa-Ba account. They see the place, the dates and the amount, not your contact details. If the stay is cancelled, the refund goes back to them. Your dates stay held for 30 minutes; after that, their payment is accepted if the dates are still free.",
+    "lienPaiement": "Payment link",
+    "copier": "Copy",
+    "copie": "Copied",
+    "copieImpossible": "Copy failed: select the link and copy it.",
+    "messageWhatsapp": "Hi! Could you pay my stay on Kwa-Ba? Here is the secure payment link: {lien}",
+    "whatsapp": "Send on WhatsApp",
+    "nouvelOnglet": "new tab",
+    "lienUneFois": "Copy this link now: it is only shown once. You can create a new one, and the old one will then stop working.",
+    "lienActif": "A payment link is active until {date}. To send it again, create a new one: the old one will stop working.",
+    "validite": "Link valid until {date}.",
+    "creerLien": "Create the payment link",
+    "nouveauLien": "Create a new link",
+    "desactiver": "Disable the link",
+    "lienDesactive": "Payment link disabled.",
+    "lienImpossible": "This is not possible right now. Please try again."
   }
 }

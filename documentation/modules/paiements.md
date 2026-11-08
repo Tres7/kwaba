@@ -58,6 +58,17 @@ Pays ouverts aux versements : Togo, Bénin, Burkina Faso, Niger, Mali (`operateu
 5. **Sans paiement à temps** : le worker annule la réservation (`annule_par = expiration`) et libère les dates. Un paiement qui arrive après coup confirme la réservation si les dates sont encore libres, sinon il est remboursé intégralement.
 6. **Versement** : à l'échéance, le worker envoie la part de l'hôte sur son compte Mobile Money (profil saisi dans Espace hôte → Revenus). Sans profil, le versement attend, et l'hôte voit le message.
 
+## Paiement par un tiers
+
+Le voyageur peut faire payer son séjour entier par une autre personne : un parent, un ami, son entreprise, un membre de son voyage Together. Code : `server/apps/reservations/tiers.py`, `client/src/features/paiement-tiers/`, CGV art. 7.7.
+
+1. **Demande** : sur sa page de paiement, le voyageur crée un lien secret, valable 24 h (`POST /api/v1/paiements/reservations/<id>/demande-tiers/`). Le lien n'est affiché qu'une fois : seule son empreinte SHA-256 est gardée (`DemandePaiementModel`), comme un mot de passe. Un nouveau lien remplace le précédent, un seul est actif par réservation, et le voyageur peut le désactiver. Dans Together, la même demande peut être ouverte aux membres du voyage où la réservation est partagée.
+2. **Payeur** : il doit être connecté (`/payer/<lien>`, `GET` puis `POST /api/v1/paiements/tiers/<lien>/`). Il voit le logement, la ville, les dates, le nombre de voyageurs, le total et le prénom du voyageur ; ni l'adresse, ni les coordonnées de quiconque. Le montant est calculé par le serveur. Refusés : le voyageur lui-même, l'hôte du logement, un lien expiré ou désactivé, une arrivée passée.
+3. **Délai** : les dates restent bloquées 30 minutes, comme pour toute réservation. Le lien ne prolonge pas le blocage, pour qu'on ne puisse pas bloquer un logement sans payer. Ensuite, le paiement n'est accepté que si les dates sont encore libres, et `paiement_recu` vérifie de nouveau à l'arrivée de l'argent (remboursement intégral sinon). L'email d'expiration le dit au voyageur tant que le lien est valable.
+4. **Le paiement est au payeur** (`PaiementModel.payeur_id`) : FedaPay voit son nom et son email ; il reçoit son reçu (`paiement_tiers_recu`, drapeau `notifie_payeur`). Le voyageur reçoit la confirmation et le bon, avec « Payé par Kofi M. ». L'hôte ne voit rien du payeur.
+5. **Remboursements** : toujours au payeur, sur le moyen débité (`RemboursementModel.payeur`). Si FedaPay n'a pas donné le numéro débité, le remboursement passe « À traiter manuellement » : un admin demande son compte au payeur. Le voyageur ne peut jamais indiquer le compte d'un remboursement qui n'est pas le sien (il pourrait détourner l'argent du payeur).
+6. **Garde-fous** : 30 créations de lien ou paiements par heure et par compte (`paiement_tiers`), journal d'audit (`paiement_tiers_lien`, `paiement_tiers_groupe`, `paiement_tiers_demarre`), pages `/payer` privées (robots) et mesurées sans leur secret (`lib/mesure-audience.ts`). Un double paiement (voyageur et payeur) est remboursé automatiquement, comme avant.
+
 ## Annulation
 
 `DELETE /api/v1/reservations/<id>/` → `services.annuler(reservation, par='voyageur')`, renvoie `{"rembourse": montant}`.

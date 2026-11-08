@@ -39,6 +39,7 @@ def bon(r) -> bytes:
         *([('Point de repère', h['point_repere'])] if h.get('point_repere') else []),
         ('Durée', f"{r.nights} nuit(s)"), ('Voyageurs', str(r.guests_count)),
         ('Hôte', _nom(hote) + ', contact par la messagerie Kwa-Ba'),
+        *([('Payé par', _nom(payeur))] if (payeur := paiements.paye_par_un_tiers('reservation', r.pk)) else []),
     ])
     lignes = []
     if r.prix_nuits is not None:

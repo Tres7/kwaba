@@ -2,7 +2,7 @@
 
 Nous n'avons pas reçu de paiement à temps pour {{ quoi }} : la réservation est annulée et les dates sont de nouveau disponibles.
 
-Aucun montant ne vous a été prélevé. Si un paiement arrive malgré tout, il vous sera remboursé automatiquement.
+{% if lien_tiers %}Le lien de paiement que vous avez envoyé reste valable jusqu'au {{ lien_tiers }} : si les dates sont encore libres au moment du paiement, il confirmera la réservation.{% else %}Aucun montant ne vous a été prélevé. Si un paiement arrive malgré tout, il vous sera remboursé automatiquement.{% endif %}
 
 Vous pouvez réserver à nouveau quand vous le souhaitez sur kwa-ba.com.
 

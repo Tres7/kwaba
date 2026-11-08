@@ -86,15 +86,16 @@ def reservation_possible() -> bool:
 # --- Encaissement ------------------------------------------------------------------------
 
 def creer_paiement(*, type_objet: str, objet_id, montant: int, moyen: str, description: str, url_retour: str,
-                   voyageur) -> str:
+                   voyageur, payeur=None) -> str:
     """Creates the transaction at the provider for the object (booking, transfer, rental or donation) and returns
-    the address of the payment page. `url_retour`: page of the site the traveller comes back to."""
+    the address of the payment page. `url_retour`: page of the site the traveller comes back to. `payeur`: someone
+    else than the traveller pays (payment by a third party); `voyageur` is then that payer, for the provider."""
     # Backstop: the views already refuse in pre-launch mode, no payment may ever be created before the opening
     if prelancement.actif():
         raise PaiementErreur(prelancement.MESSAGE)
     if moyen not in moyens_actifs():
         raise PaiementErreur("Ce moyen de paiement n'est pas disponible.")
-    cible = {f'{type_objet}_id': objet_id}
+    cible = {f'{type_objet}_id': objet_id, 'payeur_id': payeur.pk if payeur else None}
 
     if MOYENS[moyen] == 'paypal':
         paiement = PaiementModel(**cible, montant=montant, prestataire='paypal', montant_eur=paypal.en_euros(montant))
@@ -238,20 +239,27 @@ def rembourser(paiement, montant: int, motif: str):
     if montant <= 0:
         return None
     logger.info("Remboursement de %s FCFA prévu pour %s : %s", montant, paiement.reference, motif)
-    statut = 'a_envoyer'
+    statut, erreur = 'a_envoyer', ''
     if paiement.prestataire == 'fedapay' and not paiement.telephone and not _par_carte(paiement):
-        # Mobile Money: FedaPay does not give the charged number, it is asked to the traveller
-        statut = 'attente_numero'
+        if paiement.payeur_id:
+            # Paid by a third party: the money is theirs, the account is never asked to the traveller (who could give
+            # their own). The administrators ask the payer, by email.
+            statut, erreur = 'a_traiter', "Payé par un tiers, numéro débité inconnu : demander son compte Mobile Money au payeur."
+        else:
+            # Mobile Money: FedaPay does not give the charged number, it is asked to the traveller
+            statut = 'attente_numero'
     return RemboursementModel.objects.create(
         reservation_id=paiement.reservation_id, transfert_id=paiement.transfert_id, location_id=paiement.location_id,
-        paiement=paiement, montant=montant, motif=motif, statut=statut,
+        paiement=paiement, montant=montant, motif=motif, statut=statut, derniere_erreur=erreur,
     )
 
 
 def indiquer_numero_remboursement(type_objet: str, objet_id, pays: str, operateur: str, numero: str) -> int:
     """Saves the traveller's Mobile Money account on the pending refunds of the object
     (booking, transfer or rental). Returns their number."""
-    return RemboursementModel.objects.filter(**{f'{type_objet}_id': objet_id}, statut='attente_numero').update(
+    # Never the refund of a payment made by a third party: its money goes back to the payer
+    return RemboursementModel.objects.filter(**{f'{type_objet}_id': objet_id}, statut='attente_numero',
+                                             paiement__payeur_id__isnull=True).update(
         pays=pays, operateur=operateur, numero=numero, statut='a_envoyer', derniere_erreur='',
     )
 

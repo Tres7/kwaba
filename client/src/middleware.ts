@@ -6,7 +6,7 @@ import { politiqueCsp } from "@/lib/csp";
 import { moduleDuChemin, type ReglagesSite } from "@/lib/modules";
 
 // Pages reserved for signed-in users (the help centre stays public)
-const PROTECTED = ["/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/hote/annonce", "/backoffice", "/agent", "/give/don"];
+const PROTECTED = ["/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/hote/annonce", "/backoffice", "/agent", "/give/don", "/payer"];
 const PUBLIC_EXCEPTIONS = ["/profil/aide"];
 // Public landing pages; their sub-pages (transfer tracking, group trip, invitation) require signing in
 const PROTECTED_SUBPATHS = ["/transfert", "/together", "/location"];
