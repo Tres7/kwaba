@@ -145,6 +145,17 @@ def synchroniser_paiement(paiement: PaiementModel) -> str:
     return paiement.statut
 
 
+def _montant_paypal_attendu(capture: dict, paiement: PaiementModel) -> bool:
+    montant = capture.get('amount')
+    if not montant or paiement.montant_eur is None:
+        return True  # nothing to compare: the order was created by the server with this amount
+    from decimal import Decimal, InvalidOperation
+    try:
+        return montant.get('currency_code') == 'EUR' and Decimal(str(montant.get('value'))) == paiement.montant_eur
+    except InvalidOperation:
+        return False
+
+
 def _synchroniser_paypal(paiement: PaiementModel) -> str:
     """Order approved by the traveller (APPROVED) → it is captured; COMPLETED → successful payment."""
     try:
@@ -156,6 +167,18 @@ def _synchroniser_paypal(paiement: PaiementModel) -> str:
         return paiement.statut
 
     nouveau = paypal.STATUTS_COMMANDE.get(commande.get('status'))
+    if nouveau == 'reussi':
+        # An order completed is not the money received: its capture can wait for a review at PayPal (PENDING), then
+        # be refused. Only a completed capture, of the amount asked for, confirms the payment; meanwhile the payment
+        # stays pending and is read again at the next pass.
+        capture = paypal.capture(commande)
+        if capture.get('status') in ('DECLINED', 'FAILED'):
+            nouveau = 'echoue'
+        elif capture.get('status') != 'COMPLETED':
+            return paiement.statut
+        elif not _montant_paypal_attendu(capture, paiement):
+            logger.error("Capture PayPal %s d'un autre montant que le paiement %s : à vérifier", capture.get('id'), paiement.pk)
+            return paiement.statut
     if nouveau == 'reussi':
         PaiementModel.objects.filter(pk=paiement.pk).update(capture_id=paypal.id_capture(commande))
         _paiement_reussi(paiement.pk, {'mode': 'paypal'})

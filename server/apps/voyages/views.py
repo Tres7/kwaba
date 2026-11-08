@@ -261,6 +261,8 @@ class MembreView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         with transaction.atomic():
             VoteModel.objects.filter(voyage=voyage, utilisateur_id=user_id).delete()
+            # Their bookings were shared with the group as long as they were part of it
+            LienReservationModel.objects.filter(voyage=voyage, ajoute_par_id=user_id).delete()
             MembreModel.objects.filter(voyage=voyage, utilisateur_id=user_id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

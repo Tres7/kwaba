@@ -63,7 +63,7 @@ class FauxPayPal:
 
     def capturer(self, identifiant):
         return {'id': identifiant, 'status': 'COMPLETED',
-                'purchase_units': [{'payments': {'captures': [{'id': 'CAP1'}]}}]}
+                'purchase_units': [{'payments': {'captures': [{'id': 'CAP1', 'status': 'COMPLETED'}]}}]}
 
     def rembourser(self, capture, montant_eur, reference):
         self.remboursements.append((capture, montant_eur))

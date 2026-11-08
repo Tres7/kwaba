@@ -376,3 +376,22 @@ def test_agent_role_cannot_be_chosen_at_registration(api_client):
     }, format='json')
     assert response.status_code == 201
     assert response.data['role'] == 'voyageur'
+
+
+# Security audit of 2026-11-07, lead 18: a former host who became an agent does not decide on their own listing or document
+def test_un_agent_ne_valide_pas_sa_propre_annonce(client_for, hote, en_attente):
+    _identite_verifiee(hote)
+    hote.role = 'agent'
+    hote.save(update_fields=['role'])
+    assert _decider(client_for(hote), en_attente).status_code == 400
+    en_attente.refresh_from_db()
+    assert en_attente.statut_verification == 'en_attente'
+
+
+def test_un_agent_ne_valide_pas_sa_propre_piece(client_for, hote, stockage_temporaire):
+    _envoyer_piece(client_for(hote))
+    hote.role = 'agent'
+    hote.save(update_fields=['role'])
+    reponse = client_for(hote).post(f'{IDENTITES}{hote.id}/decision/', {'decision': 'verifiee'}, format='json')
+    assert reponse.status_code == 400
+    assert PieceIdentiteModel.objects.get(hote_id=hote.pk).statut == 'soumise'
