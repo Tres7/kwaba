@@ -8,17 +8,19 @@ from .models import HebergementModel, TypeLogementModel
 
 # Name of the default type, by kind of establishment
 NOMS_PAR_DEFAUT = {
-    'hotel': 'Chambre',
-    'auberge': 'Chambre',
-    'residence': 'Appartement',
+    'chambre_privee': 'Chambre privée',
+    'studio': 'Studio',
     'appartement': 'Appartement entier',
-    'villa': 'Logement entier',
-    'maison': 'Logement entier',
+    'maison_entiere': 'Maison entière',
+    'villa': 'Villa entière',
+    'chambre_hotel': 'Chambre',
+    'residence': 'Appartement',
+    'auberge': 'Chambre',
 }
 
 
-def nom_par_defaut(type_etablissement: str) -> str:
-    return NOMS_PAR_DEFAUT.get(type_etablissement, 'Logement entier')
+def nom_par_defaut(hebergement: HebergementModel) -> str:
+    return NOMS_PAR_DEFAUT.get(hebergement.type, 'Logement entier')
 
 
 def assurer_type_par_defaut(hebergement: HebergementModel) -> TypeLogementModel:
@@ -27,7 +29,7 @@ def assurer_type_par_defaut(hebergement: HebergementModel) -> TypeLogementModel:
     types = list(hebergement.types.all()[:2])
     if not types:
         return TypeLogementModel.objects.create(
-            hebergement=hebergement, nom=nom_par_defaut(hebergement.type), capacite=max(1, hebergement.max_guests),
+            hebergement=hebergement, nom=nom_par_defaut(hebergement), capacite=max(1, hebergement.max_guests),
             prix_nuit=hebergement.price_per_night, quantite=1,
         )
     if len(types) > 1:

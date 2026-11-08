@@ -8,7 +8,7 @@ import { FALLBACK_IMAGE, initials } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useSejoursAEvaluer } from "@/features/avis";
 import { useFavoris } from "@/features/favoris";
-import { useMoi } from "@/features/users";
+import { accesEspaceHote, useMoi } from "@/features/users";
 import { useMesReservations } from "@/features/reservations";
 import { useFormat } from "@/lib/format";
 
@@ -25,7 +25,8 @@ export default function ProfilPage() {
 
   const fullName = me ? `${me.first_name} ${me.last_name}` : session?.user?.name ?? "";
   const role = me?.role ?? session?.user?.role ?? "voyageur";
-  const isHost = role === "hote" || role === "admin";
+  const isHost = me ? accesEspaceHote(me) : role === "hote" || role === "admin";
+  const candidat = me?.candidature_hote === "ouverte";
   const upcoming = reservations?.filter((r) => r.status !== "cancelled" && new Date(r.check_out) >= new Date()).length;
   const stays = reservations?.filter((r) => r.status !== "cancelled").length;
 
@@ -43,7 +44,7 @@ export default function ProfilPage() {
         { icon: Heart, label: t("menu.favoris"), href: "/favoris", desc: t("menu.favorisTexte") },
         { icon: MessageCircle, label: t("menu.messages"), href: "/messages", desc: t("menu.messagesTexte") },
         isHost
-          ? { icon: Home, label: t("menu.espaceHote"), href: "/hote/espace", desc: t("menu.espaceHoteTexte") }
+          ? { icon: Home, label: t(candidat ? "menu.candidature" : "menu.espaceHote"), href: "/hote/espace", desc: t(candidat ? "menu.candidatureTexte" : "menu.espaceHoteTexte") }
           : { icon: Home, label: t("menu.devenirHote"), href: "/hote", desc: t("menu.devenirHoteTexte") },
         ...(role === "admin" ? [{ icon: ShieldCheck, label: "Back-office", href: "/backoffice", desc: t("menu.backofficeTexte") }] : []),
       ].filter((item) => filtrerLiens([item], modules).length > 0 && (item.href !== "/profil/dons" || modules?.give)),

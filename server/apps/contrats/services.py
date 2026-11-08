@@ -54,7 +54,10 @@ VARIABLES = {
     'partie.coordonnees': "« joignable au … et à l'adresse … »", 'partie.details': 'Précisions (véhicule, enregistrement…)', 'partie.designation': "« l'Hôte », « le Propriétaire »…",
     'partie.fondateur': "Programme Fondateurs : « applicable du … au … » ou « non applicable »",
     'date': "Date d'émission", 'tarifs.frais_voyageur': 'Frais de service voyageur (%)',
-    'tarifs.commission_hote': 'Commission hôte (%)', 'tarifs.commission_chauffeur': 'Commission chauffeur (%)',
+    'tarifs.frais_reduits': 'Frais de service réduits : client fidèle, Pack Séjour (%)',
+    'tarifs.commission_hote': 'Commission hôte (%)', 'tarifs.commission_hotel': 'Commission hôtel ou résidence (%)',
+    'tarifs.commission_fondateur': 'Commission Programme Fondateurs (%)',
+    'tarifs.frais_menage': 'Barème des frais de ménage par type de logement', 'tarifs.commission_chauffeur': 'Commission chauffeur (%)',
     'tarifs.commission_loueur': 'Commission loueur (%)', 'tarifs.delai_location': 'Délai minimal de réservation (jours)',
     'tarifs.restitution_caution': 'Délai de signalement des dommages après la location (heures)',
     'give.jour_reversement': 'Jour du reversement mensuel aux ONG',
@@ -78,11 +81,29 @@ def _pourcent(valeur) -> str:
     return f"{texte} %"
 
 
+# Listing types in the order of the scale, as written in a contract
+_TYPES_MENAGE = [('chambre_privee', 'chambre privée'), ('studio', 'studio'), ('appartement', 'appartement'),
+                 ('maison_entiere', 'maison entière'), ('villa', 'villa'), ('chambre_hotel', "chambre d'hôtel"),
+                 ('residence', 'résidence hôtelière'), ('auberge', 'auberge')]
+
+
+def _bareme_menage() -> str:
+    """« chambre privée 3 000 F CFA, studio 5 000 F CFA… ; aucuns frais pour chambre d'hôtel… »"""
+    grille = paiements.grille_menage()
+    payants = [f"{nom} {grille[code]:,} F CFA".replace(',', '\u202f') for code, nom in _TYPES_MENAGE if grille.get(code)]
+    gratuits = [nom for code, nom in _TYPES_MENAGE if not grille.get(code)]
+    return ', '.join(payants) + (f" ; aucuns frais pour {', '.join(gratuits)}" if gratuits else '')
+
+
 def _tarifs() -> dict:
     location = locations.parametres_contrat()
     return {
         'tarifs.frais_voyageur': _pourcent(paiements.frais_voyageur() * 100),
+        'tarifs.frais_reduits': _pourcent(paiements.frais_reduits() * 100),
         'tarifs.commission_hote': _pourcent(paiements.commission_hote() * 100),
+        'tarifs.commission_hotel': _pourcent(paiements.commission_hotel() * 100),
+        'tarifs.commission_fondateur': _pourcent(paiements.commission_fondateur() * 100),
+        'tarifs.frais_menage': _bareme_menage(),
         'tarifs.commission_chauffeur': _pourcent(transferts.commission_chauffeur() * 100),
         'tarifs.commission_loueur': _pourcent(location['commission_pourcent']) if location else '',
         'tarifs.delai_location': str(location['delai_min_jours']) if location else '2',
@@ -325,7 +346,8 @@ def hotes_a_inviter():
     """Active hosts who pre-registered or created a listing and have not signed their agreement yet."""
     candidats = set(PreinscriptionModel.objects.values_list('hote_id', flat=True)) | hebergements.ids_hotes_avec_annonce()
     signes = set(ContratModel.objects.filter(statut='signe', hote_id__in=candidats).values_list('hote_id', flat=True))
-    return users.comptes_actifs(['hote'], ids=candidats - signes)
+    # Candidates are travellers until their first listing is validated
+    return users.comptes_actifs(['hote', 'voyageur'], ids=candidats - signes)
 
 
 def inviter_hotes_a_signer() -> int:

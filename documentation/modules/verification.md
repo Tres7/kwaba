@@ -1,9 +1,16 @@
 # Vérification des hôtes et des logements
 
-N'importe qui peut créer un compte hôte. Pour protéger les voyageurs, une annonce n'est publiée qu'après la visite d'un **agent de terrain** Kwa-Ba, et une visite n'est demandée qu'une fois l'identité de l'hôte contrôlée à distance.
-Code : `server/apps/verifications/` (contrôles), `server/apps/terrain/` (espace agent : file commune des missions), `client/src/app/agent/` et `client/src/components/agent/` (espace agent), `client/src/components/hote/CandidatureHote.tsx` et `VerificationIdentite.tsx` (espace hôte).
+Tout compte commence voyageur. **On devient hôte à la première annonce validée par un agent** : avant, on est candidat. Pour protéger les voyageurs, une annonce n'est publiée qu'après la visite d'un **agent de terrain** Kwa-Ba, et une visite n'est demandée qu'une fois l'identité de l'hôte contrôlée à distance.
+Code : `server/apps/verifications/` (contrôles), `server/apps/terrain/` (espace agent : file commune des missions), `client/src/app/agent/` et `client/src/components/agent/` (espace agent), `client/src/features/hebergements/CandidatureHote.tsx` et `client/src/features/verifications/VerificationIdentite.tsx` (espace hôte).
 
 ## Candidature de l'hôte
+
+- **Ouverture** : le bouton « Commencer » de `/hote` appelle `POST /api/v1/users/me/candidature/`. Le compte reste `voyageur`, avec `candidature_hote = ouverte`. L'inscription ne propose plus de rôle, et `PATCH /users/me/` ne le change jamais.
+- **Droits du candidat** (`users.api.peut_gerer_annonces`) : brouillons, photos, annonces, pièce d'identité, compte de versement, pré-inscription et contrat, comme un hôte.
+- **Passage à hôte** : quand un agent valide une première annonce (`services.decider`), le rôle passe à `hote` dans la même transaction, journalisé (`role_modifie`). Le profil affiche alors « Hôte ».
+- **Refus** : Back-office → Utilisateurs → « Refuser la candidature », avec un motif affiché au candidat. Il ne peut plus préparer d'annonce, ses annonces sortent de la file des agents et ne peuvent plus être validées. L'équipe peut rouvrir la candidature.
+
+Comptes `hote` créés avant cette règle : `python manage.py migrer_hotes` affiche ce qui changerait, `--appliquer` l'écrit. Un compte sans annonce validée repasse voyageur, avec une candidature ouverte s'il avait commencé (annonce, brouillon, pièce ou pré-inscription). Relançable sans effet supplémentaire.
 
 L'espace hôte affiche 3 étapes tant que l'identité n'est pas vérifiée :
 
@@ -13,9 +20,9 @@ L'espace hôte affiche 3 étapes tant que l'identité n'est pas vérifiée :
 
 Badges : « Email confirmé » sur le profil (code reçu par email, rien de plus) ; « Hôte vérifié » sur la fiche d'un logement quand la pièce de l'hôte est vérifiée (`hote_verifie` dans l'API) ; « Vérifié par Kwa-Ba » sur une annonce visitée.
 
-Refuser une candidature : dans le back-office, repasser le compte en voyageur (ou le désactiver).
-
 ## Cycle d'une annonce
+
+L'espace hôte montre un seul statut, `statut_annonce`, calculé par l'API et réservé au propriétaire : `en_verification`, `refusee`, `validee` (contrôlée par un agent, mais pas encore en ligne : pré-lancement ou contrat à signer), `publiee`, `masquee`.
 
 | Statut (`statut_verification`) | Visible des voyageurs | Quand |
 |---|---|---|
@@ -33,7 +40,9 @@ Les annonces existantes au moment de la mise en place ont été marquées `verif
 - Stockée dans un espace **privé** (`STORAGES['prive']`) : bucket R2 sans domaine public (`R2_PRIVE_BUCKET`), sinon le dossier `PRIVE_ROOT` (par défaut `server/prive/`), jamais servi par le serveur web.
 - Lue uniquement par l'API (`GET /api/v1/verifications/identite/<hote>/fichier/`), pour un agent ou un administrateur. Chaque lecture est inscrite au journal d'audit (`piece_consultee`).
 - Son envoi prévient les agents (« Pièce d'identité à contrôler »). Dans l'espace agent, la mission **Pièce d'identité** permet de voir le document, puis `POST /api/v1/verifications/identites/<hote>/decision/` avec `verifiee`, ou `refusee` et un motif (10 caractères au moins) envoyé à l'hôte.
-- **Supprimée dès la décision** : seuls le type de pièce et le résultat du contrôle sont conservés. Une pièce refusée peut être renvoyée.
+- **Gardée si elle est vérifiée**, pendant la relation avec l'hôte puis 5 ans (politique de confidentialité, « Durées de conservation ») : l'agent la revoit pendant la visite pour la comparer à la personne rencontrée. Une fois vérifiée, l'hôte ne peut plus la remplacer.
+- **Supprimée si elle est refusée**, à distance ou à la visite : seuls le type de pièce et le motif sont conservés. L'hôte peut en renvoyer une.
+- Les pièces vérifiées avant ce changement (novembre 2026) n'ont plus de copie (`copie: false` dans l'API) : l'agent demande l'original sur place.
 - Identité vérifiée : les annonces en attente de l'hôte sont aussitôt envoyées aux agents pour une visite (journal : `identite_verifiee` / `identite_refusee`).
 
 ## Visite de l'agent
@@ -46,7 +55,7 @@ Les annonces existantes au moment de la mise en place ont été marquées `verif
    - les photos correspondent au logement ;
    - les équipements annoncés sont présents.
 
-   Il peut ajouter jusqu'à 10 photos (stockage privé) et un commentaire.
+   Il peut ajouter jusqu'à 10 photos (stockage privé) et un commentaire. La pièce vérifiée de l'hôte s'ouvre depuis la fiche (« Voir »), pour le premier point.
 4. **Valider** n'est possible que si tous les points sont cochés et que l'identité de l'hôte est vérifiée. Si la personne rencontrée ne correspond pas à la pièce (case décochée, refus), la pièce repasse en `refusee`. L'annonce est alors publiée et l'hôte reçoit un email ; la fiche affiche « Vérifié par Kwa-Ba ».
 5. **Refuser** exige un motif d'au moins 10 caractères, envoyé à l'hôte et affiché dans son espace. L'hôte corrige l'annonce et l'enregistre : elle repart en vérification.
 

@@ -15,16 +15,19 @@ def contrat_hote_exige() -> bool:
 
 class HebergementQuerySet(models.QuerySet):
     def publiees(self):
-        """Listings visible to the public: verified by a field agent and not hidden by the host."""
+        """Listings visible to the public: verified by a field agent, not hidden by the host, whose account is active
+        (a closed or banned host's listings leave the site, and come back if the account is reactivated)."""
         if prelancement.actif():
             return self.none()  # pre-launch: verified listings wait for the opening
-        # Once the company is registered, listings verified before wait for their host's signed agreement. The rule is
-        # a SQL condition, evaluated by the database at each query: this queryset can be built at import time
+        # Once the company is registered, listings verified before wait for their host's signed agreement. The rules are
+        # SQL conditions, evaluated by the database at each query: this queryset can be built at import time
         # (serializer fields), before the tables exist, and must follow a registration made while the API runs.
         from apps.contrats.api import condition_contrat_signe  # local import: contrats loads the payment rates
         from apps.documents.api import condition_societe_immatriculee
+        from apps.users.api import condition_compte_actif
 
         return (self.filter(is_available=True, statut_verification='verifiee')
+                .filter(condition_compte_actif('host_id'))
                 .filter(~condition_societe_immatriculee() | condition_contrat_signe('host_id')))
 
 
@@ -42,21 +45,35 @@ class HebergementModel(models.Model):
     # Changing one of these fields after the visit puts the listing back into verification (what the agent checked)
     CHAMPS_VERIFIES = ('city', 'location', 'latitude', 'longitude', 'image_url', 'images')
 
+    # Kwa-Ba taxonomy (brief AN-TAX of 2026-11-03): the words used in Lomé, no T1/T2 and no surface
     TYPE_CHOICES = [
-        ('hotel', 'Hôtel'),
-        ('villa', 'Villa'),
-        ('maison', 'Maison'),
+        ('chambre_privee', 'Chambre privée'),
+        ('studio', 'Studio'),
         ('appartement', 'Appartement'),
+        ('maison_entiere', 'Maison entière'),
+        ('villa', 'Villa'),
+        ('chambre_hotel', "Chambre d'hôtel"),
         ('residence', 'Résidence hôtelière'),
         ('auberge', 'Auberge'),
     ]
+    # Former values, still found in old links (?type=hotel)
+    ANCIENS_TYPES = {'maison': 'maison_entiere', 'hotel': 'chambre_hotel'}
+    # Rooms by type with their stock (TypeLogementModel), not the bedrooms and beds of a house
+    ETABLISSEMENTS = ('chambre_hotel', 'residence', 'auberge')
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='hotel')
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='chambre_hotel')
+    # What the traveller gets: the whole place, or a private room in a place the host shares. Follows the type
+    # since the type "chambre_privee" exists (save())
+    ESPACES = [('entier', 'Logement entier'), ('chambre_privee', 'Chambre privée')]
+    espace = models.CharField(max_length=20, choices=ESPACES, default='entier', db_default='entier')
     city = models.CharField(max_length=100)
     location = models.CharField(max_length=200, blank=True)
+    # How people find the place in Lomé ("Derrière le CHU Sylvanus Olympio, Tokoin"): almost the exact address, so
+    # only for the agent and for travellers once their booking is paid (never on the public listing)
+    point_repere = models.CharField(max_length=200, blank=True, default='', db_default='')
     # Exact position placed by the host, for the agent's visit: travellers only get positions.approchee()
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -65,8 +82,12 @@ class HebergementModel(models.Model):
     review_count = models.IntegerField(default=0)
     image_url = models.URLField(blank=True)
     images = models.JSONField(default=list, blank=True)
+    # Room shown by each photo, {url: code} ("chambre_1", "salon"…, see serializers.PIECES): travellers know what
+    # they look at. Null for the listings published before
+    legendes_photos = models.JSONField(null=True, blank=True)
     max_guests = models.PositiveIntegerField(default=4)
-    # Details shown on the page; required for a new listing, empty for the oldest ones
+    # Details shown on the page; required for a new listing, empty for the oldest ones. surface_m2 is no longer
+    # used (not a local practice): column kept until a later release drops it
     surface_m2 = models.PositiveIntegerField(null=True, blank=True)
     chambres = models.PositiveSmallIntegerField(null=True, blank=True)
     salles_de_bain = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -87,6 +108,9 @@ class HebergementModel(models.Model):
     statut_verification = models.CharField(max_length=20, choices=STATUTS_VERIFICATION, default='en_attente', db_index=True)
     verifiee_le = models.DateTimeField(null=True, blank=True)
     motif_refus = models.TextField(blank=True)
+    # Statements of the host when sending the listing (cameras, animals, works), and when they certified it
+    declarations = models.JSONField(null=True, blank=True)
+    attestation_le = models.DateTimeField(null=True, blank=True)
     host_id = models.UUIDField(db_index=True)
     archivee_le = models.DateTimeField(null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -102,6 +126,12 @@ class HebergementModel(models.Model):
     def __str__(self):
         return f"{self.name} ({self.city})"
 
+    def save(self, *args, **kwargs):
+        self.espace = 'chambre_privee' if self.type == 'chambre_privee' else 'entier'
+        if kwargs.get('update_fields') is not None and 'type' in kwargs['update_fields']:
+            kwargs['update_fields'] = {*kwargs['update_fields'], 'espace'}
+        super().save(*args, **kwargs)
+
     @cached_property
     def host(self):
         from apps.users.api import compte
@@ -109,11 +139,26 @@ class HebergementModel(models.Model):
 
     @property
     def est_publiee(self) -> bool:
+        """Same rule as HebergementQuerySet.publiees, for one listing already loaded."""
         if not (self.is_available and self.statut_verification == 'verifiee') or prelancement.actif():
             return False
+        if not (self.host and self.host.is_active):
+            return False  # account of the host closed or banned
         from apps.contrats.api import hote_a_signe
 
         return not contrat_hote_exige() or hote_a_signe(self.host_id)
+
+    @property
+    def statut_annonce(self) -> str:
+        """The one status shown to the host. `validee`: checked by an agent, but not online yet (pre-launch, or agreement
+        to sign). Drafts are another table: the host space shows them apart."""
+        if self.statut_verification == 'refusee':
+            return 'refusee'
+        if self.statut_verification != 'verifiee':
+            return 'en_verification'
+        if not self.is_available:
+            return 'masquee'
+        return 'publiee' if self.est_publiee else 'validee'
 
 
 def _photo_upload_path(instance, filename):
@@ -126,6 +171,8 @@ class HebergementPhotoModel(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_id = models.UUIDField(db_index=True)
+    # Filled when a wizard draft is sent; empty for the photos of a draft and for the older listings
+    hebergement_id = models.UUIDField(null=True, blank=True, db_index=True)
     image = models.ImageField(upload_to=_photo_upload_path)
     width = models.PositiveIntegerField()
     height = models.PositiveIntegerField()
@@ -186,6 +233,9 @@ class BlocageModel(models.Model):
                                       related_name='blocages')
     debut = models.DateField()
     fin = models.DateField()
+    # Some units of the type only (a hotel's rooms sold elsewhere): they count as taken, the others stay bookable.
+    # Empty: the whole type (or the whole establishment without a type) is closed
+    quantite = models.PositiveSmallIntegerField(null=True, blank=True)
     motif = models.CharField(max_length=120, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -222,6 +272,8 @@ class BrouillonAnnonceModel(models.Model):
     host_id = models.UUIDField(db_index=True)
     # Fields of the listing form as entered, incomplete (see brouillons.CHAMPS)
     donnees = models.JSONField(default=dict, blank=True)
+    # Wizard: key of the screen to resume from (client/src/features/hebergements/assistant/etapes.ts)
+    etape = models.CharField(max_length=30, blank=True, default='', db_default='')
     cree_le = models.DateTimeField(auto_now_add=True)
     modifie_le = models.DateTimeField(auto_now=True)
 

@@ -49,7 +49,8 @@
         "titre": "Location de voiture avec chauffeur, ou votre chauffeur pour votre propre voiture",
         "description": "Louez une citadine, une berline, un SUV, un 4x4 ou un minibus avec chauffeur, ou un chauffeur pour votre propre voiture, à l'aéroport ou à votre adresse. Prix par jour connu à l'avance, paiement en ligne."
       }
-    }
+    },
+    "titreAccueil": "Kwa-Ba · Logements vérifiés à Lomé et partout au Togo"
   },
   "commun": {
     "allerAuContenu": "Aller au contenu principal",
@@ -111,7 +112,8 @@
     "mesReservations": "Mes réservations",
     "mesFavoris": "Mes favoris",
     "fermerMenu": "Fermer le menu",
-    "location": "Location de voiture"
+    "location": "Location de voiture",
+    "maCandidature": "Ma candidature"
   },
   "logo": {
     "accueil": "Kwa-Ba, accueil"
@@ -123,7 +125,8 @@
     "titres": {
       "decouvrir": "Découvrir",
       "hotes": "Hôtes",
-      "assistance": "Assistance"
+      "assistance": "Assistance",
+      "destinations": "Destinations"
     },
     "liens": {
       "hebergements": "Hébergements",
@@ -137,7 +140,9 @@
       "espaceHote": "Espace hôte",
       "aide": "Centre d'aide",
       "remboursement": "Annulation et remboursement",
-      "location": "Location de voiture"
+      "location": "Location de voiture",
+      "preparerTogo": "Préparer votre voyage au Togo",
+      "logementsTogo": "Logements au Togo"
     },
     "legal": {
       "mentions": "Mentions légales",
@@ -184,12 +189,6 @@
     "voirTout": "Voir tout",
     "villeResume": "{nombre, plural, one {# hébergement} other {# hébergements}} · dès {prix}",
     "typesHebergement": "Types d'hébergement",
-    "types": {
-      "hotels": "Hôtels",
-      "appartements": "Appartements",
-      "villas": "Villas",
-      "auberges": "Auberges"
-    },
     "mieuxNotes": "Les mieux notés",
     "voirMieuxNotes": "Voir tous les logements les mieux notés",
     "aucunHebergement": "Aucun hébergement publié pour le moment.",
@@ -309,13 +308,6 @@
     "serveurInjoignable": "Impossible de contacter le serveur. Vérifiez votre connexion.",
     "inscriptionTexte": "Quelques informations pour commencer votre aventure.",
     "inscriptionGoogle": "S'inscrire avec Google",
-    "jeSuis": "Je suis",
-    "roles": {
-      "voyageur": "Voyageur",
-      "hote": "Hôte"
-    },
-    "roleHoteTexte": "Vous pourrez publier vos logements et aussi réserver.",
-    "roleVoyageurTexte": "Vous pourrez devenir hôte plus tard depuis votre profil.",
     "prenom": "Prénom",
     "nom": "Nom",
     "cestVous": "C'est vous ?",
@@ -486,13 +478,7 @@
   "recherche": {
     "typeLogement": "Type de logement",
     "types": {
-      "tous": "Tous",
-      "hotels": "Hôtels",
-      "villas": "Villas",
-      "appartements": "Appartements",
-      "auberges": "Auberges",
-      "maisons": "Maisons",
-      "residences": "Résidences"
+      "tous": "Tous"
     },
     "trierPar": "Trier par",
     "tris": {
@@ -594,7 +580,8 @@
     "similaires": "Vous aimerez aussi",
     "reglesMaison": "Règles de la maison",
     "voirTousEquipements": "Afficher les {nombre} équipements",
-    "voirMoinsEquipements": "Afficher moins"
+    "voirMoinsEquipements": "Afficher moins",
+    "fraisMenage": "Frais de ménage"
   },
   "avis": {
     "repondre": "Répondre publiquement",
@@ -657,7 +644,8 @@
     "payer": "Payer {montant}",
     "confirmerReservation": "Confirmer la réservation",
     "accepterPaiement": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>.",
-    "accepterConfirmation": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>."
+    "accepterConfirmation": "J'accepte les <cgu>conditions générales de vente</cgu>, les règles de l'annonce et la <annulation>politique d'annulation</annulation>.",
+    "pointRepere": "Point de repère : {repere}"
   },
   "paiement": {
     "paiementNonDemarre": "Le paiement n'a pas pu démarrer.",
@@ -747,7 +735,9 @@
       "langue": "Langue & région",
       "langueTexte": "Français, FCFA",
       "aide": "Aide & support",
-      "aideTexte": "FAQ, annulation, contact"
+      "aideTexte": "FAQ, annulation, contact",
+      "candidature": "Ma candidature",
+      "candidatureTexte": "Reprenez là où vous en étiez"
     },
     "verifie": "Email confirmé",
     "membreDepuis": "Membre depuis {date}",
@@ -860,7 +850,8 @@
     "annulation": "Annulation…",
     "annuler": "Annuler",
     "numeroEnregistre": "Numéro enregistré : votre remboursement est en route.",
-    "recommande": "Recommandé pour votre prochain voyage"
+    "recommande": "Recommandé pour votre prochain voyage",
+    "pointRepere": "Point de repère : {repere}"
   },
   "avisDepot": {
     "notes": {
@@ -1428,20 +1419,20 @@
         "texte": "Les voyageurs paient en ligne ; votre part vous est versée par Mobile Money 24 h après leur arrivée."
       }
     },
-    "active": "Votre compte hôte est activé !",
+    "active": "C'est parti ! Préparez votre annonce.",
     "acceder": "Accéder à mon espace hôte",
-    "activation": "Activation…",
-    "activer": "Activer mon compte hôte",
-    "creerCompte": "Créer un compte hôte",
+    "activation": "Un instant…",
+    "activer": "Commencer",
+    "creerCompte": "Créer mon compte et commencer",
     "titre": "Partagez votre logement avec des voyageurs du monde entier",
     "sousTitre": "Publiez gratuitement votre villa, appartement, chambre d'hôtel ou auberge sur Kwa-Ba.",
-    "dejaInscrit": "Déjà inscrit ? <lien>Connectez-vous</lien> puis activez votre compte hôte.",
+    "dejaInscrit": "Déjà inscrit ? <lien>Connectez-vous</lien> pour commencer.",
     "commentCaMarche": "Comment ça marche ?",
     "etape": "Étape {numero}",
     "ceQuIlFaut": "Ce qu'il vous faut",
     "besoins": {
       "compte": "Un compte Kwa-Ba et un numéro de téléphone",
-      "identite": "Une pièce d'identité (contrôlée par Kwa-Ba, puis supprimée)",
+      "identite": "Une pièce d'identité, contrôlée par Kwa-Ba",
       "photos": "Des photos de votre logement",
       "prix": "Un prix par nuit en FCFA",
       "capacite": "La capacité d'accueil et les équipements"
@@ -1451,22 +1442,18 @@
       "intro": "Publier est gratuit. Kwa-Ba prélève une commission seulement quand vous êtes payé.",
       "taux": {
         "particulier": {
-          "valeur": "8 %",
           "titre": "Hôte particulier",
           "texte": "du prix des nuits, prélevés sur votre versement"
         },
         "hotel": {
-          "valeur": "12 %",
           "titre": "Hôtel ou résidence hôtelière",
           "texte": "du prix des nuits, prélevés sur votre versement"
         },
         "fondateur": {
-          "valeur": "5 %",
           "titre": "Hôte fondateur",
           "texte": "pendant 6 mois pour les 50 premiers hôtes"
         },
         "voyageur": {
-          "valeur": "6 %",
           "titre": "Frais du voyageur",
           "texte": "payés par le voyageur, ils ne réduisent pas votre revenu"
         }
@@ -1479,7 +1466,10 @@
       },
       "estimateurTitre": "Estimez vos revenus",
       "estimateurTexte": "Choisissez votre profil, saisissez le prix par nuit que vous souhaitez recevoir avant commission et le nombre de nuits."
-    }
+    },
+    "bienvenue": "Votre compte est créé. Vous pouvez commencer !",
+    "reprendre": "Reprendre ma candidature",
+    "refusee": "Votre candidature n'a pas été retenue : {motif}"
   },
   "photos": {
     "envoiImpossible": "Envoi impossible.",
@@ -1492,11 +1482,13 @@
     "gauche": "Déplacer à gauche",
     "droite": "Déplacer à droite",
     "definirCouverture": "Définir comme couverture",
-    "retirer": "Retirer la photo"
+    "retirer": "Retirer la photo",
+    "reessayer": "Réessayer",
+    "quellePiece": "Quelle pièce ?",
+    "pieceDeLaPhoto": "Pièce de la photo {numero}"
   },
   "espaceHote": {
     "erreurConversation": "Impossible d'ouvrir la conversation.",
-    "bienvenue": "Bienvenue ! Publiez votre premier logement.",
     "pasHote": "Vous n'êtes pas encore hôte",
     "devenirHote": "Devenir hôte",
     "masquee": "Annonce masquée des recherches",
@@ -1555,13 +1547,14 @@
       "refuseeAide": "Corrigez ce point puis enregistrez l'annonce : elle repassera en vérification.",
       "verifiee": "Vérifiée",
       "identiteTitre": "Vérification de votre identité",
-      "identiteAide": "Pour protéger les voyageurs, chaque hôte est vérifié. Envoyez une pièce d'identité : un agent Kwa-Ba la contrôle à distance, puis elle est supprimée. Lors de la visite, il vérifiera que c'est bien vous.",
+      "identiteAide": "Pour protéger les voyageurs, chaque hôte est vérifié. Envoyez une pièce d'identité : un agent Kwa-Ba la contrôle à distance. Lors de la visite, il vérifiera que c'est bien vous. Seuls les agents Kwa-Ba la voient, jamais les voyageurs.",
       "identiteSoumise": "Pièce d'identité reçue : un agent Kwa-Ba la contrôle, en général sous 48 heures.",
       "identiteVerifiee": "Identité vérifiée",
       "identiteRefusee": "Pièce d'identité refusée : {motif}",
       "typePiece": "Type de pièce",
       "types": {
         "cni": "Carte nationale d'identité",
+        "electeur": "Carte d'électeur",
         "passeport": "Passeport",
         "permis": "Permis de conduire",
         "sejour": "Titre de séjour"
@@ -1572,11 +1565,12 @@
       "envoi": "Envoi…",
       "envoyee": "Pièce d'identité envoyée",
       "choisirFichier": "Choisissez un fichier.",
-      "confidentialite": "Document visible uniquement par les agents Kwa-Ba, jamais par les voyageurs."
+      "confidentialite": "Document visible uniquement par les agents Kwa-Ba, jamais par les voyageurs.",
+      "corriger": "Corriger mon annonce"
     },
     "candidature": {
       "titre": "Devenir hôte Kwa-Ba : {nombre} étapes",
-      "texte": "Pour la sécurité des voyageurs, chaque hôte est vérifié avant de publier. Vos annonces restent invisibles jusqu'à la fin des étapes.",
+      "texte": "Pour la sécurité des voyageurs, chaque hôte est vérifié avant de publier. Vous devenez hôte Kwa-Ba dès qu'un agent a validé votre premier logement.",
       "telephoneTitre": "Votre numéro de téléphone",
       "telephoneTexte": "L'agent Kwa-Ba vous appellera pour organiser la visite.",
       "telephoneAction": "Ajouter mon numéro",
@@ -1596,16 +1590,20 @@
       "contratTelecharger": "Voir le contrat",
       "annonceContrat": "Annonce prête. Un agent vous appellera pour la visite dès que votre identité sera vérifiée et votre contrat signé."
     },
-    "typesLogement": "Chambres et types"
+    "typesLogement": "Chambres et types",
+    "candidatureRefusee": "Votre candidature n'a pas été retenue",
+    "dontMenage": "dont {montant} de ménage"
   },
   "annonce": {
     "types": {
-      "hotel": "Chambre dans un établissement avec services",
-      "villa": "Maison entière, souvent avec jardin ou piscine",
-      "appartement": "Logement entier dans un immeuble",
+      "villa": "Grande maison, souvent avec jardin ou piscine",
+      "appartement": "Logement entier dans un immeuble, avec une ou plusieurs chambres",
       "auberge": "Hébergement simple et convivial, petit budget",
-      "maison": "Maison entière, en ville ou au village",
-      "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)"
+      "residence": "Appartement ou studio avec services hôteliers (ménage, accueil)",
+      "chambre_privee": "Une chambre rien que pour les voyageurs, le reste du logement est partagé",
+      "studio": "Une seule pièce à vivre avec coin cuisine et salle de bain",
+      "maison_entiere": "Maison entière, en ville ou au village",
+      "chambre_hotel": "Chambre dans un hôtel, qui s'occupe du ménage"
     },
     "erreurDroits": "Confirmez que vous détenez les droits sur les photos publiées.",
     "erreurPosition": "Placez votre logement sur la carte.",
@@ -1643,14 +1641,15 @@
       "ville": "la ville",
       "prix": "le prix par nuit",
       "position": "la position sur la carte",
-      "surface": "la surface",
       "lits": "au moins un lit",
       "petitDejeuner": "le petit-déjeuner",
-      "photos": "au moins une photo"
+      "photos": "au moins une photo",
+      "pointRepere": "le point de repère",
+      "sallesDeBain": "les salles de bain",
+      "legendes": "la pièce de chaque photo"
     },
     "detailsTitre": "Le logement en détail",
     "detailsAide": "Ces informations s'affichent sur votre annonce et rassurent les voyageurs.",
-    "surface": "Surface (m²)",
     "chambres": "Chambres",
     "sallesDeBain": "Salles de bain",
     "lits": "Lits",
@@ -1669,7 +1668,17 @@
     "politiqueAide": "Affichée sur votre annonce et acceptée par le voyageur avant le paiement. En plus, une réservation annulée dans les 48 heures, au moins 7 jours avant l'arrivée, est toujours remboursée.",
     "reglesMaison": "Règles de la maison",
     "reglesAide": "Elles s'affichent sur votre annonce : les voyageurs savent à quoi s'attendre avant de réserver.",
-    "nonPrecise": "Non précisé"
+    "nonPrecise": "Non précisé",
+    "pointRepere": "Point de repère",
+    "pointRepereExemple": "Derrière le CHU Sylvanus Olympio, Tokoin",
+    "pointRepereAide": "Comment on trouve le logement à Lomé. Seuls l'agent Kwa-Ba et les voyageurs qui ont payé leur réservation le voient.",
+    "chambresAide": "0 pour un studio.",
+    "litsRequis": "Ajoutez au moins un lit pour continuer.",
+    "fraisMenage": "Frais de ménage : {montant}.",
+    "fraisMenageAide": "Ils s'ajoutent au prix du séjour, une fois, et vous sont reversés en entier.",
+    "fraisMenageZero": "Pas de frais de ménage pour ce type : l'établissement s'en occupe.",
+    "menageCarte": "Ménage : {montant}",
+    "menageCarteZero": "Sans frais de ménage"
   },
   "revenus": {
     "statuts": {
@@ -1729,7 +1738,10 @@
     "toutEtablissement": "Tout l’établissement",
     "aideType": "Seul le type « {nom} » sera fermé.",
     "aideEtablissement": "Tous les types de logement seront fermés.",
-    "unitesNombre": "{nombre, plural, one {# logement} other {# logements}}"
+    "unitesNombre": "{nombre, plural, one {# logement} other {# logements}}",
+    "quantiteFermer": "Nombre de chambres à fermer",
+    "toutes": "Toutes ({nombre})",
+    "quantiteAide": "Pour les chambres vendues ailleurs (réception, autres sites) : les autres restent réservables sur Kwa-Ba. Vide : tout le type est fermé."
   },
   "location": {
     "titre": "Voitures et chauffeurs",
@@ -1863,7 +1875,7 @@
     "monChauffeurAide": "Retrouvez un chauffeur qui vous a déjà conduit : nous le contactons en priorité.",
     "sejour": "Associer à mon séjour Kwa-Ba",
     "sejourAucun": "Aucun séjour",
-    "packSejour": "Pack Séjour + Chauffeur : les frais de service de ce séjour passent à 3 %, la différence vous est remboursée.",
+    "packSejour": "Pack Séjour + Chauffeur : les frais de service de ce séjour passent à {taux}, la différence vous est remboursée.",
     "precisionsAideChauffeur": "Votre véhicule (marque, modèle, boîte), trajets prévus, horaires… Le chauffeur s'organise en conséquence.",
     "devisChauffeur": "Chauffeur, {nombre, plural, one {# jour} other {# jours}}",
     "devisPrimes": "Primes de déplacement du chauffeur",
@@ -1876,13 +1888,12 @@
     "villes": "Villes",
     "logements": "Logements",
     "logementsDispo": "{nombre, plural, =1 {1 logement} other {# logements}}",
-    "quartiers": "Quartiers de Lomé",
-    "quartierLome": "Quartier de Lomé"
+    "quartiers": "Quartiers",
+    "quartiersLome": "Quartiers de Lomé",
+    "quartierDe": "Quartier · {ville}"
   },
   "details": {
     "titre": "Le logement en détail",
-    "surfaceTitre": "Surface",
-    "surface": "{m2} m²",
     "chambresTitre": "Chambres",
     "chambres": "{nombre, plural, =1 {1 chambre} other {# chambres}}",
     "litsTitre": "{nombre, plural, =1 {1 lit} other {# lits}}",
@@ -2026,7 +2037,7 @@
       },
       "fondateur": {
         "titre": "Hôte fondateur",
-        "texte": "{taux} pendant 6 mois (50 premiers hôtes), puis 8 %"
+        "texte": "{taux} pendant 6 mois (50 premiers hôtes), puis {apres}"
       },
       "hotel": {
         "titre": "Hôtel ou résidence",
@@ -2096,5 +2107,240 @@
     "terminee": "Cette alerte pour {hebergement} (du {debut} au {fin}) est déjà terminée.",
     "voirLogement": "Voir le logement",
     "lienInvalide": "Ce lien n’est plus valable."
+  },
+  "assistantHote": {
+    "meta": "Votre annonce",
+    "quitter": "Enregistrer et quitter",
+    "retour": "Retour",
+    "suivant": "Suivant",
+    "commencer": "C'est parti",
+    "envoiPhotos": "Envoi des photos…",
+    "progression": "Avancement de votre annonce",
+    "preparation": "Préparation de votre annonce…",
+    "retourEspace": "Retour à mon espace",
+    "etat": {
+      "enCours": "Enregistrement…",
+      "enregistre": "Enregistré",
+      "horsLigne": "Hors ligne : envoi au retour du réseau"
+    },
+    "phases": {
+      "1": {
+        "titre": "Parlez-nous de votre logement",
+        "texte": "Type de bien, adresse et capacité."
+      },
+      "2": {
+        "titre": "Faites-le sortir du lot",
+        "texte": "Équipements, photos, titre et description."
+      },
+      "3": {
+        "titre": "Terminez et publiez",
+        "texte": "Prix, règles, puis vérification par Kwa-Ba."
+      }
+    },
+    "bienvenue": {
+      "titre": "Publiez votre logement, étape par étape",
+      "texte": "Comptez une dizaine de minutes. Vos réponses sont enregistrées au fur et à mesure : vous pouvez arrêter et reprendre quand vous voulez."
+    },
+    "phase-1": {
+      "surtitre": "Phase 1",
+      "titre": "Parlez-nous de votre logement",
+      "texte": "Quelques questions simples pour le situer et savoir combien de voyageurs il peut accueillir."
+    },
+    "type": {
+      "titre": "Quel type de logement proposez-vous ?"
+    },
+    "adresse": {
+      "titre": "Où se trouve votre logement ?",
+      "texte": "L'agent Kwa-Ba s'y rendra pour la visite."
+    },
+    "position": {
+      "titre": "Placez votre logement sur la carte",
+      "texte": "Touchez la carte à l'endroit exact, ou utilisez votre position si vous êtes sur place."
+    },
+    "capacite": {
+      "titre": "Combien de voyageurs pouvez-vous accueillir ?",
+      "texte": "Vous pourrez ajuster ces informations plus tard."
+    },
+    "phase-2": {
+      "surtitre": "Phase 2",
+      "titre": "Faites-le sortir du lot",
+      "texte": "Ce sont les équipements et les photos qui donnent envie de réserver."
+    },
+    "equipements": {
+      "titre": "Qu'est-ce que votre logement propose ?",
+      "texte": "Touchez tout ce qui est disponible. L'agent le vérifiera lors de sa visite."
+    },
+    "photos": {
+      "titre": "Ajoutez des photos de votre logement",
+      "texte": "La première sera la photo de couverture.",
+      "conseilJour": "Photographiez de jour, rideaux ouverts.",
+      "conseilPieces": "Montrez chaque pièce, y compris la salle de bain.",
+      "compteur": "{nombre} sur {min} photos minimum",
+      "pieces": "{nombre, plural, one {Indiquez la pièce de la photo restante.} other {Indiquez la pièce des # photos restantes.}}"
+    },
+    "titre": {
+      "titre": "Donnez un titre à votre annonce",
+      "texte": "Court et précis : ce qui rend votre logement unique.",
+      "exemple": "Villa avec piscine à Baguida"
+    },
+    "description": {
+      "titre": "Décrivez votre logement",
+      "texte": "Le quartier, l'ambiance, ce que les voyageurs vont aimer. Pas de téléphone ni d'email : ils vous écriront par la messagerie Kwa-Ba.",
+      "exemple": "Une maison calme à cinq minutes de la plage, avec une grande terrasse ombragée…",
+      "encore": "Encore {nombre} caractères au moins."
+    },
+    "envoyer": "Envoyer pour vérification",
+    "envoi": "Envoi…",
+    "phase-3": {
+      "surtitre": "Phase 3",
+      "titre": "Terminez et publiez",
+      "texte": "Votre prix, vos règles, puis les vérifications qui rassurent les voyageurs."
+    },
+    "prix": {
+      "titre": "Quel prix pour une nuit ?",
+      "texte": "Vous pourrez le modifier à tout moment.",
+      "parNuit": "par nuit, en FCFA"
+    },
+    "regles": {
+      "titre": "Quelles sont vos règles ?",
+      "texte": "Les voyageurs les acceptent avant de réserver."
+    },
+    "accueil": {
+      "titre": "Comment accueillez-vous vos voyageurs ?"
+    },
+    "securite": {
+      "titre": "Quelques déclarations",
+      "texte": "Cochez ce qui concerne votre logement : les voyageurs doivent le savoir avant de réserver.",
+      "cameras": "Il y a des caméras à l'extérieur du logement",
+      "animaux": "Des animaux vivent sur place",
+      "travaux": "Des travaux bruyants sont en cours ou prévus",
+      "attestation": "Je certifie que ces informations sont exactes, que j'ai le droit de louer ce logement et que les photos m'appartiennent, conformément aux <cgu>conditions d'utilisation</cgu>."
+    },
+    "telephone": {
+      "titre": "Votre numéro de téléphone",
+      "texte": "L'agent Kwa-Ba vous appellera pour organiser la visite. Il n'est jamais montré aux voyageurs.",
+      "libelle": "Numéro de téléphone",
+      "enregistrer": "Enregistrer ce numéro",
+      "envoi": "Enregistrement…",
+      "fait": "Numéro enregistré"
+    },
+    "identite": {
+      "titre": "Votre pièce d'identité",
+      "texte": "Carte d'identité, carte d'électeur ou passeport. Seuls les agents Kwa-Ba la voient : ils la contrôlent, puis vérifient sur place que c'est bien vous."
+    },
+    "versement": {
+      "titre": "Où recevoir vos revenus ?",
+      "texte": "Votre part vous est versée par Mobile Money, 24 h après l'arrivée des voyageurs."
+    },
+    "contrat": {
+      "titre": "Les conditions à accepter",
+      "accepte": "Conditions acceptées",
+      "aSigner": "Votre contrat hôte sera aussi à signer : vous pourrez le faire depuis <lien>votre espace hôte</lien>."
+    },
+    "recapitulatif": {
+      "titre": "Tout est prêt ?",
+      "texte": "Voici votre annonce, telle que les voyageurs la verront.",
+      "parNuit": "par nuit",
+      "voyageurs": "{nombre, plural, one {# voyageur} other {# voyageurs}}",
+      "lignes": {
+        "annonce": "Annonce complète",
+        "telephone": "Numéro de téléphone",
+        "identite": "Pièce d'identité envoyée",
+        "versement": "Compte de versement"
+      },
+      "suite": "Votre annonce n'est pas encore publiée : Kwa-Ba contrôle votre identité, puis un agent visite le logement."
+    },
+    "envoyee": {
+      "titre": "Votre annonce est envoyée !",
+      "texte": "Merci. Voici la suite, nous vous prévenons par email à chaque étape.",
+      "espace": "Voir mon espace",
+      "suite": {
+        "identite": "Kwa-Ba contrôle votre pièce d'identité.",
+        "visite": "Un agent vous appelle et visite votre logement.",
+        "publication": "Votre annonce est publiée, et vous devenez hôte Kwa-Ba."
+      }
+    },
+    "chambres": {
+      "titre": "Quelles chambres proposez-vous ?",
+      "texte": "Un type par ligne : les chambres identiques ensemble, avec leur nombre. Inutile d'en créer une par chambre.",
+      "typeNumero": "Type de chambre {numero}",
+      "nom": "Type de chambre",
+      "nomExemple": "Chambre double standard",
+      "prix": "Prix par nuit (F CFA)",
+      "quantite": "Nombre de chambres",
+      "capacite": "Personnes par chambre",
+      "ajouter": "Ajouter un type de chambre",
+      "retirer": "Retirer ce type",
+      "resume": "{total, plural, one {# chambre} other {# chambres}} au total, à partir de {prix} la nuit.",
+      "aide": "Depuis votre espace hôte, vous pourrez ajouter des photos à chaque type et fermer les chambres vendues ailleurs (réception, autres sites)."
+    }
+  },
+  "pieces": {
+    "chambre": "Chambre {numero}",
+    "salle_de_bain": "Salle de bain {numero}",
+    "piece_principale": "Pièce principale",
+    "salon": "Salon",
+    "cuisine": "Cuisine",
+    "salle_a_manger": "Salle à manger",
+    "toilettes": "Toilettes",
+    "terrasse": "Terrasse",
+    "balcon": "Balcon",
+    "jardin": "Jardin ou cour",
+    "piscine": "Piscine",
+    "exterieur": "Extérieur",
+    "entree": "Entrée",
+    "vue": "Vue",
+    "parking": "Parking",
+    "autre": "Autre",
+    "titre": "Les pièces en photos",
+    "sansPiece": "Autres photos",
+    "reception": "Réception",
+    "chambres": "Chambres",
+    "salles_de_bain": "Salles de bain",
+    "restaurant": "Restaurant",
+    "bar": "Bar",
+    "salle_de_sport": "Salle de sport",
+    "salle_de_reunion": "Salle de réunion"
+  },
+  "destinations": {
+    "accueil": "Accueil",
+    "filAriane": "Fil d'Ariane",
+    "pays": {
+      "tg": {
+        "nom": "Togo",
+        "dans": "au Togo",
+        "intro": "Des plages de Lomé aux collines de Kpalimé et aux montagnes du nord : des logements visités par nos agents, réservés et payés en ligne.",
+        "guide": "Préparer votre voyage au Togo"
+      }
+    },
+    "villes": {
+      "lome": "La capitale du Togo, au bord du golfe de Guinée : plages, Grand Marché, quartiers animés, et l'aéroport international tout proche du centre.",
+      "kpalime": "À environ 120 km au nord-ouest de Lomé, dans la région des Plateaux : cascades, randonnées sur le mont Kloto, forêts et artisanat.",
+      "aneho": "Ancienne capitale du Togo, à environ 45 km à l'est de Lomé, entre l'océan et la lagune. À Glidji, la fête Epe Ekpe rassemble chaque année le peuple guin.",
+      "atakpame": "Ville de collines au cœur de la région des Plateaux, à environ 160 km au nord de Lomé, sur la route du nord.",
+      "sokode": "Chef-lieu de la région Centrale, à environ 340 km au nord de Lomé, connue pour la fête des couteaux (Adossa-Gadao).",
+      "kara": "Chef-lieu de la région de la Kara, dans le nord du pays : luttes traditionnelles Evala en juillet et, non loin, le Koutammakou, inscrit au patrimoine mondial de l'UNESCO."
+    },
+    "titreVilles": "Villes",
+    "titre": "Logements vérifiés {lieu}",
+    "dansVille": "à {ville}, {pays}",
+    "dansQuartier": "à {quartier}, {ville}",
+    "introQuartier": "Les logements Kwa-Ba du quartier {quartier}, à {ville} : visités par un agent avant leur publication, réservés et payés en ligne.",
+    "description": "{nombre, plural, one {# logement vérifié} other {# logements vérifiés}} {lieu}, dès {prix} la nuit. Chaque logement est visité par un agent Kwa-Ba ; paiement en Mobile Money ou par carte.",
+    "descriptionVide": "Logements vérifiés {lieu} : chaque logement est visité par un agent Kwa-Ba avant sa publication. Les premiers arrivent bientôt.",
+    "nombre": "{nombre, plural, =0 {Premiers logements bientôt} one {# logement vérifié} other {# logements vérifiés}}",
+    "nombreCourt": "{nombre, plural, =0 {bientôt} one {# logement} other {# logements}}",
+    "quartiers": "Quartiers",
+    "autresQuartiers": "Autres quartiers de {ville}",
+    "logements": "Logements {lieu}",
+    "filtrer": "Choisir des dates et filtrer",
+    "vide": "Pas encore de logement publié {lieu}.",
+    "videTexte": "Nos agents visitent les premiers logements avant leur mise en ligne. En attendant, voyez tous nos logements, ou proposez le vôtre.",
+    "voirTous": "Voir tous les logements",
+    "proposer": "Proposer mon logement",
+    "confiance": "Chaque logement est visité par un agent Kwa-Ba avant sa publication. Le point de repère pour le trouver vous est donné une fois la réservation payée.",
+    "aFaire": "À voir et à faire autour de {ville}",
+    "voirExperiences": "Toutes les idées de sorties à {ville}",
+    "autresVilles": "Ailleurs {dans}"
   }
 }

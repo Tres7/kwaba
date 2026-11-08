@@ -9,20 +9,20 @@ export async function listerConversations() {
 }
 
 export async function lireConversation(id: string) {
-  return (await api.get<MessagingConversation>(`${CONVERSATIONS}/${id}/`)).data;
+  return (await api.get<MessagingConversation>(`${CONVERSATIONS}/${encodeURIComponent(id)}/`)).data;
 }
 
 /** `apres`: id of the last message known, to read only the new ones. */
 export async function listerMessages(id: string, apres?: number) {
-  return (await api.get<Paginated<MessagingMessage>>(`${CONVERSATIONS}/${id}/messages/`, { params: { after: apres } })).data.results;
+  return (await api.get<Paginated<MessagingMessage>>(`${CONVERSATIONS}/${encodeURIComponent(id)}/messages/`, { params: { after: apres } })).data.results;
 }
 
 export async function envoyerMessage(id: string, content: string) {
-  return (await api.post<MessagingMessage & { masked?: boolean }>(`${CONVERSATIONS}/${id}/messages/`, { content })).data;
+  return (await api.post<MessagingMessage & { masked?: boolean }>(`${CONVERSATIONS}/${encodeURIComponent(id)}/messages/`, { content })).data;
 }
 
 export async function marquerLu(id: string, jusquA: number) {
-  await api.post(`${CONVERSATIONS}/${id}/read/`, { up_to_id: jusquA });
+  await api.post(`${CONVERSATIONS}/${encodeURIComponent(id)}/read/`, { up_to_id: jusquA });
 }
 
 export async function compterNonLus() {

@@ -1,11 +1,12 @@
 """Verification of listings by a field agent: publication, identity document, visit, rights."""
 import json
-from io import BytesIO
+from io import BytesIO, StringIO
 
 import pytest
 from django.core import mail
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from PIL import Image
 
 from apps.hebergements.models import HebergementModel
@@ -39,8 +40,9 @@ def _annonce(**extra):
         'name': 'Villa des cocotiers', 'type': 'villa', 'city': 'Lomé', 'location': 'Bè Kpota',
         'latitude': 6.13, 'longitude': 1.22,
         'price_per_night': 35000, 'max_guests': 4, 'amenities': ['wifi'],
-        'surface_m2': 90, 'chambres': 2, 'lits_doubles': 2, 'petit_dejeuner': 'inclus',
+        'point_repere': 'Derrière la pharmacie', 'salles_de_bain': 1, 'chambres': 2, 'lits_doubles': 2, 'petit_dejeuner': 'inclus',
         'image_url': 'https://images.unsplash.com/photo-1.jpg', 'images': ['https://images.unsplash.com/photo-1.jpg'],
+        'legendes_photos': {'https://images.unsplash.com/photo-1.jpg': 'salon'},
         **extra,
     }
 
@@ -157,6 +159,11 @@ class TestPieceIdentite:
         faux = SimpleUploadedFile('piece.jpg', contenu, content_type='image/jpeg')
         assert _envoyer_piece(client_for(hote), faux).status_code == 400
 
+    def test_voter_card_accepted(self, client_for, hote):
+        # AN-H5: the voter card is a common identity document in Togo
+        reponse = _envoyer_piece(client_for(hote), type_piece='electeur')
+        assert reponse.status_code == 201 and reponse.data['type_libelle'] == "Carte d'électeur"
+
     def test_only_hosts_send_one(self, client_for, make_user):
         assert _envoyer_piece(client_for(make_user())).status_code == 403
 
@@ -179,6 +186,35 @@ class TestPieceIdentite:
         assert response['Cache-Control'] == 'no-store'
         assert 'sandbox' in response['Content-Security-Policy']
         assert JournalAuditModel.objects.filter(action='piece_consultee', utilisateur_id=agent.id).exists()
+
+
+    def test_lost_file_explained_to_the_agent(self, client_for, hote, agent, stockage_temporaire):
+        _envoyer_piece(client_for(hote))
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
+        (stockage_temporaire / piece.fichier.name).unlink()
+
+        response = client_for(agent).get(f'{IDENTITE}{hote.id}/fichier/')
+
+        assert response.status_code == 410
+        assert 'renvoyer' in response.data['detail']
+
+        _identite_verifiee(hote)
+        response = client_for(agent).get(f'{IDENTITE}{hote.id}/fichier/')
+        assert response.status_code == 410 and "l'original" in response.data['detail']
+
+    def test_lost_files_listed(self, client_for, hote, stockage_temporaire):
+        _envoyer_piece(client_for(hote))
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
+        sortie = StringIO()
+        call_command('fichiers_prives', stdout=sortie)
+        assert '0 fichier(s) introuvable(s)' in sortie.getvalue()
+
+        (stockage_temporaire / piece.fichier.name).unlink()
+        sortie = StringIO()
+        call_command('fichiers_prives', stdout=sortie)
+
+        assert 'verifications.PieceIdentiteModel.fichier : 1 fichier(s), 1 introuvable(s)' in sortie.getvalue()
+        assert str(piece.pk) in sortie.getvalue()
 
 
 class TestVisite:
@@ -208,13 +244,18 @@ class TestVisite:
         assert visite.controles == TOUT_CONFORME and visite.photos.count() == 2
         assert mail.outbox[-1].to == [hote.email] and 'vérifié' in mail.outbox[-1].subject
 
-    def test_identity_mismatch_at_the_visit_refuses_the_identity(self, client_for, agent, hote, en_attente):
-        _identite_verifiee(hote)
+    def test_identity_mismatch_at_the_visit_refuses_the_identity(self, client_for, agent, hote, en_attente,
+                                                                  stockage_temporaire):
+        _envoyer_piece(client_for(hote))
+        fichier = _identite_verifiee(hote).fichier.name
         response = _decider(client_for(agent), en_attente, decision='refusee',
                             commentaire="La personne rencontrée n'est pas celle de la pièce.",
                             controles={**TOUT_CONFORME, 'identite': False})
         assert response.status_code == 201
-        assert PieceIdentiteModel.objects.get(hote_id=hote.pk).statut == 'refusee'
+        piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
+        # Only verified documents are kept
+        assert piece.statut == 'refusee' and not piece.fichier
+        assert not (stockage_temporaire / fichier).exists()
 
     def test_cannot_validate_without_every_check_or_identity(self, client_for, agent, hote, en_attente):
         client = client_for(agent)
@@ -265,7 +306,7 @@ class TestControleIdentite:
         assert data['count'] == 1
         assert data['results'][0]['hote']['email'] == hote.email
 
-    def test_verified_identity_deletes_the_document_and_requests_the_visits(
+    def test_verified_identity_keeps_the_document_and_requests_the_visits(
             self, client_for, hote, agent, en_attente, stockage_temporaire, django_capture_on_commit_callbacks):
         _envoyer_piece(client_for(hote))
         fichier = PieceIdentiteModel.objects.get(hote_id=hote.pk).fichier.name
@@ -274,12 +315,17 @@ class TestControleIdentite:
             response = client_for(agent).post(url, {'decision': 'verifiee'}, format='json')
         assert response.status_code == 200 and response.data['statut'] == 'verifiee'
         piece = PieceIdentiteModel.objects.get(hote_id=hote.pk)
-        assert piece.verifiee_par_id == agent.id and not piece.fichier
-        assert not (stockage_temporaire / fichier).exists()
+        # Kept for the visit: the agent compares it with the person met
+        assert piece.verifiee_par_id == agent.id and piece.fichier.name == fichier
+        assert (stockage_temporaire / fichier).exists()
+        assert client_for(agent).get(VISITES).data['results'][0]['hote']['piece']['copie'] is True
+        assert client_for(agent).get(f'{IDENTITE}{hote.id}/fichier/').status_code == 200
         sujets = [m.subject for m in mail.outbox]
         assert any('Visite à planifier' in sujet for sujet in sujets)
         assert any('identité est vérifiée' in sujet for sujet in sujets)
         assert client_for(agent).get(VISITES).data['count'] == 1
+        # The agent gets the landmark to find the place
+        assert client_for(agent).get(VISITES).data['results'][0]['point_repere'] == ''
         assert client_for(agent).get(IDENTITES).data['count'] == 0
         assert JournalAuditModel.objects.filter(action='identite_verifiee').exists()
         # Already checked: no decision possible anymore
@@ -328,4 +374,24 @@ def test_agent_role_cannot_be_chosen_at_registration(api_client):
         'email': 'faux.agent@example.tg', 'first_name': 'A', 'last_name': 'B', 'role': 'agent',
         'password': 'Kwaba-Test-2026!', 'password_confirm': 'Kwaba-Test-2026!',
     }, format='json')
-    assert response.status_code == 400
+    assert response.status_code == 201
+    assert response.data['role'] == 'voyageur'
+
+
+# Security audit of 2026-11-07, lead 18: a former host who became an agent does not decide on their own listing or document
+def test_un_agent_ne_valide_pas_sa_propre_annonce(client_for, hote, en_attente):
+    _identite_verifiee(hote)
+    hote.role = 'agent'
+    hote.save(update_fields=['role'])
+    assert _decider(client_for(hote), en_attente).status_code == 400
+    en_attente.refresh_from_db()
+    assert en_attente.statut_verification == 'en_attente'
+
+
+def test_un_agent_ne_valide_pas_sa_propre_piece(client_for, hote, stockage_temporaire):
+    _envoyer_piece(client_for(hote))
+    hote.role = 'agent'
+    hote.save(update_fields=['role'])
+    reponse = client_for(hote).post(f'{IDENTITES}{hote.id}/decision/', {'decision': 'verifiee'}, format='json')
+    assert reponse.status_code == 400
+    assert PieceIdentiteModel.objects.get(hote_id=hote.pk).statut == 'soumise'

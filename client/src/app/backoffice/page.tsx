@@ -1,6 +1,6 @@
 "use client";
 
-import { lireStatsAdmin } from "@/features/users";
+import { lireStatsAdmin, useDroitsAdmin } from "@/features/users";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, CalendarCheck, ChevronRight, Home, IdCard, Star, Users } from "lucide-react";
@@ -23,12 +23,15 @@ function Tuile({ titre, valeur, detail, icone: Icone, href }: { titre: string; v
 }
 
 export default function TableauDeBord() {
+  const { data: droits } = useDroitsAdmin();
+  const ouverte = (section: string) => droits?.sections.includes(section) ?? false;
   const { data: s, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin", "stats"],
     queryFn: lireStatsAdmin,
+    enabled: ouverte("tableau-de-bord"),
   });
   // Same query as the menu badge (shared cache): refreshed every minute
-  const { data: compteurs } = useCompteursVerification(true);
+  const { data: compteurs } = useCompteursVerification(ouverte("verifications"));
   const pieces = compteurs?.pieces ?? 0;
 
   return (
@@ -38,9 +41,14 @@ export default function TableauDeBord() {
         <p className="text-muted text-sm mt-1">Vue d&apos;ensemble de la plateforme.</p>
       </div>
 
-      <CarteLancement />
+      {ouverte("annonces") && <CarteLancement />}
 
-      {isError ? (
+      {droits && !ouverte("tableau-de-bord") ? (
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+          <p className="text-dark font-semibold">Vos accès sont limités à certaines sections.</p>
+          <p className="text-muted text-sm mt-1">Retrouvez-les dans le menu.</p>
+        </div>
+      ) : isError ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
           <p className="text-dark font-semibold mb-2">Statistiques indisponibles.</p>
           <button onClick={() => refetch()} className="text-primary font-bold hover:underline">Réessayer</button>
@@ -50,7 +58,7 @@ export default function TableauDeBord() {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <Tuile titre="Utilisateurs" valeur={s.utilisateurs.total.toLocaleString("fr-FR")} detail={`+${s.utilisateurs.nouveaux_30j} en 30 j · ${s.utilisateurs.hotes} hôtes`} icone={Users} href="/backoffice/utilisateurs" />
+            <Tuile titre="Utilisateurs" valeur={s.utilisateurs.total.toLocaleString("fr-FR")} detail={`+${s.utilisateurs.nouveaux_30j} en 30 j · ${s.utilisateurs.hotes} hôtes · ${s.utilisateurs.candidats} candidats`} icone={Users} href="/backoffice/utilisateurs" />
             <Tuile titre="Annonces" valeur={s.annonces.visibles.toLocaleString("fr-FR")} detail={`visibles sur ${s.annonces.total} · ${s.annonces.verifiees} vérifiées`} icone={Home} href="/backoffice/annonces" />
             <Tuile titre="Réservations (30 j)" valeur={s.reservations.confirmees_30j.toLocaleString("fr-FR")} detail={`${s.reservations.annulees_30j} annulée${s.reservations.annulees_30j > 1 ? "s" : ""}`} icone={CalendarCheck} href="/backoffice/reservations" />
             <Tuile

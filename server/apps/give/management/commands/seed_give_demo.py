@@ -3,8 +3,9 @@ from datetime import date
 from django.core.management.base import BaseCommand
 
 from apps.give.models import OrganisationModel, ProjetModel
+from config.demo import refuser_en_production
 
-# Fictional NGOs, to try Kwa-Ba Give locally: never run this command in production
+# Fictional NGOs, to try Kwa-Ba Give locally or on the preprod
 DEMO = [
     {
         'slug': 'demo-ecoles-du-mono', 'nom': 'Écoles du Mono (démo)', 'cause': 'education', 'pays': 'TG', 'ville': 'Aného',
@@ -33,9 +34,10 @@ DEMO = [
 
 
 class Command(BaseCommand):
-    help = "Crée des ONG fictives pour essayer Kwa-Ba Give en local (idempotent)."
+    help = "Crée des ONG fictives pour essayer Kwa-Ba Give (idempotent, hors production)."
 
     def handle(self, *args, **options):
+        refuser_en_production()
         for d in DEMO:
             champs = {k: v for k, v in d.items() if k != 'projets'}
             o, _ = OrganisationModel.objects.update_or_create(slug=d['slug'], defaults={

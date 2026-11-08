@@ -4,7 +4,13 @@ from .models import ReservationModel
 from apps.avis import api as avis
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
+from apps.securite import coordonnees, fraude
 from apps.users import api as users
+
+# Bookings waiting for payment one traveller can hold at the same time: each one holds its dates for 30 minutes
+MAX_EN_ATTENTE = 3
+# Name shown to the host while the booking is not paid, as in the messaging
+VOYAGEUR_ANONYME = 'Voyageur'
 
 
 def _liste(serializer) -> list:
@@ -20,6 +26,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     nights = serializers.IntegerField(read_only=True)
     reference = serializers.CharField(read_only=True)
     guest_name = serializers.SerializerMethodField()
+    message = serializers.SerializerMethodField()
     avis_id = serializers.SerializerMethodField()
     peut_evaluer = serializers.SerializerMethodField()
     montants = serializers.SerializerMethodField()
@@ -27,6 +34,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     remboursement = serializers.SerializerMethodField()
 
     type_logement_nom = serializers.SerializerMethodField()
+    point_repere = serializers.SerializerMethodField()
 
     class Meta:
         model = ReservationModel
@@ -35,7 +43,7 @@ class ReservationSerializer(serializers.ModelSerializer):
             'check_in', 'check_out',
             'guests_count', 'total_price', 'status', 'payment_method',
             'message', 'nights', 'reference', 'guest_name', 'avis_id', 'peut_evaluer', 'created_at',
-            'montants', 'paiement', 'remboursement', 'expire_le', 'annule_par',
+            'montants', 'paiement', 'remboursement', 'expire_le', 'annule_par', 'point_repere',
         ]
         read_only_fields = ['id', 'status', 'created_at']
 
@@ -50,6 +58,14 @@ class ReservationSerializer(serializers.ModelSerializer):
     def get_hebergement_detail(self, obj):
         return self._cartes().get(obj.hebergement_id)
 
+    def get_point_repere(self, obj):
+        # Almost the exact address: only once the booking is paid
+        if obj.status != 'confirmed':
+            return None
+        if '_reperes' not in self.context:
+            self.context['_reperes'] = hebergements.points_repere({r.hebergement_id for r in _liste(self)})
+        return self.context['_reperes'].get(obj.hebergement_id) or None
+
     def get_type_logement_nom(self, obj):
         self._cartes()
         return self.context['_noms_types'].get(obj.type_logement_id)
@@ -59,7 +75,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         m = paiements.montants_de(obj, carte['price_per_night'] if carte else None)
         return {
             'prix_nuits': m.prix_nuits, 'frais_service': m.frais_service, 'taux_frais': m.taux_frais, 'total': m.total,
-            'commission_hote': m.commission_hote, 'montant_hote': m.montant_hote,
+            'commission_hote': m.commission_hote, 'montant_hote': m.montant_hote, 'frais_menage': m.frais_menage,
         }
 
     def get_paiement(self, obj):
@@ -86,8 +102,20 @@ class ReservationSerializer(serializers.ModelSerializer):
         sejour = {'voyageur_id': obj.guest_id, 'statut': obj.status, 'check_out': obj.check_out}
         return avis.motif_refus(sejour, request.user.id, obj.pk in self._avis()) is None
 
+    def _anonyme(self, obj) -> bool:
+        """Host's list (context vue_hote): a traveller who has not paid stays anonymous, as in the messaging, so that
+        the host cannot reach them outside the platform."""
+        if not self.context.get('vue_hote') or obj.status == 'confirmed':
+            return False
+        return paiements.etats_pour_serializer(self, 'reservation')[obj.pk]['paiement'] != 'reussi'
+
     def get_guest_name(self, obj):
+        if self._anonyme(obj):
+            return VOYAGEUR_ANONYME
         return obj.guest.get_full_name() if obj.guest else ''
+
+    def get_message(self, obj):
+        return '' if self._anonyme(obj) else obj.message
 
 
 # Units of one type in a single booking (a group); beyond that, several bookings
@@ -111,12 +139,22 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             'guests_count', 'payment_method', 'message', 'total_attendu',
         ]
 
+    def validate_message(self, valeur):
+        # Same rule as the messaging: contact details are hidden, and reported to the anti-fraud team after creation
+        texte, self._trouvailles = coordonnees.analyser(valeur)
+        return texte if coordonnees.masquees(self._trouvailles) else valeur
+
     def validate(self, data):
         hebergement = hebergements.fiche(data['hebergement_id'])
         if not hebergement:
             raise serializers.ValidationError({'hebergement': "Hébergement introuvable."})
         check_in, check_out = data['check_in'], data['check_out']
         request = self.context.get('request')
+        if request and ReservationModel.objects.filter(
+                guest_id=request.user.id, status='pending', expire_le__gt=timezone.now()).count() >= MAX_EN_ATTENTE:
+            raise serializers.ValidationError(
+                f"Vous avez déjà {MAX_EN_ATTENTE} réservations en attente de paiement : payez-en une, ou attendez "
+                "qu'elles expirent (30 minutes après leur création).")
 
         if check_in < timezone.localdate():
             raise serializers.ValidationError({'check_in': "La date d'arrivée ne peut pas être dans le passé."})
@@ -156,7 +194,7 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         if total_attendu is not None:
             voyageur = request.user if request else None
             total = paiements.devis_sejour(type_logement['prix_nuit'], hebergement['host_id'], (check_out - check_in).days,
-                                 voyageur=voyageur, nb_unites=nb_unites).total
+                                           voyageur=voyageur, nb_unites=nb_unites, type_annonce=hebergement['type']).total
             if total != total_attendu:
                 raise serializers.ValidationError({'total_attendu': [
                     f"Le prix a changé : le total est maintenant de {total:,} FCFA. Vérifiez le récapitulatif avant de payer."
@@ -168,17 +206,26 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         type_logement = hebergements.fiche_type(validated_data['type_logement_id'])
         nights = (validated_data['check_out'] - validated_data['check_in']).days
         montants = paiements.devis_sejour(type_logement['prix_nuit'], hebergement['host_id'], nights, voyageur=users.compte(validated_data.get('guest_id')),
-                                nb_unites=validated_data['nb_unites'])
+                                          nb_unites=validated_data['nb_unites'], type_annonce=hebergement['type'])
         if paiements.paiement_actif():
             # Dates held while paying; confirmed by the FedaPay webhook
             etat = {'status': 'pending', 'expire_le': timezone.now() + paiements.delai_paiement()}
         else:
             etat = {'status': 'confirmed'}
-        return ReservationModel.objects.create(
+        reservation = ReservationModel.objects.create(
             total_price=montants.total,
             prix_nuits=montants.prix_nuits,
             frais_service=montants.frais_service,
             commission_hote=montants.commission_hote,
+            frais_menage=montants.frais_menage,
+            # Terms of the listing as the traveller accepts them now
+            politique_annulation=hebergement['politique_annulation'] or '',
+            arrivee_a_partir=hebergement['arrivee_a_partir'],
+            depart_avant=hebergement['depart_avant'],
+            petit_dejeuner=hebergement['petit_dejeuner'] or '',
+            petit_dejeuner_prix=hebergement['petit_dejeuner_prix'],
             **etat,
             **validated_data,
         )
+        fraude.signaler(reservation.guest_id, 'reservation', reservation.pk, getattr(self, '_trouvailles', []))
+        return reservation

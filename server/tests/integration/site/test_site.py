@@ -22,7 +22,7 @@ def test_reglages_du_lancement(lancement):
     reglages = APIClient().get(SITE).json()
     assert reglages['modules'] == {
         'experiences': False, 'together': False, 'give': False, 'concierge': False,
-        'location_sans_chauffeur': False, 'paiements_non_ouverts': False,
+        'location_sans_chauffeur': False, 'paiements_non_ouverts': False, 'assistant_hote': False,
     }
     # Numbers not assigned yet: empty, the site shows "to be completed"
     assert reglages['mentions'] == {'rccm': '', 'nif': '', 'commerce_electronique': '', 'ipdcp': ''}

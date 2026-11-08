@@ -13,7 +13,7 @@ from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 from apps.transferts import api as transferts
 
-TYPES = ['hotel', 'villa', 'appartement', 'auberge']
+TYPES = hebergements.TYPES
 
 
 def _outil(name: str, description: str, proprietes: dict, requis: list[str]) -> dict:
@@ -140,7 +140,8 @@ def rechercher_logements(entree: dict):
     for h in hebergements.rechercher(ville, voyageurs, budget, type_):
         if nuits and not hebergements.est_disponible(h['id'], arrivee, depart):
             continue
-        total = paiements.total_sejour(h['price_per_night'], nuits) if nuits else None  # frais standard de 6 %
+        # Standard 6 % fees and the cleaning fee of the type
+        total = paiements.total_sejour(h['price_per_night'], nuits, h['type']) if nuits else None
         resultats.append({
             'id': str(h['id']), 'nom': h['name'], 'type': h['type'], 'ville': h['city'], 'quartier': h['location'],
             'prix_nuit_fcfa': int(h['price_per_night']), 'note': round(h['rating'], 1), 'nb_avis': h['review_count'],
@@ -161,7 +162,10 @@ def rechercher_logements(entree: dict):
     if not resultats:
         return {'resultats': [], 'message': "Aucun logement Kwa-Ba ne correspond. Propose d'élargir les critères "
                                              "(budget, dates, quartier) ; ne recommande pas de logement extérieur."}, []
-    return {'resultats': resultats, 'frais_service': '6 % inclus dans cout_total_sejour_fcfa (3 % pour un voyageur qui revient chez le même hôte)'}, cartes
+    pourcent = lambda taux: f"{taux * 100:.2f}".rstrip('0').rstrip('.').replace('.', ',')  # noqa: E731 - "6", "3,5"
+    return {'resultats': resultats, 'frais_service': f"{pourcent(paiements.frais_voyageur())} % inclus dans cout_total_sejour_fcfa "
+                                                     f"({pourcent(paiements.frais_reduits())} % pour un voyageur qui revient chez le même hôte), "
+                                                     'ainsi que les frais de ménage du type de logement'}, cartes
 
 
 def devis_transfert(entree: dict):

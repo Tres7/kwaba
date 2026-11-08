@@ -1,14 +1,17 @@
 "use client";
 
-import { devenirHote } from "@/features/users";
+import { accesEspaceHote, CLE_MOI, ouvrirCandidature, useMoi } from "@/features/users";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Car, CheckCircle, Home, MessageCircle, Wallet } from "lucide-react";
 import { CONTACT_EMAIL } from "@/lib/contact";
+import { useReglagesSite } from "@/lib/site";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import { useTaux } from "@/features/paiements";
 import EstimateurRevenus from "./EstimateurRevenus";
 
 const TAUX = ["particulier", "hotel", "fondateur", "voyageur"] as const;
@@ -21,19 +24,31 @@ const STEPS = [
 
 export default function DevenirHotePage() {
   const t = useTranslations("devenirHote");
+  // Rates set in the back-office
+  const { texte: texteTaux } = useTaux();
   const router = useRouter();
-  const { data: session, status, update } = useSession();
+  const queryClient = useQueryClient();
+  const { status } = useSession();
+  const { data: me } = useMoi(status === "authenticated");
   const [loading, setLoading] = useState(false);
-  const role = session?.user?.role;
-  const isHost = role === "hote" || role === "admin";
+  const acces = !!me && accesEspaceHote(me);
+  const assistant = useReglagesSite().data?.modules.assistant_hote === true;
 
-  const becomeHost = async () => {
+  // Coming back from sign-up: the account exists, the candidature starts with the button below.
+  // Read from the address, not useSearchParams: this public page must stay rendered on the server
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("bienvenue") !== "1") return;
+    toast.success(t("bienvenue"));
+    router.replace("/hote");
+  }, [router, t]);
+
+  const commencer = async () => {
     setLoading(true);
     try {
-      await devenirHote();
-      await update({ role: "hote" });
+      await ouvrirCandidature();
+      await queryClient.invalidateQueries({ queryKey: CLE_MOI });
       toast.success(t("active"));
-      router.push("/hote/espace");
+      router.push(assistant ? "/hote/annonce/nouvelle" : "/hote/espace");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setLoading(false);
@@ -41,10 +56,12 @@ export default function DevenirHotePage() {
   };
 
   const cta =
-    status === "loading" ? null : isHost ? (
-      <Link href="/hote/espace" className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50">{t("acceder")}</Link>
+    status === "loading" || (status === "authenticated" && !me) ? null : acces ? (
+      <Link href="/hote/espace" className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50">{t(me?.candidature_hote === "ouverte" ? "reprendre" : "acceder")}</Link>
+    ) : me?.candidature_hote === "refusee" ? (
+      <p className="max-w-xl mx-auto bg-white/10 rounded-2xl px-5 py-4 text-sm text-white">{t("refusee", { motif: me.candidature_motif })}</p>
     ) : status === "authenticated" ? (
-      <button onClick={becomeHost} disabled={loading} className="bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 disabled:opacity-60">
+      <button onClick={commencer} disabled={loading} className="bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 disabled:opacity-60">
         {loading ? t("activation") : t("activer")}
       </button>
     ) : (
@@ -92,7 +109,7 @@ export default function DevenirHotePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {TAUX.map((cle) => (
               <div key={cle} className="bg-white rounded-3xl p-5 border border-gray-100 text-center">
-                <p className="font-heading font-bold text-primary text-3xl">{t(`tarifs.taux.${cle}.valeur`)}</p>
+                <p className="font-heading font-bold text-primary text-3xl">{texteTaux[cle]}</p>
                 <p className="font-semibold text-dark text-sm mt-1">{t(`tarifs.taux.${cle}.titre`)}</p>
                 <p className="text-gray-500 text-xs mt-1 leading-relaxed">{t(`tarifs.taux.${cle}.texte`)}</p>
               </div>

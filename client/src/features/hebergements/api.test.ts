@@ -23,6 +23,22 @@ describe("hebergements", () => {
     expect(api.get).toHaveBeenLastCalledWith("/v1/hebergements/suggestions/", { params: { q: "Lo" } });
   });
 
+  it("lit et complète un brouillon étape par étape", async () => {
+    await h.lireBrouillon("b1");
+    expect(api.get).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/b1/");
+    await h.enregistrerEtape("b1", { city: "Lomé" }, "adresse");
+    expect(api.patch).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/b1/", { donnees: { city: "Lomé" }, etape: "adresse" });
+    await h.enregistrerEtape("b1", { location: "Agoè" });
+    expect(api.patch).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/b1/", { donnees: { location: "Agoè" } });
+  });
+
+  it("lit les conditions et envoie le brouillon", async () => {
+    await h.lireConditions("b1");
+    expect(api.get).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/b1/conditions/");
+    await h.soumettreBrouillon("b1");
+    expect(api.post).toHaveBeenLastCalledWith("/v1/hebergements/brouillons/b1/soumettre/");
+  });
+
   it("crée, modifie et supprime une annonce", async () => {
     await h.creerHebergement({ name: "Villa" });
     expect(api.post).toHaveBeenLastCalledWith("/v1/hebergements/", { name: "Villa" });

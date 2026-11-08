@@ -19,7 +19,7 @@ def _jour(n):
 @pytest.fixture
 def hotel(make_hebergement):
     """A hotel: 3 standard doubles (its default type) and 1 suite."""
-    h = make_hebergement(type='hotel', price_per_night=30000)
+    h = make_hebergement(type='chambre_hotel', price_per_night=30000)
     h.types.update(nom='Double standard', quantite=3)
     TypeLogementModel.objects.create(hebergement=h, nom='Suite', capacite=4, prix_nuit=80000, quantite=1, ordre=1)
     return h
@@ -44,7 +44,7 @@ class TestDateBoundaries:
 
     @pytest.fixture
     def maison(self, make_hebergement):
-        return make_hebergement(type='maison')
+        return make_hebergement(type='maison_entiere')
 
     def test_arrival_on_another_guest_departure_day(self, make_user, maison):
         unite = maison.types.get()

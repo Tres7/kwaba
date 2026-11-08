@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import re
 from datetime import timedelta
 
 from django.utils import timezone
@@ -34,6 +35,18 @@ REGLES = [
     ('fetes_autorisees', 'fetes_interdites'),
 ]
 AMENITIES += [valeur for paire in REGLES for valeur in paire]
+# Room of a photo: numbered for the bedrooms and bathrooms ("chambre_2"), otherwise one of these
+PIECES = ('piece_principale', 'salon', 'cuisine', 'salle_a_manger', 'toilettes', 'terrasse', 'balcon', 'jardin', 'piscine',
+          'exterieur', 'entree', 'vue', 'parking', 'autre',
+          # Spaces of a hotel, an aparthotel or a guesthouse
+          'reception', 'chambres', 'salles_de_bain', 'restaurant', 'bar', 'salle_de_sport', 'salle_de_reunion')
+MAX_TYPES_CHAMBRES = 30
+# Longest stay a search takes into account: the longest one that can be booked
+MAX_NUITS_RECHERCHE = 90
+PIECE_NUMEROTEE = re.compile(r'^(chambre|salle_de_bain)_([1-9]|[1-4][0-9]|50)$')
+LEGENDE_MANQUANTE = "Indiquez la pièce de chaque photo (chambre 1, salon…)."
+# What the host states before sending a listing; `attestation`: the information is true and they may rent this place out
+DECLARATIONS = ('cameras', 'animaux', 'travaux', 'attestation')
 
 
 class HebergementSerializer(serializers.ModelSerializer):
@@ -44,6 +57,7 @@ class HebergementSerializer(serializers.ModelSerializer):
     is_favorite = serializers.SerializerMethodField()
     motif_refus = serializers.SerializerMethodField()
     en_ligne = serializers.SerializerMethodField()
+    statut_annonce = serializers.SerializerMethodField()
     frais_voyageur = serializers.SerializerMethodField()
     types = serializers.SerializerMethodField()
     position = serializers.SerializerMethodField()
@@ -51,11 +65,11 @@ class HebergementSerializer(serializers.ModelSerializer):
     class Meta:
         model = HebergementModel
         fields = [
-            'id', 'name', 'description', 'type', 'city', 'location', 'latitude', 'longitude', 'position',
-            'price_per_night', 'rating', 'review_count', 'image_url', 'images',
+            'id', 'name', 'description', 'type', 'espace', 'city', 'location', 'latitude', 'longitude', 'position',
+            'price_per_night', 'rating', 'review_count', 'image_url', 'images', 'legendes_photos',
             'max_guests', 'amenities', 'is_available', 'host_id', 'host_name', 'hote_verifie', 'hote_fondateur',
-            'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne',
-            'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
+            'is_favorite', 'created_at', 'statut_verification', 'verifiee_le', 'motif_refus', 'en_ligne', 'statut_annonce',
+            'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits', 'point_repere',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant',
             'politique_annulation', 'frais_voyageur', 'types',
         ]
@@ -63,13 +77,14 @@ class HebergementSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         donnees = super().to_representation(instance)
+        donnees['legendes_photos'] = donnees.get('legendes_photos') or {}
         # Listings published before the filtering: contact details hidden from travellers (the host sees their text)
         if not self.context.get('proprietaire'):
             for champ in ('name', 'description', 'location'):
                 if donnees.get(champ):
                     donnees[champ] = coordonnees.analyser(donnees[champ])[0]
-            # Anti-bypass: the exact position would lead to the host without booking
-            del donnees['latitude'], donnees['longitude']
+            # Anti-bypass: the exact position and the landmark would lead to the host without booking
+            del donnees['latitude'], donnees['longitude'], donnees['point_repere']
         return donnees
 
     def _par_hote(self, cle: str, obj, charger):
@@ -113,6 +128,9 @@ class HebergementSerializer(serializers.ModelSerializer):
         # For the host only: is the listing actually public (verified, not hidden, opening done, agreement signed)?
         return obj.est_publiee if self.context.get('proprietaire') else None
 
+    def get_statut_annonce(self, obj):
+        return obj.statut_annonce if self.context.get('proprietaire') else None
+
     def get_frais_voyageur(self, obj):
         """Service fee rate for the visitor: 6 %, or 3 % if they already stayed with this host (loyal customer)."""
         request = self.context.get('request')
@@ -138,21 +156,27 @@ class HebergementSerializer(serializers.ModelSerializer):
 
 
 class HebergementCreateSerializer(serializers.ModelSerializer):
+    # A hotel's room types, created with the listing ("Double standard", 80 rooms…): written only, then managed in
+    # the host space (TypeLogementModel)
+    types_chambres = serializers.ListField(child=serializers.DictField(), required=False, write_only=True,
+                                           max_length=MAX_TYPES_CHAMBRES)
+
     class Meta:
         model = HebergementModel
         fields = [
-            'name', 'description', 'type', 'city', 'location', 'latitude', 'longitude',
-            'price_per_night', 'image_url', 'images', 'max_guests',
+            'name', 'description', 'type', 'city', 'location', 'point_repere', 'latitude', 'longitude',
+            'price_per_night', 'image_url', 'images', 'legendes_photos', 'max_guests', 'types_chambres',
             'amenities', 'is_available',
-            'surface_m2', 'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
+            'chambres', 'salles_de_bain', 'lits_doubles', 'lits_simples', 'canapes_lits',
             'petit_dejeuner', 'petit_dejeuner_prix', 'arrivee_a_partir', 'depart_avant', 'politique_annulation',
+            'declarations',
         ]
         extra_kwargs = {
             'latitude': {'min_value': -85, 'max_value': 85},
             'longitude': {'min_value': -180, 'max_value': 180},
-            'surface_m2': {'min_value': 5, 'max_value': 100000},
+            'max_guests': {'max_value': 20},
             'chambres': {'max_value': 200},
-            'salles_de_bain': {'max_value': 200},
+            'salles_de_bain': {'min_value': 1, 'max_value': 200},
             'lits_doubles': {'max_value': 200},
             'lits_simples': {'max_value': 200},
             'canapes_lits': {'max_value': 200},
@@ -163,18 +187,35 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
     POSITION_MANQUANTE = "Placez votre logement sur la carte."
     DETAILS_OBLIGATOIRES = {
         'latitude': POSITION_MANQUANTE,
-        'surface_m2': "Indiquez la surface en m².",
-        'chambres': "Indiquez le nombre de chambres.",
+        'point_repere': "Indiquez un point de repère pour trouver le logement.",
+        'chambres': "Indiquez le nombre de chambres (0 pour un studio).",
+        'salles_de_bain': "Indiquez le nombre de salles de bain.",
         'petit_dejeuner': "Indiquez si le petit-déjeuner est inclus, en option ou non proposé.",
     }
 
     def validate(self, data):
+        etablissement = data.get('type', getattr(self.instance, 'type', None)) in HebergementModel.ETABLISSEMENTS
+        types = data.get('types_chambres') or []
         if not self.partial:
-            manquants = {k: [m] for k, m in self.DETAILS_OBLIGATOIRES.items() if data.get(k) in (None, '')}
-            if not any(data.get(k) for k in ('lits_doubles', 'lits_simples', 'canapes_lits')):
+            # A hotel describes its rooms by type: no bedrooms, bathrooms or beds of a house
+            obligatoires = {k: m for k, m in self.DETAILS_OBLIGATOIRES.items()
+                            if not etablissement or k not in ('chambres', 'salles_de_bain')}
+            manquants = {k: [m] for k, m in obligatoires.items() if data.get(k) in (None, '')}
+            if not etablissement and not any(data.get(k) for k in ('lits_doubles', 'lits_simples', 'canapes_lits')):
                 manquants['lits'] = ["Indiquez au moins un lit."]
+            if any(not (u.get('nom') and u.get('prix_nuit') and u.get('quantite') and u.get('capacite')) for u in types):
+                manquants['types_chambres'] = ["Indiquez le nom, le prix, le nombre de chambres et la capacité de chaque type."]
             if manquants:
                 raise serializers.ValidationError(manquants)
+        if not etablissement:
+            # Left from a type chosen then changed: a house has no room types to create
+            data.pop('types_chambres', None)
+            types = []
+        complets = [u for u in types if u.get('prix_nuit') and u.get('capacite')]
+        if complets:
+            # The listing shows the cheapest room ("from") and the largest one
+            data['price_per_night'] = min(u['prix_nuit'] for u in complets)
+            data['max_guests'] = max(u['capacite'] for u in complets)
         latitude = data.get('latitude', getattr(self.instance, 'latitude', None))
         longitude = data.get('longitude', getattr(self.instance, 'longitude', None))
         if (latitude is None) != (longitude is None):
@@ -184,7 +225,19 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'petit_dejeuner_prix': ["Indiquez le prix du petit-déjeuner par personne."]})
         if formule != 'option' and 'petit_dejeuner' in data:
             data['petit_dejeuner_prix'] = None
+        self._legendes(data)
         return data
+
+    def _legendes(self, data):
+        """Keeps the room of the listing's photos only, and of all of them for a new listing."""
+        if not ({'images', 'image_url', 'legendes_photos'} & data.keys()) and self.partial:
+            return
+        photos = set(data.get('images', getattr(self.instance, 'images', None)) or [])
+        photos |= {data.get('image_url', getattr(self.instance, 'image_url', ''))} - {''}
+        legendes = data.get('legendes_photos', getattr(self.instance, 'legendes_photos', None)) or {}
+        data['legendes_photos'] = {url: piece for url, piece in legendes.items() if url in photos}
+        if not self.partial and photos - data['legendes_photos'].keys():
+            raise serializers.ValidationError({'legendes_photos': [LEGENDE_MANQUANTE]})
 
     COORDONNEES_REFUSEES = ("Les coordonnées (téléphone, email, site, réseaux sociaux) ne sont pas autorisées dans l'annonce : "
                             "les voyageurs vous écrivent par la messagerie Kwa-Ba.")
@@ -206,6 +259,9 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
 
     def validate_location(self, value):
         return self._sans_coordonnees(value)
+
+    def validate_point_repere(self, value):
+        return self._sans_coordonnees(value.strip())
 
     def validate_price_per_night(self, value):
         if value <= 0:
@@ -237,6 +293,67 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
         if not all(url_image_autorisee(u) for u in value):
             raise serializers.ValidationError(IMAGE_REFUSEE)
         return value[:10]
+
+    def validate_types_chambres(self, value):
+        """Each type: name, price per night, number of identical rooms, guests per room. A draft may hold unfinished
+        lines: only a wrong value is refused there, the missing ones at creation (validate)."""
+        propres = []
+        for u in value:
+            try:
+                propre = {
+                    'nom': str(u.get('nom') or '').strip()[:120],
+                    'prix_nuit': int(u.get('prix_nuit') or 0),
+                    'quantite': int(u.get('quantite') or 0),
+                    'capacite': int(u.get('capacite') or 0),
+                }
+            except (TypeError, ValueError):
+                raise serializers.ValidationError("Types de chambres invalides.")
+            if propre['prix_nuit'] < 0 or propre['prix_nuit'] > 10_000_000:
+                raise serializers.ValidationError("Prix par nuit invalide.")
+            if propre['quantite'] > 500 or propre['capacite'] > 50 or propre['quantite'] < 0 or propre['capacite'] < 0:
+                raise serializers.ValidationError("500 chambres et 50 personnes par chambre au plus.")
+            if propre['nom']:
+                self._sans_coordonnees(propre['nom'])
+            propres.append(propre)
+        return propres
+
+    def create(self, validated_data):
+        types = validated_data.pop('types_chambres', None) or []
+        hebergement = super().create(validated_data)
+        if types:
+            from . import types_logement
+
+            # The default type (created with the listing) becomes the first one, the others follow
+            premier, *autres = types
+            defaut = hebergement.types.first()
+            for champ, valeur in premier.items():
+                setattr(defaut, champ, valeur)
+            defaut.ordre = 0
+            defaut.save()
+            TypeLogementModel.objects.bulk_create([TypeLogementModel(hebergement=hebergement, ordre=i, **u)
+                                                   for i, u in enumerate(autres, start=1)])
+            types_logement.recalculer_etablissement(hebergement)
+        return hebergement
+
+    def update(self, instance, validated_data):
+        validated_data.pop('types_chambres', None)  # managed in the host space once the listing exists
+        return super().update(instance, validated_data)
+
+    def validate_legendes_photos(self, value):
+        if value is None:
+            return {}
+        if not isinstance(value, dict) or len(value) > 20 or not all(
+                isinstance(url, str) and isinstance(piece, str) and (piece in PIECES or PIECE_NUMEROTEE.match(piece))
+                for url, piece in value.items()):
+            raise serializers.ValidationError("Pièces des photos invalides.")
+        return value
+
+    def validate_declarations(self, value):
+        if value is None:
+            return value
+        if not isinstance(value, dict) or set(value) - set(DECLARATIONS) or not all(isinstance(v, bool) for v in value.values()):
+            raise serializers.ValidationError("Déclarations invalides.")
+        return value
 
 
 class TypeLogementSerializer(serializers.ModelSerializer):
@@ -283,13 +400,20 @@ class BlocageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BlocageModel
-        fields = ['id', 'debut', 'fin', 'motif', 'type_logement', 'type_logement_nom', 'created_at']
+        fields = ['id', 'debut', 'fin', 'motif', 'type_logement', 'type_logement_nom', 'quantite', 'created_at']
         read_only_fields = ['id', 'created_at']
+        extra_kwargs = {'quantite': {'min_value': 1}}
 
     def validate(self, data):
         today = timezone.localdate()
         if data['fin'] <= data['debut']:
             raise serializers.ValidationError({'fin': 'La fin doit être après le début.'})
+        if data.get('quantite'):
+            type_logement = data.get('type_logement')
+            if type_logement is None:
+                raise serializers.ValidationError({'quantite': ["Choisissez le type de chambre dont fermer une partie."]})
+            if data['quantite'] > type_logement.quantite:
+                raise serializers.ValidationError({'quantite': [f"Ce type compte {type_logement.quantite} unité(s)."]})
         if data['debut'] < today:
             raise serializers.ValidationError({'debut': 'Impossible de bloquer des dates passées.'})
         if data['fin'] > today + timedelta(days=730):
@@ -309,8 +433,10 @@ class RechercheSerializer(serializers.Serializer):
     disponibles = serializers.BooleanField(required=False)
 
     def validate(self, data):
-        # Dates are used only as a pair, departure after arrival
-        if not (data.get('check_in') and data.get('check_out') and data['check_out'] > data['check_in']):
+        # Dates are used only as a pair, for a stay that can be booked: departure after arrival, arrival not in the
+        # past, 90 nights at most. Availability is computed night by night: an unbounded stay would hold a worker.
+        debut, fin = data.get('check_in'), data.get('check_out')
+        if not (debut and fin and debut < fin and debut >= timezone.localdate() and (fin - debut).days <= MAX_NUITS_RECHERCHE):
             data.pop('check_in', None)
             data.pop('check_out', None)
         return data

@@ -1,9 +1,9 @@
-import { BathtubIcon, BedIcon, ClockIcon, CoffeeIcon, DoorOpenIcon, RulerIcon, type Icon } from "@phosphor-icons/react";
+import { BathtubIcon, BedIcon, ClockIcon, CoffeeIcon, DoorOpenIcon, type Icon } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 import type { Hebergement } from "@/types/api/models";
 import { useFormat } from "@/lib/format";
 
-type Details = Pick<Hebergement, "surface_m2" | "chambres" | "salles_de_bain" | "lits_doubles" | "lits_simples" | "canapes_lits"
+type Details = Pick<Hebergement, "chambres" | "salles_de_bain" | "lits_doubles" | "lits_simples" | "canapes_lits"
   | "petit_dejeuner" | "petit_dejeuner_prix" | "arrivee_a_partir" | "depart_avant">;
 
 /** « 14:00:00 » → « 14 h », « 10:30:00 » → « 10 h 30 ». */
@@ -14,11 +14,10 @@ const heure = (h: string | null) => {
 };
 export const nombreLits = (d: Details) => (d.lits_doubles ?? 0) + (d.lits_simples ?? 0) + (d.canapes_lits ?? 0);
 
-/** Short summary for cards: "140 m² · 3 bedrooms · Breakfast included". */
+/** Short summary for cards: "3 bedrooms · Breakfast included". */
 export function useResumeDetails() {
   const t = useTranslations("details");
   return (d: Details) => [
-    d.surface_m2 ? t("surface", { m2: d.surface_m2 }) : null,
     d.chambres ? t("chambres", { nombre: d.chambres }) : null,
     d.petit_dejeuner === "inclus" ? t("petitDejInclusCourt") : null,
   ].filter(Boolean).join(" · ");
@@ -38,7 +37,7 @@ function Ligne({ Icone, titre, texte }: { Icone: Icon; titre: string; texte: str
   );
 }
 
-/** The listing in detail (page): area, bedrooms, beds, bathrooms, breakfast, times. Nothing for a listing without details. */
+/** The listing in detail (page): bedrooms, beds, bathrooms, breakfast, times. Nothing for a listing without details. */
 export default function DetailsLogement({ h }: { h: Details }) {
   const { formatPrice } = useFormat();
   const t = useTranslations("details");
@@ -54,7 +53,6 @@ export default function DetailsLogement({ h }: { h: Details }) {
     heure(h.depart_avant) && t("depart", { heure: heure(h.depart_avant)! })].filter(Boolean).join(" · ");
 
   const lignes: { Icone: Icon; titre: string; texte: string }[] = [];
-  if (h.surface_m2) lignes.push({ Icone: RulerIcon, titre: t("surfaceTitre"), texte: t("surface", { m2: h.surface_m2 }) });
   if (h.chambres) lignes.push({ Icone: DoorOpenIcon, titre: t("chambresTitre"), texte: t("chambres", { nombre: h.chambres }) });
   if (lits) lignes.push({ Icone: BedIcon, titre: t("litsTitre", { nombre: nombreLits(h) }), texte: lits });
   if (h.salles_de_bain) lignes.push({ Icone: BathtubIcon, titre: t("sallesTitre"), texte: t("salles", { nombre: h.salles_de_bain }) });

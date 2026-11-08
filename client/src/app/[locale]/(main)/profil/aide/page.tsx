@@ -6,6 +6,7 @@ import { Search, ChevronDown, Mail, MessageCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import FormulaireReclamation from "@/components/aide/FormulaireReclamation";
+import { useTaux } from "@/features/paiements";
 import { CONTACT_EMAIL } from "@/lib/contact";
 import { SECTIONS_EN } from "./faq-en";
 
@@ -37,7 +38,7 @@ const SECTIONS = [
       { q: "Quand suis-je débité ?", a: "Au moment où vous réservez, sur la page sécurisée de FedaPay ; Kwa-Ba ne conserve pas les données complètes de votre carte (CGV, art. 7.1). La réservation est ferme dès la confirmation du paiement ; la confirmation vous est envoyée aussitôt, et au plus tard sous cinq jours (art. 5.3). Le prix ne peut plus augmenter ensuite (art. 6.2)." },
       { q: "Quand l'hôte est-il payé ?", a: "Kwa-Ba conserve le prix jusqu'à 24 heures après votre arrivée, puis le verse à l'hôte (CGV, art. 8.1). Ce délai vous permet de signaler un problème avant que l'hôte ne soit payé (art. 8.3)." },
       { q: "Comment suis-je remboursé ?", a: "Sur le moyen de paiement d'origine, dans un délai de sept jours ouvrés ; à défaut, sur un compte Mobile Money à votre nom, avec votre accord (CGV, art. 11.5). Le montant dépend de la politique d'annulation de l'annonce (annexe 1). Si le prestataire annule, vous êtes remboursé intégralement, frais de service compris (art. 11.3)." },
-      { q: "Que comprennent les frais de service ?", a: "Ils rémunèrent le service de réservation et l'assistance de Kwa-Ba (CGV, art. 2 et 3.3). Ils s'élèvent à 6 % du prix des nuits ; 3 % pour un client fidèle qui revient chez le même hôte ou pour un Pack Séjour + Chauffeur (art. 6.4). Les réductions ne se cumulent pas, et le détail est affiché avant le paiement (art. 5.1)." },
+      { q: "Que comprennent les frais de service ?", a: "Ils rémunèrent le service de réservation et l'assistance de Kwa-Ba (CGV, art. 2 et 3.3). Ils s'élèvent à {fraisVoyageur} du prix des nuits ; {fraisReduits} pour un client fidèle qui revient chez le même hôte ou pour un Pack Séjour + Chauffeur (art. 6.4). Les réductions ne se cumulent pas, et le détail est affiché avant le paiement (art. 5.1)." },
     ],
   },
   {
@@ -57,7 +58,7 @@ const SECTIONS = [
       // Outside the terms: how the site works
       { q: "Je n'ai pas reçu mon code de vérification", a: "Vérifiez vos spams, puis utilisez « Renvoyer le code » sur la page de vérification (un nouveau code toutes les 60 secondes). Le code est valable 10 minutes." },
       { q: "J'ai oublié mon mot de passe", a: "Cliquez sur « Mot de passe oublié ? » sur la page de connexion : un code vous est envoyé par email pour choisir un nouveau mot de passe. Gardez vos identifiants confidentiels et prévenez Kwa-Ba en cas d'usage frauduleux (CGU, art. 4.3)." },
-      { q: "Comment devenir hôte ?", a: "Depuis « Devenir hôte », activez votre compte hôte puis préparez votre annonce dans l'Espace hôte. Seul un partenaire inscrit, qui a accepté les conditions qui le concernent, peut publier (CGU, art. 5.1). Avant publication, Kwa-Ba vérifie votre identité et vos documents, et visite le logement (art. 5.2). L'annonce doit être exacte et ne contenir aucune coordonnée personnelle (art. 5.3 et 5.4)." },
+      { q: "Comment devenir hôte ?", a: "Depuis « Devenir hôte », cliquez sur « Commencer » puis préparez votre annonce. Vous devenez hôte dès qu'un agent a validé votre premier logement. Seul un partenaire inscrit, qui a accepté les conditions qui le concernent, peut publier (CGU, art. 5.1). Avant publication, Kwa-Ba vérifie votre identité et vos documents, et visite le logement (art. 5.2). L'annonce doit être exacte et ne contenir aucune coordonnée personnelle (art. 5.3 et 5.4)." },
       { q: "Comment changer de langue ?", a: "Utilisez le sélecteur FR / EN en haut de la page ou dans le pied de page, ou Profil → Langue & région ; votre choix est mémorisé sur cet appareil. Les CGV sont rédigées en français, qui fait foi en cas de traduction (CGV, art. 1.4)." },
     ],
   },
@@ -89,7 +90,12 @@ const SECTIONS = [
 
 export default function HelpPage() {
   const t = useTranslations("aide");
-  const sections = useLocale() === "en" ? SECTIONS_EN : SECTIONS;
+  const useLocaleEn = useLocale() === "en";
+  const { texte: texteTaux } = useTaux();
+  // The fee rates of the answers are the ones set in the back-office
+  const sections = useMemo(() => (useLocaleEn ? SECTIONS_EN : SECTIONS).map((s) => ({
+    ...s, items: s.items.map((i) => ({ ...i, a: i.a.replace("{fraisVoyageur}", texteTaux.voyageur).replace("{fraisReduits}", texteTaux.reduits) })),
+  })), [useLocaleEn, texteTaux.voyageur, texteTaux.reduits]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
 

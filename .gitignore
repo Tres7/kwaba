@@ -29,6 +29,12 @@ db.sqlite3-journal
 *.log
 server/.venv/
 server/.env
+documentation/diagrammes/
+docs/
+# Database dumps never go into this public repository (users' personal data)
+*.sql
+*.dump
+!deploy/postgres/roles.sql
 
 # =========================
 # client
@@ -110,3 +116,6 @@ deploy/vps/deployments.log
 # Local audit reports
 AUDIT_SECURITE_FRONT.md
 AUDIT_ARCHITECTURE_FRONT.md
+
+# Marketing material stays local (videos, WhatsApp posters, real photos)
+marketing/

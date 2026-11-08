@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import type { City, Hebergement, Paginated, Reservation, TypeLogement } from "@/types/api/models";
+import type { Conditions } from "./assistant/etapes";
 import type { BrouillonAnnonce, DonneesAnnonce } from "./brouillons";
 import type { Suggestions } from "./ChampDestination";
 import type { PeriodeIndispo } from "./disponibilites";
@@ -37,6 +38,25 @@ export async function listerBrouillons() {
 
 export async function creerBrouillon(donnees: DonneesAnnonce) {
   return (await api.post<BrouillonAnnonce>(`${HEBERGEMENTS}/brouillons/`, { donnees })).data;
+}
+
+export async function lireBrouillon(id: string) {
+  return (await api.get<BrouillonAnnonce>(`${HEBERGEMENTS}/brouillons/${id}/`)).data;
+}
+
+/** Wizard: adds the answers of a screen to the draft. `erreurs`: what the API would refuse, never a refused save. */
+export async function enregistrerEtape(id: string, donnees: DonneesAnnonce, etape?: string) {
+  const corps = { donnees, ...(etape ? { etape } : {}) };
+  return (await api.patch<BrouillonAnnonce & { erreurs: Record<string, string[]> }>(`${HEBERGEMENTS}/brouillons/${id}/`, corps)).data;
+}
+
+export async function lireConditions(id: string) {
+  return (await api.get<Conditions>(`${HEBERGEMENTS}/brouillons/${id}/conditions/`)).data;
+}
+
+/** Sends the draft for verification: the listing is created, and the draft no longer exists. */
+export async function soumettreBrouillon(id: string) {
+  return (await api.post<Hebergement>(`${HEBERGEMENTS}/brouillons/${id}/soumettre/`)).data;
 }
 
 export async function modifierBrouillon(id: string, donnees: DonneesAnnonce) {

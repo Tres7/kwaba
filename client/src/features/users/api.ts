@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { AdminStats, AdminUser } from "@/types/api/admin";
+import type { AdminStats, AdminUser, DroitsAdmin } from "@/types/api/admin";
 import type { Me } from "@/types/api/models";
 
 const MOI = "/v1/users/me/";
@@ -12,8 +12,9 @@ export async function modifierMoi(champs: Partial<Pick<Me, "first_name" | "last_
   return (await api.patch<Me>(MOI, champs)).data;
 }
 
-export async function devenirHote() {
-  await api.patch(MOI, { role: "hote" });
+/** The role does not change: the account becomes a host once an agent has validated a first listing. */
+export async function ouvrirCandidature() {
+  return (await api.post<Me>(`${MOI}candidature/`)).data;
 }
 
 export async function fermerMonCompte() {
@@ -22,6 +23,10 @@ export async function fermerMonCompte() {
 
 export async function modifierUtilisateurAdmin(id: AdminUser["id"], champs: Record<string, unknown>) {
   await api.patch(`/v1/admin/users/${id}/`, champs);
+}
+
+export async function lireDroitsAdmin() {
+  return (await api.get<DroitsAdmin>("/v1/admin/droits/")).data;
 }
 
 export async function lireStatsAdmin() {

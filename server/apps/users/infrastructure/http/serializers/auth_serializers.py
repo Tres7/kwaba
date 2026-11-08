@@ -1,6 +1,7 @@
 # JSON validation, deserialization and serialization
 import hashlib
 import re
+import unicodedata
 
 from django.contrib.auth.password_validation import validate_password
 from django.conf import settings
@@ -10,10 +11,15 @@ from django.db import connection, transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from apps.users.domain.entities.User import UserRole
 
-# The admin role can never be chosen at public sign-up
-PUBLIC_ROLES = [UserRole.VOYAGEUR.value, UserRole.HOTE.value]
+
+NOM_REFUSE = "Un nom tient sur une ligne, sans caractère invisible."
+
+
+def nom_interdit(valeur: str) -> bool:
+    """A name is shown in emails and on the site: a line break could make a line of its own, which the HTML emails
+    turn into a Kwa-Ba button, and an invisible character (text direction) could disguise it."""
+    return any(unicodedata.category(c) in ('Cc', 'Cf', 'Zl', 'Zp') for c in valeur)
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -22,7 +28,6 @@ class RegisterSerializer(serializers.Serializer):
     last_name  = serializers.CharField(max_length=150)
     password   = serializers.CharField(min_length=8, write_only=True)
     password_confirm = serializers.CharField(min_length=8, write_only=True)
-    role       = serializers.ChoiceField(choices=PUBLIC_ROLES, default=UserRole.VOYAGEUR.value)
     phone      = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
 
     def validate_email(self, value):
@@ -32,12 +37,16 @@ class RegisterSerializer(serializers.Serializer):
         value = value.strip()
         if not value:
             raise serializers.ValidationError('Le prénom est requis.')
+        if nom_interdit(value):
+            raise serializers.ValidationError(NOM_REFUSE)
         return value
 
     def validate_last_name(self, value):
         value = value.strip()
         if not value:
             raise serializers.ValidationError('Le nom est requis.')
+        if nom_interdit(value):
+            raise serializers.ValidationError(NOM_REFUSE)
         return value
 
     def validate_phone(self, value):

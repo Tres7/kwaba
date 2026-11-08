@@ -25,6 +25,11 @@ class ProduitPaye:
     passe: Callable[[], dict] | None = None                  # the product's part of the worker's pass
     versements: Callable[[str], list] | None = None          # payout id -> its ongoing payout lines (webhook)
     relance: Relance | None = None
+    # Finances (back-office): object ids -> Kwa-Ba's revenue on each (fees and commissions)
+    revenu: Callable[[list], dict] | None = None
+    # Finances: partner payouts sent in [debut, fin) or still due, as rows {categorie, beneficiaire, objet, montant,
+    # commission, statut, date_prevue, envoye_le} (statut: planifie, en_cours, envoye, echoue)
+    versements_periode: Callable[[object, object], list[dict]] | None = None
 
 
 PRODUITS: dict[str, ProduitPaye] = {}

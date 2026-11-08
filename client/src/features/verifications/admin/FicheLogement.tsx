@@ -8,6 +8,8 @@ import { deciderVisite } from "../api";
 import { cn, formatPrice, libelleType } from "@/lib/utils";
 import { urlExterneSure } from "@/lib/url-sure";
 import { ouvrirPiece } from "./documents";
+import { useTranslations } from "next-intl";
+import { libellePiece } from "@/features/hebergements";
 
 export interface Logement {
   id: string;
@@ -15,6 +17,8 @@ export interface Logement {
   type: string;
   city: string;
   location: string;
+  /** How to find the place ("Derrière le CHU…") */
+  point_repere: string;
   /** Exact position placed by the host, for the visit */
   position: { lat: number; lng: number } | null;
   description: string;
@@ -22,6 +26,8 @@ export interface Logement {
   max_guests: number;
   amenities: string[];
   photos: string[];
+  /** Room of each photo, to compare with the place */
+  legendes_photos?: Record<string, string>;
   modifiee_apres_verification: boolean;
   cree_le: string;
   hote: {
@@ -29,7 +35,8 @@ export interface Logement {
     nom: string;
     email: string;
     telephone: string | null;
-    piece: { statut: "absente" | "soumise" | "verifiee" | "refusee"; type_libelle?: string; motif_refus?: string };
+    /** copie: false for the documents verified before they were kept */
+    piece: { statut: "absente" | "soumise" | "verifiee" | "refusee"; type_libelle?: string; motif_refus?: string; copie?: boolean };
   };
 }
 
@@ -53,8 +60,11 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
   const [photos, setPhotos] = useState<File[]>([]);
   const [envoi, setEnvoi] = useState<"validee" | "refusee" | null>(null);
 
+  const tPieces = useTranslations("pieces");
   const toutCoche = Object.keys(controlesLibelles).every((cle) => controles[cle]);
   const piece = PIECE[logement.hote.piece.statut];
+  // Verified: shown again at the visit, to compare with the person met
+  const pieceVisible = logement.hote.piece.copie && ["soumise", "verifiee"].includes(logement.hote.piece.statut);
   const telephone = logement.hote.telephone?.replace(/[^\d+]/g, "");
   const destination = logement.position ? `${logement.position.lat},${logement.position.lng}` : `${logement.location}, ${logement.city}`;
   const carte = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
@@ -96,16 +106,24 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         </div>
         <div className={cn("flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm", piece.classe)}>
           <span>{piece.libelle}{logement.hote.piece.type_libelle ? ` (${logement.hote.piece.type_libelle})` : ""}</span>
-          {logement.hote.piece.statut === "soumise" && (
+          {pieceVisible && (
             <button onClick={() => ouvrirPiece(logement.hote.id)} className="flex items-center gap-1 font-bold underline"><FileText size={15} aria-hidden /> Voir</button>
           )}
         </div>
+        {logement.hote.piece.statut === "verifiee" && (
+          <p className="text-xs text-gray-500">
+            {pieceVisible
+              ? "Sur place, comparez la personne rencontrée à cette pièce."
+              : "Pas de copie de la pièce (vérifiée quand Kwa-Ba ne les gardait pas) : demandez à voir l'original sur place."}
+          </p>
+        )}
       </section>
 
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-2">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Annonce à comparer au logement</h2>
         <p className="text-sm text-dark">{libelleType(logement.type, "fr")} · {logement.max_guests} voyageurs · {formatPrice(logement.price_per_night)} / nuit</p>
         <p className="text-sm text-gray-600">{logement.location ? `${logement.location}, ` : ""}{logement.city}</p>
+        {logement.point_repere && <p className="text-sm text-dark">Point de repère : {logement.point_repere}</p>}
         {logement.amenities.length > 0 && <p className="text-sm text-gray-600">Équipements annoncés : {logement.amenities.join(", ")}</p>}
         {logement.description && <p className="text-sm text-gray-600 whitespace-pre-line">{logement.description}</p>}
         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -113,6 +131,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
           {Array.from(new Set(logement.photos)).map((url) => (
             <a key={url} href={urlExterneSure(url)} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
               <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg" />
+              {logement.legendes_photos?.[url] && <span className="block text-xs text-gray-600 mt-1">{libellePiece(logement.legendes_photos[url], tPieces)}</span>}
             </a>
           ))}
         </div>

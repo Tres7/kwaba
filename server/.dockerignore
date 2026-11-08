@@ -14,6 +14,8 @@ coverage.xml
 coverage-html/
 htmlcov/
 mediafiles/
+# Private files of a development machine (identity documents, contracts): never in an image
+prive/
 staticfiles/
 
 # Test and development tooling

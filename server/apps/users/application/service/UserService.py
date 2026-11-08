@@ -88,7 +88,8 @@ class UserService:
         if dto.avatar_url:
             user.avatar_url = dto.avatar_url
 
-        updated_user = self._repository.update(user)
+        # Only the profile: the role or the activation, which an administrator may change meanwhile, stay as they are
+        updated_user = self._repository.update(user, champs=('first_name', 'last_name', 'phone'))
         return UserResponseDTO.from_entity(updated_user)
 
     def verify_account(self, user_id: uuid.UUID) -> None:
@@ -96,23 +97,14 @@ class UserService:
         if not user:
             raise UserNotFoundException(str(user_id))
         user.verify()
-        self._repository.update(user)
-
-    def become_host(self, user_id: uuid.UUID) -> UserResponseDTO:
-        user = self._repository.find_by_id(user_id)
-        if not user:
-            raise UserNotFoundException(str(user_id))
-        if user.role == UserRole.VOYAGEUR:
-            user.change_role(UserRole.HOTE)
-            user = self._repository.update(user)
-        return UserResponseDTO.from_entity(user)
+        self._repository.update(user, champs=('is_verified',))
 
     def deactivate(self, user_id: uuid.UUID) -> None:
         user = self._repository.find_by_id(user_id)
         if not user:
             raise UserNotFoundException(str(user_id))
         user.deactivate()
-        self._repository.update(user)
+        self._repository.update(user, champs=('is_active',))
 
     def find_for_authentication(self, email: str) -> User:
         """Returns the full entity with password_hash for authentication."""
@@ -132,11 +124,16 @@ class UserService:
         if not user:
             user = self._repository.find_by_email(info.email)
             if user:
+                jamais_verifie = not user.is_verified
                 user.google_id = info.google_id
                 user.is_verified = True
                 if info.avatar_url and not user.avatar_url:
                     user.avatar_url = info.avatar_url
-                user = self._repository.update(user)
+                user = self._repository.update(user, champs=('google_id', 'is_verified'))
+                if jamais_verifie:
+                    # Nobody had proved owning this address: its password may have been chosen by someone else,
+                    # who created the account to wait for its owner. Google is now the only way in.
+                    self._repository.oublier_mot_de_passe(user.id)
             else:
                 user = User(
                     email=Email(info.email),

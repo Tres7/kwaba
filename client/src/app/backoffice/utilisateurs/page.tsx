@@ -10,8 +10,9 @@ import { apiErrorMessage } from "@/lib/api";
 import { formatDate, initials, ROLE_LABELS } from "@/lib/utils";
 import { PAGE_SIZE, useAdminList, useDebounced } from "@/lib/useAdminList";
 import AdminTable, { ActionButton, Pagination, Pill, SearchInput, type Colonne } from "@/components/backoffice/AdminTable";
-import { modifierUtilisateurAdmin } from "@/features/users";
+import { modifierUtilisateurAdmin, useDroitsAdmin } from "@/features/users";
 import ConditionsHote from "@/features/users/admin/ConditionsHote";
+import DroitsAdmin from "@/features/users/admin/DroitsAdmin";
 import ConfirmDialog, { type Confirmation } from "@/components/backoffice/ConfirmDialog";
 import Select from "@/components/ui/Select";
 import type { AdminUser, Role } from "@/types/api/admin";
@@ -22,6 +23,11 @@ const ROLES: { value: "" | Role; label: string }[] = [
   { value: "hote", label: "Hôtes" },
   { value: "agent", label: "Agents de terrain" },
   { value: "admin", label: "Administrateurs" },
+];
+const CANDIDATURES = [
+  { value: "", label: "Toutes les candidatures" },
+  { value: "ouverte", label: "Candidats hôtes" },
+  { value: "refusee", label: "Candidatures refusées" },
 ];
 const STATUTS = [
   { value: "", label: "Tous les statuts" },
@@ -36,13 +42,17 @@ function Utilisateurs() {
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [role, setRole] = useState<"" | Role>((searchParams.get("role") as Role) ?? "");
   const [actif, setActif] = useState(searchParams.get("actif") ?? "");
+  const [candidature, setCandidature] = useState(searchParams.get("candidature") ?? "");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [conditions, setConditions] = useState<AdminUser | null>(null);
+  const [droitsDe, setDroitsDe] = useState<AdminUser | null>(null);
+  const { data: droits } = useDroitsAdmin();
+  const superAdmin = droits?.est_super_admin ?? false;
   const recherche = useDebounced(q);
 
-  const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminUser>("users", { q: recherche, role, actif });
+  const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminUser>("users", { q: recherche, role, actif, candidature });
 
-  const modifier = async (u: AdminUser, patch: Partial<Pick<AdminUser, "is_active" | "role">>, succes: string) => {
+  const modifier = async (u: AdminUser, patch: Record<string, unknown>, succes: string) => {
     try {
       await modifierUtilisateurAdmin(u.id, patch);
       toast.success(succes);
@@ -70,7 +80,18 @@ function Utilisateurs() {
         </div>
       ),
     },
-    { titre: "Rôle", cellule: (u) => <Pill ton={u.role === "admin" || u.role === "agent" ? "bleu" : u.role === "hote" ? "orange" : "gris"}>{ROLE_LABELS[u.role]}</Pill> },
+    {
+      titre: "Rôle",
+      cellule: (u) => (
+        <span className="inline-flex flex-wrap gap-1">
+          <Pill ton={u.role === "admin" || u.role === "agent" ? "bleu" : u.role === "hote" ? "orange" : "gris"}>{u.est_super_admin ? "Super admin" : ROLE_LABELS[u.role]}</Pill>
+          {u.admin_sections && <Pill ton="gris">Accès limité</Pill>}
+          {u.admin_expire_le && <Pill ton="orange">Jusqu&apos;au {formatDate(u.admin_expire_le)}</Pill>}
+          {u.candidature_hote === "ouverte" && <Pill ton="orange">Candidat hôte</Pill>}
+          {u.candidature_hote === "refusee" && <Pill ton="rouge">Candidature refusée</Pill>}
+        </span>
+      ),
+    },
     { titre: "Statut", cellule: (u) => <Pill ton={u.is_active ? "vert" : "rouge"}>{u.is_active ? "Actif" : "Désactivé"}</Pill> },
     {
       titre: "Commission", masquerMobile: true,
@@ -86,11 +107,13 @@ function Utilisateurs() {
 
   const actions = (u: AdminUser) => {
     if (u.id === session?.user?.id) return <span className="text-xs text-muted">Votre compte</span>;
+    if (u.est_super_admin) return <span className="text-xs text-muted">Géré sur le serveur</span>;
+    if (u.role === "admin" && !superAdmin) return <span className="text-xs text-muted">Réservé aux super admins</span>;
     return (
       <>
         <Select
           label={`Rôle de ${nom(u)}`} value={u.role} className="w-44" buttonClassName="py-1.5 px-3 rounded-lg"
-          options={(["voyageur", "hote", "agent", "admin"] as Role[]).map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
+          options={(superAdmin ? ["voyageur", "hote", "agent", "admin"] as Role[] : ["voyageur", "hote", "agent"] as Role[]).map((r) => ({ value: r, label: ROLE_LABELS[r] }))}
           onChange={(r) => {
             if (r === u.role) return;
             setConfirmation({
@@ -102,7 +125,22 @@ function Utilisateurs() {
             });
           }}
         />
-        {u.role === "hote" && <ActionButton onClick={() => setConditions(u)}>Commission</ActionButton>}
+        {u.role === "admin" && <ActionButton onClick={() => setDroitsDe(u)}>Droits</ActionButton>}
+        {(u.role === "hote" || u.candidature_hote === "ouverte") && <ActionButton onClick={() => setConditions(u)}>Commission</ActionButton>}
+        {u.candidature_hote === "ouverte" && (
+          <ActionButton danger onClick={() => setConfirmation({
+            titre: "Refuser la candidature",
+            message: <><strong>{nom(u)}</strong> ne pourra plus préparer d&apos;annonce et verra ce motif (10 caractères au moins).</>,
+            libelle: "Refuser", danger: true, motif: true,
+            action: (motif) => modifier(u, { candidature: "refusee", motif }, "Candidature refusée"),
+          })}>Refuser la candidature</ActionButton>
+        )}
+        {u.candidature_hote === "refusee" && (
+          <ActionButton onClick={() => setConfirmation({
+            titre: "Rouvrir la candidature", message: <><strong>{nom(u)}</strong> pourra de nouveau préparer une annonce.</>,
+            libelle: "Rouvrir", action: () => modifier(u, { candidature: "ouverte" }, "Candidature rouverte"),
+          })}>Rouvrir la candidature</ActionButton>
+        )}
         {u.is_active ? (
           <ActionButton danger onClick={() => setConfirmation({
             titre: "Désactiver le compte",
@@ -131,6 +169,7 @@ function Utilisateurs() {
         <SearchInput value={q} onChange={setQ} placeholder="Nom, email ou téléphone" />
         <Select label="Rôle" value={role} onChange={setRole} options={ROLES} className="sm:w-48" />
         <Select label="Statut" value={actif} onChange={setActif} options={STATUTS} className="sm:w-48" />
+        <Select label="Candidature" value={candidature} onChange={setCandidature} options={CANDIDATURES} className="sm:w-56" />
       </div>
 
       <AdminTable
@@ -141,6 +180,7 @@ function Utilisateurs() {
       {data && <Pagination page={page} count={data.count} pageSize={PAGE_SIZE} onChange={setPage} />}
       <ConfirmDialog confirmation={confirmation} onClose={() => setConfirmation(null)} />
       <ConditionsHote key={conditions?.id ?? "aucun"} hote={conditions} onFermer={() => setConditions(null)} />
+      {droits && <DroitsAdmin key={droitsDe?.id ?? "aucun"} admin={droitsDe} sections={droits.sections_disponibles} onFermer={() => setDroitsDe(null)} />}
     </div>
   );
 }

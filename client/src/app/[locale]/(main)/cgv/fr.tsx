@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import LienContact from "@/components/legal/LienContact";
 import FormeSociete from "@/components/legal/FormeSociete";
 import MentionSociete from "@/components/legal/MentionSociete";
+import type { TauxCgv } from "./taux";
 import LegalPage, { AC } from "@/components/legal/LegalPage";
 
 /** Numbered paragraph of an article ("6.1. …"). */
@@ -10,11 +11,12 @@ function N({ n, children }: { n: string; children: React.ReactNode }) {
 }
 
 /** French version (authoritative). Terms of sale version 2.4 of 18 October 2026, adapted to the open services. */
-export default function ContenuFr() {
+/** `taux`: the traveller's fee rates set in the back-office ("6 %", "3 %"). */
+export default function ContenuFr({ taux }: { taux: TauxCgv }) {
   return (
     <LegalPage
       titre="Conditions générales de vente"
-      miseAJour="30 octobre 2026"
+      miseAJour="4 novembre 2026"
       intro={
         <>
           <p>
@@ -122,11 +124,12 @@ export default function ContenuFr() {
               <table>
                 <thead><tr><th>Élément</th><th>Montant</th></tr></thead>
                 <tbody>
-                  <tr><td>Prix des nuits, frais de ménage éventuels</td><td>Fixés par l’hôte ou l’hôtel, affichés avant la réservation</td></tr>
-                  <tr><td>Frais de service du client</td><td><strong>6 %</strong> du prix des nuits</td></tr>
-                  <tr><td>Pack Séjour + Chauffeur (logement réservé avec une voiture avec chauffeur)</td><td>3 % sur le logement</td></tr>
+                  <tr><td>Prix des nuits</td><td>Fixé par l’hôte ou l’hôtel, affiché avant la réservation</td></tr>
+                  <tr><td>Frais de ménage</td><td>Une fois par séjour, selon le type de logement (barème KWA-BA, de 3 000 à 15 000 F CFA), reversés en totalité à l’hôte, affichés avant la réservation</td></tr>
+                  <tr><td>Frais de service du client</td><td><strong>{taux.voyageur}</strong> du prix des nuits</td></tr>
+                  <tr><td>Pack Séjour + Chauffeur (logement réservé avec une voiture avec chauffeur)</td><td>{taux.reduits} sur le logement</td></tr>
                   <tr><td>Client sous contrat cadre entreprise</td><td>4 %</td></tr>
-                  <tr><td>Client fidèle (nouveau séjour chez le même hôte par la Plateforme)</td><td>3 %</td></tr>
+                  <tr><td>Client fidèle (nouveau séjour chez le même hôte par la Plateforme)</td><td>{taux.reduits}</td></tr>
                   <tr><td>Taxe de séjour ou taxe locale, si elle est applicable</td><td>Indiquée sur l’annonce et incluse dans le prix total</td></tr>
                 </tbody>
               </table>
@@ -282,7 +285,7 @@ export default function ContenuFr() {
           titre: "Réserver par la Plateforme",
           contenu: (
             <>
-              <N n="16.1">Pour un nouveau séjour ou une nouvelle location auprès d’un prestataire découvert sur la Plateforme, le client réserve à nouveau par la Plateforme. Il bénéficie alors du tarif Client fidèle (3 %) ou de la fonction « Mon chauffeur », et conserve la Garantie Kwa-Ba. La fonction « Mon chauffeur » permet au client de redemander un chauffeur qu’il a déjà eu par la Plateforme : ce chauffeur reçoit alors 6 500 F CFA par jour au lieu de 6 000, et KWA-BA conserve 500 F CFA au lieu de 1 000. Le prix payé par le client ne change pas.</N>
+              <N n="16.1">Pour un nouveau séjour ou une nouvelle location auprès d’un prestataire découvert sur la Plateforme, le client réserve à nouveau par la Plateforme. Il bénéficie alors du tarif Client fidèle ({taux.reduits}) ou de la fonction « Mon chauffeur », et conserve la Garantie Kwa-Ba. La fonction « Mon chauffeur » permet au client de redemander un chauffeur qu’il a déjà eu par la Plateforme : ce chauffeur reçoit alors 6 500 F CFA par jour au lieu de 6 000, et KWA-BA conserve 500 F CFA au lieu de 1 000. Le prix payé par le client ne change pas.</N>
               <N n="16.2">Le client qui reçoit une proposition de paiement ou de réservation hors de la Plateforme peut la signaler à KWA-BA. Un signalement vérifié est récompensé par 5 000 F CFA.</N>
             </>
           ),
@@ -407,7 +410,7 @@ export default function ContenuFr() {
             <table>
               <thead><tr><th>Service</th><th>Ce que paie le client</th></tr></thead>
               <tbody>
-                <tr><td>Séjour de courte durée</td><td>Prix des nuits + 6 % (3 % en Pack Séjour ou en Client fidèle, 4 % pour les entreprises sous contrat cadre)</td></tr>
+                <tr><td>Séjour de courte durée</td><td>Prix des nuits + {taux.voyageur} ({taux.reduits} en Pack Séjour ou en Client fidèle, 4 % pour les entreprises sous contrat cadre)</td></tr>
                 <tr><td>Voiture</td><td>Prix fixé par le propriétaire, sans frais de service</td></tr>
                 <tr><td>Transfert aéroport</td><td>Prix forfaitaire du trajet, chauffeur compris</td></tr>
                 <tr><td>Chauffeur</td><td>7 000 F CFA par jour + primes éventuelles (1 500 ou 2 000 F CFA par jour) + heures supplémentaires (1 000 F CFA)</td></tr>

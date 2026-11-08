@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "@/lib/api";
-import { devenirHote, fermerMonCompte, lireMoi, lireStatsAdmin, modifierMoi, modifierUtilisateurAdmin } from "./api";
+import { fermerMonCompte, lireDroitsAdmin, lireMoi, lireStatsAdmin, modifierMoi, modifierUtilisateurAdmin, ouvrirCandidature } from "./api";
 
-vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), patch: vi.fn(), delete: vi.fn() } }));
+vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), patch: vi.fn(), post: vi.fn(), delete: vi.fn() } }));
 
 describe("users", () => {
   beforeEach(() => {
@@ -17,15 +17,18 @@ describe("users", () => {
     expect(api.patch).toHaveBeenLastCalledWith("/v1/users/me/", { first_name: "Ama", phone: null });
   });
 
-  it("devient hôte et ferme son compte", async () => {
-    await devenirHote();
-    expect(api.patch).toHaveBeenLastCalledWith("/v1/users/me/", { role: "hote" });
+  it("ouvre une candidature et ferme son compte", async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} });
+    await ouvrirCandidature();
+    expect(api.post).toHaveBeenLastCalledWith("/v1/users/me/candidature/");
     await fermerMonCompte();
     expect(api.delete).toHaveBeenCalledWith("/v1/users/me/");
   });
 
   it("gère les comptes depuis le back-office", async () => {
     await modifierUtilisateurAdmin("u1", { is_active: false });
+    await lireDroitsAdmin();
+    expect(api.get).toHaveBeenCalledWith("/v1/admin/droits/");
     expect(api.patch).toHaveBeenLastCalledWith("/v1/admin/users/u1/", { is_active: false });
     await lireStatsAdmin();
     expect(api.get).toHaveBeenLastCalledWith("/v1/admin/stats/");

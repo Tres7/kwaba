@@ -17,6 +17,7 @@ from apps.contrats import api as contrats
 from apps.documents import api as documents
 from apps.hebergements import api as hebergements
 from apps.notifications.api import send_mail
+from apps.securite.audit import journaliser
 from apps.users import api as users
 
 from .fichiers import image_normalisee
@@ -71,7 +72,7 @@ def annonces_a_visiter(ville: str = '') -> list[dict]:
     hotes = set(PieceIdentiteModel.objects.filter(statut='verifiee').values_list('hote_id', flat=True))
     if contrats_disponibles():
         hotes = contrats.hotes_ayant_signe(hotes)
-    return hebergements.annonces_en_attente(hotes, ville)
+    return hebergements.annonces_en_attente(hotes - users.candidatures_refusees(hotes), ville)
 
 
 def statut_piece(hote) -> str:
@@ -145,8 +146,10 @@ def piece_a_controler(piece) -> None:
 
 @transaction.atomic
 def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> PieceIdentiteModel:
-    """Remote check of the identity document. Verified: the document is deleted (only the result is kept)
-    and the host's pending listings are sent to the agents for a visit."""
+    """Remote check of the identity document. Verified: the document is kept (the agent compares it with the person
+    met at the visit) and the host's pending listings are sent to the agents for a visit. Refused: it is deleted."""
+    if hote.pk == verificateur.pk:
+        raise VerificationErreur("Vous ne pouvez pas contrôler votre propre pièce d'identité : un autre agent doit le faire.")
     piece = PieceIdentiteModel.objects.select_for_update().filter(hote_id=hote.pk).first()
     if not piece or piece.statut != 'soumise':
         raise VerificationErreur("Aucune pièce d'identité à contrôler pour cet hôte.")
@@ -156,8 +159,6 @@ def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> Piec
     if decision == 'verifiee':
         piece.statut, piece.verifiee_le, piece.verifiee_par_id, piece.motif_refus = (
             'verifiee', timezone.now(), verificateur.pk, '')
-        if piece.fichier:
-            piece.fichier.delete(save=False)
         piece.save()
         annonces = hebergements.annonces_en_attente([hote.pk])
         for annonce in annonces:
@@ -190,6 +191,8 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
         raise VerificationErreur(f"{MAX_PHOTOS_VISITE} photos au plus.")
 
     hote = users.compte(annonce['host_id'])
+    if hote and hote.pk == agent.pk:
+        raise VerificationErreur("Vous ne pouvez pas décider de votre propre annonce : un autre agent doit la vérifier.")
     piece = PieceIdentiteModel.objects.select_for_update().filter(hote_id=hote.pk).first()
     if decision == 'validee':
         if not all(controles.values()):
@@ -198,6 +201,8 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
             raise VerificationErreur("L'identité de l'hôte doit être vérifiée avant de valider son logement.")
         if contrat_manquant(hote):
             raise VerificationErreur("L'hôte doit d'abord signer son contrat (depuis son espace hôte).")
+        if hote.candidature_hote == 'refusee':
+            raise VerificationErreur("La candidature de cet hôte a été refusée par l'équipe.")
     elif decision == 'refusee':
         if len(commentaire) < 10:
             raise VerificationErreur("Expliquez le motif du refus à l'hôte (10 caractères au moins).")
@@ -213,15 +218,22 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
         photo.save()
 
     if piece and decision == 'refusee' and not controles['identite']:
-        # The person met does not match the document: the host will have to prove their identity again
+        # The person met does not match the document: the host will have to prove their identity again. Only verified
+        # documents are kept
         piece.statut, piece.motif_refus = 'refusee', commentaire
-        piece.save(update_fields=['statut', 'motif_refus'])
+        if piece.fichier:
+            piece.fichier.delete(save=False)
+        piece.save(update_fields=['statut', 'motif_refus', 'fichier'])
 
     contexte = {'prenom': hote.first_name, 'hebergement': annonce['name'],
                 'url_espace': f"{settings.FRONTEND_URL}/hote/espace",
                 'url_annonce': f"{settings.FRONTEND_URL}/hebergements/{hebergement_id}"}
     hebergements.enregistrer_verification(hebergement_id, decision == 'validee', commentaire)
     if decision == 'validee':
+        # A first validated listing is what makes someone a host
+        if users.passer_hote(hote.pk):
+            journaliser('role_modifie', utilisateur=hote.pk, email=hote.email, avant='voyageur', apres='hote',
+                        annonce_id=str(hebergement_id), agent_id=str(agent.pk))
         _envoyer('annonce_verifiee', f"Votre logement est vérifié : {annonce['name']}", [hote.email], contexte)
     else:
         _envoyer('annonce_refusee', f"Votre annonce n'est pas encore publiée : {annonce['name']}", [hote.email],

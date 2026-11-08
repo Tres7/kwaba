@@ -23,6 +23,9 @@ permissions:
 jobs:
   plan:
     name: Plan
+    # Only main: dispatched on another branch, it would build that branch and push it to main with the CD App.
+    # The other jobs depend on this one and are skipped with it.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:

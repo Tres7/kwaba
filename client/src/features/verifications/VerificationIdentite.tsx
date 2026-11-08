@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 import { envoyerMaPiece } from "./api";
 import { CLE_MA_PIECE, useMaPiece } from "./hooks";
 
-type TypePiece = "cni" | "passeport" | "permis" | "sejour";
-const TYPES: TypePiece[] = ["cni", "passeport", "permis", "sejour"];
+type TypePiece = "cni" | "electeur" | "passeport" | "permis" | "sejour";
+const TYPES: TypePiece[] = ["cni", "electeur", "passeport", "permis", "sejour"];
 
 interface PieceIdentite {
   statut: "absente" | "soumise" | "verifiee" | "refusee";
@@ -21,7 +21,7 @@ interface PieceIdentite {
 }
 
 /** The host's identity document, checked by the field agent during the visit of the listing. */
-export default function VerificationIdentite() {
+export default function VerificationIdentite({ types = TYPES }: { types?: TypePiece[] }) {
   const t = useTranslations("espaceHote.verification");
   const queryClient = useQueryClient();
   const [typePiece, setTypePiece] = useState<TypePiece>("cni");
@@ -78,7 +78,7 @@ export default function VerificationIdentite() {
       <form method="post" onSubmit={envoyer} className="mt-4 grid grid-cols-1 sm:grid-cols-[220px_1fr_auto] gap-3 sm:items-end">
         <div>
           <p className="block text-xs font-bold text-dark uppercase tracking-wide mb-2">{t("typePiece")}</p>
-          <Select label={t("typePiece")} value={typePiece} onChange={setTypePiece} options={TYPES.map((id) => ({ value: id, label: t(`types.${id}`) }))} />
+          <Select label={t("typePiece")} value={typePiece} onChange={setTypePiece} options={types.map((id) => ({ value: id, label: t(`types.${id}`) }))} />
         </div>
         <label className="block">
           <span className="block text-xs font-bold text-dark uppercase tracking-wide mb-2">{t("fichier")}</span>

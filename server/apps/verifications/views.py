@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from apps.hebergements import api as hebergements
 from apps.securite.audit import journaliser
+from apps.securite.permissions import a_acces_section
 from apps.terrain import api as terrain
 from apps.users import api as users
 
@@ -18,15 +19,15 @@ from . import services
 from .fichiers import FichierInvalide, piece_identite
 from .models import PieceIdentiteModel, VisiteModel
 
-ROLES_HOTE = ('hote', 'admin')
-
 
 class EstVerificateur(IsAuthenticated):
     """Field agents and administrators: role read from the database at every request."""
     message = "Réservé aux agents de vérification."
 
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role in services.ROLES_VERIFICATEURS
+        if not (super().has_permission(request, view) and request.user.role in services.ROLES_VERIFICATEURS):
+            return False
+        return request.user.role != 'admin' or a_acces_section(request.user, 'verifications')
 
 
 def _piece_json(piece: PieceIdentiteModel | None) -> dict:
@@ -35,6 +36,8 @@ def _piece_json(piece: PieceIdentiteModel | None) -> dict:
     return {
         'statut': piece.statut, 'type_piece': piece.type_piece, 'type_libelle': piece.get_type_piece_display(),
         'soumise_le': piece.soumise_le, 'verifiee_le': piece.verifiee_le, 'motif_refus': piece.motif_refus,
+        # False for the documents verified before they were kept (deleted then): the agent asks for the original
+        'copie': bool(piece.fichier),
     }
 
 
@@ -51,7 +54,7 @@ class MaPieceIdentiteView(APIView):
         return Response(_piece_json(PieceIdentiteModel.objects.filter(hote_id=request.user.pk).first()))
 
     def post(self, request):
-        if request.user.role not in ROLES_HOTE:
+        if not users.peut_gerer_annonces(request.user):
             return Response({'detail': 'Réservé aux hôtes.'}, status=status.HTTP_403_FORBIDDEN)
         type_piece = request.data.get('type_piece')
         if type_piece not in dict(PieceIdentiteModel.TYPES):
@@ -90,10 +93,10 @@ def visites_json(annonces: list[dict]) -> list[dict]:
         hote = hotes[a['host_id']]
         resultats.append({
             'id': str(a['id']), 'name': a['name'], 'type': a['type'], 'type_libelle': a['type_libelle'],
-            'city': a['city'], 'location': a['location'], 'description': a['description'],
+            'city': a['city'], 'location': a['location'], 'point_repere': a['point_repere'], 'description': a['description'],
             'position': {'lat': float(a['latitude']), 'lng': float(a['longitude'])} if a['latitude'] is not None else None,
             'price_per_night': float(a['price_per_night']), 'max_guests': a['max_guests'], 'amenities': a['amenities'],
-            'photos': [u for u in [a['image_url'], *a['images']] if u],
+            'photos': [u for u in [a['image_url'], *a['images']] if u], 'legendes_photos': a['legendes_photos'],
             'modifiee_apres_verification': a['id'] in deja_validees,
             'cree_le': a['created_at'],
             'hote': {
@@ -217,6 +220,14 @@ class FichierPieceView(APIView):
         piece = PieceIdentiteModel.objects.filter(hote_id=user_id).first()
         if not piece or not piece.fichier:
             raise Http404
+        if not piece.fichier.storage.exists(piece.fichier.name):
+            # Lost (private files deleted by a deployment before the prive-data volume)
+            if piece.statut == 'verifiee':
+                detail = "Ce fichier est perdu. Lors de la visite, demandez à l'hôte de vous montrer l'original."
+            else:
+                detail = ("Ce fichier est perdu. Refusez la pièce avec un motif qui demande à l'hôte de la renvoyer : "
+                          "il sera prévenu par email.")
+            return Response({'detail': detail}, status=status.HTTP_410_GONE)
         journaliser('piece_consultee', request, utilisateur=request.user, hote=str(piece.hote_id))
         pdf = piece.type_contenu == 'application/pdf'
         reponse = FileResponse(piece.fichier.open('rb'), content_type=piece.type_contenu or 'application/octet-stream',

@@ -10,7 +10,7 @@ export interface AdminPage<T> {
 }
 
 export interface AdminStats {
-  utilisateurs: { total: number; nouveaux_30j: number; hotes: number; desactives: number };
+  utilisateurs: { total: number; nouveaux_30j: number; hotes: number; candidats: number; desactives: number };
   /** en_attente: waiting for an agent's visit (refused listings wait for their host). */
   annonces: { total: number; visibles: number; verifiees: number; en_attente: number };
   reservations: { confirmees_30j: number; annulees_30j: number; volume_30j: number };
@@ -34,8 +34,22 @@ export interface AdminUser {
   last_login: string | null;
   nb_reservations: number;
   nb_annonces: number;
-  /** Hosts only: commission set by the team. */
+  candidature_hote: "" | "ouverte" | "refusee";
+  candidature_motif: string;
+  /** Hosts and candidates only: commission set by the team. */
   conditions: ConditionsHote | null;
+  /** Managed on the server only: nobody can change this account from the back-office. */
+  est_super_admin: boolean;
+  /** Admins only. null: every section. */
+  admin_sections: string[] | null;
+  /** Temporary admin: end of the rights, then back to the previous role. */
+  admin_expire_le: string | null;
+}
+
+export interface DroitsAdmin {
+  est_super_admin: boolean;
+  sections: string[];
+  sections_disponibles: { code: string; libelle: string }[];
 }
 
 export interface ConditionsHote {
@@ -80,6 +94,26 @@ export interface AdminReservation {
   status: "pending" | "confirmed" | "cancelled";
   payment_method: "mobile_money" | "carte" | "paypal";
   created_at: string;
+}
+
+/** One booking opened in the back-office: how its price splits and where the money went (AN-B3). */
+export interface AdminReservationDetail extends AdminReservation {
+  type_logement_nom: string | null;
+  nb_unites: number;
+  /** Price of one night at booking time, and the listing's price today (they differ if the host changed it) */
+  prix_nuit_reserve: number;
+  prix_nuit_actuel: number | null;
+  montants: {
+    prix_nuits: number; frais_service: number; taux_frais: number; frais_menage: number; total: number;
+    commission_hote: number; taux_commission: number; montant_hote: number; revenu_kwaba: number;
+  };
+  /** False: booking older than online payment, amounts computed again */
+  montants_figes: boolean;
+  paiements: { id: string; reference: string; montant: number; prestataire: string; mode: string; statut: string; cree_le: string }[];
+  remboursements: { id: string; montant: number; motif: string; statut: string; cree_le: string; envoye_le: string | null }[];
+  versement: { montant_brut: number; commission: number; montant: number; statut: string; date_prevue: string; envoye_le: string | null } | null;
+  annule_par: string;
+  annule_le: string | null;
 }
 
 export interface AdminAvis {

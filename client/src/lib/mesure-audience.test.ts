@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { cheminMesurable } from "./mesure-audience";
 
 const APP = join(__dirname, "..", "app", "[locale]", "(main)");
-const PUBLIQUES = ["/hebergements/secret", "/give/secret"];
+// Destination pages: /[pays], /[pays]/[ville], /[pays]/[ville]/[quartier] (country, city and district names)
+const PUBLIQUES = ["/hebergements/secret", "/give/secret", "/preparer-voyage/secret", "/secret", "/secret/secret", "/secret/secret/secret"];
 
 /** Addresses of the site's dynamic pages, with "secret" in place of their parameters. */
 function pagesDynamiques(dossier = APP): string[] {

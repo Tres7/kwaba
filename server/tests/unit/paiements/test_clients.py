@@ -52,7 +52,9 @@ def test_fedapay_lectures_et_versement():
         _reponse(corps={'payout': {'id': 9, 'status': 'sent'}}),
     ])
     assert client.lire_transaction('1')['status'] == 'approved'
-    assert client.creer_versement(montant=5000, mode='togocel', client={}) == '9'
+    assert client.creer_payout(montant=5000, mode='togocel', client={}) == '9'
+    client.lancer_payout('9')
+    assert client.session.request.call_args_list[2].args == ('PUT', 'https://api.fedapay.com/v1/payouts/start')
     assert client.session.request.call_args_list[2].kwargs['json'] == {'payouts': [{'id': '9'}]}
     assert client.lire_versement('9')['status'] == 'sent'
 

@@ -9,7 +9,7 @@ from . import disponibilites
 from . import occupations
 from .occupations import FournisseurReservations as FournisseurReservations
 from . import types_logement
-from .models import HebergementModel, TypeLogementModel
+from .models import BrouillonAnnonceModel, HebergementModel, TypeLogementModel
 from .serializers import HebergementSerializer
 
 
@@ -26,6 +26,10 @@ def cartes(hebergement_ids: Iterable[uuid.UUID], request=None, publiees_seulemen
     annonces = qs.filter(pk__in=list(hebergement_ids))
     donnees = HebergementSerializer(annonces, many=True, context={'request': request}).data
     return {uuid.UUID(carte['id']): carte for carte in donnees}
+
+
+# Codes of the listing types (Kwa-Ba taxonomy)
+TYPES = [code for code, _ in HebergementModel.TYPE_CHOICES]
 
 
 def resumes(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, dict]:
@@ -71,9 +75,11 @@ def _fiche(h: HebergementModel) -> dict:
         'id': h.id, 'name': h.name, 'type': h.type, 'type_libelle': h.get_type_display(), 'city': h.city,
         'location': h.location, 'description': h.description, 'price_per_night': h.price_per_night,
         'max_guests': h.max_guests, 'amenities': h.amenities, 'image_url': h.image_url, 'images': h.images,
+        'legendes_photos': h.legendes_photos or {},
         'created_at': h.created_at, 'host_id': h.host_id, 'statut_verification': h.statut_verification,
         'politique_annulation': h.politique_annulation, 'arrivee_a_partir': h.arrivee_a_partir,
-        'depart_avant': h.depart_avant,
+        'depart_avant': h.depart_avant, 'point_repere': h.point_repere,
+        'petit_dejeuner': h.petit_dejeuner, 'petit_dejeuner_prix': h.petit_dejeuner_prix,
     }
 
 
@@ -90,6 +96,11 @@ def annonces_en_attente(hote_ids: Iterable[uuid.UUID], ville: str = '') -> list[
         qs = qs.filter(city__icontains=ville)
     # With the exact position: the agent goes there
     return [{**_fiche(h), 'latitude': h.latitude, 'longitude': h.longitude} for h in qs.order_by('created_at')]
+
+
+def points_repere(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """Landmarks of these listings, for the travellers whose booking is paid."""
+    return dict(HebergementModel.tous.filter(pk__in=list(hebergement_ids)).values_list('pk', 'point_repere'))
 
 
 def nb_annonces_non_verifiees(hote_id: uuid.UUID) -> int:
@@ -127,6 +138,14 @@ def ids_annonces_de(hote_id) -> set[uuid.UUID]:
 
 def ids_hotes_avec_annonce() -> set[uuid.UUID]:
     return set(HebergementModel.tous.values_list('host_id', flat=True).distinct())
+
+
+def ids_hotes_avec_annonce_validee() -> set[uuid.UUID]:
+    return set(HebergementModel.tous.filter(statut_verification='verifiee').values_list('host_id', flat=True).distinct())
+
+
+def ids_hotes_avec_brouillon() -> set[uuid.UUID]:
+    return set(BrouillonAnnonceModel.objects.values_list('host_id', flat=True).distinct())
 
 
 def hotes_des_annonces(hebergement_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, uuid.UUID]:

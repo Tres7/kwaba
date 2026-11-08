@@ -23,7 +23,7 @@ Plateforme de reservation d'hebergements en Afrique avec support des paiements M
 ### 1. Cloner le repo
 
 ```bash
-git clone https://github.com/Tres7/kwaba.git
+git clone https://github.com/kwa-ba/kwaba.git
 cd kwaba
 ```
 

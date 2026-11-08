@@ -38,6 +38,11 @@ describe("messaging", () => {
     expect(api.post).toHaveBeenCalledWith("/v1/messaging/conversations/c1/read/", { up_to_id: 42 });
   });
 
+  it("garde l'id de conversation de l'adresse dans un seul segment", async () => {
+    await marquerLu("../../hebergements/brouillons?", 1);
+    expect(api.post).toHaveBeenCalledWith("/v1/messaging/conversations/..%2F..%2Fhebergements%2Fbrouillons%3F/read/", { up_to_id: 1 });
+  });
+
   it("compte les messages non lus", async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { unread_count: 3 } });
     await expect(compterNonLus()).resolves.toBe(3);

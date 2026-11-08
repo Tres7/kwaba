@@ -1,8 +1,10 @@
 from decimal import Decimal
 
+from apps.users import api as users
+
 from . import notifications, tarifs
 from .documents import recu_paiement
-from .models import ConditionsHoteModel, PaiementModel, RemboursementModel
+from .models import ConditionsHoteModel, PaiementModel, ProfilVersementModel, RemboursementModel
 from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES, operateurs_du_pays
 from .paypal import FCFA_PAR_EURO
 from .registre import ProduitPaye, Relance, enregistrer as enregistrer_produit
@@ -15,7 +17,7 @@ from .services import (
 from .views import CompteRemboursementSerializer
 
 __all__ = [
-    'FONDATEURS_MAX', 'conditions_commission', 'modifier_conditions_hote', 'operateurs_du_pays', 'ProduitPaye', 'Relance', 'enregistrer_produit', 'autre_paiement_reussi', 'etats_paiement', 'etats_pour_serializer',
+    'a_profil_versement', 'titulaire_versement', 'FONDATEURS_MAX', 'conditions_commission', 'modifier_conditions_hote', 'operateurs_du_pays', 'ProduitPaye', 'Relance', 'enregistrer_produit', 'autre_paiement_reussi', 'etats_paiement', 'etats_pour_serializer',
     'ids_paiements_echoues', 'numero_remboursement_requis', 'synchroniser_dernier_paiement',
     'synchroniser_paiements_en_attente', 'CompteRemboursementSerializer', 'annuler_paiement_reservation', 'planifier_versement_hote', 'FCFA_PAR_EURO', 'INDISPONIBLE', 'OPERATEUR_CHOICES', 'PAYS_CHOICES',
     'PaiementErreur', 'alerte_admin', 'date_fr', 'commission_hote', 'conditions_hote', 'creer_paiement', 'delai_paiement',
@@ -34,8 +36,9 @@ documents_joints = notifications._documents
 alerte_admin = notifications.alerte_admin
 
 
-def total_sejour(prix_par_nuit: Decimal, nuits: int) -> int:
-    return tarifs.calculer(prix_par_nuit, nuits).total
+def total_sejour(prix_par_nuit: Decimal, nuits: int, type_annonce: str | None = None) -> int:
+    """Standard total of a stay (6 % fees), with the cleaning fee of the listing's type."""
+    return tarifs.calculer(prix_par_nuit, nuits, menage=tarifs.frais_menage(type_annonce)).total
 
 
 def _paiement_reussi(type_objet: str, objet_id) -> PaiementModel | None:
@@ -57,11 +60,11 @@ def texte_politique(reservation) -> str:
 
 
 def frais_voyageur() -> Decimal:
-    return tarifs.FRAIS_VOYAGEUR
+    return tarifs.reglages().frais_voyageur
 
 
 def commission_hote() -> Decimal:
-    return tarifs.COMMISSION_HOTE
+    return tarifs.reglages().commission_particulier
 
 
 def conditions_hote(hote_id) -> dict | None:
@@ -81,7 +84,7 @@ def hotes_fondateurs(hote_ids) -> set:
 
 def frais_reduits_sejour(prix_nuits: int) -> int:
     """Service fees of a stay at the reduced rate (loyal customer, Stay Pack + Driver)."""
-    return tarifs.arrondi(Decimal(prix_nuits) * tarifs.FRAIS_REDUITS)
+    return tarifs.arrondi(Decimal(prix_nuits) * tarifs.reglages().frais_reduits)
 
 
 def rembourser_en_partie(type_objet: str, objet_id, montant: int, motif: str) -> bool:
@@ -94,7 +97,7 @@ def rembourser_en_partie(type_objet: str, objet_id, montant: int, motif: str) ->
 
 
 def frais_reduits() -> Decimal:
-    return tarifs.FRAIS_REDUITS
+    return tarifs.reglages().frais_reduits
 
 
 def hotes_deja_visites(voyageur) -> set:
@@ -102,9 +105,14 @@ def hotes_deja_visites(voyageur) -> set:
     return tarifs.hotes_deja_visites(voyageur)
 
 
-def devis_sejour(prix_par_nuit, hote_id, nuits: int, voyageur=None, nb_unites: int = 1) -> tarifs.Montants:
-    """Amounts of a stay with the rates of this host and this traveller."""
-    return tarifs.devis(prix_par_nuit, hote_id, nuits, voyageur=voyageur, nb_unites=nb_unites)
+def devis_sejour(prix_par_nuit, hote_id, nuits: int, voyageur=None, nb_unites: int = 1,
+                 type_annonce: str | None = None) -> tarifs.Montants:
+    """Amounts of a stay with the rates of this host and this traveller, and the cleaning fee of the listing's type."""
+    return tarifs.devis(prix_par_nuit, hote_id, nuits, voyageur=voyageur, nb_unites=nb_unites, type_annonce=type_annonce)
+
+
+def frais_menage(type_annonce: str | None) -> int:
+    return tarifs.frais_menage(type_annonce)
 
 
 def montants_de(reservation, prix_par_nuit=None) -> tarifs.Montants:
@@ -114,6 +122,46 @@ def montants_de(reservation, prix_par_nuit=None) -> tarifs.Montants:
 
 def _par_objet(type_objet: str, objet_ids) -> dict:
     return {f'{type_objet}_id__in': list(objet_ids)}
+
+
+def commission_hotel() -> Decimal:
+    return tarifs.reglages().commission_hotel
+
+
+def commission_fondateur() -> Decimal:
+    return tarifs.reglages().commission_fondateur
+
+
+def grille_menage() -> dict[str, int]:
+    """Cleaning fee of every listing type (FCFA)."""
+    return tarifs.grille_menage()
+
+
+def commission_transfert() -> Decimal:
+    """Share of an airport transfer kept by Kwa-Ba, set by the team."""
+    return tarifs.reglages().commission_transfert
+
+
+def mouvements(type_objet: str, objet_id) -> dict:
+    """Every money movement of one object (back-office detail): payments, refunds and, for a stay, the host's payout."""
+    from .models import VersementModel
+
+    filtre = _par_objet(type_objet, [objet_id])
+    paiements = [{
+        'id': str(p.id), 'reference': p.reference, 'montant': p.montant, 'prestataire': p.prestataire, 'mode': p.mode,
+        'statut': p.statut, 'cree_le': p.cree_le,
+    } for p in PaiementModel.objects.filter(**filtre).order_by('cree_le')]
+    remboursements = [{
+        'id': str(r.id), 'montant': r.montant, 'motif': r.motif, 'statut': r.statut, 'cree_le': r.cree_le,
+        'envoye_le': r.envoye_le,
+    } for r in RemboursementModel.objects.filter(**filtre).order_by('cree_le')]
+    versement = None
+    if type_objet == 'reservation':
+        v = VersementModel.objects.filter(reservation_id=objet_id).first()
+        if v:
+            versement = {'montant_brut': v.montant_brut, 'commission': v.commission, 'montant': v.montant,
+                         'statut': v.statut, 'date_prevue': v.date_prevue, 'envoye_le': v.envoye_le}
+    return {'paiements': paiements, 'remboursements': remboursements, 'versement': versement}
 
 
 def etats_paiement(type_objet: str, objet_ids) -> dict:
@@ -203,7 +251,7 @@ def modifier_conditions_hote(hote, valeurs, par) -> str | None:
     Returns an error message, or None once saved."""
     from django.utils.dateparse import parse_date
 
-    if hote.role != 'hote' or not isinstance(valeurs, dict):
+    if not users.hote_ou_candidat(hote) or not isinstance(valeurs, dict):
         return "Seul un hôte a des conditions de commission."
     categorie = valeurs.get('categorie', 'particulier')
     if categorie not in dict(ConditionsHoteModel.CATEGORIES):
@@ -221,3 +269,12 @@ def modifier_conditions_hote(hote, valeurs, par) -> str | None:
     ConditionsHoteModel.objects.update_or_create(hote_id=hote.pk, defaults={
         'categorie': categorie, 'fondateur_debut': debut, 'fondateur_fin': fin, 'mis_a_jour_par_id': getattr(par, 'pk', None)})
     return None
+
+
+def a_profil_versement(hote_id) -> bool:
+    return ProfilVersementModel.objects.filter(hote_id=hote_id).exists()
+
+
+def titulaire_versement(hote_id) -> str:
+    """Name on the host's Mobile Money account: the agent compares it with the identity document."""
+    return ProfilVersementModel.objects.filter(hote_id=hote_id).values_list('titulaire', flat=True).first() or ''

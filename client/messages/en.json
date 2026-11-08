@@ -49,7 +49,8 @@
         "titre": "Car hire with a driver, or your driver for your own car",
         "description": "Hire a small car, saloon, SUV, 4x4 or minibus with a driver, or a driver for your own car, at the airport or at your address. Daily price known in advance, paid online."
       }
-    }
+    },
+    "titreAccueil": "Kwa-Ba · Verified places to stay in Lomé and across Togo"
   },
   "commun": {
     "allerAuContenu": "Skip to main content",
@@ -111,7 +112,8 @@
     "mesReservations": "My bookings",
     "mesFavoris": "My favourites",
     "fermerMenu": "Close menu",
-    "location": "Car hire"
+    "location": "Car hire",
+    "maCandidature": "My application"
   },
   "logo": {
     "accueil": "Kwa-Ba, home"
@@ -123,7 +125,8 @@
     "titres": {
       "decouvrir": "Discover",
       "hotes": "Hosts",
-      "assistance": "Help"
+      "assistance": "Help",
+      "destinations": "Destinations"
     },
     "liens": {
       "hebergements": "Stays",
@@ -137,7 +140,9 @@
       "espaceHote": "Host space",
       "aide": "Help centre",
       "remboursement": "Cancellation and refunds",
-      "location": "Car hire"
+      "location": "Car hire",
+      "preparerTogo": "Prepare your trip to Togo",
+      "logementsTogo": "Places to stay in Togo"
     },
     "legal": {
       "mentions": "Legal notice",
@@ -184,12 +189,6 @@
     "voirTout": "See all",
     "villeResume": "{nombre, plural, one {# stay} other {# stays}} · from {prix}",
     "typesHebergement": "Types of stay",
-    "types": {
-      "hotels": "Hotels",
-      "appartements": "Apartments",
-      "villas": "Villas",
-      "auberges": "Guesthouses"
-    },
     "mieuxNotes": "Top rated",
     "voirMieuxNotes": "See all top-rated stays",
     "aucunHebergement": "No stays published yet.",
@@ -309,13 +308,6 @@
     "serveurInjoignable": "Unable to reach the server. Check your connection.",
     "inscriptionTexte": "A few details to start your adventure.",
     "inscriptionGoogle": "Sign up with Google",
-    "jeSuis": "I am a",
-    "roles": {
-      "voyageur": "Traveller",
-      "hote": "Host"
-    },
-    "roleHoteTexte": "You can list your places and book stays too.",
-    "roleVoyageurTexte": "You can become a host later from your profile.",
     "prenom": "First name",
     "nom": "Last name",
     "cestVous": "Is that you?",
@@ -486,13 +478,7 @@
   "recherche": {
     "typeLogement": "Type of place",
     "types": {
-      "tous": "All",
-      "hotels": "Hotels",
-      "villas": "Villas",
-      "appartements": "Apartments",
-      "auberges": "Guesthouses",
-      "maisons": "Houses",
-      "residences": "Aparthotels"
+      "tous": "All"
     },
     "trierPar": "Sort by",
     "tris": {
@@ -594,7 +580,8 @@
     "similaires": "You may also like",
     "reglesMaison": "House rules",
     "voirTousEquipements": "Show all {nombre} amenities",
-    "voirMoinsEquipements": "Show less"
+    "voirMoinsEquipements": "Show less",
+    "fraisMenage": "Cleaning fee"
   },
   "avis": {
     "repondre": "Reply publicly",
@@ -657,7 +644,8 @@
     "payer": "Pay {montant}",
     "confirmerReservation": "Confirm booking",
     "accepterPaiement": "I accept the <cgu>terms of sale</cgu>, the listing rules and the <annulation>cancellation policy</annulation>.",
-    "accepterConfirmation": "I accept the <cgu>terms of sale</cgu>, the listing rules and the <annulation>cancellation policy</annulation>."
+    "accepterConfirmation": "I accept the <cgu>terms of sale</cgu>, the listing rules and the <annulation>cancellation policy</annulation>.",
+    "pointRepere": "Landmark: {repere}"
   },
   "paiement": {
     "paiementNonDemarre": "The payment could not start.",
@@ -747,7 +735,9 @@
       "langue": "Language & region",
       "langueTexte": "English, FCFA",
       "aide": "Help & support",
-      "aideTexte": "FAQ, cancellation, contact"
+      "aideTexte": "FAQ, cancellation, contact",
+      "candidature": "My application",
+      "candidatureTexte": "Pick up where you left off"
     },
     "verifie": "Email confirmed",
     "membreDepuis": "Member since {date}",
@@ -860,7 +850,8 @@
     "annulation": "Cancelling…",
     "annuler": "Cancel",
     "numeroEnregistre": "Number saved: your refund is on its way.",
-    "recommande": "Recommended for your next trip"
+    "recommande": "Recommended for your next trip",
+    "pointRepere": "Landmark: {repere}"
   },
   "avisDepot": {
     "notes": {
@@ -1428,20 +1419,20 @@
         "texte": "Travellers pay online; your share is sent to your Mobile Money account 24 hours after their arrival."
       }
     },
-    "active": "Your host account is active!",
+    "active": "You're all set! Prepare your listing.",
     "acceder": "Go to my host space",
-    "activation": "Activating…",
-    "activer": "Activate my host account",
-    "creerCompte": "Create a host account",
+    "activation": "One moment…",
+    "activer": "Get started",
+    "creerCompte": "Create my account and get started",
     "titre": "Share your place with travellers from around the world",
     "sousTitre": "List your villa, apartment, hotel room or guesthouse on Kwa-Ba for free.",
-    "dejaInscrit": "Already registered? <lien>Log in</lien>, then activate your host account.",
+    "dejaInscrit": "Already registered? <lien>Log in</lien> to get started.",
     "commentCaMarche": "How does it work?",
     "etape": "Step {numero}",
     "ceQuIlFaut": "What you need",
     "besoins": {
       "compte": "Kwa-Ba account and a phone number",
-      "identite": "An ID document (checked by Kwa-Ba, then deleted)",
+      "identite": "An ID document, checked by Kwa-Ba",
       "photos": "Photos of your place",
       "prix": "A nightly price in FCFA",
       "capacite": "Capacity and amenities"
@@ -1451,22 +1442,18 @@
       "intro": "Listing is free. Kwa-Ba only takes a commission when you get paid.",
       "taux": {
         "particulier": {
-          "valeur": "8%",
           "titre": "Private host",
           "texte": "of the price of nights, deducted from your payout"
         },
         "hotel": {
-          "valeur": "12%",
           "titre": "Hotel or serviced residence",
           "texte": "of the price of the nights, deducted from your payout"
         },
         "fondateur": {
-          "valeur": "5%",
           "titre": "Founding host",
           "texte": "for 6 months for the first 50 hosts"
         },
         "voyageur": {
-          "valeur": "6%",
           "titre": "Traveller fee",
           "texte": "paid by the traveller, it does not reduce your income"
         }
@@ -1479,7 +1466,10 @@
       },
       "estimateurTitre": "Estimate your earnings",
       "estimateurTexte": "Choose your profile, enter the nightly price you want to receive before commission and the number of nights."
-    }
+    },
+    "bienvenue": "Your account is ready. You can get started!",
+    "reprendre": "Resume my application",
+    "refusee": "Your application was not accepted: {motif}"
   },
   "photos": {
     "envoiImpossible": "Upload failed.",
@@ -1492,11 +1482,13 @@
     "gauche": "Move left",
     "droite": "Move right",
     "definirCouverture": "Set as cover",
-    "retirer": "Remove photo"
+    "retirer": "Remove photo",
+    "reessayer": "Try again",
+    "quellePiece": "Which room?",
+    "pieceDeLaPhoto": "Room of photo {numero}"
   },
   "espaceHote": {
     "erreurConversation": "Could not open the conversation.",
-    "bienvenue": "Welcome! List your first place.",
     "pasHote": "You're not a host yet",
     "devenirHote": "Become a host",
     "masquee": "Listing hidden from search",
@@ -1555,13 +1547,14 @@
       "refuseeAide": "Fix this, then save the listing: it will be checked again.",
       "verifiee": "Verified",
       "identiteTitre": "Identity check",
-      "identiteAide": "To protect travellers, every host is verified. Send an ID document: a Kwa-Ba agent checks it remotely, then it is deleted. During the visit, the agent will confirm it is really you.",
+      "identiteAide": "To protect travellers, every host is verified. Send an ID document: a Kwa-Ba agent checks it remotely. During the visit, the agent will confirm it is really you. Only Kwa-Ba agents can see it, never travellers.",
       "identiteSoumise": "ID document received: a Kwa-Ba agent is checking it, usually within 48 hours.",
       "identiteVerifiee": "Identity verified",
       "identiteRefusee": "ID document declined: {motif}",
       "typePiece": "Document type",
       "types": {
         "cni": "National ID card",
+        "electeur": "Voter card",
         "passeport": "Passport",
         "permis": "Driving licence",
         "sejour": "Residence permit"
@@ -1572,11 +1565,12 @@
       "envoi": "Sending…",
       "envoyee": "ID document sent",
       "choisirFichier": "Choose a file.",
-      "confidentialite": "Only Kwa-Ba agents can see this document, never travellers."
+      "confidentialite": "Only Kwa-Ba agents can see this document, never travellers.",
+      "corriger": "Fix my listing"
     },
     "candidature": {
       "titre": "Becoming a Kwa-Ba host: {nombre} steps",
-      "texte": "For travellers' safety, every host is verified before publishing. Your listings stay hidden until these steps are complete.",
+      "texte": "For travellers' safety, every host is verified before publishing. You become a Kwa-Ba host as soon as an agent has validated your first place.",
       "telephoneTitre": "Your phone number",
       "telephoneTexte": "The Kwa-Ba agent will call you to arrange the visit.",
       "telephoneAction": "Add my number",
@@ -1596,16 +1590,20 @@
       "contratTelecharger": "View the contract",
       "annonceContrat": "Listing ready. An agent will call you for the visit once your identity is verified and your contract signed."
     },
-    "typesLogement": "Rooms and types"
+    "typesLogement": "Rooms and types",
+    "candidatureRefusee": "Your application was not accepted",
+    "dontMenage": "including {montant} for cleaning"
   },
   "annonce": {
     "types": {
-      "hotel": "Room in a property with services",
-      "villa": "Entire house, often with a garden or pool",
-      "appartement": "Entire home in a building",
+      "villa": "Large house, often with a garden or a pool",
+      "appartement": "Entire home in a building, with one or more bedrooms",
       "auberge": "Simple, friendly place on a small budget",
-      "maison": "Entire house, in town or in a village",
-      "residence": "Apartment or studio with hotel services (cleaning, reception)"
+      "residence": "Apartment or studio with hotel services (cleaning, reception)",
+      "chambre_privee": "A room just for the travellers, the rest of the home is shared",
+      "studio": "A single living room with a kitchenette and a bathroom",
+      "maison_entiere": "Entire house, in town or in a village",
+      "chambre_hotel": "Room in a hotel, which takes care of the cleaning"
     },
     "erreurDroits": "Confirm that you hold the rights to the published photos.",
     "erreurPosition": "Place your listing on the map.",
@@ -1643,14 +1641,15 @@
       "ville": "the city",
       "prix": "the price per night",
       "position": "the position on the map",
-      "surface": "the floor area",
       "lits": "at least one bed",
       "petitDejeuner": "breakfast",
-      "photos": "at least one photo"
+      "photos": "at least one photo",
+      "pointRepere": "the landmark",
+      "sallesDeBain": "the bathrooms",
+      "legendes": "the room of each photo"
     },
     "detailsTitre": "The place in detail",
     "detailsAide": "Shown on your listing: these details reassure travellers.",
-    "surface": "Floor area (m²)",
     "chambres": "Bedrooms",
     "sallesDeBain": "Bathrooms",
     "lits": "Beds",
@@ -1669,7 +1668,17 @@
     "politiqueAide": "Shown on your listing and accepted by the traveller before payment. In addition, a booking cancelled within 48 hours, at least 7 days before arrival, is always refunded.",
     "reglesMaison": "House rules",
     "reglesAide": "Shown on your listing: travellers know what to expect before booking.",
-    "nonPrecise": "Not specified"
+    "nonPrecise": "Not specified",
+    "pointRepere": "Landmark",
+    "pointRepereExemple": "Behind the CHU Sylvanus Olympio, Tokoin",
+    "pointRepereAide": "How people find the place in Lomé. Only the Kwa-Ba agent and the travellers who paid their booking can see it.",
+    "chambresAide": "0 for a studio.",
+    "litsRequis": "Add at least one bed to continue.",
+    "fraisMenage": "Cleaning fee: {montant}.",
+    "fraisMenageAide": "It is added once to the price of the stay and paid back to you in full.",
+    "fraisMenageZero": "No cleaning fee for this type: the property takes care of it.",
+    "menageCarte": "Cleaning: {montant}",
+    "menageCarteZero": "No cleaning fee"
   },
   "revenus": {
     "statuts": {
@@ -1729,7 +1738,10 @@
     "toutEtablissement": "Whole property",
     "aideType": "Only the “{nom}” type will be closed.",
     "aideEtablissement": "All room types will be closed.",
-    "unitesNombre": "{nombre, plural, one {# unit} other {# units}}"
+    "unitesNombre": "{nombre, plural, one {# unit} other {# units}}",
+    "quantiteFermer": "Number of rooms to close",
+    "toutes": "All ({nombre})",
+    "quantiteAide": "For the rooms sold elsewhere (reception, other sites): the others stay bookable on Kwa-Ba. Empty: the whole type is closed."
   },
   "location": {
     "titre": "Cars and drivers",
@@ -1863,7 +1875,7 @@
     "monChauffeurAide": "Book a driver who has already driven you again: we contact them first.",
     "sejour": "Link to my Kwa-Ba stay",
     "sejourAucun": "No stay",
-    "packSejour": "Stay + Driver Pack: the service fee for this stay drops to 3%, the difference is refunded to you.",
+    "packSejour": "Stay + Driver Pack: the service fee for this stay drops to {taux}, the difference is refunded to you.",
     "precisionsAideChauffeur": "Your vehicle (make, model, gearbox), planned trips, times… The driver plans accordingly.",
     "devisChauffeur": "Driver, {nombre, plural, one {# day} other {# days}}",
     "devisPrimes": "Driver travel allowances",
@@ -1876,13 +1888,12 @@
     "villes": "Cities",
     "logements": "Stays",
     "logementsDispo": "{nombre, plural, =1 {1 stay} other {# stays}}",
-    "quartiers": "Lomé neighbourhoods",
-    "quartierLome": "Lomé neighbourhood"
+    "quartiers": "Neighbourhoods",
+    "quartiersLome": "Lomé neighbourhoods",
+    "quartierDe": "Neighbourhood · {ville}"
   },
   "details": {
     "titre": "The place in detail",
-    "surfaceTitre": "Floor area",
-    "surface": "{m2} m²",
     "chambresTitre": "Bedrooms",
     "chambres": "{nombre, plural, =1 {1 bedroom} other {# bedrooms}}",
     "litsTitre": "{nombre, plural, =1 {1 bed} other {# beds}}",
@@ -2026,7 +2037,7 @@
       },
       "fondateur": {
         "titre": "Founding host",
-        "texte": "{taux} for 6 months (first 50 hosts), then 8%"
+        "texte": "{taux} for 6 months (first 50 hosts), then {apres}"
       },
       "hotel": {
         "titre": "Hotel or residence",
@@ -2096,5 +2107,240 @@
     "terminee": "This alert for {hebergement} ({debut} to {fin}) is already over.",
     "voirLogement": "See the place",
     "lienInvalide": "This link is no longer valid."
+  },
+  "assistantHote": {
+    "meta": "Your listing",
+    "quitter": "Save and exit",
+    "retour": "Back",
+    "suivant": "Next",
+    "commencer": "Let's go",
+    "envoiPhotos": "Sending photos…",
+    "progression": "Progress of your listing",
+    "preparation": "Preparing your listing…",
+    "retourEspace": "Back to my space",
+    "etat": {
+      "enCours": "Saving…",
+      "enregistre": "Saved",
+      "horsLigne": "Offline: will be sent when the network is back"
+    },
+    "phases": {
+      "1": {
+        "titre": "Tell us about your place",
+        "texte": "Type of property, address and capacity."
+      },
+      "2": {
+        "titre": "Make it stand out",
+        "texte": "Amenities, photos, title and description."
+      },
+      "3": {
+        "titre": "Finish and publish",
+        "texte": "Price, rules, then a check by Kwa-Ba."
+      }
+    },
+    "bienvenue": {
+      "titre": "List your place, step by step",
+      "texte": "Allow about ten minutes. Your answers are saved as you go: you can stop and pick up again whenever you like."
+    },
+    "phase-1": {
+      "surtitre": "Phase 1",
+      "titre": "Tell us about your place",
+      "texte": "A few simple questions to locate it and find out how many travellers it can host."
+    },
+    "type": {
+      "titre": "What kind of place are you offering?"
+    },
+    "adresse": {
+      "titre": "Where is your place?",
+      "texte": "The Kwa-Ba agent will go there for the visit."
+    },
+    "position": {
+      "titre": "Place it on the map",
+      "texte": "Tap the exact spot on the map, or use your position if you are there."
+    },
+    "capacite": {
+      "titre": "How many travellers can you host?",
+      "texte": "You can adjust this later."
+    },
+    "phase-2": {
+      "surtitre": "Phase 2",
+      "titre": "Make it stand out",
+      "texte": "Amenities and photos are what make people want to book."
+    },
+    "equipements": {
+      "titre": "What does your place offer?",
+      "texte": "Tap everything available. The agent will check it during the visit."
+    },
+    "photos": {
+      "titre": "Add photos of your place",
+      "texte": "The first one will be the cover photo.",
+      "conseilJour": "Take photos by day, with the curtains open.",
+      "conseilPieces": "Show every room, including the bathroom.",
+      "compteur": "{nombre} of {min} photos minimum",
+      "pieces": "{nombre, plural, one {Choose the room of the last photo.} other {Choose the room of the # remaining photos.}}"
+    },
+    "titre": {
+      "titre": "Give your listing a title",
+      "texte": "Short and precise: what makes your place unique.",
+      "exemple": "Villa with a pool in Baguida"
+    },
+    "description": {
+      "titre": "Describe your place",
+      "texte": "The neighbourhood, the atmosphere, what travellers will love. No phone number or email: they will write to you through Kwa-Ba messaging.",
+      "exemple": "A quiet house five minutes from the beach, with a large shaded terrace…",
+      "encore": "At least {nombre} more characters."
+    },
+    "envoyer": "Send for checking",
+    "envoi": "Sending…",
+    "phase-3": {
+      "surtitre": "Phase 3",
+      "titre": "Finish and publish",
+      "texte": "Your price, your rules, then the checks that reassure travellers."
+    },
+    "prix": {
+      "titre": "What price per night?",
+      "texte": "You can change it at any time.",
+      "parNuit": "per night, in FCFA"
+    },
+    "regles": {
+      "titre": "What are your rules?",
+      "texte": "Travellers accept them before booking."
+    },
+    "accueil": {
+      "titre": "How do you welcome your travellers?"
+    },
+    "securite": {
+      "titre": "A few statements",
+      "texte": "Tick what applies to your place: travellers must know before booking.",
+      "cameras": "There are cameras outside the place",
+      "animaux": "Animals live on site",
+      "travaux": "Noisy works are under way or planned",
+      "attestation": "I certify that this information is accurate, that I am allowed to rent out this place and that the photos are mine, in line with the <cgu>terms of use</cgu>."
+    },
+    "telephone": {
+      "titre": "Your phone number",
+      "texte": "The Kwa-Ba agent will call you to arrange the visit. It is never shown to travellers.",
+      "libelle": "Phone number",
+      "enregistrer": "Save this number",
+      "envoi": "Saving…",
+      "fait": "Number saved"
+    },
+    "identite": {
+      "titre": "Your identity document",
+      "texte": "National ID card, voter card or passport. Only Kwa-Ba agents can see it: they check it, then confirm on site that it is really you."
+    },
+    "versement": {
+      "titre": "Where should we send your earnings?",
+      "texte": "Your share is paid by Mobile Money, 24 hours after travellers arrive."
+    },
+    "contrat": {
+      "titre": "The terms to accept",
+      "accepte": "Terms accepted",
+      "aSigner": "Your host agreement will also need signing: you can do so from <lien>your host space</lien>."
+    },
+    "recapitulatif": {
+      "titre": "All set?",
+      "texte": "Here is your listing, as travellers will see it.",
+      "parNuit": "per night",
+      "voyageurs": "{nombre, plural, one {# traveller} other {# travellers}}",
+      "lignes": {
+        "annonce": "Complete listing",
+        "telephone": "Phone number",
+        "identite": "Identity document sent",
+        "versement": "Payout account"
+      },
+      "suite": "Your listing is not published yet: Kwa-Ba checks your identity, then an agent visits the place."
+    },
+    "envoyee": {
+      "titre": "Your listing has been sent!",
+      "texte": "Thank you. Here is what comes next: we will email you at each step.",
+      "espace": "Go to my space",
+      "suite": {
+        "identite": "Kwa-Ba checks your identity document.",
+        "visite": "An agent calls you and visits your place.",
+        "publication": "Your listing is published, and you become a Kwa-Ba host."
+      }
+    },
+    "chambres": {
+      "titre": "Which rooms do you offer?",
+      "texte": "One type per line: identical rooms together, with how many. No need to create one per room.",
+      "typeNumero": "Room type {numero}",
+      "nom": "Room type",
+      "nomExemple": "Standard double room",
+      "prix": "Price per night (CFA francs)",
+      "quantite": "Number of rooms",
+      "capacite": "Guests per room",
+      "ajouter": "Add a room type",
+      "retirer": "Remove this type",
+      "resume": "{total, plural, one {# room} other {# rooms}} in all, from {prix} a night.",
+      "aide": "From your host space, you will be able to add photos to each type and close the rooms sold elsewhere (reception, other sites)."
+    }
+  },
+  "pieces": {
+    "chambre": "Bedroom {numero}",
+    "salle_de_bain": "Bathroom {numero}",
+    "piece_principale": "Main room",
+    "salon": "Living room",
+    "cuisine": "Kitchen",
+    "salle_a_manger": "Dining room",
+    "toilettes": "Toilet",
+    "terrasse": "Terrace",
+    "balcon": "Balcony",
+    "jardin": "Garden or yard",
+    "piscine": "Pool",
+    "exterieur": "Outside",
+    "entree": "Entrance",
+    "vue": "View",
+    "parking": "Parking",
+    "autre": "Other",
+    "titre": "The rooms in photos",
+    "sansPiece": "Other photos",
+    "reception": "Reception",
+    "chambres": "Rooms",
+    "salles_de_bain": "Bathrooms",
+    "restaurant": "Restaurant",
+    "bar": "Bar",
+    "salle_de_sport": "Gym",
+    "salle_de_reunion": "Meeting room"
+  },
+  "destinations": {
+    "accueil": "Home",
+    "filAriane": "Breadcrumb",
+    "pays": {
+      "tg": {
+        "nom": "Togo",
+        "dans": "in Togo",
+        "intro": "From the beaches of Lomé to the hills of Kpalimé and the mountains of the north: places to stay visited by our agents, booked and paid online.",
+        "guide": "Prepare your trip to Togo"
+      }
+    },
+    "villes": {
+      "lome": "The capital of Togo, on the Gulf of Guinea: beaches, the Grand Market, lively neighbourhoods, and the international airport close to the centre.",
+      "kpalime": "About 120 km north-west of Lomé, in the Plateaux region: waterfalls, hikes on Mount Kloto, forests and crafts.",
+      "aneho": "A former capital of Togo, about 45 km east of Lomé, between the ocean and the lagoon. In Glidji, the Epe Ekpe festival gathers the Guin people every year.",
+      "atakpame": "A hill town in the heart of the Plateaux region, about 160 km north of Lomé, on the road to the north.",
+      "sokode": "Capital of the Centrale region, about 340 km north of Lomé, known for its knife festival (Adossa-Gadao).",
+      "kara": "Capital of the Kara region, in the north of the country: traditional Evala wrestling in July and, not far away, Koutammakou, a UNESCO World Heritage site."
+    },
+    "titreVilles": "Cities",
+    "titre": "Verified places to stay {lieu}",
+    "dansVille": "in {ville}, {pays}",
+    "dansQuartier": "in {quartier}, {ville}",
+    "introQuartier": "Kwa-Ba places to stay in the {quartier} neighbourhood of {ville}: visited by an agent before going online, booked and paid online.",
+    "description": "{nombre, plural, one {# verified place to stay} other {# verified places to stay}} {lieu}, from {prix} a night. Every place is visited by a Kwa-Ba agent; pay with Mobile Money or card.",
+    "descriptionVide": "Verified places to stay {lieu}: every place is visited by a Kwa-Ba agent before going online. The first ones are coming soon.",
+    "nombre": "{nombre, plural, =0 {First places coming soon} one {# verified place} other {# verified places}}",
+    "nombreCourt": "{nombre, plural, =0 {soon} one {# place} other {# places}}",
+    "quartiers": "Neighbourhoods",
+    "autresQuartiers": "Other neighbourhoods in {ville}",
+    "logements": "Places to stay {lieu}",
+    "filtrer": "Pick dates and filter",
+    "vide": "No place to stay published {lieu} yet.",
+    "videTexte": "Our agents are visiting the first places before they go online. Meanwhile, see all our places to stay, or list yours.",
+    "voirTous": "See all places to stay",
+    "proposer": "List my place",
+    "confiance": "Every place is visited by a Kwa-Ba agent before going online. The landmark to find it is given to you once your booking is paid.",
+    "aFaire": "Things to see and do around {ville}",
+    "voirExperiences": "All ideas of things to do in {ville}",
+    "autresVilles": "Elsewhere {dans}"
   }
 }

@@ -4,26 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CalendarCheck, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, LayoutDashboard, Menu, Plane, ShieldAlert, Star, Users } from "lucide-react";
+import { ArrowLeft, CalendarCheck, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import { cn } from "@/lib/utils";
+import { useDroitsAdmin } from "@/features/users";
 import { AlerteVerifications, useCompteursVerification } from "@/features/verifications";
 
-const NAV: { href: string; label: string; icon: typeof Users; compteur?: boolean }[] = [
-  { href: "/backoffice", label: "Tableau de bord", icon: LayoutDashboard },
+const NAV: { href: string; label: string; icon: typeof Users; section: string; compteur?: boolean }[] = [
+  { href: "/backoffice", label: "Tableau de bord", icon: LayoutDashboard, section: "tableau-de-bord" },
   // Identity documents and visits are handled in the agent space, which admins share with field agents
-  { href: "/agent", label: "Vérifications", icon: ClipboardCheck, compteur: true },
-  { href: "/backoffice/utilisateurs", label: "Utilisateurs", icon: Users },
-  { href: "/backoffice/annonces", label: "Annonces", icon: Home },
-  { href: "/backoffice/reservations", label: "Réservations", icon: CalendarCheck },
-  { href: "/backoffice/avis", label: "Avis", icon: Star },
-  { href: "/backoffice/anti-fraude", label: "Anti-fraude", icon: ShieldAlert },
-  { href: "/backoffice/transferts", label: "Transferts aéroport", icon: Plane },
-  { href: "/backoffice/location", label: "Location de voiture", icon: Car },
-  { href: "/backoffice/experiences", label: "Expériences", icon: Compass },
-  { href: "/backoffice/give", label: "Kwa-Ba Give", icon: HandHeart },
-  { href: "/backoffice/documents", label: "Documents", icon: FileText },
+  { href: "/agent", label: "Vérifications", icon: ClipboardCheck, section: "verifications", compteur: true },
+  { href: "/backoffice/utilisateurs", label: "Utilisateurs", icon: Users, section: "utilisateurs" },
+  { href: "/backoffice/annonces", label: "Annonces", icon: Home, section: "annonces" },
+  { href: "/backoffice/reservations", label: "Réservations", icon: CalendarCheck, section: "reservations" },
+  { href: "/backoffice/avis", label: "Avis", icon: Star, section: "avis" },
+  { href: "/backoffice/anti-fraude", label: "Anti-fraude", icon: ShieldAlert, section: "anti-fraude" },
+  { href: "/backoffice/transferts", label: "Transferts aéroport", icon: Plane, section: "transferts" },
+  { href: "/backoffice/location", label: "Location de voiture", icon: Car, section: "location" },
+  { href: "/backoffice/experiences", label: "Expériences", icon: Compass, section: "experiences" },
+  { href: "/backoffice/give", label: "Kwa-Ba Give", icon: HandHeart, section: "give" },
+  { href: "/backoffice/documents", label: "Documents", icon: FileText, section: "documents" },
+  { href: "/backoffice/finances", label: "Finances", icon: Landmark, section: "finances" },
+  { href: "/backoffice/tarifs", label: "Tarifs", icon: Percent, section: "tarifs" },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -33,7 +36,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const courant = NAV.find((n) => actif(n.href));
   const [menuOuvert, setMenuOuvert] = useState(false);
 
-  const { data: compteurs } = useCompteursVerification(session?.user?.role === "admin");
+  const estAdmin = session?.user?.role === "admin";
+  const { data: droits } = useDroitsAdmin(estAdmin);
+  // Limited admin: only their sections (the API refuses the others anyway)
+  const menu = droits ? NAV.filter((n) => droits.sections.includes(n.section)) : NAV;
+  const { data: compteurs } = useCompteursVerification(estAdmin && (droits?.sections.includes("verifications") ?? false));
   const enAttente = compteurs?.total ?? 0;
 
   // Closes the mobile panel after every navigation
@@ -58,7 +65,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <Logo size="sm" />
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted mt-2 mb-8">Back-office</p>
         <nav className="space-y-1 flex-1" aria-label="Back-office">
-          {NAV.map(({ href, label, icon: Icon, compteur }) => (
+          {menu.map(({ href, label, icon: Icon, compteur }) => (
             <Link key={href} href={href} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium", actif(href) ? "bg-primary/10 text-primary" : "text-dark hover:bg-gray-50")}>
               <Icon size={18} /> {label}
               {compteur && <Pastille nombre={enAttente} className="ml-auto" />}
@@ -90,7 +97,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <MobileDrawer open={menuOuvert} onClose={() => setMenuOuvert(false)} label="Menu du back-office" side="left"
           header={<div><Logo size="sm" /><p className="text-[11px] font-bold uppercase tracking-widest text-muted mt-1">Back-office</p></div>}>
           <nav className="space-y-1" aria-label="Back-office">
-            {NAV.map(({ href, label, icon: Icon, compteur }) => (
+            {menu.map(({ href, label, icon: Icon, compteur }) => (
               <DrawerItem key={href}>
                 <Link href={href} onClick={() => setMenuOuvert(false)}
                   className={cn("flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-colors", actif(href) ? "bg-primary/10 text-primary" : "text-dark hover:bg-gray-50")}>

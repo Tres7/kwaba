@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, type Variants } from "framer-motion";
 import { Search, MapPin, ChevronRight, Check } from "lucide-react";
-import { ArrowCounterClockwiseIcon, BackpackIcon, BedIcon, BuildingApartmentIcon, ChatsCircleIcon, ClockCountdownIcon, HouseLineIcon, LightningIcon, SealCheckIcon, ShieldCheckIcon, UsersThreeIcon, WalletIcon } from "@phosphor-icons/react";
+import { ArrowCounterClockwiseIcon, ChatsCircleIcon, ClockCountdownIcon, LightningIcon, SealCheckIcon, ShieldCheckIcon, UsersThreeIcon, WalletIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import DateRangeField from "@/components/ui/DateRangeField";
@@ -19,6 +19,7 @@ import ChampDestination from "./ChampDestination";
 import Services from "@/components/accueil/Services";
 import { AvisVoyageurs } from "@/features/avis";
 import { useFormat } from "@/lib/format";
+import { ICONES_TYPES, TYPES_LOGEMENT } from "@/components/hebergement/TypeLogement";
 
 // Slideshow photos (public/accueil): 1240 × 1550 portrait cropped on the subject for phones, 2560 px from
 // tablets, 3840 px on large screens (2xl). Classes written in full so that Tailwind generates them; the
@@ -36,12 +37,8 @@ const heroImages = [
   "bg-[url('/accueil/hero-9-mobile.jpg?v=2')] md:bg-[url('/accueil/hero-9.jpg?v=2')] 2xl:bg-[url('/accueil/hero-9-4k.jpg?v=2')]",
 ];
 
-const CATEGORIES = [
-  { type: "hotel", label: "hotels", icon: BedIcon },
-  { type: "appartement", label: "appartements", icon: BuildingApartmentIcon },
-  { type: "villa", label: "villas", icon: HouseLineIcon },
-  { type: "auberge", label: "auberges", icon: BackpackIcon },
-];
+// The six official types of the Kwa-Ba taxonomy (the search also offers aparthotels and guesthouses)
+const CATEGORIES = TYPES_LOGEMENT.slice(0, 6);
 
 const FEATURES = [
   // Kwa-Ba brand colours: green, amber, orange, slate
@@ -141,7 +138,7 @@ function WelcomeToast() {
 }
 
 export default function HomePage() {
-  const { formatPrice } = useFormat();
+  const { formatPrice, TYPE_LABELS } = useFormat();
   // Displayed and previous photo (kept during the fade); no previous one before the first change
   const [{ currentBg, previousBg }, setDiaporama] = useState({ currentBg: 0, previousBg: -1 });
   const { status } = useSession();
@@ -242,16 +239,19 @@ export default function HomePage() {
         )}
 
         <section className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center items-center gap-3 md:gap-4" aria-label={t("typesHebergement")}>
-          {CATEGORIES.map(({ type, label, icon: Icon }) => (
+          {CATEGORIES.map((type) => {
+            const Icon = ICONES_TYPES[type];
+            return (
             <Link
               key={type}
               href={`/recherche?type=${type}`}
               className="bg-white px-4 md:px-6 py-3 md:py-4 rounded-full border border-gray-100 shadow-sm flex items-center gap-3 hover:border-primary/40 hover:shadow transition-all"
             >
-              <span className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary-50 text-primary"><Icon size={24} weight="duotone" aria-hidden /></span>
-              <span className="font-bold text-dark text-sm">{t(`types.${label}`)}</span>
+              <span className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary-50 text-primary"><Icon size={22} strokeWidth={1.75} aria-hidden /></span>
+              <span className="font-bold text-dark text-sm">{TYPE_LABELS[type]}</span>
             </Link>
-          ))}
+            );
+          })}
         </section>
 
         {(recoLoading || recommended.length > 0) && (

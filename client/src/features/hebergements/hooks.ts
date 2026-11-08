@@ -6,6 +6,8 @@ export const clesHebergements = {
   villes: ["villes"],
   mes: ["hebergements", "mine"],
   brouillons: ["hebergements", "brouillons"],
+  brouillon: (id: string) => ["hebergements", "brouillons", id],
+  conditions: (id: string) => ["hebergements", "brouillons", id, "conditions"],
   fiche: (id: string) => ["hebergement", id],
   ficheHote: (id: string) => ["hebergement", id, "hote"],
   disponibilites: (id: string) => ["disponibilites", id],

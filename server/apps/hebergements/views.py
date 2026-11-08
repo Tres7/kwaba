@@ -28,9 +28,10 @@ from .serializers import (
 from apps.contrats import api as contrats
 from apps.paiements import api as paiements
 from apps.favoris import api as favoris
+from apps.users import api as users
 from apps.verifications import api as verifications
+from config.site import module_actif
 
-HOST_ROLES = ('hote', 'admin')
 MAX_FENETRE_JOURS = 548  # 18 months of calendar per request
 MAX_NUITS = 90  # same limit as a booking
 MAX_RESULTATS = 200
@@ -102,7 +103,11 @@ class HebergementListView(APIView):
 
         type_ = request.query_params.get('type')
         if type_:
-            qs = qs.filter(type=type_)
+            qs = qs.filter(type=HebergementModel.ANCIENS_TYPES.get(type_, type_))
+
+        espace = request.query_params.get('espace')
+        if espace:
+            qs = qs.filter(espace=espace)
 
         if 'price_min' in filtres:
             qs = qs.filter(price_per_night__gte=filtres['price_min'])
@@ -160,9 +165,16 @@ class HebergementListView(APIView):
         return Response({'results': donnees, 'count': len(donnees)})
 
     def post(self, request):
-        if request.user.role not in HOST_ROLES:
+        if not users.peut_gerer_annonces(request.user):
             return Response(
                 {'detail': 'Seuls les hôtes peuvent publier un hébergement.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # With the wizard, a listing is sent through its checks (brouillons.BrouillonSoumissionView): not around them
+        if module_actif('assistant_hote') and request.user.role != 'admin':
+            return Response(
+                {'detail': "Créez votre annonce avec l'assistant.", 'code': 'assistant_requis'},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -323,7 +335,7 @@ class PhotoUploadView(APIView):
     throttle_scope = 'hebergement_photo_upload'
 
     def post(self, request):
-        if request.user.role not in HOST_ROLES:
+        if not users.peut_gerer_annonces(request.user):
             return Response({'detail': 'Seuls les hôtes peuvent envoyer des photos.'}, status=status.HTTP_403_FORBIDDEN)
 
         uploaded = request.FILES.get('file')
@@ -416,8 +428,10 @@ class DevisView(APIView):
             return Response({'detail': 'Type de logement inconnu.'}, status=status.HTTP_400_BAD_REQUEST)
         if nb_unites is None or not 1 <= nb_unites <= type_logement.quantite:
             return Response({'detail': "Nombre d'unités invalide."}, status=status.HTTP_400_BAD_REQUEST)
-        montants = paiements.devis_sejour(type_logement.prix_nuit, hebergement.host_id, nuits, voyageur=request.user, nb_unites=nb_unites)
-        return Response({'prix_nuits': montants.prix_nuits, 'frais_service': montants.frais_service, 'total': montants.total})
+        montants = paiements.devis_sejour(type_logement.prix_nuit, hebergement.host_id, nuits, voyageur=request.user,
+                                          nb_unites=nb_unites, type_annonce=hebergement.type)
+        return Response({'prix_nuits': montants.prix_nuits, 'frais_service': montants.frais_service,
+                         'frais_menage': montants.frais_menage, 'total': montants.total})
 
 
 class DisponibiliteView(APIView):
@@ -476,6 +490,15 @@ class BlocageCreateView(APIView):
             # reads the establishment), so the two never deadlock. A simultaneous booking cannot take these nights.
             verrouiller_types(hebergement.types.values_list('pk', flat=True))
             verrouiller(hebergement.id)
+            quantite = serializer.validated_data.get('quantite')
+            if quantite:
+                # Some rooms only (sold elsewhere): possible next to bookings, within the rooms still free every night
+                libres = stock.Occupation([type_logement], debut, fin).restantes(type_logement.id)
+                if libres < quantite:
+                    return Response({'quantite': [f"Il ne reste que {libres} unité(s) libre(s) de ce type sur ces dates."]},
+                                    status=status.HTTP_409_CONFLICT)
+                blocage = serializer.save(hebergement=hebergement)
+                return Response(BlocageSerializer(blocage).data, status=status.HTTP_201_CREATED)
             # Nights already booked are not closed: the host must first handle the booking
             if a_des_reservations(hebergement.id, debut, fin, type_logement=type_logement):
                 return Response(

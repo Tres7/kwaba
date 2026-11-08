@@ -145,6 +145,17 @@ def synchroniser_paiement(paiement: PaiementModel) -> str:
     return paiement.statut
 
 
+def _montant_paypal_attendu(capture: dict, paiement: PaiementModel) -> bool:
+    montant = capture.get('amount')
+    if not montant or paiement.montant_eur is None:
+        return True  # nothing to compare: the order was created by the server with this amount
+    from decimal import Decimal, InvalidOperation
+    try:
+        return montant.get('currency_code') == 'EUR' and Decimal(str(montant.get('value'))) == paiement.montant_eur
+    except InvalidOperation:
+        return False
+
+
 def _synchroniser_paypal(paiement: PaiementModel) -> str:
     """Order approved by the traveller (APPROVED) → it is captured; COMPLETED → successful payment."""
     try:
@@ -156,6 +167,18 @@ def _synchroniser_paypal(paiement: PaiementModel) -> str:
         return paiement.statut
 
     nouveau = paypal.STATUTS_COMMANDE.get(commande.get('status'))
+    if nouveau == 'reussi':
+        # An order completed is not the money received: its capture can wait for a review at PayPal (PENDING), then
+        # be refused. Only a completed capture, of the amount asked for, confirms the payment; meanwhile the payment
+        # stays pending and is read again at the next pass.
+        capture = paypal.capture(commande)
+        if capture.get('status') in ('DECLINED', 'FAILED'):
+            nouveau = 'echoue'
+        elif capture.get('status') != 'COMPLETED':
+            return paiement.statut
+        elif not _montant_paypal_attendu(capture, paiement):
+            logger.error("Capture PayPal %s d'un autre montant que le paiement %s : à vérifier", capture.get('id'), paiement.pk)
+            return paiement.statut
     if nouveau == 'reussi':
         PaiementModel.objects.filter(pk=paiement.pk).update(capture_id=paypal.id_capture(commande))
         _paiement_reussi(paiement.pk, {'mode': 'paypal'})
@@ -197,7 +220,7 @@ def planifier_versement_hote(reservation):
         reservation_id=reservation.id,
         defaults={
             'hote_id': tarifs._annonce(reservation)['host_id'],
-            'montant_brut': montants.prix_nuits,
+            'montant_brut': montants.prix_nuits + montants.frais_menage,
             'commission': montants.commission_hote,
             'montant': montants.montant_hote,
             'date_prevue': tarifs.date_versement(reservation),
@@ -283,6 +306,29 @@ def _reserver(modele, pk, de: str) -> bool:
     return modele.objects.filter(pk=pk, statut=de).update(statut='en_cours') == 1
 
 
+def _lancer_payout(ligne, *, mode: str, client: dict, compte: dict | None = None):
+    """Creates the row's payout if it has none yet, then starts it.
+
+    The payout id is saved before the start: if FedaPay's answer to the start is lost, the next try reads this payout
+    again instead of creating a second one, which would pay twice. A payout never started has paid nothing: it is
+    started again, or replaced when the account it was made for (`compte`, fields of the row) has changed since.
+    """
+    api = fedapay.client()
+    if ligne.payout_id:
+        statut = str(api.lire_versement(ligne.payout_id).get('status', '')).lower()
+        if statut == fedapay.PAYOUT_NON_LANCE:
+            if all(getattr(ligne, champ) == valeur for champ, valeur in (compte or {}).items()):
+                api.lancer_payout(ligne.payout_id)
+                return
+        elif fedapay.STATUTS_PAYOUT.get(statut) != 'echoue':
+            return  # already started: its outcome comes through the synchronisation
+    ligne.payout_id = api.creer_payout(montant=ligne.montant, mode=mode, client=client)
+    for champ, valeur in (compte or {}).items():
+        setattr(ligne, champ, valeur)
+    ligne.save(update_fields=['payout_id', *(compte or {})])
+    api.lancer_payout(ligne.payout_id)
+
+
 def envoyer_payout(ligne, *, mode: str, numero: str, pays: str, email: str, titulaire: str) -> bool:
     """Sends a Mobile Money payout for a scheduled row (payout to a host or to a driver).
 
@@ -294,12 +340,11 @@ def envoyer_payout(ligne, *, mode: str, numero: str, pays: str, email: str, titu
     prenom, _, nom = titulaire.strip().partition(' ')
     ligne.tentatives += 1
     try:
-        ligne.payout_id = fedapay.client().creer_versement(montant=ligne.montant, mode=mode, client={
+        _lancer_payout(ligne, mode=mode, compte={'mode': mode, 'numero': numero}, client={
             'firstname': prenom or 'Client', 'lastname': nom or 'Kwa-Ba', 'email': email,
             'phone_number': {'number': numero, 'country': pays.lower()},
         })
         ligne.statut, ligne.derniere_erreur = 'en_cours', ''
-        ligne.mode, ligne.numero = mode, numero
     except fedapay.FedaPayErreur as exc:
         ligne.derniere_erreur = str(exc)
         ligne.statut = 'echoue' if ligne.tentatives >= MAX_TENTATIVES else 'planifie'
@@ -325,6 +370,9 @@ def synchroniser_payout(ligne):
     ligne.save()
 
 
+COMPTE_DESACTIVE = "Compte de l'hôte désactivé : versement suspendu tant que le compte n'est pas réactivé."
+
+
 def envoyer_versements_dus() -> int:
     if not fedapay_actif():
         return 0  # payouts to hosts go through FedaPay
@@ -334,6 +382,12 @@ def envoyer_versements_dus() -> int:
     dus = users.attacher(VersementModel.objects.filter(statut='planifie', date_prevue__lte=timezone.now()), 'hote')
     confirmees = reservations.ids_confirmees(v.reservation_id for v in dus)
     for versement in [v for v in dus if v.reservation_id in confirmees][:50]:
+        if not (versement.hote and versement.hote.is_active):
+            # Account closed or banned: the payout waits, and leaves by itself if an administrator reactivates the account
+            if versement.derniere_erreur != COMPTE_DESACTIVE:
+                versement.derniere_erreur = COMPTE_DESACTIVE
+                versement.save(update_fields=['derniere_erreur', 'mis_a_jour_le'])
+            continue
         profil = ProfilVersementModel.objects.filter(hote_id=versement.hote_id).first()
         if not profil:
             if not versement.derniere_erreur:
@@ -375,10 +429,7 @@ def envoyer_remboursements() -> int:
             continue
         remboursement.tentatives += 1
         try:
-            remboursement.payout_id = fedapay.client().creer_versement(
-                montant=remboursement.montant, mode=mode,
-                client=_client_payout(remboursement.payeur, numero, pays),
-            )
+            _lancer_payout(remboursement, mode=mode, client=_client_payout(remboursement.payeur, numero, pays))
             remboursement.statut, remboursement.derniere_erreur = 'en_cours', ''
             envoyes += 1
         except fedapay.FedaPayErreur as exc:

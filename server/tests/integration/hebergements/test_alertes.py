@@ -186,7 +186,7 @@ class TestTriggers:
         assert (alerte.statut, alerte.a_verifier) == ('active', False)
 
     def test_another_type_freed_does_not_satisfy_a_type_alert(self, client_for, make_user, make_hebergement):
-        h = make_hebergement(type='hotel', name='Hôtel du Golfe')
+        h = make_hebergement(type='chambre_hotel', name='Hôtel du Golfe')
         chambre = h.types.get()
         client_for(h.host).post(f'{HEBERGEMENTS}{h.id}/types/', {'nom': 'Suite', 'capacite': 4, 'prix_nuit': 80000, 'quantite': 1},
                                 format='json')

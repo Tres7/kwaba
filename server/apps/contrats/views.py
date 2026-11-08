@@ -124,7 +124,7 @@ class EstHote(IsAuthenticated):
     message = "Réservé aux hôtes."
 
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role == 'hote'
+        return super().has_permission(request, view) and users.hote_ou_candidat(request.user)
 
 
 class ContratHoteView(APIView):
@@ -240,7 +240,7 @@ class PartiesAdminView(APIView):
         type_contrat = request.query_params.get('type')
         q = request.query_params.get('q', '').strip()
         if type_contrat in services.TYPES_HOTE:
-            lignes = [(u.pk, services._nom(u), u.email) for u in users.comptes_actifs(['hote'], texte=q, limite=30)]
+            lignes = [(u.pk, services._nom(u), u.email) for u in users.hotes_et_candidats(texte=q, limite=30)]
         elif type_contrat in PARTIES:
             lignes = [(p['id'], p['nom'], p['email']) for p in PARTIES[type_contrat][1](q)]
         else:

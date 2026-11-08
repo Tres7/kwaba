@@ -6,15 +6,17 @@ import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiErrorMessage, firstErrorMessage } from "@/lib/api";
-import { completude, type BrouillonAnnonce, type DonneesAnnonce } from "./brouillons";
+import { completude, estEtablissement, type BrouillonAnnonce, type DonneesAnnonce } from "./brouillons";
 import { clesHebergements } from "./hooks";
 import { useEquipements } from "./AmenityBadge";
 import PhotoUploader from "./PhotoUploader";
 import EstimateurRevenus from "./EstimateurRevenus";
+import FraisMenageType from "./FraisMenageType";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
 import { cn } from "@/lib/utils";
+import { quartiersDe } from "@/lib/quartiers";
 import type { Hebergement, HebergementType, PolitiqueAnnulation } from "@/types/api/models";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -50,11 +52,11 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
     type: source?.type ?? "appartement",
     city: source?.city ?? "",
     location: source?.location ?? "",
+    point_repere: source?.point_repere ?? "",
     price_per_night: source?.price_per_night ? String(source.price_per_night) : "",
     max_guests: source?.max_guests ? String(source.max_guests) : "2",
     description: source?.description ?? "",
     amenities: source?.amenities ?? [],
-    surface_m2: source?.surface_m2 ? String(source.surface_m2) : "",
     chambres: source?.chambres ?? 1,
     salles_de_bain: source?.salles_de_bain ?? 1,
     lits_doubles: source?.lits_doubles ?? (initial ? 0 : 1),
@@ -82,6 +84,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
   // Copyright and image rights: the host certifies they own the rights to the published photos
   const [droitsPhotos, setDroitsPhotos] = useState(!!initial);
   const onPhotosChange = useCallback((urls: string[]) => setPhotos(urls), []);
+  const [legendes, setLegendes] = useState<Record<string, string>>(() => source?.legendes_photos ?? {});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -103,14 +106,15 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
     type: form.type,
     city: form.city.trim(),
     location: form.location.trim(),
+    point_repere: form.point_repere.trim(),
     ...(position ? { latitude: position.lat, longitude: position.lng } : {}),
     price_per_night: form.price_per_night ? Number(form.price_per_night) : null,
     max_guests: Number(form.max_guests),
     description: form.description.trim(),
     image_url: photos[0],
     images: photos,
+    legendes_photos: Object.fromEntries(photos.filter((url) => legendes[url]).map((url) => [url, legendes[url]])),
     amenities: form.amenities,
-    surface_m2: form.surface_m2 ? Number(form.surface_m2) : null,
     chambres: form.chambres,
     salles_de_bain: form.salles_de_bain,
     lits_doubles: form.lits_doubles,
@@ -207,12 +211,13 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
             onChange={(v) => setForm((prev) => ({ ...prev, type: v }))}
             options={(Object.keys(TYPE_LABELS) as HebergementType[]).map((id) => ({ value: id, label: TYPE_LABELS[id], hint: t(`types.${id}`) }))}
           />
+          <FraisMenageType type={form.type} className="mt-2" />
         </div>
         <div>
           <p className={labelClass}>{t("capacite")}</p>
           <Stepper
             className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white"
-            label={t("voyageursMax")} value={Number(form.max_guests) || 1} min={1} max={50}
+            label={t("voyageursMax")} value={Number(form.max_guests) || 1} min={1} max={20}
             onChange={(n) => setForm((prev) => ({ ...prev, max_guests: String(n) }))}
           />
           {err("max_guests")}
@@ -224,7 +229,15 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         </div>
         <div>
           <label className={labelClass} htmlFor="h-location">{t("quartier")}</label>
-          <input id="h-location" className={inputClass} value={form.location} onChange={set("location")} placeholder="Bè Kpota" maxLength={200} />
+          <input id="h-location" className={inputClass} value={form.location} onChange={set("location")} placeholder="Bè Kpota" maxLength={200} list="h-quartiers" />
+          <datalist id="h-quartiers">{quartiersDe(form.city).map((q) => <option key={q} value={q} />)}</datalist>
+        </div>
+        <div className="sm:col-span-2">
+          <label className={labelClass} htmlFor="h-repere">{t("pointRepere")}</label>
+          <input id="h-repere" className={inputClass} value={form.point_repere} onChange={set("point_repere")}
+            placeholder={t("pointRepereExemple")} maxLength={200} required={!initial} />
+          <p className="text-xs text-gray-500 mt-1.5">{t("pointRepereAide")}</p>
+          {err("point_repere")}
         </div>
         <div className="sm:col-span-2">
           <label className={labelClass} htmlFor="h-price">{t("prix")}</label>
@@ -247,17 +260,15 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         <p className="text-xs text-gray-500 -mt-1">{t("detailsAide")}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass} htmlFor="h-surface">{t("surface")}</label>
-            <input id="h-surface" type="number" min={5} step={1} inputMode="numeric" className={inputClass} value={form.surface_m2}
-              onChange={set("surface_m2")} placeholder="80" required />
-            {err("surface_m2")}
-          </div>
-          <div className="space-y-2">
             <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("chambres")} value={form.chambres} min={0} max={50}
               onChange={(n) => setForm((prev) => ({ ...prev, chambres: n }))} />
+            <p className="text-xs text-gray-500 mt-1.5">{t("chambresAide")}</p>
             {err("chambres")}
-            <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("sallesDeBain")} value={form.salles_de_bain} min={0} max={50}
+          </div>
+          <div>
+            <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("sallesDeBain")} value={form.salles_de_bain} min={1} max={50}
               onChange={(n) => setForm((prev) => ({ ...prev, salles_de_bain: n }))} />
+            {err("salles_de_bain")}
           </div>
         </div>
         <div>
@@ -323,7 +334,10 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
       <div>
         <p className={labelClass}>{t("photos")}</p>
         <p className="text-xs text-gray-500 -mt-1 mb-3">{t("photosAide")}</p>
-        <PhotoUploader value={photos} onChange={onPhotosChange} onBusyChange={setUploading} error={errors.photos ?? errors.image_url ?? errors.images} />
+        <PhotoUploader value={photos} onChange={onPhotosChange} onBusyChange={setUploading}
+          error={errors.photos ?? errors.image_url ?? errors.images ?? errors.legendes_photos}
+          legendes={legendes} onLegende={(url, piece) => setLegendes((prev) => ({ ...prev, [url]: piece }))}
+          chambres={form.chambres} sallesDeBain={form.salles_de_bain} etablissement={estEtablissement(form.type)} />
         <div className="flex items-start gap-2 mt-4">
           <input
             type="checkbox" id="h-droits" checked={droitsPhotos} onChange={(e) => setDroitsPhotos(e.target.checked)}

@@ -1,10 +1,11 @@
 from .fichiers import FichierInvalide, piece_identite
 from .services import (
-    ROLES_VERIFICATEURS, VerificationErreur, contrat_hote_signe, hotes_verifies, verifier_limite_annonces,
+    ROLES_VERIFICATEURS, VerificationErreur, contrat_hote_signe, contrat_manquant, hotes_verifies, statut_piece,
+    verifier_limite_annonces,
     visite_a_planifier,
 )
 
 __all__ = [
-    'FichierInvalide', 'ROLES_VERIFICATEURS', 'VerificationErreur', 'contrat_hote_signe', 'hotes_verifies', 'piece_identite',
-    'verifier_limite_annonces', 'visite_a_planifier',
+    'FichierInvalide', 'ROLES_VERIFICATEURS', 'VerificationErreur', 'contrat_hote_signe', 'contrat_manquant', 'hotes_verifies',
+    'piece_identite', 'statut_piece', 'verifier_limite_annonces', 'visite_a_planifier',
 ]

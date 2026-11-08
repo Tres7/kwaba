@@ -49,6 +49,9 @@ class JournalAuditModel(models.Model):
         ('backoffice_modification', 'Modification depuis le back-office'),
         ('backoffice_suppression', 'Suppression depuis le back-office'),
         ('contrat_signe', 'Contrat signé électroniquement'),
+        ('candidature_ouverte', 'Candidature hôte ouverte'),
+        ('candidature_refusee', 'Candidature hôte refusée'),
+        ('roles_hotes_migres', 'Rôles des hôtes existants révisés'),
     ]
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -73,12 +76,12 @@ class JournalAuditModel(models.Model):
 class AlerteFraudeModel(models.Model):
     """Attempt to bypass the platform: contact details or off-site payment offered in a message
     or a listing. Reviewed by an administrator from the back-office (Anti-fraud)."""
-    CONTEXTES = [('message', 'Message'), ('annonce', 'Annonce')]
+    CONTEXTES = [('message', 'Message'), ('annonce', 'Annonce'), ('reservation', 'Réservation')]
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
     utilisateur_id = models.UUIDField(db_index=True)
     contexte = models.CharField(max_length=20, choices=CONTEXTES)
-    objet_id = models.CharField(max_length=64, help_text='Conversation ou annonce concernée')
+    objet_id = models.CharField(max_length=64, help_text='Conversation, annonce ou réservation concernée')
     types = models.JSONField(default=list, help_text='telephone, email, lien, reseau, application, hors_site')
     # Detected elements (the number, the address…): proof for the administrator, never shown to the other party
     extraits = models.JSONField(default=list)

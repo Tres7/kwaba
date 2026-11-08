@@ -8,6 +8,9 @@ Le frontend est déjà construit sur ce contrat : les noms de champs, les codes 
 - **Préfixe** : toutes les routes sont sous `/api/v1/admin/`.
 - **Accès** : utilisateur authentifié (JWT) **et** `role == "admin"`. Sinon : `401` (non connecté) ou `403` `{"detail": "Accès réservé aux administrateurs."}`.
   Utiliser `permission_classes = [EstAdministrateur]` (`apps/securite/permissions.py`) sur **chaque** vue : le rôle est lu en base à chaque requête. Ne jamais se fier au rôle de la session NextAuth ni à un rôle envoyé par le client ; la redirection du middleware Next.js n'est qu'un confort d'affichage, pas une protection.
+- **Droits des admins** : un super admin (`is_superuser`, les deux directeurs) a tous les droits. Un admin peut être limité à des sections (`admin_sections`, `null` : toutes) : `EstAdministrateur` retrouve la section d'après l'URL (`SECTIONS_ADMIN` et `_ROUTES_SECTIONS` dans `apps/securite/permissions.py`) et répond `403` `{"detail": "Cette section ne vous est pas ouverte."}`. Une nouvelle route doit y être rattachée : un test échoue sinon, et elle est refusée aux admins limités. La section `verifications` couvre aussi l'espace agent.
+- **Admin temporaire** : à `admin_expire_le`, le compte retrouve `role_avant_admin` (`voyageur` s'il est vide), dès sa première requête (`AuthentificationJWT`) ou par la tâche quotidienne (`retirer_admins_expires`).
+- **Super admins** : jamais gérés par l'API. Ils se nomment et se retirent sur le serveur : `manage.py super_admin <email> [--retirer]` (sur un compte existant ; le dernier ne peut pas être retiré).
 - **Pagination** des listes : paramètres `page` (défaut 1) et `page_size` (défaut 20, maximum 100). Réponse :
   ```json
   { "results": [ ... ], "count": 134, "page": 1, "page_size": 20 }
@@ -68,7 +71,10 @@ Filtres (tous optionnels) :
 Corps (un ou plusieurs champs) : `{ "is_active": false }`, `{ "role": "hote" }`.
 
 - Renvoie l'utilisateur mis à jour (même format que la liste), `200`.
+- Super admin seulement : `{ "admin_sections": ["avis", "finances"] }` (`null` : toutes), `{ "admin_expire_le": "2026-12-01T18:00:00Z" }` (date à venir avec fuseau, `null` : sans fin). Ces champs ne s'appliquent qu'à un admin, et peuvent accompagner `{ "role": "admin" }`.
 - `403` `{"detail": "Vous ne pouvez pas modifier votre propre compte."}` si l'admin se cible lui-même.
+- `403` si la cible est un super admin, pour tout le monde.
+- `403` pour un admin simple dès que le compte ciblé est admin, ou que la demande en fait un admin.
 - `400` si `role` n'est pas `voyageur`, `hote`, `agent` ou `admin`.
 - `404` si l'utilisateur n'existe pas.
 - Désactiver un compte (`is_active: false`) doit l'empêcher de se connecter (déjà géré par le login) **et invalider ses refresh tokens** si la blacklist SimpleJWT est activée.
@@ -157,7 +163,8 @@ Filtres : `q` (commentaire, nom de l'annonce, email de l'auteur), `note` (1 à 5
 |---|---|---|
 | GET | `/admin/stats/` | tableau de bord |
 | GET | `/admin/users/` | liste des comptes |
-| PATCH | `/admin/users/<id>/` | activer / désactiver, changer le rôle |
+| PATCH | `/admin/users/<id>/` | activer / désactiver, changer le rôle, droits d'un admin |
+| GET | `/admin/droits/` | droits de l'admin connecté (ouvert à tous les admins) |
 | GET | `/admin/hebergements/` | liste des annonces |
 | PATCH | `/admin/hebergements/<id>/` | masquer / publier, vérifier |
 | DELETE | `/admin/hebergements/<id>/?motif=` | supprimer une annonce |

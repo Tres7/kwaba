@@ -9,8 +9,10 @@ import { MentionDevise, SelecteurDevise } from "@/components/layout/Devise";
 import GererCookiesBouton from "@/components/legal/GererCookiesBouton";
 import { CONTACT_EMAIL } from "@/lib/contact";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
+import { cheminPays, cheminVille, villesDuPays } from "@/lib/destinations";
 
-const COLUMNS = [
+/** label: key in pied.liens; nom: text shown as is (city names). */
+const COLUMNS: { title: string; links: { href: string; label?: string; nom?: string }[] }[] = [
   {
     title: "decouvrir",
     links: [
@@ -29,6 +31,15 @@ const COLUMNS = [
     links: [
       { href: "/hote", label: "devenirHote" },
       { href: "/hote/espace", label: "espaceHote" },
+    ],
+  },
+  {
+    // Destination pages (country, then each city) and the travel guide of each country
+    title: "destinations",
+    links: [
+      { href: cheminPays("tg"), label: "logementsTogo" },
+      ...villesDuPays("tg").map((v) => ({ href: cheminVille(v), nom: v.nom })),
+      { href: "/preparer-voyage/togo", label: "preparerTogo" },
     ],
   },
   {
@@ -54,7 +65,7 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Logo />
             <p className="text-gray-600 text-sm mt-3 max-w-xs leading-relaxed">{t("accroche")}</p>
@@ -76,7 +87,7 @@ export default function Footer() {
               <ul className="space-y-2">
                 {filtrerLiens(col.links, reglages?.modules).map((l) => (
                   <li key={l.href}>
-                    <Link href={l.href} className="text-sm text-gray-600 hover:text-primary transition-colors">{t(`liens.${l.label}`)}</Link>
+                    <Link href={l.href} className="text-sm text-gray-600 hover:text-primary transition-colors">{l.nom ?? t(`liens.${l.label}`)}</Link>
                   </li>
                 ))}
               </ul>

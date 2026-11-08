@@ -16,6 +16,7 @@ import { cn, FALLBACK_IMAGE, isoDate } from "@/lib/utils";
 import HebergementForm from "./HebergementForm";
 import RatingBadge from "@/components/ui/RatingBadge";
 import { RevenusHote } from "@/features/paiements";
+import { accesEspaceHote, useMoi } from "@/features/users";
 import CandidatureHote from "./CandidatureHote";
 import { PreinscriptionHote } from "@/features/contrats";
 import FenetreOuverture from "./FenetreOuverture";
@@ -24,6 +25,7 @@ import type { Hebergement, Reservation } from "@/types/api/models";
 import { contacterVoyageur as conversationAvecVoyageur } from "@/features/messaging";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { useReglagesSite } from "@/lib/site";
 
 type Tab = "annonces" | "reservations" | "revenus";
 
@@ -64,14 +66,17 @@ function EspaceHoteContent() {
     }
   };
 
-  const isHost = session?.user?.role === "hote" || session?.user?.role === "admin";
+  const { data: me } = useMoi(status === "authenticated");
+  const isHost = !!me && accesEspaceHote(me);
 
   // Pre-launch: the window comes before any new listing, and once per session when the host space opens
-  const nouvelle = () => (prelancement ? setFenetre(true) : setEditing("new"));
+  const assistant = useReglagesSite().data?.modules.assistant_hote === true;
+  const ouvrirNouvelle = () => (assistant ? router.push("/hote/annonce/nouvelle") : setEditing("new"));
+  const nouvelle = () => (prelancement ? setFenetre(true) : ouvrirNouvelle());
   const fermerFenetre = useCallback(() => setFenetre(false), []);
   const creerDepuisFenetre = () => {
     setFenetre(false);
-    setEditing("new");
+    ouvrirNouvelle();
   };
 
   useEffect(() => {
@@ -88,13 +93,6 @@ function EspaceHoteContent() {
     if (onglet === "revenus" || onglet === "reservations") setTab(onglet);
   }, [searchParams]);
 
-  useEffect(() => {
-    if (searchParams.get("bienvenue") === "1") {
-      toast.success(t("bienvenue"));
-      router.replace("/hote/espace");
-    }
-  }, [searchParams, router, t]);
-
   const { data: annonces = [], isLoading } = useQuery({
     queryKey: clesHebergements.mes,
     queryFn: listerMesHebergements,
@@ -109,13 +107,17 @@ function EspaceHoteContent() {
     enabled: isHost,
   });
 
-  if (status === "loading") return <div className="max-w-6xl mx-auto px-4 py-10"><div className="h-64 skeleton rounded-3xl" /></div>;
+  if (status === "loading" || (status === "authenticated" && !me)) return <div className="max-w-6xl mx-auto px-4 py-10"><div className="h-64 skeleton rounded-3xl" /></div>;
 
   if (!isHost) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center gap-4 px-6">
-        <p className="font-heading font-bold text-xl text-dark">{t("pasHote")}</p>
-        <Link href="/hote" className="bg-primary text-white font-bold px-6 py-3 rounded-xl">{t("devenirHote")}</Link>
+        <p className="font-heading font-bold text-xl text-dark">{t(me?.candidature_hote === "refusee" ? "candidatureRefusee" : "pasHote")}</p>
+        {me?.candidature_hote === "refusee" ? (
+          <p className="text-sm text-gray-600 max-w-md">{me.candidature_motif}</p>
+        ) : (
+          <Link href="/hote" className="bg-primary text-white font-bold px-6 py-3 rounded-xl">{t("devenirHote")}</Link>
+        )}
       </div>
     );
   }
@@ -245,7 +247,7 @@ function EspaceHoteContent() {
             {annonces.map((h) => (
               <article key={h.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col sm:flex-row">
                 <Link href={`/hebergements/${h.id}`} className="sm:w-48 h-40 sm:h-auto flex-shrink-0 relative">
-                  <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className={cn("w-full h-full object-cover", (!h.is_available || h.statut_verification !== "verifiee") && "grayscale opacity-60")} />
+                  <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className={cn("w-full h-full object-cover", h.statut_annonce !== "publiee" && "grayscale opacity-60")} />
                   {!h.is_available && <span className="absolute top-3 left-3 bg-dark text-white text-[10px] font-bold uppercase px-2 py-1 rounded-full">{t("masqueeBadge")}</span>}
                 </Link>
                 <div className="flex-1 p-5 min-w-0 flex flex-col">
@@ -257,12 +259,12 @@ function EspaceHoteContent() {
                     <p className="font-heading font-bold text-primary whitespace-nowrap">{formatPrice(h.price_per_night)}<span className="text-xs text-gray-400 font-normal">/nuit</span></p>
                   </div>
                   <RatingBadge rating={h.rating} count={h.review_count} variant="full" className="mt-2" />
-                  {h.surface_m2 == null && (
+                  {(h.chambres == null || h.salles_de_bain == null || !h.point_repere) && (
                     <button type="button" onClick={() => setEditing(h)} className="relative zone-tactile flex items-start gap-1.5 text-left text-xs font-semibold text-amber-800 mt-2 hover:underline">
                       <AlertTriangle size={14} className="flex-shrink-0 mt-px" /> {tAnnonce("detailsManquants")}
                     </button>
                   )}
-                  {h.statut_verification === "verifiee" && prelancement ? (
+                  {h.statut_annonce === "validee" && prelancement ? (
                     <div className="mt-3 text-sm bg-primary/5 text-primary rounded-xl px-3 py-2">
                       <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span className="flex items-center gap-1.5 text-xs font-bold text-green-700"><ShieldCheck size={14} aria-hidden /> {tVerif("verifiee")}</span>
@@ -272,18 +274,21 @@ function EspaceHoteContent() {
                       </p>
                       <p className="mt-1 text-xs text-gray-600">{tPre("badgeAide")}</p>
                     </div>
-                  ) : h.statut_verification === "verifiee" && h.en_ligne === false && h.is_available ? (
+                  ) : h.statut_annonce === "validee" ? (
                     <div className="mt-3 text-sm bg-amber-50 text-amber-900 rounded-xl px-3 py-2">
                       <p className="flex items-center gap-1.5 font-bold"><AlertTriangle size={14} aria-hidden /> {tPre("contratRequis")}</p>
                       <Link href="/hote/espace/contrat" className="inline-block mt-1 text-xs font-bold underline">{tPre("signerContrat")}</Link>
                     </div>
-                  ) : h.statut_verification === "verifiee" ? (
+                  ) : h.statut_annonce === "publiee" || h.statut_annonce === "masquee" ? (
                     <p className="flex items-center gap-1.5 text-xs font-bold text-green-700 mt-2"><ShieldCheck size={14} /> {tVerif("verifiee")}</p>
-                  ) : h.statut_verification === "refusee" ? (
+                  ) : h.statut_annonce === "refusee" ? (
                     <div role="alert" className="mt-3 text-sm bg-red-50 text-red-800 rounded-xl px-3 py-2">
                       <p className="flex items-center gap-1.5 font-bold"><AlertTriangle size={14} /> {tVerif("refusee")}</p>
                       {h.motif_refus && <p className="mt-1">« {h.motif_refus} »</p>}
                       <p className="mt-1 text-xs">{tVerif("refuseeAide")}</p>
+                      <button type="button" onClick={() => setEditing(h)} className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold underline">
+                        <Pencil size={13} aria-hidden /> {tVerif("corriger")}
+                      </button>
                     </div>
                   ) : (
                     <div className="mt-3 text-sm bg-amber-50 text-amber-900 rounded-xl px-3 py-2">
@@ -325,6 +330,9 @@ function EspaceHoteContent() {
               <div className="flex items-center justify-between md:flex-col md:items-end gap-1">
                 <span className="font-heading font-bold text-dark" title={t("montantHoteAide")}>
                   {formatPrice(r.montants.montant_hote)} <span className="text-xs font-normal text-gray-600">{t("pourVous")}</span>
+                  {r.montants.frais_menage > 0 && (
+                    <span className="block text-xs font-normal text-gray-600 md:text-right">{t("dontMenage", { montant: formatPrice(r.montants.frais_menage) })}</span>
+                  )}
                 </span>
                 <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full",
                   r.status === "cancelled" ? "bg-red-100 text-red-700" : r.status === "pending" ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-700")}>

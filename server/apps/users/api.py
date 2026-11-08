@@ -3,14 +3,15 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, OuterRef, Q
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
 from .infrastructure.persistence.models import UserModel
 
 __all__ = [
-    'Compte', 'ROLES', 'attacher', 'compte', 'comptes', 'comptes_actifs', 'compte_demo', 'emails_actifs', 'ids_actifs',
-    'ids_par_recherche', 'revoquer_jetons', 'statistiques',
+    'Compte', 'ROLES', 'attacher', 'candidatures_refusees', 'compte', 'comptes', 'comptes_actifs', 'comptes_de_role',
+    'compte_demo', 'condition_compte_actif', 'emails_actifs', 'hote_ou_candidat', 'hotes_et_candidats', 'ids_actifs',
+    'ids_par_recherche', 'passer_hote', 'peut_gerer_annonces', 'retirer_role_hote', 'revoquer_jetons', 'statistiques',
 ]
 
 ROLES = [code for code, _ in UserModel.ROLE_CHOICES]
@@ -29,6 +30,7 @@ class Compte:
     is_verified: bool
     date_joined: datetime
     avatar_url: str | None
+    candidature_hote: str = ''
 
     is_authenticated = True
 
@@ -46,7 +48,33 @@ class Compte:
 def _compte(u: UserModel) -> Compte:
     return Compte(id=u.id, email=u.email, first_name=u.first_name, last_name=u.last_name, phone=u.phone, role=u.role,
                   is_active=u.is_active, is_verified=u.is_verified, date_joined=u.date_joined,
-                  avatar_url=u.avatar.url if u.avatar else None)
+                  avatar_url=u.avatar.url if u.avatar else None, candidature_hote=u.candidature_hote)
+
+
+def hote_ou_candidat(utilisateur) -> bool:
+    """Host, or traveller preparing their first listing (they stay a traveller until an agent validates it)."""
+    return utilisateur.role == 'hote' or utilisateur.candidature_hote == 'ouverte'
+
+
+def peut_gerer_annonces(utilisateur) -> bool:
+    """May prepare listings: drafts, photos, identity document, payout account."""
+    return utilisateur.role == 'admin' or hote_ou_candidat(utilisateur)
+
+
+def passer_hote(user_id: uuid.UUID) -> bool:
+    """First listing validated by an agent: the traveller becomes a host. False if they already had another role."""
+    return bool(UserModel.objects.filter(pk=user_id, role='voyageur').update(
+        role='hote', candidature_hote='', candidature_motif=''))
+
+
+def retirer_role_hote(user_id: uuid.UUID, candidature: bool) -> bool:
+    """Host from before the candidatures, without a validated listing: back to traveller, candidate if they had started."""
+    return bool(UserModel.objects.filter(pk=user_id, role='hote').update(
+        role='voyageur', candidature_hote='ouverte' if candidature else ''))
+
+
+def candidatures_refusees(user_ids: Iterable[uuid.UUID]) -> set[uuid.UUID]:
+    return set(UserModel.objects.filter(pk__in=list(user_ids), candidature_hote='refusee').values_list('id', flat=True))
 
 
 def compte(user_id: uuid.UUID | None) -> Compte | None:
@@ -90,6 +118,11 @@ def ids_actifs(roles: Iterable[str]) -> list[uuid.UUID]:
     return list(UserModel.objects.filter(role__in=list(roles), is_active=True).values_list('id', flat=True))
 
 
+def condition_compte_actif(champ: str) -> Exists:
+    """SQL condition: the account whose id is in field `champ` of the outer query is active (neither closed nor banned)."""
+    return Exists(UserModel.objects.filter(pk=OuterRef(champ), is_active=True))
+
+
 def comptes_actifs(roles: Iterable[str], texte: str = '', ids: Iterable[uuid.UUID] | None = None,
                    limite: int | None = None) -> list[Compte]:
     qs = UserModel.objects.filter(role__in=list(roles), is_active=True).order_by('first_name', 'last_name')
@@ -98,6 +131,19 @@ def comptes_actifs(roles: Iterable[str], texte: str = '', ids: Iterable[uuid.UUI
     if ids is not None:
         qs = qs.filter(pk__in=list(ids))
     return [_compte(u) for u in (qs[:limite] if limite else qs)]
+
+
+def hotes_et_candidats(texte: str = '', limite: int | None = None) -> list[Compte]:
+    qs = UserModel.objects.filter(Q(role='hote') | Q(candidature_hote='ouverte'), is_active=True).order_by(
+        'first_name', 'last_name')
+    if texte:
+        qs = qs.filter(Q(email__icontains=texte) | Q(first_name__icontains=texte) | Q(last_name__icontains=texte))
+    return [_compte(u) for u in (qs[:limite] if limite else qs)]
+
+
+def comptes_de_role(role: str) -> list[Compte]:
+    """Every account of a role, deactivated ones included."""
+    return [_compte(u) for u in UserModel.objects.filter(role=role).order_by('date_joined')]
 
 
 def emails_actifs(roles: Iterable[str], limite: int | None = None) -> list[str]:
@@ -111,6 +157,7 @@ def statistiques(depuis: datetime) -> dict:
         total=Count('id'),
         nouveaux_30j=Count('id', filter=Q(date_joined__gte=depuis)),
         hotes=Count('id', filter=Q(role='hote')),
+        candidats=Count('id', filter=Q(candidature_hote='ouverte')),
         desactives=Count('id', filter=Q(is_active=False)),
     )
 

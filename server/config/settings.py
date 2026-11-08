@@ -186,7 +186,7 @@ AUTH_USER_MODEL = 'users.UserModel'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'apps.users.infrastructure.http.authentication.AuthentificationJWT',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -201,6 +201,7 @@ REST_FRAMEWORK = {
         'concierge_conversation': '30/hour',
         'verification_piece': '20/hour',
         'reclamation': '5/hour',
+        'reservation_creation': '20/hour',
     },
 }
 
@@ -288,7 +289,7 @@ ASSISTANCE_CONTACT = os.getenv('ASSISTANCE_CONTACT', 'info@kwa-ba.com')
 # Module switches (config/site.py): hidden at launch. To switch one back on, set its MODULE_… variable
 # to True in the API environment and restart the API: no code deployment is needed.
 MODULES = {nom: _env_bool(f'MODULE_{nom.upper()}', 'False') for nom in (
-    'experiences', 'together', 'give', 'concierge', 'location_sans_chauffeur', 'paiements_non_ouverts',
+    'experiences', 'together', 'give', 'concierge', 'location_sans_chauffeur', 'paiements_non_ouverts', 'assistant_hote',
 )}
 
 # Legal notices expected after registration (empty: "to be completed" on the site). The RCCM and NIF

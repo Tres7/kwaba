@@ -4,10 +4,12 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.utils import formats
 
+from django.db.models import Q
+
 from apps.paiements.api import ProduitPaye, Relance
 
 from . import services
-from .models import LocationModel, VersementPartenaireModel
+from .models import LocationModel, VersementChauffeurLocationModel, VersementPartenaireModel
 
 FUSEAU = ZoneInfo('Africa/Lome')
 
@@ -27,8 +29,31 @@ def _decrire_paiement(location_id) -> dict | None:
             'moyen': loc.moyen}
 
 
+def _a_regarder(qs, debut, fin):
+    """Payouts sent in [debut, fin), or not sent yet (due)."""
+    return qs.filter(Q(envoye_le__gte=debut, envoye_le__lt=fin) | Q(statut__in=('planifie', 'en_cours', 'echoue')))
+
+
+def _versements_periode(debut, fin) -> list[dict]:
+    lignes = [{
+        'categorie': 'Propriétaire de véhicule', 'beneficiaire': str(v.partenaire), 'objet': v.location.reference,
+        'montant': v.montant, 'commission': v.commission, 'statut': v.statut, 'date_prevue': v.date_prevue,
+        'envoye_le': v.envoye_le,
+    } for v in _a_regarder(VersementPartenaireModel.objects.select_related('partenaire', 'location'), debut, fin)]
+    lignes += [{
+        'categorie': 'Chauffeur (location)', 'beneficiaire': f"Chauffeur {v.chauffeur_id}", 'objet': v.location.reference,
+        'montant': v.montant, 'commission': v.commission, 'statut': v.statut, 'date_prevue': v.date_prevue,
+        'envoye_le': v.envoye_le,
+    } for v in _a_regarder(VersementChauffeurLocationModel.objects.select_related('location'), debut, fin)]
+    return lignes
+
+
 PRODUIT_PAYE = ProduitPaye(
     type='location',
+    # The owner's commission and Kwa-Ba's share of the driver's days
+    revenu=lambda ids: {pk: commission + part for pk, commission, part in LocationModel.objects.filter(pk__in=list(ids))
+                        .values_list('pk', 'commission', 'part_kwaba_chauffeur')},
+    versements_periode=_versements_periode,
     decrire=_decrire_paiement,
     paiement_recu=services.paiement_recu,
     passe=services.passe,

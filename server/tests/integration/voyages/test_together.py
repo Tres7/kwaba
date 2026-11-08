@@ -172,3 +172,20 @@ def test_archived_listing_stays_in_the_proposals_but_is_unavailable(client_for, 
     assert proposition['hebergement']['name'] == 'Villa Assinie'
     assert proposition['disponible'] is False
     assert proposition['budget'] == {'nuits': 4, 'total': 212000, 'par_personne': 53000, 'personnes': 4}
+
+
+# Security audit of 2026-11-07, lead 23: the group no longer sees the bookings of a member who left
+def test_quitter_le_voyage_retire_ses_reservations_partagees(client_for, make_user, make_hebergement):
+    orga = client_for(make_user())
+    v = _creer(orga)
+    ami_user = make_user()
+    ami = _rejoindre(client_for, ami_user, v)
+    debut = timezone.localdate() + timedelta(days=30)
+    r = ami.post('/api/v1/reservations/', {'hebergement': str(make_hebergement(city='Abidjan').id), 'check_in': debut.isoformat(),
+                                           'check_out': (debut + timedelta(days=2)).isoformat(), 'guests_count': 2},
+                 format='json')
+    ami.post(f"{VOYAGES}{v['id']}/reservations/", {'reservation': r.data['id']}, format='json')
+    assert len(orga.get(f"{VOYAGES}{v['id']}/").data['reservations']) == 1
+
+    assert ami.delete(f"{VOYAGES}{v['id']}/membres/{ami_user.id}/").status_code == 204
+    assert orga.get(f"{VOYAGES}{v['id']}/").data['reservations'] == []

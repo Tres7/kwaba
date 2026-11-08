@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Minus, Plus } from "lucide-react";
-import { useConfigPaiement } from "@/features/paiements";
+import { useConfigPaiement, useTaux } from "@/features/paiements";
 import { calculateServiceFee, cn } from "@/lib/utils";
 import { useFormat } from "@/lib/format";
 
@@ -42,7 +42,7 @@ export default function EstimateurRevenus({ partenaire: partenaireImpose, prix: 
   const commission = calculateServiceFee(sousTotal, tauxCommission);
   const revenu = sousTotal - commission;
   const fraisVoyageur = calculateServiceFee(sousTotal, tauxVoyageur);
-  const pourcent = (taux: number) => `${Math.round(taux * 100)} %`;
+  const { pourcent, texte: texteTaux } = useTaux();
 
   const lignes: { libelle: string; valeur: string; fort?: boolean }[] = [
     { libelle: t("prixNuit"), valeur: formatFcfa(prix) },
@@ -65,7 +65,7 @@ export default function EstimateurRevenus({ partenaire: partenaireImpose, prix: 
                 className={cn("rounded-2xl border px-4 py-3 text-left transition-colors",
                   partenaire === p ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/40")}>
                 <span className="block font-bold text-dark text-sm">{t(`types.${p}.titre`)}</span>
-                <span className="block text-xs text-gray-500 mt-0.5">{t(`types.${p}.texte`, { taux: pourcent(config?.commissions?.[p] ?? TAUX_PAR_DEFAUT[p]) })}</span>
+                <span className="block text-xs text-gray-500 mt-0.5">{t(`types.${p}.texte`, { taux: pourcent(config?.commissions?.[p] ?? TAUX_PAR_DEFAUT[p]), apres: texteTaux.particulier })}</span>
               </button>
             ))}
           </div>

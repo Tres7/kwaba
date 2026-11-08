@@ -103,7 +103,8 @@ def periodes_indisponibles(hebergement_id, debut: date, fin: date, detail: bool 
                              'nb_unites': r['nb_unites'], 'type_logement': noms.get(r['type_logement_id'])})
         for b in blocages.select_related('type_logement'):
             periodes.append({'debut': b.debut, 'fin': b.fin, 'type': 'blocage', 'id': str(b.id), 'motif': b.motif,
-                             'type_logement': b.type_logement.nom if b.type_logement else None})
+                             'type_logement': b.type_logement.nom if b.type_logement else None,
+                             'nb_unites': b.quantite if b.type_logement else None})
         periodes.sort(key=lambda p: p['debut'])
         return periodes
 

@@ -4,7 +4,7 @@ from apps.users.infrastructure.http.controllers.AuthController import (
     CaptchaView, RegisterView, LoginView, GoogleAuthView, VerifyEmailView, ResendCodeView,
     PasswordResetRequestView, PasswordResetConfirmView, RefreshView,
 )
-from apps.users.infrastructure.http.controllers.UserController import MeView
+from apps.users.infrastructure.http.controllers.UserController import CandidatureHoteView, MeView
 
 urlpatterns = [
     path('auth/register/',    RegisterView.as_view(),    name='auth-register'),
@@ -15,6 +15,7 @@ urlpatterns = [
     path('auth/verify/',      VerifyEmailView.as_view(), name='auth-verify'),
     path('auth/resend-code/', ResendCodeView.as_view(),  name='auth-resend-code'),
     path('users/me/',         MeView.as_view(),          name='user-me'),
+    path('users/me/candidature/', CandidatureHoteView.as_view(), name='user-candidature'),
     path('auth/google/',      GoogleAuthView.as_view(),  name='auth-google'),
     path('auth/password-reset/',         PasswordResetRequestView.as_view(), name='auth-password-reset'),
     path('auth/password-reset/confirm/', PasswordResetConfirmView.as_view(), name='auth-password-reset-confirm'),

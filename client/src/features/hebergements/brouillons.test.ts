@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { completude, type DonneesAnnonce } from "./brouillons";
+import { completude, photoDepuisUrl, type DonneesAnnonce } from "./brouillons";
 
 const COMPLETE: DonneesAnnonce = {
   name: "Villa Océane", city: "Lomé", price_per_night: 85000, latitude: 6.1375, longitude: 1.2123,
-  surface_m2: 140, lits_doubles: 2, petit_dejeuner: "non", images: ["https://kwa-ba.com/photos/a.jpg"],
+  point_repere: "Derrière la pharmacie", salles_de_bain: 1, lits_doubles: 2, petit_dejeuner: "non", images: ["https://kwa-ba.com/photos/a.jpg"],
+  legendes_photos: { "https://kwa-ba.com/photos/a.jpg": "salon" },
 };
 
 describe("completude", () => {
   it("empty draft: nothing filled in, everything missing", () => {
     expect(completude({})).toEqual({
       pourcentage: 0,
-      manquants: ["titre", "ville", "prix", "position", "surface", "lits", "petitDejeuner", "photos"],
+      manquants: ["titre", "ville", "prix", "position", "pointRepere", "sallesDeBain", "lits", "petitDejeuner", "photos", "legendes"],
     });
   });
 
@@ -19,8 +20,12 @@ describe("completude", () => {
   });
 
   it("rounds the share of the criteria filled in", () => {
-    expect(completude({ ...COMPLETE, images: [], surface_m2: null })).toEqual({ pourcentage: 75, manquants: ["surface", "photos"] });
-    expect(completude({ name: "Studio" }).pourcentage).toBe(13);
+    expect(completude({ ...COMPLETE, images: [], point_repere: " " })).toEqual({ pourcentage: 70, manquants: ["pointRepere", "photos", "legendes"] });
+    expect(completude({ name: "Studio" }).pourcentage).toBe(10);
+  });
+
+  it("needs the room of every photo", () => {
+    expect(completude({ ...COMPLETE, images: [...COMPLETE.images!, "https://kwa-ba.com/photos/b.jpg"] }).manquants).toEqual(["legendes"]);
   });
 
   it("blank title, zero price and a single coordinate count as missing", () => {
@@ -31,5 +36,18 @@ describe("completude", () => {
   it("breakfast as an option requires its price", () => {
     expect(completude({ ...COMPLETE, petit_dejeuner: "option" }).manquants).toEqual(["petitDejeuner"]);
     expect(completude({ ...COMPLETE, petit_dejeuner: "option", petit_dejeuner_prix: 3000 }).manquants).toEqual([]);
+  });
+});
+
+describe("photoDepuisUrl", () => {
+  const id = "3f2c1b6a-9d4e-4f7a-8c21-5e6a7b8c9d0e";
+
+  it("reads the id of an uploaded photo, on R2 as on the local disk", () => {
+    expect(photoDepuisUrl(`https://kwa-ba.com/photos/hebergements/aaaa/${id}.jpg`)).toBe(id);
+    expect(photoDepuisUrl(`http://localhost:8000/media/hebergements/aaaa/${id}.jpg`)).toBe(id);
+  });
+
+  it("ignores any other image", () => {
+    expect(photoDepuisUrl("https://images.unsplash.com/photo-1.jpg")).toBeNull();
   });
 });

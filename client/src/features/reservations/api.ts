@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import type { Paginated, Reservation } from "@/types/api/models";
+import type { AdminReservationDetail } from "@/types/api/admin";
 
 const RESERVATIONS = "/v1/reservations";
 
@@ -17,6 +18,10 @@ export async function creerReservation(reservation: Record<string, unknown>) {
 
 export async function annulerReservation(id: string) {
   return (await api.delete<{ rembourse?: number; numero_requis?: boolean }>(`${RESERVATIONS}/${id}/`)).data;
+}
+
+export async function lireReservationAdmin(id: string) {
+  return (await api.get<AdminReservationDetail>(`/v1/admin/reservations/${id}/`)).data;
 }
 
 export async function annulerReservationAdmin(id: string, motif: string) {

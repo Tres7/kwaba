@@ -6,6 +6,7 @@ the exact text the host read.
 """
 import hashlib
 
+from apps.users import api as users
 from config import prelancement
 
 from .models import PreinscriptionModel
@@ -42,8 +43,12 @@ def acceptee(hote) -> bool:
 
 
 def requise(utilisateur) -> bool:
-    """Must this user accept the current text before creating a listing? Only hosts, only during the pre-launch."""
-    return prelancement.actif() and utilisateur.role == 'hote' and not acceptee(utilisateur)
+    """Must this user accept the current text before creating a listing? Only hosts and candidates, during the pre-launch."""
+    return prelancement.actif() and users.hote_ou_candidat(utilisateur) and not acceptee(utilisateur)
+
+
+def ids_preinscrits() -> set:
+    return set(PreinscriptionModel.objects.values_list('hote_id', flat=True))
 
 
 def accepter(hote, *, langue: str, ip: str | None, user_agent: str) -> PreinscriptionModel:
