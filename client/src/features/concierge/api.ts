@@ -4,6 +4,12 @@ import { creerVoyage, proposerLogement } from "@/features/voyages";
 import type { CarteTogether, ConversationResume, MessageConcierge } from "./types";
 
 const CONVERSATIONS = "/v1/concierge/conversations";
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Conversation id read from the page's address (?c=), kept only if it has the form of an id. */
+export function idConversation(valeur: string | null): string | null {
+  return valeur && UUID.test(valeur) ? valeur : null;
+}
 
 export async function lireStatut() {
   return (await api.get<{ actif: boolean }>("/v1/concierge/statut/")).data;
@@ -14,7 +20,7 @@ export async function listerConversations() {
 }
 
 export async function lireMessages(conversationId: string) {
-  return (await api.get<{ messages: MessageConcierge[] }>(`${CONVERSATIONS}/${conversationId}/`)).data.messages;
+  return (await api.get<{ messages: MessageConcierge[] }>(`${CONVERSATIONS}/${encodeURIComponent(conversationId)}/`)).data.messages;
 }
 
 export async function creerConversation() {
@@ -22,12 +28,12 @@ export async function creerConversation() {
 }
 
 export async function supprimerConversation(id: string) {
-  await api.delete(`${CONVERSATIONS}/${id}/`);
+  await api.delete(`${CONVERSATIONS}/${encodeURIComponent(id)}/`);
 }
 
 /** The answer comes as a stream, which axios cannot read in the browser: the only `fetch` of the site's API calls. */
 export async function posterMessage(conversationId: string, texte: string, langue: string, erreurParDefaut: string) {
-  const reponse = await fetch(urlProxy(`${CONVERSATIONS}/${conversationId}/messages/`), {
+  const reponse = await fetch(urlProxy(`${CONVERSATIONS}/${encodeURIComponent(conversationId)}/messages/`), {
     method: "POST",
     headers: { "Content-Type": "application/json", "Accept-Language": langue },
     body: JSON.stringify({ texte }),

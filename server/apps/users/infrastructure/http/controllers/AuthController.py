@@ -80,8 +80,14 @@ def _tokens_for(user_id) -> dict:
     return {'access': str(refresh.access_token), 'refresh': str(refresh)}
 
 
+def _cle(email: str) -> str:
+    """Address in the counters of attempts: the same for every spelling that finds the same account. The database
+    compares addresses in upper case (iexact), which also turns "ı" and "ſ" into "I" and "S"."""
+    return email.strip().lower().upper()
+
+
 def _essais_code(email: str) -> Tentatives:
-    return Tentatives(f"code:{email}", MAX_ESSAIS_PAR_HEURE, 3600)
+    return Tentatives(f"code:{_cle(email)}", MAX_ESSAIS_PAR_HEURE, 3600)
 
 
 def _trop_d_essais(attente: int, **extra) -> Response:
@@ -166,7 +172,7 @@ class LoginView(APIView):
             return _captcha_refuse()
 
         # Counted before the check: simultaneous attempts cannot exceed the limit
-        essais = Tentatives(f"connexion:{data['email']}", MAX_ESSAIS_CONNEXION, FENETRE_CONNEXION)
+        essais = Tentatives(f"connexion:{_cle(data['email'])}", MAX_ESSAIS_CONNEXION, FENETRE_CONNEXION)
         if not essais.essayer():
             journaliser('connexion_bloquee', request, email=data['email'])
             return _trop_d_essais(essais.attente, code='too_many_attempts')
@@ -319,7 +325,7 @@ class PasswordResetRequestView(APIView):
         if not user_model:
             return generic
 
-        cooldown_key = f"reset_cooldown:{email}"
+        cooldown_key = f"reset_cooldown:{_cle(email)}"
         if cache.get(cooldown_key):
             return generic
         cache.set(cooldown_key, True, timeout=int(RESEND_COOLDOWN.total_seconds()))

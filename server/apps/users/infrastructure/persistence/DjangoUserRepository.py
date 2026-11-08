@@ -1,5 +1,6 @@
 # infrastructure/persistence/user_repository.py
 import uuid
+from collections.abc import Iterable
 from typing import Optional
 
 from apps.users.domain.entities.User import User, UserRole
@@ -65,22 +66,35 @@ class DjangoUserRepository(UserRepository):
         model.save()
         return self._to_entity(model)
 
-    def update(self, user: User) -> User:
+    def update(self, user: User, champs: Iterable[str] | None = None) -> User:
         try:
             model = UserModel.objects.get(id=user.id)
         except UserModel.DoesNotExist:
             raise UserNotFoundException(f"Utilisateur {user.id} introuvable.")
 
-        model.email = str(user.email)
-        model.google_id=user.google_id
-        model.first_name = user.first_name
-        model.last_name = user.last_name
-        model.phone = PhoneNumber.to_str(user.phone)
-        model.role = user.role.value
-        model.is_verified = user.is_verified
-        model.is_active = user.is_active
-        model.save()
+        valeurs = {
+            'email': str(user.email),
+            'google_id': user.google_id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'phone': PhoneNumber.to_str(user.phone),
+            'role': user.role.value,
+            'is_verified': user.is_verified,
+            'is_active': user.is_active,
+        }
+        champs = list(valeurs) if champs is None else list(champs)
+        for champ in champs:
+            setattr(model, champ, valeurs[champ])
+        model.save(update_fields=champs)
         return self._to_entity(model)
+
+    def oublier_mot_de_passe(self, user_id: uuid.UUID) -> None:
+        from apps.users.api import revoquer_jetons  # local import: the users API loads this module's models
+
+        model = UserModel.objects.get(id=user_id)
+        model.set_unusable_password()  # access tokens issued before are refused too (CHECK_REVOKE_TOKEN)
+        model.save(update_fields=['password'])
+        revoquer_jetons(user_id)
     
     def find_by_google_id(self, google_id: str) -> Optional[User]:
         try:
