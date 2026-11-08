@@ -35,11 +35,14 @@ class Faux:
         return {'id': identifiant, 'status': self.transaction, 'mode': 'momo_test',
                 'customer': {'phone_number': {'number': '90000009', 'country': 'tg'}}}
 
-    def creer_versement(self, **kwargs):
+    def creer_payout(self, **kwargs):
         if self.payout_erreur:
             raise fedapay.FedaPayErreur(self.payout_erreur)
         self.payouts.append(kwargs)
         return f'P{len(self.payouts)}'
+
+    def lancer_payout(self, identifiant):
+        pass
 
     def lire_versement(self, identifiant):
         return {'id': identifiant, 'status': self.payout_statut, 'last_error_code': 'invalid_number'}

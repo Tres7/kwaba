@@ -144,7 +144,9 @@ Les taux ne sont plus écrits dans le code : `paiements.ReglagesTarifsModel` (un
 L'admin Django (`/admin/`) liste les paiements, versements, remboursements et profils de versement. À surveiller :
 - **Remboursements « En attente du numéro du voyageur »** : le voyageur n'a pas encore indiqué son compte ; il le voit dans Mes réservations.
 - **Remboursements « À traiter manuellement »** : paiements par carte, ou 5 échecs d'envoi → rembourser depuis FedaPay, puis passer la ligne à « Envoyé ».
-- **Versements « Échoué »** : après 5 tentatives (numéro faux, mode non activé…) ; le message d'erreur est dans `derniere_erreur`. Corriger puis repasser à « Planifié ».
+- **Versements « Échoué »** : après 5 tentatives (numéro faux, mode non activé…) ; le message d'erreur est dans `derniere_erreur`. Corriger puis repasser à « Planifié ». Si l'hôte a été payé à la main, passer la ligne à « Envoyé » : un hôte qui enregistre un nouveau numéro relance ses versements « Planifié », jamais un « Échoué ».
+- **Un payout n'est jamais créé deux fois** : son identifiant FedaPay est gardé avant le lancement. Si la réponse au lancement se perd (délai dépassé, erreur 5xx), l'essai suivant relit ce payout chez FedaPay au lieu d'en créer un second : relancé s'il est encore en attente (`pending`), laissé au suivi s'il est parti, remplacé seulement s'il a échoué ou si le compte de l'hôte a changé avant son lancement.
+- **Hôte désactivé** (compte fermé ou banni) : ses annonces quittent le site et ses versements « Planifié » restent suspendus, avec la raison dans `derniere_erreur`. Ils repartent seuls si le compte est réactivé.
 - Une annulation après le versement à l'hôte est journalisée en avertissement : à régulariser avec l'hôte.
 
 ## Tests

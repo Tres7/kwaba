@@ -154,10 +154,10 @@ class ProfilVersementView(APIView):
             # Changing the account that receives the money is the action targeted after an account takeover: it is logged
             journaliser('profil_versement_modifie', request, utilisateur=request.user,
                         operateur=serializer.instance.operateur, numero_fin=serializer.instance.numero[-2:])
-        # Payouts blocked for lack of a profile start again at the next pass of the worker
-        VersementModel.objects.filter(hote_id=request.user.pk, statut__in=('planifie', 'echoue')).update(
-            statut='planifie', derniere_erreur='', tentatives=0,
-        )
+            # Scheduled payouts start again from zero toward the new account: those blocked for lack of a profile, and
+            # those whose tries failed toward the previous one. A failed payout ("echoue") stays with the administrators,
+            # who were alerted: they may have paid it by hand.
+            VersementModel.objects.filter(hote_id=request.user.pk, statut='planifie').update(derniere_erreur='', tentatives=0)
         return Response(serializer.data)
 
 

@@ -15,16 +15,19 @@ def contrat_hote_exige() -> bool:
 
 class HebergementQuerySet(models.QuerySet):
     def publiees(self):
-        """Listings visible to the public: verified by a field agent and not hidden by the host."""
+        """Listings visible to the public: verified by a field agent, not hidden by the host, whose account is active
+        (a closed or banned host's listings leave the site, and come back if the account is reactivated)."""
         if prelancement.actif():
             return self.none()  # pre-launch: verified listings wait for the opening
-        # Once the company is registered, listings verified before wait for their host's signed agreement. The rule is
-        # a SQL condition, evaluated by the database at each query: this queryset can be built at import time
+        # Once the company is registered, listings verified before wait for their host's signed agreement. The rules are
+        # SQL conditions, evaluated by the database at each query: this queryset can be built at import time
         # (serializer fields), before the tables exist, and must follow a registration made while the API runs.
         from apps.contrats.api import condition_contrat_signe  # local import: contrats loads the payment rates
         from apps.documents.api import condition_societe_immatriculee
+        from apps.users.api import condition_compte_actif
 
         return (self.filter(is_available=True, statut_verification='verifiee')
+                .filter(condition_compte_actif('host_id'))
                 .filter(~condition_societe_immatriculee() | condition_contrat_signe('host_id')))
 
 
@@ -136,8 +139,11 @@ class HebergementModel(models.Model):
 
     @property
     def est_publiee(self) -> bool:
+        """Same rule as HebergementQuerySet.publiees, for one listing already loaded."""
         if not (self.is_available and self.statut_verification == 'verifiee') or prelancement.actif():
             return False
+        if not (self.host and self.host.is_active):
+            return False  # account of the host closed or banned
         from apps.contrats.api import hote_a_signe
 
         return not contrat_hote_exige() or hote_a_signe(self.host_id)
