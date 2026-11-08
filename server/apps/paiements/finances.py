@@ -140,6 +140,16 @@ def _date(valeur) -> str:
     return jour.strftime('%d/%m/%Y') if jour else ''
 
 
+# First characters that make a spreadsheet read a cell as a formula
+DEBUTS_FORMULE = ('=', '+', '-', '@', '\t', '\r')
+
+
+def _texte(cellules: list) -> list:
+    """A text cell that starts like a formula is written as text, behind an apostrophe: a host can put
+    "=HYPERLINK(…)" in their name or their listing's. Amounts stay numbers."""
+    return [f"'{c}" if isinstance(c, str) and c.startswith(DEBUTS_FORMULE) else c for c in cellules]
+
+
 def en_csv(donnees: dict) -> bytes:
     """Every money movement of the period, one per line, for a spreadsheet (separator ;, UTF-8 for Excel)."""
     tampon = io.StringIO()
@@ -147,15 +157,15 @@ def en_csv(donnees: dict) -> bytes:
     ecrit.writerow(['Date', 'Mouvement', 'Produit ou bénéficiaire', 'Référence', 'Détail', 'Moyen', 'Montant (F CFA)',
                     'Commission (F CFA)', 'Statut'])
     for e in donnees['encaissements']:
-        ecrit.writerow([_date(e['date']), 'Encaissement', PRODUITS_LIBELLES.get(e['produit'], e['produit']), e['reference'],
+        ecrit.writerow(_texte([_date(e['date']), 'Encaissement', PRODUITS_LIBELLES.get(e['produit'], e['produit']), e['reference'],
                         e['libelle'], ' '.join(x for x in (PRESTATAIRES.get(e['prestataire'], e['prestataire']), e['mode']) if x),
-                        e['montant'], '', 'Réussi'])
+                        e['montant'], '', 'Réussi']))
     for r in donnees['remboursements']:
-        ecrit.writerow([_date(r['date']), 'Remboursement', PRODUITS_LIBELLES.get(r['produit'], r['produit']), r['reference'],
-                        r['motif'], '', -r['montant'], '', STATUTS.get(r['statut'], r['statut'])])
+        ecrit.writerow(_texte([_date(r['date']), 'Remboursement', PRODUITS_LIBELLES.get(r['produit'], r['produit']), r['reference'],
+                        r['motif'], '', -r['montant'], '', STATUTS.get(r['statut'], r['statut'])]))
     for v in donnees['versements']:
-        ecrit.writerow([_date(v['envoye_le'] or v['date_prevue']), f"Versement · {v['categorie']}", v['beneficiaire'], v['objet'],
-                        '' if v['envoye_le'] else 'à verser', '', -v['montant'], v['commission'], STATUTS.get(v['statut'], v['statut'])])
+        ecrit.writerow(_texte([_date(v['envoye_le'] or v['date_prevue']), f"Versement · {v['categorie']}", v['beneficiaire'], v['objet'],
+                        '' if v['envoye_le'] else 'à verser', '', -v['montant'], v['commission'], STATUTS.get(v['statut'], v['statut'])]))
     return ('﻿' + tampon.getvalue()).encode('utf-8')
 
 

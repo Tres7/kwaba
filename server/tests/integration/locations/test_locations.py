@@ -493,3 +493,20 @@ def test_deposit_paid_to_the_partner_when_online_deposit_is_off(client_for, make
     paiements.passe()
     au_loueur = next(m.body for m in mail.outbox if m.to == ['yao@test.kwaba'])
     assert 'Caution à encaisser à la remise : 60 000' in au_loueur
+
+
+# Security audit of 2026-11-07, lead 20: the reduction was granted for the rental
+def test_stay_pack_reduction_is_kept_when_the_rental_is_cancelled(client_for, make_user, faux, catalogue, make_hebergement,
+                                                                   make_reservation):
+    voyageur = make_user()
+    sejour = make_reservation(make_hebergement(), guest=voyageur, starts_in=6, nights=2)
+    sejour.prix_nuits, sejour.frais_service, sejour.commission_hote, sejour.total_price = 50000, 3000, 4000, 53000
+    sejour.save()
+    PaiementModel.objects.create(reservation_id=sejour.id, montant=53000, statut='reussi', transaction_id='T-SEJOUR')
+    client = client_for(voyageur)
+    loc = _reserver_et_payer(client, faux, catalogue, reservation=str(sejour.id))
+
+    r = client.delete(f'{LOCATIONS}{loc.id}/')  # free cancellation (more than 48 h before)
+    assert r.status_code == 200, r.data
+    assert r.data['rembourse'] == loc.prix - 1500
+    assert RemboursementModel.objects.get(location_id=loc.id).montant == loc.prix - 1500
