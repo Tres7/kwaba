@@ -11,7 +11,7 @@ import { apiErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import PageHero from "@/components/layout/PageHero";
 import { useLocale, useTranslations } from "next-intl";
-import { creerConversation, posterMessage, supprimerConversation } from "./api";
+import { creerConversation, idConversation, posterMessage, supprimerConversation } from "./api";
 import CartesConcierge from "./CartesConcierge";
 import { lireFlux } from "./flux";
 import { clesConcierge, useConversationsConcierge, useMessagesConcierge, useStatutConcierge } from "./hooks";
@@ -40,7 +40,8 @@ function ConciergeContent() {
   const queryClient = useQueryClient();
   const { status } = useSession();
   const connecte = status === "authenticated";
-  const conversationId = searchParams.get("c");
+  // Conversation id taken from the address: a link can put anything there, only an id is kept
+  const conversationId = idConversation(searchParams.get("c"));
   const [saisie, setSaisie] = useState("");
   const [enCours, setEnCours] = useState<EnCours | null>(null);
   const [enAttente, setEnAttente] = useState<string | null>(null);

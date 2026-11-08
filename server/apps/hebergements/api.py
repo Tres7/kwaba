@@ -79,6 +79,7 @@ def _fiche(h: HebergementModel) -> dict:
         'created_at': h.created_at, 'host_id': h.host_id, 'statut_verification': h.statut_verification,
         'politique_annulation': h.politique_annulation, 'arrivee_a_partir': h.arrivee_a_partir,
         'depart_avant': h.depart_avant, 'point_repere': h.point_repere,
+        'petit_dejeuner': h.petit_dejeuner, 'petit_dejeuner_prix': h.petit_dejeuner_prix,
     }
 
 

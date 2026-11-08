@@ -32,6 +32,8 @@ STATUTS_PAYOUT = {
     'sent': 'envoye',
     'failed': 'echoue',
 }
+# Status of a payout created but not started: it has not paid anything
+PAYOUT_NON_LANCE = 'pending'
 
 
 class FedaPayErreur(Exception):
@@ -93,17 +95,19 @@ class FedaPay:
 
     # --- Versements (payouts) -------------------------------------------------------
 
-    def creer_versement(self, *, montant: int, mode: str, client: dict) -> str:
-        """Creates then starts a Mobile Money payout. Returns the payout id."""
+    def creer_payout(self, *, montant: int, mode: str, client: dict) -> str:
+        """Creates a Mobile Money payout, not started: no money leaves yet. Returns the payout id."""
         payout = _objet(self._appel('POST', '/payouts', {
             'amount': montant,
             'currency': {'iso': 'XOF'},
             'mode': mode,
             'customer': client,
         }), 'payout')
-        identifiant = str(payout['id'])
+        return str(payout['id'])
+
+    def lancer_payout(self, identifiant: str) -> None:
+        """Starts a created payout: the money leaves."""
         self._appel('PUT', '/payouts/start', {'payouts': [{'id': identifiant}]})
-        return identifiant
 
     def lire_versement(self, identifiant: str) -> dict:
         return _objet(self._appel('GET', f'/payouts/{identifiant}'), 'payout')

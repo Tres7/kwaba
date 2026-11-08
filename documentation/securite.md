@@ -66,6 +66,10 @@ pgAdmin et la console de gestion RabbitMQ (`compose.yaml` sert au développement
   - stockés sous forme d'empreinte HMAC ;
   - un code est invalidé après 5 échecs ;
   - 10 essais par heure et par adresse, nouveaux codes compris : redemander un code ne donne pas d'essais supplémentaires.
+- **Une seule adresse par compteur** : les compteurs par adresse email prennent sa forme en majuscules, celle que la base compare (`iexact`). Toutes les orthographes qui trouvent le même compte (« ı » sans point, « ſ ») partagent donc les mêmes essais.
+- **Connexion Google sur un compte jamais vérifié** : n'importe qui peut créer un compte avec l'adresse d'un autre, sans pouvoir la vérifier. Quand Google prouve l'adresse, le mot de passe choisi avant est effacé et les sessions sont fermées : la connexion se fait par Google, ou par un mot de passe créé avec « Mot de passe oublié ».
+- **Modification du profil** : elle n'écrit que le nom et le téléphone (`DjangoUserRepository.update(…, champs=…)`). Le rôle et l'activation, qu'un administrateur peut changer en même temps, ne sont jamais réécrits par une lecture plus ancienne.
+- **Noms** : une seule ligne, sans caractère invisible (catégories Unicode Cc, Cf, Zl, Zp). Les emails HTML transforment une ligne « Libellé : https://… » en bouton Kwa-Ba : un nom sur plusieurs lignes pouvait en fabriquer un.
 - **Limites par adresse IP** : inscription 10/h, codes 30/h, envois de codes 10/h, Google 30/min, connexion 60 par quart d'heure. Ces routes passent par le serveur Next.js, qui transmet à l'API le `X-Forwarded-For` reçu de nginx : tout nouvel appel de serveur à serveur soumis à une limite par IP doit faire de même.
 - **Compteurs atomiques** : les limites reposent sur `apps/securite/limites.py` (une requête PostgreSQL `INSERT … ON CONFLICT` par incrément). Le cache de Django lit puis écrit en deux temps : il laisserait passer des requêtes simultanées.
 - **Jetons** :
