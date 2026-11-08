@@ -28,6 +28,8 @@ Grille du 18 octobre 2026 (CGV 2.4, art. 6.4). Les taux sont dans `server/apps/p
 
 Les montants sont **figés sur la réservation** au moment où elle est créée (`prix_nuits`, `frais_service`, `commission_hote`) : changer un taux ne modifie pas les réservations existantes. Tous les montants sont des entiers en FCFA.
 
+Les **conditions du séjour** sont figées de la même façon : politique d'annulation, heures d'arrivée et de départ, petit-déjeuner (`politique_annulation`, `arrivee_a_partir`, `depart_avant`, `petit_dejeuner`, `petit_dejeuner_prix`). L'hôte peut modifier son annonce ensuite : le barème de remboursement et le bon de réservation gardent ce que le voyageur a accepté en payant. Les réservations antérieures ont reçu les valeurs de leur annonce au jour de la migration (`reservations/0010`).
+
 ## Moyens de paiement
 
 | Moyen choisi | Prestataire | Devise | Remboursement |
@@ -43,6 +45,9 @@ Pays ouverts aux versements : Togo, Bénin, Burkina Faso, Niger, Mali (`operateu
 ## Cycle d'une réservation
 
 1. **Réservation** : statut `pending`, dates bloquées `PAIEMENT_EXPIRATION_MINUTES` (30 min par défaut, champ `expire_le`).
+   - Un voyageur garde au plus **3 réservations en attente** à la fois (`MAX_EN_ATTENTE`), et en crée au plus 20 par heure (`reservation_creation`) : sans quoi un compte pourrait bloquer un logement sans jamais payer.
+   - Le **message** joint suit la règle de la messagerie : téléphones, emails et liens sont masqués, et une alerte anti-fraude est enregistrée (contexte « Réservation »).
+   - Tant qu'elle n'est pas payée, l'hôte la voit **anonyme** dans son espace (« Voyageur », sans le message), comme dans la messagerie.
 2. **Paiement** : `POST /api/v1/paiements/reservations/<id>/payer/` avec `{"moyen": "mobile_money" | "carte" | "paypal"}` → `{"url": ...}`. Le navigateur part sur la page du prestataire, puis revient sur `/reservation/paiement/<id>`.
 3. **Confirmation** : le statut de la transaction est **toujours relu chez le prestataire**, jamais pris du navigateur ou du contenu du webhook. Trois déclencheurs, tous idempotents :
    - la page de retour interroge `GET .../statut/` toutes les 3 s ;
@@ -144,7 +149,9 @@ Les taux ne sont plus écrits dans le code : `paiements.ReglagesTarifsModel` (un
 L'admin Django (`/admin/`) liste les paiements, versements, remboursements et profils de versement. À surveiller :
 - **Remboursements « En attente du numéro du voyageur »** : le voyageur n'a pas encore indiqué son compte ; il le voit dans Mes réservations.
 - **Remboursements « À traiter manuellement »** : paiements par carte, ou 5 échecs d'envoi → rembourser depuis FedaPay, puis passer la ligne à « Envoyé ».
-- **Versements « Échoué »** : après 5 tentatives (numéro faux, mode non activé…) ; le message d'erreur est dans `derniere_erreur`. Corriger puis repasser à « Planifié ».
+- **Versements « Échoué »** : après 5 tentatives (numéro faux, mode non activé…) ; le message d'erreur est dans `derniere_erreur`. Corriger puis repasser à « Planifié ». Si l'hôte a été payé à la main, passer la ligne à « Envoyé » : un hôte qui enregistre un nouveau numéro relance ses versements « Planifié », jamais un « Échoué ».
+- **Un payout n'est jamais créé deux fois** : son identifiant FedaPay est gardé avant le lancement. Si la réponse au lancement se perd (délai dépassé, erreur 5xx), l'essai suivant relit ce payout chez FedaPay au lieu d'en créer un second : relancé s'il est encore en attente (`pending`), laissé au suivi s'il est parti, remplacé seulement s'il a échoué ou si le compte de l'hôte a changé avant son lancement.
+- **Hôte désactivé** (compte fermé ou banni) : ses annonces quittent le site et ses versements « Planifié » restent suspendus, avec la raison dans `derniere_erreur`. Ils repartent seuls si le compte est réactivé.
 - Une annulation après le versement à l'hôte est journalisée en avertissement : à régulariser avec l'hôte.
 
 ## Tests

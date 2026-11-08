@@ -25,6 +25,7 @@ class Faux:
         self.payout_erreur = None
         self.commande = 'COMPLETED'
         self.remboursement = 'PENDING'
+        self.capture = 'COMPLETED'
         self.payouts = []
 
     # FedaPay
@@ -35,11 +36,14 @@ class Faux:
         return {'id': identifiant, 'status': self.transaction, 'mode': 'momo_test',
                 'customer': {'phone_number': {'number': '90000009', 'country': 'tg'}}}
 
-    def creer_versement(self, **kwargs):
+    def creer_payout(self, **kwargs):
         if self.payout_erreur:
             raise fedapay.FedaPayErreur(self.payout_erreur)
         self.payouts.append(kwargs)
         return f'P{len(self.payouts)}'
+
+    def lancer_payout(self, identifiant):
+        pass
 
     def lire_versement(self, identifiant):
         return {'id': identifiant, 'status': self.payout_statut, 'last_error_code': 'invalid_number'}
@@ -50,7 +54,7 @@ class Faux:
 
     def lire_commande(self, identifiant):
         return {'id': identifiant, 'status': self.commande,
-                'purchase_units': [{'payments': {'captures': [{'id': 'CAP9'}]}}]}
+                'purchase_units': [{'payments': {'captures': [{'id': 'CAP9', 'status': self.capture}]}}]}
 
     def capturer(self, identifiant):
         return self.lire_commande(identifiant)
@@ -234,3 +238,24 @@ def test_config_et_revenus(faux, make_user, make_hebergement):
     revenus = _client(hote).get('/api/v1/paiements/revenus/').data
     assert revenus['totaux']['a_venir'] > 0 and not revenus['profil_complet']
     assert _client(hote).get('/api/v1/paiements/profil-versement/').data is None
+
+
+# Security audit of 2026-11-07, lead 12: an order completed is not the money received
+def test_paypal_capture_en_attente_ne_confirme_rien(faux, make_user, make_hebergement):
+    faux.capture = 'PENDING'  # payment under review at PayPal
+    resa = _reservation_payee(_client(make_user()), make_hebergement(), moyen='paypal')
+    assert resa.status == 'pending'
+    assert PaiementModel.objects.get(reservation_id=resa.id).statut == 'en_attente'
+    assert not VersementModel.objects.filter(reservation_id=resa.id).exists()
+
+    faux.capture = 'COMPLETED'  # review over: the money is there
+    services.synchroniser_paiement(PaiementModel.objects.get(reservation_id=resa.id))
+    resa.refresh_from_db()
+    assert resa.status == 'confirmed'
+
+
+def test_paypal_capture_refusee_fait_echouer_le_paiement(faux, make_user, make_hebergement):
+    faux.capture = 'DECLINED'
+    resa = _reservation_payee(_client(make_user()), make_hebergement(), moyen='paypal')
+    assert resa.status == 'pending'
+    assert PaiementModel.objects.get(reservation_id=resa.id).statut == 'echoue'

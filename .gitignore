@@ -31,6 +31,10 @@ server/.venv/
 server/.env
 documentation/diagrammes/
 docs/
+# Database dumps never go into this public repository (users' personal data)
+*.sql
+*.dump
+!deploy/postgres/roles.sql
 
 # =========================
 # client

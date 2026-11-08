@@ -59,7 +59,7 @@ jobs:
             echo "::error::Variable de dépôt ${VARIANT:+PREPROD_}PUBLIC_SITE_URL absente : l'URL publique doit être figée dans l'image du client"
             exit 1
           fi
-          # GHCR requires a lowercase name (the repository owner is "Tres7")
+          # GHCR requires a lowercase name (the owner is lowercase today, "kwa-ba", but was "Tres7" before the transfer)
           echo "repository=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/kwaba-${SERVICE}${VARIANT:+-${VARIANT}}" >> "$GITHUB_OUTPUT"
           echo "cache=${SERVICE}${VARIANT:+-${VARIANT}}" >> "$GITHUB_OUTPUT"
 

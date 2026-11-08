@@ -277,7 +277,10 @@ def paiement_recu(paiement):
     location.statut, location.expire_le = 'confirmee', None
     location.annulee_par, location.annulee_le = '', None
     location.save(update_fields=['statut', 'expire_le', 'annulee_par', 'annulee_le'])
-    appliquer_pack_sejour(location)
+    reduction = appliquer_pack_sejour(location)
+    if reduction:
+        location.reduction_pack_sejour = reduction
+        location.save(update_fields=['reduction_pack_sejour'])
     logger.info("Location %s payée : à attribuer", location.reference)
 
 
@@ -416,6 +419,9 @@ def annuler(location: LocationModel, par: str) -> int:
         if paiements.paiement_reussi('location', location.pk):
             retenu = retenue_si_annulation(location) if par == 'voyageur' else 0
             rembourse = location.prix - retenu
+            if par == 'voyageur':
+                # The Stay Pack reduction was granted for this rental: the traveller who cancels it does not keep it
+                rembourse -= min(location.reduction_pack_sejour, rembourse)
             part = Decimal(retenu) / location.prix if location.prix else Decimal(0)
             for modele, montants in ((VersementPartenaireModel, _montants_versement), (VersementChauffeurLocationModel, _montants_chauffeur)):
                 for v in modele.objects.select_for_update().filter(location=location, statut__in=('planifie', 'echoue')):

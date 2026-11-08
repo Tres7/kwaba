@@ -41,6 +41,8 @@ PIECES = ('piece_principale', 'salon', 'cuisine', 'salle_a_manger', 'toilettes',
           # Spaces of a hotel, an aparthotel or a guesthouse
           'reception', 'chambres', 'salles_de_bain', 'restaurant', 'bar', 'salle_de_sport', 'salle_de_reunion')
 MAX_TYPES_CHAMBRES = 30
+# Longest stay a search takes into account: the longest one that can be booked
+MAX_NUITS_RECHERCHE = 90
 PIECE_NUMEROTEE = re.compile(r'^(chambre|salle_de_bain)_([1-9]|[1-4][0-9]|50)$')
 LEGENDE_MANQUANTE = "Indiquez la pièce de chaque photo (chambre 1, salon…)."
 # What the host states before sending a listing; `attestation`: the information is true and they may rent this place out
@@ -431,8 +433,10 @@ class RechercheSerializer(serializers.Serializer):
     disponibles = serializers.BooleanField(required=False)
 
     def validate(self, data):
-        # Dates are used only as a pair, departure after arrival
-        if not (data.get('check_in') and data.get('check_out') and data['check_out'] > data['check_in']):
+        # Dates are used only as a pair, for a stay that can be booked: departure after arrival, arrival not in the
+        # past, 90 nights at most. Availability is computed night by night: an unbounded stay would hold a worker.
+        debut, fin = data.get('check_in'), data.get('check_out')
+        if not (debut and fin and debut < fin and debut >= timezone.localdate() and (fin - debut).days <= MAX_NUITS_RECHERCHE):
             data.pop('check_in', None)
             data.pop('check_out', None)
         return data

@@ -255,6 +255,9 @@ class LocationModel(models.Model):
     caution_retenue = models.PositiveIntegerField(default=0, db_default=0, help_text='Gardée sur la caution et versée au propriétaire')
     caution_motif = models.CharField(max_length=255, blank=True, default='', db_default='', help_text='Motif de la retenue')
     caution_restituee_le = models.DateTimeField(null=True, blank=True, help_text='Remboursement de la caution prévu')
+    # Stay Pack + Driver: service fees given back on the linked stay when this rental was paid. Granted for the rental:
+    # kept from its refund if the traveller cancels it.
+    reduction_pack_sejour = models.PositiveIntegerField(default=0, db_default=0)
     moyen = models.CharField(max_length=20, choices=MOYENS, default='mobile_money')
 
     statut = models.CharField(max_length=20, choices=STATUTS, default='en_attente_paiement')

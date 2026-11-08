@@ -33,6 +33,14 @@ def en_euros(montant_fcfa: int) -> Decimal:
     return (Decimal(montant_fcfa) / FCFA_PAR_EURO).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
+def capture(commande: dict) -> dict:
+    """First capture of the order ({} if none)."""
+    for unite in commande.get('purchase_units') or []:
+        for capture in ((unite.get('payments') or {}).get('captures') or []):
+            return capture
+    return {}
+
+
 def id_capture(commande: dict) -> str:
     for unite in commande.get('purchase_units') or []:
         for capture in ((unite.get('payments') or {}).get('captures') or []):

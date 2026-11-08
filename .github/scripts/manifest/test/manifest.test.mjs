@@ -309,7 +309,9 @@ describe('command line, on a real git history', () => {
   }
 
   function run(repo, script, ...args) {
-    const out = execFileSync('node', [join(SCRIPTS, script), '--dir', 'deploy/manifests', ...args], { cwd: repo, encoding: 'utf8' });
+    // Owner of the example images, whatever the CI or the local machine says
+    const env = { ...process.env, GITHUB_REPOSITORY_OWNER: 'Tres7' };
+    const out = execFileSync('node', [join(SCRIPTS, script), '--dir', 'deploy/manifests', ...args], { cwd: repo, encoding: 'utf8', env });
     return Object.fromEntries(out.trim().split('\n').filter((l) => l.includes('=')).map((l) => l.split(/=(.*)/s).slice(0, 2)));
   }
 

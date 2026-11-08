@@ -148,6 +148,8 @@ def piece_a_controler(piece) -> None:
 def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> PieceIdentiteModel:
     """Remote check of the identity document. Verified: the document is kept (the agent compares it with the person
     met at the visit) and the host's pending listings are sent to the agents for a visit. Refused: it is deleted."""
+    if hote.pk == verificateur.pk:
+        raise VerificationErreur("Vous ne pouvez pas contrôler votre propre pièce d'identité : un autre agent doit le faire.")
     piece = PieceIdentiteModel.objects.select_for_update().filter(hote_id=hote.pk).first()
     if not piece or piece.statut != 'soumise':
         raise VerificationErreur("Aucune pièce d'identité à contrôler pour cet hôte.")
@@ -189,6 +191,8 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
         raise VerificationErreur(f"{MAX_PHOTOS_VISITE} photos au plus.")
 
     hote = users.compte(annonce['host_id'])
+    if hote and hote.pk == agent.pk:
+        raise VerificationErreur("Vous ne pouvez pas décider de votre propre annonce : un autre agent doit la vérifier.")
     piece = PieceIdentiteModel.objects.select_for_update().filter(hote_id=hote.pk).first()
     if decision == 'validee':
         if not all(controles.values()):

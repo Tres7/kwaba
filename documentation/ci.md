@@ -47,15 +47,15 @@ services:
   server:
     kind: image
     sourceRevision: <dernier commit touchant server/>
-    image: ghcr.io/tres7/kwaba-server@sha256:<digest>
+    image: ghcr.io/kwa-ba/kwaba-server@sha256:<digest>
   client:
     kind: image
     sourceRevision: <dernier commit touchant client/>
-    image: ghcr.io/tres7/kwaba-client@sha256:<digest>
+    image: ghcr.io/kwa-ba/kwaba-client@sha256:<digest>
   clientPreprod:                    # même révision que client, construite pour l'URL de la préprod
     kind: image
     sourceRevision: <dernier commit touchant client/>
-    image: ghcr.io/tres7/kwaba-client-preprod@sha256:<digest>
+    image: ghcr.io/kwa-ba/kwaba-client-preprod@sha256:<digest>
 ```
 
 Les manifests v1 (client déployé depuis Git, avant le passage au VPS) restent valides ; le premier manifest v2 reconstruit l'image du client.

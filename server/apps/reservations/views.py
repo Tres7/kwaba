@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.throttling import ScopedRateThrottle
 
 from config.prelancement import verifier_ouverture
 from apps.hebergements import api as hebergements
@@ -17,15 +18,21 @@ from .serializers import ReservationSerializer, ReservationCreateSerializer
 
 class ReservationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = 'reservation_creation'
+
+    def get_throttles(self):
+        # Only the creation: each booking holds its dates while it waits for payment
+        return [ScopedRateThrottle()] if self.request.method == 'POST' else []
 
     def get(self, request):
         # ?as=host: bookings received on my listings
-        if request.query_params.get('as') == 'host':
+        vue_hote = request.query_params.get('as') == 'host'
+        if vue_hote:
             qs = ReservationModel.objects.filter(hebergement_id__in=hebergements.ids_annonces_de(request.user.id))
         else:
             qs = ReservationModel.objects.filter(guest_id=request.user.pk)
-        qs = qs
-        serializer = ReservationSerializer(users.attacher(qs, 'guest'), many=True, context={'request': request})
+        serializer = ReservationSerializer(users.attacher(qs, 'guest'), many=True,
+                                           context={'request': request, 'vue_hote': vue_hote})
         return Response({'results': serializer.data, 'count': len(serializer.data)})
 
     def post(self, request):
