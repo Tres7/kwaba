@@ -136,3 +136,48 @@ def confirmees_par_jour(premier_jour: date) -> dict:
         .values('jour')
         .annotate(nombre=Count('id'), volume=Sum('total_price'))
     }
+
+
+# --- Payment by a third party, for Together: the members of a trip pay a booking shared with it ------------------
+
+def _du_voyageur(reservation_id, voyageur_id) -> ReservationModel:
+    r = ReservationModel.objects.filter(pk=reservation_id, guest_id=voyageur_id).first()
+    if not r:
+        raise paiements.PaiementErreur("Seule la personne qui a réservé peut demander qu'on la paie.")
+    return r
+
+
+def ouvrir_paiement_au_groupe(reservation_id, voyageur_id, voyage_id) -> None:
+    from . import tiers
+
+    tiers.ouvrir_au_groupe(_du_voyageur(reservation_id, voyageur_id), voyage_id)
+
+
+def fermer_paiement_au_groupe(reservation_id, voyageur_id, voyage_id) -> None:
+    """The trip's members can no longer pay it (a secret link given to someone keeps working)."""
+    from .models import DemandePaiementModel
+
+    _du_voyageur(reservation_id, voyageur_id)
+    DemandePaiementModel.objects.filter(reservation_id=reservation_id, voyage_id=voyage_id).update(voyage_id=None)
+
+
+def a_payer_par_le_groupe(reservation_ids, voyage_id) -> set:
+    from . import tiers
+
+    return tiers.demandes_des_groupes(reservation_ids, voyage_id)
+
+
+def apercu_paiement_du_groupe(reservation_id, voyage_id, payeur) -> dict | None:
+    from . import tiers
+
+    demande = tiers.demande_du_groupe(reservation_id, voyage_id)
+    return tiers.apercu(demande, payeur) if demande else None
+
+
+def payer_pour_le_groupe(reservation_id, voyage_id, payeur, moyen: str) -> str:
+    from . import tiers
+
+    demande = tiers.demande_du_groupe(reservation_id, voyage_id)
+    if not demande:
+        raise paiements.PaiementErreur("Personne ne demande plus au groupe de payer cette réservation.")
+    return tiers.payer(demande, payeur, moyen)

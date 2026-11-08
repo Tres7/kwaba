@@ -15,11 +15,11 @@ export async function listerMissions(params: Record<string, string>) {
 }
 
 export async function lireMission<T>(type: string, cible: string) {
-  return (await api.get<T>(`${MISSIONS}/${type}/${cible}/`)).data;
+  return (await api.get<T>(`${MISSIONS}/${encodeURIComponent(type)}/${encodeURIComponent(cible)}/`)).data;
 }
 
 export async function agirSurMission(type: string, cible: string, action: "prendre" | "liberer") {
-  await api.post(`${MISSIONS}/${type}/${cible}/${action}/`);
+  await api.post(`${MISSIONS}/${encodeURIComponent(type)}/${encodeURIComponent(cible)}/${action}/`);
 }
 
 export async function lireCompteurs() {

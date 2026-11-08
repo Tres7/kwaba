@@ -10,6 +10,7 @@ from apps.users.application.dto.dto import UpdateProfileDTO
 from apps.users.application.service.UserService import UserService
 from apps.users.domain.exceptions import UserNotFoundException
 from apps.users.domain.value_objects import PhoneNumber
+from apps.users.infrastructure.http.serializers.auth_serializers import NOM_REFUSE, nom_interdit
 from apps.users.infrastructure.persistence.DjangoUserRepository import DjangoUserRepository
 from apps.users.infrastructure.persistence.models import UserModel
 
@@ -50,6 +51,9 @@ class MeView(APIView):
         trop_longs = {champ: ['150 caractères maximum.'] for champ, valeur in noms.items() if len(valeur) > 150}
         if trop_longs:
             return Response(trop_longs, status=status.HTTP_400_BAD_REQUEST)
+        refuses = {champ: [NOM_REFUSE] for champ, valeur in noms.items() if nom_interdit(valeur)}
+        if refuses:
+            return Response(refuses, status=status.HTTP_400_BAD_REQUEST)
 
         avatar_url = request.data.get('avatar_url') or None
         if avatar_url and not url_image_autorisee(avatar_url):

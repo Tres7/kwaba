@@ -173,9 +173,13 @@ class PaiementModel(ObjetPayeMixin, models.Model):
     mode = models.CharField(max_length=40, blank=True)
     telephone = models.CharField(max_length=20, blank=True)
     pays_telephone = models.CharField(max_length=2, blank=True)
+    # Payment by a third party (someone else than the traveller pays): the payment is theirs, so are its receipt and
+    # its refunds, which never go to the traveller. Null: the traveller paid.
+    payeur_id = models.UUIDField(null=True, blank=True, db_index=True)
     # Confirmation emails sent by the worker (one flag per recipient: no duplicate if one fails)
     notifie = models.BooleanField(default=False)
     notifie_hote = models.BooleanField(default=False)
+    notifie_payeur = models.BooleanField(default=False, db_default=False)
     cree_le = models.DateTimeField(auto_now_add=True)
     mis_a_jour_le = models.DateTimeField(auto_now=True)
 
@@ -194,6 +198,14 @@ class PaiementModel(ObjetPayeMixin, models.Model):
 
     def __str__(self):
         return f"{self.montant} FCFA · {self.get_statut_display()} · {self.reference}"
+
+    @property
+    def payeur(self):
+        """Who paid: the third party if there is one, otherwise the traveller of the paid object."""
+        if self.payeur_id:
+            from apps.users.api import compte
+            return compte(self.payeur_id)
+        return self.description['payeur']
 
 
 class VersementModel(models.Model):
@@ -242,6 +254,7 @@ class VersementModel(models.Model):
 
 
 class RemboursementModel(ObjetPayeMixin, models.Model):
+    """Refund of a payment, to whoever paid it (the third party who paid in the traveller's place, if any)."""
     STATUTS = [
         ('attente_numero', 'En attente du numéro du voyageur'),
         ('a_envoyer', 'À envoyer'),
@@ -279,3 +292,7 @@ class RemboursementModel(ObjetPayeMixin, models.Model):
 
     def __str__(self):
         return f"{self.montant} FCFA · {self.reference} ({self.get_statut_display()})"
+
+    @property
+    def payeur(self):
+        return self.paiement.payeur

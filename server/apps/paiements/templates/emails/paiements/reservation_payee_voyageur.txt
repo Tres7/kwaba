@@ -1,6 +1,6 @@
 {% autoescape off %}Bonjour {{ prenom }},
 
-Votre paiement de {{ montant }} est bien reçu : votre séjour est confirmé.
+{% if paye_par %}{{ paye_par }} a payé votre séjour ({{ montant }}) : il est confirmé.{% else %}Votre paiement de {{ montant }} est bien reçu : votre séjour est confirmé.{% endif %}
 
   {{ hebergement }} ({{ ville }})
   Du {{ arrivee }} au {{ depart }} · {{ voyageurs }} voyageur{{ voyageurs|pluralize }}

@@ -25,6 +25,7 @@ __all__ = [
     'indiquer_numero_remboursement', 'moyens_actifs', 'paiement_actif', 'paiement_reussi', 'recu_pdf', 'rembourser',
     'reservation_possible', 'synchroniser_paiement', 'synchroniser_payout', 'texte_politique', 'total_sejour',
     'devis_sejour', 'frais_reduits', 'frais_reduits_sejour', 'montants_de', 'hotes_deja_visites', 'rembourser_en_partie',
+    'paye_par_un_tiers', 'statut_paiement_de',
 ]
 
 # Emails of the products paid online (stays, transfers, rentals, donations): same sending rules as the payment emails
@@ -48,6 +49,19 @@ def _paiement_reussi(type_objet: str, objet_id) -> PaiementModel | None:
 def paiement_reussi(type_objet: str, objet_id) -> bool:
     """`type_objet`: reservation, transfert, location or don."""
     return _paiement_reussi(type_objet, objet_id) is not None
+
+
+def statut_paiement_de(type_objet: str, objet_id, payeur_id) -> str | None:
+    """Status of the last payment this third party started for the object (None if they never started one)."""
+    dernier = (PaiementModel.objects.filter(**{f'{type_objet}_id': objet_id}, payeur_id=payeur_id)
+               .order_by('-cree_le').values_list('statut', flat=True).first())
+    return dernier
+
+
+def paye_par_un_tiers(type_objet: str, objet_id):
+    """The third party who paid the object (None if the traveller paid it, or if it is not paid)."""
+    paiement = _paiement_reussi(type_objet, objet_id)
+    return paiement.payeur if paiement and paiement.payeur_id else None
 
 
 def recu_pdf(type_objet: str, objet_id) -> bytes | None:

@@ -6,7 +6,11 @@ from django.db.models import Count
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
+
+from apps.securite.audit import journaliser
+from config.prelancement import verifier_ouverture
 
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
@@ -70,6 +74,7 @@ def detail(voyage, user, request) -> dict:
     liens = list(voyage.reservations.all())
     etapes = list(voyage.etapes.all())
     resas = reservations_api.resumes(lien.reservation_id for lien in liens)
+    a_payer = reservations_api.a_payer_par_le_groupe(resas, voyage.id)
     annonces = hebergements.resumes({p.hebergement_id for p in liste_propositions} | {r['hebergement_id'] for r in resas.values()})
     personnes = users.comptes({voyage.organisateur_id} | {m.utilisateur_id for m in membres}
                               | {p.propose_par_id for p in liste_propositions} | {e.ajoute_par_id for e in etapes}
@@ -112,6 +117,10 @@ def detail(voyage, user, request) -> dict:
             'check_in': r['check_in'], 'check_out': r['check_out'], 'voyageurs': r['voyageurs'], 'statut': r['statut'],
             'total': float(r['total']), 'reserve_par': nom(r['voyageur_id']),
             'peut_retirer': user.id in (lien.ajoute_par_id, voyage.organisateur_id),
+            # Payment by a third party: the booker asks the group to pay it, a member pays it in their place
+            'est_a_moi': r['voyageur_id'] == user.id,
+            'paiement_groupe': r['id'] in a_payer,
+            'peut_demander_paiement': r['voyageur_id'] == user.id and r['statut'] == 'pending',
         })
     return {
         'id': voyage.id, 'nom': voyage.nom, 'destination': voyage.destination,
@@ -261,6 +270,8 @@ class MembreView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         with transaction.atomic():
             VoteModel.objects.filter(voyage=voyage, utilisateur_id=user_id).delete()
+            # Their bookings were shared with the group as long as they were part of it
+            LienReservationModel.objects.filter(voyage=voyage, ajoute_par_id=user_id).delete()
             MembreModel.objects.filter(voyage=voyage, utilisateur_id=user_id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -417,3 +428,68 @@ class ReservationPartageeView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
         lien.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class _PaiementDuGroupe(APIView):
+    """A booking shared with the trip, paid by one of its members in the booker's place (payment by a third party)."""
+    permission_classes = [IsAuthenticated]
+    throttle_scope = 'paiement_tiers'
+
+    def get_throttles(self):
+        return [ScopedRateThrottle()] if self.request.method in ('POST', 'DELETE') else []
+
+    def _lien(self, request, pk, lien_id):
+        voyage = _voyage(pk, request.user)
+        return voyage, (voyage.reservations.filter(pk=lien_id).first() if voyage else None)
+
+
+class DemandePaiementGroupeView(_PaiementDuGroupe):
+    """The booker asks the trip's members to pay their booking (POST), or no longer asks (DELETE)."""
+
+    def post(self, request, pk, lien_id):
+        voyage, lien = self._lien(request, pk, lien_id)
+        if not lien:
+            return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            reservations_api.ouvrir_paiement_au_groupe(lien.reservation_id, request.user.id, voyage.id)
+        except paiements.PaiementErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        journaliser('paiement_tiers_groupe', request, utilisateur=request.user, reservation=str(lien.reservation_id),
+                    voyage=str(voyage.id))
+        return Response(detail(voyage, request.user, request))
+
+    def delete(self, request, pk, lien_id):
+        voyage, lien = self._lien(request, pk, lien_id)
+        if not lien:
+            return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            reservations_api.fermer_paiement_au_groupe(lien.reservation_id, request.user.id, voyage.id)
+        except paiements.PaiementErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(detail(voyage, request.user, request))
+
+
+class PaiementGroupeView(_PaiementDuGroupe):
+    """A member pays the booking: what they pay (GET), starting the payment (POST {moyen})."""
+
+    def get(self, request, pk, lien_id):
+        voyage, lien = self._lien(request, pk, lien_id)
+        apercu = reservations_api.apercu_paiement_du_groupe(lien.reservation_id, voyage.id, request.user) if lien else None
+        if not apercu:
+            return Response({'detail': 'Aucun paiement demandé au groupe pour cette réservation.'},
+                            status=status.HTTP_404_NOT_FOUND)
+        return Response(apercu)
+
+    def post(self, request, pk, lien_id):
+        verifier_ouverture()
+        voyage, lien = self._lien(request, pk, lien_id)
+        if not lien:
+            return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            url = reservations_api.payer_pour_le_groupe(lien.reservation_id, voyage.id, request.user,
+                                                        request.data.get('moyen') or 'mobile_money')
+        except paiements.PaiementErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        journaliser('paiement_tiers_demarre', request, utilisateur=request.user, reservation=str(lien.reservation_id),
+                    voyage=str(voyage.id))
+        return Response({'url': url})

@@ -201,6 +201,8 @@ REST_FRAMEWORK = {
         'concierge_conversation': '30/hour',
         'verification_piece': '20/hour',
         'reclamation': '5/hour',
+        'reservation_creation': '20/hour',
+        'paiement_tiers': '30/hour',
     },
 }
 

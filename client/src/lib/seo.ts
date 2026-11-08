@@ -25,7 +25,7 @@ export const PAGES_PUBLIQUES = [
  */
 export const CHEMINS_PRIVES = [
   "/profil", "/favoris", "/messages", "/reservation", "/hote/espace", "/hote/annonce", "/give/don", "/together/", "/transfert/", "/location/",
-  "/backoffice", "/agent", "/alertes", "/api/",
+  "/backoffice", "/agent", "/alertes", "/payer", "/api/",
 ] as const;
 
 export function langueDe(valeur: string): Langue {

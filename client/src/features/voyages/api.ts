@@ -1,5 +1,7 @@
 import api from "@/lib/api";
 import type { Hebergement, Paginated } from "@/types/api/models";
+import type { MoyenPaiement } from "@/types/api/paiement";
+import type { ApercuTiers } from "@/features/paiement-tiers";
 import type { ApercuInvitation, Voyage, VoyageResume } from "./types";
 
 const VOYAGES = "/v1/voyages";
@@ -70,11 +72,11 @@ export async function nouveauLien(id: string) {
 }
 
 export async function lireInvitation(code: string) {
-  return (await api.get<ApercuInvitation>(`${VOYAGES}/invitations/${code}/`)).data;
+  return (await api.get<ApercuInvitation>(`${VOYAGES}/invitations/${encodeURIComponent(code)}/`)).data;
 }
 
 export async function rejoindre(code: string) {
-  return (await api.post<{ id: string }>(`${VOYAGES}/invitations/${code}/`)).data;
+  return (await api.post<{ id: string }>(`${VOYAGES}/invitations/${encodeURIComponent(code)}/`)).data;
 }
 
 /** Listings that can be suggested to the group. */
@@ -82,3 +84,21 @@ export async function chercherLogements(params: { q?: string; check_in?: string;
   return (await api.get<Paginated<Hebergement>>("/v1/hebergements/", { params })).data.results;
 }
 
+// Payment by a third party: the booker asks the group to pay a shared booking, a member pays it in their place
+const paiementGroupe = (id: string, partage: number) => `${VOYAGES}/${id}/reservations/${partage}/`;
+
+export async function demanderAuGroupe(id: string, partage: number) {
+  return (await api.post<Voyage>(`${paiementGroupe(id, partage)}demande-paiement/`)).data;
+}
+
+export async function neplusDemanderAuGroupe(id: string, partage: number) {
+  return (await api.delete<Voyage>(`${paiementGroupe(id, partage)}demande-paiement/`)).data;
+}
+
+export async function lireApercuGroupe(id: string, partage: number) {
+  return (await api.get<ApercuTiers>(`${paiementGroupe(id, partage)}paiement/`)).data;
+}
+
+export async function demarrerPaiementGroupe(id: string, partage: number, moyen: MoyenPaiement) {
+  return (await api.post<{ url: string }>(`${paiementGroupe(id, partage)}paiement/`, { moyen })).data.url;
+}
