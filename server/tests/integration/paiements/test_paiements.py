@@ -38,9 +38,12 @@ class FauxFedaPay:
         return {'id': identifiant, 'status': self.statut_transaction, 'mode': 'moov_tg',
                 'payment_method': {'number': '90000001', 'country': 'tg'}}
 
-    def creer_versement(self, **kwargs):
+    def creer_payout(self, **kwargs):
         self.payouts.append(kwargs)
         return str(5000 + len(self.payouts))
+
+    def lancer_payout(self, identifiant):
+        pass
 
     def lire_versement(self, identifiant):
         return {'id': identifiant, 'status': self.statut_payout}
@@ -293,7 +296,7 @@ class CycleTests(TestCase):
 
         def refus(**kwargs):
             raise fedapay.FedaPayErreur('Opération non autorisée')
-        self.faux.creer_versement = refus
+        self.faux.creer_payout = refus
         services.envoyer_remboursements()
         remboursement.refresh_from_db()
         self.assertEqual((remboursement.statut, remboursement.tentatives), ('a_envoyer', 1))
