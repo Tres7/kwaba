@@ -102,11 +102,11 @@ Relancer le workflow **deploy** avec un manifest antérieur (en prod, cocher `sk
 
 ## Sauvegardes et restauration
 
-- Automatiques : chaque nuit (03:30 UTC) et avant chaque déploiement, dans `/opt/kwaba/backups` (14 jours). Si `env/backup.env` est rempli, une copie **chiffrée avec age** part sur R2 (aucune copie en clair ne quitte le VPS).
+- Automatiques : la base chaque nuit (03:30 UTC) et avant chaque déploiement, dans `/opt/kwaba/backups` (14 jours) ; les fichiers privés (volume `prive-data`) chaque nuit seulement (3 jours, `BACKUP_PRIVE_KEEP_DAYS`). Si `env/backup.env` est rempli, une copie **chiffrée avec age** de chacun part sur R2 (préfixes `postgres/` et `prive/`, aucune copie en clair ne quitte le VPS).
 - **Surveillance** : sur [healthchecks.io](https://healthchecks.io) (gratuit), créer un check *Period* 1 jour, *Grace* 2 heures, avec une alerte par email vers vous deux. Mettre son adresse de ping dans `BACKUP_HEALTHCHECK_URL` (`env/backup.env`). Chaque sauvegarde la signale (`/fail` en cas d'erreur) ; une nuit sans sauvegarde déclenche aussi l'alerte. Vérifier une fois avec `sudo -u deploy /opt/kwaba/scripts/backup.sh manuelle` : le check passe au vert.
 - **Copies sur R2 protégées et purgées** (tableau de bord Cloudflare → R2 → `kwaba-backups` → *Settings*) :
-  - *Bucket lock rules* → règle sur le préfixe `postgres/`, rétention **30 jours** : pendant 30 jours, une copie ne peut être ni effacée ni écrasée, même avec la clé du VPS (un attaquant qui prend le serveur ne peut pas détruire aussi les sauvegardes) ;
-  - *Object lifecycle rules* → règle sur le préfixe `postgres/`, suppression après **90 jours** (sinon les copies s'accumulent sans fin).
+  - *Bucket lock rules* → une règle sur le préfixe `postgres/` et une sur `prive/`, rétention **30 jours** : pendant 30 jours, une copie ne peut être ni effacée ni écrasée, même avec la clé du VPS (un attaquant qui prend le serveur ne peut pas détruire aussi les sauvegardes) ;
+  - *Object lifecycle rules* → une règle sur chacun des deux préfixes, suppression après **90 jours** (sinon les copies s'accumulent sans fin).
 - Récupérer une copie de R2 : la télécharger, puis `age --decrypt --identity kwaba-backups.key -o kwaba.dump <fichier>.dump.age`.
 - Restaurer (après avoir arrêté l'API et les workers) :
   ```bash
@@ -122,7 +122,7 @@ Relancer le workflow **deploy** avec un manifest antérieur (en prod, cocher `sk
 Pièces d'identité des hôtes, contrats signés et leurs PDF, factures, signature du représentant, photos des visites : jamais servis directement, lus seulement par l'API après contrôle du rôle.
 
 - Sans `R2_PRIVE_BUCKET` (`env/server.env`), ils sont sur le disque du VPS, dans le volume Docker `prive-data` (monté sur `/app/prive` de l'API et des workers). Avant ce volume, ils étaient dans le conteneur lui-même, et chaque déploiement les effaçait ; `deploy.sh` recopie dans le volume ceux des conteneurs en place avant de les remplacer.
-- Les sauvegardes de la nuit ne contiennent que la base : ce volume n'est pas encore sauvegardé.
+- Ce volume est sauvegardé chaque nuit avec la base (`scripts/backup.sh`, archive `kwaba-prive-*.tar.gz`). Le restaurer, en tant que `deploy` dans `/opt/kwaba` : `source scripts/lib.sh && kwaba_compose run --rm --no-deps -T --entrypoint tar api -C /app/prive -xzf - < backups/<archive>.tar.gz`.
 - Pour savoir quels fichiers la base cite sans qu'ils existent : `sudo -u deploy bash -c 'source /opt/kwaba/scripts/lib.sh; kwaba_compose exec api python manage.py fichiers_prives'`. Une pièce d'identité perdue se refuse avec un motif qui demande de la renvoyer : l'hôte est prévenu par email.
 
 ## Tâches planifiées (`/etc/cron.d/kwaba`)
