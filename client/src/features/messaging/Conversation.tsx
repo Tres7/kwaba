@@ -53,7 +53,7 @@ export default function ChatPage() {
   }, []);
 
   const markAsRead = useCallback(() => {
-    if (lastIdRef.current === 0) return;
+    if (!(lastIdRef.current > 0)) return;  // also NaN, if the API answered something else than messages
     // Up to the last displayed message, not the last message in the database
     marquerLu(conversationId, lastIdRef.current).catch(() => {});
   }, [conversationId]);

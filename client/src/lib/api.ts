@@ -1,6 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { getSession, signOut } from "next-auth/react";
-import { getApiBaseUrl, PROXY_API, sansSlashFinal } from "@/lib/api-url";
+import { CheminRefuse, getApiBaseUrl, PROXY_API, sansSlashFinal, sortDuChemin } from "@/lib/api-url";
 import { langue, selon } from "@/lib/utils";
 
 const navigateur = typeof window !== "undefined";
@@ -16,6 +16,8 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   // User's language: Concierge answers and, eventually, API messages
   config.headers["Accept-Language"] = langue();
+  // Never a path that leaves the route asked for (an id from the page's address that would hold "../")
+  if (config.url && sortDuChemin(config.url)) throw new CheminRefuse(config.url);
   if (navigateur && config.url) config.url = sansSlashFinal(config.url);
   return config;
 });
