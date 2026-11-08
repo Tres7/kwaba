@@ -8,7 +8,7 @@
 ## Etape 1 : Cloner et configurer
 
 ```bash
-git clone https://github.com/Tres7/kwaba.git
+git clone https://github.com/kwa-ba/kwaba.git
 cd kwaba
 cp .env.example .env
 ```

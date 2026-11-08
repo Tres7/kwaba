@@ -9,7 +9,7 @@ const previous = latestManifest(values.dir);
 const serverRevision = lastCommitTouching('server');
 const clientRevision = lastCommitTouching('client');
 // Set by GitHub Actions; the fallback is the repository owner, for local runs
-const owner = process.env.GITHUB_REPOSITORY_OWNER || 'tres7';
+const owner = process.env.GITHUB_REPOSITORY_OWNER || 'kwa-ba';
 const repositories = {
   server: imageRepository(owner, 'server'),
   client: imageRepository(owner, 'client'),
