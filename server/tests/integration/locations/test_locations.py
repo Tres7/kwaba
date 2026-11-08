@@ -35,9 +35,12 @@ class FauxFedaPay:
     def lire_transaction(self, identifiant):
         return {'id': identifiant, 'status': self.statut, 'mode': 'momo_test'}
 
-    def creer_versement(self, **kwargs):
+    def creer_payout(self, **kwargs):
         self.payouts.append(kwargs)
         return f'P{len(self.payouts)}'
+
+    def lancer_payout(self, identifiant):
+        pass
 
     def lire_versement(self, identifiant):
         return {'id': identifiant, 'status': 'sent'}

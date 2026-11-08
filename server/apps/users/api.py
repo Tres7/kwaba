@@ -3,15 +3,15 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, OuterRef, Q
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
 from .infrastructure.persistence.models import UserModel
 
 __all__ = [
     'Compte', 'ROLES', 'attacher', 'candidatures_refusees', 'compte', 'comptes', 'comptes_actifs', 'comptes_de_role',
-    'compte_demo', 'emails_actifs', 'hote_ou_candidat', 'hotes_et_candidats', 'ids_actifs', 'ids_par_recherche',
-    'passer_hote', 'peut_gerer_annonces', 'retirer_role_hote', 'revoquer_jetons', 'statistiques',
+    'compte_demo', 'condition_compte_actif', 'emails_actifs', 'hote_ou_candidat', 'hotes_et_candidats', 'ids_actifs',
+    'ids_par_recherche', 'passer_hote', 'peut_gerer_annonces', 'retirer_role_hote', 'revoquer_jetons', 'statistiques',
 ]
 
 ROLES = [code for code, _ in UserModel.ROLE_CHOICES]
@@ -116,6 +116,11 @@ def ids_par_recherche(texte: str) -> list[uuid.UUID]:
 
 def ids_actifs(roles: Iterable[str]) -> list[uuid.UUID]:
     return list(UserModel.objects.filter(role__in=list(roles), is_active=True).values_list('id', flat=True))
+
+
+def condition_compte_actif(champ: str) -> Exists:
+    """SQL condition: the account whose id is in field `champ` of the outer query is active (neither closed nor banned)."""
+    return Exists(UserModel.objects.filter(pk=OuterRef(champ), is_active=True))
 
 
 def comptes_actifs(roles: Iterable[str], texte: str = '', ids: Iterable[uuid.UUID] | None = None,
