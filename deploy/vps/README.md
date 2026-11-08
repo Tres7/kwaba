@@ -67,15 +67,15 @@ Environnements GitHub (*Settings → Environments*), branche `main` seulement :
 
 | | `production` | `preprod` |
 | --- | --- | --- |
-| Secrets | `DEPLOY_SSH_KEY`, `DEPLOY_SSH_KNOWN_HOSTS` | les mêmes, avec la clé `kwaba-preprod-deploy` et `[217.154.19.172]:2222 ssh-ed25519 …` |
-| `DEPLOY_HOST` | IP du VPS | `217.154.19.172` |
-| `DEPLOY_PORT` | (22) | `2222` |
-| `DEPLOY_USER` | (`deploy`) | `deploy-kwaba` |
+| Secrets | `DEPLOY_SSH_KEY`, `DEPLOY_SSH_KNOWN_HOSTS` | les mêmes, avec la clé restreinte de la préprod (empreinte entre crochets si le port n'est pas 22 : `[<hôte>]:<port> ssh-ed25519 …`) |
+| `DEPLOY_HOST` | IP du VPS | IP du serveur de préprod |
+| `DEPLOY_PORT` | (22) | port SSH du serveur de préprod |
+| `DEPLOY_USER` | (`deploy`) | utilisateur de déploiement de la préprod (`kwaba_utilisateur` de l'inventaire) |
 | `DEPLOY_PATH` | (`/opt/kwaba`) | inutile (le serveur tire) |
 | `DEPLOY_PULL` | (vide) | `true` |
 | `DEPLOY_SITE_URL` | (variable du dépôt `PUBLIC_SITE_URL`) | `https://preprod.kwa-ba.com` |
 
-Entre parenthèses : la valeur par défaut, rien à créer.
+Entre parenthèses : la valeur par défaut, rien à créer. Les valeurs réelles et les procédures d'exploitation sont dans le dépôt privé `kwa-ba/kwa-ba-infra` (`docs/`).
 
 Sur le VPS, le workflow appelle :
 
@@ -94,7 +94,7 @@ cd /opt/kwaba
 sudo -u deploy bash -c 'source scripts/lib.sh && kwaba_compose exec api python manage.py super_admin <email>'
 ```
 
-`--retirer` enlève le statut ; le dernier super admin ne peut pas être retiré. En préprod : `/opt/kwaba-preprod` et `deploy-kwaba`.
+`--retirer` enlève le statut ; le dernier super admin ne peut pas être retiré. En préprod : son dossier et son utilisateur de déploiement (`kwaba_racine`, `kwaba_utilisateur` de l'inventaire).
 
 ## Revenir en arrière
 
@@ -151,7 +151,7 @@ export KWABA_TLS_MODE=proxy
 - **Secrets** (`env/*.env`) : générés par Ansible depuis le Vault de `kwa-ba-infra` (voir `deploy/ansible/README.md`), jamais écrits à la main ; emails envoyés à Mailpit (`EMAIL_HOST=mailpit`, port 1025).
 - **Accès** : le Caddy partagé demande un mot de passe au navigateur sur tout le site (Mailpit compris) sauf le webhook FedaPay et `/api/health/`, et le garde hors des moteurs de recherche (`X-Robots-Tag: noindex`).
 - **`deploy.sh`** : pas de contrôle du certificat (c'est celui de Caddy) mais vérification que le réseau `proxy` existe ; test de santé depuis le conteneur nginx.
-- **Données de test** : la base démarre vide, à part ce que créent les migrations (contrats, expériences, aéroports, catégories de véhicules). `sudo -u deploy /opt/kwaba-preprod/scripts/maintenance.sh seed-demo` ajoute 12 annonces publiées, 4 ONG fictives et un compte par rôle (`hote.demo`, `voyageur.demo`, `agent.demo`, `admin.demo`, `@kwa-ba.com`), avec le mot de passe `DEMO_HOST_PASSWORD` de `env/server.env`, sinon celui de `seed_demo.py`. Relançable sans doublon, refusé en production (`FRONTEND_URL`). Pour que le contenu s'affiche, `kwaba_env` doit avoir `PRELANCEMENT=False` (sinon aucune annonce publique ni réservation) et les `MODULE_*` voulus à `True`.
+- **Données de test** : la base démarre vide, à part ce que créent les migrations (contrats, expériences, aéroports, catégories de véhicules). `scripts/maintenance.sh seed-demo`, lancé dans le dossier de la préprod avec son utilisateur de déploiement, ajoute 12 annonces publiées, 4 ONG fictives et un compte par rôle (`hote.demo`, `voyageur.demo`, `agent.demo`, `admin.demo`, `@kwa-ba.com`), avec le mot de passe `DEMO_HOST_PASSWORD` de `env/server.env`, sinon celui de `seed_demo.py`. Relançable sans doublon, refusé en production (`FRONTEND_URL`). Pour que le contenu s'affiche, `kwaba_env` doit avoir `PRELANCEMENT=False` (sinon aucune annonce publique ni réservation) et les `MODULE_*` voulus à `True`.
 
 ## Essai local de la pile de production
 
