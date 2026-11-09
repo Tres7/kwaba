@@ -1,0 +1,9 @@
+{% autoescape off %}Un hôte a ajouté {{ nombre }} photo{{ nombre|pluralize }} à une annonce déjà vérifiée. L'annonce reste en ligne : contrôlez ces photos à distance et retirez celles qui ne conviennent pas (autre logement, coordonnées visibles, image trompeuse).
+
+  {{ hebergement }}, {{ ville }}
+  Hôte : {{ hote }}
+
+Contrôler les photos : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

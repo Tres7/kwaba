@@ -1495,7 +1495,8 @@
     "retirer": "Remove photo",
     "reessayer": "Try again",
     "quellePiece": "Which room?",
-    "pieceDeLaPhoto": "Room of photo {numero}"
+    "pieceDeLaPhoto": "Room of photo {numero}",
+    "maximum": "{max} photos at most."
   },
   "espaceHote": {
     "erreurConversation": "Could not open the conversation.",
@@ -1602,7 +1603,9 @@
     },
     "typesLogement": "Rooms and types",
     "candidatureRefusee": "Your application was not accepted",
-    "dontMenage": "including {montant} for cleaning"
+    "dontMenage": "including {montant} for cleaning",
+    "miseAJourVerification": "Listing updated. It goes back into verification and comes back online after an agent's visit.",
+    "photosAjoutees": "Your new photos are online. A Kwa-Ba agent will check them."
   },
   "annonce": {
     "types": {
@@ -1778,7 +1781,7 @@
     "places": "{nombre, plural, one {# seat} other {# seats}}",
     "bagages": "{nombre, plural, one {# suitcase} other {# suitcases}}",
     "clim": "Air conditioning",
-    "parJour": "/day",
+    "parJour": "/ day",
     "nonProposee": "Not available",
     "choisir": "Choose",
     "ouSimilaire": "or similar",

@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour {{ prenom }},
+
+Un agent Kwa-Ba a contrôlé les photos que vous avez ajoutées à votre annonce « {{ hebergement }} ». {{ nombre }} photo{{ nombre|pluralize }} {{ nombre|pluralize:"a,ont" }} été retirée{{ nombre|pluralize }} :
+
+  {{ motif }}
+
+Vos autres photos restent en ligne. Vous pouvez en ajouter d'autres depuis votre espace hôte :
+{{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

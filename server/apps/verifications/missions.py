@@ -1,6 +1,7 @@
 """Field missions of the verifications: listings to visit and identity documents to check remotely."""
 from apps.paiements import api as paiements
 from apps.terrain.api import TypeMission, nom
+from apps.users import api as users
 
 from . import services as verifications
 from .models import PieceIdentiteModel, VisiteModel
@@ -27,6 +28,33 @@ def _logement_detail(v: dict) -> dict:
         'logement': v,
         'controles': VisiteModel.CONTROLES, 'max_photos': verifications.MAX_PHOTOS_VISITE,
     }
+
+
+# --- Photos added after the visit, checked from a distance ------------------------------------------------------
+
+def _photos() -> list[dict]:
+    return verifications.annonces_photos_a_controler()
+
+
+def _photos_resume(a: dict) -> dict:
+    hote = users.compte(a['host_id'])
+    nombre = len(a['photos_a_controler'])
+    return {
+        'titre': a['name'], 'sous_titre': f"{a['type_libelle']} · {nom(hote)}", 'ville': a['city'], 'adresse': '',
+        'date': a['mis_a_jour_le'], 'photo': next(iter(a['photos_a_controler']), None),
+        'etiquette': f"{nombre} photo{'s' if nombre > 1 else ''} ajoutée{'s' if nombre > 1 else ''}",
+    }
+
+
+def _photos_detail(a: dict) -> dict:
+    hote = users.compte(a['host_id'])
+    return {'photos': {
+        'id': str(a['id']), 'name': a['name'], 'city': a['city'], 'type_libelle': a['type_libelle'],
+        'hote': {'nom': nom(hote), 'email': hote.email if hote else ''},
+        'ajoutees': a['photos_a_controler'],
+        'deja_verifiees': [u for u in a['images'] if u not in a['photos_a_controler']],
+        'legendes': a['legendes_photos'],
+    }}
 
 
 # --- Identity documents to check remotely ---------------------------------------------------------------------
@@ -59,4 +87,5 @@ def _piece_detail(p: PieceIdentiteModel) -> dict:
 TYPES_MISSIONS = [
     TypeMission('logement', 'Logements à visiter', _logements, lambda v: v['id'], _logement_resume, _logement_detail),
     TypeMission('piece', "Pièces d'identité", _pieces, lambda p: p.hote_id, _piece_resume, _piece_detail),
+    TypeMission('photos', 'Photos à contrôler', _photos, lambda a: a['id'], _photos_resume, _photos_detail),
 ]

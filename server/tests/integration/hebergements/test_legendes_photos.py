@@ -41,3 +41,25 @@ def test_older_listing_changed_without_rooms(client_for, make_hebergement):
     ancienne = make_hebergement(image_url=A, images=[A, B])
     reponse = client_for(ancienne.host).patch(f'{HEBERGEMENTS}{ancienne.id}/', {'price_per_night': 30000}, format='json')
     assert reponse.status_code == 200 and reponse.data['legendes_photos'] == {}
+
+
+# Field agents' report of 2026-11-09: up to 20 photos, a gym in a house
+def _photos(nombre):
+    return [f'https://images.unsplash.com/photo-{n}.jpg' for n in range(nombre)]
+
+
+def test_vingt_photos_dont_la_salle_de_sport_d_une_maison(client_for, make_user):
+    photos = _photos(20)
+    legendes = {url: 'salon' for url in photos} | {photos[-1]: 'salle_de_sport'}
+    reponse = client_for(make_user(role='hote')).post(
+        HEBERGEMENTS, _annonce(image_url=photos[0], images=photos, legendes_photos=legendes), format='json')
+    assert reponse.status_code == 201, reponse.data
+    assert len(reponse.data['images']) == 20
+    assert reponse.data['legendes_photos'][photos[-1]] == 'salle_de_sport'
+
+
+def test_une_photo_de_trop_refusee_sans_rien_perdre_en_silence(client_for, make_user):
+    photos = _photos(21)
+    reponse = client_for(make_user(role='hote')).post(
+        HEBERGEMENTS, _annonce(image_url=photos[0], images=photos, legendes_photos={u: 'salon' for u in photos}), format='json')
+    assert reponse.status_code == 400 and '20 photos' in str(reponse.data['images'])

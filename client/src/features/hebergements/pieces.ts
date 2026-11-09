@@ -3,7 +3,7 @@
  * ("chambre_2"), a studio has a main room instead of bedrooms.
  */
 const AVANT = ["salon", "cuisine", "salle_a_manger"] as const;
-const APRES = ["toilettes", "terrasse", "balcon", "jardin", "piscine", "exterieur", "entree", "vue", "parking", "autre"] as const;
+const APRES = ["toilettes", "terrasse", "balcon", "jardin", "piscine", "salle_de_sport", "exterieur", "entree", "vue", "parking", "autre"] as const;
 const NUMEROTEE = /^(chambre|salle_de_bain)_(\d+)$/;
 /** A hotel, an aparthotel or a guesthouse: its spaces (the rooms of each type get their photos in the host space). */
 const ETABLISSEMENT = ["exterieur", "reception", "chambres", "salles_de_bain", "restaurant", "bar", "piscine", "salle_de_sport",
