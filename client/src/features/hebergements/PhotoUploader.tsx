@@ -10,7 +10,9 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { codesPieces, libellePiece } from "./pieces";
 
-export const MAX_PHOTOS = 10;
+/** Photos of a listing (serializers.MAX_PHOTOS_ANNONCE); of a hotel's room type (validate_photos). */
+export const MAX_PHOTOS = 20;
+export const MAX_PHOTOS_TYPE = 10;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 
 type Item =
@@ -35,12 +37,14 @@ interface PhotoUploaderProps {
   sallesDeBain?: number | null;
   /** A hotel: its spaces (reception, restaurant…) rather than numbered bedrooms */
   etablissement?: boolean;
+  /** Photos allowed: a listing's by default */
+  max?: number;
 }
 
 let keySeq = 0;
 const nextKey = () => `p${++keySeq}`;
 
-export default function PhotoUploader({ value, onChange, onBusyChange, error, fichiersDuBrouillon, legendes, onLegende, chambres, sallesDeBain, etablissement }: PhotoUploaderProps) {
+export default function PhotoUploader({ value, onChange, onBusyChange, error, fichiersDuBrouillon, legendes, onLegende, chambres, sallesDeBain, etablissement, max = MAX_PHOTOS }: PhotoUploaderProps) {
   const t = useTranslations("photos");
   const tPieces = useTranslations("pieces");
   const pieces = codesPieces(chambres, sallesDeBain, etablissement);
@@ -50,7 +54,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
   const inputRef = useRef<HTMLInputElement>(null);
 
   const busy = items.some((i) => i.status === "uploading");
-  const complet = items.length >= MAX_PHOTOS;
+  const complet = items.length >= max;
   const ouvrirChoix = () => {
     if (!complet) inputRef.current?.click();
   };
@@ -84,12 +88,12 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
   const addFiles = async (fileList: FileList | File[]) => {
     setNotice("");
     const files = Array.from(fileList);
-    const room = MAX_PHOTOS - items.length;
+    const room = max - items.length;
     const rejected = files.filter((f) => !ACCEPTED.includes(f.type));
     const accepted = files.filter((f) => ACCEPTED.includes(f.type)).slice(0, Math.max(0, room));
 
     if (rejected.length) setNotice(t("formats"));
-    else if (files.length > accepted.length) setNotice(`${MAX_PHOTOS} photos maximum par annonce.`);
+    else if (files.length > accepted.length) setNotice(t("maximum", { max }));
     if (!accepted.length) return;
 
     const queued = accepted.map((file) => ({ key: nextKey(), file, preview: URL.createObjectURL(file) }));
@@ -150,7 +154,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
             <span className="sm:hidden">{t("ajouterPhotos")}</span><span className="hidden sm:inline">{t("parcourez")}</span>
           </span>
         </p>
-        <p className="text-xs text-gray-500 mt-1">{t("limites", { nombre: items.length, max: MAX_PHOTOS })}</p>
+        <p className="text-xs text-gray-500 mt-1">{t("limites", { nombre: items.length, max })}</p>
         <input
           ref={inputRef}
           type="file"

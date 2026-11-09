@@ -1495,7 +1495,8 @@
     "retirer": "Retirer la photo",
     "reessayer": "Réessayer",
     "quellePiece": "Quelle pièce ?",
-    "pieceDeLaPhoto": "Pièce de la photo {numero}"
+    "pieceDeLaPhoto": "Pièce de la photo {numero}",
+    "maximum": "{max} photos au plus."
   },
   "espaceHote": {
     "erreurConversation": "Impossible d'ouvrir la conversation.",

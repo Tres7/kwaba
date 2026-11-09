@@ -37,10 +37,13 @@ REGLES = [
 AMENITIES += [valeur for paire in REGLES for valeur in paire]
 # Room of a photo: numbered for the bedrooms and bathrooms ("chambre_2"), otherwise one of these
 PIECES = ('piece_principale', 'salon', 'cuisine', 'salle_a_manger', 'toilettes', 'terrasse', 'balcon', 'jardin', 'piscine',
-          'exterieur', 'entree', 'vue', 'parking', 'autre',
+          'salle_de_sport', 'exterieur', 'entree', 'vue', 'parking', 'autre',
           # Spaces of a hotel, an aparthotel or a guesthouse
-          'reception', 'chambres', 'salles_de_bain', 'restaurant', 'bar', 'salle_de_sport', 'salle_de_reunion')
+          'reception', 'chambres', 'salles_de_bain', 'restaurant', 'bar', 'salle_de_reunion')
 MAX_TYPES_CHAMBRES = 30
+# Photos of a listing: enough for every room of a big house (bedrooms, pool, garden, gym…). Field agents' report of
+# 2026-11-09: 10 were not enough. The photos of a hotel's room type stay at 10 each.
+MAX_PHOTOS_ANNONCE = 20
 # Longest stay a search takes into account: the longest one that can be booked
 MAX_NUITS_RECHERCHE = 90
 PIECE_NUMEROTEE = re.compile(r'^(chambre|salle_de_bain)_([1-9]|[1-4][0-9]|50)$')
@@ -292,7 +295,9 @@ class HebergementCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Liste d'URL attendue.")
         if not all(url_image_autorisee(u) for u in value):
             raise serializers.ValidationError(IMAGE_REFUSEE)
-        return value[:10]
+        if len(value) > MAX_PHOTOS_ANNONCE:
+            raise serializers.ValidationError(f"{MAX_PHOTOS_ANNONCE} photos au plus par annonce.")
+        return value
 
     def validate_types_chambres(self, value):
         """Each type: name, price per night, number of identical rooms, guests per room. A draft may hold unfinished
