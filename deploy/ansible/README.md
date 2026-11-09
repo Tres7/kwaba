@@ -32,6 +32,7 @@ ansible-playbook -i ../../../kwa-ba-infra/inventory site.yml --limit production 
 ```
 
 Règles :
+- le playbook **refuse de tourner** si la copie locale de `kwa-ba-infra` n'est pas identique à `origin/main` (modifications non commitées, ou retard) : une copie ancienne réécrirait ses vieilles valeurs sur le serveur, `env/*.env` de la préprod compris. Échappatoire volontaire : `-e kwaba_inventaire_libre=true` ;
 - lancé **depuis ton poste**, avec le mot de passe sudo (`become_ask_pass` dans `ansible.cfg`), **jamais depuis GitHub Actions** ;
 - toujours `--check --diff` avant, et toujours `--limit` sur un seul serveur ;
 - sur un serveur où le rôle touche à SSH, garde une session ouverte jusqu'à avoir vérifié qu'une nouvelle connexion fonctionne.

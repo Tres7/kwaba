@@ -5,6 +5,26 @@
 - name: Environnement des serveurs Kwa-Ba
   hosts: all
   become: true
+  pre_tasks:
+    # An outdated or modified copy of kwa-ba-infra would write its old values on the server (env/*.env of the preprod
+    # included), undoing what the others changed. Escape hatch, on purpose only: -e kwaba_inventaire_libre=true
+    - name: Inventaire identique à celui de GitHub (kwa-ba-infra)
+      ansible.builtin.shell: |
+        set -eu
+        cd "$(git -C {{ inventory_dir | quote }} rev-parse --show-toplevel)"
+        git fetch --quiet origin main
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "kwa-ba-infra a des modifications non commitées : commit et push d'abord (git status)" >&2; exit 1
+        fi
+        if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+          echo "kwa-ba-infra n'est pas identique à origin/main : git switch main && git pull (ou fusionner la PR d'abord)" >&2; exit 1
+        fi
+      delegate_to: localhost
+      run_once: true
+      become: false
+      check_mode: false
+      changed_when: false
+      when: not (kwaba_inventaire_libre | default(false) | bool)
   roles:
     - systeme
     - proxy
