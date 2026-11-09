@@ -4,7 +4,7 @@ import { politiqueCsp, RAPPORTS_CSP } from "./src/lib/csp";
 
 // HSTS, X-Content-Type-Options and Referrer-Policy are set by nginx for the whole site (deploy/vps/nginx):
 // repeating them here would send them twice.
-// geolocation: the host can place a listing from where they stand (features/carte)
+// geolocation: the host can place a listing from where they stand (features/carte), the agent measures it at the visit
 const securityHeaders = [
   { key: "Reporting-Endpoints", value: `csp="${RAPPORTS_CSP}"` },
   { key: "X-Frame-Options", value: "DENY" },

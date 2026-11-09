@@ -199,6 +199,7 @@ class DecisionView(APIView):
                 visite = services.decider(
                     pk, request.user, decision=str(request.data.get('decision', '')), controles=controles,
                     commentaire=str(request.data.get('commentaire', '')), photos=request.FILES.getlist('photos'),
+                    position={k: request.data[k] for k in ('latitude', 'longitude', 'precision') if request.data.get(k)} or None,
                 )
                 terrain.terminer('logement', pk, request.user, decision=visite.decision,
                                  titre=hebergement['name'], sous_titre=hebergement['type_libelle'], ville=hebergement['city'])
@@ -208,8 +209,41 @@ class DecisionView(APIView):
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser('annonce_verifiee' if visite.decision == 'validee' else 'annonce_refusee', request,
                     utilisateur=request.user, hebergement=str(pk))
+        if visite.decision == 'validee' and visite.latitude is not None:
+            # The agent's position replaces the host's point: traced with the gap, to spot hosts who misplace theirs
+            journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk),
+                        ecart_m=visite.ecart_m, precision_m=visite.precision_m)
         return Response({'decision': visite.decision, 'statut': 'verifiee' if visite.decision == 'validee' else 'refusee'},
                         status=status.HTTP_201_CREATED)
+
+
+class PhotosDecisionView(APIView):
+    """POST {retirer: [url], motif}: the photos added to a verified listing are checked; the ones listed leave it."""
+    permission_classes = [EstVerificateur]
+
+    def post(self, request, pk):
+        annonce = hebergements.fiche(pk)
+        if not annonce:
+            return Response({'detail': 'Annonce introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        retirer = request.data.get('retirer') or []
+        if not isinstance(retirer, list) or not all(isinstance(u, str) for u in retirer):
+            return Response({'retirer': ['Liste de photos attendue.']}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            with transaction.atomic():
+                terrain.verifier_peut_decider('photos', pk, request.user)
+                resultat = services.decider_photos(pk, request.user, retirer=retirer,
+                                                   motif=str(request.data.get('motif', '')))
+                nombre = len(resultat['retirees'])
+                terrain.terminer('photos', pk, request.user, decision='validee', titre=annonce['name'],
+                                 sous_titre=f"{nombre} photo(s) retirée(s)" if nombre else 'Photos gardées',
+                                 ville=annonce['city'])
+        except terrain.MissionErreur as exc:
+            return Response({'detail': str(exc)}, status=exc.code)
+        except services.VerificationErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        journaliser('photos_controlees', request, utilisateur=request.user, hebergement=str(pk),
+                    retirees=len(resultat['retirees']))
+        return Response({'retirees': resultat['retirees'], 'images': resultat['images']})
 
 
 class FichierPieceView(APIView):
@@ -246,4 +280,5 @@ class CompteursView(APIView):
     def get(self, request):
         pieces = services.pieces_a_controler().count()
         visites = len(services.annonces_a_visiter())
-        return Response({'pieces': pieces, 'visites': visites, 'total': pieces + visites})
+        photos = len(services.annonces_photos_a_controler())
+        return Response({'pieces': pieces, 'visites': visites, 'photos': photos, 'total': pieces + visites + photos})

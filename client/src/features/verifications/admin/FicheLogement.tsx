@@ -10,6 +10,8 @@ import { urlExterneSure } from "@/lib/url-sure";
 import { ouvrirPiece } from "./documents";
 import { useTranslations } from "next-intl";
 import { libellePiece } from "@/features/hebergements";
+import PositionSurPlace from "./PositionSurPlace";
+import { champsPosition, type PositionMesuree } from "./position";
 
 export interface Logement {
   id: string;
@@ -58,7 +60,8 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
   const [controles, setControles] = useState<Record<string, boolean>>({});
   const [commentaire, setCommentaire] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
-  const [envoi, setEnvoi] = useState<"validee" | "refusee" | null>(null);
+  const [position, setPosition] = useState<PositionMesuree | null>(null);
+  const [envoi,setEnvoi] = useState<"validee" | "refusee" | null>(null);
 
   const tPieces = useTranslations("pieces");
   const toutCoche = Object.keys(controlesLibelles).every((cle) => controles[cle]);
@@ -81,6 +84,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
     donnees.append("controles", JSON.stringify(controles));
     donnees.append("commentaire", commentaire);
     photos.forEach((photo) => donnees.append("photos", photo));
+    if (position) Object.entries(champsPosition(position)).forEach(([cle, valeur]) => donnees.append(cle, valeur));
     try {
       await deciderVisite(logement.id, donnees);
       onTerminee(decision === "validee" ? "Annonce publiée, l'hôte est prévenu." : "Refus envoyé à l'hôte.");
@@ -155,6 +159,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
           <input type="file" accept="image/*" capture="environment" multiple className="sr-only" disabled={!peutDecider}
             onChange={(e) => setPhotos(Array.from(e.target.files ?? []).slice(0, maxPhotos))} />
         </label>
+        <PositionSurPlace pointHote={logement.position} valeur={position} onChange={setPosition} desactive={!peutDecider || !!envoi} />
         <label className="block">
           <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Commentaire (obligatoire en cas de refus : il est envoyé à l&apos;hôte)</span>
           <textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} rows={3} maxLength={2000} disabled={!peutDecider}

@@ -1603,7 +1603,9 @@
     },
     "typesLogement": "Chambres et types",
     "candidatureRefusee": "Votre candidature n'a pas été retenue",
-    "dontMenage": "dont {montant} de ménage"
+    "dontMenage": "dont {montant} de ménage",
+    "miseAJourVerification": "Annonce mise à jour. Elle repasse en vérification : elle revient en ligne après le passage d'un agent.",
+    "photosAjoutees": "Vos nouvelles photos sont en ligne. Un agent Kwa-Ba les contrôlera."
   },
   "annonce": {
     "types": {

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Home, IdCard, MapPin, UserRound, XCircle } from "lucide-react";
+import { CheckCircle2, ChevronRight, Home, IdCard, Images, MapPin, UserRound, XCircle } from "lucide-react";
 import { urlMission, type MissionResume, type TypeMission } from "../hooks";
 import { cn, formatDate } from "@/lib/utils";
 
-const ICONES: Record<TypeMission, typeof Home> = { logement: Home, piece: IdCard };
+const ICONES: Record<TypeMission, typeof Home> = { logement: Home, piece: IdCard, photos: Images };
 
 /** A mission in a list: opens its page (except in the history, where it is closed). */
 export default function CarteMission({ mission, action, historique }: {

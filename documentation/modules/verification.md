@@ -26,7 +26,7 @@ L'espace hôte montre un seul statut, `statut_annonce`, calculé par l'API et r�
 
 | Statut (`statut_verification`) | Visible des voyageurs | Quand |
 |---|---|---|
-| `en_attente` | non | À la création ; après une modification de la ville, de l'adresse, de la position sur la carte ou des photos ; après une modification d'une annonce refusée |
+| `en_attente` | non | À la création ; après une modification de la ville, de l'adresse, de la position sur la carte ou des photos vues par l'agent (photo retirée ou remplacée) ; après une modification d'une annonce refusée. **Ajouter des photos** à une annonce vérifiée ne la retire pas (voir « Photos ajoutées après la visite ») |
 | `verifiee` | oui (si l'hôte ne l'a pas masquée) | L'agent a validé la visite |
 | `refusee` | non | L'agent a refusé, avec un motif envoyé à l'hôte |
 
@@ -56,10 +56,23 @@ Les annonces existantes au moment de la mise en place ont été marquées `verif
    - les équipements annoncés sont présents.
 
    Il peut ajouter jusqu'à 10 photos (stockage privé) et un commentaire. La pièce vérifiée de l'hôte s'ouvre depuis la fiche (« Voir »), pour le premier point.
-4. **Valider** n'est possible que si tous les points sont cochés et que l'identité de l'hôte est vérifiée. Si la personne rencontrée ne correspond pas à la pièce (case décochée, refus), la pièce repasse en `refusee`. L'annonce est alors publiée et l'hôte reçoit un email ; la fiche affiche « Vérifié par Kwa-Ba ».
+
+   Devant l'entrée, il peut **relever la position** avec le GPS de son téléphone (« Prendre ma position », facultatif). La fiche montre la précision et l'écart avec le point placé par l'hôte, et l'avertit au-delà de 500 m. Une mesure moins précise que ± 150 m est refusée (GPS pas encore calé, à l'intérieur) : il sort à découvert et la reprend.
+4. **Valider** n'est possible que si tous les points sont cochés et que l'identité de l'hôte est vérifiée. Si la personne rencontrée ne correspond pas à la pièce (case décochée, refus), la pièce repasse en `refusee`. L'annonce est alors publiée et l'hôte reçoit un email ; la fiche affiche « Vérifié par Kwa-Ba ». Si l'agent a relevé la position, **elle remplace le point de l'hôte** (l'agent fait foi) ; les voyageurs ne voient toujours qu'une zone décalée de 150 à 400 m ([carte](carte.md)). Le journal d'audit garde l'écart (`position_corrigee`, `ecart_m`), pour repérer les hôtes qui placent mal leur logement.
 5. **Refuser** exige un motif d'au moins 10 caractères, envoyé à l'hôte et affiché dans son espace. L'hôte corrige l'annonce et l'enregistre : elle repart en vérification.
 
-Chaque décision est conservée (`VisiteModel` : agent, contrôles, commentaire, photos) et inscrite au journal d'audit.
+Chaque décision est conservée (`VisiteModel` : agent, contrôles, commentaire, photos, position relevée, précision et écart avec le point de l'hôte) et inscrite au journal d'audit. Un refus garde la mesure sur la visite, sans toucher à l'annonce.
+
+API : `POST /api/v1/verifications/visites/<annonce>/decision/` (multipart) avec `decision`, `controles` (JSON), `commentaire`, `photos`, et facultativement `latitude`, `longitude`, `precision` (mètres).
+
+## Photos ajoutées après la visite
+
+Un hôte dont l'annonce est vérifiée peut **ajouter des photos sans la retirer** (une nouvelle pièce, la salle de sport…) :
+
+- Les photos ajoutées sont en ligne tout de suite et notées à contrôler (`HebergementModel.photos_a_controler`). Les agents reçoivent un email « Photos à contrôler » et une mission **Photos à contrôler** apparaît dans la file commune.
+- L'agent les contrôle **à distance** (`/agent/mission/photos/<annonce>`), en les comparant aux photos vues à la visite. Il retire celles qui ne montrent pas ce logement, affichent des coordonnées ou trompent les voyageurs, avec un motif (10 caractères au moins) envoyé à l'hôte par email ; ou il les garde toutes. `POST /api/v1/verifications/photos/<annonce>/decision/` avec `{retirer: [url…], motif}` (journal : `photos_controlees`).
+- L'hôte peut retirer une photo pas encore contrôlée sans conséquence. **Retirer ou remplacer une photo vue par l'agent**, ou changer la ville, l'adresse ou la position, remet l'annonce en vérification complète.
+- Personne ne contrôle les photos de sa propre annonce.
 
 ## Espace agent et file commune
 

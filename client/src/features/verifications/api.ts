@@ -30,6 +30,11 @@ export async function deciderVisite(logementId: string, decision: FormData) {
   await api.post(`${VERIFICATIONS}/visites/${logementId}/decision/`, decision, MULTIPART);
 }
 
+/** Photos added to a verified listing: the ones in `retirer` leave it, the host is told why. */
+export async function deciderPhotos(hebergementId: string, decision: { retirer: string[]; motif: string }) {
+  await api.post(`${VERIFICATIONS}/photos/${encodeURIComponent(hebergementId)}/decision/`, decision);
+}
+
 export async function deciderPiece(hoteId: string, decision: { decision: string; motif: string }) {
   await api.post(`${VERIFICATIONS}/identites/${hoteId}/decision/`, decision);
 }

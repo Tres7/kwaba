@@ -1603,7 +1603,9 @@
     },
     "typesLogement": "Rooms and types",
     "candidatureRefusee": "Your application was not accepted",
-    "dontMenage": "including {montant} for cleaning"
+    "dontMenage": "including {montant} for cleaning",
+    "miseAJourVerification": "Listing updated. It goes back into verification and comes back online after an agent's visit.",
+    "photosAjoutees": "Your new photos are online. A Kwa-Ba agent will check them."
   },
   "annonce": {
     "types": {

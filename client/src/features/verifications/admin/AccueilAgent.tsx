@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { ArrowRight, CheckCircle2, ClipboardList, Home, IdCard, UserCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardList, Home, IdCard, Images, UserCheck } from "lucide-react";
 import { useTableauAgent, type TypeMission } from "../hooks";
 
-const ICONES: Record<TypeMission, typeof Home> = { logement: Home, piece: IdCard };
+const ICONES: Record<TypeMission, typeof Home> = { logement: Home, piece: IdCard, photos: Images };
 
 /** Home of the agent space: what waits in the shared queue, my ongoing missions, my activity this month. */
 export default function AccueilAgentPage() {

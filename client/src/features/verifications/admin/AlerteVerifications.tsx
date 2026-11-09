@@ -53,7 +53,10 @@ export default function AlerteVerifications({ compteurs }: { compteurs?: Compteu
     if (compteurs.visites > avant.visites) {
       notifier(House, "Nouvelle annonce à visiter", "Un logement attend la visite d'un agent.");
     }
-    if (compteurs.pieces !== avant.pieces || compteurs.visites !== avant.visites) {
+    if ((compteurs.photos ?? 0) > (avant.photos ?? 0)) {
+      notifier(House, "Nouvelles photos à contrôler", "Un hôte a ajouté des photos à une annonce déjà vérifiée.");
+    }
+    if (compteurs.pieces !== avant.pieces || compteurs.visites !== avant.visites || compteurs.photos !== avant.photos) {
       queryClient.invalidateQueries({ queryKey: ["agent"] });
     }
   }, [compteurs, queryClient]);
