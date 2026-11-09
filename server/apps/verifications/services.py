@@ -22,6 +22,7 @@ from apps.notifications.api import send_mail
 from apps.securite.audit import journaliser
 from apps.users import api as users
 
+from . import positions
 from .fichiers import image_normalisee
 from .models import PhotoVisiteModel, PieceIdentiteModel, VisiteModel
 
@@ -231,6 +232,8 @@ def _position(position: dict | None) -> tuple | None:
     """(latitude, longitude, precision) of the position measured on site, checked; None if none was measured."""
     if not position:
         return None
+    if 'precision' in position and position['precision'] in (None, ''):
+        raise VerificationErreur("Précision du GPS inconnue : reprenez la position.")
     try:
         latitude = Decimal(str(position['latitude'])).quantize(Decimal('0.000001'))
         longitude = Decimal(str(position['longitude'])).quantize(Decimal('0.000001'))
@@ -322,3 +325,36 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
         _envoyer('annonce_refusee', f"Votre annonce n'est pas encore publiée : {annonce['name']}", [hote.email],
                  {**contexte, 'motif': commentaire})
     return visite
+
+
+# Where a corrected position comes from (audit log)
+SOURCES_POSITION = ('gps', 'texte')
+
+
+def lire_position(texte: str) -> tuple:
+    """(latitude, longitude) of a pasted Google Maps link, WhatsApp location or coordinates."""
+    try:
+        return positions.lire(texte)
+    except positions.PositionIllisible as exc:
+        raise VerificationErreur(str(exc))
+
+
+@transaction.atomic
+def corriger_position(hebergement_id, agent, *, latitude, longitude, precision=None, source: str) -> dict:
+    """An agent (or an admin) corrects the position of a verified listing: it stays online, the point is replaced.
+
+    `source`: 'gps' (measured on site, `precision` required) or 'texte' (pasted link or coordinates)."""
+    if source not in SOURCES_POSITION:
+        raise VerificationErreur("Origine de la position inconnue.")
+    annonce = hebergements.verrouiller_fiche(hebergement_id)
+    if not annonce or annonce['statut_verification'] != 'verifiee':
+        raise VerificationErreur("Seule une annonce vérifiée se corrige ici : les autres reçoivent leur position à la visite.")
+    if annonce['host_id'] == agent.pk:
+        raise VerificationErreur("Vous ne pouvez pas corriger la position de votre propre annonce.")
+    mesure = _position({'latitude': latitude, 'longitude': longitude,
+                        **({'precision': precision} if source == 'gps' else {})})
+    avant = hebergements.enregistrer_position(hebergement_id, mesure[0], mesure[1])
+    return {
+        'latitude': mesure[0], 'longitude': mesure[1], 'precision_m': mesure[2] if source == 'gps' else None,
+        'ecart_m': _distance_m(avant, mesure[:2]) if avant else None,
+    }

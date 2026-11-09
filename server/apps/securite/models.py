@@ -38,7 +38,7 @@ class JournalAuditModel(models.Model):
         ('annonce_verifiee', 'Annonce validée après visite'),
         ('annonce_refusee', 'Annonce refusée après visite'),
         ('photos_controlees', 'Photos ajoutées contrôlées par un agent'),
-        ('position_corrigee', "Position relevée sur place par l'agent"),
+        ('position_corrigee', 'Position du logement corrigée par un agent'),
         ('compte_reactive', 'Compte réactivé'),
         ('annonce_modifiee', 'Annonce modifiée par un administrateur'),
         ('annonce_supprimee', 'Annonce supprimée par un administrateur'),

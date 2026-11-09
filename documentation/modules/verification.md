@@ -65,6 +65,18 @@ Chaque décision est conservée (`VisiteModel` : agent, contrôles, commentaire,
 
 API : `POST /api/v1/verifications/visites/<annonce>/decision/` (multipart) avec `decision`, `controles` (JSON), `commentaire`, `photos`, et facultativement `latitude`, `longitude`, `precision` (mètres).
 
+## Position d'une annonce déjà vérifiée
+
+Page **Positions** de l'espace agent (`/agent/positions`, agents et administrateurs) : la liste des annonces vérifiées qui ont encore le point placé par l'hôte (case « Aussi les positions déjà relevées » pour les autres), avec une recherche par nom, ville, quartier ou hôte.
+
+- **Corriger** : l'agent colle un lien Google Maps (court `maps.app.goo.gl` ou long), une position WhatsApp ouverte dans Google Maps, ou des coordonnées (`6.131900, 1.222800`, `6,1319 ; 1,2228`, `6°07'54.8"N 1°13'22.1"E`). Sur place, il peut aussi prendre la position GPS de son téléphone (± 150 m au plus).
+- La fiche montre la nouvelle position, l'écart avec le point actuel (avertissement au-delà de 500 m) et un lien **Vérifier sur Google Maps** avant d'enregistrer.
+- L'annonce **reste en ligne**. `HebergementModel.position_relevee_le` note la date ; elle repasse à vide si l'hôte déplace le point (ce qui remet aussi l'annonce en vérification). Les voyageurs ne voient toujours qu'une zone décalée.
+- Journal d'audit : `position_corrigee` avec `source` (`gps`, `texte` ou `visite`), `ecart_m` et `precision_m`. Personne ne corrige la position de sa propre annonce ; une annonce pas encore vérifiée reçoit sa position à la visite.
+- Lecture des liens (`apps/verifications/positions.py`) : seuls les liens courts `maps.app.goo.gl` / `goo.gl` sont demandés au réseau, pour lire leur redirection ; l'adresse Google Maps obtenue est lue sans être ouverte, et aucun autre site n'est jamais appelé. Un lien vers une adresse ou un nom de lieu ne contient pas de coordonnées : l'agent copie celles affichées par Google Maps. Les plus codes ne sont pas lus.
+
+API : `GET /api/v1/verifications/positions/?q=&toutes=1`, `POST …/positions/lire/` `{texte}` (limité à 120 par heure), `POST …/positions/<annonce>/` `{latitude, longitude, precision, source: gps | texte}`.
+
 ## Photos ajoutées après la visite
 
 Un hôte dont l'annonce est vérifiée peut **ajouter des photos sans la retirer** (une nouvelle pièce, la salle de sport…) :

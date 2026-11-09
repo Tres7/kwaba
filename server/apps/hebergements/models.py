@@ -88,6 +88,9 @@ class HebergementModel(models.Model):
     # Photos added by the host after the agent's visit, without removing the photos the agent saw: shown at once, then
     # checked by an agent from a distance (mission "photos"), who may remove some. Null: nothing to check.
     photos_a_controler = models.JSONField(null=True, blank=True)
+    # Position measured or corrected by a Kwa-Ba agent (visit, or correction from the agent space); None while it is
+    # the host's point, and again as soon as the host moves it
+    position_relevee_le = models.DateTimeField(null=True, blank=True)
     max_guests = models.PositiveIntegerField(default=4)
     # Details shown on the page; required for a new listing, empty for the oldest ones. surface_m2 is no longer
     # used (not a local practice): column kept until a later release drops it

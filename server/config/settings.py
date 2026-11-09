@@ -203,6 +203,8 @@ REST_FRAMEWORK = {
         'reclamation': '5/hour',
         'reservation_creation': '20/hour',
         'paiement_tiers': '30/hour',
+        # Reading a pasted position can follow a Google Maps short link (request to Google)
+        'verification_position': '120/hour',
     },
 }
 

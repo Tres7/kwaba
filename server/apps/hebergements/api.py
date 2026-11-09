@@ -242,6 +242,23 @@ def enregistrer_position(hebergement_id: uuid.UUID, latitude, longitude) -> tupl
     reference). The previous point, None if there was none. To call in a transaction."""
     h = HebergementModel.objects.select_for_update().get(pk=hebergement_id)
     avant = (h.latitude, h.longitude) if h.latitude is not None and h.longitude is not None else None
-    h.latitude, h.longitude = latitude, longitude
-    h.save(update_fields=['latitude', 'longitude', 'updated_at'])
+    h.latitude, h.longitude, h.position_relevee_le = latitude, longitude, timezone.now()
+    h.save(update_fields=['latitude', 'longitude', 'position_relevee_le', 'updated_at'])
     return avant
+
+
+def annonces_pour_position(texte: str = '', a_relever: bool = True, hote_ids: Iterable[uuid.UUID] = (),
+                           limite: int = 50) -> list[dict]:
+    """Verified listings whose position an agent can correct: by default those still at the host's point."""
+    qs = HebergementModel.objects.filter(statut_verification='verifiee')
+    if a_relever:
+        qs = qs.filter(position_relevee_le__isnull=True)
+    if texte:
+        qs = qs.filter(Q(name__icontains=texte) | Q(city__icontains=texte) | Q(location__icontains=texte)
+                       | Q(host_id__in=list(hote_ids)))
+    return [{**_fiche(h), 'latitude': h.latitude, 'longitude': h.longitude, 'position_relevee_le': h.position_relevee_le}
+            for h in qs.order_by('city', 'name')[:limite]]
+
+
+def nb_positions_a_relever() -> int:
+    return HebergementModel.objects.filter(statut_verification='verifiee', position_relevee_le__isnull=True).count()

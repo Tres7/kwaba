@@ -211,7 +211,7 @@ class DecisionView(APIView):
                     utilisateur=request.user, hebergement=str(pk))
         if visite.decision == 'validee' and visite.latitude is not None:
             # The agent's position replaces the host's point: traced with the gap, to spot hosts who misplace theirs
-            journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk),
+            journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk), source='visite',
                         ecart_m=visite.ecart_m, precision_m=visite.precision_m)
         return Response({'decision': visite.decision, 'statut': 'verifiee' if visite.decision == 'validee' else 'refusee'},
                         status=status.HTTP_201_CREATED)
@@ -282,3 +282,62 @@ class CompteursView(APIView):
         visites = len(services.annonces_a_visiter())
         photos = len(services.annonces_photos_a_controler())
         return Response({'pieces': pieces, 'visites': visites, 'photos': photos, 'total': pieces + visites + photos})
+
+
+class PositionsView(APIView):
+    """GET ?q=&toutes=1: verified listings whose position an agent can correct (by default, those still at the host's
+    point), with the number left to measure."""
+    permission_classes = [EstVerificateur]
+
+    def get(self, request):
+        q = request.query_params.get('q', '').strip()[:100]
+        toutes = request.query_params.get('toutes') in ('1', 'true')
+        annonces = hebergements.annonces_pour_position(q, a_relever=not toutes,
+                                                       hote_ids=users.ids_par_recherche(q) if q else ())
+        hotes = users.comptes({a['host_id'] for a in annonces})
+        return Response({
+            'a_relever': hebergements.nb_positions_a_relever(),
+            'results': [{
+                'id': str(a['id']), 'name': a['name'], 'type_libelle': a['type_libelle'], 'city': a['city'],
+                'location': a['location'], 'point_repere': a['point_repere'],
+                'position': {'lat': float(a['latitude']), 'lng': float(a['longitude'])} if a['latitude'] is not None else None,
+                'position_relevee_le': a['position_relevee_le'],
+                'hote': {'nom': f"{h.first_name} {h.last_name}".strip(), 'telephone': h.phone}
+                if (h := hotes.get(a['host_id'])) else None,
+            } for a in annonces],
+        })
+
+
+class LirePositionView(APIView):
+    """POST {texte}: latitude and longitude of a pasted Google Maps link, WhatsApp location or coordinates."""
+    permission_classes = [EstVerificateur]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'verification_position'
+
+    def post(self, request):
+        try:
+            latitude, longitude = services.lire_position(str(request.data.get('texte', '')))
+        except services.VerificationErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'latitude': float(latitude), 'longitude': float(longitude)})
+
+
+class CorrectionPositionView(APIView):
+    """POST {latitude, longitude, precision?, source: gps | texte}: the position of a verified listing is replaced; it
+    stays online. Traced with the gap from the previous point."""
+    permission_classes = [EstVerificateur]
+
+    def post(self, request, pk):
+        if not hebergements.fiche(pk):
+            return Response({'detail': 'Annonce introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        source = str(request.data.get('source', ''))
+        try:
+            resultat = services.corriger_position(
+                pk, request.user, latitude=request.data.get('latitude'), longitude=request.data.get('longitude'),
+                precision=request.data.get('precision'), source=source,
+            )
+        except services.VerificationErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk), source=source,
+                    ecart_m=resultat['ecart_m'], precision_m=resultat['precision_m'])
+        return Response({**resultat, 'latitude': float(resultat['latitude']), 'longitude': float(resultat['longitude'])})

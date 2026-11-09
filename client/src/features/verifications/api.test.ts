@@ -41,6 +41,19 @@ describe("verifications", () => {
     expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/photos/h1/decision/", { retirer: ["https://x/a.jpg"], motif: "Autre logement" });
   });
 
+  it("corrige la position d'une annonce vérifiée", async () => {
+    await verifications.listerPositions({ q: "Bè", toutes: true });
+    expect(api.get).toHaveBeenLastCalledWith("/v1/verifications/positions/", { params: { q: "Bè", toutes: "1" } });
+    await verifications.listerPositions({ q: "" });
+    expect(api.get).toHaveBeenLastCalledWith("/v1/verifications/positions/", { params: {} });
+    vi.mocked(api.post).mockResolvedValue({ data: { latitude: 6.1319, longitude: 1.2228 } });
+    expect(await verifications.lirePosition("6.1319, 1.2228")).toEqual({ latitude: 6.1319, longitude: 1.2228 });
+    expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/positions/lire/", { texte: "6.1319, 1.2228" });
+    const corps = { latitude: 6.1319, longitude: 1.2228, precision: null, source: "texte" as const };
+    await verifications.corrigerPosition("h1", corps);
+    expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/positions/h1/", corps);
+  });
+
   it("lit la pièce d'un hôte en binaire, jamais par une adresse publique", async () => {
     await verifications.lireFichierPiece("h1");
     expect(api.get).toHaveBeenCalledWith("/v1/verifications/identite/h1/fichier/", { responseType: "blob" });
