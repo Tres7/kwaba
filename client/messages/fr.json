@@ -1778,7 +1778,7 @@
     "places": "{nombre, plural, one {# place} other {# places}}",
     "bagages": "{nombre, plural, one {# valise} other {# valises}}",
     "clim": "Climatisation",
-    "parJour": "/jour",
+    "parJour": "/ jour",
     "nonProposee": "Non proposée",
     "choisir": "Choisir",
     "ouSimilaire": "ou similaire",
