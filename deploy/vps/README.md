@@ -59,8 +59,8 @@ Le workflow :
 1. vérifie le manifest (nom exact, images par digest) et prend l'image client de l'environnement (`client` ou `clientPreprod`) ;
 2. se connecte en SSH (empreinte du serveur imposée, jamais acceptée à la volée) ;
 3. deux modes, selon la variable `DEPLOY_PULL` de l'environnement :
-   - **le serveur tire** (`true`, la préprod) : la clé ne peut lancer que la porte de déploiement du serveur (`/usr/local/bin/<nom>-deploy`, installée par Ansible, propriété de root), avec pour seul argument le nom du manifest. Le serveur récupère lui-même `main` depuis GitHub, vérifie que le manifest y est, lit les images dedans, met à jour la configuration (`deploy/vps`) et lance `scripts/deploy.sh`. Une clé volée ne peut donc que redéployer un manifest de `main`, ni shell, ni copie de fichiers, ni tunnel ;
-   - **le workflow pousse** (la prod pour l'instant) : copie `deploy/vps/` de `main` dans `/opt/kwaba` (`rsync --delete`, sans jamais toucher à `env/`, `backups/`, `logs/`, `.deploy.env*`, `deployments.log`), puis lance `scripts/deploy.sh` ;
+   - **le serveur tire** (`true`, la préprod et la prod) : la clé ne peut lancer que la porte de déploiement du serveur (`/usr/local/bin/<nom>-deploy`, installée par Ansible, propriété de root), avec pour seul argument le nom du manifest. Le serveur récupère lui-même `main` depuis GitHub, vérifie que le manifest y est, lit les images dedans, met à jour la configuration (`deploy/vps`) et lance `scripts/deploy.sh`. Une clé volée ne peut donc que redéployer un manifest de `main`, ni shell, ni copie de fichiers, ni tunnel ;
+   - **le workflow pousse** (`DEPLOY_PULL` vide, mode d'origine, gardé pour un serveur sans porte de déploiement) : copie `deploy/vps/` de `main` dans `/opt/kwaba` (`rsync --delete`, sans jamais toucher à `env/`, `backups/`, `logs/`, `.deploy.env*`, `deployments.log`), puis lance `scripts/deploy.sh` ;
 4. vérifie `/api/health/` et `/` depuis Internet (en préprod, `/` doit répondre 401 : le mot de passe est bien demandé).
 
 Environnements GitHub (*Settings → Environments*), branche `main` seulement :
@@ -72,7 +72,7 @@ Environnements GitHub (*Settings → Environments*), branche `main` seulement :
 | `DEPLOY_PORT` | (22) | port SSH du serveur de préprod |
 | `DEPLOY_USER` | (`deploy`) | utilisateur de déploiement de la préprod (`kwaba_utilisateur` de l'inventaire) |
 | `DEPLOY_PATH` | (`/opt/kwaba`) | inutile (le serveur tire) |
-| `DEPLOY_PULL` | (vide) | `true` |
+| `DEPLOY_PULL` | `true` | `true` |
 | `DEPLOY_SITE_URL` | (variable du dépôt `PUBLIC_SITE_URL`) | `https://preprod.kwa-ba.com` |
 
 Entre parenthèses : la valeur par défaut, rien à créer. Les valeurs réelles et les procédures d'exploitation sont dans le dépôt privé `kwa-ba/kwa-ba-infra` (`docs/`).
