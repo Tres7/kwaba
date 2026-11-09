@@ -17,6 +17,10 @@ describe("codesPieces", () => {
     expect(codes.filter((c) => c.startsWith("salle_de_bain"))).toEqual(["salle_de_bain_1"]);
   });
 
+  it("offers a gym to a house too", () => {
+    expect(codesPieces(4, 3)).toContain("salle_de_sport");
+  });
+
   it("gives a hotel its spaces rather than numbered bedrooms", () => {
     const codes = codesPieces(120, 120, true);
     expect(codes).toContain("reception");

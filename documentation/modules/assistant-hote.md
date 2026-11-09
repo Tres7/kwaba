@@ -32,7 +32,7 @@ La liste des écrans, leurs visuels et la condition pour continuer sont dans `as
 
 | Condition | Refus si |
 |---|---|
-| `photos` | moins de 5 photos |
+| `photos` | moins de 5 photos (20 au plus par annonce) |
 | `photos_du_compte` | une photo n'a pas été envoyée par cet hôte (image d'un autre hôte, image externe) |
 | `attestation` | l'hôte n'a pas certifié ses informations ; la date est conservée (`attestation_le`) |
 | `telephone` | pas de numéro |

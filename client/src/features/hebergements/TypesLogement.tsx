@@ -9,7 +9,7 @@ import { BedDouble, Eye, EyeOff, Pencil, Plus, Trash2, Users } from "lucide-reac
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import PhotoUploader from "./PhotoUploader";
+import PhotoUploader, { MAX_PHOTOS_TYPE } from "./PhotoUploader";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import type { TypeLogement } from "@/types/api/models";
 import { useTranslations } from "next-intl";
@@ -171,7 +171,7 @@ function FormulaireType({ hebergementId, type, onFin, onAnnuler }: {
       <div>
         <span className="text-sm font-medium text-dark">{t("photos")}</span>
         <p className="text-xs text-gray-500 mb-2">{t("photosAide")}</p>
-        <PhotoUploader value={b.photos} onChange={(photos) => setB((x) => ({ ...x, photos }))} onBusyChange={setPhotosOccupees} />
+        <PhotoUploader value={b.photos} onChange={(photos) => setB((x) => ({ ...x, photos }))} onBusyChange={setPhotosOccupees} max={MAX_PHOTOS_TYPE} />
       </div>
       <div className="flex gap-2">
         <button type="button" onClick={onAnnuler} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium">{t("annuler")}</button>

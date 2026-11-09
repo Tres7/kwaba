@@ -1495,7 +1495,8 @@
     "retirer": "Remove photo",
     "reessayer": "Try again",
     "quellePiece": "Which room?",
-    "pieceDeLaPhoto": "Room of photo {numero}"
+    "pieceDeLaPhoto": "Room of photo {numero}",
+    "maximum": "{max} photos at most."
   },
   "espaceHote": {
     "erreurConversation": "Could not open the conversation.",
