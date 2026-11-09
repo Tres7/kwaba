@@ -1,15 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { AlertTriangle, LocateFixed, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { distanceMetres, ECART_A_VERIFIER_M, formatDistance, PRECISION_MAX_M, type PositionMesuree } from "./position";
-
-const ERREURS: Record<number, string> = {
-  1: "Localisation refusée : autorisez-la pour Kwa-Ba dans les réglages du navigateur, puis réessayez.",
-  2: "Position introuvable : activez la localisation du téléphone et sortez à découvert.",
-  3: "Le GPS met trop de temps : sortez à découvert et réessayez.",
-};
+import { distanceMetres, ECART_A_VERIFIER_M, formatDistance, type PositionMesuree } from "./position";
+import { useGps } from "./useGps";
 
 /** "Take my position" in front of the listing: the phone's GPS replaces the host's point once the visit is validated. */
 export default function PositionSurPlace({ pointHote, valeur, onChange, desactive }: {
@@ -18,33 +12,7 @@ export default function PositionSurPlace({ pointHote, valeur, onChange, desactiv
   onChange: (position: PositionMesuree | null) => void;
   desactive: boolean;
 }) {
-  const [recherche, setRecherche] = useState(false);
-  const [erreur, setErreur] = useState("");
-
-  const relever = () => {
-    if (!("geolocation" in navigator)) {
-      setErreur("Ce navigateur ne donne pas la position : ouvrez l'espace agent dans Chrome ou Safari.");
-      return;
-    }
-    setRecherche(true);
-    setErreur("");
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setRecherche(false);
-        if (coords.accuracy > PRECISION_MAX_M) {
-          setErreur(`Position trop imprécise (± ${Math.round(coords.accuracy)} m) : sortez à découvert et reprenez-la.`);
-          return;
-        }
-        onChange({ latitude: coords.latitude, longitude: coords.longitude, precision: coords.accuracy });
-      },
-      (err) => {
-        setRecherche(false);
-        setErreur(ERREURS[err.code] ?? "Position indisponible : réessayez.");
-      },
-      { enableHighAccuracy: true, timeout: 20_000, maximumAge: 0 },
-    );
-  };
-
+  const { relever, recherche, erreur } = useGps(onChange);
   const ecart = valeur && pointHote ? distanceMetres(pointHote, { lat: valeur.latitude, lng: valeur.longitude }) : null;
 
   return (

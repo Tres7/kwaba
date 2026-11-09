@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { CompteursVerification, MissionResume, TableauAgent } from "./hooks";
+import type { AnnoncePosition, CompteursVerification, MissionResume, TableauAgent } from "./hooks";
 
 const VERIFICATIONS = "/v1/verifications";
 const MISSIONS = "/v1/agent/missions";
@@ -50,4 +50,22 @@ export async function lireMaPiece<T>() {
 
 export async function envoyerMaPiece(piece: FormData) {
   await api.post(`${VERIFICATIONS}/identite/`, piece, MULTIPART);
+}
+
+/** Verified listings whose position an agent can correct (by default, those still at the host's point). */
+export async function listerPositions(params: { q?: string; toutes?: boolean }) {
+  const filtres = { ...(params.q ? { q: params.q } : {}), ...(params.toutes ? { toutes: "1" } : {}) };
+  return (await api.get<{ a_relever: number; results: AnnoncePosition[] }>(`${VERIFICATIONS}/positions/`, { params: filtres })).data;
+}
+
+/** Latitude and longitude of a pasted Google Maps link, WhatsApp location or coordinates. */
+export async function lirePosition(texte: string) {
+  return (await api.post<{ latitude: number; longitude: number }>(`${VERIFICATIONS}/positions/lire/`, { texte })).data;
+}
+
+/** Replaces the position of a verified listing (it stays online). */
+export async function corrigerPosition(hebergementId: string, corps: {
+  latitude: number; longitude: number; precision?: number | null; source: "gps" | "texte";
+}) {
+  return (await api.post<{ ecart_m: number | null }>(`${VERIFICATIONS}/positions/${encodeURIComponent(hebergementId)}/`, corps)).data;
 }

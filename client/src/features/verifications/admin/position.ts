@@ -35,3 +35,8 @@ export function champsPosition(position: PositionMesuree): Record<string, string
     precision: String(Math.round(position.precision)),
   };
 }
+
+/** Google Maps on this exact point, to check it before saving it. */
+export function lienCarte(point: { lat: number; lng: number }): string {
+  return `https://www.google.com/maps/search/?api=1&query=${point.lat.toFixed(6)},${point.lng.toFixed(6)}`;
+}

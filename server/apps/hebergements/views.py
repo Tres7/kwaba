@@ -335,6 +335,10 @@ class HebergementDetailView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         avant = {champ: getattr(obj, champ) for champ in (*HebergementModel.CHAMPS_VERIFIES, 'photos_a_controler')}
         serializer.save()
+        if obj.position_relevee_le and (avant['latitude'], avant['longitude']) != (obj.latitude, obj.longitude):
+            # The host moved the point an agent had measured: it is the host's point again (and visited again)
+            obj.position_relevee_le = None
+            obj.save(update_fields=['position_relevee_le'])
         _remettre_en_verification(obj, avant)
         return Response(HebergementSerializer(obj, context=_context(request, proprietaire=True)).data)
 

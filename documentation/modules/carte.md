@@ -9,6 +9,7 @@ Code : `client/src/features/carte/` (carte), `server/apps/hebergements/positions
 - Une annonce créée avant la carte reste modifiable sans position. Elle n'apparaît pas sur la carte, et la recherche indique combien de logements manquent.
 - Déplacer le repère d'une annonce vérifiée la remet en vérification. Une première position sur une annonce ancienne ne le fait pas : rien de ce que l'agent a vu n'a bougé.
 - À la visite, l'agent peut relever la position avec le GPS de son téléphone : une fois l'annonce validée, **elle remplace celle de l'hôte**, sans nouvelle vérification ([vérification](verification.md#visite-de-lagent)). La position publique se recalcule à partir de ce nouveau point.
+- Pour une annonce déjà vérifiée, un agent ou un administrateur corrige la position depuis la page **Positions** de l'espace agent (lien Google Maps, position WhatsApp, coordonnées ou GPS sur place), sans la retirer du site ([vérification](verification.md#position-dune-annonce-déjà-vérifiée)).
 
 ## Position exacte et position publique
 
