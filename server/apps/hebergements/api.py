@@ -120,8 +120,10 @@ def verrouiller_fiche(hebergement_id: uuid.UUID) -> dict | None:
 def enregistrer_verification(hebergement_id: uuid.UUID, verifiee: bool, motif: str = '') -> None:
     maintenant = timezone.now()
     if verifiee:
+        # The visit has seen every photo: nothing is left to check from a distance
         HebergementModel.objects.filter(pk=hebergement_id).update(
-            statut_verification='verifiee', verifiee_le=maintenant, motif_refus='', updated_at=maintenant)
+            statut_verification='verifiee', verifiee_le=maintenant, motif_refus='', photos_a_controler=None,
+            updated_at=maintenant)
     else:
         HebergementModel.objects.filter(pk=hebergement_id).update(
             statut_verification='refusee', motif_refus=motif, updated_at=maintenant)
@@ -208,3 +210,38 @@ def statistiques() -> dict:
         # Waiting for an agent's visit (refused listings wait for the host, not for an agent)
         en_attente=Count('id', filter=Q(statut_verification='en_attente')),
     )
+
+
+# --- Photos added after the visit, checked by an agent from a distance ------------------------------------------
+
+def photos_ajoutees() -> list[dict]:
+    """Verified listings with photos added since the visit, oldest change first."""
+    qs = (HebergementModel.objects.filter(statut_verification='verifiee', photos_a_controler__isnull=False)
+          .order_by('updated_at'))
+    return [{**_fiche(h), 'photos_a_controler': h.photos_a_controler, 'mis_a_jour_le': h.updated_at} for h in qs]
+
+
+def controler_photos(hebergement_id: uuid.UUID, retirer: list[str]) -> dict | None:
+    """The agent has checked the added photos: `retirer` leave the listing, the others stay. To call in a transaction.
+    The listing as it is now, None if it has no photo to check anymore."""
+    h = HebergementModel.objects.select_for_update().filter(pk=hebergement_id, photos_a_controler__isnull=False).first()
+    if not h:
+        return None
+    retirer = [u for u in retirer if u in h.photos_a_controler]
+    h.images = [u for u in h.images or [] if u not in retirer]
+    h.legendes_photos = {u: piece for u, piece in (h.legendes_photos or {}).items() if u not in retirer} or None
+    if h.image_url in retirer:
+        h.image_url = h.images[0] if h.images else ''
+    h.photos_a_controler = None
+    h.save(update_fields=['images', 'legendes_photos', 'image_url', 'photos_a_controler', 'updated_at'])
+    return {**_fiche(h), 'retirees': retirer}
+
+
+def enregistrer_position(hebergement_id: uuid.UUID, latitude, longitude) -> tuple | None:
+    """Position measured on site by the field agent: it replaces the point placed by the host (the agent is the
+    reference). The previous point, None if there was none. To call in a transaction."""
+    h = HebergementModel.objects.select_for_update().get(pk=hebergement_id)
+    avant = (h.latitude, h.longitude) if h.latitude is not None and h.longitude is not None else None
+    h.latitude, h.longitude = latitude, longitude
+    h.save(update_fields=['latitude', 'longitude', 'updated_at'])
+    return avant

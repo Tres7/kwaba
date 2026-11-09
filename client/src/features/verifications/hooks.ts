@@ -5,11 +5,12 @@ import type { CompteursVerification } from "./compteurs";
 export type { CompteursVerification };
 
 /** What field agents check (see server/apps/terrain/types.py). */
-export type TypeMission = "logement" | "piece";
+export type TypeMission = "logement" | "piece" | "photos";
 
 export const TYPES_MISSION: { code: TypeMission; libelle: string; court: string }[] = [
   { code: "logement", libelle: "Logements à visiter", court: "Logements" },
   { code: "piece", libelle: "Pièces d'identité", court: "Pièces d'identité" },
+  { code: "photos", libelle: "Photos à contrôler", court: "Photos" },
 ];
 
 export interface MissionEtat {

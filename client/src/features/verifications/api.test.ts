@@ -36,6 +36,11 @@ describe("verifications", () => {
     expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/identites/h1/decision/", { decision: "verifiee", motif: "" });
   });
 
+  it("contrôle les photos ajoutées à une annonce vérifiée", async () => {
+    await verifications.deciderPhotos("h1", { retirer: ["https://x/a.jpg"], motif: "Autre logement" });
+    expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/photos/h1/decision/", { retirer: ["https://x/a.jpg"], motif: "Autre logement" });
+  });
+
   it("lit la pièce d'un hôte en binaire, jamais par une adresse publique", async () => {
     await verifications.lireFichierPiece("h1");
     expect(api.get).toHaveBeenCalledWith("/v1/verifications/identite/h1/fichier/", { responseType: "blob" });

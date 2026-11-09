@@ -7,6 +7,8 @@
 No travel is therefore asked for a host whose identity has not been checked.
 """
 import logging
+import math
+from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 from django.db import transaction
@@ -127,6 +129,48 @@ def _visite_a_planifier(annonce: dict, hote, modification: bool = False) -> None
              })
 
 
+def photos_a_controler(hebergement_id, nombre: int) -> None:
+    """Tells the agents that a host added photos to a verified listing: online at once, to check from a distance."""
+    annonce = hebergements.fiche(hebergement_id)
+    if not annonce:
+        return
+    hote = users.compte(annonce['host_id'])
+    _envoyer('photos_a_controler', f"[Kwa-Ba] Photos à contrôler : {annonce['name']} ({annonce['city']})",
+             _verificateurs(), {
+                 'hebergement': annonce['name'], 'ville': annonce['city'], 'nombre': nombre,
+                 'hote': f"{hote.first_name} {hote.last_name}".strip() if hote else '',
+                 'url': f"{settings.FRONTEND_URL}/agent/mission/photos/{hebergement_id}",
+             })
+
+
+def annonces_photos_a_controler() -> list[dict]:
+    """Verified listings with photos added since the visit (agent space and counters)."""
+    return hebergements.photos_ajoutees()
+
+
+def decider_photos(hebergement_id, agent, *, retirer: list[str], motif: str = '') -> dict:
+    """The agent has checked the added photos from a distance: the ones in `retirer` leave the listing, and the host
+    is told why. Nobody checks the photos of their own listing."""
+    annonce = hebergements.fiche(hebergement_id)
+    if not annonce:
+        raise VerificationErreur("Annonce introuvable.")
+    if annonce['host_id'] == agent.pk:
+        raise VerificationErreur("Vous ne pouvez pas contrôler les photos de votre propre annonce : un autre agent doit le faire.")
+    motif = motif.strip()
+    if retirer and not motif:
+        raise VerificationErreur("Indiquez à l'hôte pourquoi ces photos sont retirées.")
+    resultat = hebergements.controler_photos(hebergement_id, retirer)
+    if resultat is None:
+        raise VerificationErreur("Cette annonce n'a plus de photos à contrôler.")
+    if resultat['retirees']:
+        hote = users.compte(annonce['host_id'])
+        _envoyer('photos_retirees', f"Photos retirées de votre annonce « {annonce['name']} »", [hote.email], {
+            'prenom': hote.first_name, 'hebergement': annonce['name'], 'nombre': len(resultat['retirees']),
+            'motif': motif, 'url': f"{settings.FRONTEND_URL}/hote/espace",
+        })
+    return resultat
+
+
 def contrat_hote_signe(hote) -> None:
     """The host has just signed their agreement: their pending listings are offered to the agents."""
     for annonce in hebergements.annonces_en_attente([hote.pk]):
@@ -179,9 +223,41 @@ def decider_piece(hote, verificateur, *, decision: str, motif: str = '') -> Piec
     return piece
 
 
+# A phone's GPS outdoors is within 5 to 20 m: beyond this, the position would mislead the travellers
+PRECISION_MAX_M = 150
+
+
+def _position(position: dict | None) -> tuple | None:
+    """(latitude, longitude, precision) of the position measured on site, checked; None if none was measured."""
+    if not position:
+        return None
+    try:
+        latitude = Decimal(str(position['latitude'])).quantize(Decimal('0.000001'))
+        longitude = Decimal(str(position['longitude'])).quantize(Decimal('0.000001'))
+        precision = int(round(float(position.get('precision') or 0)))
+    except (KeyError, InvalidOperation, ValueError, TypeError):
+        raise VerificationErreur("Position illisible : reprenez-la.")
+    if not (-90 <= latitude <= 90 and -180 <= longitude <= 180) or precision < 0:
+        raise VerificationErreur("Position illisible : reprenez-la.")
+    if precision > PRECISION_MAX_M:
+        raise VerificationErreur(f"Position trop imprécise (± {precision} m) : sortez à découvert et reprenez-la.")
+    return latitude, longitude, precision
+
+
+def _distance_m(a: tuple, b: tuple) -> int:
+    """Distance in metres between two (latitude, longitude) points (haversine)."""
+    lat1, lng1, lat2, lng2 = (math.radians(float(x)) for x in (*a, *b))
+    h = math.sin((lat2 - lat1) / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin((lng2 - lng1) / 2) ** 2
+    return int(round(2 * 6_371_000 * math.asin(math.sqrt(h))))
+
+
 @transaction.atomic
-def decider(hebergement_id, agent, *, decision: str, controles: dict, commentaire: str, photos: list) -> VisiteModel:
-    """Saves the visit and publishes (or refuses) the listing. Validating requires every check to be ticked."""
+def decider(hebergement_id, agent, *, decision: str, controles: dict, commentaire: str, photos: list,
+            position: dict | None = None) -> VisiteModel:
+    """Saves the visit and publishes (or refuses) the listing. Validating requires every check to be ticked.
+
+    `position` ({latitude, longitude, precision}): measured on site with the agent's phone; once the listing is
+    validated, it replaces the point placed by the host."""
     annonce = hebergements.verrouiller_fiche(hebergement_id)
     if not annonce or annonce['statut_verification'] != 'en_attente':
         raise VerificationErreur("Cette annonce n'attend pas de visite.")
@@ -209,9 +285,16 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
     else:
         raise VerificationErreur("Décision inconnue.")
 
+    mesure = _position(position)
     contenus = [image_normalisee(photo) for photo in photos]  # before any write: an invalid photo stops everything
     visite = VisiteModel.objects.create(hebergement_id=hebergement_id, agent_id=agent.pk, decision=decision,
                                         controles=controles, commentaire=commentaire)
+    if mesure:
+        visite.latitude, visite.longitude, visite.precision_m = mesure
+        if decision == 'validee':
+            avant = hebergements.enregistrer_position(hebergement_id, mesure[0], mesure[1])
+            visite.ecart_m = _distance_m(avant, mesure[:2]) if avant else None
+        visite.save(update_fields=['latitude', 'longitude', 'precision_m', 'ecart_m'])
     for contenu in contenus:
         photo = PhotoVisiteModel(visite=visite)
         photo.image.save('visite.jpg', contenu, save=False)

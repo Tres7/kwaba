@@ -6,6 +6,8 @@ export interface CompteursVerification {
   pieces: number;
   /** Listings an agent can visit now. */
   visites: number;
+  /** Verified listings with photos added since the visit, to check from a distance. */
+  photos: number;
   total: number;
 }
 

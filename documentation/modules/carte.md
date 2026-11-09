@@ -8,6 +8,7 @@ Code : `client/src/features/carte/` (carte), `server/apps/hebergements/positions
 - L'hôte la place sur la carte dans le formulaire d'annonce, en touchant la carte ou avec **Utiliser ma position**. Elle est obligatoire pour une nouvelle annonce (`400` sinon).
 - Une annonce créée avant la carte reste modifiable sans position. Elle n'apparaît pas sur la carte, et la recherche indique combien de logements manquent.
 - Déplacer le repère d'une annonce vérifiée la remet en vérification. Une première position sur une annonce ancienne ne le fait pas : rien de ce que l'agent a vu n'a bougé.
+- À la visite, l'agent peut relever la position avec le GPS de son téléphone : une fois l'annonce validée, **elle remplace celle de l'hôte**, sans nouvelle vérification ([vérification](verification.md#visite-de-lagent)). La position publique se recalcule à partir de ce nouveau point.
 
 ## Position exacte et position publique
 

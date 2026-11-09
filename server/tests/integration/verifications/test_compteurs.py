@@ -22,7 +22,7 @@ def test_counts_what_waits_for_an_agent(client_for, make_user, make_hebergement)
     make_hebergement(host=soumise, statut_verification='en_attente')    # identity not checked yet: no visit
 
     for role in ('agent', 'admin'):
-        assert client_for(make_user(role=role)).get(COMPTEURS).data == {'pieces': 1, 'visites': 1, 'total': 2}
+        assert client_for(make_user(role=role)).get(COMPTEURS).data == {'pieces': 1, 'visites': 1, 'photos': 0, 'total': 2}
 
 
 @pytest.mark.parametrize('role', ['voyageur', 'hote'])
