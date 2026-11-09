@@ -14,6 +14,7 @@ class MissionModel(models.Model):
     TYPES = [
         ('logement', 'Visite de logement'),
         ('piece', "Pièce d'identité"),
+        ('photos', 'Photos ajoutées'),
     ]
     STATUTS = [('en_cours', 'En cours'), ('terminee', 'Terminée'), ('liberee', 'Relâchée')]
     DECISIONS = [('validee', 'Validée'), ('refusee', 'Refusée')]

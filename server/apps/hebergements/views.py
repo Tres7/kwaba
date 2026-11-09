@@ -53,20 +53,44 @@ def _context(request, proprietaire=False):
 
 
 
+def _photos_ajoutees(hebergement, avant: dict, changes: set) -> list | None:
+    """The photos added to a verified listing, when nothing else the agent checked moved: the address, the city
+    and every photo the agent saw are still there (reordering them, changing the cover is fine). None otherwise."""
+    if changes - {'images', 'image_url'}:
+        return None
+    vues = [u for u in avant['images'] or [] if u not in (avant['photos_a_controler'] or [])]
+    images = hebergement.images or []
+    if not set(vues) <= set(images):
+        return None  # a photo the agent saw was removed or replaced: what they checked changed
+    return [u for u in images if u not in vues]
+
+
 def _remettre_en_verification(hebergement, avant: dict) -> bool:
     """After a change by the host: a refused listing goes back into verification, and a verified listing too
-    if what the agent checked (address, city, photos) changed. Returns True if it is put back."""
+    if what the agent checked (address, city, photos) changed. Returns True if it is put back.
+
+    Photos only added to a verified listing do not take it offline: an agent checks them afterwards."""
     if hebergement.statut_verification == 'en_attente':
         return False
     # First position of an older listing: nothing the agent saw has moved
     premiere_position = avant['latitude'] is None
-    change = any(avant[champ] != getattr(hebergement, champ) for champ in hebergement.CHAMPS_VERIFIES
-                 if not (premiere_position and champ in ('latitude', 'longitude')))
-    if hebergement.statut_verification == 'verifiee' and not change:
-        return False
+    changes = {champ for champ in hebergement.CHAMPS_VERIFIES if avant[champ] != getattr(hebergement, champ)
+               and not (premiere_position and champ in ('latitude', 'longitude'))}
+    if hebergement.statut_verification == 'verifiee':
+        if not changes:
+            return False
+        ajoutees = _photos_ajoutees(hebergement, avant, changes)
+        if ajoutees is not None:
+            nouvelles = [u for u in ajoutees if u not in (avant['photos_a_controler'] or [])]
+            hebergement.photos_a_controler = ajoutees or None
+            hebergement.save(update_fields=['photos_a_controler', 'updated_at'])
+            if nouvelles:
+                verifications.photos_a_controler(hebergement.id, len(nouvelles))
+            return False
     deja_verifiee = hebergement.statut_verification == 'verifiee'
-    hebergement.statut_verification, hebergement.motif_refus = 'en_attente', ''
-    hebergement.save(update_fields=['statut_verification', 'motif_refus', 'updated_at'])
+    # The new visit checks every photo
+    hebergement.statut_verification, hebergement.motif_refus, hebergement.photos_a_controler = 'en_attente', '', None
+    hebergement.save(update_fields=['statut_verification', 'motif_refus', 'photos_a_controler', 'updated_at'])
     verifications.visite_a_planifier(hebergement.id, modification=deja_verifiee)
     return True
 
@@ -309,8 +333,12 @@ class HebergementDetailView(APIView):
         if not serializer.is_valid():
             _signaler_coordonnees(request, serializer, obj.pk)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        avant = {champ: getattr(obj, champ) for champ in HebergementModel.CHAMPS_VERIFIES}
+        avant = {champ: getattr(obj, champ) for champ in (*HebergementModel.CHAMPS_VERIFIES, 'photos_a_controler')}
         serializer.save()
+        if obj.position_relevee_le and (avant['latitude'], avant['longitude']) != (obj.latitude, obj.longitude):
+            # The host moved the point an agent had measured: it is the host's point again (and visited again)
+            obj.position_relevee_le = None
+            obj.save(update_fields=['position_relevee_le'])
         _remettre_en_verification(obj, avant)
         return Response(HebergementSerializer(obj, context=_context(request, proprietaire=True)).data)
 

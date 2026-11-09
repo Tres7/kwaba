@@ -54,10 +54,11 @@ class TestCreate:
         assert response.status_code == 400
         assert field in response.data
 
-    def test_images_truncated_to_ten(self, client_for, make_user):
+    def test_more_than_ten_images_kept(self, client_for, make_user):
+        # Up to 20 since 2026-11-09 (beyond: refused, see test_legendes_photos.py), no longer cut at 10
         images = [f'https://images.unsplash.com/photo-{i}.jpg' for i in range(12)]
         response = client_for(make_user(role='hote')).post(HEBERGEMENTS, _listing(images=images, legendes_photos={u: 'salon' for u in images}), format='json')
-        assert len(HebergementModel.objects.get(pk=response.data['id']).images) == 10
+        assert len(HebergementModel.objects.get(pk=response.data['id']).images) == 12
 
     @pytest.mark.parametrize('url', [
         'https://pixel-espion.example/a.jpg',     # host's server: would collect the visitors' IP address

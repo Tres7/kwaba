@@ -67,6 +67,11 @@ class VisiteModel(models.Model):
     decision = models.CharField(max_length=20, choices=DECISIONS)
     controles = models.JSONField(default=dict)
     commentaire = models.TextField(blank=True)
+    # Position measured on site with the agent's phone (GPS): once validated, it replaces the point placed by the host
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    precision_m = models.PositiveIntegerField(null=True, blank=True, help_text='Précision annoncée par le téléphone')
+    ecart_m = models.PositiveIntegerField(null=True, blank=True, help_text="Distance au point placé par l'hôte")
     cree_le = models.DateTimeField(auto_now_add=True)
 
     class Meta:

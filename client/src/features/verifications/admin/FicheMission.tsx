@@ -12,6 +12,7 @@ import type { MissionEtat, TypeMission } from "../hooks";
 import { formatDate } from "@/lib/utils";
 import FicheLogement, { type Logement } from "./FicheLogement";
 import FichePiece, { type Piece } from "./FichePiece";
+import FichePhotos, { type PhotosAjoutees } from "./FichePhotos";
 
 interface Fiche {
   type: TypeMission;
@@ -27,6 +28,7 @@ interface Fiche {
   controles?: Record<string, string>;
   max_photos?: number;
   piece?: Piece;
+  photos?: PhotosAjoutees;
 }
 
 /** Page of a mission: who handles it, then the check itself (depending on the type). */
@@ -130,6 +132,9 @@ export default function FicheMissionPage() {
       )}
       {data.type === "piece" && data.piece && (
         <FichePiece piece={data.piece} peutDecider={droits.decider} onTerminee={terminee} />
+      )}
+      {data.type === "photos" && data.photos && (
+        <FichePhotos photos={data.photos} peutDecider={droits.decider} onTerminee={terminee} />
       )}
     </div>
   );

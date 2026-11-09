@@ -1,7 +1,8 @@
 from django.urls import path
 
 from .views import (
-    CompteursView, DecisionView, FichierPieceView, MaPieceIdentiteView, PieceDecisionView, PiecesView, VisitesView,
+    CompteursView, CorrectionPositionView, DecisionView, FichierPieceView, LirePositionView, MaPieceIdentiteView,
+    PhotosDecisionView, PieceDecisionView, PiecesView, PositionsView, VisitesView,
 )
 
 urlpatterns = [
@@ -12,4 +13,8 @@ urlpatterns = [
     path('compteurs/', CompteursView.as_view(), name='verification-compteurs'),
     path('visites/', VisitesView.as_view(), name='verification-visites'),
     path('visites/<uuid:pk>/decision/', DecisionView.as_view(), name='verification-decision'),
+    path('photos/<uuid:pk>/decision/', PhotosDecisionView.as_view(), name='verification-photos-decision'),
+    path('positions/', PositionsView.as_view(), name='verification-positions'),
+    path('positions/lire/', LirePositionView.as_view(), name='verification-position-lire'),
+    path('positions/<uuid:pk>/', CorrectionPositionView.as_view(), name='verification-position-correction'),
 ]

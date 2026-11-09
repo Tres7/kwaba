@@ -164,7 +164,12 @@ function EspaceHoteContent() {
         brouillon={editing === "new" ? reprise ?? undefined : undefined}
         onCancel={fermer}
         onSaved={(h) => {
-          toast.success(editing === "new" ? t("publiee") : t("miseAJour"));
+          if (editing === "new") toast.success(t("publiee"));
+          // What the agent checked changed (address, a photo they saw): offline until their visit
+          else if (h.statut_annonce === "en_verification" && editing.statut_annonce !== "en_verification") toast.success(t("miseAJourVerification"));
+          // Photos only added: online at once, an agent checks them from a distance
+          else if (h.statut_annonce === "publiee" && (h.images?.length ?? 0) > (editing.images?.length ?? 0)) toast.success(t("photosAjoutees"));
+          else toast.success(t("miseAJour"));
           fermer();
           refresh();
           if (editing === "new") router.push(`/hebergements/${h.id}`);

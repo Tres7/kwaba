@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { lireMaPiece, lireTableauAgent, listerMissions } from "./api";
+import { lireMaPiece, lireTableauAgent, listerMissions, listerPositions } from "./api";
 import type { CompteursVerification } from "./compteurs";
 
 export type { CompteursVerification };
 
 /** What field agents check (see server/apps/terrain/types.py). */
-export type TypeMission = "logement" | "piece";
+export type TypeMission = "logement" | "piece" | "photos";
 
 export const TYPES_MISSION: { code: TypeMission; libelle: string; court: string }[] = [
   { code: "logement", libelle: "Logements à visiter", court: "Logements" },
   { code: "piece", libelle: "Pièces d'identité", court: "Pièces d'identité" },
+  { code: "photos", libelle: "Photos à contrôler", court: "Photos" },
 ];
 
 export interface MissionEtat {
@@ -72,4 +73,25 @@ export function useMissions(vue: VueMissions, filtres: { type?: TypeMission | ""
     queryKey: ["agent", "missions", params],
     queryFn: () => listerMissions(params),
   });
+}
+
+/** A verified listing in the agent space's "Positions" page. */
+export interface AnnoncePosition {
+  id: string;
+  name: string;
+  type_libelle: string;
+  city: string;
+  location: string;
+  point_repere: string;
+  /** Exact current point: the host's, or the one an agent measured */
+  position: { lat: number; lng: number } | null;
+  /** When an agent measured or corrected it; null while it is the host's point */
+  position_relevee_le: string | null;
+  hote: { nom: string; telephone: string | null } | null;
+}
+
+export const CLE_POSITIONS = ["agent", "positions"];
+
+export function usePositions(q: string, toutes: boolean) {
+  return useQuery({ queryKey: [...CLE_POSITIONS, q, toutes], queryFn: () => listerPositions({ q, toutes }) });
 }

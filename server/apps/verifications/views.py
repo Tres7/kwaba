@@ -199,6 +199,7 @@ class DecisionView(APIView):
                 visite = services.decider(
                     pk, request.user, decision=str(request.data.get('decision', '')), controles=controles,
                     commentaire=str(request.data.get('commentaire', '')), photos=request.FILES.getlist('photos'),
+                    position={k: request.data[k] for k in ('latitude', 'longitude', 'precision') if request.data.get(k)} or None,
                 )
                 terrain.terminer('logement', pk, request.user, decision=visite.decision,
                                  titre=hebergement['name'], sous_titre=hebergement['type_libelle'], ville=hebergement['city'])
@@ -208,8 +209,41 @@ class DecisionView(APIView):
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         journaliser('annonce_verifiee' if visite.decision == 'validee' else 'annonce_refusee', request,
                     utilisateur=request.user, hebergement=str(pk))
+        if visite.decision == 'validee' and visite.latitude is not None:
+            # The agent's position replaces the host's point: traced with the gap, to spot hosts who misplace theirs
+            journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk), source='visite',
+                        ecart_m=visite.ecart_m, precision_m=visite.precision_m)
         return Response({'decision': visite.decision, 'statut': 'verifiee' if visite.decision == 'validee' else 'refusee'},
                         status=status.HTTP_201_CREATED)
+
+
+class PhotosDecisionView(APIView):
+    """POST {retirer: [url], motif}: the photos added to a verified listing are checked; the ones listed leave it."""
+    permission_classes = [EstVerificateur]
+
+    def post(self, request, pk):
+        annonce = hebergements.fiche(pk)
+        if not annonce:
+            return Response({'detail': 'Annonce introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        retirer = request.data.get('retirer') or []
+        if not isinstance(retirer, list) or not all(isinstance(u, str) for u in retirer):
+            return Response({'retirer': ['Liste de photos attendue.']}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            with transaction.atomic():
+                terrain.verifier_peut_decider('photos', pk, request.user)
+                resultat = services.decider_photos(pk, request.user, retirer=retirer,
+                                                   motif=str(request.data.get('motif', '')))
+                nombre = len(resultat['retirees'])
+                terrain.terminer('photos', pk, request.user, decision='validee', titre=annonce['name'],
+                                 sous_titre=f"{nombre} photo(s) retirée(s)" if nombre else 'Photos gardées',
+                                 ville=annonce['city'])
+        except terrain.MissionErreur as exc:
+            return Response({'detail': str(exc)}, status=exc.code)
+        except services.VerificationErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        journaliser('photos_controlees', request, utilisateur=request.user, hebergement=str(pk),
+                    retirees=len(resultat['retirees']))
+        return Response({'retirees': resultat['retirees'], 'images': resultat['images']})
 
 
 class FichierPieceView(APIView):
@@ -246,4 +280,64 @@ class CompteursView(APIView):
     def get(self, request):
         pieces = services.pieces_a_controler().count()
         visites = len(services.annonces_a_visiter())
-        return Response({'pieces': pieces, 'visites': visites, 'total': pieces + visites})
+        photos = len(services.annonces_photos_a_controler())
+        return Response({'pieces': pieces, 'visites': visites, 'photos': photos, 'total': pieces + visites + photos})
+
+
+class PositionsView(APIView):
+    """GET ?q=&toutes=1: verified listings whose position an agent can correct (by default, those still at the host's
+    point), with the number left to measure."""
+    permission_classes = [EstVerificateur]
+
+    def get(self, request):
+        q = request.query_params.get('q', '').strip()[:100]
+        toutes = request.query_params.get('toutes') in ('1', 'true')
+        annonces = hebergements.annonces_pour_position(q, a_relever=not toutes,
+                                                       hote_ids=users.ids_par_recherche(q) if q else ())
+        hotes = users.comptes({a['host_id'] for a in annonces})
+        return Response({
+            'a_relever': hebergements.nb_positions_a_relever(),
+            'results': [{
+                'id': str(a['id']), 'name': a['name'], 'type_libelle': a['type_libelle'], 'city': a['city'],
+                'location': a['location'], 'point_repere': a['point_repere'],
+                'position': {'lat': float(a['latitude']), 'lng': float(a['longitude'])} if a['latitude'] is not None else None,
+                'position_relevee_le': a['position_relevee_le'],
+                'hote': {'nom': f"{h.first_name} {h.last_name}".strip(), 'telephone': h.phone}
+                if (h := hotes.get(a['host_id'])) else None,
+            } for a in annonces],
+        })
+
+
+class LirePositionView(APIView):
+    """POST {texte}: latitude and longitude of a pasted Google Maps link, WhatsApp location or coordinates."""
+    permission_classes = [EstVerificateur]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'verification_position'
+
+    def post(self, request):
+        try:
+            latitude, longitude = services.lire_position(str(request.data.get('texte', '')))
+        except services.VerificationErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'latitude': float(latitude), 'longitude': float(longitude)})
+
+
+class CorrectionPositionView(APIView):
+    """POST {latitude, longitude, precision?, source: gps | texte}: the position of a verified listing is replaced; it
+    stays online. Traced with the gap from the previous point."""
+    permission_classes = [EstVerificateur]
+
+    def post(self, request, pk):
+        if not hebergements.fiche(pk):
+            return Response({'detail': 'Annonce introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        source = str(request.data.get('source', ''))
+        try:
+            resultat = services.corriger_position(
+                pk, request.user, latitude=request.data.get('latitude'), longitude=request.data.get('longitude'),
+                precision=request.data.get('precision'), source=source,
+            )
+        except services.VerificationErreur as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk), source=source,
+                    ecart_m=resultat['ecart_m'], precision_m=resultat['precision_m'])
+        return Response({**resultat, 'latitude': float(resultat['latitude']), 'longitude': float(resultat['longitude'])})
