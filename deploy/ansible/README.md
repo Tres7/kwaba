@@ -78,9 +78,11 @@ Aujourd'hui, le Caddy de TraderApp (`traderapp-caddy`) tient les ports 80/443. L
 
 Retour arrière : `docker compose -f /opt/proxy/compose.yml down`, puis redéployer la version précédente de TraderApp (son Caddy reprend les mêmes volumes).
 
-## Secrets de la préprod (Vault)
+## Secrets (Vault)
 
-Les fichiers `env/*.env` de la préprod sont générés par le rôle `kwaba` depuis `kwaba_env` (inventaire, `group_vars/vps_perso/main.yml`), dont les secrets viennent de `group_vars/vps_perso/vault.yml`, chiffré avec le vault-id `preprod` (mot de passe distinct de celui de la prod). En prod, `kwaba_env` est vide : ses fichiers restent écrits à la main et Ansible n'y touche pas.
+Les fichiers `env/*.env` de la préprod sont générés par le rôle `kwaba` depuis `kwaba_env` (inventaire, `group_vars/vps_perso/main.yml`), dont les secrets viennent de `group_vars/vps_perso/vault.yml`, chiffré avec le vault-id `preprod`. La prod suit le même principe (`group_vars/production/env.yml` et `vault.yml`, vault-id `production`, mot de passe distinct), `backup.env` compris : ses fichiers ont été repris du serveur par `tools/import_prod_env.py` de `kwa-ba-infra`, qui ne les affiche jamais. Sans `kwaba_env`, Ansible ne touche à aucun fichier `env/`.
+
+Avant et après un passage d'Ansible, `scripts/env-fingerprint.sh` (sur le serveur, en tant que l'utilisateur de déploiement) donne deux empreintes de ce que lisent les conteneurs et les sauvegardes, sans afficher aucune valeur : mêmes empreintes, mêmes valeurs.
 
 ```bash
 # Modifier un secret (depuis kwa-ba-infra)

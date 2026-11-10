@@ -17,7 +17,7 @@ kwaba_manifest_client: client
 kwaba_deploy_conf: {}
 
 # Secret files of the application: name → variables, written to env/<name>.env (values from the Vault of the inventory).
-# Empty in production: its files are still written by hand on the server, Ansible leaves them alone.
+# Empty: Ansible leaves the env files alone (written by hand).
 kwaba_env: {}
 
 # Scheduled tasks (server time: UTC)
