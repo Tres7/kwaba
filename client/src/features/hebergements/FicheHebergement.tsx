@@ -2,12 +2,12 @@
 
 import { lireHebergement } from "./api";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useParams, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Award, BadgeCheck, MapPin, ChevronDown, ChevronUp, Share2, Calendar, MessageCircle, Pencil, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Award, BadgeCheck, MapPin, ChevronDown, ChevronUp, Share2, Calendar, MessageCircle, Pencil, ShieldCheck, Images } from "lucide-react";
 import { toast } from "sonner";
 import AlerteDisponibilite from "./AlerteDisponibilite";
 import EquipementsLogement from "./EquipementsLogement";
@@ -27,6 +27,8 @@ import { nuitsIndisponibles, useDisponibilites } from "./disponibilites";
 import DateRangeCalendar from "@/components/calendrier/DateRangeCalendar";
 import Stepper from "@/components/ui/Stepper";
 import Chargement from "@/components/ui/Chargement";
+import Visionneuse from "@/components/ui/Visionneuse";
+import { CONTOUR_FOCUS_PHOTO } from "@/components/ui/visionneuse-photos";
 import { useDevisSejour, useTaux } from "@/features/paiements";
 import { contacterHote } from "@/features/messaging";
 import { useTranslations } from "next-intl";
@@ -48,6 +50,18 @@ function celluleMosaique(i: number, nombre: number) {
   return "";
 }
 
+/** A gallery photo: a button that opens the viewer, or a plain frame for the placeholder image of a listing without photos. */
+function CadrePhoto({ onAgrandir, label, className, children }: {
+  onAgrandir?: () => void; label: string; className?: string; children: ReactNode;
+}) {
+  if (!onAgrandir) return <div className={className}>{children}</div>;
+  return (
+    <button type="button" onClick={onAgrandir} aria-label={label} className={cn(className, "cursor-zoom-in", CONTOUR_FOCUS_PHOTO)}>
+      {children}
+    </button>
+  );
+}
+
 /** "Tokoin, Lomé", with links to the destination pages of the district and of the city when they exist. */
 function Lieu({ city, location }: { city: string; location: string }) {
   const ville = villeDuNom(city);
@@ -66,6 +80,7 @@ function HebergementContent() {
   const { taux } = useTaux();
   const t = useTranslations("fiche");
   const tPieces = useTranslations("pieces");
+  const tVisionneuse = useTranslations("visionneuse");
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -81,6 +96,15 @@ function HebergementContent() {
   const [unites, setUnites] = useState(Math.max(1, Number(searchParams.get("unites") || 1)));
   const [contacting, setContacting] = useState(false);
   const [calendrierOuvert, setCalendrierOuvert] = useState(false);
+  // Photo open in the full-screen viewer (null: closed)
+  const [photoAgrandie, setPhotoAgrandie] = useState<number | null>(null);
+  const carrousel = useRef<HTMLDivElement>(null);
+  // Back on the page, the phone carousel shows the last photo seen in the viewer
+  const fermerVisionneuse = useCallback((derniere: number) => {
+    setPhotoAgrandie(null);
+    const c = carrousel.current;
+    if (c) c.scrollLeft = derniere * c.clientWidth;
+  }, []);
 
   const choisirDates = (arrivee: string, depart: string) => {
     setCheckIn(arrivee);
@@ -135,6 +159,8 @@ function HebergementContent() {
   const nuitTtc = prixNuitFraisInclus(prixUnite, tauxFrais);
   const gallery = [hebergement.image_url, ...hebergement.images.filter((i) => i !== hebergement.image_url)].filter(Boolean);
   const photos = gallery.length ? gallery : [FALLBACK_IMAGE];
+  // The placeholder image of a listing without photos does not open the viewer
+  const agrandir = (i: number) => (gallery.length ? () => setPhotoAgrandie(i) : undefined);
   const reservationUrl = `/reservation/${hebergement.id}?check_in=${checkIn}&check_out=${checkOut}&guests=${Math.min(guests, capacite)}`
     + (typeLogement ? `&type=${typeLogement.id}&unites=${nbUnites}` : "");
   // Dates coming from the URL (search, shared link) but taken in the meantime
@@ -227,26 +253,37 @@ function HebergementContent() {
           </div>
         </div>
 
-        {/* Gallery: horizontal carousel on mobile, mosaic on desktop */}
-        <div className="md:hidden -mx-4 mb-8 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide" tabIndex={0} role="region" aria-label={hebergement.name}>
+        {/* Gallery: horizontal carousel on mobile, mosaic on desktop; a photo opens the full-screen viewer */}
+        <div ref={carrousel} className="md:hidden -mx-4 mb-8 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide" tabIndex={0} role="region" aria-label={hebergement.name}>
           {photos.map((img, i) => (
             <div key={img + i} className="snap-center flex-shrink-0 w-full px-4">
-              <div className="relative">
+              <CadrePhoto onAgrandir={agrandir(i)} label={tVisionneuse("agrandir", { photo: `${hebergement.name}, photo ${i + 1}` })} className="relative block w-full rounded-2xl">
                 <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-64 object-cover rounded-2xl" />
                 {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-white/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
                 <span className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">{i + 1}/{photos.length}</span>
-              </div>
+              </CadrePhoto>
             </div>
           ))}
         </div>
-        <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 h-[420px] lg:h-[480px] rounded-3xl overflow-hidden mb-12 shadow-card">
+        <div className="relative hidden md:grid grid-cols-4 grid-rows-2 gap-3 h-[420px] lg:h-[480px] rounded-3xl overflow-hidden mb-12 shadow-card">
           {photos.slice(0, 5).map((img, i) => (
-            <div key={img + i} className={cn("relative overflow-hidden", celluleMosaique(i, Math.min(photos.length, 5)))}>
+            <CadrePhoto key={img + i} onAgrandir={agrandir(i)} label={tVisionneuse("agrandir", { photo: `${hebergement.name}, photo ${i + 1}` })}
+              className={cn("relative block w-full h-full overflow-hidden", celluleMosaique(i, Math.min(photos.length, 5)))}>
               <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
               {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-white/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
-            </div>
+            </CadrePhoto>
           ))}
+          {gallery.length > 5 && (
+            <button type="button" onClick={() => setPhotoAgrandie(0)}
+              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white text-dark text-sm font-semibold px-4 py-2.5 rounded-xl shadow-card hover:bg-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              <Images size={16} aria-hidden /> {t("voirPhotos", { nombre: gallery.length })}
+            </button>
+          )}
         </div>
+        {photoAgrandie !== null && (
+          <Visionneuse photos={gallery} depart={photoAgrandie} nom={hebergement.name} onClose={fermerVisionneuse}
+            legende={(url) => (hebergement.legendes_photos?.[url] ? libellePiece(hebergement.legendes_photos[url], tPieces) : undefined)} />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
@@ -300,7 +337,8 @@ function HebergementContent() {
             </section>
 
             <DetailsLogement h={hebergement} />
-            <PhotosParPiece photos={gallery} legendes={hebergement.legendes_photos} nom={hebergement.name} />
+            <PhotosParPiece photos={gallery} legendes={hebergement.legendes_photos} nom={hebergement.name}
+              onAgrandir={(url) => setPhotoAgrandie(gallery.indexOf(url))} />
 
             <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("equipements")}</h2>

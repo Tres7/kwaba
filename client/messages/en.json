@@ -532,6 +532,7 @@
     "nouveauVoirAvis": "New place, see reviews",
     "jusquA": "up to {nombre} guests",
     "partager": "Share",
+    "voirPhotos": "Show all {nombre} photos",
     "hote": "Host",
     "hoteKwaba": "Kwa-Ba host",
     "gerer": "Manage",
@@ -2394,5 +2395,14 @@
     "desactiver": "Disable the link",
     "lienDesactive": "Payment link disabled.",
     "lienImpossible": "This is not possible right now. Please try again."
+  },
+  "visionneuse": {
+    "titre": "Photos: {nom}",
+    "photo": "{nom}, photo {numero} of {total}",
+    "position": "Photo {numero} of {total}",
+    "agrandir": "View larger: {photo}",
+    "precedente": "Previous photo",
+    "suivante": "Next photo",
+    "fermer": "Close"
   }
 }

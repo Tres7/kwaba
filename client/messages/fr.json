@@ -532,6 +532,7 @@
     "nouveauVoirAvis": "Nouveau logement, voir les avis",
     "jusquA": "jusqu'à {nombre} voyageurs",
     "partager": "Partager",
+    "voirPhotos": "Voir les {nombre} photos",
     "hote": "Hôte",
     "hoteKwaba": "Hôte Kwa-Ba",
     "gerer": "Gérer",
@@ -2394,5 +2395,14 @@
     "desactiver": "Désactiver le lien",
     "lienDesactive": "Lien de paiement désactivé.",
     "lienImpossible": "Action impossible pour le moment. Réessayez."
+  },
+  "visionneuse": {
+    "titre": "Photos : {nom}",
+    "photo": "{nom}, photo {numero} sur {total}",
+    "position": "Photo {numero} sur {total}",
+    "agrandir": "Voir en grand : {photo}",
+    "precedente": "Photo précédente",
+    "suivante": "Photo suivante",
+    "fermer": "Fermer"
   }
 }
