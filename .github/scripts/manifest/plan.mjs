@@ -10,11 +10,7 @@ const serverRevision = lastCommitTouching('server');
 const clientRevision = lastCommitTouching('client');
 // Set by GitHub Actions; the fallback is the repository owner, for local runs
 const owner = process.env.GITHUB_REPOSITORY_OWNER || 'kwa-ba';
-const repositories = {
-  server: imageRepository(owner, 'server'),
-  client: imageRepository(owner, 'client'),
-  clientPreprod: imageRepository(owner, 'client-preprod'),
-};
+const repositories = { server: imageRepository(owner, 'server'), client: imageRepository(owner, 'client') };
 const { buildServer, buildClient, changed } = plan({ previous, serverRevision, clientRevision, repositories });
 
 console.log(`changed=${changed}`);

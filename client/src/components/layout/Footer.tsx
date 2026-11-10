@@ -7,7 +7,7 @@ import Logo from "@/components/layout/Logo";
 import SelecteurLangue from "@/components/layout/SelecteurLangue";
 import { MentionDevise, SelecteurDevise } from "@/components/layout/Devise";
 import GererCookiesBouton from "@/components/legal/GererCookiesBouton";
-import { CONTACT_EMAIL } from "@/lib/contact";
+import { useConfigPublique } from "@/providers/PublicConfigProvider";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
 import { cheminPays, cheminVille, villesDuPays } from "@/lib/destinations";
 
@@ -62,6 +62,7 @@ const LEGAL = [
 export default function Footer() {
   const t = useTranslations("pied");
   const reglages = useReglagesSite().data;
+  const { contactEmail: CONTACT_EMAIL } = useConfigPublique();
   return (
     <footer className="bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12">

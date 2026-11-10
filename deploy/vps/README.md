@@ -56,7 +56,7 @@ Workflow GitHub **deploy** (*Actions → Deploy → Run workflow*, sur `main`) :
 
 Le workflow :
 
-1. vérifie le manifest (nom exact, images par digest) et prend l'image client de l'environnement (`client` ou `clientPreprod`) ;
+1. vérifie le manifest (nom exact, images par digest) et prend la même image client pour les deux environnements (sauf en préprod pour un manifest de novembre 2026 qui a une image `clientPreprod`) ;
 2. se connecte en SSH (empreinte du serveur imposée, jamais acceptée à la volée) ;
 3. deux modes, selon la variable `DEPLOY_PULL` de l'environnement :
    - **le serveur tire** (`true`, la préprod et la prod) : la clé ne peut lancer que la porte de déploiement du serveur (`/usr/local/bin/<nom>-deploy`, installée par Ansible, propriété de root), avec pour seul argument le nom du manifest. Le serveur récupère lui-même `main` depuis GitHub, vérifie que le manifest y est, lit les images dedans, met à jour la configuration (`deploy/vps`) et lance `scripts/deploy.sh`. Une clé volée ne peut donc que redéployer un manifest de `main`, ni shell, ni copie de fichiers, ni tunnel ;

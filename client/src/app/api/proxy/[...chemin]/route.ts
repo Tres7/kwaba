@@ -1,12 +1,13 @@
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getApiBaseUrl } from "@/lib/api-url";
+import { API_PUBLIQUE as ADRESSE_API_PUBLIQUE } from "@/lib/site-url";
 import { cheminApi, entetesVersApi, entetesVersNavigateur, origineAutorisee } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
 const secureCookie = (process.env.AUTH_URL ?? "").startsWith("https://");
-const API_PUBLIQUE = new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api");
+const API_PUBLIQUE = new URL(ADRESSE_API_PUBLIQUE);
 
 /**
  * Relays the browser's API calls and adds the session's token, which therefore never reaches the browser's JavaScript.

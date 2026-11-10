@@ -3,6 +3,7 @@
 import { useRouter } from "@/i18n/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useConfigPublique } from "@/providers/PublicConfigProvider";
 
 declare global {
   interface Window {
@@ -20,7 +21,6 @@ declare global {
   }
 }
 
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 let chargement: Promise<void> | null = null;
 function chargerScriptGoogle(): Promise<void> {
@@ -44,12 +44,13 @@ interface GoogleButtonProps {
   onError: (message: string) => void;
 }
 
-/** Google Identity Services button. Hidden if NEXT_PUBLIC_GOOGLE_CLIENT_ID is not configured. */
+/** Google Identity Services button. Hidden if GOOGLE_CLIENT_ID is not configured (client.env of the environment). */
 export default function GoogleButton({ label, callbackUrl, onError }: GoogleButtonProps) {
   const router = useRouter();
   const t = useTranslations("auth");
+  const { googleClientId } = useConfigPublique();
 
-  if (!GOOGLE_CLIENT_ID) return null;
+  if (!googleClientId) return null;
 
   const handleClick = async () => {
     onError("");
@@ -66,7 +67,7 @@ export default function GoogleButton({ label, callbackUrl, onError }: GoogleButt
     }
 
     window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
+      client_id: googleClientId,
       callback: async (response) => {
         if (!response.credential) {
           onError(t("googleJeton"));

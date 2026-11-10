@@ -3,8 +3,10 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing, type Langue } from "@/i18n/routing";
 
+import { SITE_URL } from "./site-url";
+
 /** Public address of the site, without a trailing "/": absolute URLs of the sitemap, link previews and canonicals. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || process.env.AUTH_URL || "http://localhost:3000").replace(/\/+$/, "");
+export { SITE_URL };
 
 export const IMAGE_PARTAGE = "/brand/kwaba-partage-1200x630.png";
 

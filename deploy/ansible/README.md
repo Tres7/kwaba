@@ -104,7 +104,7 @@ Avec `kwaba_cle_deploiement` (clé publique du workflow deploy), le rôle `kwaba
 
 - écrit `authorized_keys` de l'utilisateur de déploiement avec cette seule clé, préfixée de `restrict,command="/usr/local/bin/<kwaba_nom>-deploy"` : ni shell, ni tunnel, ni agent, ni pty, ni copie de fichiers, quelle que soit la commande demandée ;
 - installe cette porte de déploiement (propriété de root, hors du dossier qu'elle met à jour) et `git`, `rsync` ;
-- la porte n'accepte que `deploy manifest-NNNN-xxxxxxx.yaml` : elle récupère `main` depuis GitHub (dépôt public, seulement `deploy/`), vérifie que le manifest y est, lit les images de `server` et de `kwaba_manifest_client` (`clientPreprod` en préprod), met à jour la configuration puis lance `scripts/deploy.sh`.
+- la porte n'accepte que `deploy manifest-NNNN-xxxxxxx.yaml` : elle récupère `main` depuis GitHub (dépôt public, seulement `deploy/`), vérifie que le manifest y est, lit les images de `server` et de `client` (ou `clientPreprod` en préprod pour un manifest de novembre 2026 qui en a une), met à jour la configuration puis lance `scripts/deploy.sh`.
 
 Une clé volée ne peut donc que redéployer un manifest de `main`. La prod et la préprod sont dans ce mode (prod depuis le 9 novembre 2026). Sans `kwaba_cle_deploiement`, `authorized_keys` reste tel quel. Pour passer un autre serveur à ce modèle : sa clé publique dans son `group_vars`, le playbook, puis `DEPLOY_PULL=true` dans son environnement GitHub, tout de suite après (avant, la clé n'est pas restreinte et le workflow pousse encore ; après le playbook, seul le mode tiré fonctionne).
 

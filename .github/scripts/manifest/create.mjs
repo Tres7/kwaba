@@ -14,7 +14,6 @@ const { values } = parseArgs({
     // Empty: the previous manifest's image is reused (unchanged service)
     'server-image': { type: 'string', default: '' },
     'client-image': { type: 'string', default: '' },
-    'client-preprod-image': { type: 'string', default: '' },
   },
 });
 for (const required of ['source-revision', 'server-revision', 'client-revision']) {
@@ -31,7 +30,6 @@ const manifest = buildManifest({
   serverImage: values['server-image'],
   serverRevision: values['server-revision'],
   clientImage: values['client-image'],
-  clientPreprodImage: values['client-preprod-image'],
   clientRevision: values['client-revision'],
 });
 

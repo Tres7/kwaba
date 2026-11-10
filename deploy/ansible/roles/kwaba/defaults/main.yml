@@ -9,7 +9,8 @@ kwaba_utilisateur: deploy
 # Empty: authorized_keys is left as it is (key added by hand, unrestricted: the production for now).
 kwaba_cle_deploiement: ''
 kwaba_depot: https://github.com/kwa-ba/kwaba.git
-# Client image of this environment in the manifests (services.<name>): client in production, clientPreprod in preprod
+# Client image of the manifests: client everywhere; clientPreprod in preprod uses the image built for its URL when an
+# older manifest (November 2026) holds one, client otherwise
 kwaba_manifest_client: client
 
 # What makes this environment different from the production, written to env/deploy.conf and read by the VPS scripts
