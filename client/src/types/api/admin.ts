@@ -495,6 +495,12 @@ export interface AlerteFraude {
   types: string[];
   extraits: string[];
   masquee: boolean;
+  kind: "bypass" | "refusal" | "simulated" | "warning_ignored" | "false_positive" | "report" | "sanction" | "contest" | "abusive_reporter";
+  kind_libelle: string;
+  level: string;
+  simulee: boolean;
+  menace: boolean;
+  legal_hold: boolean;
   traitee: boolean;
   traitee_le: string | null;
   note: string;

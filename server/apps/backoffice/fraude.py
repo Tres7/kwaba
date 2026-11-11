@@ -13,7 +13,12 @@ from apps.users import api as users
 from apps.securite.backoffice import nom as _nom, paginer as _paginer
 
 LIBELLES = {'telephone': 'Téléphone', 'email': 'Email', 'lien': 'Lien', 'reseau': 'Réseau social',
-            'application': 'Application de messagerie', 'hors_site': 'Paiement hors site'}
+            'application': 'Application de messagerie', 'hors_site': 'Paiement hors site',
+            'insult': 'Insulte', 'hate': 'Propos haineux', 'threat': 'Menace', 'harassment': 'Harcèlement',
+            'spam': 'Spam', 'scam': 'Arnaque', 'other': 'Autre', 'reminder': 'Rappel des règles',
+            'formal_warning': 'Avertissement formel', 'short_suspension': 'Suspension courte',
+            'long_suspension': 'Suspension longue', 'admin_decision': 'Décision à prendre',
+            'contest': 'Contestation', 'abusive_reporter': 'Signalements rejetés'}
 
 
 def _alertes(alertes: list[AlerteFraudeModel]) -> list[dict]:
@@ -27,14 +32,16 @@ def _alerte(a: AlerteFraudeModel, u, nb_alertes: int | None = None) -> dict:
     return {
         'id': a.pk, 'cree_le': a.cree_le, 'contexte': a.contexte, 'contexte_libelle': a.get_contexte_display(),
         'objet_id': a.objet_id, 'types': [LIBELLES.get(t, t) for t in a.types], 'extraits': a.extraits,
-        'masquee': a.masquee, 'traitee': a.traitee, 'traitee_le': a.traitee_le, 'note': a.note,
+        'masquee': a.masquee, 'kind': a.kind, 'kind_libelle': a.get_kind_display(), 'level': a.level,
+        'simulee': a.kind == 'simulated', 'menace': 'threat' in a.types, 'legal_hold': a.legal_hold,
+        'traitee': a.traitee, 'traitee_le': a.traitee_le, 'note': a.note,
         'utilisateur': {'id': str(a.utilisateur_id), 'nom': _nom(u) if u else '', 'email': u.email if u else '',
                         'role': u.get_role_display() if u else '', 'nb_alertes': nb_alertes},
     }
 
 
 class AlertesView(APIView):
-    """GET: alerts (?statut=a_traiter|traitees|toutes, ?q= email or name)."""
+    """GET: alerts (?statut=a_traiter|traitees|toutes, ?kind=, ?q= email or name)."""
     permission_classes = [EstAdministrateur]
 
     def get(self, request):
@@ -44,6 +51,8 @@ class AlertesView(APIView):
             qs = qs.filter(traitee=False)
         elif statut == 'traitees':
             qs = qs.filter(traitee=True)
+        if kind := request.query_params.get('kind', '').strip():
+            qs = qs.filter(kind=kind)
         if q := request.query_params.get('q', '').strip():
             qs = qs.filter(utilisateur_id__in=users.ids_par_recherche(q))
         return _paginer(request, qs.order_by('-cree_le'), _alertes, en_lot=True)

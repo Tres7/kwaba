@@ -2417,5 +2417,61 @@
     "voirDansLeTexte": "Show in the text",
     "voirLesAutres": "{nombre, plural, one {See the other mistake} other {See the # other mistakes}}",
     "voirMoins": "See less"
+  },
+  "moderation": {
+    "category": {
+      "insult": "insult",
+      "hate": "hate speech",
+      "threat": "threat",
+      "harassment": "harassment"
+    },
+    "blocked": "This message breaks the messaging rules ({categories}). Rephrase it to send it.",
+    "warned": "This message may be badly received ({categories}).",
+    "notAbusive": "Not the case? Tell us about the mistake",
+    "falsePositiveSent": "Thank you, our team will check this block.",
+    "falsePositiveError": "The mistake could not be reported.",
+    "confirmQuestion": "Send this message anyway?",
+    "confirmSend": "Send anyway",
+    "confirmEdit": "Edit",
+    "suspended": "Your messaging is suspended until {date}. You can read your conversations, but not write.",
+    "report": "Report this message",
+    "reportTitle": "Report this message",
+    "reportIntro": "The author is not told. Our team will review the message and the exchanges before it.",
+    "reason": {
+      "insult": "Insult",
+      "hate": "Hate speech",
+      "threat": "Threat",
+      "harassment": "Harassment",
+      "spam": "Spam",
+      "scam": "Scam",
+      "other": "Other"
+    },
+    "reasonLabel": "Reason",
+    "details": "Details (optional)",
+    "send": "Send",
+    "cancel": "Cancel",
+    "close": "Close",
+    "reportSent": "Report sent. Thank you.",
+    "reportError": "The report could not be sent.",
+    "sanctionsTitle": "Messaging rules",
+    "step": {
+      "reminder": "Reminder of the rules",
+      "formal_warning": "Formal warning",
+      "short_suspension": "Messaging suspended",
+      "long_suspension": "Messaging suspended",
+      "admin_decision": "Account under review"
+    },
+    "sanctionLine": "{step} on {date} (reason: {reason})",
+    "contest": "Contest",
+    "contestTitle": "Contest this decision",
+    "contestIntro": "Explain why you contest it. A member of the Kwa-Ba team will review your request.",
+    "contestLabel": "Your explanation",
+    "contestSent": "Contest sent.",
+    "contestError": "The contest could not be sent.",
+    "contestStatus": {
+      "pending": "Contest under review",
+      "accepted": "Contest accepted",
+      "rejected": "Contest rejected"
+    }
   }
 }

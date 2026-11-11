@@ -2417,5 +2417,61 @@
     "voirDansLeTexte": "Voir dans le texte",
     "voirLesAutres": "{nombre, plural, one {Voir l'autre faute} other {Voir les # autres fautes}}",
     "voirMoins": "Voir moins"
+  },
+  "moderation": {
+    "category": {
+      "insult": "insulte",
+      "hate": "propos haineux",
+      "threat": "menace",
+      "harassment": "harcèlement"
+    },
+    "blocked": "Ce message ne respecte pas les règles de la messagerie ({categories}). Reformulez-le pour pouvoir l'envoyer.",
+    "warned": "Ce message risque d'être mal reçu ({categories}).",
+    "notAbusive": "Ce n'est pas le cas ? Signalez-nous l'erreur",
+    "falsePositiveSent": "Merci, notre équipe va vérifier ce blocage.",
+    "falsePositiveError": "Le signalement de l'erreur n'a pas pu être envoyé.",
+    "confirmQuestion": "Envoyer ce message quand même ?",
+    "confirmSend": "Envoyer quand même",
+    "confirmEdit": "Modifier",
+    "suspended": "Votre messagerie est suspendue jusqu'au {date}. Vous pouvez lire vos conversations, mais pas écrire.",
+    "report": "Signaler ce message",
+    "reportTitle": "Signaler ce message",
+    "reportIntro": "L'auteur du message n'est pas prévenu. Notre équipe examinera le message et les échanges qui le précèdent.",
+    "reason": {
+      "insult": "Insulte",
+      "hate": "Propos haineux",
+      "threat": "Menace",
+      "harassment": "Harcèlement",
+      "spam": "Spam",
+      "scam": "Arnaque",
+      "other": "Autre"
+    },
+    "reasonLabel": "Motif",
+    "details": "Détail (facultatif)",
+    "send": "Envoyer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "reportSent": "Signalement envoyé. Merci.",
+    "reportError": "Le signalement n'a pas pu être envoyé.",
+    "sanctionsTitle": "Règles de la messagerie",
+    "step": {
+      "reminder": "Rappel des règles",
+      "formal_warning": "Avertissement formel",
+      "short_suspension": "Suspension de la messagerie",
+      "long_suspension": "Suspension de la messagerie",
+      "admin_decision": "Examen de votre compte"
+    },
+    "sanctionLine": "{step} le {date} (motif : {reason})",
+    "contest": "Contester",
+    "contestTitle": "Contester cette décision",
+    "contestIntro": "Expliquez pourquoi vous contestez. Un membre de l'équipe Kwa-Ba examinera votre demande.",
+    "contestLabel": "Votre explication",
+    "contestSent": "Contestation envoyée.",
+    "contestError": "La contestation n'a pas pu être envoyée.",
+    "contestStatus": {
+      "pending": "Contestation en cours d'examen",
+      "accepted": "Contestation acceptée",
+      "rejected": "Contestation rejetée"
+    }
   }
 }

@@ -13,19 +13,26 @@ from apps.messaging.application.events.NewMessageEmailRequested import NewMessag
 from apps.messaging.application.ports.BookingLookup import BookingLookup, EveryoneBooked
 from apps.messaging.application.ports.ContactGuard import ContactGuard, PassThroughContactGuard
 from apps.messaging.application.ports.HebergementLookup import HebergementLookup
+from apps.messaging.application.ports.ModerationGuard import (
+    BLOCK, ENFORCE, OBSERVE, OFF, REFUSAL, SIMULATED, WARNING_IGNORED, DisabledModerationGuard, ModerationGuard,
+)
 from apps.messaging.application.ports.NotificationOutbox import NotificationOutbox
 from apps.messaging.application.ports.TransactionManager import TransactionManager
 from apps.messaging.application.ports.UserLookup import UserLookup
 from apps.messaging.domain.entities.Conversation import Conversation
 from apps.messaging.domain.entities.Message import Message
 from apps.messaging.domain.exceptions import (
+    ConfirmationRequiredException,
     ConversationAlreadyExistsException,
     ConversationNotFoundException,
     HebergementNotFoundException,
+    MessageRefusedException,
+    MessagingSuspendedException,
     NotParticipantException,
 )
 from apps.messaging.domain.repositories.ConversationRepository import ConversationRepository
 from apps.messaging.domain.repositories.MessageRepository import MessageRepository
+from apps.messaging.domain.repositories.SanctionRepository import SanctionRepository
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +62,8 @@ class MessagingService:
         email_delay_seconds: int = 60,
         guard: Optional[ContactGuard] = None,
         bookings: Optional[BookingLookup] = None,
+        moderation: Optional[ModerationGuard] = None,
+        sanctions: Optional[SanctionRepository] = None,
     ):
         self._conversations = conversations
         self._messages = messages
@@ -65,6 +74,29 @@ class MessagingService:
         self._email_delay = datetime.timedelta(seconds=email_delay_seconds)
         self._guard = guard or PassThroughContactGuard()
         self._bookings = bookings or EveryoneBooked()
+        self._moderation = moderation or DisabledModerationGuard()
+        self._sanctions = sanctions
+
+    def _ensure_can_write(self, user_id: uuid.UUID) -> None:
+        if self._sanctions is None:
+            return
+        until = self._sanctions.active_suspension_end(user_id, datetime.datetime.now(datetime.timezone.utc))
+        if until:
+            raise MessagingSuspendedException(until)
+
+    def _moderate(self, user_id: uuid.UUID, conversation_id: uuid.UUID, content: str, confirmed: bool):
+        mode = self._moderation.mode()
+        if mode == OFF:
+            return None
+        verdict = self._moderation.screen(content)
+        if not verdict.flagged:
+            return None
+        if mode == ENFORCE and verdict.level == BLOCK:
+            self._moderation.record(user_id, conversation_id, REFUSAL, verdict, content)
+            raise MessageRefusedException(verdict.categories)
+        if mode == ENFORCE and not confirmed:
+            raise ConfirmationRequiredException(verdict.categories)
+        return (SIMULATED if mode == OBSERVE else WARNING_IGNORED), verdict
 
     def start_conversation(self, user_id: uuid.UUID, hebergement_id: uuid.UUID) -> Tuple[ConversationSummaryDTO, bool]:
         """Idempotent: returns the existing thread if there is already one. The boolean tells a creation."""
@@ -95,6 +127,7 @@ class MessagingService:
         if existing:
             return self._summaries([existing], viewer_id)[0], False
 
+        self._ensure_can_write(viewer_id)
         try:
             created = self._conversations.create(conversation)
         except ConversationAlreadyExistsException:
@@ -131,8 +164,13 @@ class MessagingService:
         messages = self._messages.list(conversation.id, after_id, page_size)
         return [MessageDTO.from_entity(m, user_id) for m in messages]
 
-    def send_message(self, user_id: uuid.UUID, conversation_id: uuid.UUID, content: str) -> MessageDTO:
-        Message.compose(conversation_id, user_id, content)  # validation of the typed text (empty, length)
+    def send_message(
+        self, user_id: uuid.UUID, conversation_id: uuid.UUID, content: str, confirmed: bool = False,
+    ) -> MessageDTO:
+        typed = Message.compose(conversation_id, user_id, content)
+        self._participant_conversation(conversation_id, user_id)
+        self._ensure_can_write(user_id)
+        moderated = self._moderate(user_id, conversation_id, typed.content, confirmed)
         screening = self._guard.screen(content)
         message = Message.compose(conversation_id, user_id, screening.content)
         message.masked = screening.masked
@@ -153,6 +191,9 @@ class MessagingService:
             self._conversations.save(conversation)
             if screening.findings:
                 self._guard.report(user_id, conversation.id, screening)
+            if moderated:
+                kind, verdict = moderated
+                self._moderation.record(user_id, conversation.id, kind, verdict, typed.content)
 
             if first_unread_for_recipient:
                 self._schedule_new_message_email(conversation, saved, recipient_id)

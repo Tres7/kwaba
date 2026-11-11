@@ -117,6 +117,12 @@ Les cas sont comptés sur 30 jours glissants. Les seuils sont des paramètres mo
 
 On sépare le contenu des métadonnées : pour décider d'une suspension de compte, l'historique des sanctions suffit, sans garder les messages.
 
+## Précisions de mise en œuvre
+- Un cas daté avant la fin de la suspension en cours (message envoyé avant, confirmé tard) est rattaché à la période déjà sanctionnée : rappel des règles, sans nouvelle escalade.
+- Le 4e cas d'une fenêtre donne de nouveau un avertissement formel. Chaque nouveau cas après le palier « décision d'un admin » relance une alerte aux admins.
+- L'alerte immédiate sur les menaces part aussi pour un message envoyé après « envoyer quand même ».
+- Le détail est dans `documentation/modules/moderation.md`.
+
 ## Validation avant le passage en `enforce` en prod
 1. Un corpus de phrases écrit par l'équipe, avec des messages normaux d'hôtes et de voyageurs, passe sans faux positif.
 2. Les associés cherchent les trous du filtre en préprod.
