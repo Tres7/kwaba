@@ -1,0 +1,2 @@
+class ContestNotAllowedException(Exception):
+    pass

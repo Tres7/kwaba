@@ -1,0 +1,2 @@
+class CannotReportOwnMessageException(Exception):
+    pass

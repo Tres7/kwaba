@@ -54,6 +54,12 @@ class JournalAuditModel(models.Model):
         ('candidature_ouverte', 'Candidature hôte ouverte'),
         ('candidature_refusee', 'Candidature hôte refusée'),
         ('roles_hotes_migres', 'Rôles des hôtes existants révisés'),
+        ('report_viewed', 'Signalement consulté'),
+        ('report_confirmed', 'Signalement confirmé'),
+        ('report_rejected', 'Signalement rejeté'),
+        ('contest_reviewed', 'Contestation examinée'),
+        ('sanction_lifted', 'Sanction levée ou raccourcie'),
+        ('legal_hold_changed', 'Conservation prolongée modifiée'),
     ]
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -79,6 +85,17 @@ class AlerteFraudeModel(models.Model):
     """Attempt to bypass the platform: contact details or off-site payment offered in a message
     or a listing. Reviewed by an administrator from the back-office (Anti-fraud)."""
     CONTEXTES = [('message', 'Message'), ('annonce', 'Annonce'), ('reservation', 'Réservation')]
+    KINDS = [
+        ('bypass', 'Contournement'),
+        ('refusal', 'Message refusé'),
+        ('simulated', 'Refus simulé'),
+        ('warning_ignored', 'Envoyé après avertissement'),
+        ('false_positive', 'Blocage contesté'),
+        ('report', 'Signalement'),
+        ('sanction', 'Sanction'),
+        ('contest', 'Contestation de sanction'),
+        ('abusive_reporter', 'Signaleur abusif'),
+    ]
 
     cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
     utilisateur_id = models.UUIDField(db_index=True)
@@ -88,6 +105,10 @@ class AlerteFraudeModel(models.Model):
     # Detected elements (the number, the address…): proof for the administrator, never shown to the other party
     extraits = models.JSONField(default=list)
     masquee = models.BooleanField(default=False, help_text='Des coordonnées ont été masquées')
+    kind = models.CharField(max_length=20, choices=KINDS, default='bypass', db_index=True)
+    level = models.CharField(max_length=10, blank=True)
+    threat_notified_at = models.DateTimeField(null=True, blank=True)
+    legal_hold = models.BooleanField(default=False)
     traitee = models.BooleanField(default=False, db_index=True)
     traitee_le = models.DateTimeField(null=True, blank=True)
     traitee_par_id = models.UUIDField(null=True, blank=True, db_index=True)

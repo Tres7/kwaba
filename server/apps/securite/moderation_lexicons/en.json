@@ -1,0 +1,215 @@
+{
+  "targets": [
+    "you are",
+    "you're",
+    "youre",
+    "you were",
+    "u are",
+    "u r",
+    "ur",
+    "you"
+  ],
+  "suffix_targets": [
+    "that you are",
+    "that you're"
+  ],
+  "fillers": [
+    "a",
+    "an",
+    "the",
+    "such",
+    "so",
+    "really",
+    "fucking",
+    "fuckin",
+    "total",
+    "complete",
+    "little",
+    "big",
+    "damn",
+    "stupid",
+    "dumb",
+    "absolute"
+  ],
+  "exceptions": [
+    "killing it",
+    "kill time",
+    "dying to",
+    "die laughing",
+    "killed it",
+    "kill me laughing",
+    "knock on the door",
+    "knock on your door"
+  ],
+  "entries": [
+    {
+      "category": "insult",
+      "level": "block",
+      "targeted": false,
+      "terms": [
+        "fuck you",
+        "fuck u",
+        "fuck off",
+        "fuck yourself",
+        "go fuck yourself",
+        "motherfucker",
+        "motherfucking",
+        "asshole",
+        "arsehole",
+        "bitch",
+        "son of a bitch",
+        "cunt",
+        "dickhead",
+        "piece of shit",
+        "stfu",
+        "gtfo",
+        "wanker",
+        "twat",
+        "shut the fuck up",
+        "eat shit",
+        "bastard",
+        "douchebag",
+        "jackass",
+        "scumbag"
+      ]
+    },
+    {
+      "category": "insult",
+      "level": "block",
+      "targeted": true,
+      "terms": [
+        "idiot",
+        "stupid",
+        "moron",
+        "dumb",
+        "dumbass",
+        "imbecile",
+        "loser",
+        "pathetic",
+        "useless",
+        "trash",
+        "scum",
+        "clown",
+        "whore",
+        "slut",
+        "prick",
+        "dick",
+        "jerk",
+        "worthless",
+        "freak"
+      ]
+    },
+    {
+      "category": "insult",
+      "level": "warn",
+      "targeted": true,
+      "terms": [
+        "scammer",
+        "liar",
+        "thief",
+        "crook",
+        "fraud",
+        "cheater",
+        "incompetent",
+        "hypocrite"
+      ]
+    },
+    {
+      "category": "hate",
+      "level": "block",
+      "targeted": false,
+      "terms": [
+        "nigger",
+        "niggers",
+        "nigga",
+        "niggas",
+        "faggot",
+        "faggots",
+        "kike",
+        "kikes",
+        "chink",
+        "chinks",
+        "spic",
+        "spics",
+        "wetback",
+        "tranny",
+        "go back to your country",
+        "go back to africa",
+        "go back where you came from",
+        "death to (blacks|jews|muslims|arabs|gays|whites|immigrants)"
+      ]
+    },
+    {
+      "category": "hate",
+      "level": "block",
+      "targeted": true,
+      "terms": [
+        "monkey",
+        "ape",
+        "retard",
+        "retarded",
+        "savage",
+        "fag",
+        "subhuman"
+      ]
+    },
+    {
+      "category": "threat",
+      "level": "block",
+      "targeted": false,
+      "terms": [
+        "i (will|ll|m_gonna|m_going_to|am_going_to|gonna|want_to|wanna) (kill|murder|stab|shoot|strangle|rape|beat_up|hurt|burn) (you|u|your_family|your_wife|your_kids)",
+        "i (will|ll|m_gonna|m_going_to|am_going_to|gonna) (burn|torch) (your|ur) (house|car|place)",
+        "you (will|ll|re_gonna|are_going_to|re_going_to) die",
+        "you are dead",
+        "you're dead",
+        "ur dead",
+        "you re a dead (man|woman)",
+        "you are a dead (man|woman)",
+        "your days are numbered",
+        "i ll end you",
+        "i will end you"
+      ]
+    },
+    {
+      "category": "threat",
+      "level": "warn",
+      "targeted": false,
+      "terms": [
+        "i know where you (live|sleep|work)",
+        "you (will|ll|re_gonna|are_going_to) regret (this|it)",
+        "you (will|ll|re_gonna|are_going_to) pay for (this|it)",
+        "watch your back",
+        "watch yourself",
+        "i (will|ll|m_gonna) (ruin|destroy) (you|your_life)",
+        "you don't know who you re dealing with",
+        "you dont know who you re dealing with"
+      ]
+    },
+    {
+      "category": "harassment",
+      "level": "block",
+      "targeted": false,
+      "terms": [
+        "send (me|) (nudes|nude|naked_pics|naked_pictures|naked_photos)",
+        "show (me|) (your|ur) (tits|boobs|ass|pussy|dick|cock|body)",
+        "i (want|wanna|would_like) to (fuck|sleep_with|have_sex_with) you",
+        "suck my (dick|cock)",
+        "i m horny",
+        "im horny"
+      ]
+    },
+    {
+      "category": "harassment",
+      "level": "warn",
+      "targeted": false,
+      "terms": [
+        "(you_are|you're|ur|u_r) (so|very|really|) (sexy|hot)",
+        "send (me|) (a|some) (pic|pics|picture|pictures|photo|photos) of (you|yourself)",
+        "are you (single|married)",
+        "do you have a (boyfriend|husband)",
+        "answer me or"
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useFormat } from "@/lib/format";
 import { usePolling } from "@/lib/usePolling";
 import { listerConversations } from "./api";
+import ModerationNotice, { useModerationStatus } from "./ModerationNotice";
 import type { MessagingConversation } from "./types";
 import { useTranslations } from "next-intl";
 
@@ -26,6 +27,7 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<MessagingConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const moderation = useModerationStatus();
 
   const fetchConversations = useCallback(async () => {
     setConversations(await listerConversations());
@@ -44,6 +46,11 @@ export default function MessagesPage() {
     <div className="min-h-screen bg-light">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl mb-8">{t("titre")}</h1>
+        {moderation.status && (
+          <div className="mb-6">
+            <ModerationNotice status={moderation.status} onChange={moderation.reload} />
+          </div>
+        )}
 
         {loading ? (
           <p className="text-muted text-center py-16">{t("chargement")}</p>

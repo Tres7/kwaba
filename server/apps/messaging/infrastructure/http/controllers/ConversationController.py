@@ -10,9 +10,12 @@ from rest_framework.views import APIView
 from apps.messaging.application.dto.dto import ConversationSummaryDTO, MessageDTO
 from apps.messaging.domain.exceptions import (
     CannotContactOwnHebergementException,
+    ConfirmationRequiredException,
     ConversationNotFoundException,
     HebergementNotFoundException,
     InvalidMessageException,
+    MessageRefusedException,
+    MessagingSuspendedException,
     NotParticipantException,
 )
 from apps.messaging.infrastructure.container import messaging_service
@@ -71,6 +74,11 @@ def _conversation_json(dto: ConversationSummaryDTO) -> dict:
     }
 
 
+def suspended_response(e: MessagingSuspendedException) -> Response:
+    return Response({'detail': str(e), 'code': 'messaging_suspended', 'until': e.until},
+                    status=status.HTTP_403_FORBIDDEN)
+
+
 def _not_found(e: Exception) -> Response:
     return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
@@ -115,6 +123,8 @@ class ConversationListCreateView(WriteGuardsMixin, APIView):
             return _not_found(e)
         except CannotContactOwnHebergementException as e:
             return Response({'detail': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except MessagingSuspendedException as e:
+            return suspended_response(e)
 
         return Response(
             _conversation_json(conversation),
@@ -143,6 +153,8 @@ class ConversationWithGuestView(WriteGuardsMixin, APIView):
             return _not_found(e)
         except (CannotContactOwnHebergementException, NotParticipantException) as e:
             return Response({'detail': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except MessagingSuspendedException as e:
+            return suspended_response(e)
 
         return Response(
             _conversation_json(conversation),
@@ -189,11 +201,20 @@ class ConversationMessagesView(WriteGuardsMixin, APIView):
         try:
             message = messaging_service().send_message(
                 request.user.id, conversation_id, request.data.get('content', ''),
+                confirmed=request.data.get('confirmed') is True,
             )
         except ConversationNotFoundException as e:
             return _not_found(e)
         except InvalidMessageException as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except MessagingSuspendedException as e:
+            return suspended_response(e)
+        except MessageRefusedException as e:
+            return Response({'detail': str(e), 'code': 'abusive_content', 'categories': list(e.categories)},
+                            status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except ConfirmationRequiredException as e:
+            return Response({'detail': str(e), 'code': 'confirmation_required', 'categories': list(e.categories)},
+                            status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         return Response(_message_json(message), status=status.HTTP_201_CREATED)
 
 

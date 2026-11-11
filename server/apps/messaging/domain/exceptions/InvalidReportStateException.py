@@ -1,0 +1,2 @@
+class InvalidReportStateException(Exception):
+    pass
