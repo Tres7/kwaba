@@ -856,7 +856,8 @@
     "annuler": "Annuler",
     "numeroEnregistre": "Numéro enregistré : votre remboursement est en route.",
     "recommande": "Recommandé pour votre prochain voyage",
-    "pointRepere": "Point de repère : {repere}"
+    "pointRepere": "Point de repère : {repere}",
+    "ajouterCalendrier": "Ajouter à mon calendrier"
   },
   "avisDepot": {
     "notes": {

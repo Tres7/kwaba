@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,7 +12,7 @@ from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 from apps.users import api as users
 
-from . import paiement
+from . import calendrier, paiement
 from .models import ReservationModel
 from .serializers import ReservationSerializer, ReservationCreateSerializer
 
@@ -45,6 +46,24 @@ class ReservationListCreateView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             reservation = serializer.save(guest_id=request.user.pk)
         return Response(ReservationSerializer(reservation, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
+
+class ReservationCalendrierView(APIView):
+    """GET → .ics file of a paid stay, for the traveller's phone calendar. Only once paid: it gives the address and
+    the landmark. Opened by a plain link (the site's proxy adds the session), so the phone opens it in its calendar."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        reservation = ReservationModel.objects.filter(pk=pk, guest_id=request.user.pk, status='confirmed').first()
+        annonce = hebergements.fiche(reservation.hebergement_id, archivees=True) if reservation else None
+        if not annonce:
+            return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        langue = request.query_params.get('langue')
+        reponse = HttpResponse(calendrier.evenement(reservation, annonce, langue if langue in ('fr', 'en') else 'fr'),
+                               content_type='text/calendar; charset=utf-8')
+        reponse['Content-Disposition'] = f'attachment; filename="{calendrier.nom_fichier(reservation)}"'
+        reponse['Cache-Control'] = 'private, no-store'
+        return reponse
 
 
 class ReservationDetailView(APIView):
