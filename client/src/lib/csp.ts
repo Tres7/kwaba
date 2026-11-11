@@ -7,10 +7,13 @@ const GOOGLE_ANALYTICS_ENVOIS = `${GOOGLE_ANALYTICS_IMAGES} https://*.analytics.
 /** Receives the browsers' violation reports (app/api/csp-report, with an exact location in nginx). */
 export const RAPPORTS_CSP = "/api/csp-report";
 
-/** Public origin of the API, which serves the uploaded photos (baked at build time, like NEXT_PUBLIC_API_URL). */
+/**
+ * Origin of the API when it is not the site's own (development: Django on its port). In preprod and production the API
+ * and the photos are served under the site itself, already allowed by 'self'.
+ */
 function apiOrigin(): string {
   try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api").origin;
+    return process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : "";
   } catch {
     return "";
   }

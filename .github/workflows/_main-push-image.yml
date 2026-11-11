@@ -8,22 +8,6 @@ on:
         description: server ou client (dossier du Dockerfile et nom de l'image kwaba-<service>)
         type: string
         required: true
-      public-site-url:
-        description: URL publique du site (client uniquement, figée dans l'image au build)
-        type: string
-        default: ''
-      google-client-id:
-        description: Identifiant OAuth Google public (client uniquement)
-        type: string
-        default: ''
-      contact-email:
-        description: Adresse de contact affichée (client uniquement)
-        type: string
-        default: ''
-      variant:
-        description: Vide (production) ou preprod (client uniquement, image kwaba-client-preprod construite pour son URL)
-        type: string
-        default: ''
     outputs:
       image:
         description: Image publiée, référencée par digest (ghcr.io/...@sha256:...). Les tags lisibles (main, manifest-N) sont posés après le manifest.
@@ -34,7 +18,7 @@ permissions:
 
 jobs:
   image:
-    name: Image ${{ inputs.service }}${{ inputs.variant && format(' {0}', inputs.variant) || '' }} (build, smoke test, Trivy, push)
+    name: Image ${{ inputs.service }} (build, smoke test, Trivy, push)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -50,18 +34,10 @@ jobs:
       - id: name
         env:
           SERVICE: ${{ inputs.service }}
-          VARIANT: ${{ inputs.variant }}
-          PUBLIC_SITE_URL: ${{ inputs.public-site-url }}
         run: |
           case "$SERVICE" in server|client) ;; *) echo "::error::Service inconnu : $SERVICE"; exit 1 ;; esac
-          case "${SERVICE}:${VARIANT}" in server:|client:|client:preprod) ;; *) echo "::error::Variante inconnue pour ${SERVICE} : ${VARIANT}"; exit 1 ;; esac
-          if [ "$SERVICE" = client ] && [ -z "$PUBLIC_SITE_URL" ]; then
-            echo "::error::Variable de dépôt ${VARIANT:+PREPROD_}PUBLIC_SITE_URL absente : l'URL publique doit être figée dans l'image du client"
-            exit 1
-          fi
           # GHCR requires a lowercase name (the owner is lowercase today, "kwa-ba", but was "Tres7" before the transfer)
-          echo "repository=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/kwaba-${SERVICE}${VARIANT:+-${VARIANT}}" >> "$GITHUB_OUTPUT"
-          echo "cache=${SERVICE}${VARIANT:+-${VARIANT}}" >> "$GITHUB_OUTPUT"
+          echo "repository=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/kwaba-${SERVICE}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -71,13 +47,8 @@ jobs:
           push: false
           load: true
           tags: ${{ steps.name.outputs.repository }}:sha-${{ github.sha }}
-          build-args: |
-            NEXT_PUBLIC_SITE_URL=${{ inputs.public-site-url }}
-            NEXT_PUBLIC_API_URL=${{ inputs.public-site-url }}/api
-            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ inputs.google-client-id }}
-            NEXT_PUBLIC_CONTACT_EMAIL=${{ inputs.contact-email }}
-          cache-from: type=gha,scope=${{ steps.name.outputs.cache }}
-          cache-to: type=gha,mode=max,scope=${{ steps.name.outputs.cache }}
+          cache-from: type=gha,scope=${{ inputs.service }}
+          cache-to: type=gha,mode=max,scope=${{ inputs.service }}
 
       # The image is published only if it starts and the scan passes: exactly this image goes to GHCR
       - if: inputs.service == 'server'

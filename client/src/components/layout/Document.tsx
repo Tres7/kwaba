@@ -4,6 +4,8 @@ import "@/app/globals.css";
 import Providers from "@/providers/Providers";
 import ConsentProvider from "@/providers/ConsentProvider";
 import AuthProvider from "@/providers/AuthProvider";
+import PublicConfigProvider from "@/providers/PublicConfigProvider";
+import { lireConfigPublique } from "@/lib/public-config";
 import ThemeProvider from "@/providers/ThemeProvider";
 import SplashScreen from "@/components/layout/SplashScreen";
 import SynchroLangue from "@/components/layout/SynchroLangue";
@@ -71,6 +73,7 @@ export default async function Document({ locale, children }: { locale: Langue; c
     <html lang={locale} suppressHydrationWarning>
       <body className={`${montserrat.variable} ${inter.variable} font-body`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
+        <PublicConfigProvider value={lireConfigPublique()}>
         <SynchroLangue />
         <ThemeProvider nonce={nonce}>
           <AuthProvider>
@@ -93,6 +96,7 @@ export default async function Document({ locale, children }: { locale: Langue; c
             </Providers>
           </AuthProvider>
         </ThemeProvider>
+        </PublicConfigProvider>
         </NextIntlClientProvider>
       </body>
     </html>

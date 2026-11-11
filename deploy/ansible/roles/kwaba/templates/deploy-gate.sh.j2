@@ -40,13 +40,18 @@ image() {
   awk -v service="  $1:" '$0 == service { dedans = 1; next } dedans && /^    image: / { print $2; exit } /^  [^ ]/ { dedans = 0 }' "$fichier"
 }
 server_image=$(image server)
+# One client image for every environment. Manifests of November 2026 also hold one built for the preprod URL
+# (clientPreprod): the preprod still uses it when rolling back to one of them.
 client_image=$(image "$service_client")
-depot_client=kwaba-client
-[ "$service_client" = clientPreprod ] && depot_client=kwaba-client-preprod
+depot_client=kwaba-client-preprod
+if [ "$service_client" = client ] || [ -z "$client_image" ]; then
+  client_image=$(image client)
+  depot_client=kwaba-client
+fi
 [[ $server_image =~ ^ghcr\.io/(tres7|kwa-ba)/kwaba-server@sha256:[a-f0-9]{64}$ ]] \
   || { echo "${manifest} : pas d'image serveur par digest" >&2; exit 1; }
 [[ $client_image =~ ^ghcr\.io/(tres7|kwa-ba)/${depot_client}@sha256:[a-f0-9]{64}$ ]] \
-  || { echo "${manifest} : pas d'image ${service_client} par digest (manifest antérieur à cet environnement ?)" >&2; exit 1; }
+  || { echo "${manifest} : pas d'image client par digest" >&2; exit 1; }
 
 # Same exclusions as the deploy workflow: secrets, backups, logs and deployment state stay on the server.
 # --chmod: no group or other write, as set by Ansible, whatever the permissions of the checkout (0775 with umask 002)

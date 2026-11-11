@@ -52,19 +52,15 @@ services:
     kind: image
     sourceRevision: <dernier commit touchant client/>
     image: ghcr.io/kwa-ba/kwaba-client@sha256:<digest>
-  clientPreprod:                    # même révision que client, construite pour l'URL de la préprod
-    kind: image
-    sourceRevision: <dernier commit touchant client/>
-    image: ghcr.io/kwa-ba/kwaba-client-preprod@sha256:<digest>
 ```
 
 Les manifests v1 (client déployé depuis Git, avant le passage au VPS) restent valides ; le premier manifest v2 reconstruit l'image du client.
 
 - Les révisions sont celles du dernier commit qui touche `server/` ou `client/`, et non celles du manifest précédent : un run sauté ne fausse rien.
 - Une image n'est reconstruite que pour un service dont la révision diffère du dernier manifest ; sinon son digest est repris. Sans changement du serveur ni du client, aucun manifest n'est créé.
-- L'image du client fige au build les valeurs publiques, lues dans les variables du dépôt : `PUBLIC_SITE_URL` (obligatoire, ex. `https://kwa-ba.com`), `PUBLIC_GOOGLE_CLIENT_ID`, `PUBLIC_CONTACT_EMAIL`. L'API est attendue sur `<PUBLIC_SITE_URL>/api`.
-- La préprod a donc sa propre image client (`kwaba-client-preprod`), construite en même temps que celle de la prod, à partir de la même révision, avec `PREPROD_PUBLIC_SITE_URL` (obligatoire, `https://preprod.kwa-ba.com`) et `PREPROD_PUBLIC_GOOGLE_CLIENT_ID`. Le serveur a la même image partout. Les manifests antérieurs (sans `clientPreprod`) restent valides et déployables en prod, pas en préprod ; le premier manifest qui suit reconstruit les deux images client.
-- Les scripts (`.github/scripts/manifest`, testés par `npm test`) : `plan.mjs`, `create.mjs`, `validate.mjs`, `latest.mjs`, `target.mjs` (`--environment production|preprod` choisit l'image client).
+- **Une seule image par service, pour tous les environnements** : le manifest testé en préprod part en prod avec les mêmes digests. L'image du client ne fige rien de propre à un environnement : l'adresse du site (`AUTH_URL`), le client Google (`GOOGLE_CLIENT_ID`) et l'adresse de contact (`CONTACT_EMAIL`) sont lus au démarrage du conteneur (`env/client.env`, écrit par Ansible). L'API est servie sous le site (`/api`).
+- Les manifests de novembre 2026 ont en plus une image `clientPreprod` (`kwaba-client-preprod`), construite pour l'URL de la préprod : ils restent valides, et la préprod utilise encore cette image si on y revient.
+- Les scripts (`.github/scripts/manifest`, testés par `npm test`) : `plan.mjs`, `create.mjs`, `validate.mjs`, `latest.mjs`, `target.mjs` (`--environment production|preprod`).
 - Le commit du manifest sur `main` (protégée) est fait par la **CD App**, seule autorisée à contourner le ruleset. Sans elle (variable `CD_APP_CLIENT_ID` absente), le manifest est produit en artefact du run, non commité.
 
 ### Configurer la CD App

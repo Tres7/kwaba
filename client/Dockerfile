@@ -15,14 +15,8 @@ CMD ["npm", "run", "dev"]
 
 FROM deps AS build
 COPY . .
-ARG NEXT_PUBLIC_API_URL=http://localhost/api
-ARG NEXT_PUBLIC_SITE_URL=http://localhost
-ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID=""
-ARG NEXT_PUBLIC_CONTACT_EMAIL=""
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
-    NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
-    NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID \
-    NEXT_PUBLIC_CONTACT_EMAIL=$NEXT_PUBLIC_CONTACT_EMAIL
+# Nothing specific to an environment is baked in: the site address, the Google client and the contact address are read
+# when the container starts (env/client.env), so the same image goes to the preprod then to the production
 RUN npx next build --no-lint
 
 FROM base AS production

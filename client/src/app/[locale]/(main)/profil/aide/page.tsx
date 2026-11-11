@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import SubPageHeader from "@/components/layout/SubPageHeader";
 import FormulaireReclamation from "@/components/aide/FormulaireReclamation";
 import { useTaux } from "@/features/paiements";
-import { CONTACT_EMAIL } from "@/lib/contact";
+import { useConfigPublique } from "@/providers/PublicConfigProvider";
 import { SECTIONS_EN } from "./faq-en";
 
 // Answers written from the terms of sale and terms of use (audit no. 3): each one refers to its article. Answers
@@ -90,6 +90,7 @@ const SECTIONS = [
 
 export default function HelpPage() {
   const t = useTranslations("aide");
+  const { contactEmail: CONTACT_EMAIL } = useConfigPublique();
   const useLocaleEn = useLocale() === "en";
   const { texte: texteTaux } = useTaux();
   // The fee rates of the answers are the ones set in the back-office

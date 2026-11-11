@@ -1,7 +1,10 @@
-import { CONTACT_EMAIL } from "@/lib/contact";
+"use client";
 
-/** "mailto" link to the contact address, with an optional prefilled subject. */
+import { useConfigPublique } from "@/providers/PublicConfigProvider";
+
+/** "mailto" link to the contact address of the environment, with an optional prefilled subject. */
 export default function LienContact({ sujet }: { sujet?: string }) {
-  const href = `mailto:${CONTACT_EMAIL}${sujet ? `?subject=${encodeURIComponent(sujet)}` : ""}`;
-  return <a href={href}>{CONTACT_EMAIL}</a>;
+  const { contactEmail } = useConfigPublique();
+  const href = `mailto:${contactEmail}${sujet ? `?subject=${encodeURIComponent(sujet)}` : ""}`;
+  return <a href={href}>{contactEmail}</a>;
 }

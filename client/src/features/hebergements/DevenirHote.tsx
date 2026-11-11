@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Car, CheckCircle, Home, MessageCircle, Wallet } from "lucide-react";
-import { CONTACT_EMAIL } from "@/lib/contact";
+import { useConfigPublique } from "@/providers/PublicConfigProvider";
 import { useReglagesSite } from "@/lib/site";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api";
@@ -24,6 +24,7 @@ const STEPS = [
 
 export default function DevenirHotePage() {
   const t = useTranslations("devenirHote");
+  const { contactEmail: CONTACT_EMAIL } = useConfigPublique();
   // Rates set in the back-office
   const { texte: texteTaux } = useTaux();
   const router = useRouter();

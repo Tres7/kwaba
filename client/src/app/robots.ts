@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { CHEMINS_PRIVES, SITE_URL } from "@/lib/seo";
 
+// Computed on demand: the address of the sitemap is the one of the environment serving it, not the one of the build
+export const dynamic = "force-dynamic";
+
 const NON_TRADUITS: readonly string[] = ["/backoffice", "/agent", "/api/"];
 
 /** robots.txt: public pages crawled, private pages (account, messages, payment, back-office) excluded. */
