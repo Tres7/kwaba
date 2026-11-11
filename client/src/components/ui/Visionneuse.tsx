@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -16,6 +16,8 @@ interface VisionneuseProps {
   nom: string;
   /** Caption of a photo, its room for example. */
   legende?: (url: string) => string | undefined;
+  /** Under the caption, an action on the photo shown (an agent removes it without leaving the viewer). */
+  action?: (url: string) => ReactNode;
   /** Closing, with the last photo shown: the page can bring its own carousel to it. */
   onClose: (derniere: number) => void;
 }
@@ -29,7 +31,7 @@ const ENTREE_HISTORIQUE = "kwabaVisionneuse";
  * a flick moves one photo only. Stops at the first and the last photo. Only the photo shown and its neighbours are loaded.
  * The back button closes it. Mount it to open, unmount it in `onClose`: each opening starts from `depart`.
  */
-export default function Visionneuse({ photos, depart, nom, legende, onClose }: VisionneuseProps) {
+export default function Visionneuse({ photos, depart, nom, legende, action, onClose }: VisionneuseProps) {
   const t = useTranslations("visionneuse");
   const total = photos.length;
   const [index, setIndex] = useState(() => bornerPhoto(depart, total));
@@ -189,9 +191,10 @@ export default function Visionneuse({ photos, depart, nom, legende, onClose }: V
         )}
       </div>
 
-      <p className="min-h-[3rem] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-center text-sm font-semibold flex-shrink-0">
-        {legendeCourante}
-      </p>
+      <div className="min-h-[3rem] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-2 flex-shrink-0">
+        <p className="text-center text-sm font-semibold">{legendeCourante}</p>
+        {action?.(photos[index])}
+      </div>
     </motion.div>,
     document.body,
   );
