@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Check, ExternalLink, Trash2 } from "lucide-react";
+import Visionneuse from "@/components/ui/Visionneuse";
 import { apiErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { deciderPhotos } from "../api";
@@ -26,6 +28,10 @@ const PIECES: Record<string, string> = {
   entree: "Entrée", vue: "Vue", parking: "Parking", autre: "Autre", piece_principale: "Pièce principale",
 };
 
+const VIGNETTE = "group block w-full cursor-zoom-in focus-visible:outline-none";
+// Focus drawn inside the thumbnail: the rounded frame around it cuts what is outside
+const FOCUS_VIGNETTE = "group-focus-visible:outline group-focus-visible:outline-[3px] group-focus-visible:-outline-offset-[3px] group-focus-visible:outline-primary";
+
 function libelle(code: string | undefined) {
   if (!code) return "Sans pièce";
   const numerotee = code.match(/^(chambre|salle_de_bain)_(\d+)$/);
@@ -43,6 +49,9 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
   const [retirer, setRetirer] = useState<string[]>([]);
   const [motif, setMotif] = useState("");
   const [envoi, setEnvoi] = useState(false);
+  // Photo open in the full-screen viewer, in the added ones or in those seen at the visit
+  const [ouverte, setOuverte] = useState<{ serie: "ajoutees" | "deja_verifiees"; index: number } | null>(null);
+  const tVisionneuse = useTranslations("visionneuse");
 
   const basculer = (url: string) => setRetirer((r) => (r.includes(url) ? r.filter((u) => u !== url) : [...r, url]));
 
@@ -79,13 +88,14 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Photos ajoutées</h2>
         <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {photos.ajoutees.map((url) => {
+          {photos.ajoutees.map((url, i) => {
             const retiree = retirer.includes(url);
             return (
               <li key={url} className={cn("rounded-xl overflow-hidden border", retiree ? "border-red-400" : "border-gray-100")}>
-                <a href={url} target="_blank" rel="noopener noreferrer">
-                  <img src={url} alt={libelle(photos.legendes?.[url])} className={cn("w-full h-32 object-cover", retiree && "opacity-40")} />
-                </a>
+                <button type="button" onClick={() => setOuverte({ serie: "ajoutees", index: i })} className={VIGNETTE}
+                  aria-label={tVisionneuse("agrandir", { photo: `${libelle(photos.legendes?.[url])}, photo ${i + 1}` })}>
+                  <img src={url} alt="" className={cn("w-full h-32 object-cover", FOCUS_VIGNETTE, retiree && "opacity-40")} />
+                </button>
                 <div className="flex items-center justify-between gap-2 px-2 py-1.5">
                   <span className="text-xs text-dark truncate">{libelle(photos.legendes?.[url])}</span>
                   <button type="button" disabled={!peutDecider} onClick={() => basculer(url)} aria-pressed={retiree}
@@ -106,11 +116,32 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
             Photos vues à la visite ({photos.deja_verifiees.length}), pour comparer
           </summary>
           <ul className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">
-            {photos.deja_verifiees.map((url) => (
-              <li key={url}><img src={url} alt={libelle(photos.legendes?.[url])} className="w-full h-20 object-cover rounded-lg" /></li>
+            {photos.deja_verifiees.map((url, i) => (
+              <li key={url}>
+                <button type="button" onClick={() => setOuverte({ serie: "deja_verifiees", index: i })} className={VIGNETTE}
+                  aria-label={tVisionneuse("agrandir", { photo: `${libelle(photos.legendes?.[url])}, photo ${i + 1}` })}>
+                  <img src={url} alt="" className={cn("w-full h-20 object-cover rounded-lg", FOCUS_VIGNETTE)} />
+                </button>
+              </li>
             ))}
           </ul>
         </details>
+      )}
+
+      {ouverte && (
+        <Visionneuse photos={photos[ouverte.serie]} depart={ouverte.index} nom={photos.name}
+          legende={(url) => libelle(photos.legendes?.[url])} onClose={() => setOuverte(null)}
+          // Deciding photo after photo, without closing: the same choice as the "Remove" button of the grid
+          action={ouverte.serie === "ajoutees" && peutDecider ? (url) => {
+            const retiree = retirer.includes(url);
+            return (
+              <button type="button" onClick={() => basculer(url)} disabled={envoi} aria-pressed={retiree}
+                className={cn("flex items-center gap-1.5 text-sm font-bold rounded-xl px-4 py-2.5 disabled:opacity-50",
+                  retiree ? "bg-red-600 text-white" : "bg-white/15 text-white hover:bg-white/25")}>
+                <Trash2 size={15} aria-hidden /> {retiree ? "Photo retirée · Annuler" : "Retirer cette photo"}
+              </button>
+            );
+          } : undefined} />
       )}
 
       {peutDecider && (

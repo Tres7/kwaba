@@ -6,7 +6,7 @@ import { Camera, CheckCircle2, FileText, MapPin, Phone, XCircle } from "lucide-r
 import { apiErrorMessage } from "@/lib/api";
 import { deciderVisite } from "../api";
 import { cn, formatPrice, libelleType } from "@/lib/utils";
-import { urlExterneSure } from "@/lib/url-sure";
+import Visionneuse from "@/components/ui/Visionneuse";
 import { ouvrirPiece } from "./documents";
 import { useTranslations } from "next-intl";
 import { libellePiece } from "@/features/hebergements";
@@ -64,6 +64,12 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
   const [envoi,setEnvoi] = useState<"validee" | "refusee" | null>(null);
 
   const tPieces = useTranslations("pieces");
+  const tVisionneuse = useTranslations("visionneuse");
+  // The cover also appears in the gallery: each photo only once
+  const galerie = Array.from(new Set(logement.photos));
+  const legende = (url: string) => (logement.legendes_photos?.[url] ? libellePiece(logement.legendes_photos[url], tPieces) : undefined);
+  // Photo open in the full-screen viewer, to go from one to the next on the phone during the visit
+  const [photoAgrandie, setPhotoAgrandie] = useState<number | null>(null);
   const toutCoche = Object.keys(controlesLibelles).every((cle) => controles[cle]);
   const piece = PIECE[logement.hote.piece.statut];
   // Verified: shown again at the visit, to compare with the person met
@@ -131,15 +137,19 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         {logement.amenities.length > 0 && <p className="text-sm text-gray-600">Équipements annoncés : {logement.amenities.join(", ")}</p>}
         {logement.description && <p className="text-sm text-gray-600 whitespace-pre-line">{logement.description}</p>}
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {/* The cover also appears in the gallery: each photo only once */}
-          {Array.from(new Set(logement.photos)).map((url) => (
-            <a key={url} href={urlExterneSure(url)} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-              <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg" />
-              {logement.legendes_photos?.[url] && <span className="block text-xs text-gray-600 mt-1">{libellePiece(logement.legendes_photos[url], tPieces)}</span>}
-            </a>
+          {galerie.map((url, i) => (
+            <button key={url} type="button" onClick={() => setPhotoAgrandie(i)} className="group flex-shrink-0 text-left cursor-zoom-in focus-visible:outline-none"
+              aria-label={tVisionneuse("agrandir", { photo: `${logement.name}, photo ${i + 1}` })}>
+              {/* Focus drawn inside the thumbnail: the scrolling row cuts what is outside */}
+              <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg group-focus-visible:outline group-focus-visible:outline-[3px] group-focus-visible:-outline-offset-[3px] group-focus-visible:outline-primary" />
+              {legende(url) && <span className="block text-xs text-gray-600 mt-1">{legende(url)}</span>}
+            </button>
           ))}
         </div>
       </section>
+      {photoAgrandie !== null && (
+        <Visionneuse photos={galerie} depart={photoAgrandie} nom={logement.name} legende={legende} onClose={() => setPhotoAgrandie(null)} />
+      )}
 
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Contrôles sur place</h2>
