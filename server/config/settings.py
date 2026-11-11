@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'apps.contrats.apps.ContratsConfig',
     'apps.experiences.apps.ExperiencesConfig',
     'apps.terrain.apps.TerrainConfig',
+    'apps.correcteur.apps.CorrecteurConfig',
 ]
 
 MIDDLEWARE = [
@@ -205,6 +206,8 @@ REST_FRAMEWORK = {
         'paiement_tiers': '30/hour',
         # Reading a pasted position can follow a Google Maps short link (request to Google)
         'verification_position': '120/hour',
+        # Spelling checker of the listings: one check about a second after the host stops typing
+        'correcteur': '600/hour',
     },
 }
 
@@ -284,6 +287,14 @@ CONCIERGE = {
     # Limits per user (API cost)
     'MAX_PAR_HEURE': int(os.getenv('CONCIERGE_MAX_PAR_HEURE', '20')),
     'MAX_PAR_JOUR': int(os.getenv('CONCIERGE_MAX_PAR_JOUR', '60')),
+}
+
+# Spelling and grammar checker of the listings (apps/correcteur): LanguageTool in a container on the internal network,
+# the text never leaves the server. Empty URL: checker disabled (no underlined mistake, the forms work as before).
+CORRECTEUR = {
+    'URL': os.getenv('CORRECTEUR_URL', 'http://languagetool:8010'),
+    # Seconds LanguageTool may take to answer; beyond that the form goes on without the check
+    'DELAI': float(os.getenv('CORRECTEUR_DELAI', '3')),
 }
 
 # Support contact given to travellers (airport transfers…)

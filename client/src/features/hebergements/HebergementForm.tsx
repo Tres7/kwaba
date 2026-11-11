@@ -13,6 +13,7 @@ import PhotoUploader from "./PhotoUploader";
 import EstimateurRevenus from "./EstimateurRevenus";
 import FraisMenageType from "./FraisMenageType";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
+import { ChampCorrige } from "@/features/correcteur";
 import Select from "@/components/ui/Select";
 import Stepper from "@/components/ui/Stepper";
 import { cn } from "@/lib/utils";
@@ -90,6 +91,9 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
+  // Fields checked for spelling mistakes (ChampCorrige gives the text, not the event)
+  const setTexte = (key: "name" | "point_repere" | "description") => (valeur: string) =>
+    setForm((prev) => ({ ...prev, [key]: valeur }));
 
   const toggleAmenity = (a: string) =>
     setForm((prev) => ({ ...prev, amenities: prev.amenities.includes(a) ? prev.amenities.filter((x) => x !== a) : [...prev.amenities, a] }));
@@ -199,7 +203,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
 
       <div>
         <label className={labelClass} htmlFor="h-name">{t("titre")}</label>
-        <input id="h-name" className={inputClass} value={form.name} onChange={set("name")} placeholder={t("titreExemple")} required maxLength={200} />
+        <ChampCorrige id="h-name" className={inputClass} valeur={form.name} onValeur={setTexte("name")} placeholder={t("titreExemple")} required maxLength={200} />
         {err("name")}
       </div>
 
@@ -234,7 +238,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         </div>
         <div className="sm:col-span-2">
           <label className={labelClass} htmlFor="h-repere">{t("pointRepere")}</label>
-          <input id="h-repere" className={inputClass} value={form.point_repere} onChange={set("point_repere")}
+          <ChampCorrige id="h-repere" className={inputClass} valeur={form.point_repere} onValeur={setTexte("point_repere")}
             placeholder={t("pointRepereExemple")} maxLength={200} required={!initial} />
           <p className="text-xs text-gray-500 mt-1.5">{t("pointRepereAide")}</p>
           {err("point_repere")}
@@ -328,7 +332,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
 
       <div>
         <label className={labelClass} htmlFor="h-desc">{t("description")}</label>
-        <textarea id="h-desc" rows={5} className={cn(inputClass, "resize-y")} value={form.description} onChange={set("description")} placeholder={t("descriptionPlaceholder")} />
+        <ChampCorrige multiligne id="h-desc" rows={5} className={cn(inputClass, "resize-y")} valeur={form.description} onValeur={setTexte("description")} placeholder={t("descriptionPlaceholder")} />
       </div>
 
       <div>
