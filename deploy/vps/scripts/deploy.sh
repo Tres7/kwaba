@@ -44,6 +44,10 @@ annexes=()
 if kwaba_compose config --services | grep -qx mailpit; then annexes+=(mailpit); fi
 kwaba_compose up -d --wait postgres rabbitmq "${annexes[@]}"
 
+log "Correcteur des annonces (LanguageTool)"
+# Neither waited for nor required: without it the API works, only the spelling checker of the listings stays silent
+kwaba_compose up -d languagetool || log "LanguageTool non démarré : le correcteur des annonces reste muet"
+
 log "Sauvegarde de la base avant migrations"
 scripts/backup.sh "avant-${manifest%.yaml}"
 

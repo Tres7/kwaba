@@ -2405,5 +2405,18 @@
     "precedente": "Previous photo",
     "suivante": "Next photo",
     "fermer": "Close"
+  },
+  "correcteur": {
+    "resume": "{nombre, plural, one {# possible mistake} other {# possible mistakes}}",
+    "toutCorriger": "Fix all",
+    "orthographe": "Unknown or misspelled word",
+    "grammaire": "Possible grammar mistake",
+    "espaces": "Extra spaces",
+    "corriger": "Fix",
+    "remplacerPar": "Replace with “{mot}”",
+    "ignorer": "Ignore",
+    "voirDansLeTexte": "Show in the text",
+    "voirLesAutres": "{nombre, plural, one {See the other mistake} other {See the # other mistakes}}",
+    "voirMoins": "See less"
   }
 }

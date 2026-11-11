@@ -75,6 +75,27 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  # Spelling checker of the listings (server/apps/correcteur): the backend reaches it at http://languagetool:8010
+  languagetool:
+    image: erikvl87/languagetool:6.8@sha256:ef8fa12cbd485166c9ceeb7139d76d56d07707a624da6bb1fc1fbb5411750527
+    container_name: kwaba-languagetool
+    environment:
+      Java_Xms: 256m
+      Java_Xmx: 512m
+      # Rules of a language loaded once, not at every check (2 s → 50 ms)
+      langtool_pipelineCaching: 'true'
+      langtool_maxPipelinePoolSize: '4'
+    ports:
+      - "127.0.0.1:8010:8010"
+    # Also keeps the French and English rules loaded, and their spelling suggestions (a mistake on purpose): no host
+    # waits for them (about 8 s the first time)
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS -o /dev/null --data "language=fr&text=Une mason" http://localhost:8010/v2/check && curl -fsS -o /dev/null --data "language=en-GB&text=A hous" http://localhost:8010/v2/check']
+      interval: 30s
+      timeout: 15s
+      start_period: 60s
+      retries: 3
+
   consumer:
     build:
       context: ./server

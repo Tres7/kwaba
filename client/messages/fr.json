@@ -2405,5 +2405,18 @@
     "precedente": "Photo précédente",
     "suivante": "Photo suivante",
     "fermer": "Fermer"
+  },
+  "correcteur": {
+    "resume": "{nombre, plural, one {# faute à vérifier} other {# fautes à vérifier}}",
+    "toutCorriger": "Tout corriger",
+    "orthographe": "Mot inconnu ou mal écrit",
+    "grammaire": "Faute de grammaire possible",
+    "espaces": "Espaces en trop",
+    "corriger": "Corriger",
+    "remplacerPar": "Remplacer par « {mot} »",
+    "ignorer": "Ignorer",
+    "voirDansLeTexte": "Voir dans le texte",
+    "voirLesAutres": "{nombre, plural, one {Voir l'autre faute} other {Voir les # autres fautes}}",
+    "voirMoins": "Voir moins"
   }
 }

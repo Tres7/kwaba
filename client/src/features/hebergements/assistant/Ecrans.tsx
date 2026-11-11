@@ -6,6 +6,7 @@ import { Camera, Check, Plus, Sun, Trash2, type LucideIcon } from "lucide-react"
 import { ICONES_TYPES, TYPES_LOGEMENT } from "@/components/hebergement/TypeLogement";
 import { useConfigPaiement } from "@/features/paiements";
 import { ChoixPosition, type PointCarte } from "@/features/carte";
+import { ChampCorrige } from "@/features/correcteur";
 import Stepper from "@/components/ui/Stepper";
 import { useFormat } from "@/lib/format";
 import { quartiersDe, VILLES } from "@/lib/quartiers";
@@ -131,8 +132,8 @@ function EcranAdresse({ donnees, modifier, erreurs }: EcranProps) {
         </div>
         <div>
           <label className={libelleClass} htmlFor="a-repere">{t("pointRepere")}</label>
-          <input id="a-repere" className={champClass} value={donnees.point_repere ?? ""} maxLength={200}
-            onChange={(e) => modifier({ point_repere: e.target.value })} placeholder={t("pointRepereExemple")} />
+          <ChampCorrige id="a-repere" className={champClass} valeur={donnees.point_repere ?? ""} maxLength={200}
+            onValeur={(point_repere) => modifier({ point_repere })} placeholder={t("pointRepereExemple")} />
           <p className="text-xs text-gray-500 mt-1.5">{t("pointRepereAide")}</p>
           <Erreur messages={erreurs.point_repere} />
         </div>
@@ -332,8 +333,8 @@ function EcranTitre({ donnees, modifier, erreurs }: EcranProps) {
   return (
     <Question cle="titre">
       <label className="sr-only" htmlFor="a-titre">{t("titre.titre")}</label>
-      <textarea id="a-titre" rows={2} className={cn(champClass, "resize-none font-heading font-semibold text-lg")} value={titre}
-        onChange={(e) => modifier({ name: e.target.value.replace(/\n/g, " ") })} placeholder={t("titre.exemple")} />
+      <ChampCorrige multiligne id="a-titre" rows={2} className={cn(champClass, "resize-none font-heading font-semibold text-lg")} valeur={titre}
+        onValeur={(name) => modifier({ name: name.replace(/\n/g, " ") })} placeholder={t("titre.exemple")} />
       <Compteur valeur={titre.length} max={MAX_TITRE} />
       <Erreur messages={erreurs.name} />
     </Question>
@@ -346,8 +347,8 @@ function EcranDescription({ donnees, modifier, erreurs }: EcranProps) {
   return (
     <Question cle="description">
       <label className="sr-only" htmlFor="a-description">{t("description.titre")}</label>
-      <textarea id="a-description" rows={8} className={cn(champClass, "resize-y")} value={description}
-        onChange={(e) => modifier({ description: e.target.value })} placeholder={t("description.exemple")} />
+      <ChampCorrige multiligne id="a-description" rows={8} className={cn(champClass, "resize-y")} valeur={description}
+        onValeur={(texte) => modifier({ description: texte })} placeholder={t("description.exemple")} />
       <Compteur valeur={description.length} max={MAX_DESCRIPTION} />
       {description.trim().length > 0 && description.trim().length < MIN_DESCRIPTION && (
         <p className="text-sm text-gray-500">{t("description.encore", { nombre: MIN_DESCRIPTION - description.trim().length })}</p>
