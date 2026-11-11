@@ -140,6 +140,34 @@ services:
     logging: *logging
     mem_limit: 384m
 
+  # Spelling checker of the listings (apps/correcteur of the API): LanguageTool, on the internal network only, so the
+  # text of the listings never leaves the server. Optional: without it the API works and no mistake is underlined.
+  languagetool:
+    image: erikvl87/languagetool:6.8@sha256:ef8fa12cbd485166c9ceeb7139d76d56d07707a624da6bb1fc1fbb5411750527
+    environment:
+      # Measured on 2026-11-11: about 720 MB once French and English are loaded. Below 512 MB of heap, Java spends its
+      # time freeing memory (107 s for a description instead of 0.4 s).
+      Java_Xms: 256m
+      Java_Xmx: 512m
+      # Rules of a language loaded once, not at every check (2 s → 50 ms). Never pipelinePrewarming: it loads the
+      # thirty languages of LanguageTool and runs out of memory.
+      langtool_pipelineCaching: 'true'
+      langtool_maxPipelinePoolSize: '4'
+      langtool_maxTextLength: '10000'
+    # Also keeps the French and English rules loaded, and their spelling suggestions (a mistake on purpose): no host
+    # waits for them (about 8 s the first time)
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS -o /dev/null --data "language=fr&text=Une mason" http://localhost:8010/v2/check && curl -fsS -o /dev/null --data "language=en-GB&text=A hous" http://localhost:8010/v2/check']
+      interval: 30s
+      timeout: 15s
+      start_period: 60s
+      retries: 3
+    security_opt: *security
+    networks: [backend]
+    restart: unless-stopped
+    logging: *logging
+    mem_limit: 1g
+
   # First certificate only (scripts/init-tls.sh): plain-HTTP nginx for the Let's Encrypt challenge
   acme:
     image: nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de
