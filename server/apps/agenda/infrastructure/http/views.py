@@ -201,6 +201,17 @@ class AppointmentsView(APIView):
         return Response({'results': [_appointment_json(a, agents) for a in appointments]})
 
 
+class TargetAppointmentView(APIView):
+    permission_classes = [IsAgent]
+
+    def get(self, request, target_id):
+        appointment = next(iter(agenda_service().confirmed_for_targets([target_id])), None)
+        if appointment is None:
+            return Response({'appointment': None})
+        data = _appointment_json(appointment, users.comptes([appointment.agent_id]))
+        return Response({'appointment': {**data, 'mine': appointment.agent_id == request.user.pk}})
+
+
 class AppointmentView(APIView):
     permission_classes = [IsAgent]
 

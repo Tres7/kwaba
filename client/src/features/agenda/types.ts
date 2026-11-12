@@ -22,6 +22,10 @@ export interface Appointment {
   post_check: boolean;
 }
 
+export interface TargetAppointment extends Appointment {
+  mine: boolean;
+}
+
 export interface AppointmentDetail extends Appointment {
   position: { latitude: number; longitude: number } | null;
   host: { name: string; phone: string; email: string } | null;

@@ -32,6 +32,8 @@ describe("agenda", () => {
       { params: { start: "2026-11-09", end: "2026-11-15", agent: "all" } });
     await agenda.readAppointment("a1");
     expect(api.get).toHaveBeenLastCalledWith("/v1/agenda/appointments/a1/");
+    await agenda.readTargetAppointment("l1");
+    expect(api.get).toHaveBeenLastCalledWith("/v1/agenda/appointments/for-target/l1/");
     await agenda.onTheWay("a1");
     expect(api.post).toHaveBeenLastCalledWith("/v1/agenda/appointments/a1/on-the-way/");
     await agenda.cancelAppointment("a1", "Malade");
