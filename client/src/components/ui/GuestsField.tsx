@@ -41,11 +41,11 @@ export default function GuestsField({ value, onChange, max = 16, variant = "fiel
           open && variant === "field" && "border-primary ring-2 ring-primary/20",
         )}
       >
-        <Users size={16} className="text-primary flex-shrink-0" />
+        <Users size={16} className="text-primary shrink-0" />
         <span className="flex-1 min-w-0 text-base md:text-sm font-medium text-dark truncate">
           {t("voyageurs", { nombre: value })}
         </span>
-        <ChevronDown size={16} className={cn("text-gray-400 transition-transform flex-shrink-0", open && "rotate-180")} />
+        <ChevronDown size={16} className={cn("text-gray-400 transition-transform shrink-0", open && "rotate-180")} />
       </button>
 
       {open && (

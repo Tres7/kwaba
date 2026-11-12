@@ -208,7 +208,7 @@ function HebergementContent() {
     <div className="bg-light pb-28 lg:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
         <div className="flex items-center gap-2 text-sm text-muted min-w-0">
-          <button onClick={() => router.back()} className="relative zone-tactile flex items-center gap-1 hover:text-primary transition-colors flex-shrink-0">
+          <button onClick={() => router.back()} className="relative zone-tactile flex items-center gap-1 hover:text-primary transition-colors shrink-0">
             <ArrowLeft size={14} /> {t("retour")}
           </button>
           <span>/</span>
@@ -245,7 +245,7 @@ function HebergementContent() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button onClick={handleShare} aria-label={t("partager")} className="relative zone-tactile flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 text-sm text-dark hover:bg-light-muted transition-colors">
               <Share2 size={15} /><span className="hidden sm:inline">{t("partager")}</span>
             </button>
@@ -256,7 +256,7 @@ function HebergementContent() {
         {/* Gallery: horizontal carousel on mobile, mosaic on desktop; a photo opens the full-screen viewer */}
         <div ref={carrousel} className="md:hidden -mx-4 mb-8 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide" tabIndex={0} role="region" aria-label={hebergement.name}>
           {photos.map((img, i) => (
-            <div key={img + i} className="snap-center flex-shrink-0 w-full px-4">
+            <div key={img + i} className="snap-center shrink-0 w-full px-4">
               <CadrePhoto onAgrandir={agrandir(i)} label={tVisionneuse("agrandir", { photo: `${hebergement.name}, photo ${i + 1}` })} className="relative block w-full rounded-2xl">
                 <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-64 object-cover rounded-2xl" />
                 {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-white/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
@@ -275,7 +275,7 @@ function HebergementContent() {
           ))}
           {gallery.length > 5 && (
             <button type="button" onClick={() => setPhotoAgrandie(0)}
-              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white text-dark text-sm font-semibold px-4 py-2.5 rounded-xl shadow-card hover:bg-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white text-dark text-sm font-semibold px-4 py-2.5 rounded-xl shadow-card hover:bg-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary">
               <Images size={16} aria-hidden /> {t("voirPhotos", { nombre: gallery.length })}
             </button>
           )}
@@ -289,7 +289,7 @@ function HebergementContent() {
           <div className="lg:col-span-2 space-y-6">
             <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
                   {hebergement.host_name?.[0]?.toUpperCase() ?? "H"}
                 </div>
                 <div className="min-w-0">
@@ -316,7 +316,7 @@ function HebergementContent() {
                   <Pencil size={15} /> {t("gerer")}
                 </Link>
               ) : (
-                <button onClick={handleContact} disabled={contacting} className="flex items-center gap-2 text-sm font-bold text-primary border border-primary/30 rounded-xl px-4 py-2 hover:bg-primary/5 disabled:opacity-50 flex-shrink-0">
+                <button onClick={handleContact} disabled={contacting} className="flex items-center gap-2 text-sm font-bold text-primary border border-primary/30 rounded-xl px-4 py-2 hover:bg-primary/5 disabled:opacity-50 shrink-0">
                   <MessageCircle size={15} /> {contacting ? t("ouverture") : t("contacter")}
                 </button>
               )}
@@ -487,7 +487,7 @@ function HebergementContent() {
         <button
           onClick={() => (canBook ? goBook() : document.getElementById("reserver")?.scrollIntoView({ behavior: "smooth" }))}
           disabled={isOwner}
-          className="bg-primary text-white font-bold px-6 py-3 rounded-xl disabled:opacity-50 flex-shrink-0"
+          className="bg-primary text-white font-bold px-6 py-3 rounded-xl disabled:opacity-50 shrink-0"
         >
           {isOwner ? t("votreAnnonce") : canBook ? t("reserver") : t("choisirDates")}
         </button>

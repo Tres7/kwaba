@@ -13,7 +13,7 @@ const PREFIXE = /^\(\d+\) /;
 function Notification({ id, icone: Icone, titre, texte }: { id: string | number; icone: typeof IdCard; titre: string; texte: string }) {
   return (
     <div className="w-full sm:w-[380px] flex gap-3 rounded-2xl bg-primary-800 text-white p-4 shadow-card-hover">
-      <span className="w-10 h-10 flex-shrink-0 rounded-xl bg-white/10 flex items-center justify-center"><Icone size={20} aria-hidden /></span>
+      <span className="w-10 h-10 shrink-0 rounded-xl bg-white/10 flex items-center justify-center"><Icone size={20} aria-hidden /></span>
       <div className="flex-1 min-w-0">
         <p className="font-heading font-bold text-[15px] leading-snug">{titre}</p>
         <p className="text-sm text-white/80 mt-0.5">{texte}</p>
@@ -22,7 +22,7 @@ function Notification({ id, icone: Icone, titre, texte }: { id: string | number;
         </Link>
       </div>
       <button type="button" onClick={() => toast.dismiss(id)} aria-label="Fermer la notification"
-        className="w-8 h-8 -mt-1 -mr-1 flex-shrink-0 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10">
+        className="w-8 h-8 -mt-1 -mr-1 shrink-0 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10">
         <X size={18} aria-hidden />
       </button>
     </div>

@@ -55,7 +55,7 @@ export default function FormulaireReclamation() {
   if (etat === "envoye") {
     return (
       <div role="status" className="flex items-start gap-3 bg-secondary/10 text-dark rounded-2xl p-5">
-        <CheckCircle2 size={22} className="text-secondary flex-shrink-0 mt-0.5" />
+        <CheckCircle2 size={22} className="text-secondary shrink-0 mt-0.5" />
         <div>
           <p className="font-bold">{t("accuseTitre")}</p>
           <p className="text-sm text-gray-600 mt-1">{t("accuseTexte")}</p>
@@ -64,7 +64,7 @@ export default function FormulaireReclamation() {
     );
   }
 
-  const zone = "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base sm:text-sm text-dark outline-none focus:ring-4 focus:ring-primary/10";
+  const zone = "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base sm:text-sm text-dark outline-hidden focus:ring-4 focus:ring-primary/10";
   return (
     <form method="post" onSubmit={envoyer} className="space-y-4">
       <div>

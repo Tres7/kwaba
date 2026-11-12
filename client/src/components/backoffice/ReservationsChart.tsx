@@ -23,7 +23,7 @@ export default function ReservationsChart({ jours }: { jours: Jour[] }) {
     <div>
       <div className="flex items-center justify-between gap-3 mb-4">
         <h2 className="font-heading font-bold text-dark">Réservations confirmées (30 derniers jours)</h2>
-        <button onClick={() => setTableau(!tableau)} className="text-xs font-semibold text-primary hover:underline flex-shrink-0">
+        <button onClick={() => setTableau(!tableau)} className="text-xs font-semibold text-primary hover:underline shrink-0">
           {tableau ? "Voir le graphique" : "Voir le tableau"}
         </button>
       </div>
@@ -69,10 +69,10 @@ export default function ReservationsChart({ jours }: { jours: Jour[] }) {
                     key={j.date} type="button"
                     onMouseEnter={() => setSurvol(i)} onFocus={() => setSurvol(i)} onBlur={() => setSurvol(null)}
                     aria-label={`${formatDate(j.date, { day: "numeric", month: "long" })} : ${j.nombre} réservation(s), ${formatPrice(j.volume)}`}
-                    className="flex-1 h-full flex items-end group focus:outline-none"
+                    className="flex-1 h-full flex items-end group focus:outline-hidden"
                   >
                     <span
-                      className={cn("w-full rounded-t-[4px] transition-opacity", survol !== null && survol !== i && "opacity-40", "group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-dark")}
+                      className={cn("w-full rounded-t-[4px] transition-opacity", survol !== null && survol !== i && "opacity-40", "group-focus-visible:outline-solid group-focus-visible:outline-2 group-focus-visible:outline-dark")}
                       style={{ height: j.nombre ? `${(j.nombre / max) * 100}%` : 2, background: j.nombre ? BARRE : "#e5e7eb" }}
                     />
                   </button>

@@ -38,7 +38,7 @@ export default function SplashScreen() {
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           onClick={() => setVisible(false)}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-[#0f172a] cursor-pointer"
+          className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-white dark:bg-[#0f172a] cursor-pointer"
         >
           {/* Animated logo */}
           <motion.div

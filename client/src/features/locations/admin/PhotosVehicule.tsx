@@ -115,7 +115,7 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
         onDragOver={(e) => { e.preventDefault(); setSurvol(true); }}
         onDragLeave={() => setSurvol(false)}
         onDrop={(e) => { e.preventDefault(); setSurvol(false); if (!complet && e.dataTransfer.files.length) ajouter(e.dataTransfer.files); }}
-        className={cn("rounded-2xl border-2 border-dashed p-4 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+        className={cn("rounded-2xl border-2 border-dashed p-4 text-center transition-colors outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40",
           complet ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary/50 hover:bg-primary/5",
           survol ? "border-primary bg-primary/5" : erreur ? "border-red-300 bg-red-50/40" : "border-gray-200 bg-gray-50/60")}>
         <ImagePlus size={24} className="mx-auto text-primary mb-1" aria-hidden />
@@ -129,7 +129,7 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
       {vignettes.length > 0 && (
         <ul className="grid grid-cols-3 gap-2 mt-3">
           {vignettes.map((v) => (
-            <li key={v.cle} className={cn("relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100", v.principale && "ring-2 ring-primary")}>
+            <li key={v.cle} className={cn("relative aspect-4/3 rounded-xl overflow-hidden bg-gray-100", v.principale && "ring-2 ring-primary")}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={v.src} alt="" className={cn("w-full h-full object-cover", (v.attente || v.envoi || v.erreur) && "opacity-60")} />
               {v.principale && (
@@ -147,7 +147,7 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
                 </span>
               )}
               {!v.envoi && (
-                <span className="absolute bottom-0 inset-x-0 flex justify-end gap-1 p-1 bg-gradient-to-t from-black/60 to-transparent">
+                <span className="absolute bottom-0 inset-x-0 flex justify-end gap-1 p-1 bg-linear-to-t from-black/60 to-transparent">
                   {v.photo && !v.principale && (
                     <button type="button" onClick={() => principale(v.photo!)} disabled={action !== null} aria-label="Définir comme photo principale"
                       title="Définir comme photo principale" className={cn(bouton, "text-primary")}><Star size={13} aria-hidden /></button>

@@ -92,7 +92,7 @@ export default function FormulaireDon({ organisation, projetId }: { organisation
         <input id="don-libre" type="number" inputMode="numeric" min={config.montant_min} max={config.montant_max} step={1}
           value={libre} onChange={(e) => setLibre(e.target.value.replace(/\D/g, ""))} placeholder={t("desMontant", { montant: config.montant_min })}
           aria-describedby="don-libre-aide"
-          className="mt-1 w-full sm:w-60 rounded-xl border border-gray-200 px-4 py-2.5 text-dark focus:border-primary focus:outline-none" />
+          className="mt-1 w-full sm:w-60 rounded-xl border border-gray-200 px-4 py-2.5 text-dark focus:border-primary focus:outline-hidden" />
         <p id="don-libre-aide" className={cn("text-xs mt-1", libre && !valide ? "text-red-700" : "text-gray-600")}>
           {libre && !valide
             ? `Entre ${formatFcfa(config.montant_min)} et ${formatFcfa(config.montant_max)}.`
@@ -127,11 +127,11 @@ export default function FormulaireDon({ organisation, projetId }: { organisation
           <div className="flex justify-between gap-3"><dt className="font-bold text-primary">{t("ongRecoit")}</dt><dd className="font-bold text-primary">{formatFcfa(calcul.montantOng)}</dd></div>
         </dl>
         <p className="flex gap-2 px-4 py-3 text-gray-600">
-          <CalendarClock size={16} className="text-primary flex-shrink-0 mt-0.5" />
+          <CalendarClock size={16} className="text-primary shrink-0 mt-0.5" />
           <span>{t.rich("calendrier", { date: formatDate(dateReversement(config.jour_reversement).toISOString()), strong: (x) => <strong className="text-dark">{x}</strong> })}</span>
         </p>
         <p className="flex gap-2 px-4 py-3 text-gray-600">
-          <ShieldCheck size={16} className="text-primary flex-shrink-0 mt-0.5" />
+          <ShieldCheck size={16} className="text-primary shrink-0 mt-0.5" />
           <span>
             {t("donnees")}{" "}
             <Link href="/confidentialite" className="font-semibold text-primary hover:underline">{t("politique")}</Link>

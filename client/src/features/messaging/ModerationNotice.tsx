@@ -56,7 +56,7 @@ function ContestDialog({ sanction, onClose, onDone }: { sanction: UserSanction; 
         <span className="text-sm font-semibold text-dark">{t("contestLabel")}</span>
         <textarea
           value={text} onChange={(e) => setText(e.target.value)} maxLength={CONTEST_MAX} rows={4}
-          className="mt-1 w-full rounded-xl border border-light px-3 py-2 text-sm text-dark outline-none focus:border-primary/40"
+          className="mt-1 w-full rounded-xl border border-light px-3 py-2 text-sm text-dark outline-hidden focus:border-primary/40"
         />
       </label>
     </MessagingDialog>

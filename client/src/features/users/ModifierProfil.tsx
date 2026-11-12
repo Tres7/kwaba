@@ -85,7 +85,7 @@ export default function EditProfilePage() {
         <Link
           href="/profil"
           aria-label={t("retourProfil")}
-          className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-dark hover:bg-light transition-colors"
+          className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light transition-colors"
         >
           <ArrowLeft size={20} />
         </Link>
@@ -120,7 +120,7 @@ export default function EditProfilePage() {
                   name="first_name"
                   value={form.first_name}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -135,7 +135,7 @@ export default function EditProfilePage() {
                   name="last_name"
                   value={form.last_name}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -169,7 +169,7 @@ export default function EditProfilePage() {
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="+228 90 00 00 00"
-                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
               />
             </div>
           </div>

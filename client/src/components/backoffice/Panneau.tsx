@@ -25,7 +25,7 @@ export default function Panneau({ ouvert, titre, onFermer, onValider, envoi, lib
 
   if (!ouvert) return null;
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-stretch sm:justify-end">
+    <div className="fixed inset-0 z-100 flex items-end sm:items-stretch sm:justify-end">
       <div className="absolute inset-0 bg-black/40" onClick={() => !envoi && onFermer()} aria-hidden />
       <form
         method="post"
@@ -56,7 +56,7 @@ export default function Panneau({ ouvert, titre, onFermer, onValider, envoi, lib
   );
 }
 
-const champClasse = "w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const champClasse = "w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 /** Labelled field with its error below it. */
 export function Champ({ label, erreur, aide, children, className }: {

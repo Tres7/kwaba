@@ -49,7 +49,7 @@ export default function MobileDrawer({ open, onClose, label, header, side = "rig
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[95]" role="dialog" aria-modal="true" aria-label={label}>
+        <div className="fixed inset-0 z-95" role="dialog" aria-modal="true" aria-label={label}>
           <motion.div
             className="absolute inset-0 bg-dark/50 backdrop-blur-[2px]"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -62,7 +62,7 @@ export default function MobileDrawer({ open, onClose, label, header, side = "rig
             initial={{ x: horsEcran }} animate={{ x: 0 }} exit={{ x: horsEcran }}
             transition={{ type: "spring", stiffness: 380, damping: 36 }}
           >
-            <div className="flex items-center justify-between gap-3 px-5 h-16 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center justify-between gap-3 px-5 h-16 border-b border-gray-100 shrink-0">
               <div className="min-w-0">{header}</div>
               <button type="button" onClick={onClose} aria-label={t("fermerMenu")} className="w-10 h-10 -mr-2 rounded-full flex items-center justify-center text-dark hover:bg-gray-100">
                 <X size={22} />

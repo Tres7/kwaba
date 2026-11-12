@@ -74,9 +74,9 @@ export default function DevenirHotePage() {
       <section className="relative overflow-hidden bg-primary text-white">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2000&auto=format&fit=crop')" }} />
         {/* The photo stays visible; the gradient keeps the text readable */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary-900/95 via-primary-900/70 to-primary-900/40" />
+        <div className="absolute inset-0 bg-linear-to-t from-primary-900/95 via-primary-900/70 to-primary-900/40" />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-center">
-          <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl mb-4 drop-shadow-sm selection:bg-white selection:text-primary">{t("titre")}</h1>
+          <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl mb-4 drop-shadow-xs selection:bg-white selection:text-primary">{t("titre")}</h1>
           <p className="text-white/90 text-base md:text-lg max-w-2xl mx-auto mb-8 selection:bg-white selection:text-primary">
             {t("sousTitre")}
           </p>
@@ -93,7 +93,7 @@ export default function DevenirHotePage() {
         <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl text-center mb-10">{t("commentCaMarche")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {STEPS.map(({ icon: Icon, id }, i) => (
-            <div key={id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+            <div key={id} className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100">
               <div className="flex items-center gap-3 mb-4">
                 <span className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center"><Icon size={20} /></span>
                 <span className="text-sm font-bold text-muted">{t("etape", { numero: i + 1 })}</span>
@@ -124,7 +124,7 @@ export default function DevenirHotePage() {
           </div>
 
           <div className="mt-6 bg-primary/5 rounded-3xl p-5 md:p-6 flex flex-col sm:flex-row gap-4 sm:items-center">
-            <span className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0"><Car size={22} /></span>
+            <span className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0"><Car size={22} /></span>
             <div className="flex-1">
               <p className="font-heading font-bold text-dark">{t("tarifs.mobilite.titre")}</p>
               <p className="text-sm text-gray-600 mt-1 leading-relaxed">{t("tarifs.mobilite.texte")}</p>
@@ -137,7 +137,7 @@ export default function DevenirHotePage() {
           <h3 className="font-heading font-bold text-dark text-lg mb-4">{t("ceQuIlFaut")}</h3>
           <ul className="grid sm:grid-cols-2 gap-3 text-sm text-gray-600">
             {["compte", "identite", "photos", "prix", "capacite"].map((cle) => t(`besoins.${cle}`)).map((item) => (
-              <li key={item} className="flex items-start gap-2"><CheckCircle size={16} className="text-secondary flex-shrink-0 mt-0.5" />{item}</li>
+              <li key={item} className="flex items-start gap-2"><CheckCircle size={16} className="text-secondary shrink-0 mt-0.5" />{item}</li>
             ))}
           </ul>
         </div>

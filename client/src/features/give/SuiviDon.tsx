@@ -79,7 +79,7 @@ function RetourDon() {
 
         {don.statut === "paye" && don.date_reversement && (
           <p className="flex gap-2 mt-4 text-sm text-gray-600">
-            <CalendarClock size={16} className="text-primary flex-shrink-0 mt-0.5" />
+            <CalendarClock size={16} className="text-primary shrink-0 mt-0.5" />
             {t("calendrier", { date: formatDate(don.date_reversement, { day: "numeric", month: "long", year: "numeric" }) })}
           </p>
         )}

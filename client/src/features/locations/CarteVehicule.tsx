@@ -13,7 +13,7 @@ function Galerie({ photos, nom }: { photos: string[]; nom: string }) {
   const [index, setIndex] = useState(0);
   if (!photos.length) return <Car size={56} className="text-gray-300" aria-hidden />;
   const aller = (i: number) => rail.current?.scrollTo({ left: i * rail.current.clientWidth, behavior: "smooth" });
-  const fleche = "absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-dark shadow flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity";
+  const fleche = "absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-dark shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity";
   return (
     <div className="relative w-full h-full group">
       <div ref={rail} className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
@@ -21,7 +21,7 @@ function Galerie({ photos, nom }: { photos: string[]; nom: string }) {
         {photos.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img key={src} src={src} alt={photos.length > 1 ? t("photoNumero", { nom, numero: i + 1, total: photos.length }) : ""}
-            loading={i ? "lazy" : undefined} className="w-full h-full flex-shrink-0 object-cover snap-center" />
+            loading={i ? "lazy" : undefined} className="w-full h-full shrink-0 object-cover snap-center" />
         ))}
       </div>
       {photos.length > 1 && (
@@ -44,7 +44,7 @@ export default function CarteVehicule({ c, formule, prixChauffeur, onChoisir }: 
   const t = useTranslations("location");
   const propose = formule === "avec_chauffeur" ? c.formules.avec_chauffeur : c.formules.sans_chauffeur;
   return (
-    <article className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+    <article className="bg-white rounded-3xl border border-gray-100 shadow-xs overflow-hidden flex flex-col">
       <div className="h-40 bg-gray-50 flex items-center justify-center relative">
         <Galerie photos={c.photos?.length ? c.photos : c.image ? [c.image] : []} nom={c.nom} />
         {formule === "sans_chauffeur" && c.caution === 0 && (

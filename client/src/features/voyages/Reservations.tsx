@@ -96,7 +96,7 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
                   <button onClick={async () => {
                     try { appliquer(await partagerReservation(v.id, r.id)); }
                     catch (err) { toast.error(messageErreur(err, t("partageImpossible"))); }
-                  }} className="px-3 py-1.5 rounded-full bg-primary text-white text-xs font-bold flex-shrink-0">{t("partager")}</button>
+                  }} className="px-3 py-1.5 rounded-full bg-primary text-white text-xs font-bold shrink-0">{t("partager")}</button>
                 </li>
               ))}
             </ul>
@@ -107,7 +107,7 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
         <label htmlFor="v-notes" className="font-heading font-bold text-dark">{t("infosPratiques")}</label>
         <p className="text-xs text-gray-600 mt-1">{t("infosPratiquesTexte")}</p>
         <textarea id="v-notes" rows={8} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={4000}
-          className="w-full mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3 text-base sm:text-sm outline-none focus:border-primary/50 resize-y" />
+          className="w-full mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3 text-base sm:text-sm outline-hidden focus:border-primary/50 resize-y" />
         <button onClick={enregistrerNotes} disabled={sauvegarde || notes === v.notes} className="w-full mt-3 py-2.5 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-50">
           {sauvegarde ? t("enregistrement") : t("enregistrer")}
         </button>

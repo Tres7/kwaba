@@ -83,5 +83,5 @@ export function VersionFrancaiseFaitFoi() {
  */
 export function AC({ children }: { children: React.ReactNode }) {
   const t = useTranslations("legal");
-  return <mark className="bg-amber-100 text-amber-900 px-1 rounded font-semibold">[{t("aCompleter")} : {children}]</mark>;
+  return <mark className="bg-amber-100 text-amber-900 px-1 rounded-sm font-semibold">[{t("aCompleter")} : {children}]</mark>;
 }

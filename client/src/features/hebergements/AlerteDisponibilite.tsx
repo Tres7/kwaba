@@ -46,7 +46,7 @@ export default function AlerteDisponibilite({ hebergementId, checkIn, checkOut, 
   if (resultat) {
     return (
       <p role="status" className="text-sm text-green-800 bg-green-50 rounded-xl p-3 mb-3 flex gap-2">
-        <Check size={16} className="flex-shrink-0 mt-0.5" aria-hidden />
+        <Check size={16} className="shrink-0 mt-0.5" aria-hidden />
         <span>{resultat.statut === "active" ? t("active", { email: resultat.email }) : t("aConfirmer", { email: resultat.email })}</span>
       </p>
     );
@@ -75,7 +75,7 @@ export default function AlerteDisponibilite({ hebergementId, checkIn, checkOut, 
       <label className="block text-sm text-dark">
         {t("emailLibelle")}
         <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-none focus:border-primary" />
+          className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-hidden focus:border-primary" />
       </label>
       <p className="text-xs text-gray-500">{t("emailAide")}</p>
       <button type="submit" disabled={envoi} className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-50">

@@ -69,7 +69,7 @@ export default function ProfilPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-3xl shadow-card overflow-hidden border border-gray-100">
-              <div className="bg-gradient-to-r from-primary to-accent h-24 sm:h-28" />
+              <div className="bg-linear-to-r from-primary to-accent h-24 sm:h-28" />
               <div className="px-6 pb-6 -mt-12 text-center">
                 <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-soft mx-auto mb-4 border-4 border-white overflow-hidden">
                   {session?.user?.image ? (
@@ -78,7 +78,7 @@ export default function ProfilPage() {
                     <span className="text-primary font-heading font-bold text-3xl">{initials(fullName)}</span>
                   )}
                 </div>
-                <h1 className="font-heading font-bold text-dark text-xl sm:text-2xl break-words">{fullName || <span className="inline-block w-40 h-6 skeleton rounded" />}</h1>
+                <h1 className="font-heading font-bold text-dark text-xl sm:text-2xl wrap-break-word">{fullName || <span className="inline-block w-40 h-6 skeleton rounded-sm" />}</h1>
                 <p className="text-muted text-sm mt-1 break-all">{me?.email ?? session?.user?.email}</p>
                 <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
                   <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">{ROLE_LABELS[role]}</span>
@@ -106,20 +106,20 @@ export default function ProfilPage() {
 
           <div className="lg:col-span-2 space-y-6">
             {aEvaluer.length > 0 && (
-              <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-3xl p-5 sm:p-6">
+              <div className="bg-linear-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-3xl p-5 sm:p-6">
                 <p className="font-heading font-bold text-dark flex items-center gap-2">
                   <Star size={18} className="fill-accent text-accent" />
                   {t("aEvaluer", { nombre: aEvaluer.length })}
                 </p>
                 <div className="mt-3 space-y-2">
                   {aEvaluer.map((s) => (
-                    <Link key={s.reservation_id} href={`/profil/reservations/${s.reservation_id}/avis`} className="flex items-center gap-3 bg-white rounded-2xl p-3 hover:shadow-sm transition-shadow">
-                      <img src={s.hebergement.image_url || FALLBACK_IMAGE} alt="" className="w-14 h-12 rounded-xl object-cover flex-shrink-0" />
+                    <Link key={s.reservation_id} href={`/profil/reservations/${s.reservation_id}/avis`} className="flex items-center gap-3 bg-white rounded-2xl p-3 hover:shadow-xs transition-shadow">
+                      <img src={s.hebergement.image_url || FALLBACK_IMAGE} alt="" className="w-14 h-12 rounded-xl object-cover shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-dark text-sm truncate">{s.hebergement.name}</p>
                         <p className="text-xs text-muted">{t("departLe", { date: formatDate(s.check_out) })}</p>
                       </div>
-                      <span className="text-sm font-bold text-primary flex-shrink-0">{t("noter")}</span>
+                      <span className="text-sm font-bold text-primary shrink-0">{t("noter")}</span>
                     </Link>
                   ))}
                 </div>
@@ -132,14 +132,14 @@ export default function ProfilPage() {
                 <div className="divide-y divide-gray-100">
                   {section.items.map(({ icon: Icon, label, href, desc }) => (
                     <Link key={href} href={href} className="group flex items-center gap-4 px-6 sm:px-8 py-4 hover:bg-light-muted/50 transition-colors">
-                      <div className="w-11 h-11 bg-primary/5 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+                      <div className="w-11 h-11 bg-primary/5 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
                         <Icon size={20} className="text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-heading font-bold text-dark text-[15px] group-hover:text-primary transition-colors">{label}</p>
                         <p className="text-muted text-sm mt-0.5 truncate">{desc}</p>
                       </div>
-                      <ChevronRight size={18} className="text-muted flex-shrink-0 group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                      <ChevronRight size={18} className="text-muted shrink-0 group-hover:translate-x-1 group-hover:text-primary transition-all" />
                     </Link>
                   ))}
                 </div>
@@ -147,7 +147,7 @@ export default function ProfilPage() {
             ))}
 
             <button onClick={() => signOut({ callbackUrl: locale === "en" ? "/en" : "/" })} className="group w-full bg-white rounded-3xl shadow-soft border border-gray-100 flex items-center gap-4 px-6 sm:px-8 py-4 hover:bg-red-50/50 transition-colors">
-              <div className="w-11 h-11 bg-red-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div className="w-11 h-11 bg-red-50 rounded-2xl flex items-center justify-center shrink-0">
                 <LogOut size={20} className="text-red-600" />
               </div>
               <span className="flex-1 text-left font-heading font-bold text-red-600">{t("seDeconnecter")}</span>

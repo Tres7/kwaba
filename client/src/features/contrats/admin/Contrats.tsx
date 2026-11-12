@@ -142,7 +142,7 @@ export default function Contrats() {
         <Select label="Type" value={type} onChange={setType} options={FILTRE_TYPES} className="lg:w-52" />
         <Select label="Statut" value={statut} onChange={setStatut} options={STATUTS} className="lg:w-40" />
         <button type="button" onClick={() => { setOuvert(true); setPartie(null); setRecherchePartie(""); setErreurs({}); }}
-          className="flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">
+          className="shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">
           <Send size={16} aria-hidden /> Envoyer un contrat
         </button>
       </div>

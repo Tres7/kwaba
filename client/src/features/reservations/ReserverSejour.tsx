@@ -139,7 +139,7 @@ function ReservationContent() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10">
           <div className="lg:col-span-3 space-y-6">
-            <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-8">
+            <section className="bg-white rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-heading font-bold text-dark text-xl">{t("votreVoyage")}</h2>
                 <Link href={backToListing} className="text-sm font-bold text-primary hover:underline">{t("modifier")}</Link>
@@ -165,7 +165,7 @@ function ReservationContent() {
               )}
             </section>
 
-            <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-8">
+            <section className="bg-white rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("reservePar")}</h2>
               <p className="text-sm text-dark font-semibold">{session?.user?.name}</p>
               <p className="text-sm text-gray-500">{session?.user?.email}</p>
@@ -175,7 +175,7 @@ function ReservationContent() {
               <textarea
                 id="message" value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1000}
                 placeholder={t("messagePlaceholder")} rows={3}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-base sm:text-sm text-dark outline-none focus:border-primary/50 transition-colors resize-none"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-base sm:text-sm text-dark outline-hidden focus:border-primary/50 transition-colors resize-none"
                 aria-describedby="message-info"
               />
               <p id="message-info" className="text-xs text-gray-600 mt-2">
@@ -183,7 +183,7 @@ function ReservationContent() {
               </p>
             </section>
 
-            <section id="mode-paiement" className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-8 scroll-mt-28">
+            <section id="mode-paiement" className="bg-white rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8 scroll-mt-28">
               <h2 className="font-heading font-bold text-dark text-xl mb-5">{t("modePaiement")}</h2>
               <div className="space-y-3" role="radiogroup" aria-label={t("modePaiement")}>
                 {moyens.map((method) => {
@@ -193,9 +193,9 @@ function ReservationContent() {
                     <button
                       key={method.id} type="button" role="radio" aria-checked={isActive}
                       onClick={() => setPaymentMethod(method.id)}
-                      className={cn("w-full flex items-center gap-4 rounded-2xl p-4 sm:p-5 border transition-all", isActive ? "border-primary bg-primary/5 shadow-sm" : "border-gray-100 hover:border-primary/30")}
+                      className={cn("w-full flex items-center gap-4 rounded-2xl p-4 sm:p-5 border transition-all", isActive ? "border-primary bg-primary/5 shadow-xs" : "border-gray-100 hover:border-primary/30")}
                     >
-                      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center transition-colors flex-shrink-0", isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-500")}>
+                      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center transition-colors shrink-0", isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-500")}>
                         <Icon size={20} />
                       </div>
                       <div className="text-left flex-1 min-w-0">
@@ -205,7 +205,7 @@ function ReservationContent() {
                           {method.id === "paypal" && config && !datesInvalid && devis && <> · <strong className="text-dark">{enEuros(total, config.fcfa_par_euro)}</strong></>}
                         </p>
                       </div>
-                      <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0", isActive ? "border-primary bg-primary" : "border-gray-300")}>
+                      <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0", isActive ? "border-primary bg-primary" : "border-gray-300")}>
                         {isActive && <Check size={10} className="text-white" />}
                       </div>
                     </button>
@@ -214,14 +214,14 @@ function ReservationContent() {
               </div>
               {enLigne ? (
                 <p className="flex items-start gap-2 text-xs text-gray-600 mt-4 bg-gray-50 rounded-xl p-3">
-                  <Lock size={14} className="flex-shrink-0 mt-0.5 text-secondary" />
+                  <Lock size={14} className="shrink-0 mt-0.5 text-secondary" />
                   <span>
                     {t("redirectionInfo", { prestataire: moyenChoisi === "paypal" ? "PayPal" : "FedaPay", minutes: config?.delai_paiement_minutes ?? 30 })}
                   </span>
                 </p>
               ) : (
                 <p className="flex items-start gap-2 text-xs text-gray-500 mt-4 bg-gray-50 rounded-xl p-3">
-                  <Info size={14} className="flex-shrink-0 mt-0.5 text-primary" />
+                  <Info size={14} className="shrink-0 mt-0.5 text-primary" />
                   {t("paiementInactif")}
                 </p>
               )}
@@ -231,10 +231,10 @@ function ReservationContent() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6 lg:sticky lg:top-28">
               <div className="flex gap-4 pb-5 border-b border-gray-100">
-                <img src={hebergement.image_url || FALLBACK_IMAGE} alt={hebergement.name} className="w-24 h-20 rounded-2xl object-cover flex-shrink-0" />
+                <img src={hebergement.image_url || FALLBACK_IMAGE} alt={hebergement.name} className="w-24 h-20 rounded-2xl object-cover shrink-0" />
                 <div className="min-w-0">
                   <h3 className="font-bold text-dark text-sm line-clamp-2">{hebergement.name}</h3>
-                  <p className="flex items-center gap-1 text-gray-500 text-xs mt-1"><MapPin size={12} className="text-primary flex-shrink-0" /><span className="truncate">{hebergement.city}</span></p>
+                  <p className="flex items-center gap-1 text-gray-500 text-xs mt-1"><MapPin size={12} className="text-primary shrink-0" /><span className="truncate">{hebergement.city}</span></p>
                   <RatingBadge rating={hebergement.rating} count={hebergement.review_count} className="mt-1" />
                 </div>
               </div>
@@ -292,7 +292,7 @@ function ReservationContent() {
               {/* Express acceptance of the terms of sale, the listing rules and the cancellation policy (terms of sale, art. 5.2) */}
               <label className="flex items-start gap-2.5 text-xs text-gray-600 leading-relaxed mb-4 cursor-pointer">
                 <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-primary focus:ring-primary" />
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-gray-300 text-primary focus:ring-primary" />
                 <span>
                   {t.rich(enLigne ? "accepterPaiement" : "accepterConfirmation", {
                     cgu: (x) => <Link href="/cgv" className="text-primary font-medium">{x}</Link>,

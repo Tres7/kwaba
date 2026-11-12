@@ -31,7 +31,7 @@ function Prendre({ mission }: { mission: MissionResume }) {
 
   return (
     <button type="button" onClick={prendre} disabled={envoi}
-      className="flex-shrink-0 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-3 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-bold disabled:opacity-60">
+      className="shrink-0 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-3 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-bold disabled:opacity-60">
       <Hand size={16} aria-hidden /> {envoi ? "…" : "Je m'en occupe"}
     </button>
   );
@@ -53,8 +53,8 @@ function AFaire() {
         {[{ code: "" as const, court: "Toutes" }, ...TYPES_MISSION].map((t) => (
           <button key={t.code} type="button" onClick={() => setType(t.code)} aria-pressed={type === t.code}
             className={type === t.code
-              ? "flex-shrink-0 px-4 py-2 rounded-full bg-primary text-white text-sm font-bold"
-              : "flex-shrink-0 px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-semibold text-dark"}>
+              ? "shrink-0 px-4 py-2 rounded-full bg-primary text-white text-sm font-bold"
+              : "shrink-0 px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-semibold text-dark"}>
             {t.court}
           </button>
         ))}
@@ -64,7 +64,7 @@ function AFaire() {
         <span className="sr-only">Rechercher par nom, ville ou adresse</span>
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nom, ville ou quartier"
-          className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
       </label>
 
       <ListeMissions chargement={isLoading} erreur={isError} vide="Rien à faire pour le moment : toutes les missions sont prises ou terminées.">

@@ -59,7 +59,7 @@ export default function DetailReservation({ id, onFermer }: { id: string | null;
             <Ligne libelle="Total" montant={m.total} fort />
             {r.prix_nuit_actuel != null && r.prix_nuit_actuel !== r.prix_nuit_reserve && (
               <p className="flex items-start gap-1.5 text-xs text-amber-800 bg-amber-50 rounded-lg px-2.5 py-2 mt-2">
-                <TriangleAlert size={14} className="flex-shrink-0 mt-px" aria-hidden />
+                <TriangleAlert size={14} className="shrink-0 mt-px" aria-hidden />
                 Prix de l&apos;annonce aujourd&apos;hui : {formatPrice(r.prix_nuit_actuel)} la nuit. La réservation garde le prix du jour où elle a été faite.
               </p>
             )}

@@ -24,7 +24,7 @@ export default function PhoneBooking({ listingId }: { listingId: string }) {
   }
 
   return (
-    <form className="mt-4 rounded-2xl bg-white border border-gray-100 shadow-sm p-4" onSubmit={(e) => {
+    <form className="mt-4 rounded-2xl bg-white border border-gray-100 shadow-xs p-4" onSubmit={(e) => {
       e.preventDefault();
       book.mutate(undefined, {
         onSuccess: () => { setBooked(true); toast.success("Visite confirmée par téléphone."); },

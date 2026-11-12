@@ -119,7 +119,7 @@ function LocationDetail() {
         <div aria-live="polite">
           {enAttente && (
             <p className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 text-sm text-dark">
-              <Loader2 size={18} className="animate-spin text-primary flex-shrink-0" /> {tP("verification")}
+              <Loader2 size={18} className="animate-spin text-primary shrink-0" /> {tP("verification")}
             </p>
           )}
           {l.statut === "confirmee" && <p className="bg-blue-50 text-blue-900 rounded-2xl p-4 text-sm">{td("recu")}</p>}
@@ -135,21 +135,21 @@ function LocationDetail() {
             <h2 className="font-heading font-bold text-dark text-lg">{td("votreVehicule")}</h2>
             {v.vehicule && (
               <div className="flex items-center gap-4 mt-4">
-                <div className="w-14 h-14 rounded-full bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0"><Car size={24} aria-hidden /></div>
+                <div className="w-14 h-14 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0"><Car size={24} aria-hidden /></div>
                 <p className="min-w-0 font-bold text-dark">{v.vehicule}{v.immatriculation && <> · <span className="font-mono font-normal text-gray-600">{v.immatriculation}</span></>}</p>
               </div>
             )}
             <p className="flex items-start gap-2 mt-4 text-sm text-gray-600">
-              <Mail size={16} className="text-secondary flex-shrink-0 mt-0.5" aria-hidden /> {td("coordonneesParEmail")}
+              <Mail size={16} className="text-secondary shrink-0 mt-0.5" aria-hidden /> {td("coordonneesParEmail")}
             </p>
           </section>
         )}
 
         <section className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="flex gap-3"><Calendar size={18} className="text-primary flex-shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("prise")}</dt><dd className="font-semibold text-dark">{dateVol(l.debut_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_prise_detail.nom, l.adresse_prise)}</dd></div></div>
-            <div className="flex gap-3"><MapPin size={18} className="text-primary flex-shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("retour")}</dt><dd className="font-semibold text-dark">{dateVol(l.fin_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_retour_detail.nom, l.adresse_retour)}</dd></div></div>
-            <div className="flex gap-3"><Users size={18} className="text-primary flex-shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("passagers")}</dt><dd className="font-semibold text-dark">{l.passagers}</dd></div></div>
+            <div className="flex gap-3"><Calendar size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("prise")}</dt><dd className="font-semibold text-dark">{dateVol(l.debut_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_prise_detail.nom, l.adresse_prise)}</dd></div></div>
+            <div className="flex gap-3"><MapPin size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("retour")}</dt><dd className="font-semibold text-dark">{dateVol(l.fin_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_retour_detail.nom, l.adresse_retour)}</dd></div></div>
+            <div className="flex gap-3"><Users size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("passagers")}</dt><dd className="font-semibold text-dark">{l.passagers}</dd></div></div>
             <div className="sm:col-span-2 bg-gray-50 rounded-xl px-4 py-3"><dt className="text-gray-600">{t("precisions")}</dt><dd className="text-dark whitespace-pre-line mt-1">{l.precisions}</dd></div>
           </dl>
           <div className="mt-5 pt-4 border-t border-gray-100 space-y-1 text-sm">

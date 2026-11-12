@@ -38,7 +38,7 @@ export function Motif() {
   const id = `motif-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const masque = "radial-gradient(circle, transparent 15%, #000 75%)";
   return (
-    <svg aria-hidden className="absolute inset-0 h-full w-full text-primary/[0.09]" style={{ maskImage: masque, WebkitMaskImage: masque }}>
+    <svg aria-hidden className="absolute inset-0 h-full w-full text-primary/9" style={{ maskImage: masque, WebkitMaskImage: masque }}>
       <defs>
         <pattern id={id} width="44" height="44" patternUnits="userSpaceOnUse">
           <path d="M22 6 38 22 22 38 6 22Z" fill="none" stroke="currentColor" strokeWidth="1.5" />

@@ -142,21 +142,21 @@ export default function Visionneuse({ photos, depart, nom, legende, action, onCl
     setChargees((c) => photosAcharger(c, i, total));
   };
 
-  const fleche = "absolute top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/50 sm:bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white aria-disabled:opacity-30 aria-disabled:cursor-default";
+  const fleche = "absolute top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/50 sm:bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-opacity focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white aria-disabled:opacity-30 aria-disabled:cursor-default";
   const legendeCourante = legende?.(photos[index]);
 
   return createPortal(
     // Above the cookie banner (z-[105]), under the cookie settings (z-[110])
     <motion.div ref={dialogue} role="dialog" aria-modal="true" aria-label={t("titre", { nom })}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-[106] flex flex-col bg-black text-white">
-      <div className="flex items-center justify-between gap-3 px-3 sm:px-5 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 flex-shrink-0">
+      className="fixed inset-0 z-106 flex flex-col bg-black text-white">
+      <div className="flex items-center justify-between gap-3 px-3 sm:px-5 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 shrink-0">
         <p className="pl-2 text-sm font-semibold tabular-nums" aria-live="polite">
           <span aria-hidden>{index + 1} / {total}</span>
           <span className="sr-only">{t("position", { numero: index + 1, total })}</span>
         </p>
         <button ref={boutonFermer} type="button" onClick={quitter} aria-label={t("fermer")}
-          className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+          className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-white/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white">
           <X size={24} aria-hidden />
         </button>
       </div>
@@ -168,7 +168,7 @@ export default function Visionneuse({ photos, depart, nom, legende, action, onCl
           {photos.map((url, i) => (
             // A click beside the photo closes, like on most viewers (Escape on a keyboard)
             <div key={`${i}-${url}`} onClick={(e) => e.target === e.currentTarget && quitter()} aria-hidden={i !== index || undefined}
-              className="w-full h-full flex-shrink-0 snap-center snap-always flex items-center justify-center sm:px-20">
+              className="w-full h-full shrink-0 snap-center snap-always flex items-center justify-center sm:px-20">
               {chargees.has(i) && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={url} alt={t("photo", { nom, numero: i + 1, total })} decoding="async" draggable={false}
@@ -191,7 +191,7 @@ export default function Visionneuse({ photos, depart, nom, legende, action, onCl
         )}
       </div>
 
-      <div className="min-h-[3rem] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-2 flex-shrink-0">
+      <div className="min-h-12 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-2 shrink-0">
         <p className="text-center text-sm font-semibold">{legendeCourante}</p>
         {action?.(photos[index])}
       </div>

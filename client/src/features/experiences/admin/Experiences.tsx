@@ -109,7 +109,7 @@ export default function Experiences() {
             </button>
           ))}
         </div>
-        <button onClick={() => ouvrir("nouvelle")} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouvelle expérience</button>
+        <button onClick={() => ouvrir("nouvelle")} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouvelle expérience</button>
       </div>
 
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : liste.length === 0 ? (

@@ -185,14 +185,14 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-light flex flex-col">
-      <div className="max-w-4xl w-full mx-auto flex flex-col flex-1 min-h-0 bg-white md:border-x border-light shadow-sm">
+      <div className="max-w-4xl w-full mx-auto flex flex-col flex-1 min-h-0 bg-white md:border-x border-light shadow-xs">
         {/* Header */}
-        <div className="bg-white border-b border-light px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0 sticky top-0 z-10">
+        <div className="bg-white border-b border-light px-6 py-4 flex items-center justify-between gap-4 shrink-0 sticky top-0 z-10">
           <div className="flex items-center gap-4 min-w-0">
             <button onClick={() => router.push("/messages")} className="text-dark hover:text-primary transition-colors p-1.5 -ml-1.5 rounded-full hover:bg-light">
               <ArrowLeft size={22} />
             </button>
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-600 rounded-full flex items-center justify-center shadow-sm flex-shrink-0 overflow-hidden">
+            <div className="w-12 h-12 bg-linear-to-br from-primary to-primary-600 rounded-full flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
               {other?.avatar_url ? (
                 <img src={other.avatar_url} alt={otherName} className="w-full h-full object-cover" />
               ) : (
@@ -217,17 +217,17 @@ export default function ChatPage() {
         </div>
 
         {/* Messaging rules: contact details hidden, traveller anonymous before payment */}
-        <div className="bg-primary/5 border-b border-primary/10 px-4 md:px-6 py-2.5 text-xs text-dark space-y-1 flex-shrink-0">
-          <p className="flex gap-2"><ShieldCheck size={15} className="text-primary flex-shrink-0 mt-px" aria-hidden /> {t("securite")}</p>
+        <div className="bg-primary/5 border-b border-primary/10 px-4 md:px-6 py-2.5 text-xs text-dark space-y-1 shrink-0">
+          <p className="flex gap-2"><ShieldCheck size={15} className="text-primary shrink-0 mt-px" aria-hidden /> {t("securite")}</p>
           {!conversation.booked && (
             <p className="flex gap-2 text-muted">
-              <EyeOff size={15} className="flex-shrink-0 mt-px" aria-hidden />
+              <EyeOff size={15} className="shrink-0 mt-px" aria-hidden />
               {conversation.my_role === "host" ? t("anonymeHote") : t("anonymeVoyageur")}
             </p>
           )}
         </div>
         {moderation.status && (
-          <div className="px-4 md:px-6 pt-3 flex-shrink-0">
+          <div className="px-4 md:px-6 pt-3 shrink-0">
             <ModerationNotice status={moderation.status} onChange={moderation.reload} />
           </div>
         )}
@@ -242,7 +242,7 @@ export default function ChatPage() {
           {messages.map((msg) => (
             <div key={msg.id} className={cn("flex gap-3", msg.is_own ? "justify-end" : "justify-start")}>
               {!msg.is_own && (
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-600 rounded-full flex items-center justify-center flex-shrink-0 self-end shadow-sm mb-1">
+                <div className="w-8 h-8 bg-linear-to-br from-primary to-primary-600 rounded-full flex items-center justify-center shrink-0 self-end shadow-xs mb-1">
                   <span className="text-white text-xs font-bold">{initial}</span>
                 </div>
               )}
@@ -253,7 +253,7 @@ export default function ChatPage() {
                   : "bg-white text-dark shadow-card rounded-2xl rounded-bl-sm border border-gray-100",
                 msg.pending && "opacity-60"
               )}>
-                <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                <p className="whitespace-pre-wrap wrap-break-word">{msg.content}</p>
                 {msg.masked && (
                   <p className={cn("flex items-center gap-1 mt-1 text-[11px] font-medium", msg.is_own ? "text-white/80" : "text-muted")}>
                     <ShieldCheck size={12} aria-hidden /> {t("masque")}
@@ -281,7 +281,7 @@ export default function ChatPage() {
         </div>
 
         {/* Input */}
-        <div className="bg-white border-t border-light px-4 md:px-6 py-4 flex-shrink-0 mt-auto">
+        <div className="bg-white border-t border-light px-4 md:px-6 py-4 shrink-0 mt-auto">
           {sendError && (
             <p className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-4 py-2 mb-3">{sendError}</p>
           )}
@@ -292,7 +292,7 @@ export default function ChatPage() {
                 blocked ? "text-red-800 bg-red-50 border-red-100" : "text-amber-900 bg-amber-50 border-amber-100")}
             >
               <p className="flex gap-2">
-                <ShieldAlert size={16} className="flex-shrink-0 mt-0.5" aria-hidden />
+                <ShieldAlert size={16} className="shrink-0 mt-0.5" aria-hidden />
                 {blocked ? tm("blocked", { categories: categoriesLabel(currentCheck.categories) }) : tm("warned", { categories: categoriesLabel(currentCheck.categories) })}
               </p>
               {confirming && (
@@ -322,14 +322,14 @@ export default function ChatPage() {
                 maxLength={2000}
                 placeholder={t("placeholder")}
                 aria-label={t("votreMessage")}
-                className="w-full bg-light border border-transparent focus:border-primary/20 focus:bg-white rounded-full pl-5 pr-12 py-3.5 text-sm text-dark outline-none placeholder:text-muted transition-all shadow-sm"
+                className="w-full bg-light border border-transparent focus:border-primary/20 focus:bg-white rounded-full pl-5 pr-12 py-3.5 text-sm text-dark outline-hidden placeholder:text-muted transition-all shadow-xs"
               />
             </div>
             <button
               onClick={() => sendMessage()}
               disabled={!input.trim() || blocked || suspended}
               aria-label={t("envoyer")}
-              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center disabled:opacity-50 hover:bg-primary-600 transition-all shadow-md active:scale-95 flex-shrink-0"
+              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center disabled:opacity-50 hover:bg-primary-600 transition-all shadow-md active:scale-95 shrink-0"
             >
               <Send size={18} className="text-white ml-0.5" />
             </button>

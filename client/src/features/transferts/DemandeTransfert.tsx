@@ -34,7 +34,7 @@ const BROUILLON = "kwaba_transfert_brouillon";
 // The draft holds a phone number: a tab left open does not keep it for long
 const DUREE_BROUILLON_MS = 30 * 60 * 1000;
 
-const champ = "w-full py-3 px-4 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const champ = "w-full py-3 px-4 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 function TransfertContent() {
   const { formatFcfa, formatPrice } = useFormat();
@@ -176,7 +176,7 @@ function TransfertContent() {
 
       <form method="post" onSubmit={reserver} noValidate className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10">
         <div className="lg:col-span-3 space-y-6">
-          <section className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8 space-y-5">
+          <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-5">
             <h2 className="font-heading font-bold text-dark text-xl">{t("votreVol")}</h2>
             {reservation && (
               <p className="text-sm text-dark bg-primary/5 rounded-xl px-4 py-3">
@@ -209,14 +209,14 @@ function TransfertContent() {
             </div>
           </section>
 
-          <section className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8">
+          <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8">
             <h2 className="font-heading font-bold text-dark text-xl">{t("vehicule")}</h2>
             {!aeroport || !arrivee ? (
               <>
                 <ul className="space-y-3 mt-4">
                   {CATEGORIES.filter((c) => prixAPartir(c) !== null).map((c) => (
                     <li key={c} className="flex items-center gap-4 rounded-2xl p-4 border border-gray-100">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100 text-gray-600"><Car size={22} /></div>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gray-100 text-gray-600"><Car size={22} /></div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-dark">{t(`vehicules.${c}.nom`)}</p>
                         <p className="text-xs text-gray-600">{t(`vehicules.${c}.description`)}</p>
@@ -243,9 +243,9 @@ function TransfertContent() {
                       key={o.categorie} type="button" role="radio" aria-checked={actif} disabled={!o.disponible}
                       onClick={() => setCategorie(o.categorie)}
                       className={cn("w-full flex items-center gap-4 rounded-2xl p-4 border text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-                        actif ? "border-primary bg-primary/5 shadow-sm" : "border-gray-100 hover:border-primary/30")}
+                        actif ? "border-primary bg-primary/5 shadow-xs" : "border-gray-100 hover:border-primary/30")}
                     >
-                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0", actif ? "bg-primary text-white" : "bg-gray-100 text-gray-600")}>
+                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", actif ? "bg-primary text-white" : "bg-gray-100 text-gray-600")}>
                         <Car size={22} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -268,7 +268,7 @@ function TransfertContent() {
             )}
           </section>
 
-          <section className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8 space-y-4">
+          <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-4">
             <h2 className="font-heading font-bold text-dark text-xl">{t("destinationContact")}</h2>
             <FormField label={t("adresseDestination")} id="t-destination" value={destination} onChange={(e) => setDestination(e.target.value)}
               placeholder={t("adressePlaceholder")} error={erreurs.destination} required />

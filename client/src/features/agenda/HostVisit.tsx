@@ -91,12 +91,12 @@ export default function HostVisit() {
                   <button type="button" onClick={() => toggle(listing)} aria-pressed={isSelected} disabled={disabled}
                     className={cn("w-full flex items-center gap-3 rounded-2xl bg-white border p-3 text-left",
                       isSelected ? "border-primary ring-2 ring-primary/20" : "border-gray-100", disabled && "opacity-50")}>
-                    <img src={listing.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-16 rounded-xl object-cover bg-gray-100 flex-shrink-0" />
+                    <img src={listing.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-16 rounded-xl object-cover bg-gray-100 shrink-0" />
                     <span className="flex-1 min-w-0">
                       <span className="block font-bold text-dark truncate">{listing.name}</span>
                       <span className="flex items-center gap-1 text-sm text-gray-500 truncate"><MapPin size={14} aria-hidden /> {listing.address ? `${listing.address}, ` : ""}{listing.city}</span>
                     </span>
-                    <span className={cn("w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0",
+                    <span className={cn("w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0",
                       isSelected ? "bg-primary border-primary text-white" : "border-gray-300")}>
                       {isSelected && <Check size={16} aria-hidden />}
                       <span className="sr-only">{t("select")}</span>
@@ -114,7 +114,7 @@ export default function HostVisit() {
       )}
 
       {data && data.listings.length > 0 && (
-        <p className="mt-8 flex items-start gap-2 text-sm text-gray-500"><Phone size={16} aria-hidden className="mt-0.5 flex-shrink-0" /> {t("noInternet")}</p>
+        <p className="mt-8 flex items-start gap-2 text-sm text-gray-500"><Phone size={16} aria-hidden className="mt-0.5 shrink-0" /> {t("noInternet")}</p>
       )}
     </div>
   );
@@ -178,7 +178,7 @@ function SlotPicker(props: PickerProps) {
   });
 
   return (
-    <section className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-sm p-4 sm:p-5">
+    <section className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-xs p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-heading font-bold text-dark">{props.mode === "book" ? t("chooseSlot") : t("moveTitle")}</h3>
         <span className="text-sm text-gray-500">{formatDuration(props.minutes)}</span>
@@ -193,7 +193,7 @@ function SlotPicker(props: PickerProps) {
               const date = new Date(items[0]);
               return (
                 <button key={key} type="button" role="tab" aria-selected={isCurrent} onClick={() => { setDay(key); setSlot(null); }}
-                  className={cn("flex-shrink-0 rounded-xl px-3 py-2 text-center min-w-[4.5rem]", isCurrent ? "bg-primary text-white" : "bg-light text-dark")}>
+                  className={cn("shrink-0 rounded-xl px-3 py-2 text-center min-w-18", isCurrent ? "bg-primary text-white" : "bg-light text-dark")}>
                   <span className="block text-xs font-semibold capitalize">{formatDate(items[0], { timeZone: TIMEZONE, weekday: "short" })}</span>
                   <span className="block font-heading font-bold text-lg">{formatDate(date.toISOString(), { timeZone: TIMEZONE, day: "numeric" })}</span>
                   <span className="block text-[11px] capitalize">{formatDate(items[0], { timeZone: TIMEZONE, month: "short" })}</span>

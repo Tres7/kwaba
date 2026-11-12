@@ -117,7 +117,7 @@ export default function Categories() {
           Chaque véhicule appartient à un propriétaire partenaire, qui fixe son prix par jour et sa caution. Le chauffeur est facturé
           à part (7 000 FCFA par jour). Un véhicule n&apos;est proposé qu&apos;actif, avec un prix et des papiers à jour.
         </p>
-        <button onClick={() => ouvrir("nouvelle")} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau véhicule</button>
+        <button onClick={() => ouvrir("nouvelle")} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau véhicule</button>
       </div>
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : (
         <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">

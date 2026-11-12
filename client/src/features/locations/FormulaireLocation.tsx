@@ -16,7 +16,7 @@ import { useFormat } from "@/lib/format";
 import { calculerDevisLocation, creerLocation, listerMesChauffeurs } from "./api";
 import type { CatalogueLocation, CategorieVehicule, Formule } from "./types";
 
-const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
 
@@ -112,7 +112,7 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
   const d = devis.data;
 
   return (
-    <form method="post" onSubmit={reserver} className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8 space-y-6">
+    <form method="post" onSubmit={reserver} className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-heading font-bold text-dark text-xl">{categorie ? t("reserverTitre", { nom: categorie.nom }) : t("chauffeurSeulTitre")}</h2>
@@ -240,7 +240,7 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
 
         <label className="flex items-start gap-2.5 text-xs text-gray-600 leading-relaxed mt-5 cursor-pointer">
           <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)}
-            className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-primary focus:ring-primary" />
+            className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-gray-300 text-primary focus:ring-primary" />
           <span>{t.rich("accepter", {
             cgv: (x) => <Link href="/cgv" className="text-primary font-medium">{x}</Link>,
             annulation: (x) => <Link href="/remboursement" className="text-primary font-medium">{x}</Link>,

@@ -49,8 +49,8 @@ function Apercu({ donnees }: { donnees: DonneesAnnonce }) {
   const { name, city, location, image_url: couverture } = donnees;
   if (!name && !couverture) return null;
   return (
-    <div className="absolute bottom-8 left-8 right-8 max-w-sm hidden lg:flex items-center gap-3 rounded-2xl bg-white/90 backdrop-blur p-3 shadow-lg">
-      {couverture && <img src={couverture} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />}
+    <div className="absolute bottom-8 left-8 right-8 max-w-sm hidden lg:flex items-center gap-3 rounded-2xl bg-white/90 backdrop-blur-sm p-3 shadow-lg">
+      {couverture && <img src={couverture} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />}
       <div className="min-w-0">
         <p className="font-heading font-bold text-dark truncate">{name}</p>
         <p className="text-xs text-gray-500 truncate">{[location, city].filter(Boolean).join(", ")}</p>
@@ -69,7 +69,7 @@ function Intro({ cle }: { cle: CleEtape }) {
         <ol className="mt-7 space-y-5">
           {([1, 2, 3] as const).map((phase) => (
             <li key={phase} className="flex items-center gap-4">
-              <Tuile picto={PICTOS_PHASES[phase]} phase={phase} className="w-14 h-14 flex-shrink-0 shadow-none" />
+              <Tuile picto={PICTOS_PHASES[phase]} phase={phase} className="w-14 h-14 shrink-0 shadow-none" />
               <div>
                 <p className="font-heading font-bold text-dark">{phase}. {t(`phases.${phase}.titre`)}</p>
                 <p className="text-sm text-gray-500">{t(`phases.${phase}.texte`)}</p>
@@ -145,7 +145,7 @@ function Parcours({ id, etape, donnees, assistant }: {
   return (
     <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row bg-light-muted">
       <aside aria-hidden className={cn(
-        "relative flex items-center justify-center overflow-hidden flex-shrink-0 lg:flex-1 lg:h-full px-6 pt-4 lg:p-10",
+        "relative flex items-center justify-center overflow-hidden shrink-0 lg:flex-1 lg:h-full px-6 pt-4 lg:p-10",
         // The welcome screen has the three phases to show below its image
         etape.cle === "bienvenue" ? "h-[26dvh]" : etape.intro ? "h-[44dvh]" : etape.sansVisuelMobile ? "h-0 lg:h-full" : "h-[24dvh]",
       )}>

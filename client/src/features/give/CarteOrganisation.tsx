@@ -28,7 +28,7 @@ export default function CarteOrganisation({ o }: { o: Organisation }) {
         <div className="flex items-center gap-3">
           {o.logo && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={o.logo} alt="" className="w-10 h-10 rounded-xl object-cover border border-gray-100 flex-shrink-0" />
+            <img src={o.logo} alt="" className="w-10 h-10 rounded-xl object-cover border border-gray-100 shrink-0" />
           )}
           <div className="min-w-0">
             <p className="font-heading font-bold text-dark leading-tight group-hover:text-primary">{o.nom}</p>

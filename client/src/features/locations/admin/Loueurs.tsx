@@ -94,7 +94,7 @@ export default function Loueurs() {
           Propriétaires (particuliers ou agences), payés par Mobile Money après chaque location, moins la commission : 15 %, 10 %
           pendant le Programme Fondateurs (20 premiers, 6 mois), 12 % après 20 locations sans incident.
         </p>
-        <button onClick={() => ouvrir("nouveau")} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau propriétaire</button>
+        <button onClick={() => ouvrir("nouveau")} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau propriétaire</button>
       </div>
       <AdminTable colonnes={colonnes} lignes={data} cle={(l) => String(l.id)} titreMobile={(l) => colonnes[0].cellule(l)}
         actions={(l) => <ActionButton onClick={() => ouvrir(l)}>Modifier</ActionButton>}

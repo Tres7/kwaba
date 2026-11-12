@@ -13,7 +13,7 @@ export default function MainLayout({
     <div className="min-h-screen bg-light flex flex-col">
       <BandeauOuverture />
       <Navbar />
-      <main id="contenu" tabIndex={-1} className="flex-1 outline-none">{children}</main>
+      <main id="contenu" tabIndex={-1} className="flex-1 outline-hidden">{children}</main>
       <Footer />
       <BoutonConcierge />
       <BientotDisponible />

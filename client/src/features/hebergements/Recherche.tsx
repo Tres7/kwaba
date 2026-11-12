@@ -183,9 +183,9 @@ function RechercheContent() {
       <div>
         <p className="text-xs text-muted font-bold uppercase tracking-wider mb-2">{t("prixParNuit")}</p>
         <div className="flex items-center gap-2">
-          <input type="number" inputMode="numeric" min={0} placeholder={t("min")} value={priceMin} onChange={(e) => setPriceMin(e.target.value)} className="w-full min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-base sm:text-sm text-dark outline-none" />
+          <input type="number" inputMode="numeric" min={0} placeholder={t("min")} value={priceMin} onChange={(e) => setPriceMin(e.target.value)} className="w-full min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-base sm:text-sm text-dark outline-hidden" />
           <span className="text-muted">-</span>
-          <input type="number" inputMode="numeric" min={0} placeholder={t("max")} value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className="w-full min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-base sm:text-sm text-dark outline-none" />
+          <input type="number" inputMode="numeric" min={0} placeholder={t("max")} value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className="w-full min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-base sm:text-sm text-dark outline-hidden" />
         </div>
         <button onClick={() => submitSearch()} className="mt-3 w-full bg-primary text-white py-2.5 rounded-xl text-sm font-medium hover:bg-primary-700 transition-colors">
           {t("appliquer")}
@@ -205,10 +205,10 @@ function RechercheContent() {
 
   return (
     <div className="min-h-screen bg-light">
-      <div className="bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 py-4">
+      <div className="bg-white border-b border-gray-100 shadow-xs px-4 sm:px-6 py-4">
         <form method="post" onSubmit={submitSearch} className="max-w-7xl mx-auto grid grid-cols-2 lg:flex gap-2 sm:gap-3 items-stretch">
           <label className="col-span-2 lg:flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white focus-within:border-primary transition-colors">
-            <Search size={16} className="text-muted flex-shrink-0" />
+            <Search size={16} className="text-muted shrink-0" />
             <ChampDestination
               value={city} onChange={setCity}
               // Suggested city chosen: the search starts right away
@@ -216,7 +216,7 @@ function RechercheContent() {
               placeholder={t("destinationExemple")}
               ariaLabel={t("destination")}
               className="flex-1 min-w-0"
-              inputClassName="w-full text-base sm:text-sm text-dark placeholder:text-muted outline-none bg-transparent"
+              inputClassName="w-full text-base sm:text-sm text-dark placeholder:text-muted outline-hidden bg-transparent"
               listeClassName="-left-11 -right-4"
             />
           </label>
@@ -236,7 +236,7 @@ function RechercheContent() {
       <div className={cn("mx-auto px-4 sm:px-6 py-6", carte ? "max-w-[100rem]" : "max-w-7xl")}>
         <div className={cn("flex", carte ? "flex-col lg:flex-row lg:gap-6" : "gap-8")}>
           {!carte && (
-            <aside className="w-64 flex-shrink-0 hidden lg:block">
+            <aside className="w-64 shrink-0 hidden lg:block">
               <div className="bg-white rounded-2xl shadow-card p-5 sticky top-24">
                 <div className="flex items-center gap-2 mb-5">
                   <SlidersHorizontal size={16} className="text-primary" />
@@ -266,7 +266,7 @@ function RechercheContent() {
                 )}
                 </div>
               )}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 {avecDates && (
                   <button onClick={() => pushParams({ disponibles: params.disponibles ? "" : "true" })} aria-pressed={Boolean(params.disponibles)}
                     className={cn("flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border",
@@ -323,7 +323,7 @@ function RechercheContent() {
 
           {carte && (
             // Whole screen on a phone; beside the list on a computer, without going past the bottom of the screen
-            <div className="fixed inset-0 z-50 bg-light-muted lg:z-auto lg:sticky lg:top-24 lg:flex-1 lg:h-[calc(100dvh-14rem)] lg:min-h-[28rem] lg:rounded-2xl lg:overflow-hidden lg:shadow-card">
+            <div className="fixed inset-0 z-50 bg-light-muted lg:z-auto lg:sticky lg:top-24 lg:flex-1 lg:h-[calc(100dvh-14rem)] lg:min-h-112 lg:rounded-2xl lg:overflow-hidden lg:shadow-card">
               <CarteResultats logements={results} query={stayQuery} ville={params.city} survol={survol} />
               <div className="lg:hidden absolute top-3 left-3 flex gap-2">
                 <button onClick={() => setCarte(false)} className="flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark shadow-md">
@@ -339,7 +339,7 @@ function RechercheContent() {
       </div>
 
       {filtersOpen && (
-        <div className={cn("fixed inset-0 z-[60]", !carte && "lg:hidden")} role="dialog" aria-modal="true" aria-label={t("filtres")}>
+        <div className={cn("fixed inset-0 z-60", !carte && "lg:hidden")} role="dialog" aria-modal="true" aria-label={t("filtres")}>
           <div className="absolute inset-0 bg-black/40" onClick={() => setFiltersOpen(false)} />
           <div className="absolute bottom-0 inset-x-0 bg-white rounded-t-3xl p-5 pb-8 max-h-[85vh] overflow-y-auto lg:top-0 lg:right-auto lg:w-96 lg:max-h-none lg:rounded-none lg:rounded-r-3xl">
             <div className="flex items-center justify-between mb-5">

@@ -50,7 +50,7 @@ export default function BrouillonsHote({ brouillons, onReprendre }: {
                   <span className="text-xs font-semibold text-dark">{pourcentage} %</span>
                 </div>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 shrink-0">
                 <button type="button" onClick={() => onReprendre(b)}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary-600">
                   <FilePenLine size={14} aria-hidden /> {t("reprendre")}

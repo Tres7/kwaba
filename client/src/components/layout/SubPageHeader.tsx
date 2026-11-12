@@ -6,7 +6,7 @@ export default function SubPageHeader({ title, subtitle, back = "/profil" }: { t
   const t = useTranslations("commun");
   return (
     <div className="mb-8 flex items-center gap-4">
-      <Link href={back} aria-label={t("retour")} className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-dark hover:bg-light-muted transition-colors flex-shrink-0">
+      <Link href={back} aria-label={t("retour")} className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
         <ArrowLeft size={20} />
       </Link>
       <div>

@@ -54,7 +54,7 @@ function ReponseForm({ avis, onDone }: { avis: Avis; onDone: (a: Avis) => void }
       <textarea
         value={texte} onChange={(e) => setTexte(e.target.value)} rows={3} maxLength={1000}
         placeholder={t("reponsePlaceholder")}
-        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-none focus:border-primary resize-none"
+        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-hidden focus:border-primary resize-none"
       />
       <div className="flex gap-2 justify-end">
         <button onClick={() => setOpen(false)} className="px-4 py-2 text-sm rounded-xl border border-gray-200">{t("annuler")}</button>
@@ -76,7 +76,7 @@ function AvisCard({ avis, isOwner, hostName, onUpdate }: { avis: Avis; isOwner: 
   return (
     <article className="py-5 border-b border-gray-100 last:border-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center overflow-hidden shrink-0">
           {avis.auteur.avatar_url ? <img src={avis.auteur.avatar_url} alt="" className="w-full h-full object-cover" /> : initials(nom)}
         </div>
         <div className="min-w-0">

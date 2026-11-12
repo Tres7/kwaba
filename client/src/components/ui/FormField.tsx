@@ -29,7 +29,7 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(function FormFiel
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           className={cn(
-            "w-full py-3 bg-white border rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-all disabled:bg-gray-50 disabled:text-gray-500",
+            "w-full py-3 bg-white border rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 transition-all disabled:bg-gray-50 disabled:text-gray-500",
             Icon ? "pl-11" : "pl-4",
             trailing ? "pr-12" : "pr-4",
             error

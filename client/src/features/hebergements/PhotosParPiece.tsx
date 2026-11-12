@@ -30,7 +30,7 @@ export default function PhotosParPiece({ photos, legendes, nom, onAgrandir }: {
                   const alt = `${nom}, ${titre}${urls.length > 1 ? ` ${i + 1}` : ""}`;
                   return (
                     <button key={url} type="button" onClick={() => onAgrandir(url)} aria-label={tVisionneuse("agrandir", { photo: alt })}
-                      className={cn("max-w-[80%] sm:max-w-[60%] flex-shrink-0 rounded-xl", CONTOUR_FOCUS_PHOTO)}>
+                      className={cn("max-w-[80%] sm:max-w-[60%] shrink-0 rounded-xl", CONTOUR_FOCUS_PHOTO)}>
                       <img src={url} alt={alt} loading="lazy" className="h-36 sm:h-44 w-auto max-w-full object-cover rounded-xl" />
                     </button>
                   );

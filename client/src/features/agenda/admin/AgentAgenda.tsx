@@ -74,7 +74,7 @@ export default function AgentAgenda() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden lg:inline-flex bg-white rounded-xl p-1 shadow-sm" role="tablist" aria-label="Affichage">
+          <div className="hidden lg:inline-flex bg-white rounded-xl p-1 shadow-xs" role="tablist" aria-label="Affichage">
             {([["week", "Semaine"], ["month", "Mois"]] as const).map(([code, label]) => (
               <button key={code} type="button" role="tab" aria-selected={view === code} onClick={() => setView(code)}
                 className={cn("px-4 py-2 rounded-lg text-sm font-bold", view === code ? "bg-primary text-white" : "text-dark")}>
@@ -83,26 +83,26 @@ export default function AgentAgenda() {
             ))}
           </div>
           <button type="button" onClick={() => setSelected(today)}
-            className="hidden lg:block px-4 py-2.5 rounded-xl bg-white shadow-sm text-sm font-bold text-dark">Aujourd&apos;hui</button>
+            className="hidden lg:block px-4 py-2.5 rounded-xl bg-white shadow-xs text-sm font-bold text-dark">Aujourd&apos;hui</button>
           <button type="button" onClick={() => move(-1)} aria-label="Période précédente"
-            className="w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center text-dark"><ChevronLeft size={20} /></button>
+            className="w-11 h-11 rounded-xl bg-white shadow-xs flex items-center justify-center text-dark"><ChevronLeft size={20} /></button>
           <button type="button" onClick={() => move(1)} aria-label="Période suivante"
-            className="w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center text-dark"><ChevronRight size={20} /></button>
+            className="w-11 h-11 rounded-xl bg-white shadow-xs flex items-center justify-center text-dark"><ChevronRight size={20} /></button>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <Link href="/agent/agenda/disponibilites"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-sm text-sm font-semibold text-dark">
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-xs text-sm font-semibold text-dark">
           <CalendarCog size={16} aria-hidden /> Mes disponibilités
         </Link>
         {isAdmin && (
           <>
             <Link href="/agent/agenda/couverture"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-sm text-sm font-semibold text-dark">
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-xs text-sm font-semibold text-dark">
               <MapPin size={16} aria-hidden /> Couverture par ville
             </Link>
-            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white shadow-sm text-sm">
+            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white shadow-xs text-sm">
               <Users size={16} aria-hidden className="text-gray-500" />
               <span className="sr-only">Agenda affiché</span>
               <select value={agent} onChange={(e) => setAgent(e.target.value)} className="bg-transparent font-semibold text-dark py-0.5">
@@ -158,7 +158,7 @@ function NextVisitBanner({ appointment, now, showAgent }: { appointment: Appoint
       </div>
       {detail && (
         <a href={itineraryUrl(detail.position, detail.address, detail.city)} target="_blank" rel="noopener noreferrer"
-          className="flex-shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white text-primary font-bold px-6 py-4">
+          className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white text-primary font-bold px-6 py-4">
           <Navigation size={20} aria-hidden /> Lancer l&apos;itinéraire
         </a>
       )}
@@ -177,7 +177,7 @@ function DayStrip({ week, selected, today, days, onSelect }: {
         return (
           <button key={key} type="button" role="tab" aria-selected={isSelected} onClick={() => onSelect(key)}
             aria-label={`${capitalize(LONG_DAY.format(asDate(key)))}, ${count} visite${count > 1 ? "s" : ""}`}
-            className={cn("rounded-2xl py-3 flex flex-col items-center gap-1.5 shadow-sm",
+            className={cn("rounded-2xl py-3 flex flex-col items-center gap-1.5 shadow-xs",
               isSelected ? "bg-primary text-white" : "bg-white text-dark", key === today && !isSelected && "ring-2 ring-primary/30")}>
             <span className={cn("text-xs font-semibold", isSelected ? "text-white/80" : "text-gray-500")}>{DAY_LETTERS[i]}</span>
             <span className="font-heading font-bold text-xl">{asDate(key).getUTCDate()}</span>
@@ -210,7 +210,7 @@ function DayList({ day, today, appointments, states, now, loading, showAgent }: 
       <ol className="mt-4 space-y-4">
         {appointments.map((a) => (
           <li key={a.id} className="flex gap-3">
-            <div className="w-14 flex-shrink-0 pt-3">
+            <div className="w-14 shrink-0 pt-3">
               <p className="font-heading font-bold text-dark">{hourMinute(a.start)}</p>
               <p className="text-xs text-gray-500">{formatDuration(durationMinutes(a.start, a.end))}</p>
             </div>
@@ -240,7 +240,7 @@ function VisitCard({ appointment, state, now, showAgent }: {
   const isNext = state === "next";
   const { data: detail } = useAppointment(isNext ? appointment.id : "");
   return (
-    <div className={cn("flex-1 min-w-0 rounded-3xl p-5 shadow-sm",
+    <div className={cn("flex-1 min-w-0 rounded-3xl p-5 shadow-xs",
       isNext ? "bg-primary text-white" : "bg-white text-dark", state === "cancelled" && "opacity-60")}>
       <Link href={`/agent/agenda/${appointment.id}`} className="block">
         <StateBadge state={state} appointment={appointment} now={now} />
@@ -276,11 +276,11 @@ function WeekGrid({ week, today, days, states, now, showAgent }: {
   const nowMinutes = minutesOfDay(now.toISOString());
 
   return (
-    <section className="mt-6 rounded-3xl bg-white shadow-sm p-6" aria-label="Semaine">
+    <section className="mt-6 rounded-3xl bg-white shadow-xs p-6" aria-label="Semaine">
       <div className="flex items-center gap-6 text-sm text-dark mb-4 pl-14">
-        <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded bg-gray-200" /> Terminée</span>
-        <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded bg-primary" /> Prochaine</span>
-        <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded border-2 border-primary" /> À venir</span>
+        <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-sm bg-gray-200" /> Terminée</span>
+        <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-sm bg-primary" /> Prochaine</span>
+        <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-sm border-2 border-primary" /> À venir</span>
       </div>
       <div className="grid grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]">
         <div />
@@ -338,7 +338,7 @@ function MonthGrid({ selected, today, days, onSelect }: {
 }) {
   const month = selected.slice(0, 7);
   return (
-    <section className="mt-6 rounded-3xl bg-white shadow-sm p-4 sm:p-6" aria-label="Mois">
+    <section className="mt-6 rounded-3xl bg-white shadow-xs p-4 sm:p-6" aria-label="Mois">
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500 mb-2">
         {DAY_SHORT.map((d) => <span key={d}>{d}</span>)}
       </div>

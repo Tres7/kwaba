@@ -17,9 +17,9 @@ export default function CarteMission({ mission, action, historique }: {
   const contenu = (
     <>
       {mission.photo ? (
-        <img src={mission.photo} alt="" className="w-16 h-16 rounded-xl object-cover bg-gray-100 flex-shrink-0" />
+        <img src={mission.photo} alt="" className="w-16 h-16 rounded-xl object-cover bg-gray-100 shrink-0" />
       ) : (
-        <span className="w-16 h-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0"><Icone size={26} aria-hidden /></span>
+        <span className="w-16 h-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><Icone size={26} aria-hidden /></span>
       )}
       <span className="flex-1 min-w-0">
         <span className="block text-[11px] font-bold uppercase tracking-wide text-gray-500">{mission.type_libelle}</span>
@@ -36,14 +36,14 @@ export default function CarteMission({ mission, action, historique }: {
   );
 
   return (
-    <article className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+    <article className="bg-white rounded-2xl border border-gray-100 shadow-xs">
       <div className="flex items-center gap-3 p-3 sm:p-4">
         {historique ? (
           <div className="flex-1 min-w-0 flex items-center gap-3">{contenu}</div>
         ) : (
           <Link href={urlMission(mission.type, mission.cible)} className="flex-1 min-w-0 flex items-center gap-3 rounded-xl">
             {contenu}
-            {!action && <ChevronRight size={20} className="text-gray-300 flex-shrink-0" aria-hidden />}
+            {!action && <ChevronRight size={20} className="text-gray-300 shrink-0" aria-hidden />}
           </Link>
         )}
         {action}

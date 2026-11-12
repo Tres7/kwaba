@@ -52,8 +52,8 @@ function SearchForm({ onDone, className, focus }: { onDone?: () => void; classNa
   };
 
   return (
-    <form method="post" onSubmit={submit} role="search" className={cn("relative w-full flex items-center bg-white border border-gray-200 rounded-full py-1.5 pl-4 pr-1.5 shadow-sm hover:shadow transition-shadow", className)}>
-      <Search size={18} className="text-gray-400 flex-shrink-0 mr-3" />
+    <form method="post" onSubmit={submit} role="search" className={cn("relative w-full flex items-center bg-white border border-gray-200 rounded-full py-1.5 pl-4 pr-1.5 shadow-xs hover:shadow-sm transition-shadow", className)}>
+      <Search size={18} className="text-gray-400 shrink-0 mr-3" />
       <ChampDestination
         type="search"
         value={q}
@@ -64,10 +64,10 @@ function SearchForm({ onDone, className, focus }: { onDone?: () => void; classNa
         ariaLabel={t("rechercherDestination")}
         inputRef={champ}
         className="w-full"
-        inputClassName="w-full bg-transparent border-none text-base md:text-sm text-dark outline-none placeholder:text-gray-400"
+        inputClassName="w-full bg-transparent border-none text-base md:text-sm text-dark outline-hidden placeholder:text-gray-400"
         listeClassName="-left-12 -right-1.5"
       />
-      <button type="submit" aria-label={t("lancerRecherche")} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0 hover:bg-primary-600 transition-colors ml-2">
+      <button type="submit" aria-label={t("lancerRecherche")} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shrink-0 hover:bg-primary-600 transition-colors ml-2">
         <ArrowRight size={16} />
       </button>
     </form>
@@ -122,7 +122,7 @@ export default function Navbar() {
   const liensMobile = <T extends { href: string }>(liens: T[]) => filtrerLiens(liens, modules);
 
   const Avatar = ({ size }: { size: string }) => (
-    <div className={cn("rounded-full bg-primary/10 overflow-hidden border border-primary/20 flex items-center justify-center flex-shrink-0", size)}>
+    <div className={cn("rounded-full bg-primary/10 overflow-hidden border border-primary/20 flex items-center justify-center shrink-0", size)}>
       {session?.user?.image ? (
         <img src={session.user.image} alt="" className="w-full h-full object-cover" />
       ) : (
@@ -132,7 +132,7 @@ export default function Navbar() {
   );
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-xs">
       <div className="max-w-7xl 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between gap-4 lg:gap-6">
         <Logo />
 
@@ -204,7 +204,7 @@ export default function Navbar() {
                   <LogIn size={16} />
                   {t("seConnecter")}
                 </Link>
-                <Link href="/register" className="flex items-center gap-1.5 bg-primary text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap">
+                <Link href="/register" className="flex items-center gap-1.5 bg-primary text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-primary/90 transition-colors shadow-xs whitespace-nowrap">
                   <UserPlus size={15} />
                   {t("sInscrire")}
                 </Link>

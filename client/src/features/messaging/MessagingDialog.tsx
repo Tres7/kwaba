@@ -31,7 +31,7 @@ export default function MessagingDialog({ title, closeLabel, submitLabel, cancel
   }, [onClose, sending]);
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-dark/50" onClick={() => !sending && onClose()} aria-hidden="true" />
       <form
         ref={panel} role="dialog" aria-modal="true" aria-labelledby="messaging-dialog-title"

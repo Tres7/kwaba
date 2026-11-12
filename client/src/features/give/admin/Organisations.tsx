@@ -111,7 +111,7 @@ export default function Organisations() {
     <div className="space-y-4">
       <div className="flex justify-between items-center gap-3">
         <p className="text-sm text-muted">Une ONG n&apos;apparaît sur le site qu&apos;une fois vérifiée (date de vérification renseignée) et active.</p>
-        <button onClick={() => ouvrir("nouvelle")} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouvelle ONG</button>
+        <button onClick={() => ouvrir("nouvelle")} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouvelle ONG</button>
       </div>
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : (
         <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">

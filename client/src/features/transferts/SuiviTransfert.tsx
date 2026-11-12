@@ -116,7 +116,7 @@ function TransfertDetail() {
         <div aria-live="polite">
           {enAttente && (
             <p className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 text-sm text-dark">
-              <Loader2 size={18} className="animate-spin text-primary flex-shrink-0" />
+              <Loader2 size={18} className="animate-spin text-primary shrink-0" />
               {tr("attente")}
             </p>
           )}
@@ -137,7 +137,7 @@ function TransfertDetail() {
           <section className="bg-white rounded-3xl border-2 border-secondary/30 p-5 sm:p-6">
             <h2 className="font-heading font-bold text-dark text-lg">{tr("votreChauffeur")}</h2>
             <div className="flex items-center gap-4 mt-4">
-              <div className="w-14 h-14 rounded-full bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0"><Car size={24} /></div>
+              <div className="w-14 h-14 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0"><Car size={24} /></div>
               <div className="min-w-0">
                 <p className="font-bold text-dark">{t.chauffeur.nom}</p>
                 <p className="text-sm text-gray-600">{t.chauffeur.vehicule} · <span className="font-mono">{t.chauffeur.immatriculation}</span></p>
@@ -158,10 +158,10 @@ function TransfertDetail() {
 
         <section className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="flex gap-3"><Plane size={18} className="text-primary flex-shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tr("arrivee")}</dt><dd className="font-semibold text-dark">{dateVol(t.arrivee_locale)}</dd><dd className="text-gray-600">{tr("vol", { numero: t.numero_vol })} · {t.aeroport_detail.nom}</dd></div></div>
-            <div className="flex gap-3"><MapPin size={18} className="text-primary flex-shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tr("destination")}</dt><dd className="font-semibold text-dark">{t.destination}</dd></div></div>
-            <div className="flex gap-3"><Car size={18} className="text-primary flex-shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tr("vehicule")}</dt><dd className="font-semibold text-dark">{tT(`vehicules.${t.categorie}.nom`)}</dd></div></div>
-            <div className="flex gap-3"><Users size={18} className="text-primary flex-shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tT("passagersBagages")}</dt><dd className="font-semibold text-dark flex items-center gap-2">{t.passagers} <Luggage size={13} className="text-gray-500" /> {t.bagages}</dd></div></div>
+            <div className="flex gap-3"><Plane size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tr("arrivee")}</dt><dd className="font-semibold text-dark">{dateVol(t.arrivee_locale)}</dd><dd className="text-gray-600">{tr("vol", { numero: t.numero_vol })} · {t.aeroport_detail.nom}</dd></div></div>
+            <div className="flex gap-3"><MapPin size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tr("destination")}</dt><dd className="font-semibold text-dark">{t.destination}</dd></div></div>
+            <div className="flex gap-3"><Car size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tr("vehicule")}</dt><dd className="font-semibold text-dark">{tT(`vehicules.${t.categorie}.nom`)}</dd></div></div>
+            <div className="flex gap-3"><Users size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{tT("passagersBagages")}</dt><dd className="font-semibold text-dark flex items-center gap-2">{t.passagers} <Luggage size={13} className="text-gray-500" /> {t.bagages}</dd></div></div>
           </dl>
           <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
             <span className="text-gray-600 text-sm">{t.paiement === "reussi" ? tr("paye") : tr("prix")}</span>

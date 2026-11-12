@@ -61,7 +61,7 @@ export default function FenetreOuverture({ ouverte, onCreer, onFermer }: Props) 
   return createPortal(
     <AnimatePresence>
       {ouverte && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-80 flex items-center justify-center p-4">
           <motion.div className="absolute inset-0 bg-black/50" onClick={onFermer} aria-hidden
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div ref={panneau} role="dialog" aria-modal="true" aria-labelledby="ouverture-titre" aria-describedby="ouverture-texte"
@@ -69,7 +69,7 @@ export default function FenetreOuverture({ ouverte, onCreer, onFermer }: Props) 
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="relative w-full max-w-md max-h-[92dvh] overflow-y-auto bg-white rounded-3xl shadow-card-hover px-6 sm:px-8 pt-9 pb-6 text-center">
             <button type="button" onClick={onFermer} aria-label={t("fermer")}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-dark hover:bg-gray-100 focus-visible:!outline-accent">
+              className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-dark hover:bg-gray-100 focus-visible:outline-accent!">
               <X size={20} aria-hidden />
             </button>
 
@@ -84,11 +84,11 @@ export default function FenetreOuverture({ ouverte, onCreer, onFermer }: Props) 
             <p id="ouverture-texte" className="text-sm sm:text-base text-gray-600 leading-relaxed mt-3">{t("texte")}</p>
 
             <button ref={bouton} type="button" onClick={onCreer}
-              className="w-full mt-7 min-h-[52px] rounded-xl bg-primary text-white font-bold hover:bg-primary-600 focus-visible:!outline-accent">
+              className="w-full mt-7 min-h-[52px] rounded-xl bg-primary text-white font-bold hover:bg-primary-600 focus-visible:outline-accent!">
               {t("creer")}
             </button>
             <button type="button" onClick={onFermer}
-              className="w-full mt-3 min-h-[52px] rounded-xl bg-gray-100 text-dark font-bold hover:bg-gray-200 focus-visible:!outline-accent">
+              className="w-full mt-3 min-h-[52px] rounded-xl bg-gray-100 text-dark font-bold hover:bg-gray-200 focus-visible:outline-accent!">
               {t("plusTard")}
             </button>
           </motion.div>

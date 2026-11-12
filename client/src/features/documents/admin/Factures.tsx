@@ -83,14 +83,14 @@ export default function Factures() {
     <div className="space-y-4">
       {societe && !societe.complets && (
         <div role="alert" className="flex flex-wrap items-center gap-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl px-4 py-3 text-sm">
-          <AlertTriangle size={18} className="flex-shrink-0" aria-hidden />
+          <AlertTriangle size={18} className="shrink-0" aria-hidden />
           <span className="flex-1 min-w-[200px]">Aucune facture ne peut être émise tant que la raison sociale et l&apos;adresse de la société ne sont pas renseignées.</span>
           <button type="button" onClick={() => router.replace(`${pathname}?onglet=societe`)} className="font-bold underline">Compléter</button>
         </div>
       )}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
         <SearchInput value={q} onChange={setQ} placeholder="Numéro, client ou email" />
-        <button type="button" onClick={ouvrir} className="flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">
+        <button type="button" onClick={ouvrir} className="shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">
           <Plus size={16} aria-hidden /> Facture libre
         </button>
       </div>
@@ -123,7 +123,7 @@ export default function Factures() {
                 <Saisie aria-label={`Désignation, ligne ${i + 1}`} placeholder="Désignation" value={l.libelle} onChange={(e) => ligne(i, "libelle", e.target.value)} required />
                 {lignes.length > 1 && (
                   <button type="button" onClick={() => setLignes((ls) => ls.filter((_, j) => j !== i))} aria-label={`Supprimer la ligne ${i + 1}`}
-                    className="flex-shrink-0 w-11 rounded-xl border border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200 flex items-center justify-center">
+                    className="shrink-0 w-11 rounded-xl border border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200 flex items-center justify-center">
                     <Trash2 size={16} aria-hidden />
                   </button>
                 )}

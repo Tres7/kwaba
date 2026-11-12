@@ -39,7 +39,7 @@ export default function ReportDialog({ conversationId, messageId, onClose }: { c
         <legend className="text-sm font-semibold text-dark mb-2">{t("reasonLabel")}</legend>
         <div className="grid grid-cols-2 gap-2">
           {REASONS.map((r) => (
-            <label key={r} className="flex items-center gap-2 text-sm text-dark rounded-xl border border-light px-3 py-2 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+            <label key={r} className="flex items-center gap-2 text-sm text-dark rounded-xl border border-light px-3 py-2 cursor-pointer has-checked:border-primary has-checked:bg-primary/5">
               <input type="radio" name="report-reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="accent-primary" />
               {t(`reason.${r}`)}
             </label>
@@ -50,7 +50,7 @@ export default function ReportDialog({ conversationId, messageId, onClose }: { c
         <span className="text-sm font-semibold text-dark">{t("details")}</span>
         <textarea
           value={details} onChange={(e) => setDetails(e.target.value)} maxLength={DETAILS_MAX} rows={3}
-          className="mt-1 w-full rounded-xl border border-light px-3 py-2 text-sm text-dark outline-none focus:border-primary/40"
+          className="mt-1 w-full rounded-xl border border-light px-3 py-2 text-sm text-dark outline-hidden focus:border-primary/40"
         />
       </label>
     </MessagingDialog>

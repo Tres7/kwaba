@@ -179,7 +179,7 @@ function RegisterForm() {
         />
 
         <div className="flex items-start gap-2 pt-1">
-          <input type="checkbox" id="terms" className="mt-1 accent-primary w-4 h-4 flex-shrink-0" required />
+          <input type="checkbox" id="terms" className="mt-1 accent-primary w-4 h-4 shrink-0" required />
           <label htmlFor="terms" className="text-xs text-gray-600 leading-relaxed">
             {t.rich("accepteCgu", {
               lien: (texte) => (

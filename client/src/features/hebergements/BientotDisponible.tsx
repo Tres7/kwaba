@@ -69,7 +69,7 @@ export function PrevenezMoi({ compact }: { compact?: boolean }) {
   if (etat === "ok") {
     return (
       <p role="status" className="flex items-start gap-2 text-sm text-dark bg-green-50 border border-green-100 rounded-xl px-4 py-3">
-        <CheckCircle2 size={18} className="text-green-600 flex-shrink-0 mt-px" aria-hidden /> {t("merci")}
+        <CheckCircle2 size={18} className="text-green-600 shrink-0 mt-px" aria-hidden /> {t("merci")}
       </p>
     );
   }
@@ -79,7 +79,7 @@ export function PrevenezMoi({ compact }: { compact?: boolean }) {
       <div className="flex flex-col sm:flex-row gap-2">
         <input id={compact ? "bientot-email-bandeau" : "bientot-email"} type="email" required autoComplete="email" value={email}
           onChange={(e) => setEmail(e.target.value)} placeholder={t("email")}
-          className="flex-1 min-w-0 px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          className="flex-1 min-w-0 px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
         <button type="submit" disabled={etat === "envoi"}
           className="inline-flex items-center justify-center gap-2 min-h-[48px] px-5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-600 disabled:opacity-60 whitespace-nowrap">
           {etat === "envoi" && <Loader2 size={16} className="animate-spin" aria-hidden />} {t("prevenir")}
@@ -162,13 +162,13 @@ export default function BientotDisponible() {
   return createPortal(
     <AnimatePresence>
       {ouverte && (
-        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center sm:p-4">
+        <div className="fixed inset-0 z-80 flex items-end sm:items-center justify-center sm:p-4">
           <motion.div className="absolute inset-0 bg-black/50" onClick={fermer} aria-hidden
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div ref={panneau} role="dialog" aria-modal="true" aria-labelledby="bientot-titre" aria-describedby="bientot-texte"
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }} transition={{ duration: 0.25, ease: "easeOut" }}
             className="relative w-full sm:max-w-md max-h-[92dvh] overflow-y-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-card-hover">
-            <div className="relative bg-gradient-to-br from-primary to-primary-600 text-white px-6 pt-8 pb-7 text-center">
+            <div className="relative bg-linear-to-br from-primary to-primary-600 text-white px-6 pt-8 pb-7 text-center">
               <button type="button" onClick={fermer} aria-label={t("fermer")}
                 className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:bg-white/15">
                 <X size={20} aria-hidden />
@@ -212,9 +212,9 @@ export function BandeauBientot() {
   const aucunLogement = useAucunLogement();
   if (!aucunLogement) return null;
   return (
-    <section aria-labelledby="bandeau-bientot" className="bg-white border border-primary/15 rounded-3xl p-5 sm:p-6 shadow-sm">
+    <section aria-labelledby="bandeau-bientot" className="bg-white border border-primary/15 rounded-3xl p-5 sm:p-6 shadow-xs">
       <div className="flex items-start gap-4">
-        <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0"><Home size={22} aria-hidden /></span>
+        <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><Home size={22} aria-hidden /></span>
         <div className="flex-1 min-w-0 space-y-3">
           <div>
             <h2 id="bandeau-bientot" className="font-heading font-bold text-dark text-lg">{t("titre")}</h2>

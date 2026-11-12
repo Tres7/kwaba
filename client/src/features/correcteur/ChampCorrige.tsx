@@ -132,7 +132,7 @@ export default function ChampCorrige(props: ChampCorrigeProps) {
         <div className="mt-2 rounded-2xl border border-gray-200 bg-white p-3">
           <div className="flex items-center justify-between gap-3">
             <p className="flex items-center gap-2 text-sm font-semibold text-dark">
-              <SpellCheck size={16} className="text-primary flex-shrink-0" aria-hidden /> {t("resume", { nombre: fautes.length })}
+              <SpellCheck size={16} className="text-primary shrink-0" aria-hidden /> {t("resume", { nombre: fautes.length })}
             </p>
             {corrigeables > 1 && (
               <button type="button" onClick={() => { onValeur(toutCorriger()); setCurseur(null); }}

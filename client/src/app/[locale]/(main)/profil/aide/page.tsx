@@ -115,7 +115,7 @@ export default function HelpPage() {
         <input
           type="search" value={query} onChange={(e) => setQuery(e.target.value)}
           placeholder={t("rechercher")}
-          className="w-full bg-white rounded-full py-4 pl-14 pr-6 border border-gray-200 shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/10 text-base sm:text-[15px]"
+          className="w-full bg-white rounded-full py-4 pl-14 pr-6 border border-gray-200 shadow-xs focus:outline-hidden focus:ring-4 focus:ring-primary/10 text-base sm:text-[15px]"
         />
       </div>
 
@@ -124,7 +124,7 @@ export default function HelpPage() {
         {filtered.map((section) => (
           <section key={section.id} id={section.id} className="scroll-mt-28">
             <h2 className="font-heading font-bold text-lg text-dark mb-3">{section.title}</h2>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs divide-y divide-gray-100 overflow-hidden">
               {section.items.map((item) => {
                 const key = `${section.id}-${item.q}`;
                 const isOpen = open === key || !!query;
@@ -132,7 +132,7 @@ export default function HelpPage() {
                   <div key={key}>
                     <button onClick={() => setOpen(isOpen && !query ? null : key)} aria-expanded={isOpen} className="w-full flex items-center justify-between gap-4 p-4 sm:p-5 text-left hover:bg-gray-50">
                       <span className="font-medium text-dark text-sm sm:text-[15px]">{item.q}</span>
-                      <ChevronDown size={18} className={`text-muted flex-shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown size={18} className={`text-muted shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                     </button>
                     {isOpen && <p className="px-4 sm:px-5 pb-5 text-sm text-gray-600 leading-relaxed">{item.a}</p>}
                   </div>
@@ -144,7 +144,7 @@ export default function HelpPage() {
       </div>
 
       <div className="mt-10 bg-white rounded-2xl border border-gray-100 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0"><MessageCircle size={22} /></div>
+        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0"><MessageCircle size={22} /></div>
         <div className="flex-1">
           <p className="font-bold text-dark">{t("questionSejour")}</p>
           <p className="text-sm text-muted">{t("questionSejourTexte")}</p>
@@ -157,7 +157,7 @@ export default function HelpPage() {
         <p className="text-sm text-muted mt-1">{t("contactTexte")}</p>
         <ul className="mt-4 grid sm:grid-cols-2 gap-3 text-sm">
           <li className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-            <Mail size={18} className="text-primary flex-shrink-0" />
+            <Mail size={18} className="text-primary shrink-0" />
             <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-dark hover:text-primary">{CONTACT_EMAIL}</a>
           </li>
         </ul>

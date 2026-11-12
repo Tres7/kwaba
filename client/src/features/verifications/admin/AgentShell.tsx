@@ -58,7 +58,7 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="min-h-screen bg-light lg:flex">
-      <aside className="hidden lg:flex lg:flex-col w-64 flex-shrink-0 bg-white border-r border-gray-100 sticky top-0 h-screen p-5">
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 bg-white border-r border-gray-100 sticky top-0 h-screen p-5">
         <Logo size="sm" />
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted mt-2 mb-8">Espace agent</p>
         <nav className="space-y-1 flex-1" aria-label="Espace agent">
@@ -107,7 +107,7 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
         </header>
 
         {/* Room for the tab bar on phones */}
-        <main id="contenu" tabIndex={-1} className={cn("px-4 py-5 sm:px-6 lg:p-8 pb-28 lg:pb-8 outline-none",
+        <main id="contenu" tabIndex={-1} className={cn("px-4 py-5 sm:px-6 lg:p-8 pb-28 lg:pb-8 outline-hidden",
           pathname.startsWith("/agent/agenda") ? "max-w-6xl" : "max-w-4xl")}>{children}</main>
 
         <nav aria-label="Espace agent" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">

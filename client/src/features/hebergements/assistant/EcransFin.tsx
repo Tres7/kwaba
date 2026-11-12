@@ -32,7 +32,7 @@ export function EcranPrix({ donnees, modifier, erreurs }: EcranProps) {
       <label className="sr-only" htmlFor="a-prix">{t("prix.titre")}</label>
       <div className="flex items-baseline gap-3 border-b-2 border-primary/30 focus-within:border-primary pb-2">
         <input id="a-prix" type="number" min={1} step={500} inputMode="numeric" placeholder="35000"
-          className="w-full min-w-0 bg-transparent font-heading font-bold text-4xl sm:text-5xl text-dark !outline-none placeholder:text-gray-300"
+          className="w-full min-w-0 bg-transparent font-heading font-bold text-4xl sm:text-5xl text-dark outline-hidden! placeholder:text-gray-300"
           value={donnees.price_per_night ?? ""} onChange={(e) => modifier({ price_per_night: e.target.value ? Number(e.target.value) : null })} />
         <span className="font-heading font-bold text-gray-500">FCFA</span>
       </div>
@@ -138,13 +138,13 @@ export function EcranSecurite({ donnees, modifier }: EcranProps) {
         {DECLARATIONS.map((cle) => (
           <label key={cle} className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-2xl border border-gray-200 cursor-pointer">
             <span className="text-sm text-dark">{t(cle)}</span>
-            <input type="checkbox" className="accent-primary w-5 h-5 flex-shrink-0" checked={declarations[cle] === true}
+            <input type="checkbox" className="accent-primary w-5 h-5 shrink-0" checked={declarations[cle] === true}
               onChange={(e) => declarer({ [cle]: e.target.checked })} />
           </label>
         ))}
       </div>
       <label className="flex items-start gap-3 mt-6 p-4 rounded-2xl bg-primary-50 cursor-pointer">
-        <input type="checkbox" className="accent-primary w-5 h-5 flex-shrink-0 mt-0.5" checked={declarations.attestation === true}
+        <input type="checkbox" className="accent-primary w-5 h-5 shrink-0 mt-0.5" checked={declarations.attestation === true}
           onChange={(e) => declarer({ attestation: e.target.checked })} />
         <span className="text-sm text-dark leading-relaxed">
           {t.rich("attestation", { cgu: (x) => <Link href="/cgu#hotes" target="_blank" className="text-primary underline">{x}<span className="sr-only"> ({tAnnonce("nouvelOnglet")})</span></Link> })}
@@ -237,8 +237,8 @@ export function EcranRecapitulatif({ donnees, conditions }: EcranProps) {
   ] as const;
   return (
     <Question cle="recapitulatif">
-      <article className="rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        {donnees.image_url && <img src={donnees.image_url} alt="" className="w-full aspect-[16/9] object-cover" />}
+      <article className="rounded-3xl border border-gray-100 shadow-xs overflow-hidden">
+        {donnees.image_url && <img src={donnees.image_url} alt="" className="w-full aspect-video object-cover" />}
         <div className="p-4">
           <h2 className="font-heading font-bold text-dark text-lg">{donnees.name}</h2>
           <p className="text-sm text-gray-500 mt-0.5">

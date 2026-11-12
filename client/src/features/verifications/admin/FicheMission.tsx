@@ -96,9 +96,9 @@ export default function FicheMissionPage() {
       )}
 
       {/* Who handles it */}
-      <div className="mt-5 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 bg-white border border-gray-100 shadow-sm">
+      <div className="mt-5 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 bg-white border border-gray-100 shadow-xs">
         <p className="flex items-center gap-2 text-sm text-dark">
-          <UserRound size={18} className="text-primary flex-shrink-0" aria-hidden />
+          <UserRound size={18} className="text-primary shrink-0" aria-hidden />
           <span>
             {!mission ? "Personne ne s'en occupe pour le moment."
               : mission.moi ? <>Vous vous en occupez depuis le {formatDate(mission.prise_le)}.</>

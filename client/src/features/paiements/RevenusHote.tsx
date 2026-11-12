@@ -38,7 +38,7 @@ export default function RevenusHote() {
           { label: t("totaux.enCours"), value: revenus?.totaux.en_cours, icon: Loader2, hint: t("totaux.enCoursAide") },
           { label: t("totaux.verse"), value: revenus?.totaux.verse, icon: CheckCircle, hint: t("totaux.commission", { montant: formatPrice(revenus?.totaux.commission ?? 0) }) },
         ].map(({ label, value, icon: Icon, hint }) => (
-          <div key={label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div key={label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs">
             <p className="flex items-center gap-2 text-xs text-muted font-medium"><Icon size={14} className="text-primary" /> {label}</p>
             <p className="font-heading font-bold text-dark text-2xl mt-1">{isLoading ? "…" : formatPrice(value ?? 0)}</p>
             <p className="text-xs text-gray-600 mt-1">{hint}</p>
@@ -67,7 +67,7 @@ export default function RevenusHote() {
                     {v.voyageur} · {formatDate(v.check_in)} → {formatDate(v.check_out)} · <span className="font-mono">{v.reference}</span>
                   </p>
                   {v.probleme && (
-                    <p className="flex items-start gap-1.5 text-xs text-red-700 mt-1"><AlertTriangle size={12} className="flex-shrink-0 mt-0.5" /> {v.probleme}</p>
+                    <p className="flex items-start gap-1.5 text-xs text-red-700 mt-1"><AlertTriangle size={12} className="shrink-0 mt-0.5" /> {v.probleme}</p>
                   )}
                 </div>
                 <div className="text-xs text-gray-600 sm:text-right">
@@ -140,7 +140,7 @@ export function ProfilVersementForm({ manquant }: { manquant: boolean }) {
     const indicatif = config.pays.find((p) => p.code === profil.pays)?.indicatif;
     return (
       <section className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0"><Smartphone size={22} /></div>
+        <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0"><Smartphone size={22} /></div>
         <div className="flex-1 min-w-0">
           <h2 className="font-heading font-bold text-dark">{t("arriventSur")}</h2>
           <p className="text-sm text-gray-600">{nomOperateur(profil.operateur)} · +{indicatif} {profil.numero} · {profil.titulaire}</p>

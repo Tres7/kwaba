@@ -40,15 +40,15 @@ export default function AccueilAgentPage() {
                 const Icone = ICONES[t.type] ?? Home;
                 return (
                   <Link key={t.type} href={`/agent/a-faire?type=${t.type}`}
-                    className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:border-primary/30">
-                    <span className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0"><Icone size={22} aria-hidden /></span>
+                    className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-xs p-4 hover:border-primary/30">
+                    <span className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><Icone size={22} aria-hidden /></span>
                     <span className="flex-1 min-w-0">
                       <span className="block font-heading font-bold text-dark">{t.libelle}</span>
                       <span className="block text-sm text-gray-500">
                         {t.libres} à prendre{t.miennes ? ` · ${t.miennes} à vous` : ""}{t.equipe ? ` · ${t.equipe} pris par l'équipe` : ""}
                       </span>
                     </span>
-                    <ArrowRight size={18} className="text-gray-300 flex-shrink-0" aria-hidden />
+                    <ArrowRight size={18} className="text-gray-300 shrink-0" aria-hidden />
                   </Link>
                 );
               })}
@@ -63,7 +63,7 @@ function Chiffre({ href, icone: Icone, valeur, libelle, chargement, accent }: {
   href: string; icone: typeof Home; valeur: number; libelle: string; chargement: boolean; accent?: boolean;
 }) {
   return (
-    <Link href={href} className={accent ? "rounded-2xl p-3 sm:p-4 bg-primary text-white" : "rounded-2xl p-3 sm:p-4 bg-white border border-gray-100 shadow-sm text-dark"}>
+    <Link href={href} className={accent ? "rounded-2xl p-3 sm:p-4 bg-primary text-white" : "rounded-2xl p-3 sm:p-4 bg-white border border-gray-100 shadow-xs text-dark"}>
       <Icone size={18} aria-hidden className={accent ? "text-white/80" : "text-primary"} />
       <span className="block font-heading font-bold text-2xl sm:text-3xl mt-2 tabular-nums">{chargement ? "–" : valeur}</span>
       <span className={accent ? "block text-xs sm:text-sm text-white/80" : "block text-xs sm:text-sm text-gray-500"}>{libelle}</span>

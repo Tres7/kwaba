@@ -52,11 +52,11 @@ export default function Tarifs() {
   };
 
   if (isLoading || !data) return <div className="h-96 skeleton rounded-2xl" />;
-  const champ = "w-28 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+  const champ = "w-28 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
   return (
     <div className="space-y-6">
       <p className="flex items-start gap-2 rounded-2xl bg-amber-50 text-amber-900 px-4 py-3 text-sm">
-        <TriangleAlert size={18} className="flex-shrink-0 mt-0.5" aria-hidden />
+        <TriangleAlert size={18} className="shrink-0 mt-0.5" aria-hidden />
         <span>
           Un changement s&apos;applique aux réservations faites ensuite ; les réservations déjà faites gardent leurs montants.
           Le site, les CGV et les contrats affichent aussitôt les nouveaux taux. Les CGV (art. 23.1) prévoient d&apos;annoncer une
@@ -72,7 +72,7 @@ export default function Tarifs() {
                 <span className="block text-sm font-semibold text-dark">{libelle}</span>
                 <span className="block text-xs text-muted">{aide}</span>
               </span>
-              <span className="flex items-center gap-2 flex-shrink-0">
+              <span className="flex items-center gap-2 shrink-0">
                 <input inputMode="decimal" className={champ} value={taux[cle] ?? ""} onChange={(e) => setTaux((t) => ({ ...t, [cle]: e.target.value }))} />
                 <span className="text-sm text-muted">%</span>
               </span>

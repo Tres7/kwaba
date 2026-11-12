@@ -147,7 +147,7 @@ function PaiementContent() {
 
               {reservation && (
                 <div className="flex gap-4 items-center mt-6 p-4 rounded-2xl bg-gray-50">
-                  <img src={reservation.hebergement_detail.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                  <img src={reservation.hebergement_detail.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-dark text-sm truncate">{reservation.hebergement_detail.name}</p>
                     <p className="text-xs text-gray-600">{formatDate(reservation.check_in)} → {formatDate(reservation.check_out)}</p>

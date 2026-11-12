@@ -17,7 +17,7 @@ export default function NotificationsPage() {
       <div className="bg-white rounded-3xl shadow-card p-5 sm:p-8 space-y-4">
         {ITEMS.map(({ icon: Icon, id }) => (
           <div key={id} className="flex items-start gap-4 p-4 rounded-2xl border border-gray-100">
-            <div className="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center text-primary flex-shrink-0"><Icon size={20} /></div>
+            <div className="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0"><Icon size={20} /></div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-bold text-dark">{t(`elements.${id}.titre`)}</p>
