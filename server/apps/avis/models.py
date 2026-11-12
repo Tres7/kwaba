@@ -39,7 +39,7 @@ class AvisModel(models.Model):
         app_label = 'avis'
         ordering = ['-created_at']
         constraints = [
-            models.CheckConstraint(check=models.Q(note__gte=1, note__lte=5), name='avis_note_1_a_5'),
+            models.CheckConstraint(condition=models.Q(note__gte=1, note__lte=5), name='avis_note_1_a_5'),
         ]
 
     def __str__(self):
