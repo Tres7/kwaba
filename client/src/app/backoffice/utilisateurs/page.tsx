@@ -180,7 +180,7 @@ function Utilisateurs() {
       {data && <Pagination page={page} count={data.count} pageSize={PAGE_SIZE} onChange={setPage} />}
       <ConfirmDialog confirmation={confirmation} onClose={() => setConfirmation(null)} />
       <ConditionsHote key={conditions?.id ?? "aucun"} hote={conditions} onFermer={() => setConditions(null)} />
-      {droits && <DroitsAdmin key={droitsDe?.id ?? "aucun"} admin={droitsDe} sections={droits.sections_disponibles} onFermer={() => setDroitsDe(null)} />}
+      {droits && <DroitsAdmin key={droitsDe?.id ?? "aucun"} admin={droitsDe} sections={droits.sections_disponibles} permissions={droits.permissions_disponibles} onFermer={() => setDroitsDe(null)} />}
     </div>
   );
 }

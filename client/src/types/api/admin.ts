@@ -42,6 +42,7 @@ export interface AdminUser {
   est_super_admin: boolean;
   /** Admins only. null: every section. */
   admin_sections: string[] | null;
+  admin_permissions: string[];
   /** Temporary admin: end of the rights, then back to the previous role. */
   admin_expire_le: string | null;
 }
@@ -50,6 +51,8 @@ export interface DroitsAdmin {
   est_super_admin: boolean;
   sections: string[];
   sections_disponibles: { code: string; libelle: string }[];
+  permissions: string[];
+  permissions_disponibles: { code: string; libelle: string }[];
 }
 
 export interface ConditionsHote {

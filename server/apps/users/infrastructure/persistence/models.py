@@ -52,6 +52,7 @@ class UserModel(AbstractUser):
     # Limits of an admin, set by the super admins (is_superuser, managed on the server only: manage.py super_admin).
     # NULL: every section. A date: the account goes back to its previous role at that time (apps/users/admins.py).
     admin_sections = models.JSONField(null=True, blank=True)
+    admin_permissions = models.JSONField(default=list, blank=True, db_default=[])
     admin_expire_le = models.DateTimeField(null=True, blank=True)
     role_avant_admin = models.CharField(max_length=20, blank=True, default='', db_default='')
     USERNAME_FIELD  = 'email'

@@ -11,7 +11,7 @@ from apps.paiements import api as paiements
 from apps.reservations import api as reservations
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import VueAdmin, booleen as _booleen, introuvable as _introuvable, paginer as _paginer
-from apps.securite.permissions import SECTIONS_ADMIN
+from apps.securite.permissions import SECTIONS_ADMIN, SPECIAL_PERMISSIONS
 
 from .api import ROLES, hote_ou_candidat, revoquer_jetons
 from .infrastructure.persistence.models import UserModel
@@ -57,6 +57,7 @@ def _utilisateur(u, nb_reservations: int, nb_annonces: int) -> dict:
         'conditions': _conditions(u),
         'candidature_hote': u.candidature_hote, 'candidature_motif': u.candidature_motif,
         'est_super_admin': u.is_superuser, 'admin_sections': u.admin_sections, 'admin_expire_le': u.admin_expire_le,
+        'admin_permissions': u.admin_permissions or [],
     }
 
 
@@ -73,6 +74,12 @@ def _lire_droits_admin(donnees) -> tuple[dict, dict]:
             erreurs['admin_sections'] = ['Choisissez au moins une section valide, ou null pour toutes.']
         else:
             champs['admin_sections'] = sections
+    if 'admin_permissions' in donnees:
+        permissions = donnees['admin_permissions']
+        if not (isinstance(permissions, list) and set(permissions) <= set(SPECIAL_PERMISSIONS)):
+            erreurs['admin_permissions'] = ['Permissions inconnues.']
+        else:
+            champs['admin_permissions'] = sorted(set(permissions))
     if 'admin_expire_le' in donnees:
         valeur = donnees['admin_expire_le']
         date = parse_datetime(valeur) if isinstance(valeur, str) else None
@@ -92,6 +99,9 @@ class DroitsAdminView(VueAdmin):
             'est_super_admin': u.is_superuser,
             'sections': list(SECTIONS_ADMIN) if u.is_superuser or u.admin_sections is None else u.admin_sections,
             'sections_disponibles': [{'code': code, 'libelle': libelle} for code, libelle in SECTIONS_ADMIN.items()],
+            'permissions': list(SPECIAL_PERMISSIONS) if u.is_superuser else list(u.admin_permissions or []),
+            'permissions_disponibles': [{'code': code, 'libelle': libelle}
+                                        for code, libelle in SPECIAL_PERMISSIONS.items()],
         })
 
 
@@ -123,7 +133,8 @@ class UtilisateurDetailView(VueAdmin):
         if cible.is_superuser:
             return Response({'detail': 'Les super administrateurs se gèrent uniquement sur le serveur.'},
                             status=status.HTTP_403_FORBIDDEN)
-        droits_admin = cible.role == 'admin' or role == 'admin' or 'admin_sections' in donnees or 'admin_expire_le' in donnees
+        droits_admin = (cible.role == 'admin' or role == 'admin' or 'admin_sections' in donnees
+                        or 'admin_permissions' in donnees or 'admin_expire_le' in donnees)
         if droits_admin and not request.user.is_superuser:
             return Response({'detail': 'Seuls les super administrateurs gèrent les comptes administrateurs.'},
                             status=status.HTTP_403_FORBIDDEN)
@@ -150,6 +161,7 @@ class UtilisateurDetailView(VueAdmin):
                 cible.role_avant_admin = cible.role
             elif cible.role == 'admin':
                 cible.admin_sections, cible.admin_expire_le, cible.role_avant_admin = None, None, ''
+                cible.admin_permissions = []
             cible.role = role
             if role != 'voyageur':
                 cible.candidature_hote, cible.candidature_motif = '', ''
@@ -157,6 +169,7 @@ class UtilisateurDetailView(VueAdmin):
             for champ, valeur in limites.items():
                 setattr(cible, champ, valeur)
             journaliser('droits_admin_modifies', request, utilisateur=request.user, sections=cible.admin_sections,
+                        permissions=cible.admin_permissions,
                         expire_le=cible.admin_expire_le.isoformat() if cible.admin_expire_le else None, **trace)
         if 'is_active' in donnees and actif != cible.is_active:
             cible.is_active = actif
@@ -168,7 +181,7 @@ class UtilisateurDetailView(VueAdmin):
             journaliser('backoffice_modification', request, utilisateur=request.user, objet='conditions_hote',
                         id=str(cible.pk), champs=['categorie', 'fondateur_debut', 'fondateur_fin'])
         cible.save(update_fields=['role', 'is_active', 'candidature_hote', 'candidature_motif', 'admin_sections',
-                                  'admin_expire_le', 'role_avant_admin'])
+                                  'admin_permissions', 'admin_expire_le', 'role_avant_admin'])
         if not cible.is_active:
             # Closes their sessions: without a valid refresh token, they are signed out at the latest when the access token expires
             revoquer_jetons(cible.pk)
