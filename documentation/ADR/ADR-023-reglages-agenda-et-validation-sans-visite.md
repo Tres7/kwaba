@@ -36,9 +36,9 @@ Nous retenons l'option 3.
 | Préavis | 24 h | 1 – 72 h |
 | Horizon | 14 j | 7 – 60 j |
 | Visites max par jour | 4 | 1 – 10 |
-| Marge entre visites | 30 min | 0 – 120 min |
-| Durée de base | 60 min | 30 – 180 min |
-| Supplément par annonce | 20 min | 0 – 60 min |
+| Marge entre visites | 30 min | 0 – 2 h |
+| Durée de base | 1 h | 30 min – 3 h |
+| Supplément par annonce | 20 min | 0 – 1 h |
 | Plafond par groupe | 5 | 1 – 10 |
 | Seuil « même site » | 200 m | 50 – 1000 m |
 | Heure du résumé de la veille | 18 h | 12 – 22 h |

@@ -83,11 +83,18 @@ export function minutesUntil(moment: string, now: Date): number {
   return Math.round((new Date(moment).getTime() - now.getTime()) / 60_000);
 }
 
+export function formatDuration(minutes: number): string {
+  const total = Math.max(0, Math.round(minutes));
+  if (total < 60) return `${total} min`;
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
+  return rest ? `${hours} h ${String(rest).padStart(2, "0")}` : `${hours} h`;
+}
+
 export function inTime(minutes: number): string {
   if (minutes <= 0) return "maintenant";
-  if (minutes < 60) return `dans ${minutes} min`;
+  if (minutes < 24 * 60) return `dans ${formatDuration(minutes)}`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `dans ${hours} h${minutes % 60 ? ` ${String(minutes % 60).padStart(2, "0")}` : ""}`;
   const days = Math.round(hours / 24);
   return `dans ${days} jour${days > 1 ? "s" : ""}`;
 }

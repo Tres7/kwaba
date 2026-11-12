@@ -10,7 +10,7 @@ import { useFormat } from "@/lib/format";
 import { cn, FALLBACK_IMAGE } from "@/lib/utils";
 import { bookVisit, moveVisit } from "./api";
 import { useAgendaMutation, useFreeSlots, useMoveSlots, useMyVisit } from "./hooks";
-import { TIMEZONE, hourMinute, slotsByDay } from "./time";
+import { TIMEZONE, formatDuration, hourMinute, slotsByDay } from "./time";
 import type { HostAppointment, ListingToSchedule } from "./types";
 
 export default function HostVisit() {
@@ -52,7 +52,7 @@ export default function HostVisit() {
       </Link>
       <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark mt-3">{t("title")}</h1>
       <p className="text-gray-500 text-sm mt-2">{t("intro")}</p>
-      {rules && <p className="text-gray-500 text-sm mt-1">{t("rules", { minutes: rules.visit_duration_min, notice: rules.notice_h, days: rules.horizon_days })}</p>}
+      {rules && <p className="text-gray-500 text-sm mt-1">{t("rules", { duration: formatDuration(rules.visit_duration_min), notice: rules.notice_h, days: rules.horizon_days })}</p>}
 
       {isLoading && <p className="mt-8 text-sm text-gray-500">{t("loading")}</p>}
       {isError && <p className="mt-8 text-sm text-red-700">{t("error")}</p>}
@@ -79,7 +79,7 @@ export default function HostVisit() {
           <h2 className="font-heading font-bold text-lg text-dark">{t("toBook")}</h2>
           {rules && toBook.length > 1 && (
             <p className="text-sm text-gray-500 mt-1">
-              {t("sameSite", { distance: rules.same_site_distance_m, minutes: rules.visit_duration_min + rules.extra_listing_min })}
+              {t("sameSite", { distance: rules.same_site_distance_m, duration: formatDuration(rules.visit_duration_min + rules.extra_listing_min) })}
             </p>
           )}
           <ul className="mt-3 space-y-3">
@@ -181,7 +181,7 @@ function SlotPicker(props: PickerProps) {
     <section className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-sm p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-heading font-bold text-dark">{props.mode === "book" ? t("chooseSlot") : t("moveTitle")}</h3>
-        <span className="text-sm text-gray-500">{t("duration", { minutes: props.minutes })}</span>
+        <span className="text-sm text-gray-500">{formatDuration(props.minutes)}</span>
       </div>
       {isLoading && <p className="mt-3 text-sm text-gray-500">{t("loading")}</p>}
       {!isLoading && days.length === 0 && <p className="mt-3 text-sm text-gray-500">{t("noSlot")}</p>}

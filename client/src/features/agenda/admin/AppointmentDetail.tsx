@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { apiErrorMessage } from "@/lib/api";
 import { appointmentIcsUrl, cancelAppointment, onTheWay, reassignAppointment } from "../api";
 import { useAgendaMutation, useAgents, useAppointment } from "../hooks";
-import { durationMinutes, hourMinute, itineraryUrl } from "../time";
+import { durationMinutes, formatDuration, hourMinute, itineraryUrl } from "../time";
 
 const FULL_DATE = new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Lome", weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
@@ -54,7 +54,7 @@ export default function AppointmentDetail() {
           <span>
             <span className="block first-letter:uppercase">{FULL_DATE.format(new Date(appointment.start))}</span>
             {hourMinute(appointment.start)} – {hourMinute(appointment.end)}{" "}
-            <span className="text-gray-500">({durationMinutes(appointment.start, appointment.end)} min)</span>
+            <span className="text-gray-500">({formatDuration(durationMinutes(appointment.start, appointment.end))})</span>
           </span>
         </p>
         <p className="flex items-start gap-2 text-dark mt-2">

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Appointment } from "./types";
 import {
-  addDays, addMonths, byDay, dayKey, durationMinutes, hourMinute, inTime, itineraryUrl, minutesOfDay, monthGrid,
+  addDays, addMonths, byDay, dayKey, durationMinutes, formatDuration, hourMinute, inTime, itineraryUrl, minutesOfDay, monthGrid,
   slotsByDay, visitStates, weekDays, weekStart, weekday,
 } from "./time";
 
@@ -55,6 +55,15 @@ describe("visits of the day", () => {
       appointment("off", "2026-11-11T12:00:00Z", "2026-11-11T13:00:00Z", "cancelled"),
     ], new Date("2026-11-11T11:15:00Z"));
     expect(states).toEqual({ done: "done", missed: "past", later: "upcoming", next: "next", off: "cancelled" });
+  });
+
+  it("durations in hours, minutes only under an hour", () => {
+    expect(formatDuration(30)).toBe("30 min");
+    expect(formatDuration(60)).toBe("1 h");
+    expect(formatDuration(80)).toBe("1 h 20");
+    expect(formatDuration(140)).toBe("2 h 20");
+    expect(formatDuration(125)).toBe("2 h 05");
+    expect(formatDuration(120)).toBe("2 h");
   });
 
   it("says how long until the visit", () => {
