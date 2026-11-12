@@ -72,6 +72,7 @@ class Appointment:
     cancelled_by: str = ''
     cancellation_reason: str = ''
     closing_reason: str = ''
+    post_check: bool = False
     sequence: int = 0
     host_reminder_at: datetime | None = None
     alert_at: datetime | None = None

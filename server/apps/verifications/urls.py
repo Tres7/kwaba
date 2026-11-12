@@ -1,7 +1,8 @@
 from django.urls import path
 
 from .appointment_views import (
-    BookByPhoneView, BookView, CancelView, FreeSlotsView, MoveSlotsView, MoveView, MyVisitView, ReassignView,
+    BookByPhoneView, BookView, CancelView, FreeSlotsView, MoveSlotsView, MoveView, MyVisitView, PostCheckView,
+    ReassignView,
 )
 from .views import (
     CompteursView, CorrectionPositionView, DecisionView, FichierPieceView, LirePositionView, MaPieceIdentiteView,
@@ -27,5 +28,6 @@ urlpatterns = [
     path('visit/appointments/<uuid:pk>/move/', MoveView.as_view(), name='verification-visit-move'),
     path('listings/<uuid:pk>/appointment/', BookByPhoneView.as_view(), name='verification-book-by-phone'),
     path('appointments/<uuid:pk>/cancel/', CancelView.as_view(), name='verification-appointment-cancel'),
+    path('appointments/<uuid:pk>/post-check/', PostCheckView.as_view(), name='verification-appointment-post-check'),
     path('appointments/<uuid:pk>/reassign/', ReassignView.as_view(), name='verification-appointment-reassign'),
 ]

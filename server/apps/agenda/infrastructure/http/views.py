@@ -86,6 +86,7 @@ def _appointment_json(appointment: Appointment, agents: dict | None = None, deta
         'listings': [{'id': t.id, 'title': t.title} for t in appointment.targets],
         'agent': None,
         'cancellation_reason': appointment.cancellation_reason if appointment.status == CANCELLED else '',
+        'closing_reason': appointment.closing_reason, 'post_check': appointment.post_check,
     }
     if agents is not None:
         data['agent'] = {'id': str(appointment.agent_id), 'name': _name(agents.get(appointment.agent_id))}

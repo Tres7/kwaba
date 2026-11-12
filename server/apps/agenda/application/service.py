@@ -229,7 +229,8 @@ class AgendaService:
             self.notifier.moved(appointment, agenda)
         return appointment
 
-    def cancel(self, appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str) -> Appointment:
+    def cancel(self, appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str,
+               notify: bool = True) -> Appointment:
         reason = ' '.join(reason.split())
         if by not in (BY_AGENT, BY_ADMIN, BY_HOST):
             raise InvalidRule("Auteur de l'annulation inconnu.")
@@ -244,8 +245,14 @@ class AgendaService:
             appointment = self.appointments.save(replace(
                 appointment, status=CANCELLED, cancelled_at=self.clock.now(), cancelled_by=by,
                 cancellation_reason=reason[:500], sequence=appointment.sequence + 1))
-            self.notifier.cancelled(appointment, self.agendas.for_agent(appointment.agent_id))
+            if notify:
+                self.notifier.cancelled(appointment, self.agendas.for_agent(appointment.agent_id))
         return appointment
+
+    def keep_as_post_check(self, appointment_id: uuid.UUID) -> Appointment:
+        with self.tx.atomic():
+            appointment = self._confirmed(appointment_id)
+            return self.appointments.save(replace(appointment, post_check=True))
 
     def reassign(self, appointment_id: uuid.UUID, agent_id: uuid.UUID) -> Appointment:
         now = self.clock.now()

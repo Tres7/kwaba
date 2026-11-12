@@ -27,6 +27,13 @@ Décision : [ADR-022](../ADR/ADR-022-agenda-des-agents.md). Complète la vérifi
 
 Sans réservation : relance de l'hôte à 2 jours, alerte aux admins à 3 jours. L'agent peut aussi fixer la visite par téléphone depuis la fiche de la mission.
 
+## Décision avant l'heure et validation sans visite
+
+- Un agent qui décide avant l'heure de la visite prévue doit donner un motif. Le créneau est libéré, sauf pour une visite groupée dont une autre annonce attend encore.
+- Back-office > Annonces > « Valider sans visite » : réservé aux super admins et à la permission spéciale « Valider une annonce sans visite ». Motif obligatoire ; l'annonce est marquée « Sans visite ».
+- Par défaut, la visite prévue est annulée et la mission fermée ; l'hôte et l'agent reçoivent chacun un message.
+- « Conserver la visite prévue » : elle devient un contrôle a posteriori. Sur la fiche du rendez-vous, l'agent conclut « Conforme » ou « Non conforme » ; non conforme retire l'annonce du site (statut refusée, motif envoyé à l'hôte) et alerte les admins.
+
 ## Worker
 
 `python manage.py agenda_worker` (service `agenda` en prod, `agenda-worker` en dev ; `--once` pour une seule passe, `--interval` en secondes, 300 par défaut). Une passe :

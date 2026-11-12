@@ -13,16 +13,20 @@ export interface Confirmation {
   danger?: boolean;
   /** Asks for a reason (required, at least 5 characters), passed to `action`. */
   motif?: boolean;
-  action: (motif: string) => Promise<void>;
+  /** Optional box to tick, passed to `action` as its second argument. */
+  option?: { label: string; help?: string };
+  action: (motif: string, option: boolean) => Promise<void>;
 }
 
 /** Confirmation window for administration actions (replaces window.confirm). */
 export default function ConfirmDialog({ confirmation, onClose }: { confirmation: Confirmation | null; onClose: () => void }) {
   const [motif, setMotif] = useState("");
+  const [option, setOption] = useState(false);
   const [envoi, setEnvoi] = useState(false);
 
   useEffect(() => {
     setMotif("");
+    setOption(false);
     setEnvoi(false);
   }, [confirmation]);
 
@@ -40,7 +44,7 @@ export default function ConfirmDialog({ confirmation, onClose }: { confirmation:
     if (!motifOk || envoi) return;
     setEnvoi(true);
     try {
-      await confirmation.action(motif.trim());
+      await confirmation.action(motif.trim(), option);
       onClose();
     } catch {
       // The action shows the error itself (toast); the window stays open
@@ -71,6 +75,16 @@ export default function ConfirmDialog({ confirmation, onClose }: { confirmation:
             />
             {!motifOk && <p className="text-xs text-muted mt-1">5 caractères minimum.</p>}
           </div>
+        )}
+
+        {confirmation.option && (
+          <label className="mt-4 flex items-start gap-2 text-sm text-dark">
+            <input type="checkbox" checked={option} onChange={(e) => setOption(e.target.checked)} className="mt-1" />
+            <span>
+              <span className="font-semibold">{confirmation.option.label}</span>
+              {confirmation.option.help && <span className="block text-xs text-muted">{confirmation.option.help}</span>}
+            </span>
+          </label>
         )}
 
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">

@@ -7,7 +7,7 @@ import {
 
 const appointment = (id: string, start: string, end: string, status: Appointment["status"] = "confirmed"): Appointment => ({
   id, title: "Studio", city: "Lomé", address: "", start, end, status, origin: "host", on_the_way_at: null, listings: [], agent: null,
-  cancellation_reason: "",
+  cancellation_reason: "", closing_reason: "", post_check: false,
 });
 
 describe("dates in Lomé", () => {

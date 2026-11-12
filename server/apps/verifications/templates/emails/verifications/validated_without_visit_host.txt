@@ -1,0 +1,15 @@
+{% autoescape off %}Bonjour {{ first_name }},
+
+Votre logement « {{ listing }} » est vérifié par l'équipe Kwa-Ba : votre annonce est maintenant visible des voyageurs.
+{% if visit %}{% if visit.kept %}
+Un agent Kwa-Ba passera quand même le {{ visit.when }}, comme prévu, pour un contrôle sur place.
+{% elif visit.shared %}
+La visite prévue le {{ visit.when }} est maintenue pour vos autres annonces.
+{% else %}
+La visite prévue le {{ visit.when }} n'a plus lieu : vous n'avez rien à faire.
+{% endif %}{% endif %}
+Votre annonce : {{ url_listing }}
+Votre espace hôte : {{ url_space }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

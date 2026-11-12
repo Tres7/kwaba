@@ -38,6 +38,9 @@ describe("agenda", () => {
     expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/appointments/a1/cancel/", { reason: "Malade" });
     await agenda.reassignAppointment("a1", "u2");
     expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/appointments/a1/reassign/", { agent_id: "u2" });
+    await agenda.concludePostCheck("a1", false, "Pas de piscine");
+    expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/appointments/a1/post-check/",
+      { compliant: false, reason: "Pas de piscine" });
     await agenda.bookByPhone("l1", "2026-11-20T09:00:00Z");
     expect(api.post).toHaveBeenLastCalledWith("/v1/verifications/listings/l1/appointment/",
       { start: "2026-11-20T09:00:00Z" });

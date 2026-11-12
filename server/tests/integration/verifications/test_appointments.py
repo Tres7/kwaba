@@ -292,3 +292,86 @@ class TestHostReminders:
                                             invited_at=datetime.now(timezone.utc) - timedelta(days=4))
         _book(client_for(host), [listing], at(in_days(3), 9))
         assert remind_hosts() == {'host_reminders': 0, 'host_alerts': 0}
+
+
+class TestValidationWithoutVisit:
+    @pytest.fixture
+    def super_admin(self, make_user):
+        return make_user(role='admin', is_superuser=True, is_staff=True)
+
+    def _validate(self, client, listing, keep_visit=False):
+        return client.patch(f'/api/v1/admin/hebergements/{listing.id}/',
+                            {'est_verifie': True, 'motif': 'Hôtel déjà connu de l\'équipe', 'keep_visit': keep_visit},
+                            format='json')
+
+    def test_the_planned_visit_is_cancelled_and_both_are_told_once(self, client_for, host, make_listing, make_agent,
+                                                                   super_admin, django_capture_on_commit_callbacks):
+        agent = make_agent()
+        listing = make_listing()
+        _book(client_for(host), [listing], at(in_days(3), 9))
+        mail.outbox.clear()
+        with django_capture_on_commit_callbacks(execute=True):
+            assert self._validate(client_for(super_admin), listing).status_code == 200
+        appointment = AppointmentModel.objects.get()
+        assert appointment.status == 'cancelled' and appointment.cancelled_by == 'admin'
+        assert _mission(listing) is None
+        assert MissionModel.objects.get(cible=str(listing.id)).statut == 'terminee'
+        to_host = [m for m in mail.outbox if m.to == [host.email]]
+        to_agent = [m for m in mail.outbox if m.to == [agent.email]]
+        assert len(to_host) == 1 and "n'a plus lieu" in to_host[0].body
+        assert len(to_agent) == 1 and 'annulée' in to_agent[0].body and "Hôtel déjà connu" in to_agent[0].body
+        assert at(in_days(3), 9) in client_for(host).get(
+            f'{VISIT}slots/', {'listings': str(make_listing(name='Autre').id)}).data['slots']
+
+    def test_kept_visit_becomes_a_post_check(self, client_for, host, make_listing, make_agent, super_admin,
+                                             django_capture_on_commit_callbacks):
+        agent = make_agent()
+        listing = make_listing()
+        appointment_id = _book(client_for(host), [listing], at(in_days(3), 9)).data['id']
+        mail.outbox.clear()
+        with django_capture_on_commit_callbacks(execute=True):
+            self._validate(client_for(super_admin), listing, keep_visit=True)
+        appointment = AppointmentModel.objects.get()
+        assert appointment.status == 'confirmed' and appointment.post_check
+        assert 'contrôle a posteriori' in [m for m in mail.outbox if m.to == [agent.email]][0].body
+        detail = client_for(agent).get(f'/api/v1/agenda/appointments/{appointment_id}/').data
+        assert detail['post_check'] is True
+        url = f'/api/v1/verifications/appointments/{appointment_id}/post-check/'
+        assert client_for(make_agent()).post(url, {'compliant': True}, format='json').status_code == 403
+        response = client_for(agent).post(url, {'compliant': True}, format='json')
+        assert response.status_code == 200 and response.data['status'] == 'done'
+        listing.refresh_from_db()
+        assert listing.statut_verification == 'verifiee'
+
+    def test_failed_post_check_unpublishes_and_alerts_the_admins(self, client_for, host, make_listing, make_agent,
+                                                                 super_admin, frozen_now,
+                                                                 django_capture_on_commit_callbacks):
+        agent = make_agent()
+        listing = make_listing()
+        appointment_id = _book(client_for(host), [listing], at(in_days(3), 9)).data['id']
+        self._validate(client_for(super_admin), listing, keep_visit=True)
+        frozen_now(at(in_days(3), 9, 30))
+        url = f'/api/v1/verifications/appointments/{appointment_id}/post-check/'
+        assert client_for(agent).post(url, {'compliant': False, 'reason': 'court'}, format='json').status_code == 400
+        mail.outbox.clear()
+        with django_capture_on_commit_callbacks(execute=True):
+            response = client_for(agent).post(url, {'compliant': False, 'reason': "Pas de piscine, photos d'un autre lieu"},
+                                              format='json')
+        assert response.status_code == 200
+        listing.refresh_from_db()
+        assert listing.statut_verification == 'refusee' and 'piscine' in listing.motif_refus
+        assert AppointmentModel.objects.get().closing_reason.startswith('Contrôle non conforme')
+        assert {m.to[0] for m in mail.outbox} == {host.email, super_admin.email}
+
+    def test_a_shared_group_visit_is_kept_for_the_other_listings(self, client_for, host, make_listing, make_agent,
+                                                                 super_admin):
+        make_agent()
+        rooms = [make_listing(name=f'Chambre {i}', latitude=f'6.13{i}000') for i in range(1, 3)]
+        _book(client_for(host), rooms, at(in_days(3), 9))
+        self._validate(client_for(super_admin), rooms[0])
+        assert AppointmentModel.objects.get().status == 'confirmed'
+        assert _mission(rooms[1]) is not None
+
+    def test_without_the_permission(self, client_for, make_listing, make_user):
+        response = self._validate(client_for(make_user(role='admin')), make_listing())
+        assert response.status_code == 403

@@ -1,6 +1,7 @@
 "use client";
 
 import { modifierAnnonceAdmin, restaurerAnnonce, supprimerAnnonceAdmin } from "@/features/hebergements/api";
+import { useDroitsAdmin } from "@/features/users";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -41,6 +42,8 @@ function Annonces() {
   const [archivees, setArchivees] = useState(searchParams.get("archivees") ?? "");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const recherche = useDebounced(q);
+  const { data: droits } = useDroitsAdmin();
+  const canValidateWithoutVisit = !!droits?.permissions.includes("validate_without_visit");
 
   const { data, isLoading, isFetching, isError, refetch, page, setPage } = useAdminList<AdminHebergement>("hebergements", { q: recherche, visible, statut, archivees });
 
@@ -79,6 +82,9 @@ function Annonces() {
         h.archivee_le ? <Pill ton="rouge">Supprimée le {formatDate(h.archivee_le)}</Pill> : <div className="flex flex-col items-start gap-1">
           <Pill ton={h.is_available ? "vert" : "gris"}>{h.is_available ? "Visible" : "Masquée"}</Pill>
           {!h.est_verifie && <Pill ton={h.statut_verification === "refusee" ? "rouge" : "orange"}>{h.statut_verification === "refusee" ? "Refusée" : "À vérifier"}</Pill>}
+          {h.est_verifie && h.validated_without_visit_at && (
+            <span title={`Le ${formatDate(h.validated_without_visit_at)} : ${h.validated_without_visit_reason}`}><Pill ton="orange">Sans visite</Pill></span>
+          )}
         </div>
       ),
     },
@@ -97,15 +103,24 @@ function Annonces() {
       <Link href={`/hebergements/${h.id}`} target="_blank" aria-label={`Voir l'annonce ${h.name} sur le site (nouvel onglet)`} className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-dark hover:bg-gray-50 flex items-center gap-1">
         Voir <ExternalLink size={12} />
       </Link>
-      <ActionButton onClick={() => setConfirmation({
-        titre: h.est_verifie ? "Retirer la validation" : "Valider sans visite",
-        message: h.est_verifie
-          ? <><strong>{h.name}</strong> sera retirée du site et repassera en attente de vérification. Les agents de terrain seront prévenus qu&apos;une visite est à faire.</>
-          : <>Normalement, un agent de terrain valide l&apos;annonce après sa visite. Confirmez que <strong>{h.name}</strong> a bien été contrôlée (photos, adresse, équipements) : elle sera publiée avec le badge « Vérifié par Kwa-Ba ».</>,
-        libelle: h.est_verifie ? "Retirer la validation" : "Valider",
-        danger: h.est_verifie,
-        action: () => executer(modifierAnnonceAdmin(h.id, { est_verifie: !h.est_verifie }), h.est_verifie ? "Annonce remise en vérification" : "Annonce validée"),
-      })}>{h.est_verifie ? "Retirer validation" : "Valider"}</ActionButton>
+      {h.est_verifie ? (
+        <ActionButton onClick={() => setConfirmation({
+          titre: "Retirer la validation",
+          message: <><strong>{h.name}</strong> sera retirée du site et repassera en attente de vérification. L&apos;hôte sera invité à réserver une visite.</>,
+          libelle: "Retirer la validation",
+          danger: true,
+          action: () => executer(modifierAnnonceAdmin(h.id, { est_verifie: false }), "Annonce remise en vérification"),
+        })}>Retirer validation</ActionButton>
+      ) : canValidateWithoutVisit && (
+        <ActionButton onClick={() => setConfirmation({
+          titre: "Valider sans visite",
+          message: <>Normalement, un agent valide l&apos;annonce après sa visite. <strong>{h.name}</strong> sera publiée avec le badge « Vérifié par Kwa-Ba » et marquée « Sans visite » dans le back-office. Si une visite est prévue, elle est annulée et l&apos;agent comme l&apos;hôte sont prévenus.</>,
+          libelle: "Valider sans visite",
+          motif: true,
+          option: { label: "Conserver la visite prévue", help: "Elle devient un contrôle a posteriori : sur place, l'agent conclut « conforme » ou « non conforme », ce qui retire l'annonce du site." },
+          action: (motif, keepVisit) => executer(modifierAnnonceAdmin(h.id, { est_verifie: true, motif, keep_visit: keepVisit }), "Annonce validée sans visite"),
+        })}>Valider sans visite</ActionButton>
+      )}
       <ActionButton onClick={() => setConfirmation({
         titre: h.is_available ? "Masquer l'annonce" : "Republier l'annonce",
         message: h.is_available

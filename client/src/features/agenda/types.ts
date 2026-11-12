@@ -18,6 +18,8 @@ export interface Appointment {
   listings: ListingRef[];
   agent: { id: string; name: string } | null;
   cancellation_reason: string;
+  closing_reason: string;
+  post_check: boolean;
 }
 
 export interface AppointmentDetail extends Appointment {

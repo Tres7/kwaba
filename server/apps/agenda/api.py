@@ -10,7 +10,7 @@ from apps.agenda.infrastructure.container import agenda_service, current_setting
 
 __all__ = [
     'AgendaError', 'AgendaSettings', 'Appointment', 'DEFAULT_TIMEZONE', 'settings', 'BY_ADMIN', 'BY_AGENT', 'BY_HOST', 'BookingRequest', 'Target', 'appointment',
-    'book', 'book_by_phone', 'cancel', 'close', 'confirmed_for_targets', 'free_slots', 'move', 'reassign',
+    'book', 'book_by_phone', 'cancel', 'close', 'confirmed_for_targets', 'free_slots', 'keep_as_post_check', 'move', 'reassign',
     'register_task', 'summary',
 ]
 
@@ -46,8 +46,13 @@ def move(appointment_id: uuid.UUID, requester_id: uuid.UUID, start: datetime) ->
     return agenda_service().move(appointment_id, requester_id, start)
 
 
-def cancel(appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str) -> Appointment:
-    return agenda_service().cancel(appointment_id, author_id=author_id, by=by, reason=reason)
+def cancel(appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str,
+           notify: bool = True) -> Appointment:
+    return agenda_service().cancel(appointment_id, author_id=author_id, by=by, reason=reason, notify=notify)
+
+
+def keep_as_post_check(appointment_id: uuid.UUID) -> Appointment:
+    return agenda_service().keep_as_post_check(appointment_id)
 
 
 def reassign(appointment_id: uuid.UUID, agent_id: uuid.UUID) -> Appointment:

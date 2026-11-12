@@ -114,6 +114,9 @@ class HebergementModel(models.Model):
     statut_verification = models.CharField(max_length=20, choices=STATUTS_VERIFICATION, default='en_attente', db_index=True)
     verifiee_le = models.DateTimeField(null=True, blank=True)
     motif_refus = models.TextField(blank=True)
+    validated_without_visit_at = models.DateTimeField(null=True, blank=True)
+    validated_without_visit_by_id = models.UUIDField(null=True, blank=True)
+    validated_without_visit_reason = models.TextField(blank=True, default='', db_default='')
     # Statements of the host when sending the listing (cameras, animals, works), and when they certified it
     declarations = models.JSONField(null=True, blank=True)
     attestation_le = models.DateTimeField(null=True, blank=True)

@@ -1,11 +1,13 @@
 import uuid
 from datetime import timedelta
+from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
 from apps.agenda import api as agenda
+from apps.hebergements import api as hebergements
 from apps.terrain import api as terrain
 from apps.users import api as users
 
@@ -13,6 +15,7 @@ from . import services
 from .models import VisitInvitationModel
 
 MISSION_TYPE = 'logement'
+WEEKDAYS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
 
 
 class AppointmentError(Exception):
@@ -253,3 +256,83 @@ def remind_hosts() -> dict:
                     'url': f"{settings.FRONTEND_URL}/agent/agenda",
                 })
     return {'host_reminders': len(to_remind), 'host_alerts': len(to_alert)}
+
+
+def _listing_urls(listing_id) -> dict:
+    return {'url_space': f"{settings.FRONTEND_URL}/hote/espace",
+            'url_listing': f"{settings.FRONTEND_URL}/hebergements/{listing_id}"}
+
+
+def _when(appointment) -> str:
+    local = appointment.start.astimezone(ZoneInfo(agenda.DEFAULT_TIMEZONE))
+    return f"{WEEKDAYS[local.weekday()]} {local.day}/{local.month:02d} à {local.hour} h{local.minute:02d}".replace(' h00', ' h')
+
+
+def _close_mission(listing: dict, admin) -> None:
+    if terrain.en_cours(MISSION_TYPE, str(listing['id'])):
+        terrain.terminer(MISSION_TYPE, str(listing['id']), admin, decision='validee', titre=listing['name'],
+                         sous_titre=listing['type_libelle'], ville=listing['city'])
+
+
+@transaction.atomic
+def validated_without_visit(listing: dict, admin, reason: str, keep_visit: bool) -> None:
+    VisitInvitationModel.objects.filter(listing_id=listing['id']).delete()
+    appointment, others_waiting = services.planned_visit(listing['id'])
+    _close_mission(listing, admin)
+    host = users.compte(listing['host_id'])
+    visit = None
+    if appointment:
+        visit = {'when': _when(appointment), 'kept': keep_visit, 'shared': others_waiting}
+        if keep_visit:
+            agenda.keep_as_post_check(appointment.id)
+        elif not others_waiting:
+            agenda.cancel(appointment.id, author_id=admin.pk, by=agenda.BY_ADMIN, reason=reason, notify=False)
+        agent = users.compte(appointment.agent_id)
+        if agent:
+            services._envoyer('validated_without_visit_agent',
+                              f"[Kwa-Ba] Annonce validée sans visite : {listing['name']}", [agent.email], {
+                                  'listing': listing['name'], 'city': listing['city'], 'reason': reason, **visit,
+                                  'url': f"{settings.FRONTEND_URL}/agent/agenda/{appointment.id}",
+                              })
+    if host:
+        services._envoyer('validated_without_visit_host', f"Votre logement est vérifié : {listing['name']}",
+                          [host.email], {'first_name': host.first_name, 'listing': listing['name'], 'visit': visit,
+                                         **_listing_urls(listing['id'])})
+
+
+@transaction.atomic
+def post_check(user, appointment_id, compliant: bool, reason: str):
+    try:
+        appointment = agenda.appointment(appointment_id)
+    except agenda.AgendaError as exc:
+        raise _from_agenda(exc) from None
+    if not appointment.post_check or appointment.status != 'confirmed':
+        raise AppointmentError("Ce rendez-vous n'est pas un contrôle a posteriori en cours.", 409)
+    if appointment.agent_id != user.pk and user.role != 'admin':
+        raise AppointmentError("Seul l'agent de cette visite ou un administrateur peut conclure le contrôle.", 403)
+    reason = ' '.join(reason.split())
+    if not compliant and len(reason) < 10:
+        raise AppointmentError("Expliquez ce qui n'est pas conforme (10 caractères au moins) : l'hôte le recevra.")
+    closing = 'Contrôle conforme' if compliant else f'Contrôle non conforme : {reason}'
+    try:
+        appointment = agenda.close(appointment.id, closing)
+    except agenda.AgendaError as exc:
+        raise _from_agenda(exc) from None
+    if compliant:
+        return appointment
+    host = users.compte(appointment.requester_id)
+    for target in appointment.targets:
+        hebergements.enregistrer_verification(target.id, False, reason)
+        if host:
+            services._envoyer('annonce_refusee', f"Votre annonce n'est plus publiée : {target.title}", [host.email], {
+                'prenom': host.first_name, 'hebergement': target.title, 'motif': reason,
+                'url_espace': f"{settings.FRONTEND_URL}/hote/espace",
+                'url_annonce': f"{settings.FRONTEND_URL}/hebergements/{target.id}",
+            })
+    services._envoyer('post_check_failed', f"[Kwa-Ba] Contrôle non conforme : {appointment.title}",
+                      users.emails_actifs(['admin']), {
+                          'title': appointment.title, 'city': appointment.city, 'reason': reason,
+                          'agent': _name(users.compte(appointment.agent_id)),
+                          'url': f"{settings.FRONTEND_URL}/backoffice/annonces?statut=refusee",
+                      })
+    return appointment

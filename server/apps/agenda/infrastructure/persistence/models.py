@@ -99,6 +99,7 @@ class AppointmentModel(models.Model):
     cancelled_by = models.CharField(max_length=10, choices=CANCELLED_BY, blank=True)
     cancellation_reason = models.CharField(max_length=500, blank=True)
     closing_reason = models.CharField(max_length=500, blank=True)
+    post_check = models.BooleanField(default=False)
     sequence = models.PositiveIntegerField(default=0)
     host_reminder_at = models.DateTimeField(null=True, blank=True)
     alert_at = models.DateTimeField(null=True, blank=True)

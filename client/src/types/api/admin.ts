@@ -81,6 +81,8 @@ export interface AdminHebergement {
   host: { id: string; nom: string; email: string };
   created_at: string;
   archivee_le: string | null;
+  validated_without_visit_at: string | null;
+  validated_without_visit_reason: string;
 }
 
 export interface AdminReservation {

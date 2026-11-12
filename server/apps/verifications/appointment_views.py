@@ -150,6 +150,22 @@ class CancelView(APIView):
         return Response(agenda.summary(appointment))
 
 
+class PostCheckView(APIView):
+    permission_classes = [EstVerificateur]
+
+    def post(self, request, pk):
+        compliant = request.data.get('compliant')
+        if not isinstance(compliant, bool):
+            return Response({'compliant': ['Valeur booléenne attendue.']}, status=400)
+        try:
+            appointment = appointments.post_check(request.user, pk, compliant, str(request.data.get('reason', '')))
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        journaliser('visit_post_check', request, utilisateur=request.user, appointment=str(appointment.id),
+                    compliant=compliant)
+        return Response(agenda.summary(appointment))
+
+
 class ReassignView(APIView):
     permission_classes = [IsAdmin]
 

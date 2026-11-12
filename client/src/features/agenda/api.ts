@@ -102,3 +102,7 @@ export async function readAgendaSettings() {
 export async function saveAgendaSettings(values: Partial<AgendaSettingsValues>) {
   return (await api.put<AgendaSettings>("/v1/admin/agenda/settings/", values)).data;
 }
+
+export async function concludePostCheck(id: string, compliant: boolean, reason = "") {
+  await api.post(`${VERIFICATIONS}/appointments/${encodeURIComponent(id)}/post-check/`, { compliant, reason });
+}
