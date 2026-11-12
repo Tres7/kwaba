@@ -1,0 +1,10 @@
+{% autoescape off %}Ces annonces attendent une visite, mais leur hôte n'a pas réservé de créneau :
+
+{% for listing in listings %}  {{ listing.name }} ({{ listing.city }}) · {{ listing.host }} · {{ listing.phone }} · invité le {{ listing.invited_at|date:"d/m/Y" }}
+{% endfor %}{% if cities_without_slot %}
+Aucun créneau libre dans ces villes : {{ cities_without_slot|join:", " }}
+{% endif %}
+Appelez l'hôte et fixez la visite par téléphone, ou demandez à un agent d'ouvrir des créneaux : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

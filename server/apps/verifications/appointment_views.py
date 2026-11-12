@@ -1,0 +1,164 @@
+from zoneinfo import ZoneInfo
+
+from django.conf import settings
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.views import APIView
+
+from apps.agenda import api as agenda
+from apps.securite.audit import journaliser
+from apps.users import api as users
+
+from . import appointments
+from .views import EstVerificateur
+
+
+class IsHost(IsAuthenticated):
+    message = "Réservé aux hôtes."
+
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and users.hote_ou_candidat(request.user)
+
+
+class IsAdmin(EstVerificateur):
+    message = "Réservé aux administrateurs."
+
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.role == 'admin'
+
+
+def _start(value):
+    moment = parse_datetime(str(value or ''))
+    if moment is None:
+        return None
+    if timezone.is_naive(moment):
+        moment = moment.replace(tzinfo=ZoneInfo(settings.AGENDA['TIMEZONE']))
+    return moment
+
+
+def _ids(value) -> list[str]:
+    if isinstance(value, str):
+        value = value.split(',')
+    return [str(v).strip() for v in (value or []) if str(v).strip()]
+
+
+def _refused(exc: appointments.AppointmentError) -> Response:
+    return Response({'detail': str(exc)}, status=exc.code)
+
+
+def _no_start() -> Response:
+    return Response({'detail': 'Choisissez un créneau.'}, status=400)
+
+
+def _rules() -> dict:
+    config = settings.AGENDA
+    return {'visit_duration_min': config['VISIT_DURATION_MIN'], 'extra_listing_min': config['EXTRA_LISTING_MIN'],
+            'max_listings': config['MAX_LISTINGS'], 'notice_h': config['NOTICE_H'],
+            'horizon_days': config['HORIZON_DAYS'], 'same_site_distance_m': config['SAME_SITE_DISTANCE_M']}
+
+
+class MyVisitView(APIView):
+    permission_classes = [IsHost]
+
+    def get(self, request):
+        return Response({'listings': appointments.listings_to_schedule(request.user), 'rules': _rules()})
+
+
+class FreeSlotsView(APIView):
+    permission_classes = [IsHost]
+
+    def get(self, request):
+        try:
+            slots = appointments.free_slots(request.user, _ids(request.query_params.get('listings')))
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        return Response({'slots': slots})
+
+
+class BookView(APIView):
+    permission_classes = [IsHost]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'agenda_booking'
+
+    def post(self, request):
+        start = _start(request.data.get('start'))
+        if start is None:
+            return _no_start()
+        try:
+            appointment = appointments.book(request.user, _ids(request.data.get('listings')), start)
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        journaliser('visit_booked', request, utilisateur=request.user, appointment=str(appointment.id))
+        return Response(appointments.host_appointment_json(appointment), status=201)
+
+
+class MoveSlotsView(APIView):
+    permission_classes = [IsHost]
+
+    def get(self, request, pk):
+        try:
+            slots = appointments.free_slots_to_move(request.user, pk)
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        return Response({'slots': slots})
+
+
+class MoveView(APIView):
+    permission_classes = [IsHost]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'agenda_booking'
+
+    def post(self, request, pk):
+        start = _start(request.data.get('start'))
+        if start is None:
+            return _no_start()
+        try:
+            appointment = appointments.move(request.user, pk, start)
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        journaliser('visit_moved', request, utilisateur=request.user, appointment=str(appointment.id))
+        return Response(appointments.host_appointment_json(appointment))
+
+
+class BookByPhoneView(APIView):
+    permission_classes = [EstVerificateur]
+
+    def post(self, request, pk):
+        start = _start(request.data.get('start'))
+        if start is None:
+            return Response({'detail': "Indiquez la date et l'heure convenues."}, status=400)
+        listing_ids = [str(pk)] + [i for i in _ids(request.data.get('listings')) if i != str(pk)]
+        try:
+            appointment = appointments.book_by_phone(request.user, listing_ids, start)
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        journaliser('visit_booked_by_phone', request, utilisateur=request.user, appointment=str(appointment.id))
+        return Response(agenda.summary(appointment), status=201)
+
+
+class CancelView(APIView):
+    permission_classes = [EstVerificateur]
+
+    def post(self, request, pk):
+        try:
+            appointment = appointments.cancel(request.user, pk, str(request.data.get('reason', '')))
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        journaliser('visit_cancelled', request, utilisateur=request.user, appointment=str(appointment.id))
+        return Response(agenda.summary(appointment))
+
+
+class ReassignView(APIView):
+    permission_classes = [IsAdmin]
+
+    def post(self, request, pk):
+        try:
+            appointment = appointments.reassign(request.user, pk, request.data.get('agent_id'))
+        except appointments.AppointmentError as exc:
+            return _refused(exc)
+        journaliser('visit_reassigned', request, utilisateur=request.user, appointment=str(appointment.id),
+                    agent=str(appointment.agent_id))
+        return Response(agenda.summary(appointment))

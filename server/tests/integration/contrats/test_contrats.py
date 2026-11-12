@@ -208,7 +208,7 @@ def test_la_visite_attend_la_signature_du_contrat(client_for, make_user, make_he
     with django_capture_on_commit_callbacks(execute=True):
         client.post(f'{C}hote/signer/', {'nom': 'Test Hôte', 'signature': _signature(), 'accepte': True, 'version': version}, format='json')
     assert agent.get('/api/v1/verifications/visites/').data['count'] == 1
-    assert any('Visite à planifier' in m.subject for m in mail.outbox)
+    assert any('Réservez la visite' in m.subject and m.to == [hote.email] for m in mail.outbox)
 
 
 def test_visites_inchangees_sans_informations_legales(client_for, make_user, make_hebergement):

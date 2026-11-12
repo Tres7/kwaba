@@ -1,5 +1,8 @@
 from django.urls import path
 
+from .appointment_views import (
+    BookByPhoneView, BookView, CancelView, FreeSlotsView, MoveSlotsView, MoveView, MyVisitView, ReassignView,
+)
 from .views import (
     CompteursView, CorrectionPositionView, DecisionView, FichierPieceView, LirePositionView, MaPieceIdentiteView,
     PhotosDecisionView, PieceDecisionView, PiecesView, PositionsView, VisitesView,
@@ -17,4 +20,12 @@ urlpatterns = [
     path('positions/', PositionsView.as_view(), name='verification-positions'),
     path('positions/lire/', LirePositionView.as_view(), name='verification-position-lire'),
     path('positions/<uuid:pk>/', CorrectionPositionView.as_view(), name='verification-position-correction'),
+    path('visit/', MyVisitView.as_view(), name='verification-my-visit'),
+    path('visit/slots/', FreeSlotsView.as_view(), name='verification-visit-slots'),
+    path('visit/book/', BookView.as_view(), name='verification-visit-book'),
+    path('visit/appointments/<uuid:pk>/slots/', MoveSlotsView.as_view(), name='verification-visit-move-slots'),
+    path('visit/appointments/<uuid:pk>/move/', MoveView.as_view(), name='verification-visit-move'),
+    path('listings/<uuid:pk>/appointment/', BookByPhoneView.as_view(), name='verification-book-by-phone'),
+    path('appointments/<uuid:pk>/cancel/', CancelView.as_view(), name='verification-appointment-cancel'),
+    path('appointments/<uuid:pk>/reassign/', ReassignView.as_view(), name='verification-appointment-reassign'),
 ]

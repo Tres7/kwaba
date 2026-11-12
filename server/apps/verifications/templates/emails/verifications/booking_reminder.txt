@@ -1,0 +1,8 @@
+{% autoescape off %}Bonjour {{ first_name }},
+
+Votre annonce « {{ listing }} » attend toujours sa visite de vérification : elle sera publiée une fois vérifiée.
+
+Choisissez un créneau en deux clics : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}
