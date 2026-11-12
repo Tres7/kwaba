@@ -81,7 +81,7 @@ export default function FenetreOuverture({ ouverte, onCreer, onFermer }: Props) 
             </span>
 
             <h2 id="ouverture-titre" className="font-heading font-bold text-2xl sm:text-[28px] leading-tight text-dark mt-5">{t("titre")}</h2>
-            <p id="ouverture-texte" className="text-sm sm:text-base text-gray-600 leading-relaxed mt-3">{t("texte")}</p>
+            <p id="ouverture-texte" className="text-sm sm:text-base text-gray-600 leading-relaxed sm:leading-6 mt-3">{t("texte")}</p>
 
             <button ref={bouton} type="button" onClick={onCreer}
               className="w-full mt-7 min-h-[52px] rounded-xl bg-primary text-white font-bold hover:bg-primary-600 focus-visible:outline-accent!">

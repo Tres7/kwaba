@@ -182,7 +182,7 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-40 md:h-52 bg-linear-to-b from-transparent to-white z-2" />
 
         <div className="w-full max-w-5xl mx-auto text-center relative z-10">
-          <h1 className="animate-fade-up font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mb-4 drop-shadow-md">
+          <h1 className="animate-fade-up font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight sm:leading-none mb-4 drop-shadow-md">
             {t.rich("titre", { br: () => <br /> })}
           </h1>
           <p className="animate-fade-up-delay-1 text-white/90 text-base sm:text-lg md:text-xl mb-8 md:mb-12 max-w-2xl mx-auto font-medium drop-shadow-sm">
@@ -225,7 +225,7 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url('${dest.image_url}')` }} />
                     <div className="absolute inset-0 bg-linear-to-t from-dark/80 via-dark/20 to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
-                      <h3 className="text-white font-heading font-bold text-base md:text-lg leading-tight">{dest.city}</h3>
+                      <h3 className="text-white font-heading font-bold text-base md:text-lg leading-tight md:leading-7">{dest.city}</h3>
                       <p className="text-white/80 text-xs mt-1 font-medium">
                         {t("villeResume", { nombre: dest.count, prix: formatPrice(dest.min_price) })}
                       </p>
@@ -319,7 +319,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
           <div className="text-white max-w-xl selection:bg-white selection:text-primary">
             <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">{t("devenezHote")}</h2>
-            <p className="text-white/90 text-sm md:text-base leading-relaxed">
+            <p className="text-white/90 text-sm md:text-base leading-relaxed md:leading-6">
               {t("devenezHoteTexte")}
             </p>
             <ul className="mt-6 flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-2 text-sm font-semibold">

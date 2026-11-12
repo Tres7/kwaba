@@ -64,7 +64,7 @@ function Intro({ cle }: { cle: CleEtape }) {
   if (cle === "bienvenue") {
     return (
       <>
-        <h1 className="font-heading font-bold text-dark text-3xl sm:text-4xl leading-tight">{t("bienvenue.titre")}</h1>
+        <h1 className="font-heading font-bold text-dark text-3xl sm:text-4xl leading-tight sm:leading-10">{t("bienvenue.titre")}</h1>
         <p className="text-gray-600 mt-3">{t("bienvenue.texte")}</p>
         <ol className="mt-7 space-y-5">
           {([1, 2, 3] as const).map((phase) => (
@@ -83,7 +83,7 @@ function Intro({ cle }: { cle: CleEtape }) {
   return (
     <>
       {t.has(`${cle}.surtitre`) && <p className="text-sm font-bold uppercase tracking-wide text-secondary">{t(`${cle}.surtitre`)}</p>}
-      <h1 className="font-heading font-bold text-dark text-3xl sm:text-4xl leading-tight mt-2">{t(`${cle}.titre`)}</h1>
+      <h1 className="font-heading font-bold text-dark text-3xl sm:text-4xl leading-tight sm:leading-10 mt-2">{t(`${cle}.titre`)}</h1>
       <p className="text-gray-600 text-lg mt-4">{t(`${cle}.texte`)}</p>
     </>
   );

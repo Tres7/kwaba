@@ -34,7 +34,7 @@ export function Question({ cle, children }: { cle: string; children?: React.Reac
   const t = useTranslations("assistantHote");
   return (
     <>
-      <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl leading-tight">{t(`${cle}.titre`)}</h1>
+      <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl leading-tight sm:leading-9">{t(`${cle}.titre`)}</h1>
       {t.has(`${cle}.texte`) && <p className="text-gray-600 mt-2 mb-6">{t(`${cle}.texte`)}</p>}
       <div className={cn(!t.has(`${cle}.texte`) && "mt-6")}>{children}</div>
     </>

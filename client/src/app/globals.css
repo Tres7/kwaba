@@ -2,10 +2,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
+@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-heading: var(--font-montserrat), Montserrat, Inter, sans-serif;
+  --font-body: var(--font-inter), Inter, Roboto, sans-serif;
+}
 
+@theme {
   --color-primary-50: #eef6f5;
   --color-primary-100: #d3e8e5;
   --color-primary-200: #a7d0ca;
@@ -36,9 +40,6 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
-
-  --font-heading: var(--font-montserrat), Montserrat, Inter, sans-serif;
-  --font-body: var(--font-inter), Inter, Roboto, sans-serif;
 
   --radius-card: 10px;
   --radius-xl: 1rem;
