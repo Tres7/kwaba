@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "@/lib/api";
-import { annulerReservation, annulerReservationAdmin, creerReservation, lireReservation, listerMesReservations } from "./api";
+import { annulerReservation, annulerReservationAdmin, creerReservation, lienCalendrier, lireReservation, listerMesReservations } from "./api";
 
 vi.mock("@/lib/api", () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }));
 
@@ -21,6 +21,12 @@ describe("reservations", () => {
     const corps = { hebergement: "h1", check_in: "2026-12-01", check_out: "2026-12-03", total_attendu: 50000 };
     await creerReservation(corps);
     expect(api.post).toHaveBeenCalledWith("/v1/reservations/", corps);
+  });
+
+  it("donne le lien du fichier de calendrier, par le relais du site et dans la langue du site", () => {
+    expect(lienCalendrier("r1", "fr")).toBe("/api/proxy/v1/reservations/r1/calendrier?langue=fr");
+    expect(lienCalendrier("r1", "en")).toBe("/api/proxy/v1/reservations/r1/calendrier?langue=en");
+    expect(lienCalendrier("r1", "de")).toBe("/api/proxy/v1/reservations/r1/calendrier?langue=fr");
   });
 
   it("annule et renvoie le remboursement", async () => {

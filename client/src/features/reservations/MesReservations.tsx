@@ -2,6 +2,7 @@
 
 import { chercherHebergements } from "@/features/hebergements";
 import { annulerReservation } from "./api";
+import AjouterAuCalendrier from "./AjouterAuCalendrier";
 import { clesReservations, useMesReservations } from "./hooks";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
@@ -198,6 +199,8 @@ export default function ReservationsPage() {
                     </div>
                   </div>
                   {res.paiement === "reussi" && <Documents objet="reservation" id={res.id} className="mt-3" />}
+                  {/* Paid stay still to come: in the phone's calendar, with the address */}
+                  {res.status === "confirmed" && res.check_out >= isoDate() && <AjouterAuCalendrier reservationId={res.id} className="mt-3 self-start" />}
                 </div>
               </article>
             );

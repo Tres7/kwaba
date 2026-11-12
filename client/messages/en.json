@@ -856,7 +856,8 @@
     "annuler": "Cancel",
     "numeroEnregistre": "Number saved: your refund is on its way.",
     "recommande": "Recommended for your next trip",
-    "pointRepere": "Landmark: {repere}"
+    "pointRepere": "Landmark: {repere}",
+    "ajouterCalendrier": "Add to my calendar"
   },
   "avisDepot": {
     "notes": {

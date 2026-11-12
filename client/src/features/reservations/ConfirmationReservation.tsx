@@ -1,6 +1,7 @@
 "use client";
 
 import { useReservation } from "./hooks";
+import AjouterAuCalendrier from "./AjouterAuCalendrier";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -119,6 +120,7 @@ export default function ConfirmationPage() {
                 <p className="text-xs text-gray-500">{t("numero")}</p>
                 <p className="text-sm font-mono font-bold text-dark">{reservation.reference}</p>
                 {reservation.paiement === "reussi" && <Documents objet="reservation" id={reservation.id} className="mt-3" />}
+                {reservation.status === "confirmed" && <AjouterAuCalendrier reservationId={reservation.id} className="mt-3" />}
               </div>
             </div>
           </div>
