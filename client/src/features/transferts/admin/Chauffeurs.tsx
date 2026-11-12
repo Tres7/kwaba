@@ -62,7 +62,7 @@ export default function Chauffeurs() {
     <div className="space-y-4">
       <div className="flex justify-between items-center gap-3">
         <p className="text-sm text-muted">Chauffeurs partenaires, payés par Mobile Money après chaque course (moins la commission).</p>
-        <button onClick={() => ouvrir("nouveau")} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau chauffeur</button>
+        <button onClick={() => ouvrir("nouveau")} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau chauffeur</button>
       </div>
       <AdminTable colonnes={colonnes} lignes={data} cle={(c) => String(c.id)} titreMobile={(c) => colonnes[0].cellule(c)}
         actions={(c) => <ActionButton onClick={() => ouvrir(c)}>Modifier</ActionButton>}

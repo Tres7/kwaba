@@ -29,7 +29,7 @@ export default function GuideVoyage({ guide, modules }: { guide: GuidePays; modu
       <PageHero surtitre={<><Compass size={16} aria-hidden /> {guide.nom}</>} titre={guide.titre} sousTitre={guide.intro} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
         <p className="flex items-start gap-2 rounded-2xl bg-amber-50 text-amber-900 px-4 py-3 text-sm mb-8">
-          <TriangleAlert size={18} className="flex-shrink-0 mt-0.5" aria-hidden />
+          <TriangleAlert size={18} className="shrink-0 mt-0.5" aria-hidden />
           <span><strong className="font-semibold">{guide.misAJour}.</strong> {guide.avertissement}</span>
         </p>
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
@@ -51,7 +51,7 @@ export default function GuideVoyage({ guide, modules }: { guide: GuidePays; modu
               return (
                 <section key={cle} id={cle} className="scroll-mt-28 bg-white rounded-2xl shadow-card p-5 sm:p-6">
                   <h2 className="flex items-center gap-3 font-heading font-bold text-dark text-xl">
-                    <span className="h-10 w-10 rounded-xl bg-primary-50 text-primary flex items-center justify-center flex-shrink-0">
+                    <span className="h-10 w-10 rounded-xl bg-primary-50 text-primary flex items-center justify-center shrink-0">
                       <Icone size={20} aria-hidden />
                     </span>
                     {r.titre}

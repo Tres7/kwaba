@@ -71,7 +71,7 @@ export default function CorrectionPosition({ annonce, onTerminee }: {
         </label>
         <textarea id={`position-${annonce.id}`} value={texte} onChange={(e) => setTexte(e.target.value)} rows={2} maxLength={2000}
           placeholder="https://maps.app.goo.gl/…  ou  6.131900, 1.222800"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
         {erreurTexte && <p role="alert" className="text-sm text-red-700">{erreurTexte}</p>}
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={lire} disabled={!texte.trim() || lecture || envoi}
@@ -95,7 +95,7 @@ export default function CorrectionPosition({ annonce, onTerminee }: {
           </p>
           {loin && (
             <p className="flex items-start gap-1.5 font-semibold">
-              <AlertTriangle size={15} className="mt-0.5 flex-shrink-0" aria-hidden />
+              <AlertTriangle size={15} className="mt-0.5 shrink-0" aria-hidden />
               Écart important : vérifiez sur la carte que c&apos;est bien ce logement.
             </p>
           )}

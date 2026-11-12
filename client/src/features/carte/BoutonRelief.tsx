@@ -45,7 +45,7 @@ export default function BoutonRelief({ carte, ouvert = false }: { carte: CarteGl
     <button
       type="button" onClick={basculer} aria-pressed={actif} aria-label={t("relief")} title={t("relief")}
       className={cn("zone-tactile relative block w-[29px] h-[29px] rounded-xl shadow-md text-[11px] font-bold transition-colors",
-        actif ? "!bg-primary text-white" : "!bg-white text-dark hover:!bg-gray-100")}
+        actif ? "bg-primary! text-white" : "bg-white! text-dark hover:bg-gray-100!")}
     >
       3D
     </button>,

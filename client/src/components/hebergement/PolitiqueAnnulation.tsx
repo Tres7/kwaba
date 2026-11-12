@@ -16,7 +16,7 @@ export default function PolitiqueAnnulation({ politique, compact = false }: { po
   if (compact) {
     return (
       <div className="flex items-start gap-2 bg-gray-50 rounded-xl p-3">
-        <ShieldCheck size={16} className="text-secondary flex-shrink-0 mt-0.5" aria-hidden />
+        <ShieldCheck size={16} className="text-secondary shrink-0 mt-0.5" aria-hidden />
         <div>{contenu}</div>
       </div>
     );

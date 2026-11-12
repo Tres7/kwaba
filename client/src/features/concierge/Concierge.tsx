@@ -115,7 +115,7 @@ function ConciergeContent() {
           <ul className="grid sm:grid-cols-2 gap-3">
             {SUGGESTIONS.map((s) => (
               <li key={s}>
-                <Link href="/login?callbackUrl=/concierge" className="h-full block bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-sm text-dark leading-relaxed hover:border-primary/30 hover:shadow-card transition-all">
+                <Link href="/login?callbackUrl=/concierge" className="h-full block bg-white rounded-2xl border border-gray-100 shadow-xs p-4 text-sm text-dark leading-relaxed hover:border-primary/30 hover:shadow-card transition-all">
                   <span>{locale === "fr" ? `« ${t(`suggestions.${s}`)} »` : `“${t(`suggestions.${s}`)}”`}</span>
                 </Link>
               </li>
@@ -131,7 +131,7 @@ function ConciergeContent() {
   return (
     <div className="bg-light">
       <div className="max-w-6xl mx-auto px-0 sm:px-6 lg:py-6 flex gap-6 h-[calc(100dvh-4rem)] md:h-[calc(100dvh-5rem)]">
-        <aside className="hidden lg:flex w-64 flex-shrink-0 flex-col bg-white rounded-3xl border border-gray-100 p-3">
+        <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-white rounded-3xl border border-gray-100 p-3">
           <button onClick={() => router.push("/concierge")} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">
             <MessageSquarePlus size={16} /> {t("nouvelleConversation")}
           </button>
@@ -215,10 +215,10 @@ function ConciergeContent() {
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); envoyer(saisie); } }}
                 placeholder={t("placeholder")}
                 disabled={!statut?.actif}
-                className="flex-1 resize-none bg-transparent outline-none text-base sm:text-sm text-dark max-h-40 py-1.5"
+                className="flex-1 resize-none bg-transparent outline-hidden text-base sm:text-sm text-dark max-h-40 py-1.5"
               />
               <button type="submit" disabled={!saisie.trim() || !!enCours || !statut?.actif} aria-label={t("envoyer")}
-                className="relative zone-tactile w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40">
+                className="relative zone-tactile w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center shrink-0 disabled:opacity-40">
                 {enCours ? <Loader2 size={16} className="animate-spin" /> : <ArrowUp size={18} />}
               </button>
             </div>

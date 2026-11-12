@@ -84,10 +84,10 @@ export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: 
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 mb-8 bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex flex-col sm:flex-row gap-3 mb-8 bg-white p-3 sm:p-4 rounded-2xl shadow-xs border border-gray-100">
           <Select
             label={t("ville")} value={city} onChange={setCity} className="sm:w-56"
-            icon={<MapPin size={16} className="text-primary flex-shrink-0" />}
+            icon={<MapPin size={16} className="text-primary shrink-0" />}
             options={[{ value: "", label: t("toutesVilles") }, ...cities.map((c) => ({ value: c, label: c }))]}
           />
           <div className="relative flex-1">
@@ -97,14 +97,14 @@ export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: 
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("rechercher")}
-              className="w-full h-full min-h-[48px] bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 text-base sm:text-sm text-dark outline-none focus:border-primary/50"
+              className="w-full h-full min-h-[48px] bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 text-base sm:text-sm text-dark outline-hidden focus:border-primary/50"
             />
           </div>
         </div>
 
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" aria-busy="true">
-            {[0, 1, 2].map((i) => <div key={i} className="aspect-[4/5] rounded-3xl skeleton" />)}
+            {[0, 1, 2].map((i) => <div key={i} className="aspect-4/5 rounded-3xl skeleton" />)}
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center text-gray-500">
@@ -116,12 +116,12 @@ export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: 
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.slice(0, limite).map((e) => (
-              <article key={e.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
-                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+              <article key={e.id} className="bg-white rounded-3xl overflow-hidden shadow-xs border border-gray-100 flex flex-col">
+                <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
                   {e.image && <img src={e.image} alt={e.nom} loading="lazy" className="w-full h-full object-cover" />}
-                  <span className="absolute top-4 left-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full text-white bg-primary shadow-sm">{e.etiquette}</span>
+                  <span className="absolute top-4 left-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full text-white bg-primary shadow-xs">{e.etiquette}</span>
                   {e.credit_photo && (
-                    <a href={e.credit_photo_url || undefined} target="_blank" rel="noopener noreferrer" className="absolute bottom-2 right-2 max-w-[85%] truncate rounded bg-black/55 px-1.5 py-0.5 text-[10px] text-white hover:underline">
+                    <a href={e.credit_photo_url || undefined} target="_blank" rel="noopener noreferrer" className="absolute bottom-2 right-2 max-w-[85%] truncate rounded-sm bg-black/55 px-1.5 py-0.5 text-[10px] text-white hover:underline">
                       {t("creditPhoto", { credit: e.credit_photo })}
                     </a>
                   )}

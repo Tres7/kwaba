@@ -163,7 +163,7 @@ function VerifyForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
             placeholder={t("emailExemple")}
-            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
       )}
@@ -191,7 +191,7 @@ function VerifyForm() {
             onKeyDown={(e) => handleKeyDown(i, e)}
             onFocus={(e) => e.target.select()}
             className={cn(
-              "w-11 h-14 sm:w-12 text-center text-xl font-bold border-2 rounded-xl outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20",
+              "w-11 h-14 sm:w-12 text-center text-xl font-bold border-2 rounded-xl outline-hidden transition-all focus:border-primary focus:ring-2 focus:ring-primary/20",
               d ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-dark"
             )}
           />

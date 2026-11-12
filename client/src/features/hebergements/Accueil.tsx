@@ -87,7 +87,7 @@ function HeroSearch() {
 
   const fieldClass = "flex-1 px-5 py-3 w-full text-left min-w-0";
   const labelClass = "block text-[11px] font-bold text-dark uppercase tracking-wide";
-  const inputClass = "w-full text-base md:text-sm font-medium text-dark outline-none bg-transparent placeholder:text-gray-400";
+  const inputClass = "w-full text-base md:text-sm font-medium text-dark outline-hidden bg-transparent placeholder:text-gray-400";
 
   return (
     <form method="post"
@@ -97,7 +97,7 @@ function HeroSearch() {
       <label className={fieldClass}>
         <span className={labelClass}>{t("destination")}</span>
         <span className="flex items-center gap-2 mt-1">
-          <MapPin size={16} className="text-primary flex-shrink-0" />
+          <MapPin size={16} className="text-primary shrink-0" />
           <ChampDestination
             value={city} onChange={setCity} onVille={setCity}
             placeholder={t("ouAllezVous")} ariaLabel={t("destination")}
@@ -115,7 +115,7 @@ function HeroSearch() {
           <span className={labelClass}>{t("voyageurs")}</span>
           <GuestsField variant="bare" value={guests} onChange={setGuests} className="mt-1" />
         </div>
-        <button type="submit" className="bg-primary hover:bg-primary-600 text-white p-4 rounded-full transition-colors flex items-center gap-2 font-bold text-sm shadow-md flex-shrink-0" aria-label={t("rechercher")}>
+        <button type="submit" className="bg-primary hover:bg-primary-600 text-white p-4 rounded-full transition-colors flex items-center gap-2 font-bold text-sm shadow-md shrink-0" aria-label={t("rechercher")}>
           <Search size={18} />
           <span className="hidden lg:inline">{t("rechercher")}</span>
         </button>
@@ -178,21 +178,21 @@ export default function HomePage() {
             />
           );
         })}
-        <div className="absolute inset-0 z-[1] bg-dark/45" />
-        <div className="absolute bottom-0 left-0 right-0 h-40 md:h-52 bg-gradient-to-b from-transparent to-white z-[2]" />
+        <div className="absolute inset-0 z-1 bg-dark/45" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 md:h-52 bg-linear-to-b from-transparent to-white z-2" />
 
         <div className="w-full max-w-5xl mx-auto text-center relative z-10">
-          <h1 className="animate-fade-up font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mb-4 drop-shadow-md">
+          <h1 className="animate-fade-up font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight sm:leading-none mb-4 drop-shadow-md">
             {t.rich("titre", { br: () => <br /> })}
           </h1>
-          <p className="animate-fade-up-delay-1 text-white/90 text-base sm:text-lg md:text-xl mb-8 md:mb-12 max-w-2xl mx-auto font-medium drop-shadow">
+          <p className="animate-fade-up-delay-1 text-white/90 text-base sm:text-lg md:text-xl mb-8 md:mb-12 max-w-2xl mx-auto font-medium drop-shadow-sm">
             {t("sousTitre")}
           </p>
           <HeroSearch />
-          <ul className="animate-fade-up-delay-2 mt-5 md:mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-medium text-white/95 drop-shadow">
+          <ul className="animate-fade-up-delay-2 mt-5 md:mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-medium text-white/95 drop-shadow-sm">
             {(["verifies", "paiement", "prix"] as const).map((cle) => (
               <li key={cle} className="flex items-center gap-1.5">
-                <span className="h-5 w-5 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"><Check size={13} strokeWidth={3} aria-hidden /></span>
+                <span className="h-5 w-5 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center"><Check size={13} strokeWidth={3} aria-hidden /></span>
                 {t(`confiance.${cle}`)}
               </li>
             ))}
@@ -209,7 +209,7 @@ export default function HomePage() {
               <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl">{t("destinationsPopulaires")}</h2>
               <p className="text-gray-500 text-sm mt-1">{t("destinationsTexte")}</p>
             </div>
-            <Link href="/recherche" aria-label={t("voirDestinations")} className="relative zone-tactile flex items-center gap-1 text-primary text-sm font-bold hover:underline flex-shrink-0">
+            <Link href="/recherche" aria-label={t("voirDestinations")} className="relative zone-tactile flex items-center gap-1 text-primary text-sm font-bold hover:underline shrink-0">
               {t("voirTout")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -221,11 +221,11 @@ export default function HomePage() {
             <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6" variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
               {cities.slice(0, 4).map((dest) => (
                 <motion.div key={dest.city} variants={cardVariants}>
-                  <Link href={`/recherche?city=${encodeURIComponent(dest.city)}`} className="block relative h-44 md:h-64 rounded-[2rem] overflow-hidden group shadow-sm bg-slate-200">
+                  <Link href={`/recherche?city=${encodeURIComponent(dest.city)}`} className="block relative h-44 md:h-64 rounded-[2rem] overflow-hidden group shadow-xs bg-slate-200">
                     <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url('${dest.image_url}')` }} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-dark/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-dark/80 via-dark/20 to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
-                      <h3 className="text-white font-heading font-bold text-base md:text-lg leading-tight">{dest.city}</h3>
+                      <h3 className="text-white font-heading font-bold text-base md:text-lg leading-tight md:leading-7">{dest.city}</h3>
                       <p className="text-white/80 text-xs mt-1 font-medium">
                         {t("villeResume", { nombre: dest.count, prix: formatPrice(dest.min_price) })}
                       </p>
@@ -245,9 +245,9 @@ export default function HomePage() {
             <Link
               key={type}
               href={`/recherche?type=${type}`}
-              className="bg-white px-4 md:px-6 py-3 md:py-4 rounded-full border border-gray-100 shadow-sm flex items-center gap-3 hover:border-primary/40 hover:shadow transition-all"
+              className="bg-white px-4 md:px-6 py-3 md:py-4 rounded-full border border-gray-100 shadow-xs flex items-center gap-3 hover:border-primary/40 hover:shadow-sm transition-all"
             >
-              <span className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary-50 text-primary"><Icon size={22} strokeWidth={1.75} aria-hidden /></span>
+              <span className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-primary-50 text-primary"><Icon size={22} strokeWidth={1.75} aria-hidden /></span>
               <span className="font-bold text-dark text-sm">{TYPE_LABELS[type]}</span>
             </Link>
             );
@@ -258,7 +258,7 @@ export default function HomePage() {
         <section>
           <div className="flex items-end justify-between mb-6 md:mb-8 gap-4">
             <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl">{t("mieuxNotes")}</h2>
-            <Link href="/recherche?sort=note" aria-label={t("voirMieuxNotes")} className="relative zone-tactile flex items-center gap-1 text-primary text-sm font-bold hover:underline flex-shrink-0">
+            <Link href="/recherche?sort=note" aria-label={t("voirMieuxNotes")} className="relative zone-tactile flex items-center gap-1 text-primary text-sm font-bold hover:underline shrink-0">
               {t("voirTout")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -270,7 +270,7 @@ export default function HomePage() {
             // Phones: a row to swipe instead of 8 cards one under the other
             <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0">
               {recommended.map((prop) => (
-                <div key={prop.id} className="w-[82%] flex-shrink-0 snap-start sm:w-auto">
+                <div key={prop.id} className="w-[82%] shrink-0 snap-start sm:w-auto">
                   <PropertyCard property={prop} />
                 </div>
               ))}
@@ -291,7 +291,7 @@ export default function HomePage() {
           <motion.div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8" variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}>
             {FEATURES.map((feat) => (
               <motion.div key={feat.title} variants={cardVariants} className="flex flex-col items-center text-center">
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white ring-1 shadow-sm flex items-center justify-center mb-4 md:mb-6 ${feat.color}`}>
+                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white ring-1 shadow-xs flex items-center justify-center mb-4 md:mb-6 ${feat.color}`}>
                   <feat.icon className="w-9 h-9 md:w-11 md:h-11" weight="duotone" aria-hidden />
                 </div>
                 <h3 className="font-bold text-dark text-lg mb-2">{t(`atouts.${feat.title}.titre`)}</h3>
@@ -302,7 +302,7 @@ export default function HomePage() {
           <motion.div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8" variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}>
             {GARANTIES.map((garantie) => (
               <motion.div key={garantie.title} variants={cardVariants} className="flex flex-col items-center text-center">
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white ring-1 shadow-sm flex items-center justify-center mb-4 md:mb-6 ${garantie.color}`}>
+                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white ring-1 shadow-xs flex items-center justify-center mb-4 md:mb-6 ${garantie.color}`}>
                   <garantie.icon className="w-9 h-9 md:w-11 md:h-11" weight="duotone" aria-hidden />
                 </div>
                 <h3 className="font-bold text-dark text-lg mb-2">{t(`garanties.${garantie.title}.titre`)}</h3>
@@ -315,11 +315,11 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden bg-primary-900 py-14 md:py-20 px-4 sm:px-6">
         <div aria-hidden className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2000&auto=format&fit=crop')" }} />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-primary-900 via-primary-900/90 to-primary-900/50" />
+        <div aria-hidden className="absolute inset-0 bg-linear-to-r from-primary-900 via-primary-900/90 to-primary-900/50" />
         <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
           <div className="text-white max-w-xl selection:bg-white selection:text-primary">
             <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">{t("devenezHote")}</h2>
-            <p className="text-white/90 text-sm md:text-base leading-relaxed">
+            <p className="text-white/90 text-sm md:text-base leading-relaxed md:leading-6">
               {t("devenezHoteTexte")}
             </p>
             <ul className="mt-6 flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-2 text-sm font-semibold">
@@ -328,7 +328,7 @@ export default function HomePage() {
               ))}
             </ul>
           </div>
-          <Link href="/hote" className="bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-full font-bold transition-colors shadow-lg flex-shrink-0">
+          <Link href="/hote" className="bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-full font-bold transition-colors shadow-lg shrink-0">
             {t("commencer")}
           </Link>
         </div>

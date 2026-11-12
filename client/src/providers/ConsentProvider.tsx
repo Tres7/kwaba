@@ -35,9 +35,9 @@ function Interrupteur({ actif, onChange, desactive, id }: { actif: boolean; onCh
     <button
       id={id} type="button" role="switch" aria-checked={actif} disabled={desactive}
       onClick={() => onChange?.(!actif)}
-      className={cn("relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:cursor-not-allowed", actif ? "bg-secondary" : "bg-gray-400")}
+      className={cn("relative w-12 h-7 rounded-full transition-colors shrink-0 disabled:cursor-not-allowed", actif ? "bg-secondary" : "bg-gray-400")}
     >
-      <span className={cn("absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform", actif && "translate-x-5")} />
+      <span className={cn("absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform", actif && "translate-x-5")} />
       <span className="sr-only">{actif ? t("active") : t("desactive")}</span>
     </button>
   );
@@ -54,7 +54,7 @@ function Preferences({ initial, onFermer, onEnregistrer }: { initial: boolean; o
   }, [onFermer]);
 
   return createPortal(
-    <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center sm:p-6">
+    <div className="fixed inset-0 z-110 flex items-end sm:items-center justify-center sm:p-6">
       <div className="absolute inset-0 bg-black/50" onClick={onFermer} aria-hidden />
       <div role="dialog" aria-modal="true" aria-labelledby="pref-titre" className="relative w-full sm:max-w-lg max-h-[90vh] overflow-auto bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-card-hover">
         <div className="flex items-start justify-between gap-4">
@@ -143,10 +143,10 @@ export default function ConsentProvider({ children }: { children: React.ReactNod
       {pret && idMesure && pageMesurable && !consentement && !preferences && (
         <section
           role="region" aria-label={t("choix")}
-          className="fixed z-[105] inset-x-3 bottom-3 sm:inset-x-auto sm:left-4 sm:bottom-4 sm:max-w-md bg-white rounded-3xl shadow-card-hover border border-gray-100 p-5"
+          className="fixed z-105 inset-x-3 bottom-3 sm:inset-x-auto sm:left-4 sm:bottom-4 sm:max-w-md bg-white rounded-3xl shadow-card-hover border border-gray-100 p-5"
         >
           <div className="flex items-start gap-3">
-            <Cookie size={22} className="text-primary flex-shrink-0 mt-0.5" aria-hidden />
+            <Cookie size={22} className="text-primary shrink-0 mt-0.5" aria-hidden />
             <div>
               <h2 className="font-heading font-bold text-dark">{t("vosChoix")}</h2>
               <p className="text-sm text-gray-600 mt-1">

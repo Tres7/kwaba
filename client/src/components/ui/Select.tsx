@@ -70,7 +70,7 @@ export default function Select<T extends string>({ value, onChange, options, lab
       >
         {icon}
         <span className="flex-1 min-w-0 truncate text-base sm:text-sm font-medium text-dark">{courant?.label ?? t("choisir")}</span>
-        <ChevronDown size={16} className={cn("text-gray-400 transition-transform flex-shrink-0", open && "rotate-180")} />
+        <ChevronDown size={16} className={cn("text-gray-400 transition-transform shrink-0", open && "rotate-180")} />
       </button>
 
       {open && (
@@ -88,7 +88,7 @@ export default function Select<T extends string>({ value, onChange, options, lab
                   <span className="block truncate">{o.label}</span>
                   {o.hint && <span className="block text-xs text-muted font-normal">{o.hint}</span>}
                 </span>
-                {selectionne && <Check size={16} className="flex-shrink-0" />}
+                {selectionne && <Check size={16} className="shrink-0" />}
               </li>
             );
           })}

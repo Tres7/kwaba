@@ -83,7 +83,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
   ];
 
   return (
-    <section className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-6 mb-8">
+    <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 mb-8">
       <h2 className="font-heading font-bold text-lg text-dark">{t("titre", { nombre: etapes.length })}</h2>
       <p className="text-sm text-gray-500 mt-1">{t("texte")}</p>
       <ol className="mt-5 space-y-4">
@@ -91,7 +91,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
           const { icone: Icone, classe } = ICONES[etape.etat];
           return (
             <li key={etape.cle} className="flex gap-3">
-              <Icone size={22} className={cn("flex-shrink-0 mt-0.5", classe)} aria-hidden />
+              <Icone size={22} className={cn("shrink-0 mt-0.5", classe)} aria-hidden />
               <div className="min-w-0">
                 <p className="font-semibold text-dark text-sm">{i + 1}. {etape.titre}</p>
                 <p className="text-sm text-gray-600 mt-0.5">{etape.texte}</p>

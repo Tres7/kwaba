@@ -155,11 +155,11 @@ export default function CarteResultats({ logements, query, ville, survol }: {
       {apercu && (
         <div className="absolute inset-x-3 bottom-9 sm:inset-x-auto sm:left-3 sm:w-80 rounded-2xl bg-white shadow-card-hover">
           <Link href={`/hebergements/${apercu.id}${query}`} className="flex overflow-hidden rounded-2xl">
-            <img src={apercu.image_url || FALLBACK_IMAGE} alt="" className="w-28 flex-shrink-0 object-cover" />
+            <img src={apercu.image_url || FALLBACK_IMAGE} alt="" className="w-28 shrink-0 object-cover" />
             <div className="min-w-0 flex-1 p-3 pr-8">
               <p className="font-heading text-sm font-semibold text-dark truncate">{apercu.name}</p>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                <MapPin size={11} className="flex-shrink-0" aria-hidden />
+                <MapPin size={11} className="shrink-0" aria-hidden />
                 <span className="truncate">{apercu.location ? `${apercu.location}, ` : ""}{apercu.city}</span>
               </p>
               <RatingBadge rating={apercu.rating} count={apercu.review_count} className="mt-1" />

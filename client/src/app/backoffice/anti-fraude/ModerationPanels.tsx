@@ -7,6 +7,7 @@ import {
   type AdminReport, type AdminSanction,
 } from "@/features/messaging";
 import { apiErrorMessage } from "@/lib/api";
+import { useNow } from "@/lib/useNow";
 import { cn, formatDate } from "@/lib/utils";
 import Panneau, { Champ, Interrupteur, Zone } from "@/components/backoffice/Panneau";
 import { ActionButton, Pill } from "@/components/backoffice/AdminTable";
@@ -87,7 +88,7 @@ export function ReportPanel({ reportId, onClose, onDone }: { reportId: number; o
                   <li key={m.message_id} className={cn("rounded-xl px-3 py-2 border", m.reported ? "border-red-200 bg-red-50" : "border-gray-100",
                     m.from_author ? "mr-8" : "ml-8 bg-gray-50")}>
                     <p className="text-[11px] text-muted">{m.from_author ? "Auteur" : "Signaleur"} · {dateTime(m.created_at)}{m.reported && " · message signalé"}</p>
-                    <p className="whitespace-pre-wrap break-words text-dark">{m.content}</p>
+                    <p className="whitespace-pre-wrap wrap-break-word text-dark">{m.content}</p>
                   </li>
                 ))}
               </ol>
@@ -124,6 +125,7 @@ export function SanctionPanel({ sanctionId, onClose, onDone }: { sanctionId: num
   const [sanction] = useDetail<AdminSanction>(getSanction, sanctionId, onClose);
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
+  const now = useNow(30_000);
 
   const run = async (action: () => Promise<unknown>, success: string) => {
     setSending(true);
@@ -137,7 +139,7 @@ export function SanctionPanel({ sanctionId, onClose, onDone }: { sanctionId: num
     }
   };
 
-  const active = !!sanction?.ends_at && !sanction.cancelled_at && new Date(sanction.ends_at).getTime() > Date.now()
+  const active = !!sanction?.ends_at && !sanction.cancelled_at && new Date(sanction.ends_at).getTime() > now
     && (sanction.step === "short_suspension" || sanction.step === "long_suspension");
 
   return (

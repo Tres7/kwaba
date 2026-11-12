@@ -28,7 +28,7 @@ export default function BoutonConcierge() {
           barreReservation ? "bottom-24 lg:bottom-6" : "bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-6",
         )}
       >
-        <span className="relative flex-shrink-0">
+        <span className="relative shrink-0">
           <IconeKwaba taille={44} className="rounded-full" />
           <span aria-hidden className="sm:hidden absolute -top-1 -right-1 rounded-full bg-accent text-dark text-[10px] font-bold leading-none px-1.5 py-1 ring-2 ring-white">
             {t("ia")}

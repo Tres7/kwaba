@@ -79,8 +79,8 @@ export default function MessagesPage() {
                   href={`/messages/${conv.id}`}
                   className="group flex items-center gap-5 bg-white rounded-2xl p-5 hover:bg-light/40 transition-all duration-300 border border-transparent hover:border-light"
                 >
-                  <div className="relative flex-shrink-0">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-soft overflow-hidden">
+                  <div className="relative shrink-0">
+                    <div className="w-16 h-16 bg-linear-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-soft overflow-hidden">
                       {other?.avatar_url ? (
                         <img src={other.avatar_url} alt={name} className="w-full h-full object-cover" />
                       ) : (
@@ -99,7 +99,7 @@ export default function MessagesPage() {
                         {name}
                         <span className="ml-2 text-xs font-medium text-muted">{conv.my_role === "host" ? t("voyageur") : t("hote")}</span>
                       </p>
-                      <p className="text-muted text-xs font-medium flex-shrink-0">{formatTime(conv.last_message_at, format)}</p>
+                      <p className="text-muted text-xs font-medium shrink-0">{formatTime(conv.last_message_at, format)}</p>
                     </div>
                     <p className="text-primary text-sm font-medium mb-1 truncate">{conv.hebergement?.name ?? t("supprime")}</p>
                     <p className={cn("text-sm truncate", unread ? "text-dark font-semibold" : "text-muted")}>

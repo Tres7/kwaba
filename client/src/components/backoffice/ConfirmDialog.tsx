@@ -53,11 +53,11 @@ export default function ConfirmDialog({ confirmation, onClose }: { confirmation:
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
+    <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center p-0 sm:p-6">
       <div className="absolute inset-0 bg-black/40" onClick={() => !envoi && onClose()} aria-hidden />
       <div role="alertdialog" aria-modal="true" aria-labelledby="confirm-titre" className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-card-hover">
         <div className="flex gap-4">
-          <div className={cn("w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0", confirmation.danger ? "bg-red-50 text-red-700" : "bg-primary/10 text-primary")}>
+          <div className={cn("w-11 h-11 rounded-full flex items-center justify-center shrink-0", confirmation.danger ? "bg-red-50 text-red-700" : "bg-primary/10 text-primary")}>
             <AlertTriangle size={20} />
           </div>
           <div className="min-w-0">
@@ -71,7 +71,7 @@ export default function ConfirmDialog({ confirmation, onClose }: { confirmation:
             <label htmlFor="confirm-motif" className="block text-xs font-bold text-dark uppercase tracking-wide mb-2">Motif (conservé dans le journal)</label>
             <textarea
               id="confirm-motif" value={motif} onChange={(e) => setMotif(e.target.value)} rows={3} maxLength={500} autoFocus
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-none focus:border-primary resize-none"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-hidden focus:border-primary resize-none"
             />
             {!motifOk && <p className="text-xs text-muted mt-1">5 caractères minimum.</p>}
           </div>

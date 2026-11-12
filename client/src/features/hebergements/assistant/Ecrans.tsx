@@ -27,14 +27,14 @@ export interface EcranProps {
   conditions?: Conditions;
 }
 
-export const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+export const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 export const libelleClass = "block text-sm font-semibold text-dark mb-2";
 
 export function Question({ cle, children }: { cle: string; children?: React.ReactNode }) {
   const t = useTranslations("assistantHote");
   return (
     <>
-      <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl leading-tight">{t(`${cle}.titre`)}</h1>
+      <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl leading-tight sm:leading-9">{t(`${cle}.titre`)}</h1>
       {t.has(`${cle}.texte`) && <p className="text-gray-600 mt-2 mb-6">{t(`${cle}.texte`)}</p>}
       <div className={cn(!t.has(`${cle}.texte`) && "mt-6")}>{children}</div>
     </>
@@ -58,7 +58,7 @@ function CarteChoix({ picto: Picto, titre, texte, note, choisi, onChoisir }: {
       type="button" role="radio" aria-checked={choisi} onClick={onChoisir}
       className={cn(
         "group relative text-left rounded-3xl border-2 p-2 transition-all duration-200 motion-safe:hover:-translate-y-0.5",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+        "focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40",
         choisi ? "border-primary bg-primary-50 shadow-md" : "border-gray-100 bg-white hover:border-primary/40 hover:shadow-md",
       )}
     >
@@ -72,7 +72,7 @@ function CarteChoix({ picto: Picto, titre, texte, note, choisi, onChoisir }: {
         {note && <span className="block text-xs font-semibold text-primary mt-1.5">{note}</span>}
       </span>
       {choisi && (
-        <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-white text-primary flex items-center justify-center shadow">
+        <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-white text-primary flex items-center justify-center shadow-sm">
           <Check size={16} aria-hidden />
         </span>
       )}
@@ -231,7 +231,7 @@ function EcranChambres({ donnees, modifier, erreurs }: EcranProps) {
               </label>
               {types.length > 1 && (
                 <button type="button" onClick={() => modifier(avecTypes(types.filter((_, j) => j !== i)))} aria-label={t("retirer")}
-                  className="mt-7 w-11 h-11 flex-shrink-0 rounded-full text-red-600 hover:bg-red-50 flex items-center justify-center">
+                  className="mt-7 w-11 h-11 shrink-0 rounded-full text-red-600 hover:bg-red-50 flex items-center justify-center">
                   <Trash2 size={18} aria-hidden />
                 </button>
               )}
@@ -286,9 +286,9 @@ function EcranEquipements({ donnees, modifier }: EcranProps) {
                 const actif = choisis.includes(id);
                 return (
                   <button key={id} type="button" aria-pressed={actif} onClick={() => basculer(id)}
-                    className={cn("flex items-center gap-2.5 text-left px-3 py-3 rounded-2xl text-sm border transition-colors min-h-[3.25rem]",
+                    className={cn("flex items-center gap-2.5 text-left px-3 py-3 rounded-2xl text-sm border transition-colors min-h-13",
                       actif ? "border-primary bg-primary-50 text-primary font-semibold" : "border-gray-200 bg-white text-dark hover:border-primary/40")}>
-                    <Icone size={22} weight="duotone" className="flex-shrink-0" aria-hidden /> {label}
+                    <Icone size={22} weight="duotone" className="shrink-0" aria-hidden /> {label}
                   </button>
                 );
               })}
@@ -310,8 +310,8 @@ function EcranPhotos({ donnees, modifier, erreurs, onOccupe }: EcranProps) {
   return (
     <Question cle="photos">
       <ul className="grid gap-2 mb-5 text-sm text-gray-600">
-        <li className="flex items-start gap-2"><Sun size={18} className="text-primary flex-shrink-0" aria-hidden /> {t("photos.conseilJour")}</li>
-        <li className="flex items-start gap-2"><Camera size={18} className="text-primary flex-shrink-0" aria-hidden /> {t("photos.conseilPieces")}</li>
+        <li className="flex items-start gap-2"><Sun size={18} className="text-primary shrink-0" aria-hidden /> {t("photos.conseilJour")}</li>
+        <li className="flex items-start gap-2"><Camera size={18} className="text-primary shrink-0" aria-hidden /> {t("photos.conseilPieces")}</li>
       </ul>
       <PhotoUploader value={donnees.images ?? []} onChange={enregistrer} onBusyChange={onOccupe} fichiersDuBrouillon
         error={erreurs.images?.[0] ?? erreurs.image_url?.[0] ?? erreurs.legendes_photos?.[0]}

@@ -63,10 +63,10 @@ function Annonces() {
       titre: "Annonce", masquerMobile: true,
       cellule: (h) => (
         <div className="flex items-center gap-3 min-w-0">
-          <img src={h.image_url || FALLBACK_IMAGE} alt="" className="w-14 h-11 rounded-lg object-cover flex-shrink-0" />
+          <img src={h.image_url || FALLBACK_IMAGE} alt="" className="w-14 h-11 rounded-lg object-cover shrink-0" />
           <div className="min-w-0">
             <p className="font-semibold text-dark truncate flex items-center gap-1">
-              {h.name} {h.est_verifie && <BadgeCheck size={14} className="text-secondary flex-shrink-0" aria-label="Vérifiée par Kwa-Ba" />}
+              {h.name} {h.est_verifie && <BadgeCheck size={14} className="text-secondary shrink-0" aria-label="Vérifiée par Kwa-Ba" />}
             </p>
             <p className="text-xs text-muted truncate">{TYPE_LABELS[h.type] ?? h.type} · {h.city}</p>
           </div>
@@ -147,9 +147,9 @@ function Annonces() {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <SearchInput value={q} onChange={setQ} placeholder="Nom, ville, quartier ou email de l'hôte" />
-        <Select label="Visibilité" value={visible} onChange={setVisible} options={VISIBILITE} className="sm:w-44" icon={<span className="text-xs text-muted flex-shrink-0">Visibilité</span>} />
-        <Select label="Vérification" value={statut} onChange={setStatut} options={VERIFICATION} className="sm:w-48" icon={<span className="text-xs text-muted flex-shrink-0">Vérification</span>} />
-        <Select label="Annonces" value={archivees} onChange={setArchivees} options={ARCHIVAGE} className="sm:w-48" icon={<span className="text-xs text-muted flex-shrink-0">Annonces</span>} />
+        <Select label="Visibilité" value={visible} onChange={setVisible} options={VISIBILITE} className="sm:w-44" icon={<span className="text-xs text-muted shrink-0">Visibilité</span>} />
+        <Select label="Vérification" value={statut} onChange={setStatut} options={VERIFICATION} className="sm:w-48" icon={<span className="text-xs text-muted shrink-0">Vérification</span>} />
+        <Select label="Annonces" value={archivees} onChange={setArchivees} options={ARCHIVAGE} className="sm:w-48" icon={<span className="text-xs text-muted shrink-0">Annonces</span>} />
       </div>
 
       <AdminTable

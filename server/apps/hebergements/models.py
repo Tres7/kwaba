@@ -252,7 +252,7 @@ class BlocageModel(models.Model):
         app_label = 'hebergements'
         ordering = ['debut']
         constraints = [
-            models.CheckConstraint(check=models.Q(fin__gt=models.F('debut')), name='blocage_fin_apres_debut'),
+            models.CheckConstraint(condition=models.Q(fin__gt=models.F('debut')), name='blocage_fin_apres_debut'),
         ]
 
     def __str__(self):
@@ -339,7 +339,7 @@ class AlerteDisponibiliteModel(models.Model):
         verbose_name = 'Alerte de disponibilité'
         indexes = [models.Index(fields=['hebergement', 'statut'])]
         constraints = [
-            models.CheckConstraint(check=models.Q(date_fin__gt=models.F('date_debut')), name='alerte_fin_apres_debut'),
+            models.CheckConstraint(condition=models.Q(date_fin__gt=models.F('date_debut')), name='alerte_fin_apres_debut'),
         ]
 
     def __str__(self):

@@ -110,7 +110,7 @@ export default function LaisserAvisPage() {
       <SubPageHeader title={t("titre")} subtitle={t("sousTitre")} back="/profil/reservations" />
 
       <div className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-4 items-center mb-6">
-        <img src={h.image_url || FALLBACK_IMAGE} alt="" className="w-20 h-16 rounded-xl object-cover flex-shrink-0" />
+        <img src={h.image_url || FALLBACK_IMAGE} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0" />
         <div className="min-w-0">
           <p className="font-heading font-bold text-dark truncate">{h.name}</p>
           <p className="text-sm text-muted">{h.city} · {formatDate(reservation.check_in)} → {formatDate(reservation.check_out)}</p>
@@ -142,7 +142,7 @@ export default function LaisserAvisPage() {
             id="commentaire" value={commentaire} onChange={(e) => setCommentaire(e.target.value)}
             rows={6} maxLength={2000}
             placeholder={t("racontezPlaceholder")}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base sm:text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y"
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base sm:text-sm outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 resize-y"
           />
           <p className={cn("text-xs mt-1 text-right", commentaire.trim().length < 20 ? "text-muted" : "text-secondary")}>
             {commentaire.trim().length < 20 ? t("encore", { nombre: 20 - commentaire.trim().length }) : `${commentaire.length}/2000`}

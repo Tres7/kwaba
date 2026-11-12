@@ -33,7 +33,7 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
       href={`/hebergements/${property.id}${query}`}
       className="group bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow overflow-hidden flex flex-col h-full"
     >
-      <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+      <div className="relative aspect-4/3 bg-slate-100 overflow-hidden">
         <img
           src={property.image_url || FALLBACK_IMAGE}
           alt={property.name}
@@ -50,7 +50,7 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
             <Flame size={13} aria-hidden /> {t("plusQue", { nombre: dispo!.unites_restantes })}
           </span>
         )}
-        <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full text-dark shadow-sm">
+        <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full text-dark shadow-xs">
           <LibelleType type={property.type} />
         </span>
         <FavoriteButton
@@ -65,12 +65,12 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
         <div className="flex justify-between items-start gap-2">
           <h3 className="font-heading font-semibold text-dark text-[15px] leading-snug flex items-center gap-1 min-w-0">
             <span className="truncate">{property.name}</span>
-            {property.est_verifie && <BadgeCheck size={15} className="text-secondary flex-shrink-0" aria-label={t("verifie")} />}
+            {property.est_verifie && <BadgeCheck size={15} className="text-secondary shrink-0" aria-label={t("verifie")} />}
           </h3>
-          <RatingBadge rating={property.rating} count={property.review_count} className="flex-shrink-0" />
+          <RatingBadge rating={property.rating} count={property.review_count} className="shrink-0" />
         </div>
         <div className="flex items-center gap-1 mt-1 text-gray-500">
-          <MapPin size={11} className="flex-shrink-0" />
+          <MapPin size={11} className="shrink-0" />
           <span className="text-xs truncate">{property.location ? `${property.location}, ` : ""}{property.city}</span>
         </div>
         {resume(property) && <p className="text-xs text-gray-600 mt-1 truncate">{resume(property)}</p>}

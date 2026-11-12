@@ -12,7 +12,7 @@ export default function PreuveReversement({ r, avecOrganisation = false }: { r: 
   return (
     <li className="flex flex-wrap items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4">
       <span className={fait ? "text-secondary" : "text-amber-600"}>{fait ? <CheckCircle size={20} /> : <Clock size={20} />}</span>
-      <div className="flex-1 min-w-[12rem]">
+      <div className="flex-1 min-w-48">
         <p className="font-bold text-dark text-sm">
           {avecOrganisation && <>{r.organisation.nom} · </>}{t("donsDe", { mois: moisAnnee(r.periode) })}
         </p>

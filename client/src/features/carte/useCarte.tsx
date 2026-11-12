@@ -80,7 +80,7 @@ export function CadreCarte({ conteneur, charge, panne, children }: {
 }) {
   const t = useTranslations("carte");
   return (
-    <div className="relative w-full h-full [&_.maplibregl-ctrl-group]:!rounded-xl [&_.maplibregl-ctrl-group]:!shadow-md [&_.maplibregl-ctrl-group]:overflow-hidden">
+    <div className="relative w-full h-full [&_.maplibregl-ctrl-group]:rounded-xl! [&_.maplibregl-ctrl-group]:shadow-md! [&_.maplibregl-ctrl-group]:overflow-hidden">
       <div ref={conteneur} className="w-full h-full" />
       {!charge && !panne && <div className="absolute inset-0 skeleton" />}
       {panne && (

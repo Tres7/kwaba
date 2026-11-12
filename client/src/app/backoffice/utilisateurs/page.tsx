@@ -70,11 +70,11 @@ function Utilisateurs() {
       titre: "Utilisateur", masquerMobile: true,
       cellule: (u) => (
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-9 h-9 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 overflow-hidden">
             {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" /> : initials(nom(u))}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-dark truncate flex items-center gap-1">{nom(u)} {u.is_verified && <BadgeCheck size={14} className="text-secondary flex-shrink-0" aria-label="Email vérifié" />}</p>
+            <p className="font-semibold text-dark truncate flex items-center gap-1">{nom(u)} {u.is_verified && <BadgeCheck size={14} className="text-secondary shrink-0" aria-label="Email vérifié" />}</p>
             <p className="text-xs text-muted truncate">{u.email}</p>
           </div>
         </div>

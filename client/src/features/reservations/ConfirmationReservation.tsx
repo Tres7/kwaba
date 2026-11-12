@@ -70,14 +70,14 @@ export default function ConfirmationPage() {
 
         <motion.div className="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-8 mb-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.4 }}>
           <div className="flex flex-col md:flex-row gap-6">
-            <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className="w-full md:w-48 h-44 md:h-auto rounded-2xl object-cover flex-shrink-0" />
+            <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className="w-full md:w-48 h-44 md:h-auto rounded-2xl object-cover shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div className="min-w-0">
                   <h2 className="font-heading font-bold text-dark text-xl">{h.name}</h2>
-                  <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-primary flex-shrink-0" />{h.location ? `${h.location}, ` : ""}{h.city}</p>
+                  <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-primary shrink-0" />{h.location ? `${h.location}, ` : ""}{h.city}</p>
                   {reservation.point_repere && (
-                    <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-primary flex-shrink-0 mt-0.5" />{tRes("pointRepere", { repere: reservation.point_repere })}</p>
+                    <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-primary shrink-0 mt-0.5" />{tRes("pointRepere", { repere: reservation.point_repere })}</p>
                   )}
                 </div>
                 <span className={reservation.status === "cancelled" ? "bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-full" : "bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full"}>
@@ -87,14 +87,14 @@ export default function ConfirmationPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0"><Calendar size={18} className="text-primary" /></div>
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0"><Calendar size={18} className="text-primary" /></div>
                   <div>
                     <p className="text-xs text-gray-500">{tRes("dates")}</p>
                     <p className="text-sm font-bold text-dark">{formatDate(reservation.check_in, longDate)} – {formatDate(reservation.check_out, longDate)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0"><Users size={18} className="text-primary" /></div>
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0"><Users size={18} className="text-primary" /></div>
                   <div>
                     <p className="text-xs text-gray-500">{tRes("voyageurs")}</p>
                     <p className="text-sm font-bold text-dark">{t("personnes", { nombre: reservation.guests_count })}</p>
@@ -129,12 +129,12 @@ export default function ConfirmationPage() {
         {reservation.status === "confirmed" && (
           <Link href={`/transfert?reservation=${reservation.id}`}
             className="mb-8 flex items-center gap-4 bg-dark text-white rounded-3xl p-5 sm:p-6 hover:bg-dark/90 transition-colors">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0"><Plane size={22} /></div>
+            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0"><Plane size={22} /></div>
             <div className="flex-1 min-w-0">
               <p className="font-heading font-bold">{t("chauffeurTitre")}</p>
               <p className="text-sm text-white/80">{t("chauffeurTexte", { ville: h.city })}</p>
             </div>
-            <ArrowRight size={20} className="flex-shrink-0" />
+            <ArrowRight size={20} className="shrink-0" />
           </Link>
         )}
 

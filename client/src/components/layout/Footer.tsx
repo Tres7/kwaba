@@ -77,7 +77,7 @@ export default function Footer() {
             <MentionDevise className="mt-2" />
             <ul className="mt-4 space-y-1.5 text-sm text-gray-600" aria-label={t("contact")}>
               <li className="flex items-center gap-2">
-                <Mail size={15} className="text-primary flex-shrink-0" />
+                <Mail size={15} className="text-primary shrink-0" />
                 <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-primary">{CONTACT_EMAIL}</a>
               </li>
             </ul>

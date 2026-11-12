@@ -29,7 +29,7 @@ export default function CarteLancement() {
 
   return (
     <section className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-      <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0"><MailCheck size={20} aria-hidden /></span>
+      <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><MailCheck size={20} aria-hidden /></span>
       <div className="flex-1 min-w-0">
         <h2 className="font-heading font-bold text-dark">Liste d&apos;attente de l&apos;ouverture</h2>
         <p className="text-sm text-muted mt-0.5">
@@ -53,7 +53,7 @@ export default function CarteLancement() {
             throw err;
           }
         },
-      })} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-40">
+      })} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-40">
         Prévenir les inscrits
       </button>
       <ConfirmDialog confirmation={confirmation} onClose={() => setConfirmation(null)} />

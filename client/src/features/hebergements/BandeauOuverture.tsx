@@ -45,7 +45,7 @@ export default function BandeauOuverture() {
           </a>
         </p>
         <button type="button" onClick={masquer} aria-label={t("fermerBandeau")}
-          className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10">
+          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10">
           <X size={16} aria-hidden />
         </button>
       </div>

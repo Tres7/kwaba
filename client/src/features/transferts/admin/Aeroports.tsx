@@ -58,7 +58,7 @@ export default function Aeroports() {
     <div className="space-y-4">
       <div className="flex justify-between items-center gap-3">
         <p className="text-sm text-muted">Prix fixes par véhicule, de l&apos;aéroport vers la ville, les mêmes de jour comme de nuit.</p>
-        <button onClick={() => ouvrir("nouveau")} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouvel aéroport</button>
+        <button onClick={() => ouvrir("nouveau")} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouvel aéroport</button>
       </div>
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : (
         <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">

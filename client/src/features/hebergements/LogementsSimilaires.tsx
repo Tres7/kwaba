@@ -35,7 +35,7 @@ export default function LogementsSimilaires({ hebergement }: { hebergement: Hebe
       </h2>
       <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0">
         {data.logements.map((h) => (
-          <div key={h.id} className="w-[82%] flex-shrink-0 snap-start sm:w-auto">
+          <div key={h.id} className="w-[82%] shrink-0 snap-start sm:w-auto">
             <PropertyCard property={h} />
           </div>
         ))}

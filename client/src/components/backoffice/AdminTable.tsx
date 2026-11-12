@@ -57,7 +57,7 @@ export default function AdminTable<T>({ colonnes, lignes, cle, titreMobile, acti
             {lignes.map((l) => (
               <tr key={cle(l)} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 align-middle">
                 {colonnes.map((c) => <td key={c.titre} className={cn("px-4 py-3", c.className)}>{c.cellule(l)}</td>)}
-                {actions && <td className="px-4 py-3"><div className="flex justify-end gap-1.5 flex-wrap max-w-[14rem] ml-auto">{actions(l)}</div></td>}
+                {actions && <td className="px-4 py-3"><div className="flex justify-end gap-1.5 flex-wrap max-w-56 ml-auto">{actions(l)}</div></td>}
               </tr>
             ))}
           </tbody>
@@ -103,11 +103,11 @@ export function Pagination({ page, count, pageSize, onChange }: { page: number; 
 
 export function SearchInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
   return (
-    <label className="relative flex-1 min-w-[12rem]">
+    <label className="relative flex-1 min-w-48">
       <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
       <input
         type="search" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} aria-label={placeholder}
-        className="w-full h-full min-h-[46px] pl-10 pr-3 border border-gray-200 rounded-xl bg-white text-base sm:text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+        className="w-full h-full min-h-[46px] pl-10 pr-3 border border-gray-200 rounded-xl bg-white text-base sm:text-sm outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20"
       />
     </label>
   );

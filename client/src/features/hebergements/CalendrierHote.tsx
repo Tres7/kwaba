@@ -148,7 +148,7 @@ export default function CalendrierHotePage() {
             <label className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
               <span className="text-sm font-medium text-dark">{t("typeAffiche")}</span>
               <select value={typeChoisi} onChange={(e) => choisirType(e.target.value)}
-                className="border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-none focus:border-primary bg-white">
+                className="border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-hidden focus:border-primary bg-white">
                 {types.length > 1 && <option value="">{t("toutEtablissement")}</option>}
                 {types.map((u) => <option key={u.id} value={u.id}>{u.nom}</option>)}
               </select>
@@ -158,9 +158,9 @@ export default function CalendrierHotePage() {
             <MonthGrid month={month} onMonthChange={setMonth} count={2} minMonth={new Date()} renderDay={renderDay} onDayClick={clic} />
           )}
           <div className="flex flex-wrap gap-4 mt-5 text-xs text-gray-600">
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-white border border-gray-200" /> {t("libre")}</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-blue-100" /> {t("reserve")}</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-[repeating-linear-gradient(135deg,#f3f4f6,#f3f4f6_3px,#e5e7eb_3px,#e5e7eb_6px)]" /> {t("fermeParVous")}</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-white border border-gray-200" /> {t("libre")}</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-blue-100" /> {t("reserve")}</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-[repeating-linear-gradient(135deg,#f3f4f6,#f3f4f6_3px,#e5e7eb_3px,#e5e7eb_6px)]" /> {t("fermeParVous")}</span>
           </div>
         </div>
 
@@ -182,12 +182,12 @@ export default function CalendrierHotePage() {
                     <span className="text-sm font-medium text-dark">{t("quantiteFermer")}</span>
                     <input type="number" inputMode="numeric" min={1} max={unitesType} value={quantite} onChange={(e) => setQuantite(e.target.value)}
                       placeholder={t("toutes", { nombre: unitesType })}
-                      className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-none focus:border-primary" />
+                      className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-hidden focus:border-primary" />
                     <span className="block text-xs text-muted mt-1">{t("quantiteAide")}</span>
                   </label>
                 )}
                 <input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={120} placeholder={t("motif")}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-none focus:border-primary" />
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-hidden focus:border-primary" />
                 <div className="flex gap-2">
                   <button onClick={() => { setDebut(""); setFin(""); }} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium">{t("annuler")}</button>
                   <button onClick={fermer} disabled={envoi} className="flex-1 py-2.5 rounded-xl bg-dark text-white text-sm font-bold disabled:opacity-50">
@@ -218,7 +218,7 @@ export default function CalendrierHotePage() {
                       </p>
                     </div>
                     {p.type === "blocage" && (
-                      <button onClick={() => rouvrir(p)} className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline flex-shrink-0">
+                      <button onClick={() => rouvrir(p)} className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline shrink-0">
                         <Trash2 size={13} /> {t("rouvrir")}
                       </button>
                     )}

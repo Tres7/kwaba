@@ -81,7 +81,7 @@ export default function ReservationsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <div className="mb-8 flex items-center gap-4">
-        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-dark hover:bg-light-muted transition-colors flex-shrink-0">
+        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
           <ArrowLeft size={20} />
         </Link>
         <div>
@@ -122,8 +122,8 @@ export default function ReservationsPage() {
             const status = STATUS[res.status];
             const canCancel = res.status !== "cancelled" && res.check_in > isoDate();
             return (
-              <article key={res.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col sm:flex-row hover:shadow-card transition-shadow">
-                <Link href={`/hebergements/${res.hebergement_detail.id}`} className="w-full sm:w-48 md:w-56 h-44 sm:h-auto flex-shrink-0">
+              <article key={res.id} className="bg-white rounded-2xl shadow-xs border border-gray-100 overflow-hidden flex flex-col sm:flex-row hover:shadow-card transition-shadow">
+                <Link href={`/hebergements/${res.hebergement_detail.id}`} className="w-full sm:w-48 md:w-56 h-44 sm:h-auto shrink-0">
                   <img src={res.hebergement_detail.image_url || FALLBACK_IMAGE} alt={res.hebergement_detail.name} className="w-full h-full object-cover" />
                 </Link>
                 <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between min-w-0">
@@ -131,12 +131,12 @@ export default function ReservationsPage() {
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="min-w-0">
                         <h2 className="font-heading font-bold text-lg text-dark truncate">{res.hebergement_detail.name}</h2>
-                        <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-primary flex-shrink-0" />{res.hebergement_detail.city}</p>
+                        <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-primary shrink-0" />{res.hebergement_detail.city}</p>
                         {res.point_repere && (
-                          <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-primary flex-shrink-0 mt-0.5" />{t("pointRepere", { repere: res.point_repere })}</p>
+                          <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-primary shrink-0 mt-0.5" />{t("pointRepere", { repere: res.point_repere })}</p>
                         )}
                       </div>
-                      <span className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0", status.className)}>
+                      <span className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full shrink-0", status.className)}>
                         <status.icon size={12} /> {t(`statuts.${status.label}`)}
                       </span>
                     </div>

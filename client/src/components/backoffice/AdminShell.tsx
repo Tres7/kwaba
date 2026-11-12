@@ -64,7 +64,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="min-h-screen bg-gray-50 lg:flex">
-      <aside className="hidden lg:flex lg:flex-col w-64 flex-shrink-0 bg-white border-r border-gray-100 sticky top-0 h-screen p-5">
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 bg-white border-r border-gray-100 sticky top-0 h-screen p-5">
         <Logo size="sm" />
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted mt-2 mb-8">Back-office</p>
         <nav className="space-y-1 flex-1" aria-label="Back-office">
@@ -115,7 +115,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <Link href="/" className="mt-2 flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium text-dark hover:bg-gray-50"><ArrowLeft size={18} /> Retour au site</Link>
           </DrawerItem>
         </MobileDrawer>
-        <main id="contenu" tabIndex={-1} className="p-4 sm:p-6 lg:p-8 max-w-7xl outline-none">{children}</main>
+        <main id="contenu" tabIndex={-1} className="p-4 sm:p-6 lg:p-8 max-w-7xl outline-hidden">{children}</main>
         <AlerteVerifications compteurs={compteurs} />
       </div>
     </div>

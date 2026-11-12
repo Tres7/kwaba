@@ -2,7 +2,7 @@
  * Keyboard focus of a photo that opens the viewer: drawn inside the photo, since an outline outside is cut
  * by the scrolling rows and the rounded mosaic around it.
  */
-export const CONTOUR_FOCUS_PHOTO = "focus-visible:outline focus-visible:outline-[3px] focus-visible:-outline-offset-[3px] focus-visible:outline-primary";
+export const CONTOUR_FOCUS_PHOTO = "focus-visible:outline-solid focus-visible:outline-[3px] focus-visible:outline-offset-[-3px] focus-visible:outline-primary";
 
 /** Photos within one step of the one shown: the only ones the viewer adds to those it loads. */
 export function voisines(index: number, total: number): number[] {

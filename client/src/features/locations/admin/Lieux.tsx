@@ -57,7 +57,7 @@ export default function Lieux() {
     <div className="space-y-4">
       <div className="flex justify-between items-center gap-3">
         <p className="text-sm text-muted">Où les loueurs remettent et récupèrent les véhicules.</p>
-        <button onClick={() => ouvrir("nouveau")} className="flex-shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau lieu</button>
+        <button onClick={() => ouvrir("nouveau")} className="shrink-0 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">Nouveau lieu</button>
       </div>
       <AdminTable colonnes={colonnes} lignes={data} cle={(l) => String(l.id)} titreMobile={(l) => colonnes[0].cellule(l)}
         actions={(l) => <ActionButton onClick={() => ouvrir(l)}>Modifier</ActionButton>}

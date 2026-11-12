@@ -34,7 +34,7 @@ export default function PositionSurPlace({ pointHote, valeur, onChange, desactiv
           </div>
           {ecart !== null && ecart >= ECART_A_VERIFIER_M && (
             <p className="mt-1 flex items-start gap-1.5 font-semibold">
-              <AlertTriangle size={15} className="mt-0.5 flex-shrink-0" aria-hidden />
+              <AlertTriangle size={15} className="mt-0.5 shrink-0" aria-hidden />
               Écart important : vérifiez que vous êtes bien devant ce logement.
             </p>
           )}

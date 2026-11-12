@@ -14,7 +14,7 @@ export default function FavorisPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <div className="mb-8 flex items-center gap-4">
-        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-dark hover:bg-light-muted transition-colors flex-shrink-0">
+        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
           <ArrowLeft size={20} />
         </Link>
         <div>

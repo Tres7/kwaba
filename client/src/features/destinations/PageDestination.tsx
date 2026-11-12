@@ -124,7 +124,7 @@ export default async function PageDestination({ locale, destination }: { locale:
             </div>
           )}
           <p className="mt-5 flex items-start gap-2 text-sm text-gray-600 max-w-3xl">
-            <ShieldCheck size={18} className="text-primary flex-shrink-0 mt-0.5" aria-hidden /> {t("confiance")}
+            <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" aria-hidden /> {t("confiance")}
           </p>
         </section>
 

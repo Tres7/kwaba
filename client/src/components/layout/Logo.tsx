@@ -31,7 +31,7 @@ export function Logotype({ inverted = false, className }: { inverted?: boolean; 
 export default function Logo({ size = "md", inverted = false, className }: LogoProps) {
   const t = useTranslations("logo");
   return (
-    <Link href="/" className={cn("relative zone-tactile flex-shrink-0 inline-flex items-center", className)} aria-label={t("accueil")}>
+    <Link href="/" className={cn("relative zone-tactile shrink-0 inline-flex items-center", className)} aria-label={t("accueil")}>
       <Logotype inverted={inverted} className={SIZES[size]} />
     </Link>
   );

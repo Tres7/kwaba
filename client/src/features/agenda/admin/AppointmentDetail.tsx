@@ -49,11 +49,11 @@ export default function AppointmentDetail() {
   return (
     <div className="max-w-2xl">
       <BackLink />
-      <div className="mt-4 rounded-3xl bg-white shadow-sm p-6">
+      <div className="mt-4 rounded-3xl bg-white shadow-xs p-6">
         <Status status={appointment.status} />
         <h1 className="font-heading font-bold text-2xl text-dark mt-2">{appointment.title}</h1>
         <p className="flex items-start gap-2 text-dark mt-3">
-          <Clock size={18} aria-hidden className="text-gray-500 mt-0.5 flex-shrink-0" />
+          <Clock size={18} aria-hidden className="text-gray-500 mt-0.5 shrink-0" />
           <span>
             <span className="block first-letter:uppercase">{FULL_DATE.format(new Date(appointment.start))}</span>
             {hourMinute(appointment.start)} – {hourMinute(appointment.end)}{" "}
@@ -162,7 +162,7 @@ export default function AppointmentDetail() {
       )}
 
       {confirmed && (mine || isAdmin) && (
-        <div className="mt-4 rounded-3xl bg-white shadow-sm p-6">
+        <div className="mt-4 rounded-3xl bg-white shadow-xs p-6">
           {!cancelling ? (
             <button type="button" onClick={() => setCancelling(true)} className="text-sm font-bold text-red-700">
               Annuler cette visite
@@ -190,7 +190,7 @@ export default function AppointmentDetail() {
       )}
 
       {confirmed && isAdmin && (
-        <form className="mt-4 rounded-3xl bg-white shadow-sm p-6" onSubmit={(e) => {
+        <form className="mt-4 rounded-3xl bg-white shadow-xs p-6" onSubmit={(e) => {
           e.preventDefault();
           reassignMutation.mutate(undefined, {
             onSuccess: () => toast.success("Visite réaffectée."),

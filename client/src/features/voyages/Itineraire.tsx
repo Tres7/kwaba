@@ -43,7 +43,7 @@ export default function Itineraire({ v, appliquer, recharger }: SectionVoyage) {
             <ol className="mt-3 space-y-3 border-l-2 border-primary/20 pl-4">
               {etapes.map((e) => (
                 <li key={e.id} className="relative">
-                  <span className="absolute -left-[23px] top-1 w-3 h-3 rounded-full bg-primary" aria-hidden="true" />
+                  <span className="absolute left-[-23px] top-1 w-3 h-3 rounded-full bg-primary" aria-hidden="true" />
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-bold text-dark">{e.heure && <span className="text-primary mr-2">{locale === "en" ? e.heure.slice(0, 5) : e.heure.replace(":", " h ")}</span>}{e.titre}</p>

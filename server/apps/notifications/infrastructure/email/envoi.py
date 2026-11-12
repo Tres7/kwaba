@@ -1,4 +1,4 @@
-from email.mime.image import MIMEImage
+import email.policy
 from functools import lru_cache
 from pathlib import Path
 
@@ -38,16 +38,21 @@ def send_mail(subject: str, message: str, from_email: str, recipient_list: list[
     return get_connection().send_messages(emails)
 
 
+class BrandedEmail(EmailMultiAlternatives):
+    def message(self, *, policy=email.policy.default):
+        msg = super().message(policy=policy)
+        html = msg.get_body(preferencelist=('html',))
+        if html is not None:
+            html.add_related(_logo(), maintype='image', subtype='png', cid=f'<{CID_LOGO}>', disposition='inline',
+                             filename='kwaba.png')
+        return msg
+
+
 def _email(subject: str, message: str, html: str, from_email: str, destinataire: str,
            pieces_jointes: list[tuple[str, bytes, str]] | None) -> EmailMultiAlternatives:
     reply_to = [settings.EMAIL_REPLY_TO] if settings.EMAIL_REPLY_TO else None
-    email = EmailMultiAlternatives(subject, message, from_email, [destinataire], reply_to=reply_to)
-    email.attach_alternative(html, 'text/html')
-    email.mixed_subtype = 'related'
-    logo = MIMEImage(_logo(), 'png')
-    logo.add_header('Content-ID', f'<{CID_LOGO}>')
-    logo.add_header('Content-Disposition', 'inline', filename='kwaba.png')
-    email.attach(logo)
+    branded = BrandedEmail(subject, message, from_email, [destinataire], reply_to=reply_to)
+    branded.attach_alternative(html, 'text/html')
     for nom, contenu, type_mime in pieces_jointes or []:
-        email.attach(nom, contenu, type_mime)
-    return email
+        branded.attach(nom, contenu, type_mime)
+    return branded

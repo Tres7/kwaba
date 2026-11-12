@@ -46,7 +46,7 @@ export default function Logements({ v, appliquer, recharger }: SectionVoyage) {
     <div className="space-y-5">
       {retenue && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-secondary/10 border border-secondary/30 rounded-2xl p-4">
-          <Award size={22} className="text-secondary flex-shrink-0" />
+          <Award size={22} className="text-secondary shrink-0" />
           <p className="flex-1 text-sm text-dark">{t.rich("retenu", { nom: retenue.hebergement.name, strong: (x) => <strong>{x}</strong> })}
             {retenue.budget && <>, {t("parPersonne", { montant: formatPrice(retenue.budget.par_personne) })}</>}</p>
           {reserverUrl && v.est_organisateur && (
@@ -70,7 +70,7 @@ export default function Logements({ v, appliquer, recharger }: SectionVoyage) {
             const monChoix = v.mon_vote === p.id;
             return (
               <li key={p.id} className={cn("bg-white rounded-2xl border p-4 flex flex-col sm:flex-row gap-4", monChoix ? "border-primary" : "border-gray-100")}>
-                <Link href={`/hebergements/${h.id}`} className="sm:w-40 h-32 flex-shrink-0">
+                <Link href={`/hebergements/${h.id}`} className="sm:w-40 h-32 shrink-0">
                   <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className="w-full h-full object-cover rounded-xl" />
                 </Link>
                 <div className="flex-1 min-w-0">
@@ -132,12 +132,12 @@ export default function Logements({ v, appliquer, recharger }: SectionVoyage) {
             <div className="relative">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input value={recherche} onChange={(e) => setRecherche(e.target.value)} aria-label={t("rechercherLogement")}
-                placeholder={t("rechercherPlaceholder")} className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm outline-none focus:border-primary/50" />
+                placeholder={t("rechercherPlaceholder")} className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base sm:text-sm outline-hidden focus:border-primary/50" />
             </div>
             <ul className={cn("grid sm:grid-cols-2 gap-3 mt-3", isFetching && "opacity-60")}>
               {resultats.filter((h) => !deja.has(h.id)).map((h) => (
                 <li key={h.id} className="flex items-center gap-3 p-2 rounded-xl border border-gray-100">
-                  <img src={h.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-14 rounded-lg object-cover flex-shrink-0" />
+                  <img src={h.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-14 rounded-lg object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-sm text-dark truncate">{h.name}</p>
                     <p className="text-xs text-gray-600">{h.city} · {t("prixNuit", { prix: formatPrice(h.price_per_night) })}</p>

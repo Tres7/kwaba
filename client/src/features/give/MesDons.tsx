@@ -46,7 +46,7 @@ export default function MesDonsPage() {
         <SubPageHeader title={t("titre")} />
         {data && data.nb_payes > 0 && (
           <div className="bg-primary text-white rounded-2xl p-5 flex items-center gap-4">
-            <HandHeart size={28} className="text-accent flex-shrink-0" />
+            <HandHeart size={28} className="text-accent shrink-0" />
             <p>{t.rich("total", { montant: formatPrice(data.total_donne), nombre: data.nb_payes, strong: (x) => <strong>{x}</strong> })}</p>
           </div>
         )}
@@ -63,7 +63,7 @@ export default function MesDonsPage() {
               const cause = CAUSES[don.organisation.cause];
               return (
                 <li key={don.id} className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-4">
-                  <span className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${cause.couleur}`}><cause.icon size={18} /></span>
+                  <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cause.couleur}`}><cause.icon size={18} /></span>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap justify-between gap-2">
                       <Link href={`/give/${don.organisation.slug}`} className="font-bold text-dark hover:text-primary">{don.organisation.nom}</Link>

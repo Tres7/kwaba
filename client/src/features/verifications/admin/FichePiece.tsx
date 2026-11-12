@@ -46,7 +46,7 @@ export default function FichePiece({ piece, peutDecider, onTerminee }: {
 
   return (
     <div className="space-y-4">
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Hôte</h2>
         <p className="font-semibold text-dark">{piece.hote.nom}</p>
         <p className="flex flex-col gap-1 text-sm text-gray-600">
@@ -56,7 +56,7 @@ export default function FichePiece({ piece, peutDecider, onTerminee }: {
         </p>
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Document</h2>
         <p className="text-sm text-dark">{piece.type_libelle} · envoyé le {formatDate(piece.soumise_le)}</p>
         {piece.titulaire_versement && (
@@ -70,11 +70,11 @@ export default function FichePiece({ piece, peutDecider, onTerminee }: {
       </section>
 
       {peutDecider && (refus ? (
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
           <label className="block text-xs font-bold text-dark uppercase tracking-wide" htmlFor="motif-refus">Motif (envoyé à l&apos;hôte)</label>
           <textarea id="motif-refus" value={motif} onChange={(e) => setMotif(e.target.value)} rows={3}
             placeholder="Ex : photo floue, nom illisible, document expiré"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20" />
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setRefus(false)} className="py-3 rounded-xl text-sm font-semibold text-gray-600 bg-gray-50">Annuler</button>
             <button type="button" disabled={envoi} onClick={() => decider("refusee")}

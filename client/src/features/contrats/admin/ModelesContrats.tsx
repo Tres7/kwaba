@@ -54,14 +54,14 @@ export default function ModelesContrats() {
   return (
     <div className="space-y-4">
       <div role="note" className="flex gap-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl px-4 py-3 text-sm">
-        <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" aria-hidden />
+        <AlertTriangle size={18} className="shrink-0 mt-0.5" aria-hidden />
         <p>Ces textes sont des projets de rédaction : faites-les relire par un juriste avant d&apos;envoyer les premiers contrats. Chaque modification crée une nouvelle version ; les contrats déjà émis gardent leur texte.</p>
       </div>
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : (
         <ul className="grid sm:grid-cols-2 gap-3">
           {data?.modeles.map((m) => (
             <li key={m.type} className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-3">
-              <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0"><FileSignature size={18} aria-hidden /></span>
+              <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><FileSignature size={18} aria-hidden /></span>
               <div className="flex-1 min-w-0">
                 <p className="font-heading font-bold text-dark">{m.type_libelle}</p>
                 <p className="text-sm text-dark truncate">{m.titre}</p>

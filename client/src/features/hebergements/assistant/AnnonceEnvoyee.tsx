@@ -18,7 +18,7 @@ export default function AnnonceEnvoyee() {
         <ol className="text-left mt-6 space-y-3">
           {(["identite", "visite", "publication"] as const).map((cle, i) => (
             <li key={cle} className="flex gap-3 text-sm text-dark">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
               {t(`suite.${cle}`)}
             </li>
           ))}

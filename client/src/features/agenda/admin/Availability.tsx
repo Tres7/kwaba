@@ -13,7 +13,7 @@ import type { WeeklySlot } from "../types";
 const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const DATE = new Intl.DateTimeFormat("fr-FR", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" });
 const inputClass = "rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white";
-const cardClass = "rounded-3xl bg-white shadow-sm p-5 sm:p-6 mt-4";
+const cardClass = "rounded-3xl bg-white shadow-xs p-5 sm:p-6 mt-4";
 
 export default function Availability() {
   const { data, isLoading, isError } = useAvailability();

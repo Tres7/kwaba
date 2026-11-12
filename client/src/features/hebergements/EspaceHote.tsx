@@ -181,7 +181,7 @@ function EspaceHoteContent() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-6 flex items-center gap-4">
           <button type="button" onClick={fermer} aria-label={tCommun("retour")}
-            className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-dark hover:bg-light-muted transition-colors flex-shrink-0">
+            className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
             <ArrowLeft size={20} aria-hidden />
           </button>
           <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark">{editing === "new" ? t("nouvelle") : t("modifier")}</h1>
@@ -216,7 +216,7 @@ function EspaceHoteContent() {
           { label: t("stats.aVenir"), value: upcoming.length },
           { label: t("stats.revenus"), value: formatPrice(revenue) },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm min-w-0">
+          <div key={s.label} className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-xs min-w-0">
             <p className="text-xs text-muted font-medium">{s.label}</p>
             <p className="font-heading font-bold text-dark text-lg sm:text-2xl mt-1 truncate">{s.value}</p>
           </div>
@@ -252,8 +252,8 @@ function EspaceHoteContent() {
         ) : (
           <div className="space-y-4">
             {annonces.map((h) => (
-              <article key={h.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col sm:flex-row">
-                <Link href={`/hebergements/${h.id}`} className="sm:w-48 h-40 sm:h-auto flex-shrink-0 relative">
+              <article key={h.id} className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden flex flex-col sm:flex-row">
+                <Link href={`/hebergements/${h.id}`} className="sm:w-48 h-40 sm:h-auto shrink-0 relative">
                   <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className={cn("w-full h-full object-cover", h.statut_annonce !== "publiee" && "grayscale opacity-60")} />
                   {!h.is_available && <span className="absolute top-3 left-3 bg-dark text-white text-[10px] font-bold uppercase px-2 py-1 rounded-full">{t("masqueeBadge")}</span>}
                 </Link>
@@ -268,7 +268,7 @@ function EspaceHoteContent() {
                   <RatingBadge rating={h.rating} count={h.review_count} variant="full" className="mt-2" />
                   {(h.chambres == null || h.salles_de_bain == null || !h.point_repere) && (
                     <button type="button" onClick={() => setEditing(h)} className="relative zone-tactile flex items-start gap-1.5 text-left text-xs font-semibold text-amber-800 mt-2 hover:underline">
-                      <AlertTriangle size={14} className="flex-shrink-0 mt-px" /> {tAnnonce("detailsManquants")}
+                      <AlertTriangle size={14} className="shrink-0 mt-px" /> {tAnnonce("detailsManquants")}
                     </button>
                   )}
                   {h.statut_annonce === "validee" && prelancement ? (

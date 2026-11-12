@@ -28,9 +28,9 @@ const PIECES: Record<string, string> = {
   entree: "Entrée", vue: "Vue", parking: "Parking", autre: "Autre", piece_principale: "Pièce principale",
 };
 
-const VIGNETTE = "group block w-full cursor-zoom-in focus-visible:outline-none";
+const VIGNETTE = "group block w-full cursor-zoom-in focus-visible:outline-hidden";
 // Focus drawn inside the thumbnail: the rounded frame around it cuts what is outside
-const FOCUS_VIGNETTE = "group-focus-visible:outline group-focus-visible:outline-[3px] group-focus-visible:-outline-offset-[3px] group-focus-visible:outline-primary";
+const FOCUS_VIGNETTE = "group-focus-visible:outline-solid group-focus-visible:outline-[3px] group-focus-visible:outline-offset-[-3px] group-focus-visible:outline-primary";
 
 function libelle(code: string | undefined) {
   if (!code) return "Sans pièce";
@@ -74,7 +74,7 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
 
   return (
     <div className="space-y-4">
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
         <p className="text-sm text-dark">
           <strong>{photos.hote.nom || photos.hote.email}</strong> a ajouté {photos.ajoutees.length} photo(s) à son annonce, déjà vérifiée.
           Elles sont en ligne : retirez celles qui ne montrent pas ce logement, qui affichent des coordonnées ou qui sont trompeuses.
@@ -85,7 +85,7 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
         </a>
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Photos ajoutées</h2>
         <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
           {photos.ajoutees.map((url, i) => {
@@ -111,7 +111,7 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
       </section>
 
       {photos.deja_verifiees.length > 0 && (
-        <details className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+        <details className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
           <summary className="text-xs font-bold uppercase tracking-wide text-gray-500 cursor-pointer">
             Photos vues à la visite ({photos.deja_verifiees.length}), pour comparer
           </summary>
@@ -145,13 +145,13 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
       )}
 
       {peutDecider && (
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
           {retirer.length > 0 && (
             <label className="block">
               <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Motif envoyé à l&apos;hôte</span>
               <textarea value={motif} onChange={(e) => setMotif(e.target.value)} rows={3} maxLength={500}
                 placeholder="Par exemple : cette photo montre un autre logement."
-                className="mt-1 w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-base sm:text-sm outline-none focus:border-primary/50" />
+                className="mt-1 w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-base sm:text-sm outline-hidden focus:border-primary/50" />
             </label>
           )}
           <button type="button" onClick={valider} disabled={envoi}

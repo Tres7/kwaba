@@ -44,7 +44,7 @@ export default function DateRangeField({ checkIn, checkOut, onChange, variant = 
     >
       <span className="block text-[11px] font-bold text-dark uppercase tracking-wide">{titre}</span>
       <span className="flex items-center gap-2 mt-1">
-        <Calendar size={16} className="text-primary flex-shrink-0 hidden sm:block" />
+        <Calendar size={16} className="text-primary shrink-0 hidden sm:block" />
         <span className={cn("text-base md:text-sm font-medium truncate", valeur ? "text-dark" : "text-gray-400")}>{libelle(valeur)}</span>
       </span>
     </button>

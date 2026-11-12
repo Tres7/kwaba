@@ -75,7 +75,7 @@ export default function PayerPourAutrui({ cle, charger, demarrer }: {
               </div>
 
               <div className="flex gap-4 items-center mt-6 p-4 rounded-2xl bg-gray-50">
-                <img src={apercu.hebergement.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                <img src={apercu.hebergement.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-dark text-sm truncate">{apercu.hebergement.name}</p>
                   <p className="text-xs text-gray-600">{apercu.hebergement.city}</p>
@@ -123,9 +123,9 @@ export default function PayerPourAutrui({ cle, charger, demarrer }: {
               )}
 
               <ul className="mt-6 space-y-2 text-xs text-gray-600">
-                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary flex-shrink-0 mt-0.5" />{t("garantieRemboursement")}</li>
-                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary flex-shrink-0 mt-0.5" />{t("garantieRecu")}</li>
-                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary flex-shrink-0 mt-0.5" />{t("garantieConfidentialite", { voyageur: apercu.voyageur })}</li>
+                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary shrink-0 mt-0.5" />{t("garantieRemboursement")}</li>
+                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary shrink-0 mt-0.5" />{t("garantieRecu")}</li>
+                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary shrink-0 mt-0.5" />{t("garantieConfidentialite", { voyageur: apercu.voyageur })}</li>
               </ul>
             </>
           )}

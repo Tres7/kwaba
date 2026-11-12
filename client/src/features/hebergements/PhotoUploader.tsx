@@ -142,7 +142,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files); }}
         className={cn(
-          "rounded-2xl border-2 border-dashed p-6 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+          "rounded-2xl border-2 border-dashed p-6 text-center transition-colors outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40",
           complet ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary/50 hover:bg-primary/5",
           dragOver ? "border-primary bg-primary/5" : error ? "border-red-300 bg-red-50/40" : "border-gray-200 bg-gray-50/60"
         )}
@@ -175,7 +175,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
             const src = item.status === "done" ? item.url : item.preview;
             return (
               <li key={item.key} className="space-y-1.5">
-              <div className={cn("relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 group", index === 0 && item.status === "done" && "ring-2 ring-primary")}>
+              <div className={cn("relative aspect-4/3 rounded-xl overflow-hidden bg-gray-100 group", index === 0 && item.status === "done" && "ring-2 ring-primary")}>
                 <img src={src} alt={`Photo ${index + 1}`} className={cn("w-full h-full object-cover", item.status !== "done" && "opacity-60")} />
 
                 {index === 0 && item.status === "done" && (
@@ -204,7 +204,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
                 )}
 
                 {item.status !== "uploading" && (
-                  <div className="absolute bottom-0 inset-x-0 flex items-center justify-between gap-1 p-1.5 bg-gradient-to-t from-black/60 to-transparent">
+                  <div className="absolute bottom-0 inset-x-0 flex items-center justify-between gap-1 p-1.5 bg-linear-to-t from-black/60 to-transparent">
                     <div className="flex gap-1">
                       {item.status === "done" && (
                         <>
@@ -223,7 +223,7 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
               {onLegende && item.status === "done" && (
                 <select value={legendes?.[item.url] ?? ""} onChange={(e) => onLegende(item.url, e.target.value)}
                   aria-label={t("pieceDeLaPhoto", { numero: index + 1 })}
-                  className={cn("w-full rounded-lg border px-2 py-2 text-sm bg-white text-dark focus:outline-none focus:ring-2 focus:ring-primary/20",
+                  className={cn("w-full rounded-lg border px-2 py-2 text-sm bg-white text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20",
                     legendes?.[item.url] ? "border-gray-200" : "border-secondary/60 text-gray-500")}>
                   <option value="" disabled>{t("quellePiece")}</option>
                   {pieces.map((code) => <option key={code} value={code}>{libellePiece(code, tPieces)}</option>)}

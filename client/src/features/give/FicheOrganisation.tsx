@@ -59,7 +59,7 @@ function PageOrganisation() {
             <div className="flex items-start gap-4">
               {o.logo && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={o.logo} alt="" className="w-16 h-16 rounded-2xl object-cover border border-gray-100 flex-shrink-0" />
+                <img src={o.logo} alt="" className="w-16 h-16 rounded-2xl object-cover border border-gray-100 shrink-0" />
               )}
               <div className="min-w-0">
                 <span className={cn("inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full", cause.couleur)}>

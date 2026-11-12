@@ -16,11 +16,11 @@ function Logement({ c }: { c: CarteLogement }) {
   const t = useTranslations("conciergeCartes");
   const sejour = c.arrivee && c.depart ? `?check_in=${c.arrivee}&check_out=${c.depart}&guests=${c.voyageurs ?? 1}` : "";
   return (
-    <article className="w-60 flex-shrink-0 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+    <article className="w-60 shrink-0 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs">
       <img src={c.image || FALLBACK_IMAGE} alt={c.nom} className="w-full h-32 object-cover" />
       <div className="p-3">
         <p className="font-bold text-sm text-dark truncate">{c.nom}</p>
-        <p className="flex items-center gap-1 text-xs text-gray-600 truncate"><MapPin size={11} className="text-primary flex-shrink-0" /> {c.quartier || c.ville}</p>
+        <p className="flex items-center gap-1 text-xs text-gray-600 truncate"><MapPin size={11} className="text-primary shrink-0" /> {c.quartier || c.ville}</p>
         <p className="flex items-center gap-2 text-xs text-gray-600 mt-1">
           {c.nb_avis > 0 && <span className="flex items-center gap-0.5"><Star size={11} className="fill-accent text-accent" /> {c.note.toFixed(1)}</span>}
           <span className="flex items-center gap-0.5"><Users size={11} /> {c.capacite}</span>
@@ -44,7 +44,7 @@ function Transfert({ c }: { c: CarteTransfert }) {
   const [jour, heure] = c.arrivee.split("T");
   const lien = `/transfert?aeroport=${c.aeroport}&date=${jour}&heure=${heure}&passagers=${c.passagers}&bagages=${c.bagages}`;
   return (
-    <article className="w-72 flex-shrink-0 bg-dark text-white rounded-2xl p-4">
+    <article className="w-72 shrink-0 bg-dark text-white rounded-2xl p-4">
       <p className="flex items-center gap-2 font-bold text-sm"><Car size={16} /> {t("transfertDepuis", { ville: c.ville })}</p>
       <p className="text-xs text-white/75 mt-1">{t("detailVol", { date: formatDate(jour), heure: locale === "en" ? heure : heure.replace(":", " h "), passagers: c.passagers, bagages: c.bagages })}</p>
       <ul className="mt-3 space-y-1.5 text-sm">
@@ -79,7 +79,7 @@ function Together({ c }: { c: CarteTogether }) {
     }
   };
   return (
-    <article className="w-72 flex-shrink-0 bg-primary/5 border border-primary/20 rounded-2xl p-4">
+    <article className="w-72 shrink-0 bg-primary/5 border border-primary/20 rounded-2xl p-4">
       <p className="flex items-center gap-2 font-bold text-sm text-dark"><Users size={16} className="text-primary" /> {t("voyageGroupe", { nom: c.nom })}</p>
       <p className="text-xs text-gray-600 mt-1">
         {c.destination} · {tV("voyageurs", { nombre: c.voyageurs })}

@@ -26,6 +26,7 @@ export function useBrouillonAssistant(id: string) {
   const attente = useRef<DonneesAnnonce>({});
   const file = useRef<Promise<void>>(Promise.resolve());
   const minuteur = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const retry = useRef<(etape?: string) => Promise<void>>(() => Promise.resolve());
 
   useEffect(() => {
     if (brouillon) setDonnees((actuelles) => actuelles ?? brouillon.donnees);
@@ -46,11 +47,15 @@ export function useBrouillonAssistant(id: string) {
         // Newer answers typed in the meantime win over the ones put back
         attente.current = { ...champs, ...attente.current };
         setEtat("hors_ligne");
-        minuteur.current = setTimeout(() => void envoyer(etape), NOUVEL_ESSAI_MS);
+        minuteur.current = setTimeout(() => void retry.current(etape), NOUVEL_ESSAI_MS);
       }
     });
     return file.current;
   }, [id]);
+
+  useEffect(() => {
+    retry.current = envoyer;
+  }, [envoyer]);
 
   const modifier = useCallback((champs: DonneesAnnonce) => {
     setDonnees((actuelles) => ({ ...actuelles, ...champs }));

@@ -10,6 +10,7 @@ import { clesGive } from "./hooks";
 import { Documents } from "@/features/documents";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { useNow } from "@/lib/useNow";
 
 const ATTENTE_MAX_MS = 3 * 60 * 1000;
 
@@ -19,6 +20,7 @@ function RetourDon() {
   const { id } = useParams<{ id: string }>();
   const annule = useSearchParams().get("annule") === "1";
   const [debut] = useState(() => Date.now());
+  const now = useNow(5000);
 
   const { data: don, isError } = useQuery({
     queryKey: clesGive.don(id),
@@ -37,7 +39,7 @@ function RetourDon() {
   }
   if (!don) return <div className="max-w-xl mx-auto px-4 py-10"><div className="h-80 skeleton rounded-3xl" /></div>;
 
-  const enAttente = don.statut === "en_attente" && !annule && Date.now() - debut < ATTENTE_MAX_MS;
+  const enAttente = don.statut === "en_attente" && !annule && now - debut < ATTENTE_MAX_MS;
   const echoue = don.statut === "echoue" || (don.statut === "en_attente" && !enAttente);
 
   return (
@@ -79,7 +81,7 @@ function RetourDon() {
 
         {don.statut === "paye" && don.date_reversement && (
           <p className="flex gap-2 mt-4 text-sm text-gray-600">
-            <CalendarClock size={16} className="text-primary flex-shrink-0 mt-0.5" />
+            <CalendarClock size={16} className="text-primary shrink-0 mt-0.5" />
             {t("calendrier", { date: formatDate(don.date_reversement, { day: "numeric", month: "long", year: "numeric" }) })}
           </p>
         )}

@@ -35,7 +35,7 @@ interface HebergementFormProps {
   onCancel: () => void;
 }
 
-const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
 
 export default function HebergementForm({ initial, brouillon, onSaved, onCancel }: HebergementFormProps) {
@@ -345,7 +345,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         <div className="flex items-start gap-2 mt-4">
           <input
             type="checkbox" id="h-droits" checked={droitsPhotos} onChange={(e) => setDroitsPhotos(e.target.checked)}
-            className="mt-1 accent-primary w-4 h-4 flex-shrink-0" aria-describedby={errors.droits ? "h-droits-erreur" : undefined}
+            className="mt-1 accent-primary w-4 h-4 shrink-0" aria-describedby={errors.droits ? "h-droits-erreur" : undefined}
           />
           <label htmlFor="h-droits" className="text-xs text-gray-600 leading-relaxed">
             {t.rich("certification", { cgu: (x) => <Link href="/cgu#hotes" target="_blank" className="text-primary underline">{x}<span className="sr-only"> ({t("nouvelOnglet")})</span></Link> })}
@@ -385,7 +385,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
             const options = [{ id: null, label: t("nonPrecise") }, { id: r.oui.id, label: r.oui.label }, { id: r.non.id, label: r.non.label }];
             return (
               <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <span className="text-sm font-semibold text-dark sm:w-40 flex-shrink-0">{r.label}</span>
+                <span className="text-sm font-semibold text-dark sm:w-40 shrink-0">{r.label}</span>
                 <div role="radiogroup" aria-label={r.label} className="inline-flex flex-wrap rounded-xl border border-gray-200 bg-white p-1 gap-1">
                   {options.map((o) => (
                     <button key={o.id ?? "aucun"} type="button" role="radio" aria-checked={valeur === o.id} onClick={() => choisirRegle(r, o.id)}

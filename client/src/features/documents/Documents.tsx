@@ -37,7 +37,7 @@ export default function Documents({ objet, id, className }: { objet: ObjetDocume
           onClick={() => telecharger(doc)}
           disabled={enCours !== null}
           aria-label={t("telecharger", { nom: nom(doc).toLowerCase() })}
-          className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-full border border-gray-200 bg-white text-xs font-semibold text-dark hover:border-primary hover:text-primary transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-full border border-gray-200 bg-white text-xs font-semibold text-dark hover:border-primary hover:text-primary transition-colors disabled:opacity-60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
         >
           {enCours === doc ? <Loader2 size={14} className="animate-spin" aria-hidden /> : <FileDown size={14} aria-hidden />}
           {nom(doc)}

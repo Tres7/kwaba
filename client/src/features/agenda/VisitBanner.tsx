@@ -21,7 +21,7 @@ export default function VisitBanner() {
     return (
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-amber-50 border border-amber-200 p-4">
         <div className="flex items-start gap-3">
-          <CalendarClock size={22} aria-hidden className="text-amber-800 flex-shrink-0 mt-0.5" />
+          <CalendarClock size={22} aria-hidden className="text-amber-800 shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-dark">{t("bannerToBook", { count: toBook })}</p>
             <p className="text-sm text-gray-600">{t("bannerToBookHelp")}</p>

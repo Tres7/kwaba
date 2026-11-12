@@ -45,7 +45,7 @@ export default function Finances() {
     }
   };
 
-  const champ = "px-3 py-2 border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+  const champ = "px-3 py-2 border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
   const jours = d?.jours.filter((j) => j.nb_paiements || j.rembourse || j.verse) ?? [];
   return (
     <div className="space-y-6">

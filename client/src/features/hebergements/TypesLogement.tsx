@@ -80,7 +80,7 @@ export default function TypesLogementPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="font-heading font-bold text-dark flex items-center gap-2">
-                    <BedDouble size={16} className="text-primary flex-shrink-0" /> <span className="truncate">{u.nom}</span>
+                    <BedDouble size={16} className="text-primary shrink-0" /> <span className="truncate">{u.nom}</span>
                     {u.actif === false && <span className="text-[11px] font-semibold bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">{t("inactif")}</span>}
                   </h2>
                   <p className="text-sm text-gray-600 mt-1 flex flex-wrap gap-x-3 gap-y-1">
@@ -141,7 +141,7 @@ function FormulaireType({ hebergementId, type, onFin, onAnnuler }: {
     }
   };
 
-  const champ = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-none focus:border-primary";
+  const champ = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-hidden focus:border-primary";
   return (
     <form onSubmit={enregistrer} className="bg-white rounded-3xl shadow-card p-5 space-y-4">
       <h2 className="font-heading font-bold text-dark">{type ? t("modifierTitre") : t("ajouter")}</h2>

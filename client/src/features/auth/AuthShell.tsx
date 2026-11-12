@@ -15,7 +15,7 @@ export default function AuthShell({ image, title, subtitle, reverse = false, chi
     <div className={cn("min-h-screen flex bg-white", reverse && "flex-row-reverse")}>
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/60 to-orange-900/70" />
+        <div className="absolute inset-0 bg-linear-to-br from-primary/80 via-primary/60 to-orange-900/70" />
         <div className="relative z-10 flex flex-col justify-between p-12 h-full w-full">
           <Logo inverted />
           <div className="text-white max-w-md">
@@ -26,7 +26,7 @@ export default function AuthShell({ image, title, subtitle, reverse = false, chi
       </div>
 
       <div className="w-full lg:w-1/2 flex items-start sm:items-center justify-center px-5 py-10 sm:p-12 overflow-y-auto">
-        <main id="contenu" tabIndex={-1} className="w-full max-w-[420px] outline-none">
+        <main id="contenu" tabIndex={-1} className="w-full max-w-[420px] outline-hidden">
           <Logo className="mb-8 lg:hidden" />
           {children}
         </main>

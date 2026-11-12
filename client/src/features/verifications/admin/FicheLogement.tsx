@@ -111,7 +111,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
 
   return (
     <div className="space-y-4">
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Hôte</h2>
         <p className="font-semibold text-dark">{logement.hote.nom} <span className="font-normal text-gray-500 break-all">· {logement.hote.email}</span></p>
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
@@ -138,7 +138,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         )}
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-2">
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-2">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Annonce à comparer au logement</h2>
         <p className="text-sm text-dark">{libelleType(logement.type, "fr")} · {logement.max_guests} voyageurs · {formatPrice(logement.price_per_night)} / nuit</p>
         <p className="text-sm text-gray-600">{logement.location ? `${logement.location}, ` : ""}{logement.city}</p>
@@ -147,10 +147,10 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         {logement.description && <p className="text-sm text-gray-600 whitespace-pre-line">{logement.description}</p>}
         <div className="flex gap-2 overflow-x-auto pb-1">
           {galerie.map((url, i) => (
-            <button key={url} type="button" onClick={() => setPhotoAgrandie(i)} className="group flex-shrink-0 text-left cursor-zoom-in focus-visible:outline-none"
+            <button key={url} type="button" onClick={() => setPhotoAgrandie(i)} className="group shrink-0 text-left cursor-zoom-in focus-visible:outline-hidden"
               aria-label={tVisionneuse("agrandir", { photo: `${logement.name}, photo ${i + 1}` })}>
               {/* Focus drawn inside the thumbnail: the scrolling row cuts what is outside */}
-              <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg group-focus-visible:outline group-focus-visible:outline-[3px] group-focus-visible:-outline-offset-[3px] group-focus-visible:outline-primary" />
+              <img src={url} alt="" className="w-32 h-24 object-cover rounded-lg group-focus-visible:outline-solid group-focus-visible:outline-[3px] group-focus-visible:outline-offset-[-3px] group-focus-visible:outline-primary" />
               {legende(url) && <span className="block text-xs text-gray-600 mt-1">{legende(url)}</span>}
             </button>
           ))}
@@ -160,12 +160,12 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         <Visionneuse photos={galerie} depart={photoAgrandie} nom={logement.name} legende={legende} onClose={() => setPhotoAgrandie(null)} />
       )}
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Contrôles sur place</h2>
         {Object.entries(controlesLibelles).map(([cle, libelle]) => (
           <label key={cle} className="flex items-start gap-3 bg-gray-50 rounded-xl px-3 py-3.5 text-sm text-dark">
             <input type="checkbox" checked={!!controles[cle]} disabled={!peutDecider}
-              onChange={(e) => setControles((c) => ({ ...c, [cle]: e.target.checked }))} className="mt-0.5 w-5 h-5 accent-primary flex-shrink-0" />
+              onChange={(e) => setControles((c) => ({ ...c, [cle]: e.target.checked }))} className="mt-0.5 w-5 h-5 accent-primary shrink-0" />
             {libelle}
           </label>
         ))}
@@ -182,7 +182,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         <label className="block">
           <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Commentaire (obligatoire en cas de refus : il est envoyé à l&apos;hôte)</span>
           <textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} rows={3} maxLength={2000} disabled={!peutDecider}
-            className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
             placeholder="Ex. : la piscine annoncée n'existe pas ; les photos montrent un autre logement…" />
         </label>
       </section>
@@ -190,13 +190,13 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
       {peutDecider && earlyVisit && (
         <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <p className="flex items-start gap-2 text-sm font-semibold text-amber-900">
-            <CalendarClock size={18} aria-hidden className="flex-shrink-0 mt-0.5" />
+            <CalendarClock size={18} aria-hidden className="shrink-0 mt-0.5" />
             Une visite est prévue avec l&apos;hôte le {PLANNED.format(new Date(earlyVisit.start))}. Si vous décidez maintenant, le créneau est libéré.
           </p>
           <label className="block mt-3">
             <span className="text-xs font-bold uppercase tracking-wide text-amber-900">Pourquoi décider avant la visite ? (obligatoire)</span>
             <textarea value={earlyReason} onChange={(e) => setEarlyReason(e.target.value)} rows={2} maxLength={500}
-              className="mt-2 w-full px-4 py-3 border border-amber-200 rounded-xl bg-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="mt-2 w-full px-4 py-3 border border-amber-200 rounded-xl bg-white text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
               placeholder="Ex. : visite faite plus tôt avec l'hôte, qui était disponible" />
           </label>
         </section>

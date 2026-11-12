@@ -150,7 +150,7 @@ export default function ChampDestination({
               >
                 {option.type === "ville" ? (
                   <>
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-primary"><MapPin size={16} /></span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-primary"><MapPin size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-dark">{option.city}</span>
                       <span className="block text-xs text-gray-500">{t("logementsDispo", { nombre: option.count })}</span>
@@ -158,7 +158,7 @@ export default function ChampDestination({
                   </>
                 ) : option.type === "quartier" ? (
                   <>
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-primary"><MapPin size={16} /></span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-primary"><MapPin size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-dark">{option.nom}</span>
                       <span className="block text-xs text-gray-500">{t("quartierDe", { ville: option.ville })}</span>
@@ -168,9 +168,9 @@ export default function ChampDestination({
                   <>
                     {option.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={option.image_url} alt="" className="h-9 w-9 flex-shrink-0 rounded-lg object-cover" />
+                      <img src={option.image_url} alt="" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
                     ) : (
-                      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400"><Home size={16} /></span>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400"><Home size={16} /></span>
                     )}
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-dark">{option.name}</span>

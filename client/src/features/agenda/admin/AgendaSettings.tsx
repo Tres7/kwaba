@@ -13,7 +13,7 @@ import { formatDuration } from "../time";
 import type { AgendaSettingsValues } from "../types";
 
 const UPDATED = new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Lome", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
-const inputClass = "w-20 sm:w-24 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const inputClass = "w-20 sm:w-24 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 function display(field: SettingField, value: number): string {
   return field.kind === "duration" ? formatDuration(value) : `${value} ${field.unit?.(value) ?? ""}`.trim();
@@ -54,7 +54,7 @@ export default function AgendaSettings() {
   return (
     <div className="space-y-6">
       <p className="flex items-start gap-2 rounded-2xl bg-amber-50 text-amber-900 px-4 py-3 text-sm">
-        <TriangleAlert size={18} className="flex-shrink-0 mt-0.5" aria-hidden />
+        <TriangleAlert size={18} className="shrink-0 mt-0.5" aria-hidden />
         <span>
           Un changement s&apos;applique aux réservations faites ensuite. Une visite déjà confirmée garde sa durée et son écart.
           Chaque modification est enregistrée dans le journal d&apos;audit.
@@ -109,12 +109,12 @@ function SettingRow({ field, values, defaultValue, bounds, error, onChange }: {
           <label htmlFor={inputId} className="text-sm font-semibold text-dark">{field.label}</label>
           <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls={helpId}
             aria-label={`À quoi sert « ${field.label} » ?`}
-            className={cn("w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0",
+            className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0",
               open ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100")}>
             <Info size={15} aria-hidden />
           </button>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {field.kind === "duration" ? (
             <select id={inputId} value={value} onChange={(e) => onChange(Number(e.target.value))}
               className={cn(inputClass, "w-28 text-left")}>

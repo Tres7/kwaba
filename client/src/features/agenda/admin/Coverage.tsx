@@ -31,7 +31,7 @@ export default function Coverage() {
               ["Rendez-vous → visite", data.delays.booking_to_visit],
               ["Visite → décision", data.delays.visit_to_decision],
             ] as const).map(([label, stats]) => (
-              <div key={label} className="rounded-2xl bg-white shadow-sm p-4">
+              <div key={label} className="rounded-2xl bg-white shadow-xs p-4">
                 <p className="text-xs font-semibold text-gray-500">{label}</p>
                 <p className="font-heading font-bold text-2xl text-dark mt-1">{hours(stats)}</p>
                 <p className="text-xs text-gray-500">médiane sur {stats.count} visite{stats.count > 1 ? "s" : ""}</p>
@@ -42,7 +42,7 @@ export default function Coverage() {
             {data.delays.days} derniers jours · {data.delays.total} rendez-vous, dont {data.delays.by_phone} fixés par téléphone.
           </p>
 
-          <div className="mt-6 rounded-3xl bg-white shadow-sm overflow-x-auto">
+          <div className="mt-6 rounded-3xl bg-white shadow-xs overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-gray-500">

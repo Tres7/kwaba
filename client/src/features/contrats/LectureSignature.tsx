@@ -66,7 +66,7 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
 
       {signe && (
         <div role="status" className="flex gap-3 bg-green-50 border border-green-200 text-green-900 rounded-2xl p-4">
-          <CheckCircle2 size={22} className="flex-shrink-0 text-green-600" aria-hidden />
+          <CheckCircle2 size={22} className="shrink-0 text-green-600" aria-hidden />
           <div>
             <p className="font-bold">{t("signeTitre")}</p>
             <p className="text-sm mt-0.5">{t("signeTexte", { nom: contrat.signataire_nom, date: quand(contrat.signe_le) })}</p>
@@ -75,14 +75,14 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
       )}
       {contrat.expire && (
         <div role="alert" className="flex gap-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-4">
-          <AlertTriangle size={22} className="flex-shrink-0" aria-hidden />
+          <AlertTriangle size={22} className="shrink-0" aria-hidden />
           <p className="text-sm">{t("expire")}</p>
         </div>
       )}
       {langue() === "en" && <p className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-3">{t("enFrancais")}</p>}
 
       <article aria-label={contrat.titre} tabIndex={0}
-        className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-8 max-h-[65vh] overflow-y-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-primary" lang="fr">
+        className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 max-h-[65vh] overflow-y-auto focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary" lang="fr">
         {contrat.blocs.map((b, i) => b.type === "titre"
           ? <h2 key={i} className="font-heading font-bold text-primary text-base mt-5 first:mt-0 mb-1.5">{b.texte}</h2>
           : <p key={i} className="text-sm text-dark leading-relaxed mb-3 whitespace-pre-line text-justify">{b.texte}</p>)}
@@ -99,19 +99,19 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
 
       {!signe && !contrat.expire && contrat.statut === "a_signer" && (
         <form method="post" onSubmit={(e) => { e.preventDefault(); if (!envoi) signer(); }}
-          className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 sm:p-6 space-y-5">
+          className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 space-y-5">
           <h2 className="font-heading font-bold text-lg text-dark flex items-center gap-2"><PenLine size={20} className="text-primary" aria-hidden /> {t("signerTitre")}</h2>
           <label className="block">
             <span className="block text-sm font-semibold text-dark mb-1.5">{t("nomComplet")}</span>
             <input value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="name" placeholder={contrat.partie_nom}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base text-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
           </label>
           <div>
             <span className="block text-sm font-semibold text-dark mb-1.5" id="libelle-signature">{t("votreSignature")}</span>
             <PadSignature onChange={setSignature} nom={nom} desactive={envoi} />
           </div>
           <label className="flex gap-3 items-start cursor-pointer">
-            <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)} className="accent-primary w-5 h-5 mt-0.5 flex-shrink-0" />
+            <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)} className="accent-primary w-5 h-5 mt-0.5 shrink-0" />
             <span className="text-sm text-dark">{t("consentement")}</span>
           </label>
           {erreur && <p role="alert" className="text-sm text-red-600">{erreur}</p>}
