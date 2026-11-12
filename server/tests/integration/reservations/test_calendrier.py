@@ -3,7 +3,7 @@ from datetime import time
 
 import pytest
 
-from apps.reservations.calendrier import _plier
+from apps.export.api import fold
 
 
 def _url(reservation, langue=''):
@@ -76,7 +76,7 @@ def test_lignes_de_75_octets_au_plus(sejour, client_for):
 
 
 def test_pliage_jamais_dans_une_lettre_accentuee():
-    lignes = _plier('DESCRIPTION:' + 'é' * 60).split('\r\n')
+    lignes = fold('DESCRIPTION:' + 'é' * 60).split('\r\n')
     assert [len(ligne.encode('utf-8')) for ligne in lignes] == [74, 59]
     assert ''.join(lignes[:1] + [ligne[1:] for ligne in lignes[1:]]) == 'DESCRIPTION:' + 'é' * 60
 

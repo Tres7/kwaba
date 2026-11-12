@@ -8,7 +8,8 @@ from datetime import datetime, time
 from urllib.parse import urlsplit
 
 from django.conf import settings
-from django.utils import timezone
+
+from apps.export import api as export
 
 # Hours of the listing when the booking has none (bookings made before the hours were frozen on them)
 ARRIVEE_PAR_DEFAUT = time(14, 0)
@@ -44,30 +45,6 @@ TEXTES = {
 }
 
 
-def _echapper(texte: str) -> str:
-    """Text value of an .ics property: backslash, comma, semicolon and line breaks escaped."""
-    return (texte.replace('\\', '\\\\').replace(';', '\\;').replace(',', '\\,')
-            .replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\\n'))
-
-
-def _plier(ligne: str) -> str:
-    """Lines of at most 75 octets, the next ones starting with a space (RFC 5545, 3.1), never inside a character."""
-    morceaux, courant = [], ''
-    for caractere in ligne:
-        limite = 75 if not morceaux else 74
-        if len((courant + caractere).encode('utf-8')) > limite:
-            morceaux.append(courant)
-            courant = caractere
-        else:
-            courant += caractere
-    morceaux.append(courant)
-    return '\r\n '.join(morceaux)
-
-
-def _utc(jour, heure: time) -> str:
-    return datetime.combine(jour, heure).strftime('%Y%m%dT%H%M%SZ')
-
-
 def _jour(jour, langue: str) -> str:
     return jour.strftime('%d/%m/%Y') if langue == 'fr' else jour.strftime('%Y-%m-%d')
 
@@ -98,29 +75,15 @@ def evenement(reservation, annonce: dict, langue: str = 'fr') -> str:
         t['lien'].format(url=url),
     ]
     domaine = urlsplit(settings.FRONTEND_URL).hostname or 'kwa-ba.com'
-    lignes = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//Kwa-Ba//Reservations//FR',
-        'CALSCALE:GREGORIAN',
-        'METHOD:PUBLISH',
-        'BEGIN:VEVENT',
-        # Same identifier for the same booking: a calendar that imports the file again updates the event
-        f'UID:reservation-{reservation.pk}@{domaine}',
-        f"DTSTAMP:{timezone.now().strftime('%Y%m%dT%H%M%SZ')}",
-        f'DTSTART:{_utc(reservation.check_in, arrivee)}',
-        f'DTEND:{_utc(reservation.check_out, depart)}',
-        f"SUMMARY:{_echapper(t['titre'].format(nom=annonce.get('name') or 'Kwa-Ba'))}",
-        f'LOCATION:{_echapper(adresse)}',
-        f"DESCRIPTION:{_echapper(chr(10).join(description))}",
-        f'URL:{url}',
-        'STATUS:CONFIRMED',
-        'BEGIN:VALARM',
-        'ACTION:DISPLAY',
-        'TRIGGER:-P1D',
-        f"DESCRIPTION:{_echapper(t['rappel'].format(nom=annonce.get('name') or 'Kwa-Ba'))}",
-        'END:VALARM',
-        'END:VEVENT',
-        'END:VCALENDAR',
-    ]
-    return '\r\n'.join(_plier(ligne) for ligne in lignes) + '\r\n'
+    name = annonce.get('name') or 'Kwa-Ba'
+    return export.calendar([export.Event(
+        uid=f'reservation-{reservation.pk}@{domaine}',
+        start=datetime.combine(reservation.check_in, arrivee),
+        end=datetime.combine(reservation.check_out, depart),
+        title=t['titre'].format(nom=name),
+        location=adresse,
+        description='\n'.join(description),
+        url=url,
+        alarm='-P1D',
+        alarm_text=t['rappel'].format(nom=name),
+    )], prodid='-//Kwa-Ba//Reservations//FR')

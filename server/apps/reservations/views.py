@@ -1,5 +1,4 @@
 from django.db import transaction
-from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import ScopedRateThrottle
 
 from config.prelancement import verifier_ouverture
+from apps.export import api as export
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 from apps.users import api as users
@@ -59,11 +59,8 @@ class ReservationCalendrierView(APIView):
         if not annonce:
             return Response({'detail': 'Réservation introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         langue = request.query_params.get('langue')
-        reponse = HttpResponse(calendrier.evenement(reservation, annonce, langue if langue in ('fr', 'en') else 'fr'),
-                               content_type='text/calendar; charset=utf-8')
-        reponse['Content-Disposition'] = f'attachment; filename="{calendrier.nom_fichier(reservation)}"'
-        reponse['Cache-Control'] = 'private, no-store'
-        return reponse
+        content = calendrier.evenement(reservation, annonce, langue if langue in ('fr', 'en') else 'fr')
+        return export.ics_response(content, calendrier.nom_fichier(reservation))
 
 
 class ReservationDetailView(APIView):
