@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour,
+
+Rappel : un agent Kwa-Ba vient vérifier votre logement demain à {{ hour }}.
+
+{% for listing in listings %}  {{ listing }}
+{% endfor %}  {{ city }}
+
+Prévoyez votre pièce d'identité. Votre visite : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

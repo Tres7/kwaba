@@ -88,3 +88,15 @@ class PhotoVisiteModel(models.Model):
     visite = models.ForeignKey(VisiteModel, on_delete=models.CASCADE, related_name='photos')
     image = models.ImageField(upload_to=_chemin_photo_visite, storage=stockage_prive)
     cree_le = models.DateTimeField(auto_now_add=True)
+
+
+class VisitInvitationModel(models.Model):
+    listing_id = models.UUIDField(unique=True)
+    host_id = models.UUIDField(db_index=True)
+    invited_at = models.DateTimeField()
+    reminded_at = models.DateTimeField(null=True, blank=True)
+    alerted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Invitation à réserver une visite'
+        verbose_name_plural = 'Invitations à réserver une visite'

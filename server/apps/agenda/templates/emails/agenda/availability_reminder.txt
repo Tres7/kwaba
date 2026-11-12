@@ -1,0 +1,8 @@
+{% autoescape off %}Bonjour,
+
+Vous n'avez aucune disponibilité publiée pour les 14 prochains jours : les hôtes ne peuvent pas réserver de visite avec vous.
+
+Publiez votre semaine type ou vos disponibilités ponctuelles : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

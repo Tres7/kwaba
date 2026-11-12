@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour,
+
+Votre visite de vérification est déplacée au {{ when }}.
+
+{% for listing in listings %}  {{ listing }}
+{% endfor %}  {{ city }}
+
+Votre visite : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

@@ -19,6 +19,7 @@ import { RevenusHote } from "@/features/paiements";
 import { accesEspaceHote, useMoi } from "@/features/users";
 import CandidatureHote from "./CandidatureHote";
 import { PreinscriptionHote } from "@/features/contrats";
+import { VisitBanner } from "@/features/agenda";
 import FenetreOuverture from "./FenetreOuverture";
 import { usePrelancement } from "./hooks";
 import type { Hebergement, Reservation } from "@/types/api/models";
@@ -207,6 +208,7 @@ function EspaceHoteContent() {
       </div>
 
       <CandidatureHote nbAnnonces={annonces.length} onNouvelle={nouvelle} />
+      <VisitBanner />
 
       <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
         {[

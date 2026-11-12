@@ -1,7 +1,7 @@
 """Verification of hosts and listings, in this order:
 
 1. the host sends their identity document, checked remotely by an agent or an admin;
-2. only once the identity is verified, their listings are offered to the agents for a visit;
+2. only once the identity is verified, the host books the visit of their listings in the agents' agenda;
 3. the agent visits the listing and publishes (or refuses) it.
 
 No travel is therefore asked for a host whose identity has not been checked.
@@ -15,6 +15,7 @@ from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from apps.agenda import api as agenda
 from apps.contrats import api as contrats
 from apps.documents import api as documents
 from apps.hebergements import api as hebergements
@@ -24,7 +25,7 @@ from apps.users import api as users
 
 from . import positions
 from .fichiers import image_normalisee
-from .models import PhotoVisiteModel, PieceIdentiteModel, VisiteModel
+from .models import PhotoVisiteModel, PieceIdentiteModel, VisitInvitationModel, VisiteModel
 
 logger = logging.getLogger('apps.verifications')
 
@@ -121,13 +122,13 @@ def visite_a_planifier(hebergement_id, modification: bool = False) -> None:
 def _visite_a_planifier(annonce: dict, hote, modification: bool = False) -> None:
     if not identite_verifiee(hote) or contrat_manquant(hote):
         return
-    _envoyer('visite_a_planifier', f"[Kwa-Ba] Visite à planifier : {annonce['name']} ({annonce['city']})",
-             _verificateurs(), {
-                 'modification': modification, 'hebergement': annonce['name'], 'ville': annonce['city'],
-                 'adresse': annonce['location'], 'hote': f"{hote.first_name} {hote.last_name}".strip(),
-                 'telephone': hote.phone or '-', 'email': hote.email,
-                 'url': f"{settings.FRONTEND_URL}/agent",
-             })
+    VisitInvitationModel.objects.update_or_create(
+        listing_id=annonce['id'],
+        defaults={'host_id': hote.pk, 'invited_at': timezone.now(), 'reminded_at': None, 'alerted_at': None})
+    _envoyer('book_visit', f"Réservez la visite de votre logement : {annonce['name']}", [hote.email], {
+        'first_name': hote.first_name, 'modification': modification, 'listing': annonce['name'],
+        'city': annonce['city'], 'url': f"{settings.FRONTEND_URL}/hote/espace/visite",
+    })
 
 
 def photos_a_controler(hebergement_id, nombre: int) -> None:
@@ -315,6 +316,8 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
                 'url_espace': f"{settings.FRONTEND_URL}/hote/espace",
                 'url_annonce': f"{settings.FRONTEND_URL}/hebergements/{hebergement_id}"}
     hebergements.enregistrer_verification(hebergement_id, decision == 'validee', commentaire)
+    agenda.mark_done(hebergement_id)
+    VisitInvitationModel.objects.filter(listing_id=hebergement_id).delete()
     if decision == 'validee':
         # A first validated listing is what makes someone a host
         if users.passer_hote(hote.pk):

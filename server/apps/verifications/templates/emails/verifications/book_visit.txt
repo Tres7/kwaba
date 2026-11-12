@@ -1,0 +1,12 @@
+{% autoescape off %}Bonjour {{ first_name }},
+
+{% if modification %}Votre annonce « {{ listing }} » a été modifiée (adresse, ville ou photos) : elle est masquée jusqu'à une nouvelle visite.{% else %}Votre annonce « {{ listing }} » attend la visite d'un agent Kwa-Ba à {{ city }}.{% endif %}
+
+Choisissez vous-même le jour et l'heure de la visite parmi les créneaux proposés : {{ url }}
+
+Votre choix vaut confirmation. Si vous avez plusieurs logements au même endroit, l'agent peut les vérifier pendant la même visite.
+
+Sans accès à internet ? Un agent vous appellera pour fixer la visite.
+
+L'équipe Kwa-Ba
+{% endautoescape %}

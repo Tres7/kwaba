@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/v1/give/', include('apps.give.urls')),
     path('api/v1/verifications/', include('apps.verifications.urls')),
     path('api/v1/agent/', include('apps.terrain.urls')),
+    path('api/v1/agenda/', include('apps.agenda.infrastructure.http.urls')),
     path('api/v1/locations/', include('apps.locations.urls')),
     path('api/v1/experiences/', include('apps.experiences.urls')),
     path('api/v1/correcteur/', include('apps.correcteur.urls')),

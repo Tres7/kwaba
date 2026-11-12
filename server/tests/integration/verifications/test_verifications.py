@@ -79,7 +79,7 @@ def _decider(client, hebergement, decision='validee', controles=None, commentair
 
 
 class TestPublication:
-    def test_new_listing_waits_for_a_visit_and_agents_are_told(self, client_for, hote, agent, api_client,
+    def test_new_listing_waits_for_a_visit_and_the_host_is_invited_to_book(self, client_for, hote, agent, api_client,
                                                                  django_capture_on_commit_callbacks):
         _identite_verifiee(hote)
         with django_capture_on_commit_callbacks(execute=True):
@@ -92,8 +92,9 @@ class TestPublication:
         assert api_client.get(f'{HEBERGEMENTS}{identifiant}/').status_code == 404
         assert client_for(hote).get(f'{HEBERGEMENTS}{identifiant}/').status_code == 200
         assert client_for(agent).get(f'{HEBERGEMENTS}{identifiant}/').status_code == 200
-        assert [m.to for m in mail.outbox] == [[agent.email]]
-        assert 'Visite à planifier' in mail.outbox[0].subject
+        assert [m.to for m in mail.outbox] == [[hote.email]]
+        assert 'Réservez la visite' in mail.outbox[0].subject
+        assert '/hote/espace/visite' in mail.outbox[0].body
 
     def test_no_visit_requested_before_identity_is_verified(self, client_for, hote, agent,
                                                              django_capture_on_commit_callbacks):
@@ -321,7 +322,7 @@ class TestControleIdentite:
         assert client_for(agent).get(VISITES).data['results'][0]['hote']['piece']['copie'] is True
         assert client_for(agent).get(f'{IDENTITE}{hote.id}/fichier/').status_code == 200
         sujets = [m.subject for m in mail.outbox]
-        assert any('Visite à planifier' in sujet for sujet in sujets)
+        assert any('Réservez la visite' in sujet for sujet in sujets)
         assert any('identité est vérifiée' in sujet for sujet in sujets)
         assert client_for(agent).get(VISITES).data['count'] == 1
         # The agent gets the landmark to find the place

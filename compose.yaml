@@ -139,6 +139,19 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  agenda-worker:
+    build:
+      context: ./server
+    command: python manage.py agenda_worker
+    volumes:
+      - ./server:/app
+    env_file:
+      - server/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
 volumes:
   postgres_data:
   rabbitmq_data:

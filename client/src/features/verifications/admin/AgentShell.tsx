@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { ClipboardList, History, Home, LayoutDashboard, LogOut, MapPin, ShieldAlert, UserCheck } from "lucide-react";
+import { CalendarDays, ClipboardList, History, Home, LayoutDashboard, LogOut, MapPin, ShieldAlert, UserCheck } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import AlerteVerifications from "./AlerteVerifications";
 import { useTableauAgent } from "../hooks";
@@ -16,6 +16,7 @@ const NAV: { href: string; label: string; court: string; icon: typeof Home; comp
   { href: "/agent", label: "Accueil", court: "Accueil", icon: Home },
   { href: "/agent/a-faire", label: "À faire", court: "À faire", icon: ClipboardList, compteur: "libres" },
   { href: "/agent/missions", label: "Mes missions", court: "Missions", icon: UserCheck, compteur: "miennes" },
+  { href: "/agent/agenda", label: "Agenda", court: "Agenda", icon: CalendarDays },
   { href: "/agent/positions", label: "Positions", court: "Positions", icon: MapPin },
   { href: "/agent/historique", label: "Historique", court: "Historique", icon: History },
 ];
@@ -106,10 +107,11 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
         </header>
 
         {/* Room for the tab bar on phones */}
-        <main id="contenu" tabIndex={-1} className="px-4 py-5 sm:px-6 lg:p-8 pb-28 lg:pb-8 max-w-4xl outline-none">{children}</main>
+        <main id="contenu" tabIndex={-1} className={cn("px-4 py-5 sm:px-6 lg:p-8 pb-28 lg:pb-8 outline-none",
+          pathname.startsWith("/agent/agenda") ? "max-w-6xl" : "max-w-4xl")}>{children}</main>
 
         <nav aria-label="Espace agent" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
-          <ul className="grid grid-cols-5">
+          <ul className="grid grid-cols-6">
             {NAV.map(({ href, court, icon: Icon, compteur }) => (
               <li key={href}>
                 <Link href={href} aria-current={actifOnglet(href) ? "page" : undefined}

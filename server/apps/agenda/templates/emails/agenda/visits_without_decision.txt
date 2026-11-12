@@ -1,0 +1,8 @@
+{% autoescape off %}Ces visites sont passées sans décision de l'agent :
+
+{% for visit in visits %}  {{ visit.when }}  {{ visit.title }} ({{ visit.city }}) · {{ visit.agent }}
+{% endfor %}
+Agenda des agents : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}
