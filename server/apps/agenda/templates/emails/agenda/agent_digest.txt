@@ -1,0 +1,10 @@
+{% autoescape off %}Bonjour,
+
+Vos visites de demain, {{ day }} :
+
+{% for visit in visits %}  {{ visit.hour }}  {{ visit.title }} ({{ visit.city }})
+{% endfor %}
+Adresses et contacts dans votre agenda : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

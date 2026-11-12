@@ -1,0 +1,12 @@
+{% autoescape off %}Bonjour,
+
+La visite de vérification prévue le {{ when }} est annulée.
+
+{% for listing in listings %}  {{ listing }}
+{% endfor %}
+Motif : {{ reason }}
+
+Choisissez un nouveau créneau : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

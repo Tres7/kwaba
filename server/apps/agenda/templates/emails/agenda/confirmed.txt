@@ -1,0 +1,12 @@
+{% autoescape off %}Bonjour,
+
+{% if by_phone %}Comme convenu par téléphone, la{% else %}La{% endif %} visite de vérification est confirmée le {{ when }}.
+
+{% for listing in listings %}  {{ listing }}
+{% endfor %}  {{ city }}
+
+Un agent Kwa-Ba passera vérifier votre logement. Prévoyez votre pièce d'identité.
+Vous pouvez déplacer la visite jusqu'à 24 h avant : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

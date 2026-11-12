@@ -5,6 +5,7 @@ root_package = apps
 name = Les modules métier ne dépendent pas les uns des autres
 type = independence
 modules =
+    apps.agenda
     apps.avis
     apps.backoffice
     apps.concierge
@@ -34,6 +35,7 @@ source_modules =
     apps.notifications
     apps.export
 forbidden_modules =
+    apps.agenda
     apps.avis
     apps.backoffice
     apps.concierge
@@ -57,6 +59,7 @@ forbidden_modules =
 name = Les emails passent par apps.notifications.api
 type = forbidden
 source_modules =
+    apps.agenda
     apps.avis
     apps.backoffice
     apps.concierge
