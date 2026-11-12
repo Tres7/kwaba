@@ -255,9 +255,29 @@ def _distance_m(a: tuple, b: tuple) -> int:
     return int(round(2 * 6_371_000 * math.asin(math.sqrt(h))))
 
 
+def planned_visit(hebergement_id):
+    appointment = next(iter(agenda.confirmed_for_targets([hebergement_id])), None)
+    if appointment is None:
+        return None, False
+    others_waiting = False
+    for target in appointment.targets:
+        if target.id == str(hebergement_id):
+            continue
+        other = hebergements.fiche(target.id)
+        others_waiting = others_waiting or bool(other and other['statut_verification'] == 'en_attente')
+    return appointment, others_waiting
+
+
+def early_visit(hebergement_id):
+    appointment, others_waiting = planned_visit(hebergement_id)
+    if appointment and not others_waiting and appointment.start > timezone.now():
+        return appointment
+    return None
+
+
 @transaction.atomic
 def decider(hebergement_id, agent, *, decision: str, controles: dict, commentaire: str, photos: list,
-            position: dict | None = None) -> VisiteModel:
+            position: dict | None = None, early_reason: str = '') -> VisiteModel:
     """Saves the visit and publishes (or refuses) the listing. Validating requires every check to be ticked.
 
     `position` ({latitude, longitude, precision}): measured on site with the agent's phone; once the listing is
@@ -289,6 +309,12 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
     else:
         raise VerificationErreur("Décision inconnue.")
 
+    appointment, others_waiting = planned_visit(hebergement_id)
+    early_reason = ' '.join(early_reason.split())
+    if appointment and not others_waiting and appointment.start > timezone.now() and len(early_reason) < 5:
+        raise VerificationErreur("Une visite est prévue plus tard avec l'hôte : indiquez pourquoi vous décidez avant "
+                                 "(5 caractères au moins). Le créneau sera libéré.")
+
     mesure = _position(position)
     contenus = [image_normalisee(photo) for photo in photos]  # before any write: an invalid photo stops everything
     visite = VisiteModel.objects.create(hebergement_id=hebergement_id, agent_id=agent.pk, decision=decision,
@@ -316,7 +342,8 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
                 'url_espace': f"{settings.FRONTEND_URL}/hote/espace",
                 'url_annonce': f"{settings.FRONTEND_URL}/hebergements/{hebergement_id}"}
     hebergements.enregistrer_verification(hebergement_id, decision == 'validee', commentaire)
-    agenda.mark_done(hebergement_id)
+    if appointment and not others_waiting:
+        agenda.close(appointment.id, early_reason)
     VisitInvitationModel.objects.filter(listing_id=hebergement_id).delete()
     if decision == 'validee':
         # A first validated listing is what makes someone a host

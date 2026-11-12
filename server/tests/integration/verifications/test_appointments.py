@@ -223,15 +223,48 @@ class TestAgentAndAdmin:
         assert 'Nouvelle visite' in subjects[second.email] and 'autre agent' in subjects[first.email]
         assert host.email not in subjects
 
-    def test_the_decision_marks_the_visit_done(self, client_for, host, make_listing, make_agent):
+    def test_deciding_before_the_visit_needs_a_reason_and_frees_the_slot(self, client_for, host, make_listing,
+                                                                          make_agent):
         agent = make_agent()
         listing = make_listing()
         _book(client_for(host), [listing], at(in_days(3), 9))
+        mission = client_for(agent).get(f'/api/v1/agent/missions/logement/{listing.id}/').data
+        assert mission['early_visit']['start'] == at(in_days(3), 9)
+        url = f'/api/v1/verifications/visites/{listing.id}/decision/'
+        body = {'decision': 'validee', 'controles': json.dumps(TOUT_CONFORME)}
+        refused = client_for(agent).post(url, body, format='multipart')
+        assert refused.status_code == 400 and 'prévue' in refused.data['detail']
+        decision = client_for(agent).post(url, {**body, 'early_reason': "Visite faite plus tôt avec l'hôte"},
+                                          format='multipart')
+        assert decision.status_code == 201
+        appointment = AppointmentModel.objects.get()
+        assert appointment.status == 'done' and appointment.closing_reason == "Visite faite plus tôt avec l'hôte"
+        assert at(in_days(3), 9) in client_for(host).get(
+            f'{VISIT}slots/', {'listings': str(make_listing(name='Autre').id)}).data['slots']
+
+    def test_a_group_visit_is_kept_while_another_listing_waits(self, client_for, host, make_listing, make_agent):
+        agent = make_agent()
+        rooms = [make_listing(name=f'Chambre {i}', latitude=f'6.13{i}000') for i in range(1, 3)]
+        _book(client_for(host), rooms, at(in_days(3), 9))
+        assert client_for(agent).get(f'/api/v1/agent/missions/logement/{rooms[0].id}/').data['early_visit'] is None
+        decision = client_for(agent).post(f'/api/v1/verifications/visites/{rooms[0].id}/decision/',
+                                          {'decision': 'validee', 'controles': json.dumps(TOUT_CONFORME)},
+                                          format='multipart')
+        assert decision.status_code == 201
+        assert AppointmentModel.objects.get().status == 'confirmed'
+
+    def test_the_decision_after_the_visit_closes_it_without_reason(self, client_for, host, make_listing,
+                                                                  make_agent, frozen_now):
+        agent = make_agent()
+        listing = make_listing()
+        _book(client_for(host), [listing], at(in_days(3), 9))
+        frozen_now(at(in_days(3), 10, 15))
         decision = client_for(agent).post(f'/api/v1/verifications/visites/{listing.id}/decision/',
                                           {'decision': 'validee', 'controles': json.dumps(TOUT_CONFORME)},
                                           format='multipart')
         assert decision.status_code == 201
-        assert AppointmentModel.objects.get().status == 'done'
+        appointment = AppointmentModel.objects.get()
+        assert appointment.status == 'done' and appointment.closing_reason == ''
 
 
 class TestHostReminders:

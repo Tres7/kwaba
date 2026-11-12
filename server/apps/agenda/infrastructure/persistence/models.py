@@ -98,6 +98,7 @@ class AppointmentModel(models.Model):
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancelled_by = models.CharField(max_length=10, choices=CANCELLED_BY, blank=True)
     cancellation_reason = models.CharField(max_length=500, blank=True)
+    closing_reason = models.CharField(max_length=500, blank=True)
     sequence = models.PositiveIntegerField(default=0)
     host_reminder_at = models.DateTimeField(null=True, blank=True)
     alert_at = models.DateTimeField(null=True, blank=True)
@@ -117,7 +118,7 @@ class AppointmentModel(models.Model):
                     ('agenda', RangeOperators.EQUAL),
                     (TsTzRange('start', 'blocked_until'), RangeOperators.OVERLAPS),
                 ],
-                condition=Q(status__in=['confirmed', 'done']),
+                condition=Q(status='confirmed'),
             ),
         ]
 

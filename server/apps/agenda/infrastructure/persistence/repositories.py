@@ -90,7 +90,7 @@ class DjangoAgendaRepository(AgendaRepository):
 
 FIELDS = ('agent_id', 'requester_id', 'city', 'address', 'start', 'end', 'blocked_until', 'status', 'origin',
           'waiting_since', 'created_at', 'on_the_way_at', 'done_at', 'cancelled_at', 'cancelled_by',
-          'cancellation_reason', 'sequence', 'host_reminder_at', 'alert_at')
+          'cancellation_reason', 'closing_reason', 'sequence', 'host_reminder_at', 'alert_at')
 
 
 def _coordinate(value):

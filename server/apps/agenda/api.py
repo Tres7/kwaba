@@ -9,7 +9,7 @@ from apps.agenda.infrastructure.container import agenda_service
 
 __all__ = [
     'AgendaError', 'Appointment', 'BY_ADMIN', 'BY_AGENT', 'BY_HOST', 'BookingRequest', 'Target', 'appointment',
-    'book', 'book_by_phone', 'cancel', 'confirmed_for_targets', 'free_slots', 'mark_done', 'move', 'reassign',
+    'book', 'book_by_phone', 'cancel', 'close', 'confirmed_for_targets', 'free_slots', 'move', 'reassign',
     'register_task', 'summary',
 ]
 
@@ -57,5 +57,5 @@ def confirmed_for_targets(target_ids) -> list[Appointment]:
     return agenda_service().confirmed_for_targets(target_ids)
 
 
-def mark_done(target_id) -> None:
-    agenda_service().mark_done(str(target_id))
+def close(appointment_id: uuid.UUID, reason: str = '') -> Appointment:
+    return agenda_service().close(appointment_id, reason)

@@ -268,10 +268,15 @@ class AgendaService:
             self.notifier.on_the_way(appointment, self.agendas.for_agent(agent_id))
         return appointment
 
-    def mark_done(self, target_id: str) -> None:
+    def close(self, appointment_id: uuid.UUID, reason: str = '') -> Appointment:
+        reason = ' '.join(reason.split())
         now = self.clock.now()
-        for appointment in self.appointments.confirmed_for_targets([str(target_id)]):
-            self.appointments.save(replace(appointment, status=DONE, done_at=now))
+        with self.tx.atomic():
+            appointment = self._confirmed(appointment_id)
+            if now < appointment.start and len(reason) < 5:
+                raise InvalidRule("La visite n'a pas encore eu lieu : indiquez pourquoi vous décidez avant "
+                                  "(5 caractères au moins).")
+            return self.appointments.save(replace(appointment, status=DONE, done_at=now, closing_reason=reason[:500]))
 
     def confirmed_for_targets(self, target_ids) -> list[Appointment]:
         return self.appointments.confirmed_for_targets([str(i) for i in target_ids])

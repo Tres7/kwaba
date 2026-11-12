@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Camera, CheckCircle2, FileText, MapPin, Phone, XCircle } from "lucide-react";
+import { CalendarClock, Camera, CheckCircle2, FileText, MapPin, Phone, XCircle } from "lucide-react";
 import { apiErrorMessage } from "@/lib/api";
 import { deciderVisite } from "../api";
 import { cn, formatPrice, libelleType } from "@/lib/utils";
@@ -12,6 +12,8 @@ import { useTranslations } from "next-intl";
 import { libellePiece } from "@/features/hebergements";
 import PositionSurPlace from "./PositionSurPlace";
 import { champsPosition, type PositionMesuree } from "./position";
+
+const PLANNED = new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Lome", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
 
 export interface Logement {
   id: string;
@@ -50,8 +52,9 @@ const PIECE: Record<Logement["hote"]["piece"]["statut"], { libelle: string; clas
 };
 
 /** Visit of a listing: the listing to compare, the checklist, the photos taken on site, the decision. */
-export default function FicheLogement({ logement, controlesLibelles, maxPhotos, peutDecider, onTerminee }: {
+export default function FicheLogement({ logement, controlesLibelles, maxPhotos, peutDecider, onTerminee, earlyVisit }: {
   logement: Logement;
+  earlyVisit?: { start: string } | null;
   controlesLibelles: Record<string, string>;
   maxPhotos: number;
   peutDecider: boolean;
@@ -59,6 +62,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
 }) {
   const [controles, setControles] = useState<Record<string, boolean>>({});
   const [commentaire, setCommentaire] = useState("");
+  const [earlyReason, setEarlyReason] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [position, setPosition] = useState<PositionMesuree | null>(null);
   const [envoi,setEnvoi] = useState<"validee" | "refusee" | null>(null);
@@ -83,12 +87,17 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
       toast.error("Expliquez à l'hôte le motif du refus (10 caractères au moins).");
       return;
     }
+    if (earlyVisit && earlyReason.trim().length < 5) {
+      toast.error("Indiquez pourquoi vous décidez avant la visite prévue (5 caractères au moins).");
+      return;
+    }
     if (decision === "validee" && !window.confirm(`Publier « ${logement.name} » ?`)) return;
     setEnvoi(decision);
     const donnees = new FormData();
     donnees.append("decision", decision);
     donnees.append("controles", JSON.stringify(controles));
     donnees.append("commentaire", commentaire);
+    if (earlyVisit) donnees.append("early_reason", earlyReason);
     photos.forEach((photo) => donnees.append("photos", photo));
     if (position) Object.entries(champsPosition(position)).forEach(([cle, valeur]) => donnees.append(cle, valeur));
     try {
@@ -177,6 +186,21 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
             placeholder="Ex. : la piscine annoncée n'existe pas ; les photos montrent un autre logement…" />
         </label>
       </section>
+
+      {peutDecider && earlyVisit && (
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <p className="flex items-start gap-2 text-sm font-semibold text-amber-900">
+            <CalendarClock size={18} aria-hidden className="flex-shrink-0 mt-0.5" />
+            Une visite est prévue avec l&apos;hôte le {PLANNED.format(new Date(earlyVisit.start))}. Si vous décidez maintenant, le créneau est libéré.
+          </p>
+          <label className="block mt-3">
+            <span className="text-xs font-bold uppercase tracking-wide text-amber-900">Pourquoi décider avant la visite ? (obligatoire)</span>
+            <textarea value={earlyReason} onChange={(e) => setEarlyReason(e.target.value)} rows={2} maxLength={500}
+              className="mt-2 w-full px-4 py-3 border border-amber-200 rounded-xl bg-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              placeholder="Ex. : visite faite plus tôt avec l'hôte, qui était disponible" />
+          </label>
+        </section>
+      )}
 
       {peutDecider && (
         <div className="grid grid-cols-2 gap-3">
