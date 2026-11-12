@@ -1,6 +1,12 @@
+from datetime import date
+from zoneinfo import ZoneInfo
+
+from django.utils import timezone
 from rest_framework.response import Response
 
-from apps.agenda.domain.settings import BOUNDS, AgendaSettings, InvalidSettings
+from apps.agenda.domain import rules
+from apps.agenda.domain.entities import CANCELLED
+from apps.agenda.domain.settings import BOUNDS, DEFAULT_TIMEZONE, AgendaSettings, InvalidSettings
 from apps.agenda.infrastructure.container import agenda_service
 from apps.securite.audit import journaliser
 from apps.securite.backoffice import VueAdmin
@@ -42,3 +48,42 @@ class AgendaSettingsView(VueAdmin):
         if diff:
             journaliser('agenda_settings_changed', request, utilisateur=request.user, changes=diff)
         return Response(_settings_json(stored))
+
+
+def _range(start, end) -> dict:
+    return {'start': start, 'end': end}
+
+
+def _plan_json(plan, accounts: dict) -> dict:
+    account = accounts.get(plan.agenda.agent_id)
+    return {
+        'id': str(plan.agenda.agent_id),
+        'name': (account.get_full_name() or account.email) if account else '',
+        'role': account.role if account else '',
+        'cities': plan.agenda.cities,
+        'max_visits': plan.max_visits,
+        'visits': sum(1 for a in plan.appointments if a.status != CANCELLED),
+        'windows': [_range(a, b) for a, b in plan.windows],
+        'blocks': [_range(a, b) for a, b in plan.blocks],
+        'appointments': [{
+            'id': str(a.id), 'title': a.title, 'city': a.city, 'address': a.address, 'start': a.start, 'end': a.end,
+            'status': a.status, 'origin': a.origin, 'on_the_way_at': a.on_the_way_at, 'post_check': a.post_check,
+        } for a in plan.appointments],
+    }
+
+
+class AgentPlanningView(VueAdmin):
+    def get(self, request):
+        requested = request.query_params.get('day', '')
+        try:
+            day = date.fromisoformat(requested) if requested else timezone.localdate(timezone=ZoneInfo(DEFAULT_TIMEZONE))
+        except ValueError:
+            return Response({'detail': 'Date invalide.'}, status=400)
+        city = ' '.join(request.query_params.get('city', '').split())
+        plans = agenda_service().planning(day)
+        cities = sorted({c for p in plans for c in p.agenda.cities}, key=rules.normalize_city)
+        if city:
+            plans = [p for p in plans if rules.covers(p.agenda, city)]
+        accounts = users.comptes(p.agenda.agent_id for p in plans)
+        agents = sorted((_plan_json(p, accounts) for p in plans), key=lambda a: a['name'].lower())
+        return Response({'day': day, 'city': city, 'timezone': DEFAULT_TIMEZONE, 'cities': cities, 'agents': agents})
