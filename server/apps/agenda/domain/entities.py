@@ -71,6 +71,8 @@ class Appointment:
     cancelled_at: datetime | None = None
     cancelled_by: str = ''
     cancellation_reason: str = ''
+    closing_reason: str = ''
+    post_check: bool = False
     sequence: int = 0
     host_reminder_at: datetime | None = None
     alert_at: datetime | None = None
@@ -83,4 +85,6 @@ class Appointment:
 
     @property
     def active(self) -> bool:
-        return self.status in ACTIVE
+        if self.status == DONE:
+            return self.done_at is None or self.done_at >= self.start
+        return self.status == CONFIRMED

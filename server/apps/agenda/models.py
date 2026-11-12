@@ -1,5 +1,6 @@
 from apps.agenda.infrastructure.persistence.models import (
     AgendaModel,
+    AgendaSettingsModel,
     AppointmentModel,
     AvailabilityExceptionModel,
     DayLimitModel,
@@ -7,5 +8,5 @@ from apps.agenda.infrastructure.persistence.models import (
     WeeklySlotModel,
 )
 
-__all__ = ['AgendaModel', 'AppointmentModel', 'AvailabilityExceptionModel', 'DayLimitModel', 'DigestModel',
+__all__ = ['AgendaModel', 'AgendaSettingsModel', 'AppointmentModel', 'AvailabilityExceptionModel', 'DayLimitModel', 'DigestModel',
            'WeeklySlotModel']

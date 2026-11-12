@@ -5,11 +5,12 @@ from apps.agenda.application.service import BY_ADMIN, BY_AGENT, BY_HOST, Booking
 from apps.agenda.application.tasks import register_task
 from apps.agenda.domain.entities import Appointment, Target
 from apps.agenda.domain.exceptions import AgendaError
-from apps.agenda.infrastructure.container import agenda_service
+from apps.agenda.domain.settings import DEFAULT_TIMEZONE, AgendaSettings
+from apps.agenda.infrastructure.container import agenda_service, current_settings
 
 __all__ = [
-    'AgendaError', 'Appointment', 'BY_ADMIN', 'BY_AGENT', 'BY_HOST', 'BookingRequest', 'Target', 'appointment',
-    'book', 'book_by_phone', 'cancel', 'confirmed_for_targets', 'free_slots', 'mark_done', 'move', 'reassign',
+    'AgendaError', 'AgendaSettings', 'Appointment', 'DEFAULT_TIMEZONE', 'settings', 'BY_ADMIN', 'BY_AGENT', 'BY_HOST', 'BookingRequest', 'Target', 'appointment',
+    'book', 'book_by_phone', 'cancel', 'close', 'confirmed_for_targets', 'free_slots', 'keep_as_post_check', 'move', 'reassign',
     'register_task', 'summary',
 ]
 
@@ -22,6 +23,10 @@ def summary(appointment: Appointment) -> dict:
         'start': appointment.start, 'end': appointment.end, 'status': appointment.status,
         'origin': appointment.origin, 'on_the_way_at': appointment.on_the_way_at,
     }
+
+
+def settings() -> AgendaSettings:
+    return current_settings()
 
 
 def free_slots(city: str, listing_count: int, agent_id: uuid.UUID | None = None,
@@ -41,8 +46,13 @@ def move(appointment_id: uuid.UUID, requester_id: uuid.UUID, start: datetime) ->
     return agenda_service().move(appointment_id, requester_id, start)
 
 
-def cancel(appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str) -> Appointment:
-    return agenda_service().cancel(appointment_id, author_id=author_id, by=by, reason=reason)
+def cancel(appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str,
+           notify: bool = True) -> Appointment:
+    return agenda_service().cancel(appointment_id, author_id=author_id, by=by, reason=reason, notify=notify)
+
+
+def keep_as_post_check(appointment_id: uuid.UUID) -> Appointment:
+    return agenda_service().keep_as_post_check(appointment_id)
 
 
 def reassign(appointment_id: uuid.UUID, agent_id: uuid.UUID) -> Appointment:
@@ -57,5 +67,5 @@ def confirmed_for_targets(target_ids) -> list[Appointment]:
     return agenda_service().confirmed_for_targets(target_ids)
 
 
-def mark_done(target_id) -> None:
-    agenda_service().mark_done(str(target_id))
+def close(appointment_id: uuid.UUID, reason: str = '') -> Appointment:
+    return agenda_service().close(appointment_id, reason)

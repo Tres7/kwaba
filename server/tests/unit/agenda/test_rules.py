@@ -224,3 +224,18 @@ class TestAgentChoice:
             (quiet, [make_appointment(quiet, utc(MONDAY + timedelta(days=1), 8))]),
         ]
         assert r.choose(candidates, utc(MONDAY, 10)) is quiet
+
+
+class TestClosedVisits:
+    def test_a_visit_closed_before_its_start_frees_the_slot(self):
+        agenda = make_agenda()
+        early = make_appointment(agenda, utc(MONDAY, 9), status='done')
+        early.done_at = utc(MONDAY, 8) - timedelta(days=2)
+        check(agenda, [early], utc(MONDAY, 9))
+
+    def test_a_visit_done_on_time_still_counts(self):
+        agenda = make_agenda()
+        done = make_appointment(agenda, utc(MONDAY, 9), status='done')
+        done.done_at = utc(MONDAY, 10)
+        with pytest.raises(SlotUnavailable):
+            check(agenda, [done], utc(MONDAY, 9, 30), check_availability=False)

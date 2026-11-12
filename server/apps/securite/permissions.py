@@ -20,6 +20,12 @@ SECTIONS_ADMIN = {
     'tarifs': 'Tarifs',
 }
 
+# Granted one by one by a super admin, on top of the sections: an admin without limits does not have them (ADR-023)
+SPECIAL_PERMISSIONS = {
+    'agenda_settings': "Réglages de l'agenda",
+    'validate_without_visit': 'Valider une annonce sans visite',
+}
+
 # Start of the path after /api/v1/admin/ → section. A route listed nowhere is refused to a limited admin
 _ROUTES_SECTIONS = {
     'stats/': 'tableau-de-bord',
@@ -37,6 +43,7 @@ _ROUTES_SECTIONS = {
     'contrats/': 'documents',
     'paiements/finances/': 'finances',
     'paiements/tarifs/': 'tarifs',
+    'agenda/': 'verifications',
 }
 # Open to every admin, whatever their sections
 ROUTES_TOUS_ADMINS = ('droits/',)
@@ -51,6 +58,10 @@ def section_de(chemin: str) -> str | None:
 def a_acces_section(utilisateur, section: str | None) -> bool:
     """Super admin, admin without limits (admin_sections NULL) or section granted."""
     return utilisateur.is_superuser or utilisateur.admin_sections is None or section in utilisateur.admin_sections
+
+
+def has_special_permission(user, permission: str) -> bool:
+    return user.role == 'admin' and (user.is_superuser or permission in (user.admin_permissions or []))
 
 
 class EstAdministrateur(IsAuthenticated):

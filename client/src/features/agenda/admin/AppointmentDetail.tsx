@@ -6,13 +6,13 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import {
-  ArrowLeft, CalendarPlus, CheckCircle2, Clock, Mail, MapPin, Navigation, Phone, Send, UserRound, XCircle,
+  ArrowLeft, CalendarPlus, CheckCircle2, Clock, Mail, MapPin, Navigation, Phone, Send, ShieldQuestion, UserRound, XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiErrorMessage } from "@/lib/api";
-import { appointmentIcsUrl, cancelAppointment, onTheWay, reassignAppointment } from "../api";
+import { appointmentIcsUrl, cancelAppointment, concludePostCheck, onTheWay, reassignAppointment } from "../api";
 import { useAgendaMutation, useAgents, useAppointment } from "../hooks";
-import { durationMinutes, hourMinute, itineraryUrl } from "../time";
+import { durationMinutes, formatDuration, hourMinute, itineraryUrl } from "../time";
 
 const FULL_DATE = new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Lome", weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
@@ -25,10 +25,13 @@ export default function AppointmentDetail() {
   const [reason, setReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [newAgent, setNewAgent] = useState("");
+  const [finding, setFinding] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   const onTheWayMutation = useAgendaMutation(() => onTheWay(id));
   const cancelMutation = useAgendaMutation(() => cancelAppointment(id, reason));
   const reassignMutation = useAgendaMutation(() => reassignAppointment(id, newAgent));
+  const postCheckMutation = useAgendaMutation((compliant: boolean) => concludePostCheck(id, compliant, finding));
 
   if (isLoading) return <p className="text-sm text-gray-500">Chargement…</p>;
   if (isError || !appointment) {
@@ -54,7 +57,7 @@ export default function AppointmentDetail() {
           <span>
             <span className="block first-letter:uppercase">{FULL_DATE.format(new Date(appointment.start))}</span>
             {hourMinute(appointment.start)} – {hourMinute(appointment.end)}{" "}
-            <span className="text-gray-500">({durationMinutes(appointment.start, appointment.end)} min)</span>
+            <span className="text-gray-500">({formatDuration(durationMinutes(appointment.start, appointment.end))})</span>
           </span>
         </p>
         <p className="flex items-start gap-2 text-dark mt-2">
@@ -69,6 +72,9 @@ export default function AppointmentDetail() {
             <p className="text-sm font-bold text-dark">Visite groupée · {appointment.listings.length} annonces</p>
             <ul className="mt-1 text-sm text-dark list-disc pl-5">{appointment.listings.map((l) => <li key={l.id}>{l.title}</li>)}</ul>
           </div>
+        )}
+        {appointment.closing_reason && (
+          <p className="mt-4 text-sm text-gray-600">Clôture : {appointment.closing_reason}</p>
         )}
         {appointment.cancellation_reason && (
           <p className="mt-4 text-sm text-red-700">Motif d&apos;annulation : {appointment.cancellation_reason}</p>
@@ -112,6 +118,48 @@ export default function AppointmentDetail() {
           )}
         </div>
       </div>
+
+      {confirmed && appointment.post_check && (mine || isAdmin) && (
+        <div className="mt-4 rounded-3xl border border-amber-200 bg-amber-50 p-6">
+          <p className="flex items-center gap-2 font-bold text-amber-900"><ShieldQuestion size={18} aria-hidden /> Contrôle a posteriori</p>
+          <p className="text-sm text-amber-900 mt-1">
+            L&apos;annonce a été validée sans visite par un administrateur. Vérifiez sur place qu&apos;elle correspond au logement, puis concluez.
+          </p>
+          {!reporting ? (
+            <div className="grid sm:grid-cols-2 gap-2 mt-4">
+              <button type="button" disabled={postCheckMutation.isPending}
+                onClick={() => postCheckMutation.mutate(true, {
+                  onSuccess: () => toast.success("Contrôle conforme enregistré."),
+                  onError: (err) => toast.error(apiErrorMessage(err, "Enregistrement impossible.")),
+                })}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-primary text-white font-bold py-3 disabled:opacity-60">
+                <CheckCircle2 size={18} aria-hidden /> Conforme
+              </button>
+              <button type="button" onClick={() => setReporting(true)}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-white border border-red-200 text-red-700 font-bold py-3">
+                <XCircle size={18} aria-hidden /> Non conforme
+              </button>
+            </div>
+          ) : (
+            <form className="mt-4" onSubmit={(e) => {
+              e.preventDefault();
+              postCheckMutation.mutate(false, {
+                onSuccess: () => toast.success("Annonce retirée du site : l'hôte et les admins sont prévenus."),
+                onError: (err) => toast.error(apiErrorMessage(err, "Enregistrement impossible.")),
+              });
+            }}>
+              <label htmlFor="finding" className="block text-sm font-bold text-dark">Ce qui n&apos;est pas conforme (envoyé à l&apos;hôte)</label>
+              <textarea id="finding" value={finding} onChange={(e) => setFinding(e.target.value)} rows={3} required minLength={10}
+                className="mt-2 w-full rounded-xl border border-gray-200 p-3 text-sm bg-white" />
+              <div className="flex gap-2 mt-3">
+                <button type="submit" disabled={postCheckMutation.isPending}
+                  className="rounded-xl bg-red-700 text-white font-bold px-4 py-2.5 text-sm disabled:opacity-60">Retirer l&apos;annonce du site</button>
+                <button type="button" onClick={() => setReporting(false)} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-dark">Retour</button>
+              </div>
+            </form>
+          )}
+        </div>
+      )}
 
       {confirmed && (mine || isAdmin) && (
         <div className="mt-4 rounded-3xl bg-white shadow-sm p-6">

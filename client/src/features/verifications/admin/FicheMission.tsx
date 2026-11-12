@@ -25,6 +25,7 @@ interface Fiche {
   droits: { prendre: boolean; liberer: boolean; decider: boolean };
   // Depending on the type
   logement?: Logement;
+  early_visit?: { start: string } | null;
   controles?: Record<string, string>;
   max_photos?: number;
   piece?: Piece;
@@ -127,7 +128,7 @@ export default function FicheMissionPage() {
       )}
 
       {data.type === "logement" && data.logement && (
-        <FicheLogement logement={data.logement} controlesLibelles={data.controles ?? {}} maxPhotos={data.max_photos ?? 10}
+        <FicheLogement logement={data.logement} earlyVisit={data.early_visit ?? null} controlesLibelles={data.controles ?? {}} maxPhotos={data.max_photos ?? 10}
           peutDecider={droits.decider} onTerminee={terminee} />
       )}
       {data.type === "piece" && data.piece && (

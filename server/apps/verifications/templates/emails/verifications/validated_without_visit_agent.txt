@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour,
+
+Un administrateur a validé sans visite l'annonce « {{ listing }} » ({{ city }}).
+Motif : {{ reason }}
+
+{% if kept %}Votre visite du {{ when }} est maintenue comme contrôle a posteriori. Sur place, concluez-la depuis la fiche du rendez-vous : « Conforme » ou « Non conforme ». Non conforme retire l'annonce du site.{% elif shared %}Votre visite du {{ when }} est maintenue pour les autres annonces de l'hôte.{% else %}Votre visite du {{ when }} est annulée : le créneau est de nouveau libre dans votre agenda.{% endif %}
+
+{{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

@@ -24,9 +24,11 @@ def _logement_resume(v: dict) -> dict:
 
 
 def _logement_detail(v: dict) -> dict:
+    early = verifications.early_visit(v['id'])
     return {
         'logement': v,
         'controles': VisiteModel.CONTROLES, 'max_photos': verifications.MAX_PHOTOS_VISITE,
+        'early_visit': {'start': early.start} if early else None,
     }
 
 

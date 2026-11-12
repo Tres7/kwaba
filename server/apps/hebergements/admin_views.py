@@ -1,5 +1,7 @@
 """Back-office: listings (list, publication, archiving and restoring)."""
+from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -8,9 +10,11 @@ from apps.securite.audit import journaliser
 from apps.securite.backoffice import (
     VueAdmin, booleen as _booleen, introuvable as _introuvable, motif as _motif, nom as _nom, paginer as _paginer,
 )
+from apps.securite.permissions import has_special_permission
 from apps.users import api as users
 from apps.verifications import api as verifications
 
+from . import api as hebergements_api
 from .archivage import ArchivageImpossible, archiver, restaurer
 from .models import HebergementModel
 
@@ -25,6 +29,8 @@ def _hebergements_json(liste) -> list[dict]:
         'rating': h.rating, 'review_count': h.review_count, 'nb_reservations': nb_reservations.get(h.id, 0),
         'host': {'id': str(h.host_id), 'nom': _nom(h.host) if h.host else '', 'email': h.host.email if h.host else ''},
         'created_at': h.created_at, 'archivee_le': h.archivee_le,
+        'validated_without_visit_at': h.validated_without_visit_at,
+        'validated_without_visit_reason': h.validated_without_visit_reason,
     } for h in liste]
 
 
@@ -65,6 +71,18 @@ class HebergementDetailView(VueAdmin):
             if champ in donnees and not isinstance(donnees[champ], bool):
                 return Response({champ: ['Valeur booléenne attendue.']}, status=status.HTTP_400_BAD_REQUEST)
 
+        validate_without_visit = (donnees.get('est_verifie') is True and annonce.statut_verification != 'verifiee')
+        if validate_without_visit:
+            if not has_special_permission(request.user, 'validate_without_visit'):
+                return Response({'detail': "La validation sans visite ne vous est pas ouverte."},
+                                status=status.HTTP_403_FORBIDDEN)
+            reason, erreur = _motif(donnees.get('motif'))
+            if erreur:
+                return erreur
+            keep_visit = donnees.get('keep_visit', False)
+            if not isinstance(keep_visit, bool):
+                return Response({'keep_visit': ['Valeur booléenne attendue.']}, status=status.HTTP_400_BAD_REQUEST)
+
         changements = {}
         if 'is_available' in donnees and donnees['is_available'] != annonce.is_available:
             changements['is_available'] = annonce.is_available = donnees['is_available']
@@ -75,13 +93,25 @@ class HebergementDetailView(VueAdmin):
             annonce.statut_verification = 'verifiee' if donnees['est_verifie'] else 'en_attente'
             if donnees['est_verifie']:
                 annonce.motif_refus = ''
+                annonce.validated_without_visit_at = timezone.now()
+                annonce.validated_without_visit_by_id = request.user.pk
+                annonce.validated_without_visit_reason = reason
+            else:
+                annonce.validated_without_visit_at = annonce.validated_without_visit_by_id = None
+                annonce.validated_without_visit_reason = ''
             changements['statut_verification'] = annonce.statut_verification
             a_verifier = not donnees['est_verifie']
 
         if changements:
-            annonce.save()
-            journaliser('annonce_modifiee', request, utilisateur=request.user,
-                        annonce_id=str(annonce.pk), annonce=annonce.name, **changements)
+            with transaction.atomic():
+                annonce.save()
+                journaliser('annonce_modifiee', request, utilisateur=request.user,
+                            annonce_id=str(annonce.pk), annonce=annonce.name, **changements)
+                if validate_without_visit:
+                    journaliser('validated_without_visit', request, utilisateur=request.user,
+                                annonce_id=str(annonce.pk), motif=reason, keep_visit=keep_visit)
+                    verifications.validated_without_visit(hebergements_api.fiche(annonce.pk), request.user, reason,
+                                                          keep_visit)
             if a_verifier:
                 verifications.visite_a_planifier(annonce.id)
         return Response(_hebergement(_hebergements().get(pk=annonce.pk)))

@@ -67,8 +67,9 @@ class TestBooking:
         assert appointment.agent_id == quiet.pk
         assert appointment.end - appointment.start == timedelta(minutes=60)
         assert appointment.blocked_until - appointment.end == timedelta(minutes=30)
-        assert [m.to for m in mail.outbox] == [[host.email]]
-        assert 'Visite confirmée' in mail.outbox[0].subject
+        subjects = {m.to[0]: m.subject for m in mail.outbox}
+        assert set(subjects) == {host.email, quiet.email}
+        assert 'Visite confirmée' in subjects[host.email] and 'Nouvelle visite' in subjects[quiet.email]
 
     def test_the_same_slot_cannot_be_taken_twice(self, agent, make_agenda, host, make_user):
         make_agenda(agent)

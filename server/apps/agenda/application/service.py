@@ -14,8 +14,11 @@ from apps.agenda.domain.exceptions import (
     ActionNotAllowed, AlreadyBooked, AppointmentNotFound, DailyLimitReached, InvalidRule, SlotUnavailable,
 )
 
+from apps.agenda.domain.settings import AgendaSettings, validated
+
 from .ports import (
-    AgendaRepository, AppointmentRepository, Clock, DigestRepository, Notifier, PeopleLookup, TransactionManager,
+    AgendaRepository, AppointmentRepository, Clock, DigestRepository, Notifier, PeopleLookup, SettingsRepository,
+    StoredSettings, TransactionManager,
 )
 
 logger = logging.getLogger('apps.agenda')
@@ -44,11 +47,12 @@ class Settings:
 
 class AgendaService:
     def __init__(self, *, agendas: AgendaRepository, appointments: AppointmentRepository, digests: DigestRepository,
-                 people: PeopleLookup, notifier: Notifier, tx: TransactionManager, clock: Clock, rules: r.Rules,
+                 settings_store: SettingsRepository, people: PeopleLookup, notifier: Notifier, tx: TransactionManager, clock: Clock, rules: r.Rules,
                  settings: Settings, tasks: Callable[[], list[Callable[[], dict | None]]]):
         self.agendas = agendas
         self.appointments = appointments
         self.digests = digests
+        self.settings_store = settings_store
         self.people = people
         self.notifier = notifier
         self.tx = tx
@@ -56,6 +60,15 @@ class AgendaService:
         self.rules = rules
         self.settings = settings
         self.tasks = tasks
+
+    def stored_settings(self) -> StoredSettings:
+        return self.settings_store.load()
+
+    def update_settings(self, changes: dict, author_id: uuid.UUID) -> tuple[AgendaSettings, StoredSettings]:
+        with self.tx.atomic():
+            before = self.settings_store.load().values
+            after = validated(before, changes)
+            return before, self.settings_store.save(after, author_id, self.clock.now())
 
     def agenda(self, agent_id: uuid.UUID) -> Agenda:
         return self.agendas.for_agent(agent_id) or self.agendas.create(agent_id)
@@ -216,7 +229,8 @@ class AgendaService:
             self.notifier.moved(appointment, agenda)
         return appointment
 
-    def cancel(self, appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str) -> Appointment:
+    def cancel(self, appointment_id: uuid.UUID, *, author_id: uuid.UUID, by: str, reason: str,
+               notify: bool = True) -> Appointment:
         reason = ' '.join(reason.split())
         if by not in (BY_AGENT, BY_ADMIN, BY_HOST):
             raise InvalidRule("Auteur de l'annulation inconnu.")
@@ -231,8 +245,14 @@ class AgendaService:
             appointment = self.appointments.save(replace(
                 appointment, status=CANCELLED, cancelled_at=self.clock.now(), cancelled_by=by,
                 cancellation_reason=reason[:500], sequence=appointment.sequence + 1))
-            self.notifier.cancelled(appointment, self.agendas.for_agent(appointment.agent_id))
+            if notify:
+                self.notifier.cancelled(appointment, self.agendas.for_agent(appointment.agent_id))
         return appointment
+
+    def keep_as_post_check(self, appointment_id: uuid.UUID) -> Appointment:
+        with self.tx.atomic():
+            appointment = self._confirmed(appointment_id)
+            return self.appointments.save(replace(appointment, post_check=True))
 
     def reassign(self, appointment_id: uuid.UUID, agent_id: uuid.UUID) -> Appointment:
         now = self.clock.now()
@@ -247,9 +267,11 @@ class AgendaService:
             (target, appointments), = self._with_appointments([locked[agent_id]], appointment.start)
             r.check(target, appointments, appointment.start, appointment.end - appointment.start, now=now,
                     rules=self.rules, check_availability=False)
+            previous_agent_id = appointment.agent_id
             appointment = self.appointments.save(replace(
                 appointment, agenda_id=target.id, agent_id=agent_id, sequence=appointment.sequence + 1,
                 on_the_way_at=None))
+            self.notifier.reassigned(appointment, target, previous_agent_id)
         return appointment
 
     def on_the_way(self, appointment_id: uuid.UUID, agent_id: uuid.UUID) -> Appointment:
@@ -266,10 +288,15 @@ class AgendaService:
             self.notifier.on_the_way(appointment, self.agendas.for_agent(agent_id))
         return appointment
 
-    def mark_done(self, target_id: str) -> None:
+    def close(self, appointment_id: uuid.UUID, reason: str = '') -> Appointment:
+        reason = ' '.join(reason.split())
         now = self.clock.now()
-        for appointment in self.appointments.confirmed_for_targets([str(target_id)]):
-            self.appointments.save(replace(appointment, status=DONE, done_at=now))
+        with self.tx.atomic():
+            appointment = self._confirmed(appointment_id)
+            if now < appointment.start and len(reason) < 5:
+                raise InvalidRule("La visite n'a pas encore eu lieu : indiquez pourquoi vous décidez avant "
+                                  "(5 caractères au moins).")
+            return self.appointments.save(replace(appointment, status=DONE, done_at=now, closing_reason=reason[:500]))
 
     def confirmed_for_targets(self, target_ids) -> list[Appointment]:
         return self.appointments.confirmed_for_targets([str(i) for i in target_ids])

@@ -1,0 +1,11 @@
+{% autoescape off %}Le contrôle a posteriori de « {{ title }} » ({{ city }}) n'est pas conforme. L'annonce, validée sans visite, est retirée du site.
+
+Agent : {{ agent }}
+Constat : {{ reason }}
+
+L'hôte a reçu le motif et peut corriger son annonce, qui repassera alors en vérification.
+
+Annonces refusées : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

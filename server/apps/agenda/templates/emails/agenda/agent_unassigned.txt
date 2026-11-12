@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour,
+
+La visite du {{ when }} a été confiée à un autre agent par un administrateur. Vous n'avez plus à vous en occuper.
+
+{% for listing in listings %}  {{ listing }}
+{% endfor %}  {{ city }}
+
+Votre agenda : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

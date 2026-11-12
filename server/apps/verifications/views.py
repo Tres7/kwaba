@@ -200,6 +200,7 @@ class DecisionView(APIView):
                     pk, request.user, decision=str(request.data.get('decision', '')), controles=controles,
                     commentaire=str(request.data.get('commentaire', '')), photos=request.FILES.getlist('photos'),
                     position={k: request.data[k] for k in ('latitude', 'longitude', 'precision') if request.data.get(k)} or None,
+                    early_reason=str(request.data.get('early_reason', '')),
                 )
                 terrain.terminer('logement', pk, request.user, decision=visite.decision,
                                  titre=hebergement['name'], sous_titre=hebergement['type_libelle'], ville=hebergement['city'])

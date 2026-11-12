@@ -136,17 +136,25 @@ class TestAnnonces:
         assert attente['count'] == 1
         assert attente['results'][0]['est_verifie'] is False
 
-    def test_masquer_puis_valider(self, api_admin, make_hebergement):
+    def test_masquer_puis_valider(self, api_admin, admin, make_hebergement):
         annonce = make_hebergement(statut_verification='en_attente')
 
         r = api_admin.patch(f'{ADMIN}hebergements/{annonce.id}/', {'is_available': False}, format='json')
         assert r.status_code == 200 and r.data['is_available'] is False
 
         r = api_admin.patch(f'{ADMIN}hebergements/{annonce.id}/', {'est_verifie': True}, format='json')
-        assert r.data['est_verifie'] is True
+        assert r.status_code == 403
+        admin.admin_permissions = ['validate_without_visit']
+        admin.save(update_fields=['admin_permissions'])
+        r = api_admin.patch(f'{ADMIN}hebergements/{annonce.id}/', {'est_verifie': True}, format='json')
+        assert r.status_code == 400 and 'motif' in r.data
+        r = api_admin.patch(f'{ADMIN}hebergements/{annonce.id}/', {'est_verifie': True, 'motif': 'Hôtel connu, déjà visité'},
+                            format='json')
+        assert r.data['est_verifie'] is True and r.data['validated_without_visit_reason'] == 'Hôtel connu, déjà visité'
         annonce.refresh_from_db()
-        assert annonce.statut_verification == 'verifiee'
+        assert annonce.statut_verification == 'verifiee' and annonce.validated_without_visit_at is not None
         assert JournalAuditModel.objects.filter(action='annonce_modifiee').count() == 2
+        assert JournalAuditModel.objects.filter(action='validated_without_visit').count() == 1
 
     def test_retirer_la_validation_retire_du_site(self, api_admin, make_hebergement):
         annonce = make_hebergement()

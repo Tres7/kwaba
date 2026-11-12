@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
+
+const nb = (text: string) => text.replace(/ /g, "\u00a0");
 import type { Appointment } from "./types";
 import {
-  addDays, addMonths, byDay, dayKey, durationMinutes, hourMinute, inTime, itineraryUrl, minutesOfDay, monthGrid,
+  addDays, addMonths, byDay, dayKey, durationMinutes, formatDuration, hourMinute, inTime, itineraryUrl, minutesOfDay, monthGrid,
   slotsByDay, visitStates, weekDays, weekStart, weekday,
 } from "./time";
 
 const appointment = (id: string, start: string, end: string, status: Appointment["status"] = "confirmed"): Appointment => ({
   id, title: "Studio", city: "Lomé", address: "", start, end, status, origin: "host", on_the_way_at: null, listings: [], agent: null,
-  cancellation_reason: "",
+  cancellation_reason: "", closing_reason: "", post_check: false,
 });
 
 describe("dates in Lomé", () => {
@@ -57,10 +59,19 @@ describe("visits of the day", () => {
     expect(states).toEqual({ done: "done", missed: "past", later: "upcoming", next: "next", off: "cancelled" });
   });
 
+  it("durations in hours, minutes only under an hour", () => {
+    expect(formatDuration(30)).toBe(nb("30 min"));
+    expect(formatDuration(60)).toBe(nb("1 h"));
+    expect(formatDuration(80)).toBe(nb("1 h 20"));
+    expect(formatDuration(140)).toBe(nb("2 h 20"));
+    expect(formatDuration(125)).toBe(nb("2 h 05"));
+    expect(formatDuration(120)).toBe(nb("2 h"));
+  });
+
   it("says how long until the visit", () => {
-    expect(inTime(40)).toBe("dans 40 min");
-    expect(inTime(150)).toBe("dans 2 h 30");
-    expect(inTime(120)).toBe("dans 2 h");
+    expect(inTime(40)).toBe("dans " + nb("40 min"));
+    expect(inTime(150)).toBe("dans " + nb("2 h 30"));
+    expect(inTime(120)).toBe("dans " + nb("2 h"));
     expect(inTime(60 * 50)).toBe("dans 2 jours");
     expect(inTime(-5)).toBe("maintenant");
   });

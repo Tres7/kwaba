@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { urlProxy } from "@/lib/api-url";
 import type {
-  AgentRef, Appointment, AppointmentDetail, Availability, Coverage, HostAppointment, MyVisit, WeeklySlot,
+  AgendaSettings, AgendaSettingsValues, AgentRef, Appointment, AppointmentDetail, Availability, Coverage, HostAppointment, MyVisit, WeeklySlot,
 } from "./types";
 
 const AGENDA = "/v1/agenda";
@@ -93,4 +93,16 @@ export async function listMoveSlots(appointmentId: string) {
 export async function moveVisit(appointmentId: string, start: string) {
   return (await api.post<HostAppointment>(
     `${VERIFICATIONS}/visit/appointments/${encodeURIComponent(appointmentId)}/move/`, { start })).data;
+}
+
+export async function readAgendaSettings() {
+  return (await api.get<AgendaSettings>("/v1/admin/agenda/settings/")).data;
+}
+
+export async function saveAgendaSettings(values: Partial<AgendaSettingsValues>) {
+  return (await api.put<AgendaSettings>("/v1/admin/agenda/settings/", values)).data;
+}
+
+export async function concludePostCheck(id: string, compliant: boolean, reason = "") {
+  await api.post(`${VERIFICATIONS}/appointments/${encodeURIComponent(id)}/post-check/`, { compliant, reason });
 }

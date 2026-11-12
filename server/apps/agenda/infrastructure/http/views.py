@@ -9,8 +9,9 @@ from rest_framework.views import APIView
 
 from apps.agenda.domain.entities import CANCELLED, Appointment, AvailabilityException, WeeklySlot
 from apps.agenda.domain.exceptions import AgendaError
+from apps.agenda.domain.settings import PER_DAY_CEILING
 from apps.agenda.infrastructure import ics
-from apps.agenda.infrastructure.container import agenda_service, rules
+from apps.agenda.infrastructure.container import agenda_service, current_settings
 from apps.export import api as export
 from apps.securite.audit import journaliser
 from apps.securite.permissions import a_acces_section
@@ -56,7 +57,7 @@ def _name(account) -> str:
 
 
 def _agenda_json(agenda) -> dict:
-    config = rules()
+    config = current_settings()
     return {
         'timezone': agenda.timezone,
         'cities': agenda.cities,
@@ -66,12 +67,12 @@ def _agenda_json(agenda) -> dict:
                        for e in sorted(agenda.exceptions, key=lambda e: (e.day, e.start or time.min))],
         'day_limits': [{'day': d, 'max_visits': n} for d, n in sorted(agenda.day_limits.items())],
         'rules': {
-            'visit_duration_min': int(config.visit_duration.total_seconds() // 60),
-            'margin_min': int(config.margin.total_seconds() // 60),
+            'visit_duration_min': config.visit_minutes,
+            'margin_min': config.margin_minutes,
             'max_per_day': config.max_per_day,
-            'per_day_ceiling': config.per_day_ceiling,
-            'notice_h': int(config.notice.total_seconds() // 3600),
-            'horizon_days': config.horizon.days,
+            'per_day_ceiling': PER_DAY_CEILING,
+            'notice_h': config.notice_hours,
+            'horizon_days': config.horizon_days,
         },
     }
 
@@ -85,6 +86,7 @@ def _appointment_json(appointment: Appointment, agents: dict | None = None, deta
         'listings': [{'id': t.id, 'title': t.title} for t in appointment.targets],
         'agent': None,
         'cancellation_reason': appointment.cancellation_reason if appointment.status == CANCELLED else '',
+        'closing_reason': appointment.closing_reason, 'post_check': appointment.post_check,
     }
     if agents is not None:
         data['agent'] = {'id': str(appointment.agent_id), 'name': _name(agents.get(appointment.agent_id))}

@@ -6,6 +6,7 @@ from django.db import transaction
 from django.template.loader import render_to_string
 
 from apps.agenda.application.ports import Notifier, PeopleLookup
+from apps.agenda.domain.settings import DEFAULT_TIMEZONE
 from apps.notifications.api import send_mail
 
 logger = logging.getLogger('apps.agenda')
@@ -58,12 +59,35 @@ class EmailNotifier(Notifier):
             'url': _url('/hote/espace/visite'), **context,
         })
 
+    def _to_agent(self, agent_id, template: str, subject: str, appointment, agenda, **context) -> None:
+        agent = self.people.person(agent_id)
+        if agent is None:
+            return
+        _send(template, subject, [agent.email], {
+            'title': appointment.title, 'listings': [t.title for t in appointment.targets],
+            'city': appointment.city, 'when': when(appointment.start, agenda.tz),
+            'url': _url(f'/agent/agenda/{appointment.id}'), **context,
+        })
+
     def confirmed(self, appointment, agenda):
         self._to_host('confirmed', f"Visite confirmée le {when(appointment.start, agenda.tz)}", appointment, agenda,
                       by_phone=appointment.origin == 'phone')
+        if appointment.origin == 'host':
+            self._to_agent(appointment.agent_id, 'agent_booked',
+                           f"[Kwa-Ba] Nouvelle visite le {when(appointment.start, agenda.tz)}", appointment, agenda)
 
     def moved(self, appointment, agenda):
         self._to_host('moved', f"Visite déplacée au {when(appointment.start, agenda.tz)}", appointment, agenda)
+        self._to_agent(appointment.agent_id, 'agent_moved',
+                       f"[Kwa-Ba] Visite déplacée au {when(appointment.start, agenda.tz)}", appointment, agenda)
+
+    def reassigned(self, appointment, agenda, previous_agent_id):
+        self._to_agent(appointment.agent_id, 'agent_booked',
+                       f"[Kwa-Ba] Nouvelle visite le {when(appointment.start, agenda.tz)}", appointment, agenda,
+                       reassigned=True)
+        self._to_agent(previous_agent_id, 'agent_unassigned',
+                       f"[Kwa-Ba] Visite confiée à un autre agent : {appointment.title}", appointment, agenda,
+                       url=_url('/agent/agenda'))
 
     def cancelled(self, appointment, agenda):
         if appointment.cancelled_by == 'host':
@@ -97,7 +121,7 @@ class EmailNotifier(Notifier):
 
     def visits_without_decision(self, appointments):
         agents = self.people.people({a.agent_id for a in appointments})
-        tz = ZoneInfo(settings.AGENDA['TIMEZONE'])
+        tz = ZoneInfo(DEFAULT_TIMEZONE)
         visits = [{'when': when(a.start, tz), 'title': a.title, 'city': a.city,
                    'agent': agents[a.agent_id].name if a.agent_id in agents else '-'} for a in appointments]
         _send('visits_without_decision', f"[Kwa-Ba] Visites passées sans décision ({len(appointments)})",

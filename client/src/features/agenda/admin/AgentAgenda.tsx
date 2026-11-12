@@ -7,7 +7,7 @@ import { CalendarCog, CheckCircle2, ChevronLeft, ChevronRight, Clock, MapPin, Na
 import { cn } from "@/lib/utils";
 import { useAgents, useAppointment, useAppointments } from "../hooks";
 import {
-  TIMEZONE, addDays, addMonths, byDay, dayKey, durationMinutes, hourMinute, inTime, itineraryUrl, minutesOfDay,
+  TIMEZONE, addDays, addMonths, byDay, dayKey, durationMinutes, formatDuration, hourMinute, inTime, itineraryUrl, minutesOfDay,
   minutesUntil, monthGrid, visitStates, weekDays, weekStart, type VisitState,
 } from "../time";
 import type { Appointment } from "../types";
@@ -212,7 +212,7 @@ function DayList({ day, today, appointments, states, now, loading, showAgent }: 
           <li key={a.id} className="flex gap-3">
             <div className="w-14 flex-shrink-0 pt-3">
               <p className="font-heading font-bold text-dark">{hourMinute(a.start)}</p>
-              <p className="text-xs text-gray-500">{durationMinutes(a.start, a.end)} min</p>
+              <p className="text-xs text-gray-500">{formatDuration(durationMinutes(a.start, a.end))}</p>
             </div>
             <VisitCard appointment={a} state={states[a.id]} now={now} showAgent={showAgent} />
           </li>

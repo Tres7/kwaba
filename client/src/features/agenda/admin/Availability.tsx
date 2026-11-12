@@ -7,7 +7,7 @@ import { ArrowLeft, CalendarPlus, Copy, Plus, RefreshCw, Trash2, X } from "lucid
 import { apiErrorMessage } from "@/lib/api";
 import { addException, deleteException, regenerateFeed, saveWeek, setDayLimit } from "../api";
 import { useAgendaMutation, useAvailability, useFeed } from "../hooks";
-import { dayKey } from "../time";
+import { dayKey, formatDuration } from "../time";
 import type { WeeklySlot } from "../types";
 
 const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
@@ -48,8 +48,8 @@ export default function Availability() {
       </Link>
       <h1 className="font-heading font-bold text-2xl text-dark mt-3">Mes disponibilités</h1>
       <p className="text-sm text-gray-500 mt-1">
-        Les hôtes de vos villes réservent leur visite dans ces plages : {data.rules.visit_duration_min} min par visite,
-        {" "}{data.rules.margin_min} min d&apos;écart avant la suivante, {data.rules.max_per_day} visites par jour au plus,
+        Les hôtes de vos villes réservent leur visite dans ces plages : {formatDuration(data.rules.visit_duration_min)} par visite,
+        {" "}{formatDuration(data.rules.margin_min)} d&apos;écart avant la suivante, {data.rules.max_per_day} visites par jour au plus,
         {" "}{data.rules.notice_h} h à l&apos;avance et sur {data.rules.horizon_days} jours. Retirer une plage n&apos;annule jamais un rendez-vous déjà pris.
       </p>
 

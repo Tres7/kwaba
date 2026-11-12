@@ -15,12 +15,14 @@ function pourSaisie(iso: string | null) {
 }
 
 /** Rights of an admin, set by a super admin: sections opened and end of a temporary access. */
-export default function DroitsAdmin({ admin, sections, onFermer }: {
-  admin: AdminUser | null; sections: Droits["sections_disponibles"]; onFermer: () => void;
+export default function DroitsAdmin({ admin, sections, permissions, onFermer }: {
+  admin: AdminUser | null; sections: Droits["sections_disponibles"]; permissions: Droits["permissions_disponibles"];
+  onFermer: () => void;
 }) {
   const queryClient = useQueryClient();
   const [limite, setLimite] = useState(!!admin?.admin_sections);
   const [choisies, setChoisies] = useState<string[]>(admin?.admin_sections ?? []);
+  const [granted, setGranted] = useState<string[]>(admin?.admin_permissions ?? []);
   const [fin, setFin] = useState(pourSaisie(admin?.admin_expire_le ?? null));
   const [erreurs, setErreurs] = useState<Record<string, string>>({});
   const [envoi, setEnvoi] = useState(false);
@@ -35,6 +37,7 @@ export default function DroitsAdmin({ admin, sections, onFermer }: {
     try {
       await modifierUtilisateurAdmin(admin.id, {
         admin_sections: limite ? choisies : null,
+        admin_permissions: granted,
         admin_expire_le: fin ? new Date(fin).toISOString() : null,
       });
       toast.success("Droits mis à jour");
@@ -64,6 +67,18 @@ export default function DroitsAdmin({ admin, sections, onFermer }: {
           {erreurs.admin_sections && <p role="alert" className="text-sm text-red-700">{erreurs.admin_sections}</p>}
         </fieldset>
       )}
+      <fieldset className="space-y-2">
+        <legend className="text-xs font-bold text-dark uppercase tracking-wide mb-1">Permissions spéciales</legend>
+        <p className="text-xs text-muted mb-2">Jamais incluses d&apos;office, même pour un administrateur sans limite de sections.</p>
+        {permissions.map(({ code, libelle }) => (
+          <label key={code} className="flex items-center gap-2 text-sm text-dark">
+            <input type="checkbox" checked={granted.includes(code)}
+              onChange={(e) => setGranted(e.target.checked ? [...granted, code] : granted.filter((c) => c !== code))} />
+            {libelle}
+          </label>
+        ))}
+        {erreurs.admin_permissions && <p role="alert" className="text-sm text-red-700">{erreurs.admin_permissions}</p>}
+      </fieldset>
       <Champ label="Fin de l'accès" erreur={erreurs.admin_expire_le} aide="Vide : pas de limite. À cette date, le compte retrouve son rôle précédent.">
         <Saisie type="datetime-local" value={fin} onChange={(e) => setFin(e.target.value)} />
       </Champ>

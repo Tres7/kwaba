@@ -35,7 +35,8 @@ Nous retenons l'option 3.
 - `management/commands/agenda_worker` (`--once`, `--interval`), service `agenda` dans `deploy/vps/compose.yml`.
 
 ## Règles
-- Visite de 60 min. Groupe sur un même site : 60 min + 20 min par annonce supplémentaire, 5 annonces au plus (140 min).
+- Visite d'1 h. Groupe sur un même site : 1 h + 20 min par annonce supplémentaire, 5 annonces au plus (2 h 20).
+- Les durées s'affichent en heures (« 1 h 20 ») ; seules celles de moins d'une heure s'affichent en minutes (« 30 min »).
 - Même site : annonces du même hôte, dans la même ville, toutes à moins de 200 m les unes des autres. L'hôte déclare le groupe, le serveur contrôle la distance ; une annonce sans position ne peut pas être groupée.
 - Un groupe compte pour une visite : l'agent ne se déplace qu'une fois.
 - Marge de 30 min après chaque visite. Elle est enregistrée sur le rendez-vous à la réservation (`blocked_until = end + margin`) : un changement de règle ne rallonge jamais un rendez-vous confirmé.

@@ -98,6 +98,8 @@ class AppointmentModel(models.Model):
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancelled_by = models.CharField(max_length=10, choices=CANCELLED_BY, blank=True)
     cancellation_reason = models.CharField(max_length=500, blank=True)
+    closing_reason = models.CharField(max_length=500, blank=True)
+    post_check = models.BooleanField(default=False)
     sequence = models.PositiveIntegerField(default=0)
     host_reminder_at = models.DateTimeField(null=True, blank=True)
     alert_at = models.DateTimeField(null=True, blank=True)
@@ -117,12 +119,34 @@ class AppointmentModel(models.Model):
                     ('agenda', RangeOperators.EQUAL),
                     (TsTzRange('start', 'blocked_until'), RangeOperators.OVERLAPS),
                 ],
-                condition=Q(status__in=['confirmed', 'done']),
+                condition=Q(status='confirmed'),
             ),
         ]
 
     def __str__(self):
         return f"Visite {self.start:%d/%m/%Y %H:%M} · {self.city}"
+
+
+class AgendaSettingsModel(models.Model):
+    notice_hours = models.PositiveSmallIntegerField(default=24)
+    horizon_days = models.PositiveSmallIntegerField(default=14)
+    max_per_day = models.PositiveSmallIntegerField(default=4)
+    margin_minutes = models.PositiveSmallIntegerField(default=30)
+    visit_minutes = models.PositiveSmallIntegerField(default=60)
+    extra_listing_minutes = models.PositiveSmallIntegerField(default=20)
+    max_listings = models.PositiveSmallIntegerField(default=5)
+    same_site_distance_m = models.PositiveSmallIntegerField(default=200)
+    digest_hour = models.PositiveSmallIntegerField(default=18)
+    decision_alert_hours = models.PositiveSmallIntegerField(default=2)
+    host_reminder_days = models.PositiveSmallIntegerField(default=2)
+    host_alert_days = models.PositiveSmallIntegerField(default=3)
+    updated_at = models.DateTimeField(null=True, blank=True)
+    updated_by_id = models.UUIDField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'agenda_settings'
+        verbose_name = "Réglages de l'agenda"
+        verbose_name_plural = "Réglages de l'agenda"
 
 
 class DigestModel(models.Model):

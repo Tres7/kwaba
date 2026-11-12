@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CalendarCheck, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
+import { ArrowLeft, CalendarCheck, CalendarCog, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import { cn } from "@/lib/utils";
 import { useDroitsAdmin } from "@/features/users";
 import { AlerteVerifications, useCompteursVerification } from "@/features/verifications";
 
-const NAV: { href: string; label: string; icon: typeof Users; section: string; compteur?: boolean }[] = [
+const NAV: { href: string; label: string; icon: typeof Users; section: string; compteur?: boolean; permission?: string }[] = [
   { href: "/backoffice", label: "Tableau de bord", icon: LayoutDashboard, section: "tableau-de-bord" },
   // Identity documents and visits are handled in the agent space, which admins share with field agents
   { href: "/agent", label: "Vérifications", icon: ClipboardCheck, section: "verifications", compteur: true },
@@ -27,6 +27,7 @@ const NAV: { href: string; label: string; icon: typeof Users; section: string; c
   { href: "/backoffice/documents", label: "Documents", icon: FileText, section: "documents" },
   { href: "/backoffice/finances", label: "Finances", icon: Landmark, section: "finances" },
   { href: "/backoffice/tarifs", label: "Tarifs", icon: Percent, section: "tarifs" },
+  { href: "/backoffice/agenda", label: "Réglages agenda", icon: CalendarCog, section: "verifications", permission: "agenda_settings" },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
@@ -39,7 +40,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const estAdmin = session?.user?.role === "admin";
   const { data: droits } = useDroitsAdmin(estAdmin);
   // Limited admin: only their sections (the API refuses the others anyway)
-  const menu = droits ? NAV.filter((n) => droits.sections.includes(n.section)) : NAV;
+  const menu = droits
+    ? NAV.filter((n) => droits.sections.includes(n.section) && (!n.permission || droits.permissions.includes(n.permission)))
+    : NAV.filter((n) => !n.permission);
   const { data: compteurs } = useCompteursVerification(estAdmin && (droits?.sections.includes("verifications") ?? false));
   const enAttente = compteurs?.total ?? 0;
 
