@@ -7,6 +7,7 @@ import { CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { lireStatutTiers } from "./api";
+import { useNow } from "@/lib/useNow";
 
 // Beyond that, the server is no longer polled: the worker and the webhook take over
 const ATTENTE_MAX_MS = 3 * 60 * 1000;
@@ -16,6 +17,7 @@ export default function RetourPaiementTiers() {
   const t = useTranslations("paiementTiers");
   const { demande } = useParams<{ demande: string }>();
   const [debut] = useState(() => Date.now());
+  const now = useNow(5000);
   const { data: statut, isError } = useQuery({
     queryKey: ["paiement-tiers", "statut", demande],
     queryFn: () => lireStatutTiers(demande),
@@ -41,7 +43,7 @@ export default function RetourPaiementTiers() {
     icone = <XCircle size={32} className="text-red-600" />;
     titre = t("nonAbouti");
     texte = t("nonAboutiTexte");
-  } else if (statut && Date.now() - debut >= ATTENTE_MAX_MS) {
+  } else if (statut && now - debut >= ATTENTE_MAX_MS) {
     icone = <Clock size={32} className="text-amber-600" />;
     titre = t("attenteLongue");
     texte = t("attenteLongueTexte");

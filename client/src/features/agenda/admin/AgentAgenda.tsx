@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { CalendarCog, CheckCircle2, ChevronLeft, ChevronRight, Clock, MapPin, Navigation, Phone, Users } from "lucide-react";
@@ -55,8 +55,8 @@ export default function AgentAgenda() {
   const { data: agents } = useAgents(isAdmin);
 
   const active = appointments.filter((a) => a.status !== "cancelled");
-  const states = useMemo(() => visitStates(appointments, now), [appointments, now]);
-  const days = useMemo(() => byDay(appointments), [appointments]);
+  const states = visitStates(appointments, now);
+  const days = byDay(appointments);
   const next = active.find((a) => states[a.id] === "next");
   const showAgent = isAdmin && agent !== "";
 

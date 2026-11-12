@@ -1,10 +1,5 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const compat = new FlatCompat({ baseDirectory: __dirname });
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
 // Frontiers between modules: documentation/frontieres-front.md
 const CLIENT_UNIQUE = { group: ["axios"], message: "Les appels passent par le client unique : @/lib/api." };
@@ -21,7 +16,11 @@ const eslintConfig = [
   {
     ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"],
   },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextVitals,
+  ...nextTypescript,
+  {
+    rules: { "react-hooks/set-state-in-effect": "warn" },
+  },
   {
     files: ["src/**/*.{ts,tsx}"],
     rules: { "no-restricted-imports": ["error", { patterns: [CLIENT_UNIQUE, PAR_INDEX] }] },

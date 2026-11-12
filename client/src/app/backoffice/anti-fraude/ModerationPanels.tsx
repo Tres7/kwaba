@@ -7,6 +7,7 @@ import {
   type AdminReport, type AdminSanction,
 } from "@/features/messaging";
 import { apiErrorMessage } from "@/lib/api";
+import { useNow } from "@/lib/useNow";
 import { cn, formatDate } from "@/lib/utils";
 import Panneau, { Champ, Interrupteur, Zone } from "@/components/backoffice/Panneau";
 import { ActionButton, Pill } from "@/components/backoffice/AdminTable";
@@ -124,6 +125,7 @@ export function SanctionPanel({ sanctionId, onClose, onDone }: { sanctionId: num
   const [sanction] = useDetail<AdminSanction>(getSanction, sanctionId, onClose);
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
+  const now = useNow(30_000);
 
   const run = async (action: () => Promise<unknown>, success: string) => {
     setSending(true);
@@ -137,7 +139,7 @@ export function SanctionPanel({ sanctionId, onClose, onDone }: { sanctionId: num
     }
   };
 
-  const active = !!sanction?.ends_at && !sanction.cancelled_at && new Date(sanction.ends_at).getTime() > Date.now()
+  const active = !!sanction?.ends_at && !sanction.cancelled_at && new Date(sanction.ends_at).getTime() > now
     && (sanction.step === "short_suspension" || sanction.step === "long_suspension");
 
   return (

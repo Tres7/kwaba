@@ -15,6 +15,7 @@ import type { MoyenPaiement } from "@/types/api/paiement";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
 import { FairePayerParUnTiers } from "@/features/paiement-tiers";
+import { useNow } from "@/lib/useNow";
 
 const MOYENS: { id: MoyenPaiement; label: string; icon: typeof Smartphone }[] = [
   { id: "mobile_money", label: "mobileMoney", icon: Smartphone },
@@ -35,6 +36,7 @@ function PaiementContent() {
   const queryClient = useQueryClient();
   const { data: config } = useConfigPaiement();
   const [debut] = useState(() => Date.now());
+  const now = useNow(5000);
   const [moyen, setMoyen] = useState<MoyenPaiement | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState(searchParams.get("erreur") || "");
@@ -90,7 +92,7 @@ function PaiementContent() {
 
   const minutes = minutesRestantes(statut?.expire_le ?? null);
   const enAttente = statut?.reservation === "pending" && statut.paiement === "en_attente" && !annuleParVoyageur;
-  const attenteLongue = enAttente && Date.now() - debut >= ATTENTE_MAX_MS;
+  const attenteLongue = enAttente && now - debut >= ATTENTE_MAX_MS;
   const aPayer = statut?.reservation === "pending" && !enAttente;
   const total = reservation?.montants.total ?? 0;
 

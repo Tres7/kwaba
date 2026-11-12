@@ -17,6 +17,7 @@ import { Documents } from "@/features/documents";
 import type { MoyenPaiement } from "@/types/api/paiement";
 import type { StatutLocation } from "./types";
 import { useFormat } from "@/lib/format";
+import { useNow } from "@/lib/useNow";
 
 const STATUTS: Record<StatutLocation, { className: string; icon: typeof Clock }> = {
   en_attente_paiement: { className: "bg-amber-100 text-amber-800", icon: Clock },
@@ -39,6 +40,7 @@ function LocationDetail() {
   const queryClient = useQueryClient();
   const { data: config } = useConfigPaiement();
   const [debutPage] = useState(() => Date.now());
+  const now = useNow(5000);
   const [envoi, setEnvoi] = useState(false);
   const [annulation, setAnnulation] = useState(false);
   const [aRembourser, setARembourser] = useState<number | null>(null);
@@ -66,7 +68,7 @@ function LocationDetail() {
   if (!l) return <div className="max-w-3xl mx-auto px-4 py-10"><div className="h-96 skeleton rounded-3xl" /></div>;
 
   const statut = STATUTS[l.statut];
-  const enAttente = l.statut === "en_attente_paiement" && l.paiement === "en_attente" && !annuleParVoyageur && Date.now() - debutPage < ATTENTE_MAX_MS;
+  const enAttente = l.statut === "en_attente_paiement" && l.paiement === "en_attente" && !annuleParVoyageur && now - debutPage < ATTENTE_MAX_MS;
   const aPayer = l.statut === "en_attente_paiement" && !enAttente;
   const moyens = (config?.moyens ?? []) as MoyenPaiement[];
   const minutes = minutesRestantes(l.expire_le);

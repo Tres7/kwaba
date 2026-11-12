@@ -129,7 +129,7 @@ function TransfertContent() {
     if (!connecte) {
       // The whole request is filled in without an account; sign-in is only asked here, just before payment
       try {
-        sessionStorage.setItem(BROUILLON, JSON.stringify({ enregistreLe: Date.now(), aeroport, date, heure, vol, passagers, bagages, categorie: choix?.categorie ?? categorie, destination, telephone, message }));
+        saveDraft({ aeroport, date, heure, vol, passagers, bagages, categorie: choix?.categorie ?? categorie, destination, telephone, message });
       } catch { /* without storage, the traveller types it again after signing in */ }
       router.push(`/login?callbackUrl=${encodeURIComponent(`${pathname}?${searchParams.toString()}`)}`);
       return;
@@ -335,6 +335,10 @@ function TransfertContent() {
       </form>
     </div>
   );
+}
+
+function saveDraft(fields: Record<string, unknown>) {
+  sessionStorage.setItem(BROUILLON, JSON.stringify({ enregistreLe: Date.now(), ...fields }));
 }
 
 export default function TransfertPage() {

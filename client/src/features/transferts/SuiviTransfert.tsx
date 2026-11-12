@@ -17,6 +17,7 @@ import type { MoyenPaiement } from "@/types/api/paiement";
 import type { StatutTransfert } from "./types";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/format";
+import { useNow } from "@/lib/useNow";
 
 const STATUTS: Record<StatutTransfert, { label: string; className: string; icon: typeof Clock }> = {
   en_attente_paiement: { label: "enAttente", className: "bg-amber-100 text-amber-800", icon: Clock },
@@ -39,6 +40,7 @@ function TransfertDetail() {
   const queryClient = useQueryClient();
   const { data: config } = useConfigPaiement();
   const [debut] = useState(() => Date.now());
+  const now = useNow(5000);
   const [envoi, setEnvoi] = useState(false);
   const [annulation, setAnnulation] = useState(false);
   const [aRembourser, setARembourser] = useState<number | null>(null);
@@ -66,7 +68,7 @@ function TransfertDetail() {
   if (!t) return <div className="max-w-3xl mx-auto px-4 py-10"><div className="h-96 skeleton rounded-3xl" /></div>;
 
   const statut = STATUTS[t.statut];
-  const enAttente = t.statut === "en_attente_paiement" && t.paiement === "en_attente" && !annuleParVoyageur && Date.now() - debut < ATTENTE_MAX_MS;
+  const enAttente = t.statut === "en_attente_paiement" && t.paiement === "en_attente" && !annuleParVoyageur && now - debut < ATTENTE_MAX_MS;
   const aPayer = t.statut === "en_attente_paiement" && !enAttente;
   const moyens = (config?.moyens ?? []) as MoyenPaiement[];
   const minutes = minutesRestantes(t.expire_le);

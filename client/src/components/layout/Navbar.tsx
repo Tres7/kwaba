@@ -121,16 +121,6 @@ export default function Navbar() {
   const liensBarre = filtrerLiens(NAV_LINKS, modules);
   const liensMobile = <T extends { href: string }>(liens: T[]) => filtrerLiens(liens, modules);
 
-  const Avatar = ({ size }: { size: string }) => (
-    <div className={cn("rounded-full bg-primary/10 overflow-hidden border border-primary/20 flex items-center justify-center shrink-0", size)}>
-      {session?.user?.image ? (
-        <img src={session.user.image} alt="" className="w-full h-full object-cover" />
-      ) : (
-        <span className="text-primary font-bold text-sm">{initials(session?.user?.name)}</span>
-      )}
-    </div>
-  );
-
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-xs">
       <div className="max-w-7xl 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between gap-4 lg:gap-6">
@@ -195,7 +185,7 @@ export default function Navbar() {
                     <p className="text-xs font-bold text-dark leading-tight max-w-[140px] truncate">{session.user?.name ?? t("monProfil")}</p>
                     <p className="text-[10px] text-gray-500">{roleLabel}</p>
                   </div>
-                  <Avatar size="w-9 h-9" />
+                  <Avatar size="w-9 h-9" image={session?.user?.image} name={session?.user?.name} />
                 </Link>
               </>
             ) : status !== "loading" ? (
@@ -243,7 +233,7 @@ export default function Navbar() {
         {authenticated && (
           <DrawerItem className="mt-5">
             <Link href="/profil" className="flex items-center gap-3 p-3 rounded-2xl bg-light-muted">
-              <Avatar size="w-11 h-11" />
+              <Avatar size="w-11 h-11" image={session?.user?.image} name={session?.user?.name} />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-dark truncate">{session.user?.name ?? t("monProfil")}</p>
                 <p className="text-xs text-gray-500">{roleLabel}</p>
@@ -320,5 +310,17 @@ export default function Navbar() {
         </DrawerItem>
       </MobileDrawer>
     </header>
+  );
+}
+
+function Avatar({ size, image, name }: { size: string; image?: string | null; name?: string | null }) {
+  return (
+    <div className={cn("rounded-full bg-primary/10 overflow-hidden border border-primary/20 flex items-center justify-center shrink-0", size)}>
+      {image ? (
+        <img src={image} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <span className="text-primary font-bold text-sm">{initials(name)}</span>
+      )}
+    </div>
   );
 }
