@@ -58,6 +58,10 @@ describe("agenda", () => {
     expect(api.get).toHaveBeenLastCalledWith("/v1/agenda/admin/coverage/");
     await agenda.listAgents();
     expect(api.get).toHaveBeenLastCalledWith("/v1/agenda/admin/agents/");
+    await agenda.readPlanning("2026-11-20", "Lomé");
+    expect(api.get).toHaveBeenLastCalledWith("/v1/admin/agenda/planning/", { params: { day: "2026-11-20", city: "Lomé" } });
+    await agenda.readPlanning("2026-11-20", "");
+    expect(api.get).toHaveBeenLastCalledWith("/v1/admin/agenda/planning/", { params: { day: "2026-11-20" } });
     await agenda.readAgendaSettings();
     expect(api.get).toHaveBeenLastCalledWith("/v1/admin/agenda/settings/");
     await agenda.saveAgendaSettings({ notice_hours: 48 });

@@ -108,3 +108,16 @@ export function slotsByDay(slots: string[]): [string, string[]][] {
   const days = byDay(slots.map((start) => ({ start })));
   return Object.entries(days).map(([key, items]) => [key, items.map((i) => i.start)]);
 }
+
+export function rangeMinutes(range: { start: string; end: string }, day: string): [number, number] {
+  const start = dayKey(range.start) < day ? 0 : minutesOfDay(range.start);
+  const end = dayKey(range.end) > day ? 1440 : minutesOfDay(range.end);
+  return [start, end];
+}
+
+export function hoursShown(ranges: [number, number][], first = 7, last = 19): [number, number] {
+  const finite = ranges.filter(([start, end]) => end - start < 1440);
+  const from = Math.min(first, ...finite.map(([start]) => Math.floor(start / 60)));
+  const to = Math.max(last, ...finite.map(([, end]) => Math.ceil(end / 60)));
+  return [Math.max(0, from), Math.min(24, to)];
+}

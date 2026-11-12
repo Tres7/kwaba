@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 const nb = (text: string) => text.replace(/ /g, "\u00a0");
 import type { Appointment } from "./types";
 import {
-  addDays, addMonths, byDay, dayKey, durationMinutes, formatDuration, hourMinute, inTime, itineraryUrl, minutesOfDay, monthGrid,
+  addDays, addMonths, byDay, dayKey, durationMinutes, formatDuration, hourMinute, hoursShown, inTime, rangeMinutes, itineraryUrl, minutesOfDay, monthGrid,
   slotsByDay, visitStates, weekDays, weekStart, weekday,
 } from "./time";
 
@@ -88,5 +88,18 @@ describe("visits of the day", () => {
       ["2026-11-11", ["2026-11-11T09:00:00Z", "2026-11-11T15:00:00Z"]],
       ["2026-11-12", ["2026-11-12T09:00:00Z"]],
     ]);
+  });
+});
+
+describe("planning timeline", () => {
+  it("minutes of a range within the day", () => {
+    expect(rangeMinutes({ start: "2026-11-20T08:00:00Z", end: "2026-11-20T12:30:00Z" }, "2026-11-20")).toEqual([480, 750]);
+    expect(rangeMinutes({ start: "2026-11-20T00:00:00Z", end: "2026-11-21T00:00:00Z" }, "2026-11-20")).toEqual([0, 1440]);
+  });
+
+  it("hours shown cover every visit and window, whole-day blocks aside", () => {
+    expect(hoursShown([])).toEqual([7, 19]);
+    expect(hoursShown([[360, 600], [1080, 1230]])).toEqual([6, 21]);
+    expect(hoursShown([[0, 1440]])).toEqual([7, 19]);
   });
 });

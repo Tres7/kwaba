@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CalendarCheck, CalendarCog, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
+import { ArrowLeft, CalendarCheck, CalendarCog, CalendarRange, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ const NAV: { href: string; label: string; icon: typeof Users; section: string; c
   { href: "/backoffice", label: "Tableau de bord", icon: LayoutDashboard, section: "tableau-de-bord" },
   // Identity documents and visits are handled in the agent space, which admins share with field agents
   { href: "/agent", label: "Vérifications", icon: ClipboardCheck, section: "verifications", compteur: true },
+  { href: "/backoffice/planning", label: "Planning des agents", icon: CalendarRange, section: "verifications" },
   { href: "/backoffice/utilisateurs", label: "Utilisateurs", icon: Users, section: "utilisateurs" },
   { href: "/backoffice/annonces", label: "Annonces", icon: Home, section: "annonces" },
   { href: "/backoffice/reservations", label: "Réservations", icon: CalendarCheck, section: "reservations" },
