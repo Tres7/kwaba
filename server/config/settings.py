@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'apps.experiences.apps.ExperiencesConfig',
     'apps.terrain.apps.TerrainConfig',
     'apps.correcteur.apps.CorrecteurConfig',
+    'apps.export.apps.ExportConfig',
 ]
 
 MIDDLEWARE = [
