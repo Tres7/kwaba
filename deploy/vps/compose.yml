@@ -92,6 +92,11 @@ services:
     command: ['python', 'manage.py', 'traiter_paiements']
     mem_limit: 256m
 
+  agenda:
+    <<: *server
+    command: ['python', 'manage.py', 'agenda_worker']
+    mem_limit: 256m
+
   client:
     image: ${CLIENT_IMAGE:?CLIENT_IMAGE manquant (.deploy.env)}
     env_file: [env/client.env]
