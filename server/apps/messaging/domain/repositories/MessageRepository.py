@@ -1,6 +1,7 @@
 # this repository defines how messages can be saved
 # it defines methods without body. Infrastructure will make the body
 from abc import ABC, abstractmethod
+import datetime
 from typing import Dict, List, Optional
 import uuid
 
@@ -34,4 +35,13 @@ class MessageRepository(ABC):
 
     @abstractmethod
     def unread_counts(self, user_id: uuid.UUID, conversations: List[Conversation]) -> Dict[uuid.UUID, int]:
+        pass
+
+    @abstractmethod
+    def get(self, message_id: int) -> Optional[Message]:
+        pass
+
+    @abstractmethod
+    def context_before(self, conversation_id: uuid.UUID, message_id: int, since: datetime.datetime,
+                       limit: int) -> List[Message]:
         pass

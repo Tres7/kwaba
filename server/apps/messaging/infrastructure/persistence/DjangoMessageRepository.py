@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from typing import Dict, List, Optional
 
@@ -76,3 +77,15 @@ class DjangoMessageRepository(MessageRepository):
             .annotate(unread=Count('id'))
         )
         return {row['conversation_id']: row['unread'] for row in rows}
+
+    def get(self, message_id: int) -> Optional[Message]:
+        model = MessageModel.objects.filter(pk=message_id).first()
+        return self._to_entity(model) if model else None
+
+    def context_before(self, conversation_id: uuid.UUID, message_id: int, since: datetime.datetime,
+                       limit: int) -> List[Message]:
+        rows = list(MessageModel.objects
+                    .filter(conversation_id=conversation_id, id__lt=message_id, created_at__gte=since)
+                    .order_by('-id')[:limit])
+        rows.reverse()
+        return [self._to_entity(m) for m in rows]

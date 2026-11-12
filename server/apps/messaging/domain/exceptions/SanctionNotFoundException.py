@@ -1,0 +1,2 @@
+class SanctionNotFoundException(Exception):
+    pass

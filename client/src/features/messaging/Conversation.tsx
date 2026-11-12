@@ -3,16 +3,20 @@
 import { Link, useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Send, ShieldCheck, EyeOff } from "lucide-react";
+import { ArrowLeft, EyeOff, Flag, Send, ShieldAlert, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useFormat } from "@/lib/format";
 import { usePolling } from "@/lib/usePolling";
-import { envoyerMessage, lireConversation, listerMessages, marquerLu } from "./api";
-import type { MessagingConversation, MessagingMessage } from "./types";
+import { checkDraft, envoyerMessage, lireConversation, listerMessages, marquerLu, reportFalsePositive } from "./api";
+import ModerationNotice, { useModerationStatus } from "./ModerationNotice";
+import { checkFor, isSuspended, moderationFailure, type DraftCheck } from "./moderation";
+import ReportDialog from "./ReportDialog";
+import type { MessagingConversation, MessagingMessage, ModerationCategory } from "./types";
 import { useTranslations } from "next-intl";
 
 const CHAT_POLL_INTERVAL_MS = 4_000;
+const DRAFT_CHECK_DELAY_MS = 400;
 
 type ChatMessage = MessagingMessage & { pending?: boolean };
 
@@ -24,6 +28,7 @@ function errorMessage(err: unknown, t: ReturnType<typeof useTranslations<"messag
 
 export default function ChatPage() {
   const t = useTranslations("messages");
+  const tm = useTranslations("moderation");
   const { langue } = useFormat();
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -35,6 +40,11 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [sendError, setSendError] = useState("");
+  const [draftCheck, setDraftCheck] = useState<DraftCheck | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [reporting, setReporting] = useState<number | null>(null);
+  const moderation = useModerationStatus();
+  const suspended = isSuspended(moderation.status?.suspended_until ?? null);
   const bottomRef = useRef<HTMLDivElement>(null);
   // Highest message id confirmed by the server: polling cursor
   const lastIdRef = useRef(0);
@@ -81,9 +91,40 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
+  useEffect(() => {
+    const text = input.trim();
+    if (!text) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      checkDraft(text)
+        .then((result) => { if (!cancelled) setDraftCheck({ ...result, text }); })
+        .catch(() => { if (!cancelled) setDraftCheck(null); });
+    }, DRAFT_CHECK_DELAY_MS);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [input]);
+
+  const currentCheck = checkFor(draftCheck, input);
+  const blocked = currentCheck?.level === "block";
+  const warned = currentCheck?.level === "warn";
+  const categoriesLabel = (categories: ModerationCategory[]) => categories.map((c) => tm(`category.${c}`)).join(", ");
+
+  const signalFalsePositive = async () => {
+    try {
+      await reportFalsePositive(conversationId, input.trim());
+      toast.success(tm("falsePositiveSent"));
+    } catch {
+      toast.error(tm("falsePositiveError"));
+    }
+  };
+
+  const sendMessage = async (confirmed = false) => {
     const content = input.trim();
-    if (!content) return;
+    if (!content || blocked || suspended) return;
+    if (warned && !confirmed) {
+      setConfirming(true);
+      return;
+    }
+    setConfirming(false);
     setSendError("");
 
     // Shown immediately, replaced by the server version when the response arrives
@@ -95,14 +136,22 @@ export default function ChatPage() {
     setInput("");
 
     try {
-      const envoye = await envoyerMessage(conversationId, content);
+      const envoye = await envoyerMessage(conversationId, content, confirmed);
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       mergeMessages([envoye]);
       if (envoye.masked) toast.info(t("masqueEnvoi"));
     } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setInput(content);
-      setSendError(errorMessage(err, t));
+      const failure = moderationFailure(err);
+      if (failure?.code === "messaging_suspended") {
+        moderation.suspend(failure.until);
+      } else if (failure) {
+        setDraftCheck({ text: content, level: failure.code === "abusive_content" ? "block" : "warn", categories: failure.categories });
+        if (failure.code === "confirmation_required") setConfirming(true);
+      } else {
+        setSendError(errorMessage(err, t));
+      }
     }
   };
 
@@ -177,6 +226,11 @@ export default function ChatPage() {
             </p>
           )}
         </div>
+        {moderation.status && (
+          <div className="px-4 md:px-6 pt-3 flex-shrink-0">
+            <ModerationNotice status={moderation.status} onChange={moderation.reload} />
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8 space-y-6 bg-gray-50/50">
@@ -211,6 +265,14 @@ export default function ChatPage() {
                       ? t("envoi")
                       : new Date(msg.created_at).toLocaleTimeString(langue() === "en" ? "en-GB" : "fr-FR", { hour: "2-digit", minute: "2-digit" })}
                   </p>
+                  {!msg.is_own && !msg.pending && (
+                    <button
+                      type="button" onClick={() => setReporting(msg.id)} aria-label={tm("report")} title={tm("report")}
+                      className="relative zone-tactile p-1 -m-1 rounded-full text-muted/60 hover:text-red-700 transition-colors"
+                    >
+                      <Flag size={12} aria-hidden />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -223,13 +285,40 @@ export default function ChatPage() {
           {sendError && (
             <p className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-4 py-2 mb-3">{sendError}</p>
           )}
+          {currentCheck && currentCheck.level !== "allow" && !suspended && (
+            <div
+              role="alert"
+              className={cn("text-sm rounded-xl px-4 py-2 mb-3 border space-y-1",
+                blocked ? "text-red-800 bg-red-50 border-red-100" : "text-amber-900 bg-amber-50 border-amber-100")}
+            >
+              <p className="flex gap-2">
+                <ShieldAlert size={16} className="flex-shrink-0 mt-0.5" aria-hidden />
+                {blocked ? tm("blocked", { categories: categoriesLabel(currentCheck.categories) }) : tm("warned", { categories: categoriesLabel(currentCheck.categories) })}
+              </p>
+              {confirming && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="font-semibold">{tm("confirmQuestion")}</span>
+                  <button type="button" onClick={() => sendMessage(true)} className="px-3 py-1 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700">
+                    {tm("confirmSend")}
+                  </button>
+                  <button type="button" onClick={() => setConfirming(false)} className="px-3 py-1 rounded-lg font-semibold hover:bg-amber-100">
+                    {tm("confirmEdit")}
+                  </button>
+                </div>
+              )}
+              <button type="button" onClick={signalFalsePositive} className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100">
+                {tm("notAbusive")}
+              </button>
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <div className="flex-1 relative flex items-center">
               <input
                 type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => { setInput(e.target.value); setConfirming(false); }}
                 onKeyDown={handleKeyDown}
+                disabled={suspended}
                 maxLength={2000}
                 placeholder={t("placeholder")}
                 aria-label={t("votreMessage")}
@@ -237,8 +326,8 @@ export default function ChatPage() {
               />
             </div>
             <button
-              onClick={sendMessage}
-              disabled={!input.trim()}
+              onClick={() => sendMessage()}
+              disabled={!input.trim() || blocked || suspended}
               aria-label={t("envoyer")}
               className="w-12 h-12 bg-primary rounded-full flex items-center justify-center disabled:opacity-50 hover:bg-primary-600 transition-all shadow-md active:scale-95 flex-shrink-0"
             >
@@ -247,6 +336,9 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
+      {reporting !== null && (
+        <ReportDialog conversationId={conversationId} messageId={reporting} onClose={() => setReporting(null)} />
+      )}
     </div>
   );
 }

@@ -197,6 +197,8 @@ REST_FRAMEWORK = {
     'NUM_PROXIES': None,
     'DEFAULT_THROTTLE_RATES': {
         'messaging_conversation_create': '10/hour',
+        'messaging_moderation_check': '60/minute',
+        'messaging_report': '20/hour',
         'messaging_message_send': '30/min',
         'hebergement_photo_upload': '120/hour',
         'concierge_conversation': '30/hour',
@@ -244,6 +246,25 @@ MESSAGING = {
     'EMAIL_HOURLY_CAP': int(os.getenv('MESSAGING_EMAIL_HOURLY_CAP', '5')),
     'OUTBOX_RETENTION_DAYS': int(os.getenv('MESSAGING_OUTBOX_RETENTION_DAYS', '7')),
     'RELAY_INTERVAL_SECONDS': int(os.getenv('MESSAGING_RELAY_INTERVAL_SECONDS', '10')),
+}
+
+MODERATION = {
+    'MODE': os.getenv('MODERATION_MODE', 'observe'),
+    'WINDOW_DAYS': int(os.getenv('MODERATION_WINDOW_DAYS', '30')),
+    'WARNING_THRESHOLD': int(os.getenv('MODERATION_WARNING_THRESHOLD', '3')),
+    'SUSPENSION_THRESHOLD': int(os.getenv('MODERATION_SUSPENSION_THRESHOLD', '5')),
+    'FIRST_SUSPENSION_HOURS': int(os.getenv('MODERATION_FIRST_SUSPENSION_HOURS', '24')),
+    'SECOND_SUSPENSION_DAYS': int(os.getenv('MODERATION_SECOND_SUSPENSION_DAYS', '7')),
+    'REFUSAL_ALERT_THRESHOLD': int(os.getenv('MODERATION_REFUSAL_ALERT_THRESHOLD', '3')),
+    'ABUSIVE_REPORTER_THRESHOLD': int(os.getenv('MODERATION_ABUSIVE_REPORTER_THRESHOLD', '3')),
+    'CONTEST_DAYS': int(os.getenv('MODERATION_CONTEST_DAYS', '14')),
+    'CONTEXT_MESSAGES': int(os.getenv('MODERATION_CONTEXT_MESSAGES', '10')),
+    'CONTEXT_DAYS': int(os.getenv('MODERATION_CONTEXT_DAYS', '7')),
+    'REFUSAL_EXCERPT_RETENTION_DAYS': int(os.getenv('MODERATION_REFUSAL_EXCERPT_RETENTION_DAYS', '90')),
+    'REJECTED_REPORT_RETENTION_DAYS': int(os.getenv('MODERATION_REJECTED_REPORT_RETENTION_DAYS', '90')),
+    'CONFIRMED_REPORT_RETENTION_DAYS': int(os.getenv('MODERATION_CONFIRMED_REPORT_RETENTION_DAYS', '365')),
+    'SANCTION_RETENTION_DAYS': int(os.getenv('MODERATION_SANCTION_RETENTION_DAYS', '730')),
+    'REPORTER_COUNTER_RETENTION_DAYS': int(os.getenv('MODERATION_REPORTER_COUNTER_RETENTION_DAYS', '365')),
 }
 
 # Online payment (FedaPay). Without a FedaPay or PayPal key, online payment is disabled:

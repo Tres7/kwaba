@@ -83,3 +83,67 @@ class NotificationOutboxModel(models.Model):
             models.Index(fields=['status', 'available_at'], name='messaging_outbox_due_idx'),
             models.Index(fields=['recipient_id', 'status', 'processed_at'], name='messaging_outbox_cap_idx'),
         ]
+
+
+class MessageReportModel(models.Model):
+    STATUS_CHOICES = [('pending', 'À examiner'), ('confirmed', 'Confirmé'), ('rejected', 'Rejeté')]
+    REASON_CHOICES = [
+        ('insult', 'Insulte'), ('hate', 'Propos haineux'), ('threat', 'Menace'), ('harassment', 'Harcèlement'),
+        ('spam', 'Spam'), ('scam', 'Arnaque'), ('other', 'Autre'),
+    ]
+
+    id = models.BigAutoField(primary_key=True)
+    conversation_id = models.UUIDField(db_index=True)
+    message_id = models.BigIntegerField()
+    reporter_id = models.UUIDField(db_index=True)
+    author_id = models.UUIDField(db_index=True)
+    reason = models.CharField(max_length=20, choices=REASON_CHOICES)
+    details = models.TextField(blank=True)
+    context = models.JSONField(default=list, blank=True)
+    message_created_at = models.DateTimeField()
+    created_at = models.DateTimeField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending', db_index=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    reviewed_by_id = models.UUIDField(null=True, blank=True)
+    review_note = models.TextField(blank=True)
+    legal_hold = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = 'messaging'
+        db_table = 'messaging_message_report'
+        constraints = [
+            models.UniqueConstraint(fields=['reporter_id', 'message_id'], name='messaging_unique_report'),
+        ]
+        indexes = [
+            models.Index(fields=['author_id', 'status'], name='messaging_report_author_idx'),
+            models.Index(fields=['reporter_id', 'status', 'reviewed_at'], name='messaging_report_reporter_idx'),
+        ]
+
+
+class SanctionModel(models.Model):
+    STEP_CHOICES = [
+        ('reminder', 'Rappel des règles'), ('formal_warning', 'Avertissement formel'),
+        ('short_suspension', 'Suspension courte'), ('long_suspension', 'Suspension longue'),
+        ('admin_decision', 'Décision administrateur'),
+    ]
+
+    id = models.BigAutoField(primary_key=True)
+    user_id = models.UUIDField(db_index=True)
+    report_id = models.BigIntegerField(db_index=True)
+    step = models.CharField(max_length=20, choices=STEP_CHOICES)
+    category = models.CharField(max_length=20)
+    created_at = models.DateTimeField(db_index=True)
+    starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    contested_at = models.DateTimeField(null=True, blank=True)
+    contest_text = models.TextField(blank=True)
+    contest_status = models.CharField(max_length=10, blank=True)
+    contest_reviewed_at = models.DateTimeField(null=True, blank=True)
+    contest_reviewed_by_id = models.UUIDField(null=True, blank=True)
+    contest_note = models.TextField(blank=True)
+
+    class Meta:
+        app_label = 'messaging'
+        db_table = 'messaging_sanction'
+        indexes = [models.Index(fields=['user_id', 'ends_at'], name='messaging_sanction_user_idx')]

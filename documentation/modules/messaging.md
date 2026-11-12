@@ -4,6 +4,8 @@ Messagerie entre un voyageur et l'hôte d'un hébergement, avec notification par
 
 Décisions liées : [ADR-015](../ADR/ADR-015-reception-des-messages-par-polling-rest.md) (polling), [ADR-016](../ADR/ADR-016-outbox-et-relais-pour-les-notifications-de-la-messagerie.md) (outbox et relais), [ADR-017](../ADR/ADR-017-curseurs-de-lecture-et-regle-de-notification-0-a-1.md) (curseurs et règle 0→1), [ADR-018](../ADR/ADR-018-garde-fous-anti-abus-de-la-messagerie.md) (anti-abus), [ADR-014](../ADR/ADR-014-fiabilite-du-consumer-rabbitmq-par-dead-letter-queue.md) (dead-letter queue du consumer).
 
+Modération des messages (insultes, menaces, signalements, sanctions) : [moderation.md](moderation.md), [ADR-021](../ADR/ADR-021-message-moderation.md).
+
 ## En bref
 
 - Un voyageur ouvre un fil depuis la fiche d'un hébergement (« Contacter l'hôte »). Il y a un seul fil par couple (hébergement, voyageur).

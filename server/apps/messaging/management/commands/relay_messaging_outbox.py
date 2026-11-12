@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand
 from django.db import close_old_connections
 
 from apps.messaging.infrastructure.container import outbox_relay_service
+from apps.messaging.infrastructure.persistence import moderation_retention
 
 logger = logging.getLogger('apps.messaging.relay')
 
@@ -43,6 +44,9 @@ class Command(BaseCommand):
                     last_purge = now
                     if purged:
                         logger.info("Rétention : %s ligne(s) d'outbox supprimée(s)", purged)
+                    moderated = moderation_retention.purge(now)
+                    if moderated:
+                        logger.info("Rétention de la modération : %s", moderated)
             except Exception:
                 # Database unavailable for example: log it and try again at the next pass
                 logger.exception("Erreur pendant la passe du relais")

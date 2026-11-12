@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 
 from apps.messaging.application.ports.EventPublisher import EventPublisher
 from apps.messaging.application.ports.HebergementLookup import HebergementInfo, HebergementLookup
+from apps.messaging.application.ports.ModerationGuard import OBSERVE, ModerationGuard, ModerationVerdict
 from apps.messaging.application.ports.NotificationOutbox import NotificationOutbox, OutboxEntry
 from apps.messaging.application.ports.TransactionManager import TransactionManager
 from apps.messaging.application.ports.UserLookup import UserInfo, UserLookup
@@ -96,6 +97,42 @@ class FakeMessageRepository(MessageRepository):
     def _unread(self, conversation, user_id):
         cursor = conversation.last_read_id_for(user_id)
         return sum(1 for m in self._of(conversation.id) if m.id > cursor and m.sender_id != user_id)
+
+    def get(self, message_id):
+        return next((dataclasses.replace(m) for m in self.rows if m.id == message_id), None)
+
+    def context_before(self, conversation_id, message_id, since, limit):
+        rows = [m for m in self._of(conversation_id) if m.id < message_id and m.created_at >= since]
+        return rows[-limit:]
+
+
+class FakeModerationGuard(ModerationGuard):
+    def __init__(self, mode=OBSERVE, verdict=None):
+        self.current_mode = mode
+        self.verdict = verdict or ModerationVerdict()
+        self.records = []
+        self.false_positives = []
+
+    def mode(self):
+        return self.current_mode
+
+    def screen(self, text):
+        return self.verdict
+
+    def record(self, user_id, conversation_id, kind, verdict, content):
+        self.records.append((user_id, conversation_id, kind, verdict.level, content))
+
+    def record_false_positive(self, user_id, conversation_id, verdict, content):
+        self.false_positives.append((user_id, conversation_id, content))
+
+
+class FakeSanctionRepository:
+    def __init__(self):
+        self.suspended_until: Dict[uuid.UUID, datetime.datetime] = {}
+
+    def active_suspension_end(self, user_id, now):
+        until = self.suspended_until.get(user_id)
+        return until if until and until > now else None
 
 
 class FakeHebergementLookup(HebergementLookup):
