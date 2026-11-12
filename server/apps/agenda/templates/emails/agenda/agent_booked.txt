@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour,
+
+{% if reassigned %}Une visite vous a été confiée par un administrateur{% else %}Un hôte vient de réserver une visite avec vous{% endif %} : {{ when }}.
+
+{% for listing in listings %}  {{ listing }}
+{% endfor %}  {{ city }}
+
+Adresse et contact de l'hôte : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}

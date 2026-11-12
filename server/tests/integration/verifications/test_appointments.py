@@ -64,6 +64,11 @@ def _book(client, listings, start):
                        format='json')
 
 
+def listing_host_email(listing):
+    from apps.users.infrastructure.persistence.models import UserModel
+    return UserModel.objects.get(pk=listing.host_id).email
+
+
 def _mission(listing):
     return MissionModel.objects.filter(type='logement', cible=str(listing.id), statut='en_cours').first()
 
@@ -86,7 +91,9 @@ class TestHostBooking:
         assert response.data['movable'] is True
         assert _mission(listing).agent_id == agent.pk
         assert client.get(VISIT).data['listings'][0]['appointment']['id'] == response.data['id']
-        assert [m.to for m in mail.outbox] == [[host.email]]
+        assert sorted(m.to[0] for m in mail.outbox) == sorted([host.email, agent.email])
+        to_agent, = [m for m in mail.outbox if m.to == [agent.email]]
+        assert 'Nouvelle visite' in to_agent.subject and 'Studio meublé' in to_agent.body
 
     def test_a_second_host_cannot_take_the_same_slot(self, client_for, host, make_listing, make_agent, make_user,
                                                       make_hebergement):
@@ -148,7 +155,7 @@ class TestHostBooking:
 class TestMoveAndCancel:
     def test_the_host_moves_until_twenty_four_hours_before(self, client_for, host, make_listing, make_agent,
                                                            frozen_now, django_capture_on_commit_callbacks):
-        make_agent()
+        agent = make_agent()
         client = client_for(host)
         appointment_id = _book(client, [make_listing()], at(in_days(3), 9)).data['id']
         slots = client.get(f'{VISIT}appointments/{appointment_id}/slots/').data['slots']
@@ -157,7 +164,7 @@ class TestMoveAndCancel:
             response = client.post(f'{VISIT}appointments/{appointment_id}/move/',
                                    {'start': at(in_days(4), 15).isoformat()}, format='json')
         assert response.status_code == 200 and response.data['start'] == at(in_days(4), 15)
-        assert 'déplacée' in mail.outbox[-1].subject
+        assert sorted(m.to[0] for m in mail.outbox if 'déplacée' in m.subject) == sorted([host.email, agent.email])
         frozen_now(at(in_days(4), 0))
         late = client.post(f'{VISIT}appointments/{appointment_id}/move/', {'start': at(in_days(5), 9).isoformat()},
                            format='json')
@@ -196,9 +203,11 @@ class TestAgentAndAdmin:
                                               {'start': start.isoformat()}, format='json')
         assert response.status_code == 201 and response.data['origin'] == 'phone'
         assert _mission(listing).agent_id == agent.pk
+        assert [m.to for m in mail.outbox] == [[listing_host_email(listing)]]
         assert 'Comme convenu par téléphone' in mail.outbox[-1].body
 
-    def test_admin_reassigns_to_another_agent(self, client_for, host, make_listing, make_agent, make_user):
+    def test_admin_reassigns_to_another_agent(self, client_for, host, make_listing, make_agent, make_user,
+                                              django_capture_on_commit_callbacks):
         listing = make_listing()
         first = make_agent()
         appointment_id = _book(client_for(host), [listing], at(in_days(3), 9)).data['id']
@@ -206,9 +215,13 @@ class TestAgentAndAdmin:
         admin = make_user(role='admin')
         url = f'/api/v1/verifications/appointments/{appointment_id}/reassign/'
         assert client_for(first).post(url, {'agent_id': str(second.pk)}, format='json').status_code == 403
-        response = client_for(admin).post(url, {'agent_id': str(second.pk)}, format='json')
+        with django_capture_on_commit_callbacks(execute=True):
+            response = client_for(admin).post(url, {'agent_id': str(second.pk)}, format='json')
         assert response.status_code == 200 and response.data['agent_id'] == str(second.pk)
         assert _mission(listing).agent_id == second.pk
+        subjects = {m.to[0]: m.subject for m in mail.outbox}
+        assert 'Nouvelle visite' in subjects[second.email] and 'autre agent' in subjects[first.email]
+        assert host.email not in subjects
 
     def test_the_decision_marks_the_visit_done(self, client_for, host, make_listing, make_agent):
         agent = make_agent()

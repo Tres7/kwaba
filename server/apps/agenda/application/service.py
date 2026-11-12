@@ -247,9 +247,11 @@ class AgendaService:
             (target, appointments), = self._with_appointments([locked[agent_id]], appointment.start)
             r.check(target, appointments, appointment.start, appointment.end - appointment.start, now=now,
                     rules=self.rules, check_availability=False)
+            previous_agent_id = appointment.agent_id
             appointment = self.appointments.save(replace(
                 appointment, agenda_id=target.id, agent_id=agent_id, sequence=appointment.sequence + 1,
                 on_the_way_at=None))
+            self.notifier.reassigned(appointment, target, previous_agent_id)
         return appointment
 
     def on_the_way(self, appointment_id: uuid.UUID, agent_id: uuid.UUID) -> Appointment:

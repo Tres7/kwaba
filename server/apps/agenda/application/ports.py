@@ -154,6 +154,10 @@ class Notifier(ABC):
         pass
 
     @abstractmethod
+    def reassigned(self, appointment: Appointment, agenda: Agenda, previous_agent_id: uuid.UUID) -> None:
+        pass
+
+    @abstractmethod
     def host_reminder(self, appointment: Appointment, agenda: Agenda) -> None:
         pass
 

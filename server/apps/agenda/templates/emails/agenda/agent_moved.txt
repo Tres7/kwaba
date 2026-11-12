@@ -1,0 +1,11 @@
+{% autoescape off %}Bonjour,
+
+L'hôte a déplacé sa visite au {{ when }}.
+
+{% for listing in listings %}  {{ listing }}
+{% endfor %}  {{ city }}
+
+Votre agenda : {{ url }}
+
+L'équipe Kwa-Ba
+{% endautoescape %}
