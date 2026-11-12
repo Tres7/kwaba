@@ -315,3 +315,21 @@ def test_worker_command_runs_one_pass(agent, monkeypatch, django_capture_on_comm
     with django_capture_on_commit_callbacks(execute=True):
         call_command('agenda_worker', '--once')
     assert [m.to for m in mail.outbox] == [[agent.email]]
+
+
+class TestTargetAppointment:
+    def test_planned_visit_of_a_listing(self, agent, make_user, make_agenda, make_appointment, client_for):
+        appointment = make_appointment(make_agenda(agent), at(in_days(3), 9),
+                                       targets=[{'id': 'listing-9', 'title': 'Villa'}])
+        mine = client_for(agent).get('/api/v1/agenda/appointments/for-target/listing-9/').data['appointment']
+        assert mine['id'] == str(appointment.id) and mine['mine'] is True and mine['origin'] == 'host'
+        other = client_for(make_user(role='agent')).get('/api/v1/agenda/appointments/for-target/listing-9/')
+        assert other.data['appointment']['mine'] is False and other.data['appointment']['agent']['name']
+
+    def test_no_planned_visit(self, agent, make_agenda, make_appointment, client_for):
+        make_appointment(make_agenda(agent), at(in_days(3), 9), status='cancelled',
+                         targets=[{'id': 'listing-9', 'title': 'Villa'}])
+        assert client_for(agent).get('/api/v1/agenda/appointments/for-target/listing-9/').data == {'appointment': None}
+
+    def test_reserved_to_agents(self, make_user, client_for):
+        assert client_for(make_user(role='hote')).get('/api/v1/agenda/appointments/for-target/x/').status_code == 403

@@ -3,17 +3,41 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Phone } from "lucide-react";
+import { CalendarCheck, Phone } from "lucide-react";
 import { apiErrorMessage } from "@/lib/api";
 import { bookByPhone } from "../api";
-import { useAgendaMutation } from "../hooks";
-import { dayKey } from "../time";
+import { useAgendaMutation, useTargetAppointment } from "../hooks";
+import { dayKey, hourMinute } from "../time";
+
+const PLANNED = new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Lome", weekday: "long", day: "numeric", month: "long" });
 
 export default function PhoneBooking({ listingId }: { listingId: string }) {
   const [day, setDay] = useState("");
   const [time, setTime] = useState("09:00");
   const [booked, setBooked] = useState(false);
   const book = useAgendaMutation(() => bookByPhone(listingId, `${day}T${time}:00+00:00`));
+  const { data: planned, isLoading } = useTargetAppointment(listingId);
+
+  if (isLoading) return null;
+
+  if (planned) {
+    return (
+      <div className="mt-4 rounded-2xl bg-primary/10 p-4">
+        <p className="flex items-center gap-2 font-bold text-primary">
+          <CalendarCheck size={18} aria-hidden /> Visite prévue le {PLANNED.format(new Date(planned.start))} à {hourMinute(planned.start)}
+        </p>
+        <p className="text-sm text-dark mt-1">
+          {planned.origin === "phone" ? "Fixée par téléphone" : "Réservée par l'hôte"}
+          {planned.mine ? ", dans votre agenda." : planned.agent ? ` avec ${planned.agent.name}.` : "."}
+        </p>
+        {planned.mine && (
+          <Link href={`/agent/agenda/${planned.id}`} className="inline-block mt-2 text-sm font-semibold text-primary underline">
+            Voir le rendez-vous
+          </Link>
+        )}
+      </div>
+    );
+  }
 
   if (booked) {
     return (

@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { urlProxy } from "@/lib/api-url";
 import type {
-  AgendaSettings, AgendaSettingsValues, AgentRef, Appointment, AppointmentDetail, Availability, Coverage, HostAppointment, MyVisit, WeeklySlot,
+  AgendaSettings, AgendaSettingsValues, AgentRef, TargetAppointment, Appointment, AppointmentDetail, Availability, Coverage, HostAppointment, MyVisit, WeeklySlot,
 } from "./types";
 
 const AGENDA = "/v1/agenda";
@@ -33,6 +33,11 @@ export async function listAppointments(params: { start: string; end: string; age
 
 export async function readAppointment(id: string) {
   return (await api.get<AppointmentDetail>(`${AGENDA}/appointments/${encodeURIComponent(id)}/`)).data;
+}
+
+export async function readTargetAppointment(targetId: string) {
+  return (await api.get<{ appointment: TargetAppointment | null }>(
+    `${AGENDA}/appointments/for-target/${encodeURIComponent(targetId)}/`)).data.appointment;
 }
 
 export async function onTheWay(id: string) {
