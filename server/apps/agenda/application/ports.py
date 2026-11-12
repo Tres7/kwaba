@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import ContextManager
 
 from apps.agenda.domain.entities import Agenda, Appointment, AvailabilityException, WeeklySlot
+from apps.agenda.domain.settings import AgendaSettings
 
 
 class Clock(ABC):
@@ -105,6 +106,23 @@ class AppointmentRepository(ABC):
 
     @abstractmethod
     def created_since(self, since: datetime) -> list[Appointment]:
+        pass
+
+
+@dataclass(frozen=True)
+class StoredSettings:
+    values: AgendaSettings
+    updated_at: datetime | None = None
+    updated_by_id: uuid.UUID | None = None
+
+
+class SettingsRepository(ABC):
+    @abstractmethod
+    def load(self) -> StoredSettings:
+        pass
+
+    @abstractmethod
+    def save(self, values: AgendaSettings, author_id: uuid.UUID, moment: datetime) -> StoredSettings:
         pass
 
 

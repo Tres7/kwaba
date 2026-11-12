@@ -271,24 +271,6 @@ MODERATION = {
     'REPORTER_COUNTER_RETENTION_DAYS': int(os.getenv('MODERATION_REPORTER_COUNTER_RETENTION_DAYS', '365')),
 }
 
-AGENDA = {
-    'TIMEZONE': os.getenv('AGENDA_TIMEZONE', 'Africa/Lome'),
-    'VISIT_DURATION_MIN': int(os.getenv('AGENDA_VISIT_DURATION_MIN', '60')),
-    'EXTRA_LISTING_MIN': int(os.getenv('AGENDA_EXTRA_LISTING_MIN', '20')),
-    'MAX_LISTINGS': int(os.getenv('AGENDA_MAX_LISTINGS', '5')),
-    'MARGIN_MIN': int(os.getenv('AGENDA_MARGIN_MIN', '30')),
-    'MAX_PER_DAY': int(os.getenv('AGENDA_MAX_PER_DAY', '4')),
-    'PER_DAY_CEILING': int(os.getenv('AGENDA_PER_DAY_CEILING', '10')),
-    'NOTICE_H': int(os.getenv('AGENDA_NOTICE_H', '24')),
-    'HORIZON_DAYS': int(os.getenv('AGENDA_HORIZON_DAYS', '14')),
-    'STEP_MIN': int(os.getenv('AGENDA_STEP_MIN', '30')),
-    'SAME_SITE_DISTANCE_M': int(os.getenv('AGENDA_SAME_SITE_DISTANCE_M', '200')),
-    'DIGEST_HOUR': int(os.getenv('AGENDA_DIGEST_HOUR', '18')),
-    'DECISION_DELAY_H': int(os.getenv('AGENDA_DECISION_DELAY_H', '2')),
-    'HOST_REMINDER_DAYS': int(os.getenv('AGENDA_HOST_REMINDER_DAYS', '2')),
-    'HOST_ALERT_DAYS': int(os.getenv('AGENDA_HOST_ALERT_DAYS', '3')),
-}
-
 # Online payment (FedaPay). Without a FedaPay or PayPal key, online payment is disabled:
 # bookings are then confirmed immediately, without collecting money.
 FEDAPAY = {

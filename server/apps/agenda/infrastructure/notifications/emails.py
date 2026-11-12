@@ -6,6 +6,7 @@ from django.db import transaction
 from django.template.loader import render_to_string
 
 from apps.agenda.application.ports import Notifier, PeopleLookup
+from apps.agenda.domain.settings import DEFAULT_TIMEZONE
 from apps.notifications.api import send_mail
 
 logger = logging.getLogger('apps.agenda')
@@ -120,7 +121,7 @@ class EmailNotifier(Notifier):
 
     def visits_without_decision(self, appointments):
         agents = self.people.people({a.agent_id for a in appointments})
-        tz = ZoneInfo(settings.AGENDA['TIMEZONE'])
+        tz = ZoneInfo(DEFAULT_TIMEZONE)
         visits = [{'when': when(a.start, tz), 'title': a.title, 'city': a.city,
                    'agent': agents[a.agent_id].name if a.agent_id in agents else '-'} for a in appointments]
         _send('visits_without_decision', f"[Kwa-Ba] Visites passées sans décision ({len(appointments)})",

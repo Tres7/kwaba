@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  listAgents, listAppointments, listFreeSlots, listMoveSlots, readAppointment, readAvailability, readCoverage,
+  listAgents, listAppointments, readAgendaSettings, listFreeSlots, listMoveSlots, readAppointment, readAvailability, readCoverage,
   readFeed, readMyVisit,
 } from "./api";
 
@@ -12,6 +12,7 @@ export const agendaKeys = {
   feed: () => [...agendaKeys.all, "feed"] as const,
   coverage: () => [...agendaKeys.all, "coverage"] as const,
   agents: () => [...agendaKeys.all, "agents"] as const,
+  settings: () => [...agendaKeys.all, "settings"] as const,
   myVisit: () => [...agendaKeys.all, "my-visit"] as const,
   freeSlots: (listingIds: string[]) => [...agendaKeys.all, "free-slots", ...listingIds] as const,
   moveSlots: (appointmentId: string) => [...agendaKeys.all, "move-slots", appointmentId] as const,
@@ -72,4 +73,8 @@ export function useAgendaMutation<T, R>(action: (value: T) => Promise<R>) {
     mutationFn: action,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: agendaKeys.all }),
   });
+}
+
+export function useAgendaSettings() {
+  return useQuery({ queryKey: agendaKeys.settings(), queryFn: readAgendaSettings });
 }

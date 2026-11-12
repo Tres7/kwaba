@@ -120,3 +120,26 @@ export interface MyVisit {
     same_site_distance_m: number;
   };
 }
+
+export interface AgendaSettingsValues {
+  notice_hours: number;
+  horizon_days: number;
+  max_per_day: number;
+  margin_minutes: number;
+  visit_minutes: number;
+  extra_listing_minutes: number;
+  max_listings: number;
+  same_site_distance_m: number;
+  digest_hour: number;
+  decision_alert_hours: number;
+  host_reminder_days: number;
+  host_alert_days: number;
+}
+
+export interface AgendaSettings {
+  values: AgendaSettingsValues;
+  defaults: AgendaSettingsValues;
+  bounds: Record<keyof AgendaSettingsValues, { min: number; max: number }>;
+  updated_at: string | null;
+  updated_by: string | null;
+}

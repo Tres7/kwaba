@@ -14,8 +14,11 @@ from apps.agenda.domain.exceptions import (
     ActionNotAllowed, AlreadyBooked, AppointmentNotFound, DailyLimitReached, InvalidRule, SlotUnavailable,
 )
 
+from apps.agenda.domain.settings import AgendaSettings, validated
+
 from .ports import (
-    AgendaRepository, AppointmentRepository, Clock, DigestRepository, Notifier, PeopleLookup, TransactionManager,
+    AgendaRepository, AppointmentRepository, Clock, DigestRepository, Notifier, PeopleLookup, SettingsRepository,
+    StoredSettings, TransactionManager,
 )
 
 logger = logging.getLogger('apps.agenda')
@@ -44,11 +47,12 @@ class Settings:
 
 class AgendaService:
     def __init__(self, *, agendas: AgendaRepository, appointments: AppointmentRepository, digests: DigestRepository,
-                 people: PeopleLookup, notifier: Notifier, tx: TransactionManager, clock: Clock, rules: r.Rules,
+                 settings_store: SettingsRepository, people: PeopleLookup, notifier: Notifier, tx: TransactionManager, clock: Clock, rules: r.Rules,
                  settings: Settings, tasks: Callable[[], list[Callable[[], dict | None]]]):
         self.agendas = agendas
         self.appointments = appointments
         self.digests = digests
+        self.settings_store = settings_store
         self.people = people
         self.notifier = notifier
         self.tx = tx
@@ -56,6 +60,15 @@ class AgendaService:
         self.rules = rules
         self.settings = settings
         self.tasks = tasks
+
+    def stored_settings(self) -> StoredSettings:
+        return self.settings_store.load()
+
+    def update_settings(self, changes: dict, author_id: uuid.UUID) -> tuple[AgendaSettings, StoredSettings]:
+        with self.tx.atomic():
+            before = self.settings_store.load().values
+            after = validated(before, changes)
+            return before, self.settings_store.save(after, author_id, self.clock.now())
 
     def agenda(self, agent_id: uuid.UUID) -> Agenda:
         return self.agendas.for_agent(agent_id) or self.agendas.create(agent_id)

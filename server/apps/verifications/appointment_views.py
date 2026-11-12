@@ -1,6 +1,5 @@
 from zoneinfo import ZoneInfo
 
-from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework.permissions import IsAuthenticated
@@ -35,7 +34,7 @@ def _start(value):
     if moment is None:
         return None
     if timezone.is_naive(moment):
-        moment = moment.replace(tzinfo=ZoneInfo(settings.AGENDA['TIMEZONE']))
+        moment = moment.replace(tzinfo=ZoneInfo(agenda.DEFAULT_TIMEZONE))
     return moment
 
 
@@ -54,10 +53,10 @@ def _no_start() -> Response:
 
 
 def _rules() -> dict:
-    config = settings.AGENDA
-    return {'visit_duration_min': config['VISIT_DURATION_MIN'], 'extra_listing_min': config['EXTRA_LISTING_MIN'],
-            'max_listings': config['MAX_LISTINGS'], 'notice_h': config['NOTICE_H'],
-            'horizon_days': config['HORIZON_DAYS'], 'same_site_distance_m': config['SAME_SITE_DISTANCE_M']}
+    config = agenda.settings()
+    return {'visit_duration_min': config.visit_minutes, 'extra_listing_min': config.extra_listing_minutes,
+            'max_listings': config.max_listings, 'notice_h': config.notice_hours,
+            'horizon_days': config.horizon_days, 'same_site_distance_m': config.same_site_distance_m}
 
 
 class MyVisitView(APIView):

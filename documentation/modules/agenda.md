@@ -31,32 +31,20 @@ Sans réservation : relance de l'hôte à 2 jours, alerte aux admins à 3 jours.
 
 `python manage.py agenda_worker` (service `agenda` en prod, `agenda-worker` en dev ; `--once` pour une seule passe, `--interval` en secondes, 300 par défaut). Une passe :
 
-- récapitulatifs de la veille et rappels aux hôtes, à partir de `AGENDA_DIGEST_HOUR` ;
+- récapitulatifs de la veille et rappels aux hôtes, à partir de l'heure réglée (18 h par défaut) ;
 - relance des agents sans disponibilité sur 14 jours, une fois par semaine au plus ;
 - alerte aux admins pour les visites passées sans décision ;
 - tâches déclarées par les autres modules (`agenda.api.register_task`), dont la relance des hôtes de `verifications`.
 
 ## Réglages
 
-Variables d'environnement, avec leur valeur par défaut :
+Back-office > Réglages agenda (`/backoffice/agenda`), décision : [ADR-023](../ADR/ADR-023-reglages-agenda-et-validation-sans-visite.md).
 
-| Variable | Défaut | Rôle |
-|---|---|---|
-| `AGENDA_TIMEZONE` | `Africa/Lome` | fuseau des emails d'alerte |
-| `AGENDA_VISIT_DURATION_MIN` | 60 | durée d'une visite |
-| `AGENDA_EXTRA_LISTING_MIN` | 20 | par annonce en plus dans une visite groupée |
-| `AGENDA_MAX_LISTINGS` | 5 | annonces par visite groupée |
-| `AGENDA_MARGIN_MIN` | 30 | écart avant la visite suivante |
-| `AGENDA_MAX_PER_DAY` | 4 | visites par jour et par agent |
-| `AGENDA_PER_DAY_CEILING` | 10 | limite maximale qu'un agent peut fixer pour une journée |
-| `AGENDA_NOTICE_H` | 24 | préavis de réservation et de déplacement |
-| `AGENDA_HORIZON_DAYS` | 14 | horizon de réservation |
-| `AGENDA_STEP_MIN` | 30 | pas des créneaux proposés |
-| `AGENDA_SAME_SITE_DISTANCE_M` | 200 | distance maximale d'une visite groupée |
-| `AGENDA_DIGEST_HOUR` | 18 | heure locale des récapitulatifs et rappels |
-| `AGENDA_DECISION_DELAY_H` | 2 | délai avant l'alerte « visite sans décision » |
-| `AGENDA_HOST_REMINDER_DAYS` | 2 | relance de l'hôte sans réservation |
-| `AGENDA_HOST_ALERT_DAYS` | 3 | alerte aux admins |
+- Ouvert aux super admins, et aux admins qui ont la permission spéciale « Réglages de l'agenda » (Utilisateurs > Droits). Un admin sans limite de sections ne l'a pas d'office.
+- Valeurs par défaut dans `server/apps/agenda/domain/settings.py`, bornes vérifiées au même endroit. Sans modification, les règles validées s'appliquent.
+- Une seule ligne en base (`agenda_settings`). Chaque changement va au journal d'audit (`agenda_settings_changed`, avant et après).
+- Effet limité aux nouvelles réservations : un rendez-vous garde sa fin et son écart.
+- Chaque réglage a un bouton d'info avec un exemple calculé sur sa valeur.
 
 ## Calendriers externes
 

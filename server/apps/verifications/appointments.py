@@ -35,7 +35,7 @@ def _host_listings(host_id) -> dict[str, dict]:
 
 
 def _movable(appointment) -> bool:
-    notice = timedelta(hours=settings.AGENDA['NOTICE_H'])
+    notice = timedelta(hours=agenda.settings().notice_hours)
     return appointment.status == 'confirmed' and appointment.start - notice > timezone.now()
 
 
@@ -203,8 +203,9 @@ def _name(account) -> str:
 
 
 def _hosts_without_appointment(now) -> tuple[list, list]:
-    remind_after = timedelta(days=settings.AGENDA['HOST_REMINDER_DAYS'])
-    alert_after = timedelta(days=settings.AGENDA['HOST_ALERT_DAYS'])
+    config = agenda.settings()
+    remind_after = timedelta(days=config.host_reminder_days)
+    alert_after = timedelta(days=config.host_alert_days)
     invitations = list(VisitInvitationModel.objects.filter(invited_at__lte=now - remind_after).exclude(
         reminded_at__isnull=False, alerted_at__isnull=False))
     if not invitations:

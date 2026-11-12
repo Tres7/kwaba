@@ -1,18 +1,21 @@
 import hashlib
+from dataclasses import fields
 from typing import ContextManager
 
 from django.db import IntegrityError, connection, transaction
 
 from apps.agenda.application.ports import (
-    AgendaRepository, AppointmentRepository, DigestRepository, TransactionManager,
+    AgendaRepository, AppointmentRepository, DigestRepository, SettingsRepository, StoredSettings, TransactionManager,
 )
 from apps.agenda.domain.entities import (
     CONFIRMED, DONE, Agenda, Appointment, AvailabilityException, Target, WeeklySlot,
 )
 from apps.agenda.domain.exceptions import SlotUnavailable
+from apps.agenda.domain.settings import AgendaSettings
 
 from .models import (
-    AgendaModel, AppointmentModel, AvailabilityExceptionModel, DayLimitModel, DigestModel, WeeklySlotModel, new_token,
+    AgendaModel, AgendaSettingsModel, AppointmentModel, AvailabilityExceptionModel, DayLimitModel, DigestModel,
+    WeeklySlotModel, new_token,
 )
 
 ACTIVE = [CONFIRMED, DONE]
@@ -181,3 +184,22 @@ class DjangoDigestRepository(DigestRepository):
     def mark(self, agenda_id, day, moment):
         _, created = DigestModel.objects.get_or_create(agenda_id=agenda_id, day=day, defaults={'sent_at': moment})
         return created
+
+
+class DjangoSettingsRepository(SettingsRepository):
+    NAMES = tuple(f.name for f in fields(AgendaSettings))
+
+    def load(self):
+        row = AgendaSettingsModel.objects.first()
+        if row is None:
+            return StoredSettings(values=AgendaSettings())
+        return StoredSettings(values=AgendaSettings(**{name: getattr(row, name) for name in self.NAMES}),
+                              updated_at=row.updated_at, updated_by_id=row.updated_by_id)
+
+    def save(self, values, author_id, moment):
+        row = AgendaSettingsModel.objects.select_for_update().first() or AgendaSettingsModel()
+        for name, value in values.as_dict().items():
+            setattr(row, name, value)
+        row.updated_at, row.updated_by_id = moment, author_id
+        row.save()
+        return self.load()

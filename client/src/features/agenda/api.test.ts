@@ -53,6 +53,10 @@ describe("agenda", () => {
     expect(api.get).toHaveBeenLastCalledWith("/v1/agenda/admin/coverage/");
     await agenda.listAgents();
     expect(api.get).toHaveBeenLastCalledWith("/v1/agenda/admin/agents/");
+    await agenda.readAgendaSettings();
+    expect(api.get).toHaveBeenLastCalledWith("/v1/admin/agenda/settings/");
+    await agenda.saveAgendaSettings({ notice_hours: 48 });
+    expect(api.put).toHaveBeenLastCalledWith("/v1/admin/agenda/settings/", { notice_hours: 48 });
   });
 
   it("the host books and moves their visit", async () => {

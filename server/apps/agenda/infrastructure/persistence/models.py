@@ -126,6 +126,28 @@ class AppointmentModel(models.Model):
         return f"Visite {self.start:%d/%m/%Y %H:%M} · {self.city}"
 
 
+class AgendaSettingsModel(models.Model):
+    notice_hours = models.PositiveSmallIntegerField(default=24)
+    horizon_days = models.PositiveSmallIntegerField(default=14)
+    max_per_day = models.PositiveSmallIntegerField(default=4)
+    margin_minutes = models.PositiveSmallIntegerField(default=30)
+    visit_minutes = models.PositiveSmallIntegerField(default=60)
+    extra_listing_minutes = models.PositiveSmallIntegerField(default=20)
+    max_listings = models.PositiveSmallIntegerField(default=5)
+    same_site_distance_m = models.PositiveSmallIntegerField(default=200)
+    digest_hour = models.PositiveSmallIntegerField(default=18)
+    decision_alert_hours = models.PositiveSmallIntegerField(default=2)
+    host_reminder_days = models.PositiveSmallIntegerField(default=2)
+    host_alert_days = models.PositiveSmallIntegerField(default=3)
+    updated_at = models.DateTimeField(null=True, blank=True)
+    updated_by_id = models.UUIDField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'agenda_settings'
+        verbose_name = "Réglages de l'agenda"
+        verbose_name_plural = "Réglages de l'agenda"
+
+
 class DigestModel(models.Model):
     agenda = models.ForeignKey(AgendaModel, on_delete=models.CASCADE, related_name='digests')
     day = models.DateField()
