@@ -13,7 +13,7 @@ import { formatDuration } from "../time";
 import type { AgendaSettingsValues } from "../types";
 
 const UPDATED = new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Lome", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
-const inputClass = "w-24 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const inputClass = "w-20 sm:w-24 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 function display(field: SettingField, value: number): string {
   return field.kind === "duration" ? formatDuration(value) : `${value} ${field.unit?.(value) ?? ""}`.trim();
@@ -126,7 +126,7 @@ function SettingRow({ field, values, defaultValue, bounds, error, onChange }: {
             <>
               <input id={inputId} type="number" inputMode="numeric" min={bounds.min} max={bounds.max} value={value}
                 onChange={(e) => onChange(Math.round(Number(e.target.value)))} className={inputClass} />
-              <span className="w-16 text-sm text-muted">{field.unit?.(value)}</span>
+              <span className="w-14 sm:w-16 text-sm text-muted">{field.unit?.(value)}</span>
             </>
           )}
         </div>

@@ -20,7 +20,7 @@ export function clock(totalMinutes: number): string {
   const minutes = ((totalMinutes % 1440) + 1440) % 1440;
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  return rest ? `${hours} h ${String(rest).padStart(2, "0")}` : `${hours} h`;
+  return rest ? `${hours}\u00a0h\u00a0${String(rest).padStart(2, "0")}` : `${hours}\u00a0h`;
 }
 
 export function afterMonday10(hours: number): string {
@@ -80,7 +80,7 @@ export const SECTIONS: { title: string; fields: SettingField[] }[] = [
         help: (v) => `Un hôte peut regrouper au plus ${plural(v.max_listings, "annonce")} dans une même visite, soit ${formatDuration(v.visit_minutes + (v.max_listings - 1) * v.extra_listing_minutes)} au plus.`,
       },
       {
-        key: "same_site_distance_m", label: "Distance « même site »", kind: "number", unit: () => "m",
+        key: "same_site_distance_m", label: "Distance «\u00a0même site\u00a0»", kind: "number", unit: () => "m",
         help: (v) => `Des annonces peuvent être visitées ensemble si elles sont toutes à moins de ${v.same_site_distance_m} m les unes des autres (environ ${Math.max(1, Math.round(v.same_site_distance_m / 80))} min à pied). Au-delà, l'hôte réserve une visite par annonce.`,
       },
     ],
@@ -93,7 +93,7 @@ export const SECTIONS: { title: string; fields: SettingField[] }[] = [
         help: (v) => `À partir de ${v.digest_hour} h, chaque agent reçoit la liste de ses visites du lendemain, et chaque hôte un rappel de sa visite.`,
       },
       {
-        key: "decision_alert_hours", label: "Alerte « visite sans décision »", kind: "number", unit: () => "h",
+        key: "decision_alert_hours", label: "Alerte «\u00a0visite sans décision\u00a0»", kind: "number", unit: () => "h",
         help: (v) => `Une visite qui finit à 10 h sans décision de l'agent déclenche une alerte aux admins à ${clock((10 + v.decision_alert_hours) * 60)}${10 + v.decision_alert_hours >= 24 ? " (un autre jour)" : ""}.`,
       },
       {

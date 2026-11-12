@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+
+const nb = (text: string) => text.replace(/ /g, "\u00a0");
 import { SECTIONS, afterMonday10, clock, durationOptions } from "./settingsHelp";
 import type { AgendaSettingsValues } from "./types";
 
@@ -13,25 +15,25 @@ const help = (key: keyof AgendaSettingsValues, values = DEFAULTS) =>
 
 describe("settings help", () => {
   it("clock times", () => {
-    expect(clock(570)).toBe("9 h 30");
-    expect(clock(600)).toBe("10 h");
-    expect(clock(1500)).toBe("1 h");
+    expect(clock(570)).toBe(nb("9 h 30"));
+    expect(clock(600)).toBe(nb("10 h"));
+    expect(clock(1500)).toBe(nb("1 h"));
   });
 
   it("notice from Monday at 10", () => {
-    expect(afterMonday10(24)).toBe("le mardi à 10 h");
-    expect(afterMonday10(1)).toBe("le lundi à 11 h");
-    expect(afterMonday10(72)).toBe("le jeudi à 10 h");
+    expect(afterMonday10(24)).toBe("le mardi à " + nb("10 h"));
+    expect(afterMonday10(1)).toBe("le lundi à " + nb("11 h"));
+    expect(afterMonday10(72)).toBe("le jeudi à " + nb("10 h"));
   });
 
   it("concrete examples follow the values", () => {
-    expect(help("notice_hours")).toContain("le mardi à 10 h");
-    expect(help("visit_minutes")).toContain("se termine à 10 h");
-    expect(help("visit_minutes", { ...DEFAULTS, visit_minutes: 80 })).toContain("10 h 20");
-    expect(help("extra_listing_minutes")).toContain("1 h 40");
-    expect(help("margin_minutes")).toContain("10 h 30");
+    expect(help("notice_hours")).toContain("le mardi à " + nb("10 h"));
+    expect(help("visit_minutes")).toContain("se termine à " + nb("10 h"));
+    expect(help("visit_minutes", { ...DEFAULTS, visit_minutes: 80 })).toContain(nb("10 h 20"));
+    expect(help("extra_listing_minutes")).toContain(nb("1 h 40"));
+    expect(help("margin_minutes")).toContain(nb("10 h 30"));
     expect(help("margin_minutes", { ...DEFAULTS, margin_minutes: 0 })).toContain("Aucun écart");
-    expect(help("max_listings")).toContain("2 h 20");
+    expect(help("max_listings")).toContain(nb("2 h 20"));
     expect(help("host_reminder_days")).toContain("le mercredi");
     expect(help("host_alert_days", { ...DEFAULTS, host_alert_days: 8 })).toContain("de la semaine suivante");
   });

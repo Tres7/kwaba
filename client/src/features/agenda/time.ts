@@ -85,10 +85,10 @@ export function minutesUntil(moment: string, now: Date): number {
 
 export function formatDuration(minutes: number): string {
   const total = Math.max(0, Math.round(minutes));
-  if (total < 60) return `${total} min`;
+  if (total < 60) return `${total}\u00a0min`;
   const hours = Math.floor(total / 60);
   const rest = total % 60;
-  return rest ? `${hours} h ${String(rest).padStart(2, "0")}` : `${hours} h`;
+  return rest ? `${hours}\u00a0h\u00a0${String(rest).padStart(2, "0")}` : `${hours}\u00a0h`;
 }
 
 export function inTime(minutes: number): string {
