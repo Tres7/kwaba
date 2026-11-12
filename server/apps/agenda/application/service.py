@@ -38,6 +38,15 @@ class BookingRequest:
 
 
 @dataclass(frozen=True)
+class AgentPlan:
+    agenda: Agenda
+    windows: list[tuple[datetime, datetime]]
+    blocks: list[tuple[datetime, datetime]]
+    max_visits: int
+    appointments: list[Appointment]
+
+
+@dataclass(frozen=True)
 class Settings:
     digest_hour: int = 18
     decision_delay: timedelta = timedelta(hours=2)
@@ -312,6 +321,38 @@ class AgendaService:
 
     def regenerate_token(self, agent_id: uuid.UUID) -> str:
         return self.agendas.regenerate_token(self.agenda(agent_id))
+
+    def planning(self, day: date, city: str = '') -> list[AgentPlan]:
+        agendas = {a.agent_id: a for a in self.agendas.all()}
+        for agent_id in self.people.active_agents():
+            agendas.setdefault(agent_id, Agenda(agent_id=agent_id))
+        active = self._active_agents(agendas)
+        selected = [a for a in agendas.values() if a.agent_id in active and (not city or r.covers(a, city))]
+        if not selected:
+            return []
+        start, end = self._day_bounds(selected[0], day)
+        found = self.appointments.between(start - timedelta(hours=14), end + timedelta(hours=14), with_cancelled=True)
+        plans = []
+        for agenda in selected:
+            day_start, day_end = self._day_bounds(agenda, day)
+            blocks = []
+            for exception in agenda.exceptions:
+                if exception.day != day or exception.kind != BLOCK:
+                    continue
+                if exception.start is None or exception.end is None:
+                    blocks.append((day_start, day_end))
+                else:
+                    blocks.append((datetime.combine(day, exception.start, tzinfo=agenda.tz),
+                                   datetime.combine(day, exception.end, tzinfo=agenda.tz)))
+            plans.append(AgentPlan(
+                agenda=agenda,
+                windows=r.day_windows(agenda, day),
+                blocks=blocks,
+                max_visits=r.day_limit(agenda, day, self.rules),
+                appointments=sorted((x for x in found if x.agent_id == agenda.agent_id
+                                     and day_start <= x.start < day_end), key=lambda x: x.start),
+            ))
+        return plans
 
     def coverage(self) -> list[dict]:
         agendas = self.agendas.all()

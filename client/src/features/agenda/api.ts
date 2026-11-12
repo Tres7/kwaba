@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { urlProxy } from "@/lib/api-url";
 import type {
-  AgendaSettings, AgendaSettingsValues, AgentRef, TargetAppointment, Appointment, AppointmentDetail, Availability, Coverage, HostAppointment, MyVisit, WeeklySlot,
+  AgendaSettings, AgendaSettingsValues, AgentRef, Planning, TargetAppointment, Appointment, AppointmentDetail, Availability, Coverage, HostAppointment, MyVisit, WeeklySlot,
 } from "./types";
 
 const AGENDA = "/v1/agenda";
@@ -110,4 +110,8 @@ export async function saveAgendaSettings(values: Partial<AgendaSettingsValues>) 
 
 export async function concludePostCheck(id: string, compliant: boolean, reason = "") {
   await api.post(`${VERIFICATIONS}/appointments/${encodeURIComponent(id)}/post-check/`, { compliant, reason });
+}
+
+export async function readPlanning(day: string, city: string) {
+  return (await api.get<Planning>("/v1/admin/agenda/planning/", { params: { day, ...(city ? { city } : {}) } })).data;
 }

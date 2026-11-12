@@ -34,6 +34,15 @@ Sans réservation : relance de l'hôte à 2 jours, alerte aux admins à 3 jours.
 - Par défaut, la visite prévue est annulée et la mission fermée ; l'hôte et l'agent reçoivent chacun un message.
 - « Conserver la visite prévue » : elle devient un contrôle a posteriori. Sur la fiche du rendez-vous, l'agent conclut « Conforme » ou « Non conforme » ; non conforme retire l'annonce du site (statut refusée, motif envoyé à l'hôte) et alerte les admins.
 
+## Planning des agents
+
+Back-office > Planning des agents (`/backoffice/planning`), ouvert aux admins qui ont la section Vérifications.
+
+- Une ligne par agent actif, avec ses villes et ses visites du jour sur sa limite (« 2/4 visites »).
+- Sur une journée découpée en heures : plages de disponibilité, indisponibilités (congés, jours ou heures bloqués) et visites, colorées selon leur état (prévue, terminée, annulée, contrôle a posteriori, agent en route, fixée par téléphone).
+- Navigation par jour et filtre par ville ; une visite ouvre sa fiche, d'où un admin peut la réaffecter.
+- API : `GET /api/v1/admin/agenda/planning/?day=AAAA-MM-JJ&city=…`.
+
 ## Worker
 
 `python manage.py agenda_worker` (service `agenda` en prod, `agenda-worker` en dev ; `--once` pour une seule passe, `--interval` en secondes, 300 par défaut). Une passe :

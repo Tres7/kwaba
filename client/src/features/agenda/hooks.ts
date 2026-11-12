@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  listAgents, listAppointments, readAgendaSettings, readTargetAppointment, listFreeSlots, listMoveSlots, readAppointment, readAvailability, readCoverage,
+  listAgents, listAppointments, readAgendaSettings, readPlanning, readTargetAppointment, listFreeSlots, listMoveSlots, readAppointment, readAvailability, readCoverage,
   readFeed, readMyVisit,
 } from "./api";
 
@@ -14,6 +14,7 @@ export const agendaKeys = {
   coverage: () => [...agendaKeys.all, "coverage"] as const,
   agents: () => [...agendaKeys.all, "agents"] as const,
   settings: () => [...agendaKeys.all, "settings"] as const,
+  planning: (day: string, city: string) => [...agendaKeys.all, "planning", day, city] as const,
   myVisit: () => [...agendaKeys.all, "my-visit"] as const,
   freeSlots: (listingIds: string[]) => [...agendaKeys.all, "free-slots", ...listingIds] as const,
   moveSlots: (appointmentId: string) => [...agendaKeys.all, "move-slots", appointmentId] as const,
@@ -82,4 +83,13 @@ export function useAgendaSettings() {
 
 export function useTargetAppointment(targetId: string) {
   return useQuery({ queryKey: agendaKeys.targetAppointment(targetId), queryFn: () => readTargetAppointment(targetId) });
+}
+
+export function usePlanning(day: string, city: string) {
+  return useQuery({
+    queryKey: agendaKeys.planning(day, city),
+    queryFn: () => readPlanning(day, city),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+  });
 }

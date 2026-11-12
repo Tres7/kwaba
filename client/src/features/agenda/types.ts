@@ -149,3 +149,41 @@ export interface AgendaSettings {
   updated_at: string | null;
   updated_by: string | null;
 }
+
+export interface TimeRange {
+  start: string;
+  end: string;
+}
+
+export interface PlanningAppointment {
+  id: string;
+  title: string;
+  city: string;
+  address: string;
+  start: string;
+  end: string;
+  status: AppointmentStatus;
+  origin: "host" | "phone";
+  on_the_way_at: string | null;
+  post_check: boolean;
+}
+
+export interface AgentPlan {
+  id: string;
+  name: string;
+  role: string;
+  cities: string[];
+  max_visits: number;
+  visits: number;
+  windows: TimeRange[];
+  blocks: TimeRange[];
+  appointments: PlanningAppointment[];
+}
+
+export interface Planning {
+  day: string;
+  city: string;
+  timezone: string;
+  cities: string[];
+  agents: AgentPlan[];
+}
