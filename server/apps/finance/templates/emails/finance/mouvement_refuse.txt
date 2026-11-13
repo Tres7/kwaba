@@ -1,0 +1,13 @@
+{% autoescape off %}Bonjour,
+
+Le grand livre a refusé un mouvement d'argent : il n'a pas été écrit. L'action qui le demandait (paiement, versement, remboursement…) échoue avec lui, sauf si le code qui l'a appelé a choisi de continuer.
+
+Origine : {{ origine }}
+Raison : {{ raison }}
+
+Que faire : vérifier le référentiel du module finance (nature, offre, compte d'argent, type de tiers, moyen de paiement) et l'état de la période comptable. Si le référentiel est juste, l'erreur vient du code appelant : prévenir l'équipe technique.
+
+Cet email ne contient ni montant ni nom de personne.
+
+Kwa-Ba, module finance
+{% endautoescape %}

@@ -13,6 +13,7 @@ modules =
     apps.documents
     apps.experiences
     apps.favoris
+    apps.finance
     apps.give
     apps.hebergements
     apps.locations
@@ -43,6 +44,7 @@ forbidden_modules =
     apps.documents
     apps.experiences
     apps.favoris
+    apps.finance
     apps.give
     apps.hebergements
     apps.locations
@@ -67,6 +69,7 @@ source_modules =
     apps.documents
     apps.experiences
     apps.favoris
+    apps.finance
     apps.give
     apps.hebergements
     apps.locations
@@ -83,3 +86,13 @@ forbidden_modules =
     apps.notifications.infrastructure
     apps.notifications.management
 allow_indirect_imports = True
+
+[importlinter:contract:finance-couches]
+name = Module finance : le domaine et l'application ne dépendent pas de l'infrastructure (ADR-024)
+type = layers
+containers =
+    apps.finance
+layers =
+    infrastructure
+    application
+    domain

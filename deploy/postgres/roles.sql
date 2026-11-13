@@ -44,3 +44,10 @@ REVOKE UPDATE, DELETE ON securite_journal_audit FROM kwaba_app;
 -- Hosts' pre-registration proofs (contrats_preinscription): same rule as the audit log.
 -- The table is created by the contrats 0005 migration: run this script again after that migration.
 REVOKE UPDATE, DELETE ON contrats_preinscription FROM kwaba_app;
+
+-- Ledger of the finance module and its histories (apps.finance): append only. Their triggers already refuse any
+-- change or deletion, whoever asks; the rights say the same. Created by the finance 0001 migration: run this script
+-- again after it. Without UPDATE, kwaba_app cannot lock these rows either (SELECT … FOR UPDATE): the code never does.
+REVOKE UPDATE, DELETE ON finance_mouvement FROM kwaba_app;
+REVOKE UPDATE, DELETE ON finance_parametre_histo FROM kwaba_app;
+REVOKE UPDATE, DELETE ON finance_correspondance_histo FROM kwaba_app;

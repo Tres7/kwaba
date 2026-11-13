@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'apps.correcteur.apps.CorrecteurConfig',
     'apps.export.apps.ExportConfig',
     'apps.agenda.apps.AgendaConfig',
+    'apps.finance.apps.FinanceConfig',
 ]
 
 MIDDLEWARE = [
