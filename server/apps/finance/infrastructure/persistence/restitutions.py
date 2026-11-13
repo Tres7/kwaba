@@ -46,6 +46,13 @@ class SqlRestitutions(Restitutions):
         return _lignes('SELECT tiers_type, tiers_id, solde_du::bigint AS solde_du FROM finance_du_aux_partenaires '
                        'ORDER BY tiers_type, tiers_id')
 
+    def derniers_mouvements(self, limite: int) -> list[dict]:
+        return _lignes('SELECT p.id, p.date_evenement, p.famille, p.nature_code, p.nature_libelle, p.offre_code, '
+                       'p.tiers_type, p.tiers_id, p.compte_argent_code, p.moyen_paiement_code, p.piece_reference, '
+                       'p.montant, p.montant_signe, m.origine, m.annule_mouvement_id '
+                       'FROM finance_pivot p JOIN finance_mouvement m ON m.id = p.id ORDER BY p.id DESC LIMIT %s',
+                       [limite])
+
     def cautions_detenues(self) -> list[dict]:
         return _lignes('SELECT reservation_id, location_id, solde_detenu::bigint AS solde_detenu '
                        'FROM finance_cautions_detenues ORDER BY reservation_id, location_id')

@@ -60,9 +60,11 @@ def preparer(ligne: Ligne, ref: Referentiels, *, origine: str, par_id=None, main
             raise MouvementRefuse(inconnu.format(code=code))
         if not actifs[code]:
             raise MouvementRefuse(inactif.format(code=code))
-    if (ligne.tiers_type is None) != (ligne.tiers_id is None):
-        raise MouvementRefuse('Le type de tiers et son identifiant vont ensemble.')
-    if nature.famille == FONDS_DE_TIERS and ligne.tiers_id is None:
+    if ligne.tiers_id is not None and ligne.tiers_type is None:
+        raise MouvementRefuse("Un identifiant de tiers va avec son type (hote, chauffeur…).")
+    # Partner money is owed to a kind of partner; the person may still be to designate (the driver of a transfer is
+    # assigned after the payment), then the line is moved to them
+    if nature.famille == FONDS_DE_TIERS and ligne.tiers_type is None:
         raise MouvementRefuse(f'La nature {nature.code} (fonds de tiers) exige le tiers à qui la somme est due.')
     if nature.famille == CAUTION and not (ligne.reservation_id or ligne.location_id):
         raise MouvementRefuse(f'La nature {nature.code} (caution) exige la réservation ou la location concernée.')

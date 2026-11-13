@@ -244,7 +244,9 @@ class MouvementModel(models.Model):
     offre = models.ForeignKey(OffreModel, on_delete=models.PROTECT, db_column='offre_code', related_name='mouvements')
     tiers_type = models.ForeignKey(TiersTypeModel, on_delete=models.PROTECT, null=True, blank=True,
                                    db_column='tiers_type', related_name='mouvements')
-    tiers_id = models.UUIDField(null=True, blank=True)
+    # Id of the third party in its module, as text: the UUID of an account, the number of a driver or of a rental
+    # partner (the ledger does not know their modules)
+    tiers_id = models.CharField(max_length=64, null=True, blank=True)
     moyen_paiement = models.ForeignKey(MoyenPaiementModel, on_delete=models.PROTECT, null=True, blank=True,
                                        db_column='moyen_paiement_code', related_name='mouvements')
     compte_argent = models.ForeignKey(CompteArgentModel, on_delete=models.PROTECT, db_column='compte_argent_code',
@@ -290,7 +292,7 @@ class MouvementModel(models.Model):
             # of them. Corrections keep the reference of the line they cancel and are left out
             models.UniqueConstraint(
                 F('externe_reference'), F('nature'), F('sens'), F('compte_argent'),
-                Coalesce(F('tiers_id'), Value(UUID_NUL, output_field=models.UUIDField())),
+                Coalesce(F('tiers_id'), Value('')),
                 Coalesce(F('ligne_reservation_id'), Value(UUID_NUL, output_field=models.UUIDField())),
                 condition=Q(externe_reference__isnull=False, annule_mouvement__isnull=True),
                 name=CLE_IDEMPOTENCE),

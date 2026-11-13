@@ -27,7 +27,7 @@ Nous retenons l'option 3.
 ## Structure
 - `domain/` : entités (`Ligne`, `Ecriture`, `Mouvement`, référentiels), règles pures du grand livre (contrôle d'une ligne, ligne inverse, mois comptable), exceptions (`MouvementRefuse`, `RestitutionRefusee`). Aucun import de Django.
 - `application/` : ports (`GrandLivre`, `Parametres`, `Restitutions`, `Alertes`, `Journal`, `TransactionManager`, `Clock`) et cas d'usage (`GrandLivreService` : enregistrer, contre-passer, lire un paramètre ; `RestitutionService` : invariants, clôture, rapports, soldes).
-- `infrastructure/` : modèles et dépôts Django (`persistence/`), vues et fonctions SQL (`persistence/sql_restitutions.py`) et leur lecture (`persistence/restitutions.py`), alertes par `notifications.api` (`notifications/alertes.py`), journal d'audit par `securite` (`journal.py`), contrôle Django (`checks.py`), `container.py`.
+- `infrastructure/` : modèles et dépôts Django (`persistence/`), vues et fonctions SQL (`persistence/sql_restitutions.py`) et leur lecture (`persistence/restitutions.py`), alertes par `notifications.api` (`notifications/alertes.py`), journal d'activité par `activity.api` (`journal.py`), contrôle Django (`checks.py`), `container.py`.
 - `api.py` : seule porte d'entrée des autres modules ; données simples en entrée et en sortie.
 - Un contrat `layers` d'import-linter (`server/.importlinter`) interdit au domaine et à l'application d'importer l'infrastructure.
 
@@ -48,7 +48,7 @@ Nous retenons l'option 3.
 - Chaque module qui écrit déclare au démarrage les offres et les natures qu'il utilise et son interrupteur (`finance.api.declarer_ecritures`). Le contrôle Django `finance.E001`, joué par chaque `migrate` donc par chaque déploiement, arrête le déploiement si un module ouvert écrirait dans une offre ou une nature inactive ; l'écran de contrôle le montre aussi (invariant I14).
 - Les modules qui déplacent de l'argent appellent `finance.api.enregistrer` **dans leur propre transaction**. C'est un appel direct et non une réaction à un événement (ADR-019, ADR-011) : un événement traité après la validation pourrait manquer, alors qu'une ligne non écrite au moment du paiement est définitivement perdue.
 - Alertes : un mouvement refusé, ou un événement du prestataire rejoué avec un autre montant, part par email via `notifications.api.send_mail` aux administrateurs qui voient la section « Finances » du back-office (`users.api.emails_admins_section`). L'email part tout de suite, pas après la validation : un refus annule en général la transaction de l'appelant. Jamais de montant ni de nom de personne (NFF-05).
-- Journal : chaque correction (ligne inverse) va au journal d'audit de `securite` (`ecriture_corrigee`), en ajout seul pour l'application.
+- Journal : chaque correction (ligne inverse) va au journal d'activité (module `activity`, action `ecriture_corrigee`), en ajout seul pour l'application.
 - Le module ne lit aucune table d'un autre module ; `users.api` lui donne les destinataires des alertes.
 
 ## Écarts assumés par rapport au fichier SQL

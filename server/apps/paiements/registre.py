@@ -30,6 +30,9 @@ class ProduitPaye:
     # Finances: partner payouts sent in [debut, fin) or still due, as rows {categorie, beneficiaire, objet, montant,
     # commission, statut, date_prevue, envoye_le} (statut: planifie, en_cours, envoye, echoue)
     versements_periode: Callable[[object, object], list[dict]] | None = None
+    # Ledger of the finance module (grand_livre.py): object id -> its offer (COURTE_DUREE, HOTEL…). None: the product
+    # does not write its money in the ledger yet
+    offre: Callable[[object], str] | None = None
 
 
 PRODUITS: dict[str, ProduitPaye] = {}

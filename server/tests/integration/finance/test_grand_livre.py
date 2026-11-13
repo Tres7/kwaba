@@ -14,7 +14,7 @@ from apps.finance.models import (CompteArgentModel, CorrespondanceHistoModel, Mo
                                  OffreModel, ParametreHistoModel, ParametreModel, PeriodeModel, RapportModel)
 from apps.activity.models import ActivityEntryModel
 
-HOTE = uuid.uuid4()
+HOTE = str(uuid.uuid4())  # third party ids are text in the ledger
 RESERVATION = uuid.uuid4()
 
 
@@ -311,6 +311,7 @@ def test_a_zero_or_negative_amount_is_refused(montant):
     ({'nature': 'I01', 'tiers_type': None, 'tiers_id': None}, 'inactive'),      # VAT: waiting for the tax office
     ({'offre': 'EVENTS'}, "n'est pas ouverte"),                                 # offer of wave 4
     ({'compte_argent': 'BANQUE_EXP'}, 'est inactif'),                            # bank account not opened yet
+    ({'compte_argent': 'PAYPAL', 'moyen_paiement': 'PAYPAL'}, 'est inactif'),    # PayPal off at launch
     ({'tiers_type': 'bailleur'}, 'est inactif'),
 ])
 def test_inactive_codes_are_refused(champs, message):

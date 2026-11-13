@@ -53,6 +53,15 @@ class FauxGrandLivre(GrandLivre):
     def verrouiller(self, cle):
         self.verrous.append(cle)
 
+    def a_des_lignes(self, *, externe_reference=None, reservation_id=None, transfert_id=None, location_id=None):
+        return any(m.ligne.externe_reference == externe_reference or m.ligne.reservation_id == reservation_id
+                   for m in self.lignes.values())
+
+    def lignes_en_vigueur(self, nature, *, reservation_id=None, transfert_id=None, location_id=None):
+        corrigees = {m.annule_mouvement_id for m in self.lignes.values()}
+        return [m for m in self.lignes.values() if m.ligne.nature == nature and m.annule_mouvement_id is None
+                and m.id not in corrigees and m.ligne.reservation_id == reservation_id]
+
 
 class FauxParametres(Parametres):
     def lire(self, cle):
@@ -153,3 +162,22 @@ def test_parameters_in_force_only(service):
         service.parametre('events_commission')
     with pytest.raises(ValueError, match='inconnu'):
         service.parametre('taux_invente')
+
+
+def test_rectifying_cancels_the_lines_in_force_and_writes_the_right_amount(service):
+    """Service fees lowered from 6 to 3 % after the payment (Stay Pack + Driver)."""
+    reservation = uuid.uuid4()
+    service.grand_livre.referentiels = lambda lignes: Referentiels(
+        natures={'R01': Nature('R01', 'R', ENTREE, True)}, offres={'COURTE_DUREE': True},
+        comptes_argent={'FEDAPAY': True}, tiers_types={}, moyens_paiement={})
+    service.enregistrer([Ligne(nature='R01', offre='COURTE_DUREE', montant=15_000, sens=ENTREE,
+                               compte_argent='FEDAPAY', reservation_id=reservation)], origine='paiement')
+
+    ids = service.rectifier('R01', 7_500, motif='Pack Séjour', origine='pack_sejour',
+                            objet={'reservation_id': reservation})
+
+    inverse, nouvelle = (service.grand_livre.lignes[i] for i in ids)
+    assert (inverse.annule_mouvement_id, inverse.ligne.montant) == (1, 15_000)
+    assert (nouvelle.ligne.montant, nouvelle.ligne.sens, nouvelle.ligne.motif) == (7_500, ENTREE, 'Pack Séjour')
+    with pytest.raises(MouvementRefuse, match='rien à rectifier'):
+        service.rectifier('R02', 0, motif='x', origine='x', objet={'reservation_id': reservation})

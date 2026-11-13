@@ -49,6 +49,16 @@ class GrandLivre(ABC):
         pass
 
     @abstractmethod
+    def a_des_lignes(self, *, externe_reference=None, reservation_id=None, transfert_id=None,
+                     location_id=None) -> bool:
+        pass
+
+    @abstractmethod
+    def lignes_en_vigueur(self, nature: str, *, reservation_id=None, transfert_id=None,
+                          location_id=None) -> list[Mouvement]:
+        """Lines of a nature for an object, neither corrections nor corrected."""
+
+    @abstractmethod
     def verrouiller(self, cle: str) -> None:
         """Serializes the transactions working on the same key until they end (advisory lock: the application role
         has no UPDATE right on the ledger, hence no row lock)."""
@@ -107,6 +117,10 @@ class Restitutions(ABC):
 
     @abstractmethod
     def du_aux_partenaires(self) -> list[dict]:
+        pass
+
+    @abstractmethod
+    def derniers_mouvements(self, limite: int) -> list[dict]:
         pass
 
     @abstractmethod

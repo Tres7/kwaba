@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { Activity, ArrowLeft, CalendarCheck, CalendarCog, CalendarRange, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
+import { Activity, ArrowLeft, BookOpen, CalendarCheck, CalendarCog, CalendarRange, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ const NAV: { href: string; label: string; icon: typeof Users; section: string; c
   { href: "/backoffice/give", label: "Kwa-Ba Give", icon: HandHeart, section: "give" },
   { href: "/backoffice/documents", label: "Documents", icon: FileText, section: "documents" },
   { href: "/backoffice/finances", label: "Finances", icon: Landmark, section: "finances" },
+  { href: "/backoffice/grand-livre", label: "Grand livre", icon: BookOpen, section: "finances" },
   { href: "/backoffice/tarifs", label: "Tarifs", icon: Percent, section: "tarifs" },
   { href: "/backoffice/agenda", label: "Réglages agenda", icon: CalendarCog, section: "verifications", permission: "agenda_settings" },
 ];

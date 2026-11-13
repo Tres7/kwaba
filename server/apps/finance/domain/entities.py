@@ -27,7 +27,8 @@ class Ligne:
     sens: str
     compte_argent: str
     tiers_type: str | None = None
-    tiers_id: uuid.UUID | str | None = None
+    # Id in the module of the third party (UUID of an account, number of a driver…), stored as text
+    tiers_id: uuid.UUID | int | str | None = None
     moyen_paiement: str | None = None
     piece_reference: str | None = None
     # Id of the provider's transaction: the same event is written once (FIN-01.7)

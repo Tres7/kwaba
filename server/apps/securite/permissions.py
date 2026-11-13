@@ -43,6 +43,7 @@ _ROUTES_SECTIONS = {
     'documents/': 'documents',
     'contrats/': 'documents',
     'paiements/finances/': 'finances',
+    'finance/': 'finances',
     'paiements/tarifs/': 'tarifs',
     'agenda/': 'verifications',
 }
