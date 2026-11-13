@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from apps.reservations import api as reservations_api
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import (
     VueAdmin, booleen as _booleen, introuvable as _introuvable, motif as _motif, nom as _nom, paginer as _paginer,
 )
@@ -105,11 +105,11 @@ class HebergementDetailView(VueAdmin):
         if changements:
             with transaction.atomic():
                 annonce.save()
-                journaliser('annonce_modifiee', request, utilisateur=request.user,
-                            annonce_id=str(annonce.pk), annonce=annonce.name, **changements)
+                activity.record('annonce_modifiee', request, actor=request.user,
+                                annonce_id=str(annonce.pk), annonce=annonce.name, **changements)
                 if validate_without_visit:
-                    journaliser('validated_without_visit', request, utilisateur=request.user,
-                                annonce_id=str(annonce.pk), motif=reason, keep_visit=keep_visit)
+                    activity.record('validated_without_visit', request, actor=request.user,
+                                    annonce_id=str(annonce.pk), motif=reason, keep_visit=keep_visit)
                     verifications.validated_without_visit(hebergements_api.fiche(annonce.pk), request.user, reason,
                                                           keep_visit)
             if a_verifier:
@@ -128,7 +128,7 @@ class HebergementDetailView(VueAdmin):
             archiver(annonce)
         except ArchivageImpossible as e:
             return Response({'detail': str(e)}, status=status.HTTP_409_CONFLICT)
-        journaliser('annonce_supprimee', request, utilisateur=request.user, **trace)
+        activity.record('annonce_supprimee', request, actor=request.user, **trace)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -138,8 +138,8 @@ class HebergementRestaurerView(VueAdmin):
         if not annonce:
             return _introuvable('Annonce archivée')
         restaurer(annonce)
-        journaliser('annonce_restauree', request, utilisateur=request.user, annonce_id=str(annonce.pk),
-                    annonce=annonce.name, hote=annonce.host.email)
+        activity.record('annonce_restauree', request, actor=request.user, annonce_id=str(annonce.pk),
+                        annonce=annonce.name, hote=annonce.host.email)
         return Response(_hebergement(_hebergements().get(pk=annonce.pk)))
 
 

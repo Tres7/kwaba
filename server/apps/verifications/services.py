@@ -20,7 +20,7 @@ from apps.contrats import api as contrats
 from apps.documents import api as documents
 from apps.hebergements import api as hebergements
 from apps.notifications.api import send_mail
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.users import api as users
 
 from . import positions
@@ -348,8 +348,8 @@ def decider(hebergement_id, agent, *, decision: str, controles: dict, commentair
     if decision == 'validee':
         # A first validated listing is what makes someone a host
         if users.passer_hote(hote.pk):
-            journaliser('role_modifie', utilisateur=hote.pk, email=hote.email, avant='voyageur', apres='hote',
-                        annonce_id=str(hebergement_id), agent_id=str(agent.pk))
+            activity.record('role_modifie', actor=agent, target=activity.Target('account', str(hote.pk), hote.email),
+                            avant='voyageur', apres='hote', annonce_id=str(hebergement_id), annonce=annonce['name'])
         _envoyer('annonce_verifiee', f"Votre logement est vérifié : {annonce['name']}", [hote.email], contexte)
     else:
         _envoyer('annonce_refusee', f"Votre annonce n'est pas encore publiée : {annonce['name']}", [hote.email],

@@ -8,7 +8,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken
 
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.securite.permissions import ROUTES_TOUS_ADMINS, SECTIONS_ADMIN, section_de
 from apps.users.infrastructure.persistence.models import UserModel
 
@@ -110,7 +110,7 @@ class TestSuperAdmin:
         assert reponse.data['admin_sections'] == ['avis', 'finances']
         autre.refresh_from_db()
         assert autre.admin_expire_le == fin
-        assert JournalAuditModel.objects.filter(action='droits_admin_modifies').exists()
+        assert ActivityEntryModel.objects.filter(action='droits_admin_modifies').exists()
 
     def test_creates_a_temporary_admin_in_one_request(self, api_super, make_user):
         voyageur = make_user(role='voyageur')
@@ -182,7 +182,7 @@ class TestTemporaryAdmin:
         assert _client_jwt(hote).get(ADMIN + 'avis/').status_code == 403
         hote.refresh_from_db()
         assert (hote.role, hote.admin_sections, hote.admin_expire_le, hote.role_avant_admin) == ('hote', None, None, '')
-        assert JournalAuditModel.objects.filter(action='admin_expire', details__apres='hote').count() == 1
+        assert ActivityEntryModel.objects.filter(action='admin_expire', details__apres='hote').count() == 1
 
     def test_keeps_rights_before_the_date(self, make_user):
         admin = make_user(role='admin', admin_expire_le=timezone.now() + timedelta(hours=1))

@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'apps.concierge.apps.ConciergeConfig',
     'apps.give.apps.GiveConfig',
     'apps.securite.apps.SecuriteConfig',
+    'apps.activity.apps.ActivityConfig',
     'apps.verifications.apps.VerificationsConfig',
     'apps.locations.apps.LocationsConfig',
     'apps.documents.apps.DocumentsConfig',

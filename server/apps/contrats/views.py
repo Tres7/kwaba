@@ -11,7 +11,7 @@ from config import prelancement
 from apps.documents.api import societe_immatriculee
 from apps.give import api as give
 from apps.locations import api as locations
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import paginer
 from apps.securite.limites import ip_client, limite_ip
 from apps.securite.permissions import EstAdministrateur
@@ -55,8 +55,8 @@ def _signer(request, contrat, methode):
         )
     except services.ContratErreur as exc:
         return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-    journaliser('contrat_signe', request, utilisateur=request.user if request.user.is_authenticated else None,
-                email=contrat.partie_email, contrat=contrat.reference, type=contrat.type)
+    activity.record('contrat_signe', request, actor=request.user if request.user.is_authenticated else None,
+                    email=contrat.partie_email, contrat=contrat.reference, type=contrat.type)
     return Response(_public(contrat))
 
 
@@ -228,7 +228,8 @@ class ContratsAdminView(APIView):
             contrat = services.emettre(type_contrat, cible, par=request.user)
         except services.ContratErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_409_CONFLICT)
-        journaliser('backoffice_creation', request, utilisateur=request.user, objet='contrat', id=str(contrat.pk), libelle=contrat.reference)
+        activity.record('backoffice_creation', request, actor=request.user, objet='contrat', id=str(contrat.pk),
+                        libelle=contrat.reference)
         return Response(_admin(contrat), status=status.HTTP_201_CREATED)
 
 
@@ -268,7 +269,8 @@ class ContratAdminActionView(APIView):
                 return Response({'detail': 'Action inconnue.'}, status=status.HTTP_404_NOT_FOUND)
         except services.ContratErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('backoffice_modification', request, utilisateur=request.user, objet='contrat', id=str(contrat.pk), champs=[action])
+        activity.record('backoffice_modification', request, actor=request.user, objet='contrat', id=str(contrat.pk),
+                        champs=[action])
         return Response(_admin(contrat))
 
 
@@ -318,8 +320,9 @@ class ModeleAdminView(APIView):
         if (titre, corps) != (modele.titre, modele.corps):
             modele.titre, modele.corps, modele.version, modele.modifie_par_id = titre, corps, modele.version + 1, request.user.pk
             modele.save()
-            journaliser('backoffice_modification', request, utilisateur=request.user, objet='modele_contrat', id=modele.type,
-                        champs=['titre', 'corps'], version=modele.version)
+            activity.record('backoffice_modification', request, actor=request.user, objet='modele_contrat',
+                            id=modele.type,
+                            champs=['titre', 'corps'], version=modele.version)
         return Response(_modele(modele))
 
 

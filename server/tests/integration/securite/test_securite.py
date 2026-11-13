@@ -9,7 +9,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.hebergements import views as hebergements_views
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.securite.permissions import EstAdministrateur
 
 LOGIN = '/api/v1/auth/login/'
@@ -20,7 +20,7 @@ WEBHOOK = '/api/v1/paiements/webhooks/fedapay/'
 
 
 def _actions(**filtres):
-    return list(JournalAuditModel.objects.filter(**filtres).values_list('action', flat=True))
+    return list(ActivityEntryModel.objects.filter(**filtres).values_list('action', flat=True))
 
 
 class TestConnexion:
@@ -32,7 +32,7 @@ class TestConnexion:
         assert response.status_code == 429
         assert response.data['code'] == 'too_many_attempts'
         assert int(response['Retry-After']) > 0
-        assert 'connexion_bloquee' in _actions(email=user.email)
+        assert 'connexion_bloquee' in _actions(actor_email=user.email)
 
     def test_success_resets_the_counter(self, api_client, make_user, password):
         user = make_user()
@@ -53,8 +53,8 @@ class TestConnexion:
         user = make_user()
         api_client.post(LOGIN, {'email': user.email, 'password': 'mauvais-secret'}, format='json')
         api_client.post(LOGIN, {'email': user.email, 'password': password}, format='json')
-        assert _actions(utilisateur_id=user.id) == ['connexion', 'connexion_echec']
-        assert 'mauvais-secret' not in json.dumps(list(JournalAuditModel.objects.values('details')))
+        assert _actions(actor_id=user.id) == ['connexion', 'connexion_echec']
+        assert 'mauvais-secret' not in json.dumps(list(ActivityEntryModel.objects.values('details')))
 
 
 class TestLimitesParIP:
@@ -99,7 +99,7 @@ class TestLimitesParIP:
         user = make_user()
         api_client.post(LOGIN, {'email': user.email, 'password': password}, format='json',
                         HTTP_X_FORWARDED_FOR='9.9.9.9, 41.207.0.1')
-        assert JournalAuditModel.objects.get(action='connexion', email=user.email).ip == '41.207.0.1'
+        assert ActivityEntryModel.objects.get(action='connexion', actor_email=user.email).ip == '41.207.0.1'
 
 
 class TestHotePublic:
@@ -122,7 +122,7 @@ class TestAdministration:
             assert client.post(self.URL, {'username': admin.email, 'password': 'mauvais'}).status_code == 200
         response = client.post(self.URL, {'username': admin.email, 'password': password})
         assert response.status_code == 429
-        assert 'admin_connexion_echec' in _actions(email=admin.email)
+        assert 'admin_connexion_echec' in _actions(actor_email=admin.email)
 
     def test_admin_login_still_works(self, make_user, password):
         admin = make_user(role='admin', is_staff=True, is_superuser=True)
@@ -150,7 +150,7 @@ class TestSessions:
         session.credentials(HTTP_AUTHORIZATION=f"Bearer {jetons['access']}")
         assert session.delete(ME).status_code == 204
         assert api_client.post(REFRESH, {'refresh': jetons['refresh']}, format='json').status_code == 401
-        assert 'compte_desactive' in _actions(utilisateur_id=user.id)
+        assert 'compte_desactive' in _actions(actor_id=user.id)
 
     def test_jwt_not_signed_with_the_django_secret_key(self, settings):
         assert settings.SIMPLE_JWT['SIGNING_KEY'] != settings.SECRET_KEY
@@ -174,7 +174,7 @@ class TestProfil:
     def test_opening_a_candidature_is_audited(self, client_for, make_user):
         user = make_user()
         client_for(user).post(f'{ME}candidature/', format='json')
-        assert JournalAuditModel.objects.filter(action='candidature_ouverte', utilisateur_id=user.id).exists()
+        assert ActivityEntryModel.objects.filter(action='candidature_ouverte', actor_id=user.id).exists()
 
 
 class TestEntreesInvalides:
@@ -217,7 +217,7 @@ class TestWebhook:
         response = api_client.post(WEBHOOK, '{}', content_type='application/json',
                                    HTTP_X_FEDAPAY_SIGNATURE=f't={int(timezone.now().timestamp())},s=faux')
         assert response.status_code == 400
-        assert JournalAuditModel.objects.get(action='webhook_refuse').details == {'motif': 'signature_invalide'}
+        assert ActivityEntryModel.objects.get(action='webhook_refuse').details == {'motif': 'signature_invalide'}
 
 
 class TestConcierge:
@@ -239,10 +239,11 @@ class TestConcierge:
 
 def test_audit_log_is_read_only_in_the_admin(make_user, password):
     admin = make_user(role='admin', is_staff=True, is_superuser=True)
-    JournalAuditModel.objects.create(action='connexion', email='x@example.tg', cree_le=timezone.now() - timedelta(days=1))
+    ActivityEntryModel.objects.create(action='connexion', actor_email='x@example.tg',
+                                      created_at=timezone.now() - timedelta(days=1))
     client = Client()
     client.force_login(admin)
-    entree = JournalAuditModel.objects.get()
-    assert client.get('/admin/securite/journalauditmodel/').status_code == 200
-    assert client.post(f'/admin/securite/journalauditmodel/{entree.pk}/delete/', {'post': 'yes'}).status_code == 403
-    assert JournalAuditModel.objects.exists()
+    entree = ActivityEntryModel.objects.get()
+    assert client.get('/admin/activity/activityentrymodel/').status_code == 200
+    assert client.post(f'/admin/activity/activityentrymodel/{entree.pk}/delete/', {'post': 'yes'}).status_code == 403
+    assert ActivityEntryModel.objects.exists()

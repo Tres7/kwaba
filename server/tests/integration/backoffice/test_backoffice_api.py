@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from apps.avis.models import CRITERES, AvisModel
 from apps.hebergements.models import HebergementModel
 from apps.reservations.models import ReservationModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 
 ADMIN = '/api/v1/admin/'
 
@@ -96,7 +96,7 @@ class TestUtilisateurs:
 
         assert reponse.status_code == 200
         assert reponse.data['role'] == 'agent'
-        entree = JournalAuditModel.objects.get(action='role_modifie')
+        entree = ActivityEntryModel.objects.get(action='role_modifie')
         assert entree.details['apres'] == 'agent' and entree.details['cible_email'] == cible.email
 
     def test_role_invalide(self, api_admin, make_user):
@@ -112,7 +112,7 @@ class TestUtilisateurs:
         assert reponse.status_code == 200 and reponse.data['is_active'] is False
         jeton = OutstandingToken.objects.get(user=cible)
         assert BlacklistedToken.objects.filter(token=jeton).exists()
-        assert JournalAuditModel.objects.filter(action='compte_desactive').exists()
+        assert ActivityEntryModel.objects.filter(action='compte_desactive').exists()
 
     def test_pas_sur_son_propre_compte(self, api_admin, admin):
         reponse = api_admin.patch(f'{ADMIN}users/{admin.id}/', {'is_active': False}, format='json')
@@ -153,8 +153,8 @@ class TestAnnonces:
         assert r.data['est_verifie'] is True and r.data['validated_without_visit_reason'] == 'Hôtel connu, déjà visité'
         annonce.refresh_from_db()
         assert annonce.statut_verification == 'verifiee' and annonce.validated_without_visit_at is not None
-        assert JournalAuditModel.objects.filter(action='annonce_modifiee').count() == 2
-        assert JournalAuditModel.objects.filter(action='validated_without_visit').count() == 1
+        assert ActivityEntryModel.objects.filter(action='annonce_modifiee').count() == 2
+        assert ActivityEntryModel.objects.filter(action='validated_without_visit').count() == 1
 
     def test_retirer_la_validation_retire_du_site(self, api_admin, make_hebergement):
         annonce = make_hebergement()
@@ -173,7 +173,7 @@ class TestAnnonces:
         assert reponse.status_code == 204
         assert not HebergementModel.objects.filter(pk=annonce.pk).exists()
         assert HebergementModel.tous.filter(pk=annonce.pk).exists()
-        assert JournalAuditModel.objects.get(action='annonce_supprimee').details['motif'] == 'Annonce frauduleuse'
+        assert ActivityEntryModel.objects.get(action='annonce_supprimee').details['motif'] == 'Annonce frauduleuse'
 
 
 class TestReservations:
@@ -204,7 +204,7 @@ class TestReservations:
         assert reponse.status_code == 200 and reponse.data['status'] == 'cancelled'
         resa.refresh_from_db()
         assert resa.annule_par == 'plateforme'
-        assert JournalAuditModel.objects.get(action='reservation_annulee').details['motif'] == 'Doublon signalé'
+        assert ActivityEntryModel.objects.get(action='reservation_annulee').details['motif'] == 'Doublon signalé'
 
         deja = api_admin.post(f'{ADMIN}reservations/{resa.id}/annuler/', {'motif': 'Doublon signalé'}, format='json')
         assert deja.status_code == 400
@@ -225,7 +225,7 @@ class TestAvis:
         assert reponse.status_code == 204
         logement.refresh_from_db()
         assert (logement.rating, logement.review_count) == (5.0, 1)
-        assert JournalAuditModel.objects.get(action='avis_supprime').details['note'] == 1
+        assert ActivityEntryModel.objects.get(action='avis_supprime').details['note'] == 1
 
 
 class TestDetailReservation:

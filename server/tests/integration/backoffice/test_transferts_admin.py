@@ -4,7 +4,7 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.transferts.models import AeroportModel, ChauffeurModel, TarifTransfertModel, TransfertModel
 
 B = '/api/v1/admin/transferts/'
@@ -50,7 +50,7 @@ def test_aeroport_et_tarifs(admin):
     # The code cannot be changed
     admin.patch(f'{B}aeroports/ABJ/', {'code': 'XXX', 'actif': False}, format='json')
     assert AeroportModel.objects.filter(code='ABJ', actif=False).exists()
-    assert JournalAuditModel.objects.filter(details__objet='tarifs_transfert').exists()
+    assert ActivityEntryModel.objects.filter(details__objet='tarifs_transfert').exists()
 
 
 def test_chauffeur(admin):

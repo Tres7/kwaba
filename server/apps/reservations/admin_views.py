@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.users import api as users
 from apps.securite.backoffice import VueAdmin, introuvable as _introuvable, motif as _motif, nom as _nom, paginer as _paginer
 
@@ -105,8 +105,8 @@ class ReservationAnnulerView(VueAdmin):
             rembourse = paiement.annuler(reservation, par='plateforme')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('reservation_annulee', request, utilisateur=request.user, reservation_id=str(reservation.pk),
-                    reference=reservation.reference, voyageur=reservation.guest.email, rembourse=rembourse, motif=motif)
+        activity.record('reservation_annulee', request, actor=request.user, reservation_id=str(reservation.pk),
+                        reference=reservation.reference, voyageur=reservation.guest.email, rembourse=rembourse, motif=motif)
         return Response(_reservation(_reservations().get(pk=reservation.pk)))
 
 

@@ -6,7 +6,7 @@ from django.utils import timezone
 from apps.hebergements.models import HebergementModel
 from apps.messaging.infrastructure.persistence.models import ConversationModel
 from apps.reservations.models import ReservationModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.verifications.models import VisiteModel
 
 HEBERGEMENTS = '/api/v1/hebergements/'
@@ -145,7 +145,7 @@ class TestRestauration:
         restauree = HebergementModel.objects.get(pk=annonce.pk)
         assert not restauree.is_available
         assert [h['id'] for h in client_for(annonce.host).get(f'{HEBERGEMENTS}mine/').data['results']] == [str(annonce.id)]
-        assert JournalAuditModel.objects.filter(action='annonce_restauree').exists()
+        assert ActivityEntryModel.objects.filter(action='annonce_restauree').exists()
 
     def test_only_an_archived_listing_can_be_restored(self, admin, annonce):
         assert admin.post(f'{ADMIN}{annonce.id}/restaurer/').status_code == 404

@@ -10,7 +10,7 @@ from django.core.management import call_command
 from PIL import Image
 
 from apps.hebergements.models import HebergementModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.verifications.models import PhotoVisiteModel, PieceIdentiteModel, VisiteModel
 
 HEBERGEMENTS = '/api/v1/hebergements/'
@@ -186,7 +186,7 @@ class TestPieceIdentite:
         assert response.status_code == 200
         assert response['Cache-Control'] == 'no-store'
         assert 'sandbox' in response['Content-Security-Policy']
-        assert JournalAuditModel.objects.filter(action='piece_consultee', utilisateur_id=agent.id).exists()
+        assert ActivityEntryModel.objects.filter(action='piece_consultee', actor_id=agent.id).exists()
 
 
     def test_lost_file_explained_to_the_agent(self, client_for, hote, agent, stockage_temporaire):
@@ -328,7 +328,7 @@ class TestControleIdentite:
         # The agent gets the landmark to find the place
         assert client_for(agent).get(VISITES).data['results'][0]['point_repere'] == ''
         assert client_for(agent).get(IDENTITES).data['count'] == 0
-        assert JournalAuditModel.objects.filter(action='identite_verifiee').exists()
+        assert ActivityEntryModel.objects.filter(action='identite_verifiee').exists()
         # Already checked: no decision possible anymore
         assert client_for(agent).post(url, {'decision': 'refusee', 'motif': 'Trop tard ici'},
                                       format='json').status_code == 400

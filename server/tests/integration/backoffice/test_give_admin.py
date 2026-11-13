@@ -8,7 +8,7 @@ from django.utils import timezone
 from PIL import Image
 
 from apps.give.models import DonModel, OrganisationModel, ReversementModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 
 B = '/api/v1/admin/give/'
 
@@ -51,7 +51,7 @@ def test_creer_une_ong_puis_la_publier(admin):
     assert admin.patch(url, {'verifiee_le': '2026-10-01'}, format='json').status_code == 400
     publie = admin.patch(url, {'verifiee_le': '2026-10-01', 'verification': 'Récépissé et statuts vérifiés'}, format='json')
     assert publie.status_code == 200
-    assert JournalAuditModel.objects.filter(details__objet='ong').count() == 2
+    assert ActivityEntryModel.objects.filter(details__objet='ong').count() == 2
 
 
 def test_projets_d_une_ong(admin):

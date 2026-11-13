@@ -1,16 +1,15 @@
 from django.contrib import admin
 
-from .models import JournalAuditModel
+from .models import ActivityEntryModel
 
 
-@admin.register(JournalAuditModel)
-class JournalAuditAdmin(admin.ModelAdmin):
-    list_display = ('cree_le', 'action', 'email', 'ip')
-    list_filter = ('action',)
-    search_fields = ('email', 'ip')
-    date_hierarchy = 'cree_le'
+@admin.register(ActivityEntryModel)
+class ActivityEntryAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'action', 'actor_email', 'target_kind', 'target_label', 'ip')
+    list_filter = ('action', 'target_kind')
+    search_fields = ('actor_email', 'ip', 'target_label', 'target_id')
+    date_hierarchy = 'created_at'
 
-    # Read-only log: nobody can change or delete it from the administration
     def has_add_permission(self, request):
         return False
 

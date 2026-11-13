@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.contrats import api as contrats
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import paginer
 from apps.securite.permissions import EstAdministrateur
 
@@ -99,11 +99,13 @@ class SocieteView(APIView):
             societe.signature_representant.save('signature-representant.png', ContentFile(contenu), save=True)
         elif str(request.data.get('supprimer_signature')).lower() == 'true' and societe.signature_representant:
             societe.signature_representant.delete(save=True)
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="societe", champs=sorted(request.data.keys()))
+        activity.record("backoffice_modification", request, actor=request.user, objet="societe",
+                        champs=sorted(request.data.keys()))
         if societe.immatriculee and not etait_immatriculee:
             # RCCM and NIF just filled in: hosts are invited to sign their agreement, once
             invites = contrats.inviter_hotes_a_signer()
-            journaliser("backoffice_modification", request, utilisateur=request.user, objet="contrats_hotes", invites=invites)
+            activity.record("backoffice_modification", request, actor=request.user, objet="contrats_hotes",
+                            invites=invites)
         return Response(SocieteSerializer(societe).data)
 
 
@@ -165,7 +167,8 @@ class FacturesView(APIView):
                 f = services.facture_libre(**donnees.validated_data, par=request.user)
         except services.DocumentErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_409_CONFLICT)
-        journaliser("backoffice_creation", request, utilisateur=request.user, objet="facture", id=str(f.pk), libelle=f.numero)
+        activity.record("backoffice_creation", request, actor=request.user, objet="facture", id=str(f.pk),
+                        libelle=f.numero)
         return Response(_facture(f), status=status.HTTP_201_CREATED)
 
 

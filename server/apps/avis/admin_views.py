@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from apps.hebergements import api as hebergements
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.users import api as users
 from apps.securite.backoffice import VueAdmin, entier as _entier, introuvable as _introuvable, motif as _motif, nom as _nom, paginer as _paginer
 
@@ -47,5 +47,5 @@ class AvisDetailView(VueAdmin):
         trace = {'avis_id': str(avis.pk), 'annonce': annonce['name'] if annonce else '', 'auteur': getattr(users.compte(avis.auteur_id), 'email', ''),
                  'note': avis.note, 'motif': motif}
         avis.delete()  # the post_delete signal of the avis app computes the listing's rating again
-        journaliser('avis_supprime', request, utilisateur=request.user, **trace)
+        activity.record('avis_supprime', request, actor=request.user, **trace)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -7,7 +7,7 @@ from django.db import connection
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.users.infrastructure.persistence.models import VerificationCode, hacher_code
 
 VERIFY = '/api/v1/auth/verify/'
@@ -60,7 +60,7 @@ class TestVerify:
         # Even the right code no longer works: a new one has to be asked for
         assert _verify(api_client, unverified, INITIAL_CODE).status_code == 400
         assert not VerificationCode.objects.filter(user=unverified).exists()
-        assert JournalAuditModel.objects.filter(action='code_bloque', utilisateur_id=unverified.id).exists()
+        assert ActivityEntryModel.objects.filter(action='code_bloque', actor_id=unverified.id).exists()
 
     def test_expired_code(self, api_client, unverified):
         _age_codes(unverified, seconds=11 * 60)
@@ -160,7 +160,7 @@ class TestPasswordReset:
         assert not VerificationCode.objects.filter(user=user).exists()
         assert api_client.post(LOGIN, {'email': user.email, 'password': NEW_PASSWORD}, format='json').status_code == 200
         assert api_client.post(LOGIN, {'email': user.email, 'password': password}, format='json').status_code == 401
-        assert JournalAuditModel.objects.filter(action='mdp_reinitialise', utilisateur_id=user.id).exists()
+        assert ActivityEntryModel.objects.filter(action='mdp_reinitialise', actor_id=user.id).exists()
 
     def test_reset_closes_every_open_session(self, api_client, make_user, password, code_envoye):
         """After a reset, neither the access tokens nor the refresh tokens issued before work anymore."""

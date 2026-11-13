@@ -11,7 +11,7 @@ from PIL import Image
 from apps.locations.models import (
     CategorieVehiculeModel, LieuRemiseModel, LocationModel, PartenaireLocationModel, PhotoVehiculeModel,
 )
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.transferts.models import ChauffeurModel
 
 B = '/api/v1/admin/location/'
@@ -69,7 +69,7 @@ def test_regles_creees_puis_modifiees(admin):
               'conditions': '23 ans minimum.'}
     assert admin.put(B + 'regles/', regles, format='json').status_code == 200
     assert admin.put(B + 'regles/', {**regles, 'delai_min_jours': 3}, format='json').data['delai_min_jours'] == 3
-    assert JournalAuditModel.objects.filter(action='backoffice_modification', details__objet='regles_location').count() == 2
+    assert ActivityEntryModel.objects.filter(action='backoffice_modification', details__objet='regles_location').count() == 2
 
 
 def _photo(nom='voiture.png'):
@@ -88,7 +88,7 @@ def test_vehicule_prix_caution_et_activation(admin, lieu):
     reponse = admin.patch(url, {'prix_jour': 25000, 'proprietaire': proprietaire.id, 'caution_jours': 2, 'actif': True}, format='json')
     assert reponse.data['actif'] is True and reponse.data['caution'] == 50000  # two days
     assert admin.patch(url, {'prix_jour': 80000}, format='json').data['caution'] == 100000  # plafond
-    assert JournalAuditModel.objects.filter(action='backoffice_modification', details__objet='categorie_vehicule').exists()
+    assert ActivityEntryModel.objects.filter(action='backoffice_modification', details__objet='categorie_vehicule').exists()
 
 
 def test_categorie_plusieurs_photos(admin, monkeypatch):
@@ -120,7 +120,7 @@ def test_categorie_plusieurs_photos(admin, monkeypatch):
     # Limit per category
     monkeypatch.setattr(PhotoVehiculeModel, 'MAX_PAR_CATEGORIE', 2)
     assert admin.post(url, {'image': _photo()}, format='multipart').status_code == 400
-    assert JournalAuditModel.objects.filter(details__objet='categorie_vehicule', details__champs=['photos']).count() == 5
+    assert ActivityEntryModel.objects.filter(details__objet='categorie_vehicule', details__champs=['photos']).count() == 5
 
 
 def test_lieu_et_loueur(admin, berline):
@@ -135,7 +135,7 @@ def test_lieu_et_loueur(admin, berline):
     mauvais = admin.patch(f"{B}loueurs/{loueur.data['id']}/", {'operateur_versement': 'togocel'}, format='json')
     assert mauvais.status_code == 400
     assert admin.get(B + 'loueurs/').data[0]['nom'] == 'Cotonou Cars'
-    assert JournalAuditModel.objects.filter(action='backoffice_creation', details__objet='loueur').exists()
+    assert ActivityEntryModel.objects.filter(action='backoffice_creation', details__objet='loueur').exists()
 
 
 def test_attribuer_proprietaire_et_chauffeur(admin, location, berline, lieu):

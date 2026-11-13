@@ -13,7 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.securite import captcha
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.limites import Tentatives, incrementer, limite_ip
 from apps.users.api import revoquer_jetons
 from apps.users.application.dto.dto import GoogleAuthDTO, RegisterDTO, UserRole
@@ -107,7 +107,7 @@ def _echec_code(email: str, vc: VerificationCode | None) -> None:
     echecs, _ = incrementer(f"code_courant:{vc.pk}", 15 * 60)
     if echecs >= MAX_ESSAIS_PAR_CODE:
         vc.delete()
-        journaliser('code_bloque', utilisateur=vc.user_id, email=email)
+        activity.record('code_bloque', actor=vc.user_id, email=email)
 
 
 def _captcha_refuse() -> Response:
@@ -154,7 +154,7 @@ class RegisterView(APIView):
         except IntegrityError:
             return Response({'email': ['Ce compte existe déjà.']}, status=status.HTTP_409_CONFLICT)
 
-        journaliser('inscription', request, utilisateur=result.id, email=str(result.email))
+        activity.record('inscription', request, actor=result.id, email=str(result.email))
         return Response(_user_payload(result), status=status.HTTP_201_CREATED)
 
 
@@ -174,18 +174,18 @@ class LoginView(APIView):
         # Counted before the check: simultaneous attempts cannot exceed the limit
         essais = Tentatives(f"connexion:{_cle(data['email'])}", MAX_ESSAIS_CONNEXION, FENETRE_CONNEXION)
         if not essais.essayer():
-            journaliser('connexion_bloquee', request, email=data['email'])
+            activity.record('connexion_bloquee', request, email=data['email'])
             return _trop_d_essais(essais.attente, code='too_many_attempts')
 
         try:
             user = _service().find_for_authentication(data['email'])
         except UserNotFoundException:
             check_password(data['password'], _EMPREINTE_FACTICE)
-            journaliser('connexion_echec', request, email=data['email'])
+            activity.record('connexion_echec', request, email=data['email'])
             return Response({'detail': 'Identifiants invalides.'}, status=status.HTTP_401_UNAUTHORIZED)
 
         if not check_password(data['password'], str(user.password_hash)):
-            journaliser('connexion_echec', request, utilisateur=user.id, email=data['email'])
+            activity.record('connexion_echec', request, actor=user.id, email=data['email'])
             return Response({'detail': 'Identifiants invalides.'}, status=status.HTTP_401_UNAUTHORIZED)
 
         if not user.is_active:
@@ -198,7 +198,7 @@ class LoginView(APIView):
             )
 
         essais.reussite()
-        journaliser('connexion', request, utilisateur=user.id, email=data['email'])
+        activity.record('connexion', request, actor=user.id, email=data['email'])
         return Response({**_tokens_for(user.id), 'user': _user_payload(user)}, status=status.HTTP_200_OK)
 
 
@@ -219,7 +219,7 @@ class GoogleAuthView(APIView):
         if not result.is_active:
             return Response({'detail': 'Compte désactivé.', 'code': 'inactive'}, status=status.HTTP_403_FORBIDDEN)
 
-        journaliser('connexion_google', request, utilisateur=result.id, email=str(result.email))
+        activity.record('connexion_google', request, actor=result.id, email=str(result.email))
         return Response({**_tokens_for(result.id), 'user': _user_payload(result)}, status=status.HTTP_200_OK)
 
 
@@ -253,7 +253,7 @@ class VerifyEmailView(APIView):
             return Response({"detail": str(e), "code": "invalid_code"}, status=status.HTTP_400_BAD_REQUEST)
 
         essais.reussite()
-        journaliser('email_verifie', request, utilisateur=user_id, email=email)
+        activity.record('email_verifie', request, actor=user_id, email=email)
         # The code proves ownership of the email: the session is opened directly
         user = _service().get_by_id(user_id)
         return Response({
@@ -374,7 +374,7 @@ class PasswordResetConfirmView(APIView):
         # All open sessions (maybe by the person who had the password) are closed
         revoquer_jetons(user_model.id)
         essais.reussite()
-        journaliser('mdp_reinitialise', request, utilisateur=user_model, email=email)
+        activity.record('mdp_reinitialise', request, actor=user_model, email=email)
         return Response({'detail': 'Mot de passe modifié.'}, status=status.HTTP_200_OK)
 
 

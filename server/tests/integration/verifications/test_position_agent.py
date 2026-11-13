@@ -7,7 +7,7 @@ from decimal import Decimal
 import pytest
 
 from apps.hebergements.models import HebergementModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.verifications.models import PieceIdentiteModel, VisiteModel
 
 TOUT_CONFORME = {'identite': True, 'adresse': True, 'photos': True, 'equipements': True}
@@ -54,7 +54,7 @@ def test_la_position_de_l_agent_remplace_celle_de_l_hote(agent, annonce, api_cli
     assert annonce.statut_verification == 'verifiee'
     visite = VisiteModel.objects.get()
     assert visite.precision_m == 12 and 1100 <= visite.ecart_m <= 1125
-    trace = JournalAuditModel.objects.get(action='position_corrigee')
+    trace = ActivityEntryModel.objects.get(action='position_corrigee')
     assert trace.details['ecart_m'] == visite.ecart_m and trace.details['hebergement'] == str(annonce.id)
 
     # Travellers still get an offset position, around the agent's point (never the exact one)
@@ -77,7 +77,7 @@ def test_un_refus_garde_le_point_de_l_hote_mais_note_la_mesure(agent, annonce):
     assert (annonce.latitude, annonce.longitude) == POINT_HOTE
     visite = VisiteModel.objects.get()
     assert visite.latitude == Decimal('6.140000') and visite.ecart_m is None
-    assert not JournalAuditModel.objects.filter(action='position_corrigee').exists()
+    assert not ActivityEntryModel.objects.filter(action='position_corrigee').exists()
 
 
 def test_sans_mesure_le_point_de_l_hote_reste(agent, annonce):

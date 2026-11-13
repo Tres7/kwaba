@@ -7,7 +7,7 @@ from django.core.management import call_command
 
 from apps.contrats.models import PreinscriptionModel
 from apps.hebergements.models import BrouillonAnnonceModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.users.infrastructure.persistence.models import UserModel
 from apps.verifications import services
 from apps.verifications.models import PieceIdentiteModel
@@ -71,7 +71,7 @@ class TestOuverture:
         assert (reponse.data['role'], reponse.data['candidature_hote']) == ('voyageur', 'ouverte')
 
         assert client.post(CANDIDATURE).status_code == 200
-        assert JournalAuditModel.objects.filter(action='candidature_ouverte', utilisateur_id=utilisateur.pk).count() == 1
+        assert ActivityEntryModel.objects.filter(action='candidature_ouverte', actor_id=utilisateur.pk).count() == 1
 
     @pytest.mark.parametrize('role', ['hote', 'agent', 'admin'])
     def test_other_roles_are_left_alone(self, client_for, make_user, role):
@@ -102,7 +102,7 @@ class TestValidation:
 
         candidat.refresh_from_db()
         assert (candidat.role, candidat.candidature_hote) == ('hote', '')
-        entree = JournalAuditModel.objects.get(action='role_modifie', utilisateur_id=candidat.pk)
+        entree = ActivityEntryModel.objects.get(action='role_modifie', target_kind='account', target_id=str(candidat.pk))
         assert (entree.details['avant'], entree.details['apres']) == ('voyageur', 'hote')
 
     def test_a_refused_listing_gives_no_role(self, client_for, candidat, agent, make_hebergement):
@@ -190,13 +190,13 @@ class TestMigrationDesHotes:
         for commence in (en_attente, brouillon, preinscrit, piece):
             assert (commence.role, commence.candidature_hote) == ('voyageur', 'ouverte')
         assert (rien.role, rien.candidature_hote) == ('voyageur', '')
-        assert JournalAuditModel.objects.filter(action='role_modifie').count() == 5
-        assert JournalAuditModel.objects.filter(action='roles_hotes_migres').count() == 1
+        assert ActivityEntryModel.objects.filter(action='role_modifie').count() == 5
+        assert ActivityEntryModel.objects.filter(action='roles_hotes_migres').count() == 1
 
     def test_applying_twice_changes_nothing_more(self, hotes):
         call_command('migrer_hotes', '--appliquer', stdout=StringIO())
         call_command('migrer_hotes', '--appliquer', stdout=StringIO())
-        assert JournalAuditModel.objects.filter(action='role_modifie').count() == 5
+        assert ActivityEntryModel.objects.filter(action='role_modifie').count() == 5
 
 
 class TestBackOffice:

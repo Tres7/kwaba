@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from config import prelancement
 from apps.notifications.api import send_mail
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.limites import limite_ip
 from apps.securite.permissions import EstAdministrateur
 
@@ -74,5 +74,6 @@ class LancementAdminView(APIView):
             inscription.prevenu_le = timezone.now()
             inscription.save(update_fields=['prevenu_le'])
             envoyes += 1
-        journaliser('backoffice_modification', request, utilisateur=request.user, objet='lancement', champs=['prevenir'], envoyes=envoyes)
+        activity.record('backoffice_modification', request, actor=request.user, objet='lancement',
+                        champs=['prevenir'], envoyes=envoyes)
         return Response({'envoyes': envoyes, 'a_prevenir': InscriptionLancementModel.objects.filter(prevenu_le__isnull=True).count()})
