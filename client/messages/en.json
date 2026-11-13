@@ -79,6 +79,16 @@
     "euro": "Euro (€)",
     "euroTexte": "Prices shown in euros as a guide; payment stays in FCFA"
   },
+  "theme": {
+    "choose": "Choose theme",
+    "title": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Device",
+    "lightText": "Light background, at all times",
+    "darkText": "Dark background, easier on the eyes at night",
+    "systemText": "Follows the setting of your phone or computer"
+  },
   "roles": {
     "voyageur": "Traveller",
     "hote": "Host",
