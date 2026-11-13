@@ -48,8 +48,10 @@ def test_detail_lines_in_french_with_before_and_after():
     lines = catalogue.detail_lines('agenda_settings_changed',
                                    {'changes': {'notice_hours': {'before': 24, 'after': 48}}})
     assert lines == [{'label': 'Préavis (h)', 'value': '24 → 48'}]
-    lines = catalogue.detail_lines('validated_without_visit', {'motif': 'Hôtel connu', 'keep_visit': True})
-    assert lines == [{'label': 'Motif', 'value': 'Hôtel connu'}, {'label': 'Visite conservée', 'value': 'oui'}]
+    lines = catalogue.detail_lines('validated_without_visit', {'keep_visit': True, 'annonce_id': 'l1', 'motif': 'Connu'})
+    assert lines == [{'label': 'Motif', 'value': 'Connu'}, {'label': 'Visite conservée', 'value': 'oui'}]
+    lines = catalogue.detail_lines('role_modifie', {'apres': 'hote', 'cible_id': 'u1', 'avant': 'voyageur'})
+    assert lines == [{'label': 'Avant', 'value': 'voyageur'}, {'label': 'Après', 'value': 'hote'}]
 
 
 def test_levels_split_the_actions():

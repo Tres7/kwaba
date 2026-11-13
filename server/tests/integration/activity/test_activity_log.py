@@ -93,6 +93,13 @@ class TestList:
         results = client.get(URL, {'target_kind': 'listing', 'target_id': 'l1'}).data['results']
         assert len(results) == 2
 
+    def test_newest_first_by_date_whatever_the_insertion_order(self, client):
+        _entry('role_modifie', days_ago=0, actor_email='today@x.tg')
+        _entry('role_modifie', days_ago=2, actor_email='older@x.tg')
+        ActivityEntryModel.objects.filter(actor_email='today@x.tg').update(created_at=timezone.now())
+        results = client.get(URL).data['results']
+        assert [r['actor']['email'] for r in results] == ['today@x.tg', 'older@x.tg']
+
     def test_period_and_pagination(self, client):
         _entry('role_modifie', days_ago=20)
         for _ in range(3):

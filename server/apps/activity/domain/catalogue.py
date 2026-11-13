@@ -262,7 +262,9 @@ SETTING_LABELS = {
     'commission_fondateur': 'Commission fondateur', 'commission_transfert': 'Commission transfert',
 }
 
-HIDDEN_DETAILS = {'changes'}
+HIDDEN_DETAILS = {'changes', 'cible_id', 'annonce_id', 'hebergement', 'appointment', 'agent_id', 'avis_id',
+                  'reservation_id', 'hote'}
+DETAIL_ORDER = {key: index for index, key in enumerate(DETAIL_LABELS)}
 
 
 def _value(value) -> str:
@@ -290,7 +292,7 @@ def detail_lines(action: str, details: dict) -> list[dict]:
         if isinstance(change, dict):
             lines.append({'label': SETTING_LABELS.get(key, key),
                           'value': f"{_value(change.get('before'))} → {_value(change.get('after'))}"})
-    for key, value in details.items():
+    for key, value in sorted(details.items(), key=lambda item: DETAIL_ORDER.get(item[0], len(DETAIL_ORDER))):
         if key in HIDDEN_DETAILS or (key in ('avant', 'apres') and isinstance(value, dict)):
             continue
         lines.append({'label': DETAIL_LABELS.get(key, key.replace('_', ' ').capitalize()), 'value': _value(value)})

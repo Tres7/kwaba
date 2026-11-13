@@ -54,8 +54,11 @@ class DjangoEntryRepository(EntryRepository):
     def search(self, query, actor_ids):
         qs = _filtered(query, actor_ids)
         if query.before_id:
-            qs = qs.filter(id__lt=query.before_id)
-        return [_entry(m) for m in qs.order_by('-id')[:query.limit]]
+            cursor = ActivityEntryModel.objects.filter(pk=query.before_id).values_list('created_at', flat=True).first()
+            if cursor is None:
+                return []
+            qs = qs.filter(Q(created_at__lt=cursor) | Q(created_at=cursor, id__lt=query.before_id))
+        return [_entry(m) for m in qs.order_by('-created_at', '-id')[:query.limit]]
 
     def count_by_action(self, query, actor_ids):
         rows = _filtered(query, actor_ids).order_by().values('action').annotate(n=Count('id'))
