@@ -57,7 +57,8 @@ export default function LegalPage({ titre, miseAJour, intro, sections }: LegalPa
           {sections.map((s, i) => (
             <section key={s.id} id={s.id} className="mt-10 scroll-mt-28" aria-labelledby={`${s.id}-titre`}>
               <h2 id={`${s.id}-titre`} className="font-heading font-bold text-xl text-dark mb-3">{s.numero === "" ? "" : `${s.numero ?? i + 1}. `}{s.titre}</h2>
-              <div className="text-gray-700 leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:underline [&_table]:w-full [&_table]:text-sm [&_th]:text-left [&_th]:p-2 [&_th]:bg-gray-50 [&_td]:p-2 [&_td]:align-top [&_tr]:border-b [&_tr]:border-gray-100">
+              {/* Table cells may break a long word (cookie names, "authjs.session-token"): otherwise the tables widen the page on a phone */}
+              <div className="text-gray-700 leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:underline [&_table]:w-full [&_table]:text-sm [&_th]:text-left [&_th]:p-2 [&_th]:bg-gray-50 [&_td]:p-2 [&_td]:align-top [&_th]:wrap-anywhere [&_td]:wrap-anywhere [&_tr]:border-b [&_tr]:border-gray-100">
                 {s.contenu}
               </div>
             </section>
