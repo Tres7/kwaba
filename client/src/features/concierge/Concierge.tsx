@@ -105,7 +105,7 @@ function ConciergeContent() {
       <div className="min-h-[70vh] bg-light pb-12">
         <PageHero surtitre={<><Sparkles size={16} /> Concierge {t("ia")}</>} titre="Kwa-Ba Concierge" sousTitre={t("presentation")}>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/login?callbackUrl=/concierge" className="inline-flex items-center gap-2 bg-white text-primary-700 font-bold px-6 py-3 rounded-xl hover:bg-primary-50">{t("seConnecter")}</Link>
+            <Link href="/login?callbackUrl=/concierge" className="inline-flex items-center gap-2 bg-white text-primary-700 dark:bg-gray-900 dark:text-primary-800 font-bold px-6 py-3 rounded-xl hover:bg-primary-50 dark:hover:bg-gray-800">{t("seConnecter")}</Link>
             <Link href="/register" className="inline-flex items-center gap-2 border border-white/40 text-white font-bold px-6 py-3 rounded-xl hover:bg-white/10">{tNav("creerCompte")}</Link>
           </div>
         </PageHero>
@@ -115,7 +115,7 @@ function ConciergeContent() {
           <ul className="grid sm:grid-cols-2 gap-3">
             {SUGGESTIONS.map((s) => (
               <li key={s}>
-                <Link href="/login?callbackUrl=/concierge" className="h-full block bg-white rounded-2xl border border-gray-100 shadow-xs p-4 text-sm text-dark leading-relaxed hover:border-primary/30 hover:shadow-card transition-all">
+                <Link href="/login?callbackUrl=/concierge" className="h-full block bg-surface rounded-2xl border border-gray-100 shadow-xs p-4 text-sm text-dark leading-relaxed hover:border-primary/30 hover:shadow-card transition-all">
                   <span>{locale === "fr" ? `« ${t(`suggestions.${s}`)} »` : `“${t(`suggestions.${s}`)}”`}</span>
                 </Link>
               </li>
@@ -131,14 +131,14 @@ function ConciergeContent() {
   return (
     <div className="bg-light">
       <div className="max-w-6xl mx-auto px-0 sm:px-6 lg:py-6 flex gap-6 h-[calc(100dvh-4rem)] md:h-[calc(100dvh-5rem)]">
-        <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-white rounded-3xl border border-gray-100 p-3">
+        <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-surface rounded-3xl border border-gray-100 p-3">
           <button onClick={() => router.push("/concierge")} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary text-white text-sm font-bold">
             <MessageSquarePlus size={16} /> {t("nouvelleConversation")}
           </button>
           <ul className="mt-3 flex-1 overflow-y-auto space-y-1">
             {conversations.map((c) => (
               <li key={c.id} className="group flex items-center">
-                <Link href={`/concierge?c=${c.id}`} className={cn("flex-1 min-w-0 px-3 py-2 rounded-xl text-sm truncate", c.id === conversationId ? "bg-primary/10 text-primary font-semibold" : "text-dark hover:bg-gray-50")}>
+                <Link href={`/concierge?c=${c.id}`} className={cn("flex-1 min-w-0 px-3 py-2 rounded-xl text-sm truncate", c.id === conversationId ? "bg-primary/10 text-brand font-semibold" : "text-dark hover:bg-gray-50")}>
                   {c.titre}
                 </Link>
                 <button onClick={() => supprimer(c.id)} aria-label={`Supprimer la conversation ${c.titre}`} className="p-1.5 text-gray-400 hover:text-red-700 opacity-0 group-hover:opacity-100 focus:opacity-100">
@@ -149,7 +149,7 @@ function ConciergeContent() {
           </ul>
         </aside>
 
-        <section className="flex-1 min-w-0 flex flex-col bg-white sm:rounded-3xl sm:border sm:border-gray-100 overflow-hidden">
+        <section className="flex-1 min-w-0 flex flex-col bg-background sm:rounded-3xl sm:border sm:border-gray-100 overflow-hidden">
           <header className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center"><Sparkles size={18} /></div>
@@ -159,7 +159,7 @@ function ConciergeContent() {
               </div>
             </div>
             {conversationId && (
-              <button onClick={() => router.push("/concierge")} className="lg:hidden flex items-center gap-1.5 text-xs font-bold text-primary">
+              <button onClick={() => router.push("/concierge")} className="lg:hidden flex items-center gap-1.5 text-xs font-bold text-brand">
                 <MessageSquarePlus size={15} /> {t("nouvelle")}
               </button>
             )}
@@ -197,7 +197,7 @@ function ConciergeContent() {
                       <Bulle role="assistant" texte={enCours.texte} cartes={[]} enCours />
                     )}
                     {enCours.outil && (
-                      <p className="flex items-center gap-2 text-sm text-gray-600"><Loader2 size={15} className="animate-spin text-primary" /> {enCours.outil}…</p>
+                      <p className="flex items-center gap-2 text-sm text-gray-600"><Loader2 size={15} className="animate-spin text-brand" /> {enCours.outil}…</p>
                     )}
                     <CartesConcierge cartes={enCours.cartes} />
                   </div>
@@ -245,7 +245,7 @@ function Bulle({ role, texte, cartes, enCours }: { role: "user" | "assistant"; t
     <div className="space-y-3">
       {(texte || enCours) && (
         <div className="max-w-[92%] sm:max-w-[80%] text-sm text-dark">
-          {texte ? <TexteConcierge texte={texte} /> : <Loader2 size={16} className="animate-spin text-primary" aria-label={tB("ecrit")} />}
+          {texte ? <TexteConcierge texte={texte} /> : <Loader2 size={16} className="animate-spin text-brand" aria-label={tB("ecrit")} />}
         </div>
       )}
       <CartesConcierge cartes={cartes} />

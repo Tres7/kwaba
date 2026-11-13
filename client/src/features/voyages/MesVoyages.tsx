@@ -56,11 +56,11 @@ export default function TogetherPage() {
     <div className="bg-light pb-12">
       <PageHero surtitre={<><Users size={16} /> Kwa-Ba Together</>} titre={t("titre")} sousTitre={t("sousTitre")}>
           {connecte ? (
-            <button onClick={() => setCreation(true)} className="mt-6 inline-flex items-center gap-2 bg-white text-primary-700 font-bold px-6 py-3 rounded-xl hover:bg-orange-50">
+            <button onClick={() => setCreation(true)} className="mt-6 inline-flex items-center gap-2 bg-white text-primary-700 dark:bg-gray-900 dark:text-primary-800 font-bold px-6 py-3 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800">
               <Plus size={18} /> {t("creer")}
             </button>
           ) : (
-            <Link href="/login?callbackUrl=/together" className="mt-6 inline-flex items-center gap-2 bg-white text-primary-700 font-bold px-6 py-3 rounded-xl">
+            <Link href="/login?callbackUrl=/together" className="mt-6 inline-flex items-center gap-2 bg-white text-primary-700 dark:bg-gray-900 dark:text-primary-800 font-bold px-6 py-3 rounded-xl">
               {t("seConnecter")}
             </Link>
           )}
@@ -68,7 +68,7 @@ export default function TogetherPage() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {creation && (
-          <form method="post" onSubmit={creer} noValidate className="bg-white rounded-3xl border border-gray-100 shadow-card p-5 sm:p-8 space-y-4">
+          <form method="post" onSubmit={creer} noValidate className="bg-surface rounded-3xl border border-gray-100 shadow-card p-5 sm:p-8 space-y-4">
             <h2 className="font-heading font-bold text-dark text-xl">{t("nouveau")}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label={t("nomVoyage")} id="v-nom" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
@@ -99,16 +99,16 @@ export default function TogetherPage() {
             {isLoading ? (
               <div className="grid sm:grid-cols-2 gap-4">{[0, 1].map((i) => <div key={i} className="h-32 skeleton rounded-2xl" />)}</div>
             ) : voyages.length === 0 ? (
-              <p className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-600">
+              <p className="bg-surface rounded-2xl border border-gray-100 p-8 text-center text-gray-600">
                 {t("aucun")}
               </p>
             ) : (
               <ul className="grid sm:grid-cols-2 gap-4">
                 {voyages.map((v) => (
                   <li key={v.id}>
-                    <Link href={`/together/${v.id}`} className="block bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-card transition-shadow">
+                    <Link href={`/together/${v.id}`} className="block bg-surface rounded-2xl border border-gray-100 p-5 hover:shadow-card transition-shadow">
                       <p className="font-heading font-bold text-dark text-lg">{v.nom}</p>
-                      <p className="flex items-center gap-1.5 text-sm text-gray-600 mt-1"><MapPin size={14} className="text-primary" /> {v.destination}
+                      <p className="flex items-center gap-1.5 text-sm text-gray-600 mt-1"><MapPin size={14} className="text-brand" /> {v.destination}
                         {v.date_debut && v.date_fin && <> · {formatDate(v.date_debut)} → {formatDate(v.date_fin)}</>}
                       </p>
                       <p className="text-sm text-gray-600 mt-3">
@@ -125,8 +125,8 @@ export default function TogetherPage() {
 
         <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {ATOUTS.map(({ icon: Icon, id }) => (
-            <div key={id} className="bg-white rounded-2xl border border-gray-100 p-5">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center"><Icon size={20} /></div>
+            <div key={id} className="bg-surface rounded-2xl border border-gray-100 p-5">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 text-brand flex items-center justify-center"><Icon size={20} /></div>
               <h3 className="font-heading font-bold text-dark mt-3">{t(`atouts.${id}.titre`)}</h3>
               <p className="text-sm text-gray-600 mt-1">{t(`atouts.${id}.texte`)}</p>
             </div>

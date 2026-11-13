@@ -48,7 +48,7 @@ export default function Membres({ v, recharger }: { v: Voyage; recharger: () => 
   return (
     <div className="grid lg:grid-cols-5 gap-6">
       <div className="lg:col-span-3 space-y-5">
-        <section className="bg-white rounded-2xl border border-gray-100 p-5">
+        <section className="bg-background rounded-2xl border border-gray-100 p-5">
           <h3 className="font-heading font-bold text-dark">{t("inviter")}</h3>
           <p className="text-sm text-gray-600 mt-1">{t("inviterTexte")}</p>
           <div className="flex gap-2 mt-3">
@@ -68,14 +68,14 @@ export default function Membres({ v, recharger }: { v: Voyage; recharger: () => 
           )}
         </section>
 
-        <section className="bg-white rounded-2xl border border-gray-100 p-5">
+        <section className="bg-background rounded-2xl border border-gray-100 p-5">
           <h3 className="font-heading font-bold text-dark">{tT("membres", { nombre: v.membres.length })}</h3>
           <ul className="mt-3 divide-y divide-gray-100">
             {v.membres.map((m) => (
               <li key={m.id} className="flex items-center justify-between gap-3 py-2.5">
                 <span className="flex items-center gap-2 text-sm text-dark">
                   {m.nom}{m.moi && ` (${t("vous")})`}
-                  {m.organisateur && <span className="flex items-center gap-1 text-xs font-bold text-primary"><Crown size={12} /> {t("organise")}</span>}
+                  {m.organisateur && <span className="flex items-center gap-1 text-xs font-bold text-brand"><Crown size={12} /> {t("organise")}</span>}
                 </span>
                 {!m.organisateur && (m.moi || v.est_organisateur) && (
                   <button onClick={() => retirer(m.id, m.nom, m.moi)} className="text-xs text-gray-600 hover:text-red-700 underline">{m.moi ? t("quitter") : t("retirer")}</button>
@@ -87,7 +87,7 @@ export default function Membres({ v, recharger }: { v: Voyage; recharger: () => 
       </div>
 
       {v.est_organisateur && (
-        <section className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5 h-fit space-y-3">
+        <section className="lg:col-span-2 bg-background rounded-2xl border border-gray-100 p-5 h-fit space-y-3">
           <h3 className="font-heading font-bold text-dark">{t("datesTaille")}</h3>
           <div className="grid grid-cols-2 gap-3">
             <FormField label={tT("arrivee")} id="m-debut" type="date" value={dates.date_debut} onChange={(e) => setDates({ ...dates, date_debut: e.target.value })} />

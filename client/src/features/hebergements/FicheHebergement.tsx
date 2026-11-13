@@ -66,7 +66,7 @@ function CadrePhoto({ onAgrandir, label, className, children }: {
 function Lieu({ city, location }: { city: string; location: string }) {
   const ville = villeDuNom(city);
   const quartier = ville && quartierDeAdresse(ville, location);
-  const lien = "hover:text-primary hover:underline";
+  const lien = "hover:text-brand hover:underline";
   return (
     <>
       {location && <>{ville && quartier ? <Link href={cheminQuartier(ville, quartier)} className={lien}>{location}</Link> : location}, </>}
@@ -208,7 +208,7 @@ function HebergementContent() {
     <div className="bg-light pb-28 lg:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
         <div className="flex items-center gap-2 text-sm text-muted min-w-0">
-          <button onClick={() => router.back()} className="relative zone-tactile flex items-center gap-1 hover:text-primary transition-colors shrink-0">
+          <button onClick={() => router.back()} className="relative zone-tactile flex items-center gap-1 hover:text-brand transition-colors shrink-0">
             <ArrowLeft size={14} /> {t("retour")}
           </button>
           <span>/</span>
@@ -238,7 +238,7 @@ function HebergementContent() {
               {hebergement.statut_verification === "verifiee" && (
                 <>
                   <span className="text-muted">·</span>
-                  <span className="flex items-center gap-1 font-semibold text-primary" title={t("verifieAide")}>
+                  <span className="flex items-center gap-1 font-semibold text-brand" title={t("verifieAide")}>
                     <BadgeCheck size={15} /> {t("verifieBadge")}
                   </span>
                 </>
@@ -259,7 +259,7 @@ function HebergementContent() {
             <div key={img + i} className="snap-center shrink-0 w-full px-4">
               <CadrePhoto onAgrandir={agrandir(i)} label={tVisionneuse("agrandir", { photo: `${hebergement.name}, photo ${i + 1}` })} className="relative block w-full rounded-2xl">
                 <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-64 object-cover rounded-2xl" />
-                {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-white/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
+                {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-surface/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
                 <span className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">{i + 1}/{photos.length}</span>
               </CadrePhoto>
             </div>
@@ -270,12 +270,12 @@ function HebergementContent() {
             <CadrePhoto key={img + i} onAgrandir={agrandir(i)} label={tVisionneuse("agrandir", { photo: `${hebergement.name}, photo ${i + 1}` })}
               className={cn("relative block w-full h-full overflow-hidden", celluleMosaique(i, Math.min(photos.length, 5)))}>
               <img src={img} alt={`${hebergement.name}, photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
-              {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-white/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
+              {hebergement.legendes_photos?.[img] && <span className="absolute bottom-3 left-3 bg-surface/90 text-dark text-xs font-semibold px-2.5 py-1 rounded-full">{libellePiece(hebergement.legendes_photos[img], tPieces)}</span>}
             </CadrePhoto>
           ))}
           {gallery.length > 5 && (
             <button type="button" onClick={() => setPhotoAgrandie(0)}
-              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white text-dark text-sm font-semibold px-4 py-2.5 rounded-xl shadow-card hover:bg-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary">
+              className="absolute bottom-4 right-4 flex items-center gap-2 bg-surface text-dark text-sm font-semibold px-4 py-2.5 rounded-xl shadow-card hover:bg-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary">
               <Images size={16} aria-hidden /> {t("voirPhotos", { nombre: gallery.length })}
             </button>
           )}
@@ -287,9 +287,9 @@ function HebergementContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6 flex items-center justify-between gap-4">
+            <section className="bg-background rounded-2xl shadow-card p-5 sm:p-6 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-brand font-bold flex items-center justify-center shrink-0">
                   {hebergement.host_name?.[0]?.toUpperCase() ?? "H"}
                 </div>
                 <div className="min-w-0">
@@ -312,24 +312,24 @@ function HebergementContent() {
                 </div>
               </div>
               {isOwner ? (
-                <Link href="/hote/espace" className="flex items-center gap-2 text-sm font-bold text-primary border border-primary/30 rounded-xl px-4 py-2 hover:bg-primary/5">
+                <Link href="/hote/espace" className="flex items-center gap-2 text-sm font-bold text-brand border border-primary/30 rounded-xl px-4 py-2 hover:bg-primary/5">
                   <Pencil size={15} /> {t("gerer")}
                 </Link>
               ) : (
-                <button onClick={handleContact} disabled={contacting} className="flex items-center gap-2 text-sm font-bold text-primary border border-primary/30 rounded-xl px-4 py-2 hover:bg-primary/5 disabled:opacity-50 shrink-0">
+                <button onClick={handleContact} disabled={contacting} className="flex items-center gap-2 text-sm font-bold text-brand border border-primary/30 rounded-xl px-4 py-2 hover:bg-primary/5 disabled:opacity-50 shrink-0">
                   <MessageCircle size={15} /> {contacting ? t("ouverture") : t("contacter")}
                 </button>
               )}
             </section>
 
-            <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+            <section className="bg-background rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("description")}</h2>
               <div className="text-gray-600 leading-relaxed">
                 <motion.div animate={{ height: expanded ? "auto" : "4.8rem" }} transition={{ duration: 0.3 }} className="overflow-hidden" style={{ height: "4.8rem" }}>
                   <p className="whitespace-pre-line">{hebergement.description || t("aucuneDescription")}</p>
                 </motion.div>
                 {(hebergement.description?.length ?? 0) > 180 && (
-                  <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1 text-primary font-medium text-sm mt-3 hover:underline">
+                  <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1 text-brand font-medium text-sm mt-3 hover:underline">
                     {expanded ? <>{t("voirMoins")} <ChevronUp size={14} /></> : <>{t("voirPlus")} <ChevronDown size={14} /></>}
                   </button>
                 )}
@@ -340,7 +340,7 @@ function HebergementContent() {
             <PhotosParPiece photos={gallery} legendes={hebergement.legendes_photos} nom={hebergement.name}
               onAgrandir={(url) => setPhotoAgrandie(gallery.indexOf(url))} />
 
-            <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+            <section className="bg-background rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("equipements")}</h2>
               <EquipementsLogement amenities={hebergement.amenities} />
             </section>
@@ -349,7 +349,7 @@ function HebergementContent() {
 
             <AvisSection hebergementId={hebergement.id} isOwner={isOwner} hostName={hebergement.host_name || t("lHote")} />
 
-            <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+            <section className="bg-background rounded-2xl shadow-card p-5 sm:p-6">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("localisation")}</h2>
               {hebergement.position && (
                 <div className="h-56 sm:h-72 rounded-xl overflow-hidden bg-light-muted mb-3">
@@ -362,7 +362,7 @@ function HebergementContent() {
           </div>
 
           <div className="lg:col-span-1" id="reserver">
-            <div className="bg-white rounded-3xl shadow-soft border border-gray-100 p-5 sm:p-7 lg:sticky lg:top-28">
+            <div className="bg-surface rounded-3xl shadow-soft border border-gray-100 p-5 sm:p-7 lg:sticky lg:top-28">
               <div className="mb-5">
                 <div className="flex flex-wrap items-baseline gap-x-2">
                   <span className="text-dark font-heading font-bold text-3xl">{formatPrice(nuitTtc.total)}</span>
@@ -460,7 +460,7 @@ function HebergementContent() {
                   )}
                   <div className="flex justify-between font-heading font-bold pt-3 border-t border-gray-100 text-lg">
                     <span className="text-dark">{t("total")}</span>
-                    <span className="text-primary">{devis ? formatPrice(devis.total) : <Chargement />}</span>
+                    <span className="text-brand">{devis ? formatPrice(devis.total) : <Chargement />}</span>
                   </div>
                   {devisEnErreur && <p role="alert" className="text-xs text-red-700">{t("prixIndisponible")}</p>}
                 </div>
@@ -479,7 +479,7 @@ function HebergementContent() {
       </div>
 
       {/* Mobile booking bar */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-gray-100 px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <div className="min-w-0">
           <p className="font-heading font-bold text-dark truncate">{formatPrice(devis && nights > 0 ? devis.total : nuitTtc.total)}</p>
           <p className="text-xs text-muted">{nights > 0 ? t("nuitsFraisInclus", { nombre: nights }) : t("parNuitFraisInclus")}</p>

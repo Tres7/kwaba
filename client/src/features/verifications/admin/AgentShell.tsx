@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { CalendarDays, ClipboardList, History, Home, LayoutDashboard, LogOut, MapPin, ShieldAlert, UserCheck } from "lucide-react";
 import Logo from "@/components/layout/Logo";
+import ThemeSelector from "@/components/layout/ThemeSelector";
 import AlerteVerifications from "./AlerteVerifications";
 import { useTableauAgent } from "../hooks";
 import { useCompteursVerification } from "../compteurs";
@@ -51,21 +52,21 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center bg-light">
         <ShieldAlert size={40} className="text-red-600" />
         <p className="font-heading font-bold text-xl text-dark">Accès réservé aux agents de terrain</p>
-        <Link href="/" className="text-primary font-bold hover:underline">Retour au site</Link>
+        <Link href="/" className="text-brand font-bold hover:underline">Retour au site</Link>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-light lg:flex">
-      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 bg-white border-r border-gray-100 sticky top-0 h-screen p-5">
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 bg-surface border-r border-gray-100 sticky top-0 h-screen p-5">
         <Logo size="sm" />
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted mt-2 mb-8">Espace agent</p>
         <nav className="space-y-1 flex-1" aria-label="Espace agent">
           {NAV.map(({ href, label, icon: Icon, compteur }) => (
             <Link key={href} href={href} aria-current={actifOnglet(href) ? "page" : undefined}
               className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
-                actifOnglet(href) ? "bg-primary/10 text-primary" : "text-dark hover:bg-gray-50")}>
+                actifOnglet(href) ? "bg-primary/10 text-brand" : "text-dark hover:bg-gray-50")}>
               <Icon size={18} aria-hidden /> {label}
               {compteur && <Pastille nombre={totaux[compteur]} className="ml-auto" />}
             </Link>
@@ -79,6 +80,7 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
         <div className="border-t border-gray-100 pt-4">
           <p className="text-sm font-semibold text-dark truncate">{session?.user?.name}</p>
           <p className="text-xs text-muted">{role === "admin" ? "Administrateur" : "Agent de terrain"}</p>
+          <ThemeSelector className="mt-3" />
           <button onClick={() => signOut({ callbackUrl: "/" })} className="mt-3 flex items-center gap-2 text-sm font-medium text-dark hover:text-red-600">
             <LogOut size={15} aria-hidden /> Se déconnecter
           </button>
@@ -86,7 +88,7 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
       </aside>
 
       <div className="flex-1 min-w-0">
-        <header className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-100">
+        <header className="lg:hidden sticky top-0 z-40 bg-background border-b border-gray-100">
           <div className="flex items-center justify-between gap-2 px-4 h-14">
             <div className="flex items-center gap-2 min-w-0">
               <Logo size="sm" />
@@ -110,13 +112,13 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
         <main id="contenu" tabIndex={-1} className={cn("px-4 py-5 sm:px-6 lg:p-8 pb-28 lg:pb-8 outline-hidden",
           pathname.startsWith("/agent/agenda") ? "max-w-6xl" : "max-w-4xl")}>{children}</main>
 
-        <nav aria-label="Espace agent" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
+        <nav aria-label="Espace agent" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
           <ul className="grid grid-cols-6">
             {NAV.map(({ href, court, icon: Icon, compteur }) => (
               <li key={href}>
                 <Link href={href} aria-current={actifOnglet(href) ? "page" : undefined}
                   className={cn("relative flex flex-col items-center gap-1 pt-2.5 pb-2 text-[11px] font-semibold",
-                    actifOnglet(href) ? "text-primary" : "text-gray-500")}>
+                    actifOnglet(href) ? "text-brand" : "text-gray-500")}>
                   <span className="relative">
                     <Icon size={22} aria-hidden />
                     {compteur && <Pastille nombre={totaux[compteur]} petite className="absolute -top-1.5 -right-3" />}
@@ -137,8 +139,8 @@ export default function AgentShell({ children }: { children: React.ReactNode }) 
 function Pastille({ nombre, petite, className }: { nombre: number; petite?: boolean; className?: string }) {
   if (nombre <= 0) return null;
   return (
-    <span className={cn("rounded-full bg-orange-700 text-white font-bold tabular-nums flex items-center justify-center",
-      petite ? "min-w-[18px] h-[18px] px-1 text-[10px] ring-2 ring-white" : "min-w-[22px] h-[22px] px-1.5 text-xs", className)}>
+    <span className={cn("rounded-full bg-orange-700 dark:bg-orange-600 text-white font-bold tabular-nums flex items-center justify-center",
+      petite ? "min-w-[18px] h-[18px] px-1 text-[10px] ring-2 ring-surface" : "min-w-[22px] h-[22px] px-1.5 text-xs", className)}>
       {nombre > 99 ? "99+" : nombre}
       <span className="sr-only"> en attente</span>
     </span>

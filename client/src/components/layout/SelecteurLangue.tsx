@@ -37,7 +37,7 @@ export default function SelecteurLangue({ className, complet = false }: { classN
           aria-pressed={l === locale}
           title={NOMS[l]}
           className={cn("rounded-full px-2.5 py-1 text-xs font-bold uppercase transition-colors",
-            l === locale ? "bg-primary text-white" : "text-dark hover:text-primary")}
+            l === locale ? "bg-primary text-white" : "text-dark hover:text-brand")}
         >
           {complet ? NOMS[l] : l}
         </button>

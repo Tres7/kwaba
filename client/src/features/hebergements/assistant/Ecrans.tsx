@@ -27,7 +27,7 @@ export interface EcranProps {
   conditions?: Conditions;
 }
 
-export const champClass = "w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
+export const champClass = "w-full px-4 py-3.5 bg-surface border border-gray-200 rounded-2xl text-base text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 export const libelleClass = "block text-sm font-semibold text-dark mb-2";
 
 export function Question({ cle, children }: { cle: string; children?: React.ReactNode }) {
@@ -59,20 +59,20 @@ function CarteChoix({ picto: Picto, titre, texte, note, choisi, onChoisir }: {
       className={cn(
         "group relative text-left rounded-3xl border-2 p-2 transition-all duration-200 motion-safe:hover:-translate-y-0.5",
         "focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40",
-        choisi ? "border-primary bg-primary-50 shadow-md" : "border-gray-100 bg-white hover:border-primary/40 hover:shadow-md",
+        choisi ? "border-primary bg-primary-50 shadow-md" : "border-gray-100 bg-surface hover:border-primary/40 hover:shadow-md",
       )}
     >
       <span className={cn("flex items-center justify-center h-20 sm:h-24 rounded-2xl transition-colors duration-200",
-        choisi ? "bg-primary text-light" : "bg-light-muted text-primary group-hover:bg-primary-50")}>
+        choisi ? "bg-primary text-white" : "bg-light-muted text-brand group-hover:bg-primary-50")}>
         <Picto size={34} strokeWidth={1.5} aria-hidden className="transition-transform duration-300 motion-safe:group-hover:scale-110" />
       </span>
       <span className="block px-2 pt-2.5 pb-2">
         <span className="block font-heading font-bold text-dark text-sm sm:text-base">{titre}</span>
         <span className="block text-xs text-gray-500 mt-0.5 leading-snug">{texte}</span>
-        {note && <span className="block text-xs font-semibold text-primary mt-1.5">{note}</span>}
+        {note && <span className="block text-xs font-semibold text-brand mt-1.5">{note}</span>}
       </span>
       {choisi && (
-        <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-white text-primary flex items-center justify-center shadow-sm">
+        <span className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full bg-surface text-brand flex items-center justify-center shadow-sm">
           <Check size={16} aria-hidden />
         </span>
       )}
@@ -116,7 +116,7 @@ function EcranAdresse({ donnees, modifier, erreurs }: EcranProps) {
             {VILLES.map(({ nom: ville }) => (
               <button key={ville} type="button" aria-pressed={donnees.city === ville} onClick={() => modifier({ city: ville })}
                 className={cn("px-3.5 py-1.5 rounded-full text-sm border transition-colors",
-                  donnees.city === ville ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}>
+                  donnees.city === ville ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200 hover:border-primary/40")}>
                 {ville}
               </button>
             ))}
@@ -221,7 +221,7 @@ function EcranChambres({ donnees, modifier, erreurs }: EcranProps) {
     <Question cle="chambres">
       <div className="space-y-4">
         {types.map((u, i) => (
-          <fieldset key={i} className="rounded-2xl border border-gray-200 bg-white p-4 space-y-3">
+          <fieldset key={i} className="rounded-2xl border border-gray-200 bg-surface p-4 space-y-3">
             <legend className="sr-only">{t("typeNumero", { numero: i + 1 })}</legend>
             <div className="flex items-start gap-2">
               <label className="flex-1">
@@ -256,11 +256,11 @@ function EcranChambres({ donnees, modifier, erreurs }: EcranProps) {
           </fieldset>
         ))}
         <button type="button" onClick={() => modifier(avecTypes([...types, NOUVEAU_TYPE]))} disabled={types.length >= 30}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-300 py-3.5 text-sm font-semibold text-primary hover:border-primary/50 disabled:opacity-50">
+          className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-300 py-3.5 text-sm font-semibold text-brand hover:border-primary/50 disabled:opacity-50">
           <Plus size={18} aria-hidden /> {t("ajouter")}
         </button>
         {complets.length > 0 && (
-          <p className="text-sm font-semibold text-primary">
+          <p className="text-sm font-semibold text-brand">
             {t("resume", { total, prix: formatPrice(Math.min(...complets.map((u) => u.prix_nuit))) })}
           </p>
         )}
@@ -287,7 +287,7 @@ function EcranEquipements({ donnees, modifier }: EcranProps) {
                 return (
                   <button key={id} type="button" aria-pressed={actif} onClick={() => basculer(id)}
                     className={cn("flex items-center gap-2.5 text-left px-3 py-3 rounded-2xl text-sm border transition-colors min-h-13",
-                      actif ? "border-primary bg-primary-50 text-primary font-semibold" : "border-gray-200 bg-white text-dark hover:border-primary/40")}>
+                      actif ? "border-primary bg-primary-50 text-brand font-semibold" : "border-gray-200 bg-surface text-dark hover:border-primary/40")}>
                     <Icone size={22} weight="duotone" className="shrink-0" aria-hidden /> {label}
                   </button>
                 );
@@ -310,15 +310,15 @@ function EcranPhotos({ donnees, modifier, erreurs, onOccupe }: EcranProps) {
   return (
     <Question cle="photos">
       <ul className="grid gap-2 mb-5 text-sm text-gray-600">
-        <li className="flex items-start gap-2"><Sun size={18} className="text-primary shrink-0" aria-hidden /> {t("photos.conseilJour")}</li>
-        <li className="flex items-start gap-2"><Camera size={18} className="text-primary shrink-0" aria-hidden /> {t("photos.conseilPieces")}</li>
+        <li className="flex items-start gap-2"><Sun size={18} className="text-brand shrink-0" aria-hidden /> {t("photos.conseilJour")}</li>
+        <li className="flex items-start gap-2"><Camera size={18} className="text-brand shrink-0" aria-hidden /> {t("photos.conseilPieces")}</li>
       </ul>
       <PhotoUploader value={donnees.images ?? []} onChange={enregistrer} onBusyChange={onOccupe} fichiersDuBrouillon
         error={erreurs.images?.[0] ?? erreurs.image_url?.[0] ?? erreurs.legendes_photos?.[0]}
         legendes={donnees.legendes_photos ?? {}} chambres={donnees.chambres} sallesDeBain={donnees.salles_de_bain}
         etablissement={estEtablissement(donnees.type)}
         onLegende={(url, piece) => modifier({ legendes_photos: { ...donnees.legendes_photos, [url]: piece } })} />
-      <p className={cn("text-sm font-semibold mt-3", nombre >= MIN_PHOTOS ? "text-primary" : "text-dark")}>
+      <p className={cn("text-sm font-semibold mt-3", nombre >= MIN_PHOTOS ? "text-brand" : "text-dark")}>
         {t("photos.compteur", { nombre, min: MIN_PHOTOS })}
       </p>
       {/* Says why "Next" waits */}

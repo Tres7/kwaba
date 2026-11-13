@@ -37,11 +37,11 @@ export default function GuestsField({ value, onChange, max = 16, variant = "fiel
         type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="dialog"
         className={cn(
           "w-full flex items-center gap-2 text-left",
-          variant === "field" && "h-full border border-gray-200 rounded-xl px-4 py-3 bg-white hover:border-gray-300",
+          variant === "field" && "h-full border border-gray-200 rounded-xl px-4 py-3 bg-surface hover:border-gray-300",
           open && variant === "field" && "border-primary ring-2 ring-primary/20",
         )}
       >
-        <Users size={16} className="text-primary shrink-0" />
+        <Users size={16} className="text-brand shrink-0" />
         <span className="flex-1 min-w-0 text-base md:text-sm font-medium text-dark truncate">
           {t("voyageurs", { nombre: value })}
         </span>
@@ -54,7 +54,7 @@ export default function GuestsField({ value, onChange, max = 16, variant = "fiel
           <Stepper label={t("enfants")} hint={t("enfantsAide")} value={enfants} min={0} max={max - adultes} onChange={(e) => maj(adultes, e)} />
           <p className="text-xs text-muted">{t("bebes")}{max < 16 ? ` ${t("maximum", { nombre: max })}` : ""}</p>
           <div className="flex justify-end">
-            <button type="button" onClick={() => setOpen(false)} className="px-5 py-2 rounded-xl bg-dark text-white text-sm font-bold">{t("valider")}</button>
+            <button type="button" onClick={() => setOpen(false)} className="px-5 py-2 rounded-xl bg-dark text-inverse text-sm font-bold">{t("valider")}</button>
           </div>
         </Floating>
       )}

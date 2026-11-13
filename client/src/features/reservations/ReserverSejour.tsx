@@ -75,7 +75,7 @@ function ReservationContent() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-center px-6">
         <p className="font-heading font-bold text-xl text-dark">{t("introuvable")}</p>
-        <Link href="/recherche" className="text-primary font-bold hover:underline">{t("retourRecherche")}</Link>
+        <Link href="/recherche" className="text-brand font-bold hover:underline">{t("retourRecherche")}</Link>
       </div>
     );
   }
@@ -127,9 +127,9 @@ function ReservationContent() {
 
   return (
     <div className="bg-light pb-12">
-      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 py-4">
+      <div className="bg-surface border-b border-gray-100 px-4 sm:px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
-          <button onClick={() => router.back()} className="text-dark hover:text-primary transition-colors" aria-label={t("retour")}>
+          <button onClick={() => router.back()} className="text-dark hover:text-brand transition-colors" aria-label={t("retour")}>
             <ArrowLeft size={20} />
           </button>
           <h1 className="font-heading font-bold text-dark text-lg sm:text-xl">{t("confirmerPayer")}</h1>
@@ -139,10 +139,10 @@ function ReservationContent() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10">
           <div className="lg:col-span-3 space-y-6">
-            <section className="bg-white rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8">
+            <section className="bg-background rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-heading font-bold text-dark text-xl">{t("votreVoyage")}</h2>
-                <Link href={backToListing} className="text-sm font-bold text-primary hover:underline">{t("modifier")}</Link>
+                <Link href={backToListing} className="text-sm font-bold text-brand hover:underline">{t("modifier")}</Link>
               </div>
               {datesInvalid ? (
                 <p className="text-sm text-red-700 bg-red-50 rounded-xl p-3">
@@ -165,7 +165,7 @@ function ReservationContent() {
               )}
             </section>
 
-            <section className="bg-white rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8">
+            <section className="bg-background rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8">
               <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("reservePar")}</h2>
               <p className="text-sm text-dark font-semibold">{session?.user?.name}</p>
               <p className="text-sm text-gray-500">{session?.user?.email}</p>
@@ -183,7 +183,7 @@ function ReservationContent() {
               </p>
             </section>
 
-            <section id="mode-paiement" className="bg-white rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8 scroll-mt-28">
+            <section id="mode-paiement" className="bg-background rounded-3xl shadow-xs border border-gray-100 p-5 sm:p-8 scroll-mt-28">
               <h2 className="font-heading font-bold text-dark text-xl mb-5">{t("modePaiement")}</h2>
               <div className="space-y-3" role="radiogroup" aria-label={t("modePaiement")}>
                 {moyens.map((method) => {
@@ -199,7 +199,7 @@ function ReservationContent() {
                         <Icon size={20} />
                       </div>
                       <div className="text-left flex-1 min-w-0">
-                        <p className={cn("font-bold text-sm", isActive ? "text-primary" : "text-dark")}>{t(`moyens.${method.label}`)}</p>
+                        <p className={cn("font-bold text-sm", isActive ? "text-brand" : "text-dark")}>{t(`moyens.${method.label}`)}</p>
                         <p className="text-gray-500 text-xs mt-0.5">
                           {method.sublabel === "paypalDetail" ? t("moyens.paypalDetail") : method.sublabel === "operateurs" ? operateurs : method.sublabel}
                           {method.id === "paypal" && config && !datesInvalid && devis && <> · <strong className="text-dark">{enEuros(total, config.fcfa_par_euro)}</strong></>}
@@ -221,7 +221,7 @@ function ReservationContent() {
                 </p>
               ) : (
                 <p className="flex items-start gap-2 text-xs text-gray-500 mt-4 bg-gray-50 rounded-xl p-3">
-                  <Info size={14} className="shrink-0 mt-0.5 text-primary" />
+                  <Info size={14} className="shrink-0 mt-0.5 text-brand" />
                   {t("paiementInactif")}
                 </p>
               )}
@@ -229,12 +229,12 @@ function ReservationContent() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6 lg:sticky lg:top-28">
+            <div className="bg-surface rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6 lg:sticky lg:top-28">
               <div className="flex gap-4 pb-5 border-b border-gray-100">
                 <img src={hebergement.image_url || FALLBACK_IMAGE} alt={hebergement.name} className="w-24 h-20 rounded-2xl object-cover shrink-0" />
                 <div className="min-w-0">
                   <h3 className="font-bold text-dark text-sm line-clamp-2">{hebergement.name}</h3>
-                  <p className="flex items-center gap-1 text-gray-500 text-xs mt-1"><MapPin size={12} className="text-primary shrink-0" /><span className="truncate">{hebergement.city}</span></p>
+                  <p className="flex items-center gap-1 text-gray-500 text-xs mt-1"><MapPin size={12} className="text-brand shrink-0" /><span className="truncate">{hebergement.city}</span></p>
                   <RatingBadge rating={hebergement.rating} count={hebergement.review_count} className="mt-1" />
                 </div>
               </div>
@@ -271,7 +271,7 @@ function ReservationContent() {
 
                   <div className="pt-5 flex justify-between items-center mb-5">
                     <span className="font-heading font-bold text-dark text-lg">{tFiche("total")}</span>
-                    <span className="text-right"><span className="block font-heading font-bold text-primary text-2xl">{devis ? formatPrice(total) : <Chargement />}</span>{devis && <MontantDebite montant={total} />}</span>
+                    <span className="text-right"><span className="block font-heading font-bold text-brand text-2xl">{devis ? formatPrice(total) : <Chargement />}</span>{devis && <MontantDebite montant={total} />}</span>
                   </div>
                 </>
               )}
@@ -282,7 +282,7 @@ function ReservationContent() {
               {enLigne && (
                 <p className="flex items-center justify-between gap-2 text-sm text-gray-600 mb-3">
                   <span>{t("payerAvec")} <strong className="text-dark">{t(`moyens.${moyens.find((m) => m.id === moyenChoisi)?.label ?? "mobileMoney"}`)}</strong></span>
-                  <a href="#mode-paiement" className="text-primary font-semibold hover:underline">{t("changer")}</a>
+                  <a href="#mode-paiement" className="text-brand font-semibold hover:underline">{t("changer")}</a>
                 </p>
               )}
               <div className="mb-4">
@@ -292,11 +292,11 @@ function ReservationContent() {
               {/* Express acceptance of the terms of sale, the listing rules and the cancellation policy (terms of sale, art. 5.2) */}
               <label className="flex items-start gap-2.5 text-xs text-gray-600 leading-relaxed mb-4 cursor-pointer">
                 <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-gray-300 text-primary focus:ring-primary" />
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-gray-300 text-brand focus:ring-primary" />
                 <span>
                   {t.rich(enLigne ? "accepterPaiement" : "accepterConfirmation", {
-                    cgu: (x) => <Link href="/cgv" className="text-primary font-medium">{x}</Link>,
-                    annulation: (x) => <Link href="/remboursement" className="text-primary font-medium">{x}</Link>,
+                    cgu: (x) => <Link href="/cgv" className="text-brand font-medium">{x}</Link>,
+                    annulation: (x) => <Link href="/remboursement" className="text-brand font-medium">{x}</Link>,
                   })}
                 </span>
               </label>

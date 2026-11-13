@@ -57,7 +57,7 @@ export function SelecteurDevise({ className, complet = false }: { className?: st
       {options.map((o) => (
         <button key={o.valeur} type="button" onClick={() => choisir(o.valeur)} aria-pressed={o.valeur === devise} title={o.long}
           className={cn("rounded-full px-2.5 py-1 text-xs font-bold transition-colors",
-            o.valeur === devise ? "bg-primary text-white" : "text-dark hover:text-primary")}>
+            o.valeur === devise ? "bg-primary text-white" : "text-dark hover:text-brand")}>
           {complet ? o.long : o.court}
         </button>
       ))}

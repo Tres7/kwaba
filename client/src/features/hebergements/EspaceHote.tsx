@@ -181,12 +181,12 @@ function EspaceHoteContent() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-6 flex items-center gap-4">
           <button type="button" onClick={fermer} aria-label={tCommun("retour")}
-            className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
+            className="w-10 h-10 rounded-full bg-surface shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
             <ArrowLeft size={20} aria-hidden />
           </button>
           <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark">{editing === "new" ? t("nouvelle") : t("modifier")}</h1>
         </div>
-        <div className="bg-white rounded-3xl shadow-card p-5 sm:p-8">
+        <div className="bg-surface rounded-3xl shadow-card p-5 sm:p-8">
           {/* Pre-launch: a new listing starts with the pre-registration (shown only if still to be accepted) */}
           {editing === "new" ? <PreinscriptionHote onCancel={fermer}>{formulaire}</PreinscriptionHote> : formulaire}
         </div>
@@ -216,7 +216,7 @@ function EspaceHoteContent() {
           { label: t("stats.aVenir"), value: upcoming.length },
           { label: t("stats.revenus"), value: formatPrice(revenue) },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-xs min-w-0">
+          <div key={s.label} className="bg-surface rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-xs min-w-0">
             <p className="text-xs text-muted font-medium">{s.label}</p>
             <p className="font-heading font-bold text-dark text-lg sm:text-2xl mt-1 truncate">{s.value}</p>
           </div>
@@ -226,7 +226,7 @@ function EspaceHoteContent() {
       <div className="flex gap-6 border-b border-gray-200 mb-6 overflow-x-auto scrollbar-hide" role="tablist">
         {([["annonces", t("onglets.annonces", { nombre: annonces.length })], ["reservations", t("onglets.reservations", { nombre: reservations.length })], ["revenus", t("onglets.revenus")]] as const).map(([id, label]) => (
           <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
-            className={cn("pb-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors", tab === id ? "text-primary border-primary" : "text-gray-400 border-transparent hover:text-dark")}>
+            className={cn("pb-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors", tab === id ? "text-brand border-primary" : "text-gray-400 border-transparent hover:text-dark")}>
             {label}
           </button>
         ))}
@@ -245,25 +245,25 @@ function EspaceHoteContent() {
         isLoading ? (
           <div className="space-y-4">{[0, 1].map((i) => <div key={i} className="h-36 skeleton rounded-2xl" />)}</div>
         ) : annonces.length === 0 ? (
-          <div className="bg-white rounded-3xl p-10 sm:p-16 text-center border border-gray-100">
+          <div className="bg-surface rounded-3xl p-10 sm:p-16 text-center border border-gray-100">
             <p className="text-gray-500 mb-4">{t("aucuneAnnonce")}</p>
             <button onClick={nouvelle} className="bg-primary text-white font-bold px-6 py-3 rounded-xl">{t("publierPremier")}</button>
           </div>
         ) : (
           <div className="space-y-4">
             {annonces.map((h) => (
-              <article key={h.id} className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden flex flex-col sm:flex-row">
+              <article key={h.id} className="bg-surface rounded-2xl border border-gray-100 shadow-xs overflow-hidden flex flex-col sm:flex-row">
                 <Link href={`/hebergements/${h.id}`} className="sm:w-48 h-40 sm:h-auto shrink-0 relative">
                   <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className={cn("w-full h-full object-cover", h.statut_annonce !== "publiee" && "grayscale opacity-60")} />
-                  {!h.is_available && <span className="absolute top-3 left-3 bg-dark text-white text-[10px] font-bold uppercase px-2 py-1 rounded-full">{t("masqueeBadge")}</span>}
+                  {!h.is_available && <span className="absolute top-3 left-3 bg-night text-white text-[10px] font-bold uppercase px-2 py-1 rounded-full">{t("masqueeBadge")}</span>}
                 </Link>
                 <div className="flex-1 p-5 min-w-0 flex flex-col">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h2 className="font-heading font-bold text-dark truncate">{h.name}</h2>
-                      <p className="flex items-center gap-1 text-sm text-gray-500 mt-1"><MapPin size={13} className="text-primary" />{h.city} · {TYPE_LABELS[h.type]} · {t("pers", { nombre: h.max_guests })}</p>
+                      <p className="flex items-center gap-1 text-sm text-gray-500 mt-1"><MapPin size={13} className="text-brand" />{h.city} · {TYPE_LABELS[h.type]} · {t("pers", { nombre: h.max_guests })}</p>
                     </div>
-                    <p className="font-heading font-bold text-primary whitespace-nowrap">{formatPrice(h.price_per_night)}<span className="text-xs text-gray-400 font-normal">/nuit</span></p>
+                    <p className="font-heading font-bold text-brand whitespace-nowrap">{formatPrice(h.price_per_night)}<span className="text-xs text-gray-400 font-normal">/nuit</span></p>
                   </div>
                   <RatingBadge rating={h.rating} count={h.review_count} variant="full" className="mt-2" />
                   {(h.chambres == null || h.salles_de_bain == null || !h.point_repere) && (
@@ -272,7 +272,7 @@ function EspaceHoteContent() {
                     </button>
                   )}
                   {h.statut_annonce === "validee" && prelancement ? (
-                    <div className="mt-3 text-sm bg-primary/5 text-primary rounded-xl px-3 py-2">
+                    <div className="mt-3 text-sm bg-primary/5 text-brand rounded-xl px-3 py-2">
                       <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span className="flex items-center gap-1.5 text-xs font-bold text-green-700"><ShieldCheck size={14} aria-hidden /> {tVerif("verifiee")}</span>
                         <span className="inline-flex items-center gap-1 bg-accent/15 text-amber-900 text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
@@ -320,19 +320,19 @@ function EspaceHoteContent() {
       ) : resLoading ? (
         <div className="h-36 skeleton rounded-2xl" />
       ) : reservations.length === 0 ? (
-        <div className="bg-white rounded-3xl p-10 sm:p-16 text-center border border-gray-100 text-gray-500">{t("aucuneResa")}</div>
+        <div className="bg-surface rounded-3xl p-10 sm:p-16 text-center border border-gray-100 text-gray-500">{t("aucuneResa")}</div>
       ) : (
         <div className="space-y-3">
           {reservations.map((r) => (
-            <article key={r.id} className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+            <article key={r.id} className="bg-surface rounded-2xl border border-gray-100 p-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
               <div className="flex-1 min-w-0">
                 <p className="font-heading font-bold text-dark truncate">{r.hebergement_detail.name}</p>
                 <p className="text-sm text-gray-500">{t("par", { nom: r.guest_name })} · <span className="font-mono text-xs">{r.reference}</span></p>
                 {r.message && <p className="text-sm text-gray-600 mt-2 bg-gray-50 rounded-xl px-3 py-2 italic">« {r.message} »</p>}
               </div>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-gray-600">
-                <span className="flex items-center gap-1.5"><Calendar size={14} className="text-primary" />{formatDate(r.check_in)} → {formatDate(r.check_out)}</span>
-                <span className="flex items-center gap-1.5"><Users size={14} className="text-primary" />{r.guests_count}</span>
+                <span className="flex items-center gap-1.5"><Calendar size={14} className="text-brand" />{formatDate(r.check_in)} → {formatDate(r.check_out)}</span>
+                <span className="flex items-center gap-1.5"><Users size={14} className="text-brand" />{r.guests_count}</span>
               </div>
               <div className="flex items-center justify-between md:flex-col md:items-end gap-1">
                 <span className="font-heading font-bold text-dark" title={t("montantHoteAide")}>
@@ -352,7 +352,7 @@ function EspaceHoteContent() {
                 {r.status === "confirmed" && (
                   <button
                     onClick={() => contacterVoyageur(r)} disabled={contactId === r.id}
-                    className="mt-1 flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/5 disabled:opacity-50"
+                    className="mt-1 flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary/30 text-brand text-sm font-semibold hover:bg-primary/5 disabled:opacity-50"
                   >
                     <MessageCircle size={14} /> {contactId === r.id ? t("ouverture") : t("contacterNom", { nom: r.guest_name.split(" ")[0] })}
                   </button>

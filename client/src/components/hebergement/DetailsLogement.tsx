@@ -26,7 +26,7 @@ export function useResumeDetails() {
 function Ligne({ Icone, titre, texte }: { Icone: Icon; titre: string; texte: string }) {
   return (
     <div className="flex items-center gap-3 bg-light-muted rounded-xl px-3 py-2.5">
-      <span className="h-8 w-8 rounded-lg bg-white text-primary shadow-xs flex items-center justify-center shrink-0">
+      <span className="h-8 w-8 rounded-lg bg-surface text-brand shadow-xs flex items-center justify-center shrink-0">
         <Icone size={20} weight="duotone" aria-hidden />
       </span>
       <span className="min-w-0">
@@ -61,7 +61,7 @@ export default function DetailsLogement({ h }: { h: Details }) {
   if (!lignes.length) return null;
 
   return (
-    <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+    <section className="bg-background rounded-2xl shadow-card p-5 sm:p-6">
       <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("titre")}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {lignes.map((l) => <Ligne key={l.titre} {...l} />)}

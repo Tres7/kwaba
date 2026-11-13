@@ -63,7 +63,7 @@ export function EcranRegles({ donnees, modifier }: EcranProps) {
                   <button key={option.id} type="button" role="radio" aria-checked={valeur === option.id}
                     onClick={() => choisir(regle, valeur === option.id ? null : option.id)}
                     className={cn("px-3 py-3 rounded-2xl text-sm border transition-colors",
-                      valeur === option.id ? "border-primary bg-primary-50 text-primary font-semibold" : "border-gray-200 bg-white text-dark hover:border-primary/40")}>
+                      valeur === option.id ? "border-primary bg-primary-50 text-brand font-semibold" : "border-gray-200 bg-surface text-dark hover:border-primary/40")}>
                     {option.label}
                   </button>
                 ))}
@@ -101,7 +101,7 @@ export function EcranAccueil({ donnees, modifier, erreurs }: EcranProps) {
               <button key={v} type="button" role="radio" aria-checked={donnees.petit_dejeuner === v}
                 onClick={() => modifier({ petit_dejeuner: v })}
                 className={cn("px-2 py-3 rounded-2xl text-sm border transition-colors",
-                  donnees.petit_dejeuner === v ? "border-primary bg-primary-50 text-primary font-semibold" : "border-gray-200 bg-white text-dark hover:border-primary/40")}>
+                  donnees.petit_dejeuner === v ? "border-primary bg-primary-50 text-brand font-semibold" : "border-gray-200 bg-surface text-dark hover:border-primary/40")}>
                 {t(v === "inclus" ? "petitDejInclus" : v === "option" ? "petitDejOption" : "petitDejNon")}
               </button>
             ))}
@@ -147,7 +147,7 @@ export function EcranSecurite({ donnees, modifier }: EcranProps) {
         <input type="checkbox" className="accent-primary w-5 h-5 shrink-0 mt-0.5" checked={declarations.attestation === true}
           onChange={(e) => declarer({ attestation: e.target.checked })} />
         <span className="text-sm text-dark leading-relaxed">
-          {t.rich("attestation", { cgu: (x) => <Link href="/cgu#hotes" target="_blank" className="text-primary underline">{x}<span className="sr-only"> ({tAnnonce("nouvelOnglet")})</span></Link> })}
+          {t.rich("attestation", { cgu: (x) => <Link href="/cgu#hotes" target="_blank" className="text-brand underline">{x}<span className="sr-only"> ({tAnnonce("nouvelOnglet")})</span></Link> })}
         </span>
       </label>
     </Question>
@@ -184,11 +184,11 @@ export function EcranTelephone({ conditions }: EcranProps) {
         <label className={libelleClass} htmlFor="a-telephone">{t("libelle")}</label>
         <input id="a-telephone" type="tel" autoComplete="tel" inputMode="tel" className={champClass} placeholder="+228 90 00 00 00"
           value={valeur} onChange={(e) => setNumero(e.target.value)} />
-        <button type="submit" disabled={envoi || !valeur.trim()} className="px-5 py-3 rounded-2xl border border-primary/30 text-primary font-semibold disabled:opacity-50">
+        <button type="submit" disabled={envoi || !valeur.trim()} className="px-5 py-3 rounded-2xl border border-primary/30 text-brand font-semibold disabled:opacity-50">
           {envoi ? t("envoi") : t("enregistrer")}
         </button>
         {erreur && <p role="alert" className="text-sm text-red-700">{erreur}</p>}
-        {conditions?.telephone && <p className="flex items-center gap-2 text-sm font-semibold text-primary"><CheckCircle2 size={18} aria-hidden /> {t("fait")}</p>}
+        {conditions?.telephone && <p className="flex items-center gap-2 text-sm font-semibold text-brand"><CheckCircle2 size={18} aria-hidden /> {t("fait")}</p>}
       </form>
     </Question>
   );
@@ -215,11 +215,11 @@ export function EcranContrat({ conditions }: EcranProps) {
   return (
     <Question cle="contrat">
       <PreinscriptionHote onCancel={() => window.history.back()}>
-        {conditions?.preinscription && <p className="flex items-center gap-2 text-sm font-semibold text-primary"><CheckCircle2 size={18} aria-hidden /> {t("accepte")}</p>}
+        {conditions?.preinscription && <p className="flex items-center gap-2 text-sm font-semibold text-brand"><CheckCircle2 size={18} aria-hidden /> {t("accepte")}</p>}
       </PreinscriptionHote>
       {conditions?.contrat_a_signer && (
         <p className="text-sm text-gray-600 mt-5">
-          {t.rich("aSigner", { lien: (x) => <Link href="/hote/espace/contrat" className="font-bold text-primary underline">{x}</Link> })}
+          {t.rich("aSigner", { lien: (x) => <Link href="/hote/espace/contrat" className="font-bold text-brand underline">{x}</Link> })}
         </p>
       )}
     </Question>
@@ -244,13 +244,13 @@ export function EcranRecapitulatif({ donnees, conditions }: EcranProps) {
           <p className="text-sm text-gray-500 mt-0.5">
             {donnees.type && TYPE_LABELS[donnees.type]} · {[donnees.location, donnees.city].filter(Boolean).join(", ")} · {t("voyageurs", { nombre: donnees.max_guests ?? 1 })}
           </p>
-          <p className="font-heading font-bold text-primary mt-2">{formatPrice(Number(donnees.price_per_night) || 0)} <span className="text-sm font-normal text-gray-500">{t("parNuit")}</span></p>
+          <p className="font-heading font-bold text-brand mt-2">{formatPrice(Number(donnees.price_per_night) || 0)} <span className="text-sm font-normal text-gray-500">{t("parNuit")}</span></p>
         </div>
       </article>
       <ul className="mt-5 space-y-2.5">
         {lignes.map(([cle, ok]) => {
           const Icone = ok ? CheckCircle2 : Circle;
-          return <li key={cle} className={cn("flex items-center gap-2.5 text-sm", ok ? "text-dark" : "text-red-700 font-semibold")}><Icone size={18} className={ok ? "text-primary" : ""} aria-hidden /> {t(`lignes.${cle}`)}</li>;
+          return <li key={cle} className={cn("flex items-center gap-2.5 text-sm", ok ? "text-dark" : "text-red-700 font-semibold")}><Icone size={18} className={ok ? "text-brand" : ""} aria-hidden /> {t(`lignes.${cle}`)}</li>;
         })}
       </ul>
       <p className="text-sm text-gray-600 mt-5 bg-gray-50 rounded-2xl p-4">{t("suite")}</p>

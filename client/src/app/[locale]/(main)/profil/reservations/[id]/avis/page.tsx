@@ -66,7 +66,7 @@ export default function LaisserAvisPage() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-center px-6">
         <p className="font-heading font-bold text-xl text-dark">{t("introuvable")}</p>
-        <Link href="/profil/reservations" className="text-primary font-bold hover:underline">{t("mesReservations")}</Link>
+        <Link href="/profil/reservations" className="text-brand font-bold hover:underline">{t("mesReservations")}</Link>
       </div>
     );
   }
@@ -78,9 +78,9 @@ export default function LaisserAvisPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
         <SubPageHeader title={t("titre")} back="/profil/reservations" />
-        <div className="bg-white rounded-3xl p-8 text-center text-gray-600">
+        <div className="bg-surface rounded-3xl p-8 text-center text-gray-600">
           {reservation.avis_id
-            ? <>{t("dejaEvalue")} <Link href={`/hebergements/${h.id}#avis`} className="text-primary font-bold hover:underline">{t("voirAvis")}</Link></>
+            ? <>{t("dejaEvalue")} <Link href={`/hebergements/${h.id}#avis`} className="text-brand font-bold hover:underline">{t("voirAvis")}</Link></>
             : t("nonEvaluable")}
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function LaisserAvisPage() {
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <SubPageHeader title={t("titre")} subtitle={t("sousTitre")} back="/profil/reservations" />
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-4 items-center mb-6">
+      <div className="bg-surface rounded-2xl border border-gray-100 p-4 flex gap-4 items-center mb-6">
         <img src={h.image_url || FALLBACK_IMAGE} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0" />
         <div className="min-w-0">
           <p className="font-heading font-bold text-dark truncate">{h.name}</p>
@@ -117,11 +117,11 @@ export default function LaisserAvisPage() {
         </div>
       </div>
 
-      <form method="post" onSubmit={envoyer} className="bg-white rounded-3xl shadow-card p-5 sm:p-8 space-y-8">
+      <form method="post" onSubmit={envoyer} className="bg-surface rounded-3xl shadow-card p-5 sm:p-8 space-y-8">
         <div className="text-center">
           <p className="font-heading font-bold text-dark text-lg mb-3">{t("noteGlobale")}</p>
           <div className="flex justify-center"><StarInput value={note} onChange={setNote} size={38} label={t("noteGlobaleCourt")} /></div>
-          <p className="text-sm font-semibold text-primary mt-2 h-5">{note ? t(`notes.${note}`) : ""}</p>
+          <p className="text-sm font-semibold text-brand mt-2 h-5">{note ? t(`notes.${note}`) : ""}</p>
         </div>
 
         <div className="space-y-5">

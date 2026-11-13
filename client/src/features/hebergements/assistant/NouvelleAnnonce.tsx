@@ -35,7 +35,7 @@ export default function NouvelleAnnonce() {
       {erreur ? (
         <>
           <p role="alert" className="text-dark font-semibold max-w-sm">{erreur}</p>
-          <Link href="/hote/espace" className="font-bold text-primary underline">{t("retourEspace")}</Link>
+          <Link href="/hote/espace" className="font-bold text-brand underline">{t("retourEspace")}</Link>
         </>
       ) : (
         <p role="status" className="text-dark font-semibold">{t("preparation")}</p>

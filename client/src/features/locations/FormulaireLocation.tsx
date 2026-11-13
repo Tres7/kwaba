@@ -16,7 +16,7 @@ import { useFormat } from "@/lib/format";
 import { calculerDevisLocation, creerLocation, listerMesChauffeurs } from "./api";
 import type { CatalogueLocation, CategorieVehicule, Formule } from "./types";
 
-const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const inputClass = "w-full px-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
 
@@ -112,13 +112,13 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
   const d = devis.data;
 
   return (
-    <form method="post" onSubmit={reserver} className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-6">
+    <form method="post" onSubmit={reserver} className="bg-surface rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-heading font-bold text-dark text-xl">{categorie ? t("reserverTitre", { nom: categorie.nom }) : t("chauffeurSeulTitre")}</h2>
           <p className="text-sm text-gray-500">{t(`formules.${formule}`)}{categorie?.exemple_modele ? ` · ${categorie.exemple_modele}` : ""}</p>
         </div>
-        <button type="button" onClick={onChanger} className="text-sm font-semibold text-primary hover:underline">{categorie ? t("changer") : t("changerFormule")}</button>
+        <button type="button" onClick={onChanger} className="text-sm font-semibold text-brand hover:underline">{categorie ? t("changer") : t("changerFormule")}</button>
       </div>
 
       <p className="text-sm bg-amber-50 text-amber-900 rounded-xl px-4 py-3">{t("delai", { jours: regles.delai_min_jours })}</p>
@@ -153,7 +153,7 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <p className={labelClass}>{t("passagers")}</p>
-          <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("passagers")} value={passagers}
+          <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-surface" label={t("passagers")} value={passagers}
             min={1} max={placesMax} onChange={setPassagers} />
         </div>
         <label className="block">
@@ -169,11 +169,11 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className={labelClass}>{t("joursHorsLome", { prime: formatPrice(catalogue.chauffeur?.prime_hors_lome ?? 1500) })}</p>
-              <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("joursHorsLomeCourt")} value={horsLome} min={0} max={60} onChange={setHorsLome} />
+              <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-surface" label={t("joursHorsLomeCourt")} value={horsLome} min={0} max={60} onChange={setHorsLome} />
             </div>
             <div>
               <p className={labelClass}>{t("joursHorsPays", { prime: formatPrice(catalogue.chauffeur?.prime_hors_pays ?? 2000) })}</p>
-              <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("joursHorsPaysCourt")} value={horsPays} min={0} max={60} onChange={setHorsPays} />
+              <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-surface" label={t("joursHorsPaysCourt")} value={horsPays} min={0} max={60} onChange={setHorsPays} />
             </div>
           </div>
           {!!mesChauffeurs.data?.length && (
@@ -240,10 +240,10 @@ export default function FormulaireLocation({ catalogue, categorie, formule, onCh
 
         <label className="flex items-start gap-2.5 text-xs text-gray-600 leading-relaxed mt-5 cursor-pointer">
           <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-gray-300 text-primary focus:ring-primary" />
+            className="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-gray-300 text-brand focus:ring-primary" />
           <span>{t.rich("accepter", {
-            cgv: (x) => <Link href="/cgv" className="text-primary font-medium">{x}</Link>,
-            annulation: (x) => <Link href="/remboursement" className="text-primary font-medium">{x}</Link>,
+            cgv: (x) => <Link href="/cgv" className="text-brand font-medium">{x}</Link>,
+            annulation: (x) => <Link href="/remboursement" className="text-brand font-medium">{x}</Link>,
           })}</span>
         </label>
         <button type="submit" disabled={envoi || !d || (status === "authenticated" && !accepte)}

@@ -75,7 +75,7 @@ export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: 
                 onClick={() => setTab(o.id)}
                 className={cn(
                   "relative zone-tactile pb-3 text-[15px] font-bold transition-colors whitespace-nowrap border-b-2",
-                  tab === o.id ? "text-primary border-primary" : "text-gray-400 border-transparent hover:text-dark"
+                  tab === o.id ? "text-brand border-primary" : "text-gray-400 border-transparent hover:text-dark"
                 )}
               >
                 {t(`onglets.${o.label}`)}
@@ -84,10 +84,10 @@ export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: 
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 mb-8 bg-white p-3 sm:p-4 rounded-2xl shadow-xs border border-gray-100">
+        <div className="flex flex-col sm:flex-row gap-3 mb-8 bg-surface p-3 sm:p-4 rounded-2xl shadow-xs border border-gray-100">
           <Select
             label={t("ville")} value={city} onChange={setCity} className="sm:w-56"
-            icon={<MapPin size={16} className="text-primary shrink-0" />}
+            icon={<MapPin size={16} className="text-brand shrink-0" />}
             options={[{ value: "", label: t("toutesVilles") }, ...cities.map((c) => ({ value: c, label: c }))]}
           />
           <div className="relative flex-1">
@@ -107,16 +107,16 @@ export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: 
             {[0, 1, 2].map((i) => <div key={i} className="aspect-4/5 rounded-3xl skeleton" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 text-center text-gray-500">
+          <div className="bg-surface rounded-3xl p-12 text-center text-gray-500">
             {t("aucune")}
-            <button onClick={() => { setTab("tout"); setCity(""); setQ(""); }} className="block mx-auto mt-3 text-primary font-bold hover:underline">
+            <button onClick={() => { setTab("tout"); setCity(""); setQ(""); }} className="block mx-auto mt-3 text-brand font-bold hover:underline">
               {t("reinitialiser")}
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.slice(0, limite).map((e) => (
-              <article key={e.id} className="bg-white rounded-3xl overflow-hidden shadow-xs border border-gray-100 flex flex-col">
+              <article key={e.id} className="bg-surface rounded-3xl overflow-hidden shadow-xs border border-gray-100 flex flex-col">
                 <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
                   {e.image && <img src={e.image} alt={e.nom} loading="lazy" className="w-full h-full object-cover" />}
                   <span className="absolute top-4 left-4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full text-white bg-primary shadow-xs">{e.etiquette}</span>
@@ -128,11 +128,11 @@ export default function DecouvrirPage({ villeInitiale = "" }: { villeInitiale?: 
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <h2 className="font-heading font-bold text-dark text-base leading-tight">{e.nom}</h2>
-                  <p className="flex items-center gap-1 text-gray-500 text-sm mt-1"><MapPin size={13} className="text-primary" />{e.ville}, {e.pays}</p>
+                  <p className="flex items-center gap-1 text-gray-500 text-sm mt-1"><MapPin size={13} className="text-brand" />{e.ville}, {e.pays}</p>
                   <p className="text-gray-600 text-sm mt-3 leading-relaxed flex-1">{e.description}</p>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                    <span className="font-bold text-primary text-sm">{e.gratuit ? t("gratuit") : e.prix !== null ? `≈ ${formatPrice(e.prix)}` : ""}</span>
-                    <Link href={`/recherche?city=${encodeURIComponent(e.ville)}`} className="relative zone-tactile flex items-center gap-1 text-sm font-semibold text-dark hover:text-primary">
+                    <span className="font-bold text-brand text-sm">{e.gratuit ? t("gratuit") : e.prix !== null ? `≈ ${formatPrice(e.prix)}` : ""}</span>
+                    <Link href={`/recherche?city=${encodeURIComponent(e.ville)}`} className="relative zone-tactile flex items-center gap-1 text-sm font-semibold text-dark hover:text-brand">
                       {t("dormirA", { ville: e.ville })} <ArrowRight size={14} />
                     </Link>
                   </div>

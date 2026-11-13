@@ -74,18 +74,18 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
 
   return (
     <div className="space-y-4">
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
+      <section className="bg-background rounded-2xl border border-gray-100 shadow-xs p-4">
         <p className="text-sm text-dark">
           <strong>{photos.hote.nom || photos.hote.email}</strong> a ajouté {photos.ajoutees.length} photo(s) à son annonce, déjà vérifiée.
           Elles sont en ligne : retirez celles qui ne montrent pas ce logement, qui affichent des coordonnées ou qui sont trompeuses.
         </p>
         <a href={`/hebergements/${photos.id}`} target="_blank" rel="noopener noreferrer"
-          className="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">
+          className="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline">
           Voir l&apos;annonce <ExternalLink size={14} aria-hidden />
         </a>
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
+      <section className="bg-background rounded-2xl border border-gray-100 shadow-xs p-4">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Photos ajoutées</h2>
         <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
           {photos.ajoutees.map((url, i) => {
@@ -111,7 +111,7 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
       </section>
 
       {photos.deja_verifiees.length > 0 && (
-        <details className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
+        <details className="bg-surface rounded-2xl border border-gray-100 shadow-xs p-4">
           <summary className="text-xs font-bold uppercase tracking-wide text-gray-500 cursor-pointer">
             Photos vues à la visite ({photos.deja_verifiees.length}), pour comparer
           </summary>
@@ -145,7 +145,7 @@ export default function FichePhotos({ photos, peutDecider, onTerminee }: {
       )}
 
       {peutDecider && (
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
+        <section className="bg-background rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
           {retirer.length > 0 && (
             <label className="block">
               <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Motif envoyé à l&apos;hôte</span>

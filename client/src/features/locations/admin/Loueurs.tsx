@@ -29,7 +29,7 @@ function Choix<T extends { id: number; nom: string }>({ label, elements, valeur,
           const actif = valeur.includes(e.id);
           return (
             <button key={e.id} type="button" aria-pressed={actif} onClick={() => onChange(actif ? valeur.filter((x) => x !== e.id) : [...valeur, e.id])}
-              className={cn("relative zone-tactile px-3 py-1.5 rounded-full text-sm border", actif ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200")}>
+              className={cn("relative zone-tactile px-3 py-1.5 rounded-full text-sm border", actif ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200")}>
               {e.nom}
             </button>
           );

@@ -50,7 +50,7 @@ export default function AntiFraudePage() {
     {
       titre: "Compte", masquerMobile: true, cellule: (a) => (
         <div className="text-xs min-w-0">
-          <Link href={`/backoffice/utilisateurs?q=${encodeURIComponent(a.utilisateur.email)}`} className="text-dark font-semibold hover:text-primary truncate block">
+          <Link href={`/backoffice/utilisateurs?q=${encodeURIComponent(a.utilisateur.email)}`} className="text-dark font-semibold hover:text-brand truncate block">
             {a.utilisateur.nom}
           </Link>
           <p className="text-muted truncate">{a.utilisateur.email} · {a.utilisateur.role}</p>
@@ -133,7 +133,7 @@ export default function AntiFraudePage() {
         <Select label="Nature" value={kind} onChange={setKind} options={KINDS} className="sm:w-56" />
       </div>
       {data?.count === 0 && statut === "a_traiter" && !recherche && !kind ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+        <div className="bg-surface rounded-2xl border border-gray-100 p-8 text-center">
           <ShieldCheck size={36} className="mx-auto text-secondary" aria-hidden />
           <p className="mt-3 font-semibold text-dark">Aucune alerte à traiter</p>
         </div>

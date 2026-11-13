@@ -18,7 +18,7 @@ export default function ContenuEn() {
             <strong>Kwa-Ba uses no advertising or social media cookies.</strong> Audience measurement only runs with your
             consent.
           </p>
-          <GererCookiesBouton className="mt-2 px-5 py-3 rounded-xl bg-dark text-white text-sm font-bold">Manage my cookie choices</GererCookiesBouton>
+          <GererCookiesBouton className="mt-2 px-5 py-3 rounded-xl bg-dark text-inverse text-sm font-bold">Manage my cookie choices</GererCookiesBouton>
           <VersionFrancaiseFaitFoi />
         </>
       }

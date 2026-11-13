@@ -67,15 +67,15 @@ export default function FenetreOuverture({ ouverte, onCreer, onFermer }: Props) 
           <motion.div ref={panneau} role="dialog" aria-modal="true" aria-labelledby="ouverture-titre" aria-describedby="ouverture-texte"
             initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="relative w-full max-w-md max-h-[92dvh] overflow-y-auto bg-white rounded-3xl shadow-card-hover px-6 sm:px-8 pt-9 pb-6 text-center">
+            className="relative w-full max-w-md max-h-[92dvh] overflow-y-auto bg-surface rounded-3xl shadow-card-hover px-6 sm:px-8 pt-9 pb-6 text-center">
             <button type="button" onClick={onFermer} aria-label={t("fermer")}
               className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-dark hover:bg-gray-100 focus-visible:outline-accent!">
               <X size={20} aria-hidden />
             </button>
 
-            <span className="relative mx-auto w-[72px] h-[72px] rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+            <span className="relative mx-auto w-[72px] h-[72px] rounded-2xl bg-primary/10 text-brand flex items-center justify-center">
               <Home size={30} strokeWidth={1.75} aria-hidden />
-              <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-accent text-white border-2 border-white flex items-center justify-center" aria-hidden>
+              <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-accent text-white border-2 border-surface flex items-center justify-center" aria-hidden>
                 <Sparkle size={11} className="fill-white" />
               </span>
             </span>

@@ -38,7 +38,7 @@ export default function GuideVoyage({ guide, modules }: { guide: GuidePays; modu
               <p className="text-xs font-bold uppercase tracking-wider text-muted mb-3">{guide.sommaire}</p>
               <ol className="space-y-1.5 text-sm">
                 {RUBRIQUES.map((cle) => (
-                  <li key={cle}><a href={`#${cle}`} className="text-gray-600 hover:text-primary">{guide.rubriques[cle].titre}</a></li>
+                  <li key={cle}><a href={`#${cle}`} className="text-gray-600 hover:text-brand">{guide.rubriques[cle].titre}</a></li>
                 ))}
               </ol>
             </div>
@@ -49,9 +49,9 @@ export default function GuideVoyage({ guide, modules }: { guide: GuidePays; modu
               const Icone = ICONES[r.icone];
               const action = r.action && filtrerLiens([r.action], modules)[0];
               return (
-                <section key={cle} id={cle} className="scroll-mt-28 bg-white rounded-2xl shadow-card p-5 sm:p-6">
+                <section key={cle} id={cle} className="scroll-mt-28 bg-background rounded-2xl shadow-card p-5 sm:p-6">
                   <h2 className="flex items-center gap-3 font-heading font-bold text-dark text-xl">
-                    <span className="h-10 w-10 rounded-xl bg-primary-50 text-primary flex items-center justify-center shrink-0">
+                    <span className="h-10 w-10 rounded-xl bg-primary-50 text-brand flex items-center justify-center shrink-0">
                       <Icone size={20} aria-hidden />
                     </span>
                     {r.titre}
@@ -65,7 +65,7 @@ export default function GuideVoyage({ guide, modules }: { guide: GuidePays; modu
                       {r.sources.map((s, i) => (
                         <Fragment key={s.url}>
                           {i > 0 && " · "}
-                          <a href={s.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-medium hover:underline">
+                          <a href={s.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand font-medium hover:underline">
                             {s.libelle} <ExternalLink size={13} aria-hidden />
                           </a>
                         </Fragment>

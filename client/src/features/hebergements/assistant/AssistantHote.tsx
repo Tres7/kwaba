@@ -49,7 +49,7 @@ function Apercu({ donnees }: { donnees: DonneesAnnonce }) {
   const { name, city, location, image_url: couverture } = donnees;
   if (!name && !couverture) return null;
   return (
-    <div className="absolute bottom-8 left-8 right-8 max-w-sm hidden lg:flex items-center gap-3 rounded-2xl bg-white/90 backdrop-blur-sm p-3 shadow-lg">
+    <div className="absolute bottom-8 left-8 right-8 max-w-sm hidden lg:flex items-center gap-3 rounded-2xl bg-surface/90 backdrop-blur-sm p-3 shadow-lg">
       {couverture && <img src={couverture} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />}
       <div className="min-w-0">
         <p className="font-heading font-bold text-dark truncate">{name}</p>
@@ -154,7 +154,7 @@ function Parcours({ id, etape, donnees, assistant }: {
       </aside>
 
       <div className={cn(
-        "relative z-10 flex-1 lg:flex-none lg:w-[54%] xl:w-[50%] min-h-0 flex flex-col bg-white",
+        "relative z-10 flex-1 lg:flex-none lg:w-[54%] xl:w-[50%] min-h-0 flex flex-col bg-surface",
         "rounded-t-[2rem] lg:rounded-t-none lg:rounded-l-[2.5rem] shadow-[0_-12px_40px_rgba(14,77,71,0.08)]",
         !etape.sansVisuelMobile && "-mt-6 lg:mt-0",
       )}>
@@ -163,7 +163,7 @@ function Parcours({ id, etape, donnees, assistant }: {
           <div className="flex items-center gap-4">
             <Sauvegarde etat={assistant.etat} />
             <button type="button" onClick={() => quitter("/hote/espace")}
-              className="text-sm font-semibold text-dark underline underline-offset-4 decoration-gray-300 hover:decoration-primary">
+              className="text-sm font-semibold text-dark underline underline-offset-4 decoration-gray-300 hover:decoration-brand">
               {t("quitter")}
             </button>
           </div>
@@ -177,7 +177,7 @@ function Parcours({ id, etape, donnees, assistant }: {
           </div>
         </main>
 
-        <footer className="sticky bottom-0 bg-white px-5 sm:px-10 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-gray-100">
+        <footer className="sticky bottom-0 bg-background px-5 sm:px-10 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-gray-100">
           <Progression cle={etape.cle} />
           <div className="flex items-center justify-between gap-3 mt-3">
             <button type="button" onClick={() => precedente && aller(precedente, "arriere")} disabled={!precedente}

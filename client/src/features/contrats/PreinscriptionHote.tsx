@@ -56,7 +56,7 @@ export default function PreinscriptionHote({ children, onCancel }: Props) {
   return (
     <section aria-labelledby="preinscription-titre" className="space-y-5">
       <div className="flex items-start gap-3">
-        <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><ScrollText size={22} aria-hidden /></span>
+        <span className="w-11 h-11 rounded-2xl bg-primary/10 text-brand flex items-center justify-center shrink-0"><ScrollText size={22} aria-hidden /></span>
         <div>
           <h2 id="preinscription-titre" className="font-heading font-bold text-xl text-dark">{t("titre")}</h2>
           <p className="text-sm text-gray-600 mt-1">{t("intro")}</p>
@@ -67,7 +67,7 @@ export default function PreinscriptionHote({ children, onCancel }: Props) {
 
       <label htmlFor="preinscription-case" className="flex items-start gap-3 cursor-pointer text-sm text-dark">
         <input id="preinscription-case" type="checkbox" checked={cochee} onChange={(e) => setCochee(e.target.checked)}
-          className="mt-0.5 w-5 h-5 shrink-0 rounded-sm border-gray-300 text-primary focus:ring-primary" />
+          className="mt-0.5 w-5 h-5 shrink-0 rounded-sm border-gray-300 text-brand focus:ring-primary" />
         <span>{t("case")}</span>
       </label>
 

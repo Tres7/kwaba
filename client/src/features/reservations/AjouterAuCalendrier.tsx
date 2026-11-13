@@ -22,7 +22,7 @@ export default function AjouterAuCalendrier({ reservationId, className }: { rese
         await getSession().catch(() => null);
         window.location.assign(lien);
       }}
-      className={cn("inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary-50 text-primary text-sm font-semibold hover:bg-primary-100 transition-colors", className)}
+      className={cn("inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary-50 text-brand text-sm font-semibold hover:bg-primary-100 transition-colors", className)}
     >
       <CalendarPlus size={15} aria-hidden /> {t("ajouterCalendrier")}
     </a>

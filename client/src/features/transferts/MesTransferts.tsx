@@ -30,7 +30,7 @@ export default function MesTransfertsPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/profil" aria-label={tr("retourProfil")} className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted">
+          <Link href="/profil" aria-label={tr("retourProfil")} className="w-10 h-10 rounded-full bg-surface shadow-xs flex items-center justify-center text-dark hover:bg-light-muted">
             <ArrowLeft size={20} />
           </Link>
           <div>
@@ -46,8 +46,8 @@ export default function MesTransfertsPage() {
       {isLoading ? (
         <div className="space-y-3">{[0, 1].map((i) => <div key={i} className="h-28 skeleton rounded-2xl" />)}</div>
       ) : transferts.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-gray-100 p-10 sm:p-16 text-center">
-          <Plane size={32} className="mx-auto text-primary mb-3" />
+        <div className="bg-surface rounded-3xl border border-gray-100 p-10 sm:p-16 text-center">
+          <Plane size={32} className="mx-auto text-brand mb-3" />
           <p className="text-gray-600 mb-4">{tr("aucun")}</p>
           <Link href="/transfert" className="inline-block bg-primary text-white font-bold px-6 py-3 rounded-xl">{tr("reserver")}</Link>
         </div>
@@ -55,8 +55,8 @@ export default function MesTransfertsPage() {
         <ul className="space-y-3">
           {transferts.map((t) => (
             <li key={t.id}>
-              <Link href={`/transfert/${t.id}`} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-card transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><Car size={22} /></div>
+              <Link href={`/transfert/${t.id}`} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 bg-surface rounded-2xl border border-gray-100 p-5 hover:shadow-card transition-shadow">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 text-brand flex items-center justify-center shrink-0"><Car size={22} /></div>
                 <div className="flex-1 min-w-0">
                   <p className="font-heading font-bold text-dark">{t.aeroport_detail.ville} → {t.destination}</p>
                   <p className="text-sm text-gray-600 first-letter:uppercase">{dateVol(t.arrivee_locale)} · {tr("vol", { numero: t.numero_vol })}</p>

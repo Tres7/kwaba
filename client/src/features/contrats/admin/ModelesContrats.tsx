@@ -60,8 +60,8 @@ export default function ModelesContrats() {
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : (
         <ul className="grid sm:grid-cols-2 gap-3">
           {data?.modeles.map((m) => (
-            <li key={m.type} className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-3">
-              <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><FileSignature size={18} aria-hidden /></span>
+            <li key={m.type} className="bg-surface rounded-2xl border border-gray-100 p-4 flex gap-3">
+              <span className="w-10 h-10 rounded-xl bg-primary/10 text-brand flex items-center justify-center shrink-0"><FileSignature size={18} aria-hidden /></span>
               <div className="flex-1 min-w-0">
                 <p className="font-heading font-bold text-dark">{m.type_libelle}</p>
                 <p className="text-sm text-dark truncate">{m.titre}</p>
@@ -85,7 +85,7 @@ export default function ModelesContrats() {
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(data?.variables ?? {}).map(([cle, libelle]) => (
               <button key={cle} type="button" onClick={() => inserer(cle)} title={libelle}
-                className="px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-mono text-dark hover:border-primary hover:text-primary">
+                className="px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-mono text-dark hover:border-primary hover:text-brand">
                 {cle}
               </button>
             ))}

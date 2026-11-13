@@ -59,25 +59,25 @@ function Avis() {
       </div>
 
       {isError ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+        <div className="bg-surface rounded-2xl border border-gray-100 p-10 text-center">
           <p className="text-dark font-semibold mb-2">Impossible de charger les avis.</p>
-          <button onClick={() => refetch()} className="text-primary font-bold hover:underline">Réessayer</button>
+          <button onClick={() => refetch()} className="text-brand font-bold hover:underline">Réessayer</button>
         </div>
       ) : isLoading && !data ? (
         <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-32 skeleton rounded-2xl" />)}</div>
       ) : !data?.results.length ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-muted">Aucun avis pour ces critères.</div>
+        <div className="bg-surface rounded-2xl border border-gray-100 p-10 text-center text-muted">Aucun avis pour ces critères.</div>
       ) : (
         <ul className={cn("space-y-3 transition-opacity", isFetching && "opacity-60")}>
           {data.results.map((a) => (
-            <li key={a.id} className="bg-white rounded-2xl border border-gray-100 p-5">
+            <li key={a.id} className="bg-surface rounded-2xl border border-gray-100 p-5">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="inline-flex gap-0.5" role="img" aria-label={`${a.note} sur 5`}>
                       {[1, 2, 3, 4, 5].map((i) => <Star key={i} size={14} className={i <= a.note ? "fill-accent text-accent" : "text-gray-300"} />)}
                     </span>
-                    <Link href={`/hebergements/${a.hebergement.id}#avis`} target="_blank" className="text-sm font-semibold text-dark hover:text-primary truncate">{a.hebergement.name}</Link>
+                    <Link href={`/hebergements/${a.hebergement.id}#avis`} target="_blank" className="text-sm font-semibold text-dark hover:text-brand truncate">{a.hebergement.name}</Link>
                   </div>
                   <p className="text-xs text-muted mt-1">{a.auteur.nom} · {a.auteur.email} · {formatDate(a.created_at)}</p>
                 </div>

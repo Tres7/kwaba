@@ -13,7 +13,7 @@ const STATUTS: Record<string, string> = { planifie: "Planifié", en_cours: "En c
 
 function Chiffre({ libelle, montant, aide, accent }: { libelle: string; montant: number; aide?: string; accent?: boolean }) {
   return (
-    <div className={`rounded-2xl p-4 ${accent ? "bg-primary text-white" : "bg-white border border-gray-100"}`}>
+    <div className={`rounded-2xl p-4 ${accent ? "bg-primary text-white" : "bg-surface border border-gray-100"}`}>
       <p className={`text-xs font-semibold ${accent ? "text-white/80" : "text-muted"}`}>{libelle}</p>
       <p className="font-heading font-bold text-xl mt-1 tabular-nums">{formatPrice(montant)}</p>
       {aide && <p className={`text-xs mt-0.5 ${accent ? "text-white/80" : "text-muted"}`}>{aide}</p>}
@@ -55,7 +55,7 @@ export default function Finances() {
         <label className="text-sm"><span className="block text-xs font-semibold text-muted mb-1">Au</span>
           <input type="date" className={champ} value={fin} min={debut} onChange={(e) => setFin(e.target.value)} /></label>
         <div className="flex gap-2 sm:ml-auto">
-          <button onClick={() => exporter("csv")} disabled={!!export_ || !d} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold disabled:opacity-50">
+          <button onClick={() => exporter("csv")} disabled={!!export_ || !d} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-surface text-sm font-semibold disabled:opacity-50">
             <Download size={16} aria-hidden /> {export_ === "csv" ? "Export…" : "Export CSV"}
           </button>
           <button onClick={() => exporter("pdf")} disabled={!!export_ || !d} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-50">
@@ -82,7 +82,7 @@ export default function Finances() {
             </p>
           )}
 
-          <section className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+          <section className="bg-background rounded-2xl border border-gray-100 overflow-x-auto">
             <h2 className="font-heading font-bold text-dark px-5 pt-5">Rapprochement jour par jour</h2>
             <p className="text-xs text-muted px-5 mb-3">Solde du jour = encaissé − remboursé − versé.</p>
             <table className="w-full text-sm">
@@ -104,7 +104,7 @@ export default function Finances() {
             </table>
           </section>
 
-          <section className="bg-white rounded-2xl border border-gray-100 p-5">
+          <section className="bg-background rounded-2xl border border-gray-100 p-5">
             <h2 className="font-heading font-bold text-dark mb-3">Versements aux partenaires</h2>
             {d.versements.length === 0 ? <p className="text-sm text-muted">Aucun versement sur la période ni à venir.</p> : (
               <ul className="divide-y divide-gray-50 text-sm">

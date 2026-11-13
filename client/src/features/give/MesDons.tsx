@@ -20,7 +20,7 @@ function Suivi({ don }: { don: Don }) {
       <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-secondary">
         <span className="flex items-center gap-1"><CheckCircle size={13} /> {t("reverseLe", { date: formatDate(don.reversement.effectue_le ?? "") })}</span>
         {urlExterneSure(don.reversement.justificatif) && (
-          <a href={urlExterneSure(don.reversement.justificatif)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-bold text-primary hover:underline">
+          <a href={urlExterneSure(don.reversement.justificatif)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 font-bold text-brand hover:underline">
             <FileText size={13} /> {t("preuve")}<span className="sr-only"> {t("preuveSr")}</span>
           </a>
         )}
@@ -53,7 +53,7 @@ export default function MesDonsPage() {
         {isLoading ? (
           [0, 1].map((i) => <div key={i} className="h-24 skeleton rounded-2xl" />)
         ) : !data?.results.length ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+          <div className="bg-surface rounded-2xl border border-gray-100 p-8 text-center">
             <p className="text-gray-600">{t("aucun")}</p>
             <Link href="/give" className="inline-block mt-4 bg-secondary text-white font-bold px-5 py-2.5 rounded-xl">{t("decouvrir")}</Link>
           </div>
@@ -62,11 +62,11 @@ export default function MesDonsPage() {
             {data.results.map((don) => {
               const cause = CAUSES[don.organisation.cause];
               return (
-                <li key={don.id} className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-4">
+                <li key={don.id} className="bg-surface rounded-2xl border border-gray-100 p-4 flex gap-4">
                   <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cause.couleur}`}><cause.icon size={18} /></span>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap justify-between gap-2">
-                      <Link href={`/give/${don.organisation.slug}`} className="font-bold text-dark hover:text-primary">{don.organisation.nom}</Link>
+                      <Link href={`/give/${don.organisation.slug}`} className="font-bold text-dark hover:text-brand">{don.organisation.nom}</Link>
                       <span className="font-bold text-dark">{formatPrice(don.montant)}</span>
                     </div>
                     <p className="text-xs text-gray-600 mt-0.5">

@@ -64,7 +64,7 @@ export default function FormulaireReclamation() {
     );
   }
 
-  const zone = "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base sm:text-sm text-dark outline-hidden focus:ring-4 focus:ring-primary/10";
+  const zone = "w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-base sm:text-sm text-dark outline-hidden focus:ring-4 focus:ring-primary/10";
   return (
     <form method="post" onSubmit={envoyer} className="space-y-4">
       <div>

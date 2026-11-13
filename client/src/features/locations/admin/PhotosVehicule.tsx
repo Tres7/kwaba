@@ -100,7 +100,7 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
     onEnAttente(enAttente.filter((x) => x.cle !== c));
   };
 
-  const bouton = "w-7 h-7 rounded-full bg-white/90 flex items-center justify-center disabled:opacity-40";
+  const bouton = "w-7 h-7 rounded-full bg-surface/90 flex items-center justify-center disabled:opacity-40";
   const vignettes = [
     ...photos.map((p, i) => ({ cle: `p${p.id}`, src: p.url, photo: p, principale: i === 0 })),
     ...enAttente.map((f) => ({ cle: f.cle, src: f.apercu, attente: true })),
@@ -118,8 +118,8 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
         className={cn("rounded-2xl border-2 border-dashed p-4 text-center transition-colors outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40",
           complet ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary/50 hover:bg-primary/5",
           survol ? "border-primary bg-primary/5" : erreur ? "border-red-300 bg-red-50/40" : "border-gray-200 bg-gray-50/60")}>
-        <ImagePlus size={24} className="mx-auto text-primary mb-1" aria-hidden />
-        <p className="text-sm font-medium text-dark">Glissez vos photos ici ou <span className="text-primary font-bold">parcourez</span></p>
+        <ImagePlus size={24} className="mx-auto text-brand mb-1" aria-hidden />
+        <p className="text-sm font-medium text-dark">Glissez vos photos ici ou <span className="text-brand font-bold">parcourez</span></p>
         <p className="text-xs text-muted mt-0.5">{total}/{MAX_PHOTOS_VEHICULE} · plusieurs à la fois possible</p>
         <input ref={champ} type="file" accept={FORMATS.join(",")} multiple className="hidden" onClick={(e) => e.stopPropagation()}
           onChange={(e) => { if (e.target.files) ajouter(e.target.files); e.target.value = ""; }} />
@@ -137,12 +137,12 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
                   <Star size={9} className="fill-white" aria-hidden /> Principale
                 </span>
               )}
-              {v.attente && <span className="absolute top-1.5 left-1.5 bg-dark/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">À l&apos;enregistrement</span>}
+              {v.attente && <span className="absolute top-1.5 left-1.5 bg-night/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">À l&apos;enregistrement</span>}
               {(v.envoi || action === v.photo?.id) && (
                 <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-white"><Loader2 size={18} className="animate-spin" aria-label="Envoi en cours" /></span>
               )}
               {v.erreur && (
-                <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-red-900/70 text-white p-1.5 text-center">
+                <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-red-900/70 dark:bg-red-950/70 text-white p-1.5 text-center">
                   <TriangleAlert size={16} aria-hidden /><span className="text-[10px] leading-tight">{v.erreur}</span>
                 </span>
               )}
@@ -150,7 +150,7 @@ export default function PhotosVehicule({ categorieId, photos, onPhotos, enAttent
                 <span className="absolute bottom-0 inset-x-0 flex justify-end gap-1 p-1 bg-linear-to-t from-black/60 to-transparent">
                   {v.photo && !v.principale && (
                     <button type="button" onClick={() => principale(v.photo!)} disabled={action !== null} aria-label="Définir comme photo principale"
-                      title="Définir comme photo principale" className={cn(bouton, "text-primary")}><Star size={13} aria-hidden /></button>
+                      title="Définir comme photo principale" className={cn(bouton, "text-brand")}><Star size={13} aria-hidden /></button>
                   )}
                   {v.photo ? (
                     <button type="button" onClick={() => retirer(v.photo!)} disabled={action !== null} aria-label="Retirer la photo"

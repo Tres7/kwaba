@@ -45,7 +45,7 @@ function Alertes() {
   const dates = resume && { debut: formatDate(resume.debut, { day: "numeric", month: "long" }), fin: formatDate(resume.fin, { day: "numeric", month: "long" }) };
   return (
     <div className="max-w-md mx-auto px-4 py-16 text-center">
-      <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-primary flex items-center justify-center mb-5"><Icone size={26} aria-hidden /></div>
+      <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 text-brand flex items-center justify-center mb-5"><Icone size={26} aria-hidden /></div>
       <h1 className="font-heading font-bold text-2xl text-dark mb-3">{action === "confirmer" ? t("confirmerTitre") : t("desinscrireTitre")}</h1>
       {!jeton ? (
         <p className="text-gray-600">{t("lienInvalide")}</p>
@@ -56,7 +56,7 @@ function Alertes() {
               : resume.statut === "annulee" ? t("arretee", { hebergement: resume.hebergement, ...dates })
                 : t("terminee", { hebergement: resume.hebergement, ...dates })}
           </p>
-          <Link href={`/hebergements/${resume.hebergement_id}`} className="inline-block mt-6 text-sm font-semibold text-primary hover:underline">{t("voirLogement")}</Link>
+          <Link href={`/hebergements/${resume.hebergement_id}`} className="inline-block mt-6 text-sm font-semibold text-brand hover:underline">{t("voirLogement")}</Link>
         </>
       ) : (
         <>

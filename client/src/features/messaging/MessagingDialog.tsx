@@ -32,11 +32,11 @@ export default function MessagingDialog({ title, closeLabel, submitLabel, cancel
 
   return createPortal(
     <div className="fixed inset-0 z-70 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-dark/50" onClick={() => !sending && onClose()} aria-hidden="true" />
+      <div className="absolute inset-0 bg-night/50" onClick={() => !sending && onClose()} aria-hidden="true" />
       <form
         ref={panel} role="dialog" aria-modal="true" aria-labelledby="messaging-dialog-title"
         onSubmit={(e) => { e.preventDefault(); if (canSubmit && !sending) onSubmit(); }}
-        className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-xl p-6 max-h-[90vh] overflow-y-auto"
+        className="relative w-full sm:max-w-md bg-surface rounded-t-3xl sm:rounded-3xl shadow-xl p-6 max-h-[90vh] overflow-y-auto"
       >
         <button type="button" onClick={onClose} aria-label={closeLabel} className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100">
           <X size={18} />

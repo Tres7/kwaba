@@ -111,7 +111,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
 
   return (
     <div className="space-y-4">
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
+      <section className="bg-background rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Hôte</h2>
         <p className="font-semibold text-dark">{logement.hote.nom} <span className="font-normal text-gray-500 break-all">· {logement.hote.email}</span></p>
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
@@ -121,7 +121,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
               <a href={`https://wa.me/${telephone.replace("+", "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-3 py-3 rounded-xl bg-green-50 text-sm font-semibold text-green-700">WhatsApp</a>
             </>
           )}
-          <a href={carte} target="_blank" rel="noopener noreferrer" className="col-span-2 flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl bg-primary/10 text-sm font-bold text-primary"><MapPin size={16} aria-hidden /> Itinéraire</a>
+          <a href={carte} target="_blank" rel="noopener noreferrer" className="col-span-2 flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl bg-primary/10 text-sm font-bold text-brand"><MapPin size={16} aria-hidden /> Itinéraire</a>
         </div>
         <div className={cn("flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm", piece.classe)}>
           <span>{piece.libelle}{logement.hote.piece.type_libelle ? ` (${logement.hote.piece.type_libelle})` : ""}</span>
@@ -138,7 +138,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         )}
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-2">
+      <section className="bg-background rounded-2xl border border-gray-100 shadow-xs p-4 space-y-2">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Annonce à comparer au logement</h2>
         <p className="text-sm text-dark">{libelleType(logement.type, "fr")} · {logement.max_guests} voyageurs · {formatPrice(logement.price_per_night)} / nuit</p>
         <p className="text-sm text-gray-600">{logement.location ? `${logement.location}, ` : ""}{logement.city}</p>
@@ -160,7 +160,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
         <Visionneuse photos={galerie} depart={photoAgrandie} nom={logement.name} legende={legende} onClose={() => setPhotoAgrandie(null)} />
       )}
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
+      <section className="bg-background rounded-2xl border border-gray-100 shadow-xs p-4 space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wide text-gray-500">Contrôles sur place</h2>
         {Object.entries(controlesLibelles).map(([cle, libelle]) => (
           <label key={cle} className="flex items-start gap-3 bg-gray-50 rounded-xl px-3 py-3.5 text-sm text-dark">
@@ -196,7 +196,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
           <label className="block mt-3">
             <span className="text-xs font-bold uppercase tracking-wide text-amber-900">Pourquoi décider avant la visite ? (obligatoire)</span>
             <textarea value={earlyReason} onChange={(e) => setEarlyReason(e.target.value)} rows={2} maxLength={500}
-              className="mt-2 w-full px-4 py-3 border border-amber-200 rounded-xl bg-white text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="mt-2 w-full px-4 py-3 border border-amber-200 rounded-xl bg-surface text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
               placeholder="Ex. : visite faite plus tôt avec l'hôte, qui était disponible" />
           </label>
         </section>
@@ -204,7 +204,7 @@ export default function FicheLogement({ logement, controlesLibelles, maxPhotos, 
 
       {peutDecider && (
         <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => decider("refusee")} disabled={!!envoi} className="flex items-center justify-center gap-2 py-4 rounded-xl border border-red-200 bg-white text-red-700 font-bold disabled:opacity-50">
+          <button onClick={() => decider("refusee")} disabled={!!envoi} className="flex items-center justify-center gap-2 py-4 rounded-xl border border-red-200 bg-surface text-red-700 font-bold disabled:opacity-50">
             <XCircle size={18} aria-hidden /> {envoi === "refusee" ? "Envoi…" : "Refuser"}
           </button>
           <button onClick={() => decider("validee")} disabled={!!envoi || !toutCoche || logement.hote.piece.statut === "absente" || logement.hote.piece.statut === "refusee"}

@@ -134,9 +134,9 @@ function RegisterForm() {
           {existingAccount && (
             <p className="text-xs text-gray-500 mt-1.5 ml-1">
               {t("cestVous")}{" "}
-              <Link href="/login" onClick={() => retenirEmail(form.email.trim().toLowerCase())} className="text-primary font-bold hover:underline">{t("seConnecter")}</Link>
+              <Link href="/login" onClick={() => retenirEmail(form.email.trim().toLowerCase())} className="text-brand font-bold hover:underline">{t("seConnecter")}</Link>
               {" "}{t("ou")}{" "}
-              <Link href="/verify" onClick={() => retenirEmail(form.email.trim().toLowerCase())} className="text-primary font-bold hover:underline">{t("verifierCompte")}</Link>
+              <Link href="/verify" onClick={() => retenirEmail(form.email.trim().toLowerCase())} className="text-brand font-bold hover:underline">{t("verifierCompte")}</Link>
             </p>
           )}
         </div>
@@ -183,7 +183,7 @@ function RegisterForm() {
           <label htmlFor="terms" className="text-xs text-gray-600 leading-relaxed">
             {t.rich("accepteCgu", {
               lien: (texte) => (
-                <Link href="/cgu" target="_blank" className="text-primary font-medium underline">
+                <Link href="/cgu" target="_blank" className="text-brand font-medium underline">
                   {texte}<span className="sr-only"> ({t("nouvelOnglet")})</span>
                 </Link>
               ),
@@ -194,7 +194,7 @@ function RegisterForm() {
         {/* GDPR notice: the account relies on the contract (terms of use), not on a consent box to tick */}
         <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 rounded-xl p-3">
           {t("rgpd")}{" "}
-          <Link href="/confidentialite" target="_blank" className="text-primary font-medium underline">
+          <Link href="/confidentialite" target="_blank" className="text-brand font-medium underline">
             {t("politiqueConfidentialite")}<span className="sr-only"> ({t("nouvelOnglet")})</span>
           </Link>
         </p>
@@ -212,7 +212,7 @@ function RegisterForm() {
 
       <p className="mt-6 text-center text-sm text-gray-500">
         {t("dejaUnCompte")}{" "}
-        <Link href="/login" className="relative zone-tactile font-bold text-primary hover:underline">{t("seConnecter")}</Link>
+        <Link href="/login" className="relative zone-tactile font-bold text-brand hover:underline">{t("seConnecter")}</Link>
       </p>
     </>
   );

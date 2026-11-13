@@ -35,12 +35,12 @@ export default function LegalPage({ titre, miseAJour, intro, sections }: LegalPa
           <nav aria-label={t("documents")} className="sticky top-28 space-y-1 text-sm">
             <p className="font-heading font-bold text-dark mb-3">{t("informations")}</p>
             {PAGES.map((p) => (
-              <Link key={p.href} href={p.href} className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-white hover:text-dark">{t(`titres.${p.cle}`)}</Link>
+              <Link key={p.href} href={p.href} className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-surface hover:text-dark">{t(`titres.${p.cle}`)}</Link>
             ))}
           </nav>
         </aside>
 
-        <article className="bg-white rounded-3xl shadow-card p-6 sm:p-10 min-w-0">
+        <article className="bg-surface rounded-3xl shadow-card p-6 sm:p-10 min-w-0">
           <h1 className="font-heading font-bold text-3xl sm:text-4xl text-dark">{titre}</h1>
           <p className="text-sm text-gray-600 mt-2">{t("miseAJour", { date: miseAJour })}</p>
           <div className="mt-6 text-gray-700 leading-relaxed space-y-3">{intro}</div>
@@ -49,7 +49,7 @@ export default function LegalPage({ titre, miseAJour, intro, sections }: LegalPa
             <p className="font-semibold text-dark text-sm mb-2">{t("sommaire")}</p>
             <ol className="list-decimal list-inside space-y-1 text-sm">
               {sections.map((s) => (
-                <li key={s.id} className={s.numero === "" ? "list-none" : undefined}><a href={`#${s.id}`} className="text-primary hover:underline">{s.titre}</a></li>
+                <li key={s.id} className={s.numero === "" ? "list-none" : undefined}><a href={`#${s.id}`} className="text-brand hover:underline">{s.titre}</a></li>
               ))}
             </ol>
           </nav>
@@ -58,7 +58,7 @@ export default function LegalPage({ titre, miseAJour, intro, sections }: LegalPa
             <section key={s.id} id={s.id} className="mt-10 scroll-mt-28" aria-labelledby={`${s.id}-titre`}>
               <h2 id={`${s.id}-titre`} className="font-heading font-bold text-xl text-dark mb-3">{s.numero === "" ? "" : `${s.numero ?? i + 1}. `}{s.titre}</h2>
               {/* Table cells may break a long word (cookie names, "authjs.session-token"): otherwise the tables widen the page on a phone */}
-              <div className="text-gray-700 leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:underline [&_table]:w-full [&_table]:text-sm [&_th]:text-left [&_th]:p-2 [&_th]:bg-gray-50 [&_td]:p-2 [&_td]:align-top [&_th]:wrap-anywhere [&_td]:wrap-anywhere [&_tr]:border-b [&_tr]:border-gray-100">
+              <div className="text-gray-700 leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-brand [&_a]:underline [&_table]:w-full [&_table]:text-sm [&_th]:text-left [&_th]:p-2 [&_th]:bg-gray-50 [&_td]:p-2 [&_td]:align-top [&_th]:wrap-anywhere [&_td]:wrap-anywhere [&_tr]:border-b [&_tr]:border-gray-100">
                 {s.contenu}
               </div>
             </section>

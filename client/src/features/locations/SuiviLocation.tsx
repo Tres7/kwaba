@@ -61,7 +61,7 @@ function LocationDetail() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-center px-6">
         <p className="font-heading font-bold text-xl text-dark">{td("introuvable")}</p>
-        <Link href="/location" className="text-primary font-bold hover:underline">{t("mesLocations")}</Link>
+        <Link href="/location" className="text-brand font-bold hover:underline">{t("mesLocations")}</Link>
       </div>
     );
   }
@@ -120,8 +120,8 @@ function LocationDetail() {
 
         <div aria-live="polite">
           {enAttente && (
-            <p className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4 text-sm text-dark">
-              <Loader2 size={18} className="animate-spin text-primary shrink-0" /> {tP("verification")}
+            <p className="flex items-center gap-3 bg-surface rounded-2xl border border-gray-100 p-4 text-sm text-dark">
+              <Loader2 size={18} className="animate-spin text-brand shrink-0" /> {tP("verification")}
             </p>
           )}
           {l.statut === "confirmee" && <p className="bg-blue-50 text-blue-900 rounded-2xl p-4 text-sm">{td("recu")}</p>}
@@ -133,7 +133,7 @@ function LocationDetail() {
         </div>
 
         {v && (
-          <section className="bg-white rounded-3xl border-2 border-secondary/30 p-5 sm:p-6">
+          <section className="bg-background rounded-3xl border-2 border-secondary/30 p-5 sm:p-6">
             <h2 className="font-heading font-bold text-dark text-lg">{td("votreVehicule")}</h2>
             {v.vehicule && (
               <div className="flex items-center gap-4 mt-4">
@@ -147,11 +147,11 @@ function LocationDetail() {
           </section>
         )}
 
-        <section className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6">
+        <section className="bg-background rounded-3xl border border-gray-100 p-5 sm:p-6">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="flex gap-3"><Calendar size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("prise")}</dt><dd className="font-semibold text-dark">{dateVol(l.debut_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_prise_detail.nom, l.adresse_prise)}</dd></div></div>
-            <div className="flex gap-3"><MapPin size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("retour")}</dt><dd className="font-semibold text-dark">{dateVol(l.fin_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_retour_detail.nom, l.adresse_retour)}</dd></div></div>
-            <div className="flex gap-3"><Users size={18} className="text-primary shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("passagers")}</dt><dd className="font-semibold text-dark">{l.passagers}</dd></div></div>
+            <div className="flex gap-3"><Calendar size={18} className="text-brand shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("prise")}</dt><dd className="font-semibold text-dark">{dateVol(l.debut_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_prise_detail.nom, l.adresse_prise)}</dd></div></div>
+            <div className="flex gap-3"><MapPin size={18} className="text-brand shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("retour")}</dt><dd className="font-semibold text-dark">{dateVol(l.fin_locale)}</dd><dd className="text-gray-600">{lieu(l.lieu_retour_detail.nom, l.adresse_retour)}</dd></div></div>
+            <div className="flex gap-3"><Users size={18} className="text-brand shrink-0 mt-0.5" /><div><dt className="text-gray-600">{t("passagers")}</dt><dd className="font-semibold text-dark">{l.passagers}</dd></div></div>
             <div className="sm:col-span-2 bg-gray-50 rounded-xl px-4 py-3"><dt className="text-gray-600">{t("precisions")}</dt><dd className="text-dark whitespace-pre-line mt-1">{l.precisions}</dd></div>
           </dl>
           <div className="mt-5 pt-4 border-t border-gray-100 space-y-1 text-sm">
@@ -188,7 +188,7 @@ function LocationDetail() {
         </section>
 
         {aPayer && (
-          <section className="bg-white rounded-3xl border border-amber-200 p-5 sm:p-6">
+          <section className="bg-background rounded-3xl border border-amber-200 p-5 sm:p-6">
             <h2 className="font-heading font-bold text-dark text-lg">{annuleParVoyageur || l.paiement === "annule" ? tP("paiementAnnule") : l.paiement === "echoue" ? tP("echoue") : tP("enAttente")}</h2>
             <p className="text-sm text-gray-600 mt-1">{tP("aucunDebit")}{minutes !== null && minutes > 0 && ` (${minutes} min)`}</p>
             <div className="flex flex-wrap gap-2 mt-4">
@@ -215,7 +215,7 @@ function LocationDetail() {
         )}
 
         <p className="text-center text-sm">
-          <Link href="/location" className="text-primary font-bold hover:underline">{t("mesLocations")}</Link>
+          <Link href="/location" className="text-brand font-bold hover:underline">{t("mesLocations")}</Link>
         </p>
       </div>
 

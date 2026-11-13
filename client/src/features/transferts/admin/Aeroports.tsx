@@ -64,7 +64,7 @@ export default function Aeroports() {
         <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {aeroports?.map((a) => (
             <li key={a.code}>
-              <button type="button" onClick={() => ouvrir(a)} className="w-full text-left bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-card transition-shadow">
+              <button type="button" onClick={() => ouvrir(a)} className="w-full text-left bg-surface rounded-2xl border border-gray-100 p-4 hover:shadow-card transition-shadow">
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-heading font-bold text-dark">{a.ville} <span className="text-muted font-mono text-sm">{a.code}</span></p>
                   <Pill ton={a.actif ? "vert" : "gris"}>{a.actif ? "Proposé" : "Désactivé"}</Pill>

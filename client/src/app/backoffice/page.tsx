@@ -11,7 +11,7 @@ import ReservationsChart from "@/components/backoffice/ReservationsChart";
 
 function Tuile({ titre, valeur, detail, icone: Icone, href }: { titre: string; valeur: string; detail: string; icone: typeof Users; href: string }) {
   return (
-    <Link href={href} className="block min-w-0 bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-card transition-shadow">
+    <Link href={href} className="block min-w-0 bg-surface rounded-2xl border border-gray-100 p-5 hover:shadow-card transition-shadow">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted font-medium">{titre}</p>
         <Icone size={18} className="text-gray-400" />
@@ -44,14 +44,14 @@ export default function TableauDeBord() {
       {ouverte("annonces") && <CarteLancement />}
 
       {droits && !ouverte("tableau-de-bord") ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+        <div className="bg-surface rounded-2xl border border-gray-100 p-10 text-center">
           <p className="text-dark font-semibold">Vos accès sont limités à certaines sections.</p>
           <p className="text-muted text-sm mt-1">Retrouvez-les dans le menu.</p>
         </div>
       ) : isError ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+        <div className="bg-surface rounded-2xl border border-gray-100 p-10 text-center">
           <p className="text-dark font-semibold mb-2">Statistiques indisponibles.</p>
-          <button onClick={() => refetch()} className="text-primary font-bold hover:underline">Réessayer</button>
+          <button onClick={() => refetch()} className="text-brand font-bold hover:underline">Réessayer</button>
         </div>
       ) : isLoading || !s ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">{[0, 1, 2, 3].map((i) => <div key={i} className="h-32 skeleton rounded-2xl" />)}</div>
@@ -69,7 +69,7 @@ export default function TableauDeBord() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="lg:col-span-2 bg-surface rounded-2xl border border-gray-100 p-5">
               <ReservationsChart jours={s.reservations_par_jour} />
             </div>
             <div className="space-y-4">
@@ -77,37 +77,37 @@ export default function TableauDeBord() {
                 titre="Avis" valeur={s.avis.moyenne !== null ? `${s.avis.moyenne.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} / 5` : "-"}
                 detail={`${s.avis.total} avis vérifiés`} icone={Star} href="/backoffice/avis"
               />
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="bg-surface rounded-2xl border border-gray-100 p-5">
                 <p className="text-sm font-semibold text-dark mb-3">À traiter</p>
                 <ul className="space-y-2 text-sm">
                   <li>
                     <Link href="/agent"
                       className={pieces > 0
                         ? "flex items-center justify-between gap-2 -mx-2 px-2 py-2 rounded-xl bg-orange-50 text-orange-900 font-semibold hover:bg-orange-100"
-                        : "flex items-center justify-between gap-2 hover:text-primary"}>
+                        : "flex items-center justify-between gap-2 hover:text-brand"}>
                       <span className="flex items-center gap-2"><IdCard size={15} className={pieces > 0 ? "text-orange-700" : "text-gray-400"} /> Pièces d&apos;identité à contrôler</span>
                       {pieces > 0 ? (
                         <span className="flex items-center gap-1">
-                          <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-orange-700 text-white text-xs font-bold tabular-nums flex items-center justify-center">{pieces}</span>
+                          <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-orange-700 dark:bg-orange-600 text-white text-xs font-bold tabular-nums flex items-center justify-center">{pieces}</span>
                           <ChevronRight size={16} className="text-orange-700" aria-hidden />
                         </span>
                       ) : <span className="font-bold tabular-nums">0</span>}
                     </Link>
                   </li>
                   <li>
-                    <Link href="/backoffice/annonces?statut=en_attente" className="flex items-center justify-between hover:text-primary">
+                    <Link href="/backoffice/annonces?statut=en_attente" className="flex items-center justify-between hover:text-brand">
                       <span className="flex items-center gap-2"><BadgeCheck size={15} className="text-gray-400" /> Annonces à vérifier</span>
                       <span className="font-bold tabular-nums">{s.annonces.en_attente}</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/backoffice/utilisateurs?actif=false" className="flex items-center justify-between hover:text-primary">
+                    <Link href="/backoffice/utilisateurs?actif=false" className="flex items-center justify-between hover:text-brand">
                       <span className="flex items-center gap-2"><Users size={15} className="text-gray-400" /> Comptes désactivés</span>
                       <span className="font-bold tabular-nums">{s.utilisateurs.desactives}</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/backoffice/avis?note=1" className="flex items-center justify-between hover:text-primary">
+                    <Link href="/backoffice/avis?note=1" className="flex items-center justify-between hover:text-brand">
                       <span className="flex items-center gap-2"><Star size={15} className="text-gray-400" /> Avis à 1 étoile</span>
                       <span className="text-xs text-muted" aria-hidden>voir</span>
                     </Link>

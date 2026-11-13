@@ -18,7 +18,7 @@ interface Lieu {
   nombre: number;
 }
 
-const puce = "inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-dark hover:border-primary/40 hover:text-primary transition-colors";
+const puce = "inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-surface px-4 py-2 text-sm font-semibold text-dark hover:border-primary/40 hover:text-brand transition-colors";
 
 /**
  * Country, city or district page: its listings rendered by the server (what Google reads), the places under it,
@@ -79,7 +79,7 @@ export default async function PageDestination({ locale, destination }: { locale:
                 {i > 0 && <ChevronRight size={14} aria-hidden />}
                 {i === etapes.length - 1
                   ? <span aria-current="page" className="font-semibold text-dark">{e.nom}</span>
-                  : <Link href={e.chemin} className="hover:text-primary hover:underline">{e.nom}</Link>}
+                  : <Link href={e.chemin} className="hover:text-brand hover:underline">{e.nom}</Link>}
               </li>
             ))}
           </ol>
@@ -106,7 +106,7 @@ export default async function PageDestination({ locale, destination }: { locale:
           <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
             <h2 id="logements" className="font-heading font-bold text-dark text-xl md:text-2xl">{t("logements", { lieu })}</h2>
             {logements.length > 0 && (
-              <Link href={lienRecherche} className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline">
+              <Link href={lienRecherche} className="inline-flex items-center gap-1 text-sm font-bold text-brand hover:underline">
                 {t("filtrer")} <ArrowRight size={15} aria-hidden />
               </Link>
             )}
@@ -114,17 +114,17 @@ export default async function PageDestination({ locale, destination }: { locale:
           {logements.length > 0 ? (
             <ListeLogements logements={logements} />
           ) : (
-            <div className="rounded-2xl bg-white shadow-card p-6 md:p-8 max-w-2xl">
+            <div className="rounded-2xl bg-surface shadow-card p-6 md:p-8 max-w-2xl">
               <p className="font-heading font-bold text-dark text-lg">{t("vide", { lieu })}</p>
               <p className="text-gray-600 mt-2">{t("videTexte")}</p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link href="/recherche" className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-700 transition-colors">{t("voirTous")}</Link>
-                <Link href="/hote" className="rounded-xl border border-primary/30 px-5 py-3 text-sm font-bold text-primary hover:bg-primary/5 transition-colors">{t("proposer")}</Link>
+                <Link href="/hote" className="rounded-xl border border-primary/30 px-5 py-3 text-sm font-bold text-brand hover:bg-primary/5 transition-colors">{t("proposer")}</Link>
               </div>
             </div>
           )}
           <p className="mt-5 flex items-start gap-2 text-sm text-gray-600 max-w-3xl">
-            <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" aria-hidden /> {t("confiance")}
+            <ShieldCheck size={18} className="text-brand shrink-0 mt-0.5" aria-hidden /> {t("confiance")}
           </p>
         </section>
 
@@ -133,14 +133,14 @@ export default async function PageDestination({ locale, destination }: { locale:
             <h2 id="a-faire" className="font-heading font-bold text-dark text-xl md:text-2xl mb-4">{t("aFaire", { ville: ville.nom })}</h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {experiences.slice(0, 8).map((e) => (
-                <li key={e.id} className="rounded-2xl bg-white shadow-card p-4">
+                <li key={e.id} className="rounded-2xl bg-surface shadow-card p-4">
                   <p className="font-semibold text-dark">{(locale === "en" && e.nom_en) || e.nom}</p>
                   <p className="text-sm text-gray-500 mt-0.5">{(locale === "en" && e.etiquette_en) || e.etiquette}</p>
                 </li>
               ))}
             </ul>
             {lienDecouvrir && (
-              <Link href={lienDecouvrir.href} className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline">
+              <Link href={lienDecouvrir.href} className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-brand hover:underline">
                 <Compass size={15} aria-hidden /> {t("voirExperiences", { ville: ville.nom })}
               </Link>
             )}
@@ -160,7 +160,7 @@ export default async function PageDestination({ locale, destination }: { locale:
               </>
             )}
             {guide && (
-              <Link href={guide} className="mt-5 inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline">
+              <Link href={guide} className="mt-5 inline-flex items-center gap-1 text-sm font-bold text-brand hover:underline">
                 {t(`pays.${pays}.guide`)} <ArrowRight size={15} aria-hidden />
               </Link>
             )}

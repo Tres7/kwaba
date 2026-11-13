@@ -49,7 +49,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
       etat: me.phone ? "fait" : "a_faire",
       titre: t("telephoneTitre"),
       texte: me.phone ? me.phone : (
-        <>{t("telephoneTexte")} <Link href="/profil/edit" className="font-bold text-primary underline">{t("telephoneAction")}</Link></>
+        <>{t("telephoneTexte")} <Link href="/profil/edit" className="font-bold text-brand underline">{t("telephoneAction")}</Link></>
       ),
     },
     {
@@ -66,7 +66,7 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
       texte: (
         <>
           {contrat.statut === "signe" ? t("contratSigne") : t("contratTexte")}{" "}
-          <Link href="/hote/espace/contrat" className="font-bold text-primary underline">
+          <Link href="/hote/espace/contrat" className="font-bold text-brand underline">
             {contrat.statut === "signe" ? t("contratTelecharger") : t("contratAction")}
           </Link>
         </>
@@ -77,13 +77,13 @@ export default function CandidatureHote({ nbAnnonces, onNouvelle }: { nbAnnonces
       etat: nbAnnonces > 0 ? "attente" : "a_faire",
       titre: t("annonceTitre"),
       texte: nbAnnonces > 0 ? (contrat ? t("annonceContrat") : t("annonceEnAttente")) : (
-        <>{t("annonceTexte")} <button type="button" onClick={onNouvelle} className="font-bold text-primary underline">{t("annonceAction")}</button></>
+        <>{t("annonceTexte")} <button type="button" onClick={onNouvelle} className="font-bold text-brand underline">{t("annonceAction")}</button></>
       ),
     },
   ];
 
   return (
-    <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 mb-8">
+    <section className="bg-background rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 mb-8">
       <h2 className="font-heading font-bold text-lg text-dark">{t("titre", { nombre: etapes.length })}</h2>
       <p className="text-sm text-gray-500 mt-1">{t("texte")}</p>
       <ol className="mt-5 space-y-4">

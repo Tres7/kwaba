@@ -51,14 +51,14 @@ export default function MobileDrawer({ open, onClose, label, header, side = "rig
       {open && (
         <div className="fixed inset-0 z-95" role="dialog" aria-modal="true" aria-label={label}>
           <motion.div
-            className="absolute inset-0 bg-dark/50 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-night/50 backdrop-blur-[2px]"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
           />
           <motion.div
             ref={panneau}
-            className={`absolute inset-y-0 ${side === "right" ? "right-0" : "left-0"} w-[min(22rem,88vw)] bg-white shadow-2xl flex flex-col`}
+            className={`absolute inset-y-0 ${side === "right" ? "right-0" : "left-0"} w-[min(22rem,88vw)] bg-surface shadow-2xl flex flex-col`}
             initial={{ x: horsEcran }} animate={{ x: 0 }} exit={{ x: horsEcran }}
             transition={{ type: "spring", stiffness: 380, damping: 36 }}
           >

@@ -36,9 +36,9 @@ export default function Itineraire({ v, appliquer, recharger }: SectionVoyage) {
     <div className="grid lg:grid-cols-5 gap-6">
       <div className="lg:col-span-3 space-y-4">
         {Object.keys(jours).length === 0 ? (
-          <p className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-600">{t("itineraireVide")}</p>
+          <p className="bg-surface rounded-2xl border border-gray-100 p-8 text-center text-gray-600">{t("itineraireVide")}</p>
         ) : Object.entries(jours).map(([jour, etapes]) => (
-          <section key={jour} className="bg-white rounded-2xl border border-gray-100 p-5">
+          <section key={jour} className="bg-background rounded-2xl border border-gray-100 p-5">
             <h3 className="font-heading font-bold text-dark capitalize">{formatDate(`${jour}T12:00:00`, { weekday: "long", day: "numeric", month: "long" })}</h3>
             <ol className="mt-3 space-y-3 border-l-2 border-primary/20 pl-4">
               {etapes.map((e) => (
@@ -46,7 +46,7 @@ export default function Itineraire({ v, appliquer, recharger }: SectionVoyage) {
                   <span className="absolute left-[-23px] top-1 w-3 h-3 rounded-full bg-primary" aria-hidden="true" />
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-bold text-dark">{e.heure && <span className="text-primary mr-2">{locale === "en" ? e.heure.slice(0, 5) : e.heure.replace(":", " h ")}</span>}{e.titre}</p>
+                      <p className="text-sm font-bold text-dark">{e.heure && <span className="text-brand mr-2">{locale === "en" ? e.heure.slice(0, 5) : e.heure.replace(":", " h ")}</span>}{e.titre}</p>
                       {e.lieu && <p className="text-xs text-gray-600 flex items-center gap-1"><MapPin size={11} /> {e.lieu}</p>}
                       {e.details && <p className="text-sm text-gray-700 mt-1">{e.details}</p>}
                       <p className="text-[11px] text-gray-500 mt-0.5">{t("ajoutePar", { nom: e.ajoute_par })}</p>
@@ -62,7 +62,7 @@ export default function Itineraire({ v, appliquer, recharger }: SectionVoyage) {
           </section>
         ))}
       </div>
-      <form method="post" onSubmit={ajouter} className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5 space-y-3 h-fit">
+      <form method="post" onSubmit={ajouter} className="lg:col-span-2 bg-surface rounded-2xl border border-gray-100 p-5 space-y-3 h-fit">
         <h3 className="font-heading font-bold text-dark">{t("ajouterEtape")}</h3>
         <div className="grid grid-cols-2 gap-3">
           <FormField label={t("jour")} id="e-date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })}

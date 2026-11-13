@@ -28,7 +28,7 @@ export default function Positions() {
         <span className="sr-only">Rechercher par nom, ville, quartier ou hôte</span>
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nom, ville, quartier ou hôte"
-          className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          className="w-full pl-11 pr-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
       </label>
       <label className="inline-flex items-center gap-2 mt-3 text-sm text-dark">
         <input type="checkbox" checked={toutes} onChange={(e) => setToutes(e.target.checked)} className="w-4 h-4 accent-primary" />
@@ -38,7 +38,7 @@ export default function Positions() {
       <ListeMissions chargement={isLoading} erreur={isError}
         vide={toutes || q ? "Aucune annonce vérifiée ne correspond." : "Toutes les annonces vérifiées ont une position relevée par un agent."}>
         {data?.results.map((a) => (
-          <article key={a.id} className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
+          <article key={a.id} className="bg-surface rounded-2xl border border-gray-100 shadow-xs p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="font-semibold text-dark truncate">{a.name}</h2>
@@ -58,7 +58,7 @@ export default function Positions() {
             </div>
             {a.position && (
               <a href={lienCarte(a.position)} target="_blank" rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-brand hover:underline">
                 Point actuel sur Google Maps <ExternalLink size={12} aria-hidden />
               </a>
             )}

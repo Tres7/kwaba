@@ -28,8 +28,8 @@ export default function CarteLancement() {
   const pret = data.logements_publies > 0 && data.a_prevenir > 0;
 
   return (
-    <section className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-      <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><MailCheck size={20} aria-hidden /></span>
+    <section className="bg-background rounded-2xl border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+      <span className="w-11 h-11 rounded-2xl bg-primary/10 text-brand flex items-center justify-center shrink-0"><MailCheck size={20} aria-hidden /></span>
       <div className="flex-1 min-w-0">
         <h2 className="font-heading font-bold text-dark">Liste d&apos;attente de l&apos;ouverture</h2>
         <p className="text-sm text-muted mt-0.5">

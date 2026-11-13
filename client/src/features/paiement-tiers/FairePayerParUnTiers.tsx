@@ -67,7 +67,7 @@ export default function FairePayerParUnTiers({ reservationId, onActif }: { reser
   if (!demande.active && !ouvert) {
     return (
       <button type="button" onClick={() => setOuvert(true)}
-        className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-2xl border border-primary/30 text-primary text-sm font-bold hover:bg-primary/5">
+        className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-2xl border border-primary/30 text-brand text-sm font-bold hover:bg-primary/5">
         <HandCoins size={17} /> {t("fairePayer")}
       </button>
     );
@@ -75,15 +75,15 @@ export default function FairePayerParUnTiers({ reservationId, onActif }: { reser
 
   return (
     <section className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-4" aria-labelledby="faire-payer">
-      <h2 id="faire-payer" className="flex items-center gap-2 font-heading font-bold text-dark"><HandCoins size={18} className="text-primary" /> {t("fairePayer")}</h2>
+      <h2 id="faire-payer" className="flex items-center gap-2 font-heading font-bold text-dark"><HandCoins size={18} className="text-brand" /> {t("fairePayer")}</h2>
       <p className="text-sm text-gray-700 mt-1">{t("explication")}</p>
 
       {lien ? (
         <>
           <div className="flex gap-2 mt-3">
             <input readOnly value={lien} aria-label={t("lienPaiement")} onFocus={(e) => e.target.select()}
-              className="flex-1 min-w-0 bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-dark" />
-            <button type="button" onClick={copier} className="flex items-center gap-1.5 px-4 rounded-xl border border-gray-200 bg-white text-sm font-bold text-dark hover:bg-gray-50">
+              className="flex-1 min-w-0 bg-surface border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-dark" />
+            <button type="button" onClick={copier} className="flex items-center gap-1.5 px-4 rounded-xl border border-gray-200 bg-surface text-sm font-bold text-dark hover:bg-gray-50">
               {copie ? <Check size={15} className="text-secondary" /> : <Copy size={15} />} {copie ? t("copie") : t("copier")}
             </button>
           </div>

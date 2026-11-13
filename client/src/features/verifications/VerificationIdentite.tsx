@@ -64,8 +64,8 @@ export default function VerificationIdentite({ types = TYPES }: { types?: TypePi
 
   const soumise = piece.statut === "soumise";
   return (
-    <section className={cn("rounded-3xl border p-5 sm:p-6 mb-6", soumise ? "bg-white border-gray-100" : "bg-amber-50 border-amber-200")}>
-      <h2 className="flex items-center gap-2 font-heading font-bold text-dark"><ShieldCheck size={20} className="text-primary" /> {t("identiteTitre")}</h2>
+    <section className={cn("rounded-3xl border p-5 sm:p-6 mb-6", soumise ? "bg-background border-gray-100" : "bg-amber-50 border-amber-200")}>
+      <h2 className="flex items-center gap-2 font-heading font-bold text-dark"><ShieldCheck size={20} className="text-brand" /> {t("identiteTitre")}</h2>
       {soumise ? (
         <p className="text-sm text-gray-600 mt-2">{t("identiteSoumise")}</p>
       ) : (

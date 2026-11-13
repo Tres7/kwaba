@@ -96,7 +96,7 @@ export default function Experiences() {
   const liste = (experiences ?? []).filter((e) => !filtre || e.categorie === filtre);
   const photoAffichee = apercu ?? (edition && edition !== "nouvelle" ? edition.photo : null);
   const puce = (actif: boolean) => cn("relative zone-tactile px-3 py-1.5 rounded-full text-xs font-bold border transition-colors",
-    actif ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40");
+    actif ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200 hover:border-primary/40");
 
   return (
     <div className="space-y-4">
@@ -113,12 +113,12 @@ export default function Experiences() {
       </div>
 
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : liste.length === 0 ? (
-        <p className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-sm text-muted">Aucune expérience dans cette catégorie.</p>
+        <p className="bg-surface rounded-2xl border border-gray-100 p-8 text-center text-sm text-muted">Aucune expérience dans cette catégorie.</p>
       ) : (
         <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {liste.map((e) => (
             <li key={e.id}>
-              <button type="button" onClick={() => ouvrir(e)} className="w-full text-left bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-card transition-shadow">
+              <button type="button" onClick={() => ouvrir(e)} className="w-full text-left bg-surface rounded-2xl border border-gray-100 overflow-hidden hover:shadow-card transition-shadow">
                 <div className="h-32 bg-gray-100 flex items-center justify-center">
                   {e.photo
                     // eslint-disable-next-line @next/next/no-img-element

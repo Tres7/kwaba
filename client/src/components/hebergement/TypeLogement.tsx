@@ -28,7 +28,7 @@ export function LibelleType({ type, className }: { type: string; className?: str
       <span>{principal}</span>
       {autre !== principal && (
         <small lang={langue === "fr" ? "en" : "fr"}
-          className="px-1.5 py-px rounded-full bg-primary-50 text-primary text-[10px] font-semibold normal-case tracking-normal leading-4">
+          className="px-1.5 py-px rounded-full bg-primary-50 text-brand text-[10px] font-semibold normal-case tracking-normal leading-4">
           {autre}
         </small>
       )}

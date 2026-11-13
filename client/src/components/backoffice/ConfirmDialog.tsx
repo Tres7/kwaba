@@ -55,9 +55,9 @@ export default function ConfirmDialog({ confirmation, onClose }: { confirmation:
   return createPortal(
     <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center p-0 sm:p-6">
       <div className="absolute inset-0 bg-black/40" onClick={() => !envoi && onClose()} aria-hidden />
-      <div role="alertdialog" aria-modal="true" aria-labelledby="confirm-titre" className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-card-hover">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="confirm-titre" className="relative w-full sm:max-w-md bg-surface rounded-t-3xl sm:rounded-3xl p-6 shadow-card-hover">
         <div className="flex gap-4">
-          <div className={cn("w-11 h-11 rounded-full flex items-center justify-center shrink-0", confirmation.danger ? "bg-red-50 text-red-700" : "bg-primary/10 text-primary")}>
+          <div className={cn("w-11 h-11 rounded-full flex items-center justify-center shrink-0", confirmation.danger ? "bg-red-50 text-red-700" : "bg-primary/10 text-brand")}>
             <AlertTriangle size={20} />
           </div>
           <div className="min-w-0">
@@ -91,7 +91,7 @@ export default function ConfirmDialog({ confirmation, onClose }: { confirmation:
           <button onClick={onClose} disabled={envoi} className="px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-medium">{selon({ fr: "Annuler", en: "Cancel" })}</button>
           <button
             onClick={valider} disabled={!motifOk || envoi}
-            className={cn("px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50", confirmation.danger ? "bg-red-600 hover:bg-red-700" : "bg-primary hover:bg-primary-600")}
+            className={cn("px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50", confirmation.danger ? "bg-red-600 hover:bg-red-700 dark:hover:bg-red-500" : "bg-primary hover:bg-primary-600")}
           >
             {envoi ? "..." : confirmation.libelle}
           </button>

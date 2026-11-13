@@ -38,8 +38,8 @@ export default function RevenusHote() {
           { label: t("totaux.enCours"), value: revenus?.totaux.en_cours, icon: Loader2, hint: t("totaux.enCoursAide") },
           { label: t("totaux.verse"), value: revenus?.totaux.verse, icon: CheckCircle, hint: t("totaux.commission", { montant: formatPrice(revenus?.totaux.commission ?? 0) }) },
         ].map(({ label, value, icon: Icon, hint }) => (
-          <div key={label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs">
-            <p className="flex items-center gap-2 text-xs text-muted font-medium"><Icon size={14} className="text-primary" /> {label}</p>
+          <div key={label} className="bg-surface rounded-2xl p-5 border border-gray-100 shadow-xs">
+            <p className="flex items-center gap-2 text-xs text-muted font-medium"><Icon size={14} className="text-brand" /> {label}</p>
             <p className="font-heading font-bold text-dark text-2xl mt-1">{isLoading ? "…" : formatPrice(value ?? 0)}</p>
             <p className="text-xs text-gray-600 mt-1">{hint}</p>
           </div>
@@ -48,7 +48,7 @@ export default function RevenusHote() {
 
       <ProfilVersementForm manquant={revenus ? !revenus.profil_complet : false} />
 
-      <section className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6">
+      <section className="bg-background rounded-3xl border border-gray-100 p-5 sm:p-6">
         <h2 className="font-heading font-bold text-dark text-lg">{t("versements")}</h2>
         <p className="text-sm text-gray-600 mt-1">
           {t("explication", { commission })}
@@ -139,7 +139,7 @@ export function ProfilVersementForm({ manquant }: { manquant: boolean }) {
   if (profil && !edition) {
     const indicatif = config.pays.find((p) => p.code === profil.pays)?.indicatif;
     return (
-      <section className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+      <section className="bg-background rounded-3xl border border-gray-100 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0"><Smartphone size={22} /></div>
         <div className="flex-1 min-w-0">
           <h2 className="font-heading font-bold text-dark">{t("arriventSur")}</h2>
@@ -151,8 +151,8 @@ export function ProfilVersementForm({ manquant }: { manquant: boolean }) {
   }
 
   return (
-    <section className={cn("bg-white rounded-3xl border p-5 sm:p-6", manquant ? "border-amber-300" : "border-gray-100")}>
-      <h2 className="flex items-center gap-2 font-heading font-bold text-dark text-lg"><Wallet size={20} className="text-primary" /> {t("ouRecevoir")}</h2>
+    <section className={cn("bg-background rounded-3xl border p-5 sm:p-6", manquant ? "border-amber-300" : "border-gray-100")}>
+      <h2 className="flex items-center gap-2 font-heading font-bold text-dark text-lg"><Wallet size={20} className="text-brand" /> {t("ouRecevoir")}</h2>
       <p className="text-sm text-gray-600 mt-1">
         {manquant
           ? t("manquant")

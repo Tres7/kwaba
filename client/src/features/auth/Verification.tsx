@@ -144,7 +144,7 @@ function VerifyForm() {
   return (
     <>
       <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-        <Mail size={26} className="text-primary" />
+        <Mail size={26} className="text-brand" />
       </div>
 
       <h1 className="font-heading font-bold text-3xl text-dark mb-2">{t("verificationEmail")}</h1>
@@ -163,7 +163,7 @@ function VerifyForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
             placeholder={t("emailExemple")}
-            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="w-full px-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
       )}
@@ -192,7 +192,7 @@ function VerifyForm() {
             onFocus={(e) => e.target.select()}
             className={cn(
               "w-11 h-14 sm:w-12 text-center text-xl font-bold border-2 rounded-xl outline-hidden transition-all focus:border-primary focus:ring-2 focus:ring-primary/20",
-              d ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-dark"
+              d ? "border-primary bg-primary/5 text-brand" : "border-gray-200 text-dark"
             )}
           />
         ))}
@@ -211,7 +211,7 @@ function VerifyForm() {
         <button
           onClick={handleResend}
           disabled={resending || cooldown > 0 || !email}
-          className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline disabled:opacity-50 disabled:no-underline"
+          className="inline-flex items-center gap-2 text-sm font-bold text-brand hover:underline disabled:opacity-50 disabled:no-underline"
         >
           <RefreshCw size={14} className={resending ? "animate-spin" : ""} />
           {resending ? t("envoiEnCours") : cooldown > 0 ? t("renvoyerCodeDans", { secondes: cooldown }) : t("renvoyerCode")}
@@ -220,7 +220,7 @@ function VerifyForm() {
 
       <p className="mt-6 text-center text-sm text-gray-500">
         {t("mauvaiseAdresse")}{" "}
-        <Link href="/register" className="font-bold text-primary hover:underline">{t("recommencerInscription")}</Link>
+        <Link href="/register" className="font-bold text-brand hover:underline">{t("recommencerInscription")}</Link>
       </p>
     </>
   );

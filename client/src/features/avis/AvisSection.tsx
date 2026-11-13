@@ -32,7 +32,7 @@ function ReponseForm({ avis, onDone }: { avis: Avis; onDone: (a: Avis) => void }
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+      <button onClick={() => setOpen(true)} className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
         <MessageSquareReply size={15} /> {t("repondre")}
       </button>
     );
@@ -76,7 +76,7 @@ function AvisCard({ avis, isOwner, hostName, onUpdate }: { avis: Avis; isOwner: 
   return (
     <article className="py-5 border-b border-gray-100 last:border-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center overflow-hidden shrink-0">
+        <div className="w-10 h-10 rounded-full bg-primary/10 text-brand font-bold flex items-center justify-center overflow-hidden shrink-0">
           {avis.auteur.avatar_url ? <img src={avis.auteur.avatar_url} alt="" className="w-full h-full object-cover" /> : initials(nom)}
         </div>
         <div className="min-w-0">
@@ -135,13 +135,13 @@ export default function AvisSection({ hebergementId, isOwner, hostName }: AvisSe
       old && { ...old, pages: old.pages.map((p) => ({ ...p, results: p.results.map((a) => (a.id === maj.id ? maj : a)) })) }
     );
 
-  if (isLoading) return <section id="avis" className="bg-white rounded-2xl shadow-card p-5 sm:p-6"><div className="h-40 skeleton rounded-xl" /></section>;
+  if (isLoading) return <section id="avis" className="bg-background rounded-2xl shadow-card p-5 sm:p-6"><div className="h-40 skeleton rounded-xl" /></section>;
 
   const resume = data?.pages[0]?.resume;
   const avis = data?.pages.flatMap((p) => p.results) ?? [];
 
   return (
-    <section id="avis" className="bg-white rounded-2xl shadow-card p-5 sm:p-6 scroll-mt-24">
+    <section id="avis" className="bg-background rounded-2xl shadow-card p-5 sm:p-6 scroll-mt-24">
       <h2 className="font-heading font-bold text-dark text-xl mb-1">{t("titre")}</h2>
       <p className="text-xs text-muted mb-5 flex items-center gap-1">
         <BadgeCheck size={13} className="text-secondary" /> {t("uniquementSejournes")}

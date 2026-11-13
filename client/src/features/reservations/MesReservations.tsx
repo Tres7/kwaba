@@ -81,7 +81,7 @@ export default function ReservationsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <div className="mb-8 flex items-center gap-4">
-        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
+        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-surface shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
           <ArrowLeft size={20} />
         </Link>
         <div>
@@ -97,7 +97,7 @@ export default function ReservationsPage() {
             role="tab"
             aria-selected={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={cn("pb-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2", activeTab === tab.id ? "text-primary border-primary" : "text-gray-400 border-transparent hover:text-dark")}
+            className={cn("pb-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2", activeTab === tab.id ? "text-brand border-primary" : "text-gray-400 border-transparent hover:text-dark")}
           >
             {t(`onglets.${tab.label}`)}{counts[tab.id] > 0 && <span className="ml-1.5 text-xs">({counts[tab.id]})</span>}
           </button>
@@ -108,12 +108,12 @@ export default function ReservationsPage() {
         {isLoading ? (
           [0, 1].map((i) => <div key={i} className="h-48 skeleton rounded-2xl" />)
         ) : isError ? (
-          <div className="bg-white rounded-3xl p-12 text-center">
+          <div className="bg-surface rounded-3xl p-12 text-center">
             <p className="text-red-600 font-medium mb-2">{t("erreurChargement")}</p>
-            <button onClick={() => refetch()} className="text-primary font-bold hover:underline">{t("reessayer")}</button>
+            <button onClick={() => refetch()} className="text-brand font-bold hover:underline">{t("reessayer")}</button>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-gray-100 p-10 sm:p-16 text-center">
+          <div className="bg-surface rounded-3xl border border-gray-100 p-10 sm:p-16 text-center">
             <p className="text-gray-500 font-medium mb-4">{t("aucune")}</p>
             {activeTab === "upcoming" && <Link href="/recherche" className="inline-block bg-primary text-white font-bold px-6 py-3 rounded-xl">{t("trouver")}</Link>}
           </div>
@@ -122,7 +122,7 @@ export default function ReservationsPage() {
             const status = STATUS[res.status];
             const canCancel = res.status !== "cancelled" && res.check_in > isoDate();
             return (
-              <article key={res.id} className="bg-white rounded-2xl shadow-xs border border-gray-100 overflow-hidden flex flex-col sm:flex-row hover:shadow-card transition-shadow">
+              <article key={res.id} className="bg-surface rounded-2xl shadow-xs border border-gray-100 overflow-hidden flex flex-col sm:flex-row hover:shadow-card transition-shadow">
                 <Link href={`/hebergements/${res.hebergement_detail.id}`} className="w-full sm:w-48 md:w-56 h-44 sm:h-auto shrink-0">
                   <img src={res.hebergement_detail.image_url || FALLBACK_IMAGE} alt={res.hebergement_detail.name} className="w-full h-full object-cover" />
                 </Link>
@@ -131,9 +131,9 @@ export default function ReservationsPage() {
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="min-w-0">
                         <h2 className="font-heading font-bold text-lg text-dark truncate">{res.hebergement_detail.name}</h2>
-                        <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-primary shrink-0" />{res.hebergement_detail.city}</p>
+                        <p className="flex items-center gap-1.5 text-gray-500 text-sm mt-1"><MapPin size={14} className="text-brand shrink-0" />{res.hebergement_detail.city}</p>
                         {res.point_repere && (
-                          <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-primary shrink-0 mt-0.5" />{t("pointRepere", { repere: res.point_repere })}</p>
+                          <p className="flex items-start gap-1.5 text-dark text-sm mt-1"><Signpost size={14} className="text-brand shrink-0 mt-0.5" />{t("pointRepere", { repere: res.point_repere })}</p>
                         )}
                       </div>
                       <span className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full shrink-0", status.className)}>
@@ -141,8 +141,8 @@ export default function ReservationsPage() {
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-600">
-                      <span className="flex items-center gap-2"><Calendar size={14} className="text-primary" />{formatDate(res.check_in)} → {formatDate(res.check_out)}</span>
-                      <span className="flex items-center gap-2"><Users size={14} className="text-primary" />{tVoy("voyageurs", { nombre: res.guests_count })}</span>
+                      <span className="flex items-center gap-2"><Calendar size={14} className="text-brand" />{formatDate(res.check_in)} → {formatDate(res.check_out)}</span>
+                      <span className="flex items-center gap-2"><Users size={14} className="text-brand" />{tVoy("voyageurs", { nombre: res.guests_count })}</span>
                     </div>
                     <p className="text-xs text-gray-500 font-mono mt-2">{res.reference}</p>
                     {res.status === "pending" && res.expire_le && (

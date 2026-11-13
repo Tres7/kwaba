@@ -29,7 +29,7 @@ export default function RetourPaiementTiers() {
     retry: false,
   });
 
-  let icone = <Loader2 size={32} className="animate-spin text-primary" />;
+  let icone = <Loader2 size={32} className="animate-spin text-brand" />;
   let titre = t("verification");
   let texte = "";
   if (isError) {
@@ -52,11 +52,11 @@ export default function RetourPaiementTiers() {
   return (
     <div className="bg-light min-h-[70vh]">
       <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-        <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8 text-center" aria-live="polite">
+        <div className="bg-surface rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8 text-center" aria-live="polite">
           <div className="w-16 h-16 mx-auto rounded-full bg-gray-50 flex items-center justify-center mb-4">{icone}</div>
           <h1 className="font-heading font-bold text-dark text-2xl">{titre}</h1>
           {texte && <p className="text-gray-600 text-sm mt-2 max-w-md mx-auto">{texte}</p>}
-          <Link href="/" className="inline-block mt-6 text-primary font-bold hover:underline">{t("accueil")}</Link>
+          <Link href="/" className="inline-block mt-6 text-brand font-bold hover:underline">{t("accueil")}</Link>
         </div>
       </div>
     </div>

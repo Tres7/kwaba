@@ -59,7 +59,7 @@ export default function Societe() {
 
   return (
     <form method="post" onSubmit={(e) => { e.preventDefault(); if (!envoi) enregistrer(); }}
-      className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-5 max-w-3xl">
+      className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-5 max-w-3xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted flex-1 min-w-[220px]">
           Ces informations apparaissent en tête de chaque document. La raison sociale et l&apos;adresse sont obligatoires pour émettre une facture.
@@ -92,12 +92,12 @@ export default function Societe() {
         <Champ label="Signature scannée" erreur={erreurs.signature_representant}
           aide="Imprimée sur les contrats, côté Kwa-Ba. Signature à l'encre foncée sur papier blanc : le fond devient transparent.">
           <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => { setSignature(e.target.files?.[0] ?? null); setSupprimer(false); }}
-            className="block w-full text-sm text-dark file:mr-3 file:px-4 file:py-2 file:rounded-xl file:border-0 file:bg-primary/10 file:text-primary file:font-semibold" />
+            className="block w-full text-sm text-dark file:mr-3 file:px-4 file:py-2 file:rounded-xl file:border-0 file:bg-primary/10 file:text-brand file:font-semibold" />
         </Champ>
         {apercuSignature && !supprimer && (
           <div className="flex items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={apercuSignature} alt="Signature du représentant" className="h-16 max-w-[240px] object-contain rounded-lg border border-gray-100 bg-white p-1" />
+            <img src={apercuSignature} alt="Signature du représentant" className="h-16 max-w-[240px] object-contain rounded-lg border border-gray-100 bg-surface p-1" />
             {data?.signature_presente && !signature && (
               <button type="button" onClick={() => setSupprimer(true)} className="text-sm font-semibold text-red-700 hover:underline">Retirer</button>
             )}

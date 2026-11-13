@@ -14,7 +14,7 @@ const STYLES: Record<ActivityCategory, { icon: typeof Home; tone: string }> = {
   connections: { icon: KeyRound, tone: "bg-sky-50 text-sky-700" },
   rights: { icon: Shield, tone: "bg-violet-50 text-violet-700" },
   listings: { icon: Home, tone: "bg-emerald-50 text-emerald-700" },
-  agenda: { icon: CalendarDays, tone: "bg-primary/10 text-primary" },
+  agenda: { icon: CalendarDays, tone: "bg-primary/10 text-brand" },
   money: { icon: Banknote, tone: "bg-amber-50 text-amber-700" },
   moderation: { icon: Flag, tone: "bg-red-50 text-red-700" },
   objects: { icon: Box, tone: "bg-gray-100 text-gray-700" },
@@ -40,11 +40,11 @@ function Segmented<T extends string>({ options, value, onChange, label }: {
   options: [T, string][]; value: T; onChange: (value: T) => void; label: string;
 }) {
   return (
-    <div className="inline-flex bg-white border border-gray-200 rounded-xl p-1" role="tablist" aria-label={label}>
+    <div className="inline-flex bg-surface border border-gray-200 rounded-xl p-1" role="tablist" aria-label={label}>
       {options.map(([code, text]) => (
         <button key={code} type="button" role="tab" aria-selected={value === code} onClick={() => onChange(code)}
           className={cn("px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap",
-            value === code ? "bg-primary/10 text-primary" : "text-dark")}>
+            value === code ? "bg-primary/10 text-brand" : "text-dark")}>
           {text}
         </button>
       ))}
@@ -89,11 +89,11 @@ export default function ActivityLog() {
             <Search size={16} aria-hidden className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input value={text} onChange={(e) => { setSelected(null); setText(e.target.value); }}
               placeholder="Compte, email ou adresse IP"
-              className="w-64 max-w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm" />
+              className="w-64 max-w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-surface text-sm" />
           </label>
           <Segmented label="Période" options={PERIODS} value={filters.period} onChange={(period) => update({ period })} />
           <a href={activityExportUrl(query)} aria-label="Exporter en CSV" title="Exporter la recherche en CSV"
-            className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-dark hover:bg-gray-50">
+            className="w-10 h-10 rounded-xl bg-surface border border-gray-200 flex items-center justify-center text-dark hover:bg-gray-50">
             <Download size={17} aria-hidden />
           </a>
         </div>
@@ -102,7 +102,7 @@ export default function ActivityLog() {
       {first && first.today.sensitive > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3">
           <div className="flex items-start gap-3">
-            <span className="w-9 h-9 rounded-xl bg-white text-amber-700 flex items-center justify-center shrink-0">
+            <span className="w-9 h-9 rounded-xl bg-surface text-amber-700 flex items-center justify-center shrink-0">
               <ShieldAlert size={18} aria-hidden />
             </span>
             <div>
@@ -121,7 +121,7 @@ export default function ActivityLog() {
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Catégories">
         <button type="button" role="tab" aria-selected={!filters.category} onClick={() => update({ category: "" })}
           className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border",
-            !filters.category ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200")}>
+            !filters.category ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200")}>
           Toutes <span className="tabular-nums opacity-80">{total}</span>
         </button>
         {first?.categories.map(({ code, label }) => {
@@ -131,7 +131,7 @@ export default function ActivityLog() {
           return (
             <button key={code} type="button" role="tab" aria-selected={active} onClick={() => update({ category: code })}
               className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border",
-                active ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200")}>
+                active ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200")}>
               <Icon size={14} aria-hidden /> {label} <span className="tabular-nums opacity-70">{first.counts[code] ?? 0}</span>
             </button>
           );
@@ -142,7 +142,7 @@ export default function ActivityLog() {
         <Segmented label="Niveau" options={LEVELS} value={filters.level} onChange={(level) => update({ level })} />
         {scoped && (
           <button type="button" onClick={() => update({ actor: "", ip: "", target_kind: "", target_id: "" })}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold px-3 py-1.5">
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-brand text-sm font-semibold px-3 py-1.5">
             {filters.ip ? `Adresse ${filters.ip}` : filters.actor ? "Un seul compte" : "Un seul objet"} <X size={14} aria-hidden />
           </button>
         )}
@@ -153,7 +153,7 @@ export default function ActivityLog() {
 
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-4 items-start">
-          <section className="min-w-0 bg-white rounded-2xl border border-gray-100 p-3 sm:p-4">
+          <section className="min-w-0 bg-background rounded-2xl border border-gray-100 p-3 sm:p-4">
             {entries.length === 0 && <p className="py-10 text-center text-sm text-muted">Aucun événement pour cette recherche.</p>}
             {groups.map((group) => (
               <div key={group.key} className="mb-4 last:mb-0">
@@ -219,7 +219,7 @@ function EntryPanel({ id, onClose, onFilter }: {
   const { data: entry, isLoading } = useActivityEntry(id);
   if (!id) {
     return (
-      <aside className="hidden lg:block bg-white rounded-2xl border border-gray-100 p-6 text-sm text-muted">
+      <aside className="hidden lg:block bg-surface rounded-2xl border border-gray-100 p-6 text-sm text-muted">
         Choisissez un événement pour voir le détail.
       </aside>
     );
@@ -274,26 +274,26 @@ function EntryPanel({ id, onClose, onFilter }: {
       <div className="mt-4 space-y-2">
         {entry.actor?.id && (
           <button type="button" onClick={() => onFilter({ actor: entry.actor?.id ?? "", ip: "", target_kind: "", target_id: "" })}
-            className="w-full rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-primary">Voir l&apos;activité de ce compte</button>
+            className="w-full rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-brand">Voir l&apos;activité de ce compte</button>
         )}
         {entry.target && (
           <button type="button" onClick={() => onFilter({ target_kind: entry.target?.kind ?? "", target_id: entry.target?.id ?? "", actor: "", ip: "" })}
-            className="w-full rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-primary">
+            className="w-full rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-brand">
             Tout ce qui concerne {entry.target.kind === "account" ? "ce compte" : "cet objet"}
           </button>
         )}
         {entry.ip && (
           <button type="button" onClick={() => onFilter({ ip: entry.ip ?? "", actor: "", target_kind: "", target_id: "" })}
-            className="w-full rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-primary">Filtrer sur cette adresse IP</button>
+            className="w-full rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-brand">Filtrer sur cette adresse IP</button>
         )}
       </div>
     </>
   );
   return (
     <>
-      <aside className="hidden lg:block sticky top-6 bg-white rounded-2xl border border-gray-100 p-5">{content}</aside>
+      <aside className="hidden lg:block sticky top-6 bg-surface rounded-2xl border border-gray-100 p-5">{content}</aside>
       <div className="lg:hidden fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-        <div className="w-full max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="w-full max-h-[85vh] overflow-y-auto rounded-t-3xl bg-surface p-5" onClick={(e) => e.stopPropagation()}>
           <div className="flex justify-end">
             <button type="button" onClick={onClose} aria-label="Fermer" className="w-9 h-9 rounded-full flex items-center justify-center text-dark hover:bg-gray-100">
               <X size={18} />

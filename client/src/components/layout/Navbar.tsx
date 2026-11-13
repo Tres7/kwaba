@@ -12,6 +12,7 @@ import { cn, initials } from "@/lib/utils";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import SelecteurLangue from "@/components/layout/SelecteurLangue";
+import ThemeSelector from "@/components/layout/ThemeSelector";
 import { MentionDevise, SelecteurDevise } from "@/components/layout/Devise";
 import { ChampDestination } from "@/features/hebergements";
 import { filtrerLiens, useReglagesSite } from "@/lib/site";
@@ -52,7 +53,7 @@ function SearchForm({ onDone, className, focus }: { onDone?: () => void; classNa
   };
 
   return (
-    <form method="post" onSubmit={submit} role="search" className={cn("relative w-full flex items-center bg-white border border-gray-200 rounded-full py-1.5 pl-4 pr-1.5 shadow-xs hover:shadow-sm transition-shadow", className)}>
+    <form method="post" onSubmit={submit} role="search" className={cn("relative w-full flex items-center bg-surface border border-gray-200 rounded-full py-1.5 pl-4 pr-1.5 shadow-xs hover:shadow-sm transition-shadow", className)}>
       <Search size={18} className="text-gray-400 shrink-0 mr-3" />
       <ChampDestination
         type="search"
@@ -122,7 +123,7 @@ export default function Navbar() {
   const liensMobile = <T extends { href: string }>(liens: T[]) => filtrerLiens(liens, modules);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-xs">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-gray-100 shadow-xs">
       <div className="max-w-7xl 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between gap-4 lg:gap-6">
         <Logo />
 
@@ -138,7 +139,7 @@ export default function Navbar() {
             type="button" onClick={() => setRechercheOuverte((o) => !o)}
             aria-expanded={rechercheOuverte} aria-controls="recherche-barre" aria-label={t("rechercherDestination")}
             className={cn("hidden xl:flex 2xl:hidden w-10 h-10 rounded-full items-center justify-center border transition-colors",
-              rechercheOuverte ? "border-primary text-primary bg-primary/5" : "border-gray-200 text-dark hover:border-primary hover:text-primary")}
+              rechercheOuverte ? "border-primary text-brand bg-primary/5" : "border-gray-200 text-dark hover:border-primary hover:text-brand")}
           >
             <Search size={18} />
           </button>
@@ -149,7 +150,7 @@ export default function Navbar() {
                 key={href}
                 href={isHost && href === "/hote" ? "/hote/espace" : href}
                 className={cn("text-sm font-medium transition-colors whitespace-nowrap",
-                  pathname.startsWith(href) ? "text-primary" : "text-dark hover:text-primary")}
+                  pathname.startsWith(href) ? "text-brand" : "text-dark hover:text-brand")}
               >
                 {isHost && href === "/hote" ? labelHote : t(label)}
               </Link>
@@ -171,14 +172,14 @@ export default function Navbar() {
                   </Link>
                 )}
                 {isAdmin && (
-                  <Link href="/backoffice" aria-label="Back-office" title="Back-office" className="flex items-center text-xs font-bold text-dark border border-gray-200 rounded-full px-3 py-1.5 hover:border-primary hover:text-primary">
+                  <Link href="/backoffice" aria-label="Back-office" title="Back-office" className="flex items-center text-xs font-bold text-dark border border-gray-200 rounded-full px-3 py-1.5 hover:border-primary hover:text-brand">
                     <ShieldCheck size={14} />
                   </Link>
                 )}
-                <Link href="/messages" className="relative p-2 text-gray-500 hover:text-primary transition-colors" aria-label={unread ? t("messagesNonLus", { nombre: unread }) : t("messages")}>
+                <Link href="/messages" className="relative p-2 text-gray-500 hover:text-brand transition-colors" aria-label={unread ? t("messagesNonLus", { nombre: unread }) : t("messages")}>
                   <MessageCircle size={20} />
                   {unread > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-surface">
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}
@@ -193,7 +194,7 @@ export default function Navbar() {
               </>
             ) : status !== "loading" ? (
               <>
-                <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`} className="flex items-center gap-1.5 text-sm font-medium text-dark hover:text-primary transition-colors whitespace-nowrap">
+                <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`} className="flex items-center gap-1.5 text-sm font-medium text-dark hover:text-brand transition-colors whitespace-nowrap">
                   <LogIn size={16} />
                   {t("seConnecter")}
                 </Link>
@@ -212,7 +213,7 @@ export default function Navbar() {
           {authenticated && (
             <Link href="/messages" className="relative zone-tactile p-2 text-dark" aria-label={t("messages")}>
               <MessageCircle size={22} />
-              {unread > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />}
+              {unread > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-surface" />}
             </Link>
           )}
           <button className="relative zone-tactile p-2 text-dark" onClick={() => setMobileOpen(true)} aria-expanded={mobileOpen} aria-haspopup="dialog" aria-label={t("ouvrirMenu")}>
@@ -280,9 +281,9 @@ export default function Navbar() {
               <Link
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className={cn("flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-colors", pathname === href ? "bg-primary/10 text-primary" : "text-dark hover:bg-gray-50")}
+                className={cn("flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-colors", pathname === href ? "bg-primary/10 text-brand" : "text-dark hover:bg-gray-50")}
               >
-                <Icon size={18} className="text-primary" />
+                <Icon size={18} className="text-brand" />
                 {label}
               </Link>
             </DrawerItem>
@@ -293,6 +294,7 @@ export default function Navbar() {
           <SelecteurLangue complet />
           <SelecteurDevise complet />
           <MentionDevise className="w-full" />
+          <ThemeSelector full />
         </DrawerItem>
 
         <DrawerItem className="mt-4 pt-4 border-t border-gray-100">
@@ -322,7 +324,7 @@ function Avatar({ size, image, name }: { size: string; image?: string | null; na
       {image ? (
         <img src={image} alt="" className="w-full h-full object-cover" />
       ) : (
-        <span className="text-primary font-bold text-sm">{initials(name)}</span>
+        <span className="text-brand font-bold text-sm">{initials(name)}</span>
       )}
     </div>
   );

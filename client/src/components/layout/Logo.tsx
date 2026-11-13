@@ -22,7 +22,7 @@ export function LettreA() {
 /** Kwa-Ba logotype: "KWA-BA", deep green letters (white on a dark background) and two orange A's. */
 export function Logotype({ inverted = false, className }: { inverted?: boolean; className?: string }) {
   return (
-    <span className={cn("font-heading font-extrabold tracking-[0.04em] leading-none select-none", inverted ? "text-white" : "text-primary dark:text-white", className)}>
+    <span className={cn("font-heading font-extrabold tracking-[0.04em] leading-none select-none", inverted ? "text-white" : "text-brand", className)}>
       KW<LettreA />-B<LettreA />
     </span>
   );

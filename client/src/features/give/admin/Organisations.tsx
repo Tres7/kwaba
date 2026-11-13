@@ -116,12 +116,12 @@ export default function Organisations() {
       {isLoading ? <div className="h-40 skeleton rounded-2xl" /> : (
         <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {ongs?.map((o) => (
-            <li key={o.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col">
+            <li key={o.id} className="bg-surface rounded-2xl border border-gray-100 overflow-hidden flex flex-col">
               <div className="h-28 bg-primary/5 flex items-center justify-center">
                 {o.image
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={o.image} alt="" className="w-full h-full object-cover" />
-                  : <HandHeart size={32} className="text-primary/30" />}
+                  : <HandHeart size={32} className="text-brand/30" />}
               </div>
               <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-center justify-between gap-2">

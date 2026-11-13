@@ -85,7 +85,7 @@ export default function EditProfilePage() {
         <Link
           href="/profil"
           aria-label={t("retourProfil")}
-          className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light transition-colors"
+          className="w-10 h-10 rounded-full bg-surface shadow-xs flex items-center justify-center text-dark hover:bg-light transition-colors"
         >
           <ArrowLeft size={20} />
         </Link>
@@ -95,7 +95,7 @@ export default function EditProfilePage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-card p-5 sm:p-8 md:p-10">
+      <div className="bg-surface rounded-2xl shadow-card p-5 sm:p-8 md:p-10">
         <form method="post" onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
@@ -120,7 +120,7 @@ export default function EditProfilePage() {
                   name="first_name"
                   value={form.first_name}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
+                  className="w-full pl-11 pr-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -135,7 +135,7 @@ export default function EditProfilePage() {
                   name="last_name"
                   value={form.last_name}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
+                  className="w-full pl-11 pr-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -169,7 +169,7 @@ export default function EditProfilePage() {
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="+228 90 00 00 00"
-                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
+                className="w-full pl-11 pr-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
               />
             </div>
           </div>
@@ -193,10 +193,10 @@ export default function EditProfilePage() {
         </form>
       </div>
 
-      <section aria-labelledby="fermer-titre" className="mt-8 bg-white rounded-2xl border border-red-100 p-6 md:p-8">
+      <section aria-labelledby="fermer-titre" className="mt-8 bg-background rounded-2xl border border-red-100 p-6 md:p-8">
         <h2 id="fermer-titre" className="font-heading font-bold text-lg text-dark">{t("fermerCompte")}</h2>
         <p className="text-sm text-gray-600 mt-2 max-w-2xl">
-          {t.rich("fermerTexte", { lien: (x) => <Link href="/confidentialite#droits" className="text-primary underline">{x}</Link> })}
+          {t.rich("fermerTexte", { lien: (x) => <Link href="/confidentialite#droits" className="text-brand underline">{x}</Link> })}
         </p>
         <button
           type="button"

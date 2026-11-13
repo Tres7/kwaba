@@ -74,10 +74,10 @@ export default function FicheMissionPage() {
   if (error || !data) {
     const introuvable = estErreurApi(error) && error.response?.status === 404;
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+      <div className="bg-surface rounded-2xl border border-gray-100 p-8 text-center">
         <p className="font-heading font-bold text-dark">{introuvable ? "Cette mission n'est plus à faire" : "Impossible d'ouvrir cette mission"}</p>
         <p className="text-sm text-gray-500 mt-1">{introuvable ? "Elle a été traitée ou retirée entre-temps." : apiErrorMessage(error)}</p>
-        <Link href="/agent/a-faire" className="inline-block mt-4 text-primary font-bold hover:underline">Voir les missions à faire</Link>
+        <Link href="/agent/a-faire" className="inline-block mt-4 text-brand font-bold hover:underline">Voir les missions à faire</Link>
       </div>
     );
   }
@@ -86,7 +86,7 @@ export default function FicheMissionPage() {
 
   return (
     <div>
-      <button type="button" onClick={() => router.back()} className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-primary">
+      <button type="button" onClick={() => router.back()} className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-brand">
         <ArrowLeft size={16} aria-hidden /> Retour
       </button>
       <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500 mt-4">{data.type_libelle}</p>
@@ -96,9 +96,9 @@ export default function FicheMissionPage() {
       )}
 
       {/* Who handles it */}
-      <div className="mt-5 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 bg-white border border-gray-100 shadow-xs">
+      <div className="mt-5 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 bg-surface border border-gray-100 shadow-xs">
         <p className="flex items-center gap-2 text-sm text-dark">
-          <UserRound size={18} className="text-primary shrink-0" aria-hidden />
+          <UserRound size={18} className="text-brand shrink-0" aria-hidden />
           <span>
             {!mission ? "Personne ne s'en occupe pour le moment."
               : mission.moi ? <>Vous vous en occupez depuis le {formatDate(mission.prise_le)}.</>

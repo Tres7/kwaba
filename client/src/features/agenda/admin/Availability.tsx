@@ -12,8 +12,8 @@ import type { WeeklySlot } from "../types";
 
 const WEEKDAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const DATE = new Intl.DateTimeFormat("fr-FR", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" });
-const inputClass = "rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white";
-const cardClass = "rounded-3xl bg-white shadow-xs p-5 sm:p-6 mt-4";
+const inputClass = "rounded-xl border border-gray-200 px-3 py-2 text-sm bg-surface";
+const cardClass = "rounded-3xl bg-surface shadow-xs p-5 sm:p-6 mt-4";
 
 export default function Availability() {
   const { data, isLoading, isError } = useAvailability();
@@ -43,7 +43,7 @@ export default function Availability() {
 
   return (
     <div className="max-w-3xl">
-      <Link href="/agent/agenda" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+      <Link href="/agent/agenda" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand">
         <ArrowLeft size={16} aria-hidden /> Agenda
       </Link>
       <h1 className="font-heading font-bold text-2xl text-dark mt-3">Mes disponibilités</h1>
@@ -63,7 +63,7 @@ export default function Availability() {
         <h2 className="font-heading font-bold text-lg text-dark">Villes couvertes</h2>
         <div className="flex flex-wrap gap-2 mt-3">
           {cities.map((c) => (
-            <span key={c} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary font-semibold text-sm pl-3 pr-1 py-1">
+            <span key={c} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-brand font-semibold text-sm pl-3 pr-1 py-1">
               {c}
               <button type="button" onClick={() => setCities(cities.filter((x) => x !== c))} aria-label={`Retirer ${c}`}
                 className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-primary/10"><X size={14} /></button>
@@ -101,7 +101,7 @@ export default function Availability() {
                   ))}
                 </div>
                 <button type="button" onClick={() => setSlots([...slots, { weekday, start: "08:00", end: "12:00" }])}
-                  className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/5">
+                  className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-brand hover:bg-primary/5">
                   <Plus size={16} aria-hidden /> Plage
                 </button>
               </div>

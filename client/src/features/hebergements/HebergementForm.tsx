@@ -35,7 +35,7 @@ interface HebergementFormProps {
   onCancel: () => void;
 }
 
-const inputClass = "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const inputClass = "w-full px-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 const labelClass = "block text-xs font-bold text-dark uppercase tracking-wide mb-2";
 
 export default function HebergementForm({ initial, brouillon, onSaved, onCancel }: HebergementFormProps) {
@@ -220,7 +220,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         <div>
           <p className={labelClass}>{t("capacite")}</p>
           <Stepper
-            className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white"
+            className="border border-gray-200 rounded-xl px-4 py-2.5 bg-surface"
             label={t("voyageursMax")} value={Number(form.max_guests) || 1} min={1} max={20}
             onChange={(n) => setForm((prev) => ({ ...prev, max_guests: String(n) }))}
           />
@@ -264,13 +264,13 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         <p className="text-xs text-gray-500 -mt-1">{t("detailsAide")}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("chambres")} value={form.chambres} min={0} max={50}
+            <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-surface" label={t("chambres")} value={form.chambres} min={0} max={50}
               onChange={(n) => setForm((prev) => ({ ...prev, chambres: n }))} />
             <p className="text-xs text-gray-500 mt-1.5">{t("chambresAide")}</p>
             {err("chambres")}
           </div>
           <div>
-            <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white" label={t("sallesDeBain")} value={form.salles_de_bain} min={1} max={50}
+            <Stepper className="border border-gray-200 rounded-xl px-4 py-2.5 bg-surface" label={t("sallesDeBain")} value={form.salles_de_bain} min={1} max={50}
               onChange={(n) => setForm((prev) => ({ ...prev, salles_de_bain: n }))} />
             {err("salles_de_bain")}
           </div>
@@ -279,7 +279,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
           <p className={labelClass}>{t("lits")}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {(["lits_doubles", "lits_simples", "canapes_lits"] as const).map((cle) => (
-              <Stepper key={cle} className="border border-gray-200 rounded-xl px-4 py-2.5 bg-white"
+              <Stepper key={cle} className="border border-gray-200 rounded-xl px-4 py-2.5 bg-surface"
                 label={t(cle === "lits_doubles" ? "litsDoubles" : cle === "lits_simples" ? "litsSimples" : "canapesLits")}
                 value={form[cle]} min={0} max={50} onChange={(n) => setForm((prev) => ({ ...prev, [cle]: n }))} />
             ))}
@@ -293,7 +293,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
               <button key={v} type="button" role="radio" aria-checked={form.petit_dejeuner === v}
                 onClick={() => setForm((prev) => ({ ...prev, petit_dejeuner: v }))}
                 className={cn("relative zone-tactile px-4 py-2 rounded-full text-sm border transition-colors",
-                  form.petit_dejeuner === v ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}>
+                  form.petit_dejeuner === v ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200 hover:border-primary/40")}>
                 {t(v === "inclus" ? "petitDejInclus" : v === "option" ? "petitDejOption" : "petitDejNon")}
               </button>
             ))}
@@ -348,7 +348,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
             className="mt-1 accent-primary w-4 h-4 shrink-0" aria-describedby={errors.droits ? "h-droits-erreur" : undefined}
           />
           <label htmlFor="h-droits" className="text-xs text-gray-600 leading-relaxed">
-            {t.rich("certification", { cgu: (x) => <Link href="/cgu#hotes" target="_blank" className="text-primary underline">{x}<span className="sr-only"> ({t("nouvelOnglet")})</span></Link> })}
+            {t.rich("certification", { cgu: (x) => <Link href="/cgu#hotes" target="_blank" className="text-brand underline">{x}<span className="sr-only"> ({t("nouvelOnglet")})</span></Link> })}
           </label>
         </div>
         {errors.droits && <p id="h-droits-erreur" role="alert" className="text-xs text-red-600 mt-1.5">{errors.droits}</p>}
@@ -365,7 +365,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
                   const active = form.amenities.includes(id);
                   return (
                     <button key={id} type="button" aria-pressed={active} onClick={() => toggleAmenity(id)}
-                      className={cn("inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors", active ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}>
+                      className={cn("inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors", active ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200 hover:border-primary/40")}>
                       <Icone size={18} weight="duotone" aria-hidden /> {label}
                     </button>
                   );
@@ -386,7 +386,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
             return (
               <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <span className="text-sm font-semibold text-dark sm:w-40 shrink-0">{r.label}</span>
-                <div role="radiogroup" aria-label={r.label} className="inline-flex flex-wrap rounded-xl border border-gray-200 bg-white p-1 gap-1">
+                <div role="radiogroup" aria-label={r.label} className="inline-flex flex-wrap rounded-xl border border-gray-200 bg-surface p-1 gap-1">
                   {options.map((o) => (
                     <button key={o.id ?? "aucun"} type="button" role="radio" aria-checked={valeur === o.id} onClick={() => choisirRegle(r, o.id)}
                       className={cn("px-3 py-1.5 rounded-lg text-sm transition-colors", valeur === o.id ? "bg-primary text-white font-semibold" : "text-dark hover:bg-gray-50")}>
@@ -404,7 +404,7 @@ export default function HebergementForm({ initial, brouillon, onSaved, onCancel 
         <button type="button" onClick={onCancel} className="px-6 py-3 rounded-xl border border-gray-200 text-dark font-medium hover:bg-gray-50">{t("annuler")}</button>
         {!initial && (
           <button type="button" onClick={enregistrerBrouillon} disabled={savingBrouillon || saving || uploading}
-            className="px-6 py-3 rounded-xl border border-primary/30 text-primary font-semibold hover:bg-primary/5 disabled:opacity-60">
+            className="px-6 py-3 rounded-xl border border-primary/30 text-brand font-semibold hover:bg-primary/5 disabled:opacity-60">
             {savingBrouillon ? t("enregistrement") : t("enregistrerBrouillon")}
           </button>
         )}

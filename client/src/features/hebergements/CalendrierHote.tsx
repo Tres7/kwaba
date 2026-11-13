@@ -98,8 +98,8 @@ export default function CalendrierHotePage() {
         passe && "text-gray-300",
         !passe && !p && !selectionne && "text-dark hover:bg-gray-100 font-medium",
         p?.type === "reservation" && !passe && "bg-blue-100 text-blue-800 font-semibold",
-        p?.type === "blocage" && !passe && "bg-[repeating-linear-gradient(135deg,#f3f4f6,#f3f4f6_4px,#e5e7eb_4px,#e5e7eb_8px)] text-gray-500 line-through",
-        selectionne && "bg-dark text-white font-bold",
+        p?.type === "blocage" && !passe && "bg-[repeating-linear-gradient(135deg,var(--color-gray-100),var(--color-gray-100)_4px,var(--color-gray-200)_4px,var(--color-gray-200)_8px)] text-gray-500 line-through",
+        selectionne && "bg-dark text-inverse font-bold",
       ),
     };
   };
@@ -143,12 +143,12 @@ export default function CalendrierHotePage() {
       <SubPageHeader title={t("titre")} subtitle={hebergement?.name ?? "…"} back="/hote/espace" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-3xl shadow-card p-4 sm:p-6">
+        <div className="lg:col-span-2 bg-surface rounded-3xl shadow-card p-4 sm:p-6">
           {(types.length > 1 || plusieursUnites) && (
             <label className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
               <span className="text-sm font-medium text-dark">{t("typeAffiche")}</span>
               <select value={typeChoisi} onChange={(e) => choisirType(e.target.value)}
-                className="border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-hidden focus:border-primary bg-white">
+                className="border border-gray-200 rounded-xl px-3 py-2 text-base sm:text-sm outline-hidden focus:border-primary bg-surface">
                 {types.length > 1 && <option value="">{t("toutEtablissement")}</option>}
                 {types.map((u) => <option key={u.id} value={u.id}>{u.nom}</option>)}
               </select>
@@ -158,15 +158,15 @@ export default function CalendrierHotePage() {
             <MonthGrid month={month} onMonthChange={setMonth} count={2} minMonth={new Date()} renderDay={renderDay} onDayClick={clic} />
           )}
           <div className="flex flex-wrap gap-4 mt-5 text-xs text-gray-600">
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-white border border-gray-200" /> {t("libre")}</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-surface border border-gray-200" /> {t("libre")}</span>
             <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-blue-100" /> {t("reserve")}</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-[repeating-linear-gradient(135deg,#f3f4f6,#f3f4f6_3px,#e5e7eb_3px,#e5e7eb_6px)]" /> {t("fermeParVous")}</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded-sm bg-[repeating-linear-gradient(135deg,var(--color-gray-100),var(--color-gray-100)_3px,var(--color-gray-200)_3px,var(--color-gray-200)_6px)]" /> {t("fermeParVous")}</span>
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl shadow-card p-5">
-            <h2 className="font-heading font-bold text-dark mb-2 flex items-center gap-2"><Lock size={16} className="text-primary" /> {t("fermerTitre")}</h2>
+          <div className="bg-surface rounded-3xl shadow-card p-5">
+            <h2 className="font-heading font-bold text-dark mb-2 flex items-center gap-2"><Lock size={16} className="text-brand" /> {t("fermerTitre")}</h2>
             {!debut ? (
               <p className="text-sm text-muted">{t("aide")}{types.length > 1 && <> {nomType ? t("aideType", { nom: nomType }) : t("aideEtablissement")}</>}</p>
             ) : (
@@ -190,7 +190,7 @@ export default function CalendrierHotePage() {
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-hidden focus:border-primary" />
                 <div className="flex gap-2">
                   <button onClick={() => { setDebut(""); setFin(""); }} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium">{t("annuler")}</button>
-                  <button onClick={fermer} disabled={envoi} className="flex-1 py-2.5 rounded-xl bg-dark text-white text-sm font-bold disabled:opacity-50">
+                  <button onClick={fermer} disabled={envoi} className="flex-1 py-2.5 rounded-xl bg-dark text-inverse text-sm font-bold disabled:opacity-50">
                     {envoi ? "..." : t("fermerDates")}
                   </button>
                 </div>
@@ -198,7 +198,7 @@ export default function CalendrierHotePage() {
             )}
           </div>
 
-          <div className="bg-white rounded-3xl shadow-card p-5">
+          <div className="bg-surface rounded-3xl shadow-card p-5">
             <h2 className="font-heading font-bold text-dark mb-3">{t("aVenir")}</h2>
             {aVenir.length === 0 ? (
               <p className="text-sm text-muted">{t("rienAVenir")}</p>
@@ -226,7 +226,7 @@ export default function CalendrierHotePage() {
                 ))}
               </ul>
             )}
-            <Link href="/hote/espace" className="block mt-4 text-sm font-semibold text-primary hover:underline">{t("voirToutes")}</Link>
+            <Link href="/hote/espace" className="block mt-4 text-sm font-semibold text-brand hover:underline">{t("voirToutes")}</Link>
           </div>
         </div>
       </div>

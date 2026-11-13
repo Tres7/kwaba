@@ -50,7 +50,7 @@ export default function ProposerAuGroupe({ hebergementId }: { hebergementId: str
         <Floating ref={panelRef} anchor={ref} onClose={() => setOpen(false)} label={t("proposerA")} className="p-2 w-72">
           {voyages.length === 0 ? (
             <div className="p-3 text-sm text-gray-600">
-              {t("aucunVoyage")} <Link href="/together" className="text-primary font-bold">{t("creerVoyage")}</Link>
+              {t("aucunVoyage")} <Link href="/together" className="text-brand font-bold">{t("creerVoyage")}</Link>
             </div>
           ) : (
             <ul>

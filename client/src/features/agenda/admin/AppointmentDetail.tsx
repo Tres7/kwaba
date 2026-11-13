@@ -49,7 +49,7 @@ export default function AppointmentDetail() {
   return (
     <div className="max-w-2xl">
       <BackLink />
-      <div className="mt-4 rounded-3xl bg-white shadow-xs p-6">
+      <div className="mt-4 rounded-3xl bg-surface shadow-xs p-6">
         <Status status={appointment.status} />
         <h1 className="font-heading font-bold text-2xl text-dark mt-2">{appointment.title}</h1>
         <p className="flex items-start gap-2 text-dark mt-3">
@@ -86,11 +86,11 @@ export default function AppointmentDetail() {
             <p className="flex items-center gap-2 font-bold text-dark"><UserRound size={18} aria-hidden /> {appointment.host.name}</p>
             <div className="flex flex-wrap gap-2 mt-3">
               {appointment.host.phone && (
-                <a href={`tel:${appointment.host.phone}`} className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-dark">
+                <a href={`tel:${appointment.host.phone}`} className="inline-flex items-center gap-1.5 rounded-xl bg-surface px-3 py-2 text-sm font-semibold text-dark">
                   <Phone size={16} aria-hidden /> {appointment.host.phone}
                 </a>
               )}
-              <a href={`mailto:${appointment.host.email}`} className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-dark">
+              <a href={`mailto:${appointment.host.email}`} className="inline-flex items-center gap-1.5 rounded-xl bg-surface px-3 py-2 text-sm font-semibold text-dark">
                 <Mail size={16} aria-hidden /> Email
               </a>
             </div>
@@ -103,7 +103,7 @@ export default function AppointmentDetail() {
             <Navigation size={18} aria-hidden /> Lancer l&apos;itinéraire
           </a>
           <a href={appointmentIcsUrl(appointment.id)}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-white border border-gray-200 text-dark font-bold py-3.5">
+            className="flex items-center justify-center gap-2 rounded-2xl bg-surface border border-gray-200 text-dark font-bold py-3.5">
             <CalendarPlus size={18} aria-hidden /> Ajouter à mon calendrier
           </a>
           {confirmed && mine && (
@@ -136,7 +136,7 @@ export default function AppointmentDetail() {
                 <CheckCircle2 size={18} aria-hidden /> Conforme
               </button>
               <button type="button" onClick={() => setReporting(true)}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-white border border-red-200 text-red-700 font-bold py-3">
+                className="flex items-center justify-center gap-2 rounded-2xl bg-surface border border-red-200 text-red-700 font-bold py-3">
                 <XCircle size={18} aria-hidden /> Non conforme
               </button>
             </div>
@@ -150,10 +150,10 @@ export default function AppointmentDetail() {
             }}>
               <label htmlFor="finding" className="block text-sm font-bold text-dark">Ce qui n&apos;est pas conforme (envoyé à l&apos;hôte)</label>
               <textarea id="finding" value={finding} onChange={(e) => setFinding(e.target.value)} rows={3} required minLength={10}
-                className="mt-2 w-full rounded-xl border border-gray-200 p-3 text-sm bg-white" />
+                className="mt-2 w-full rounded-xl border border-gray-200 p-3 text-sm bg-surface" />
               <div className="flex gap-2 mt-3">
                 <button type="submit" disabled={postCheckMutation.isPending}
-                  className="rounded-xl bg-red-700 text-white font-bold px-4 py-2.5 text-sm disabled:opacity-60">Retirer l&apos;annonce du site</button>
+                  className="rounded-xl bg-red-700 dark:bg-red-600 text-white font-bold px-4 py-2.5 text-sm disabled:opacity-60">Retirer l&apos;annonce du site</button>
                 <button type="button" onClick={() => setReporting(false)} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-dark">Retour</button>
               </div>
             </form>
@@ -162,7 +162,7 @@ export default function AppointmentDetail() {
       )}
 
       {confirmed && (mine || isAdmin) && (
-        <div className="mt-4 rounded-3xl bg-white shadow-xs p-6">
+        <div className="mt-4 rounded-3xl bg-surface shadow-xs p-6">
           {!cancelling ? (
             <button type="button" onClick={() => setCancelling(true)} className="text-sm font-bold text-red-700">
               Annuler cette visite
@@ -181,7 +181,7 @@ export default function AppointmentDetail() {
               <p className="text-xs text-gray-500 mt-1">L&apos;annonce retourne dans la file « À faire » et l&apos;hôte pourra réserver un autre créneau.</p>
               <div className="flex gap-2 mt-3">
                 <button type="submit" disabled={cancelMutation.isPending}
-                  className="rounded-xl bg-red-700 text-white font-bold px-4 py-2.5 text-sm disabled:opacity-60">Confirmer l&apos;annulation</button>
+                  className="rounded-xl bg-red-700 dark:bg-red-600 text-white font-bold px-4 py-2.5 text-sm disabled:opacity-60">Confirmer l&apos;annulation</button>
                 <button type="button" onClick={() => setCancelling(false)} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-dark">Garder la visite</button>
               </div>
             </form>
@@ -190,7 +190,7 @@ export default function AppointmentDetail() {
       )}
 
       {confirmed && isAdmin && (
-        <form className="mt-4 rounded-3xl bg-white shadow-xs p-6" onSubmit={(e) => {
+        <form className="mt-4 rounded-3xl bg-surface shadow-xs p-6" onSubmit={(e) => {
           e.preventDefault();
           reassignMutation.mutate(undefined, {
             onSuccess: () => toast.success("Visite réaffectée."),
@@ -215,7 +215,7 @@ export default function AppointmentDetail() {
 
 function BackLink() {
   return (
-    <Link href="/agent/agenda" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+    <Link href="/agent/agenda" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand">
       <ArrowLeft size={16} aria-hidden /> Agenda
     </Link>
   );
@@ -223,7 +223,7 @@ function BackLink() {
 
 function Status({ status }: { status: string }) {
   const map: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
-    confirmed: { label: "Confirmée", icon: CheckCircle2, className: "bg-primary/10 text-primary" },
+    confirmed: { label: "Confirmée", icon: CheckCircle2, className: "bg-primary/10 text-brand" },
     done: { label: "Terminée", icon: CheckCircle2, className: "bg-gray-100 text-dark" },
     cancelled: { label: "Annulée", icon: XCircle, className: "bg-red-50 text-red-700" },
   };

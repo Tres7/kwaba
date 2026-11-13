@@ -135,7 +135,7 @@ export default function ChampDestination({
           aria-label={ariaLabel}
           // Keeps the focus in the field: otherwise the blur would close the list before the click
           onMouseDown={(e) => e.preventDefault()}
-          className={cn("absolute top-full z-50 mt-3 max-h-[70vh] overflow-y-auto rounded-2xl border border-gray-100 bg-white pb-2 text-left shadow-card", listeClassName ?? "left-0 w-full min-w-[18rem]")}
+          className={cn("absolute top-full z-50 mt-3 max-h-[70vh] overflow-y-auto rounded-2xl border border-gray-100 bg-surface pb-2 text-left shadow-card", listeClassName ?? "left-0 w-full min-w-[18rem]")}
         >
           {options.map((option, index) => (
             <Fragment key={option.type === "ville" ? `v-${option.city}` : option.type === "quartier" ? `q-${option.ville}-${option.nom}` : `l-${option.id}`}>
@@ -150,7 +150,7 @@ export default function ChampDestination({
               >
                 {option.type === "ville" ? (
                   <>
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-primary"><MapPin size={16} /></span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-brand"><MapPin size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-dark">{option.city}</span>
                       <span className="block text-xs text-gray-500">{t("logementsDispo", { nombre: option.count })}</span>
@@ -158,7 +158,7 @@ export default function ChampDestination({
                   </>
                 ) : option.type === "quartier" ? (
                   <>
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-primary"><MapPin size={16} /></span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-brand"><MapPin size={16} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-dark">{option.nom}</span>
                       <span className="block text-xs text-gray-500">{t("quartierDe", { ville: option.ville })}</span>

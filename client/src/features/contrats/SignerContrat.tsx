@@ -35,7 +35,7 @@ export default function ContratPage() {
             <div className="h-96 skeleton rounded-3xl" />
           </div>
         ) : isError || !data ? (
-          <div className="bg-white rounded-3xl border border-gray-100 p-8 text-center">
+          <div className="bg-surface rounded-3xl border border-gray-100 p-8 text-center">
             <FileX2 size={40} className="mx-auto text-gray-400" aria-hidden />
             <p className="mt-4 text-dark font-semibold">{t("introuvable")}</p>
           </div>

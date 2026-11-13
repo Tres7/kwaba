@@ -21,7 +21,7 @@ export default function ImpactPage() {
     <div className="bg-light pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
         <div>
-          <Link href="/give" className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"><ArrowLeft size={15} /> Kwa-Ba Give</Link>
+          <Link href="/give" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline"><ArrowLeft size={15} /> Kwa-Ba Give</Link>
           <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl mt-3">{t("titre")}</h1>
           <p className="text-gray-600 mt-2 max-w-2xl">
             {t("texte")}
@@ -40,7 +40,7 @@ export default function ImpactPage() {
                 {impact.causes.map((c) => {
                   const { icon: Icon, couleur } = CAUSES[c.code];
                   return (
-                    <li key={c.code} className="bg-white rounded-2xl border border-gray-100 p-4">
+                    <li key={c.code} className="bg-surface rounded-2xl border border-gray-100 p-4">
                       <span className={cn("inline-flex w-9 h-9 rounded-xl items-center justify-center", couleur)}><Icon size={18} /></span>
                       <p className="font-bold text-dark text-sm mt-2">{CAUSES[c.code].nom}</p>
                       <p className="text-xs text-gray-600 mt-0.5">{formatPrice(c.collecte)} · {tG("nbDons", { nombre: c.nb_dons })}</p>
@@ -53,7 +53,7 @@ export default function ImpactPage() {
             <section aria-labelledby="preuves-titre">
               <h2 id="preuves-titre" className="font-heading font-bold text-dark text-xl mb-3">{t("derniers")}</h2>
               {impact.reversements.length === 0 ? (
-                <p className="bg-white rounded-2xl border border-gray-100 p-5 text-sm text-gray-600">
+                <p className="bg-surface rounded-2xl border border-gray-100 p-5 text-sm text-gray-600">
                   {t("aucun")}
                 </p>
               ) : (

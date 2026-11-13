@@ -61,7 +61,7 @@ function VoyageContent() {
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-center px-6">
         <p className="font-heading font-bold text-xl text-dark">{t("introuvable")}</p>
         <p className="text-gray-600 text-sm">{t("introuvableTexte")}</p>
-        <Link href="/together" className="text-primary font-bold hover:underline">{t("mesVoyagesGroupe")}</Link>
+        <Link href="/together" className="text-brand font-bold hover:underline">{t("mesVoyagesGroupe")}</Link>
       </div>
     );
   }
@@ -69,14 +69,14 @@ function VoyageContent() {
 
   return (
     <div className="bg-light min-h-[70vh] pb-12">
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-surface border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-0">
           <Link href="/together" className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-dark"><ArrowLeft size={16} /> {t("mesVoyages")}</Link>
           <div className="flex flex-wrap items-end justify-between gap-3 mt-3">
             <div>
               <h1 className="font-heading font-bold text-dark text-2xl sm:text-3xl">{v.nom}</h1>
               <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600 mt-1">
-                <span className="flex items-center gap-1"><MapPin size={14} className="text-primary" /> {v.destination}</span>
+                <span className="flex items-center gap-1"><MapPin size={14} className="text-brand" /> {v.destination}</span>
                 {v.date_debut && v.date_fin
                   ? <span>{formatDate(v.date_debut)} → {formatDate(v.date_fin)} · {tFiche("nuits", { nombre: v.nuits ?? 0 })}</span>
                   : <span>{t("datesADefinir")}</span>}
@@ -85,7 +85,7 @@ function VoyageContent() {
             </div>
             <div className="flex -space-x-2" aria-label={tT("membres", { nombre: v.membres.length })}>
               {v.membres.slice(0, 6).map((m) => (
-                <span key={m.id} title={m.nom} className="w-9 h-9 rounded-full bg-primary/10 border-2 border-white text-primary text-xs font-bold flex items-center justify-center">
+                <span key={m.id} title={m.nom} className="w-9 h-9 rounded-full bg-primary/10 border-2 border-surface text-brand text-xs font-bold flex items-center justify-center">
                   {m.nom.split(" ").map((x) => x[0]).join("").slice(0, 2).toUpperCase()}
                 </span>
               ))}
@@ -95,7 +95,7 @@ function VoyageContent() {
             {ONGLETS.map(({ id, label, icon: Icon }) => (
               <button key={id} role="tab" aria-selected={onglet === id} onClick={() => setOnglet(id)}
                 className={cn("flex items-center gap-1.5 pb-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors",
-                  onglet === id ? "text-primary border-primary" : "text-gray-500 border-transparent hover:text-dark")}>
+                  onglet === id ? "text-brand border-primary" : "text-gray-500 border-transparent hover:text-dark")}>
                 <Icon size={15} /> {t(`onglets.${label}`)}
               </button>
             ))}

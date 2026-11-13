@@ -35,13 +35,13 @@ export default function VisitBanner() {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-primary/5 border border-primary/20 p-4">
       <p className="flex items-center gap-2 font-bold text-dark">
-        <CalendarCheck size={20} aria-hidden className="text-primary" />
+        <CalendarCheck size={20} aria-hidden className="text-brand" />
         {t("bannerBooked", {
           date: formatDate(next.start, { timeZone: TIMEZONE, weekday: "long", day: "numeric", month: "long" }),
           time: hourMinute(next.start),
         })}
       </p>
-      <Link href="/hote/espace/visite" className="text-sm font-bold text-primary">{t("bannerSee")}</Link>
+      <Link href="/hote/espace/visite" className="text-sm font-bold text-brand">{t("bannerSee")}</Link>
     </div>
   );
 }

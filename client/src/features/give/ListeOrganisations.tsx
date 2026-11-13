@@ -47,7 +47,7 @@ export default function GivePage() {
               const actif = cause === c.code;
               return (
                 <button key={c.code} type="button" aria-pressed={actif} onClick={() => setCause(actif ? null : c.code)}
-                  className={cn("text-left bg-white rounded-2xl border-2 p-4 transition-colors",
+                  className={cn("text-left bg-surface rounded-2xl border-2 p-4 transition-colors",
                     actif ? "border-primary" : "border-transparent hover:border-primary/30")}>
                   <span className={cn("inline-flex w-10 h-10 rounded-xl items-center justify-center", couleur)}><Icon size={20} /></span>
                   <p className="font-heading font-bold text-dark mt-3">{CAUSES[c.code].nom}</p>
@@ -63,12 +63,12 @@ export default function GivePage() {
             <h2 id="ong-titre" className="font-heading font-bold text-dark text-xl">
               {cause ? `${t("ongPartenaires")} · ${CAUSES[cause].nom}` : t("ongPartenaires")}
             </h2>
-            {cause && <button onClick={() => setCause(null)} className="text-sm font-bold text-primary hover:underline">{t("toutesCauses")}</button>}
+            {cause && <button onClick={() => setCause(null)} className="text-sm font-bold text-brand hover:underline">{t("toutesCauses")}</button>}
           </div>
           {isLoading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">{[0, 1, 2].map((i) => <div key={i} className="h-72 skeleton rounded-3xl" />)}</div>
           ) : !organisations?.length ? (
-            <p className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-600">
+            <p className="bg-surface rounded-2xl border border-gray-100 p-8 text-center text-gray-600">
               {cause ? t("aucuneOngCause") : t("aucuneOng")}
             </p>
           ) : (
@@ -82,15 +82,15 @@ export default function GivePage() {
           <h2 id="engagements-titre" className="font-heading font-bold text-dark text-xl mb-4">{t("engagements")}</h2>
           <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {ENGAGEMENTS.map(({ icon: Icon, id }) => (
-              <li key={id} className="bg-white rounded-2xl border border-gray-100 p-5">
+              <li key={id} className="bg-surface rounded-2xl border border-gray-100 p-5">
                 {/* Same badge as the causes: a single icon family on the page */}
-                <span className="inline-flex w-10 h-10 rounded-xl items-center justify-center bg-primary/10 text-primary"><Icon size={20} /></span>
+                <span className="inline-flex w-10 h-10 rounded-xl items-center justify-center bg-primary/10 text-brand"><Icon size={20} /></span>
                 <p className="font-heading font-bold text-dark mt-3">{t(`engagementsListe.${id}.titre`)}</p>
                 <p className="text-sm text-gray-600 mt-1">{t(`engagementsListe.${id}.texte`)}</p>
               </li>
             ))}
           </ul>
-          <Link href="/give/impact" className="inline-flex items-center gap-1.5 mt-4 text-sm font-bold text-primary hover:underline">
+          <Link href="/give/impact" className="inline-flex items-center gap-1.5 mt-4 text-sm font-bold text-brand hover:underline">
             {t("voirImpact")} <ArrowRight size={15} />
           </Link>
         </section>

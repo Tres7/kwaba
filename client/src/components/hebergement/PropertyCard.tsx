@@ -31,7 +31,7 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
   return (
     <Link
       href={`/hebergements/${property.id}${query}`}
-      className="group bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow overflow-hidden flex flex-col h-full"
+      className="group bg-surface rounded-2xl shadow-card hover:shadow-card-hover transition-shadow overflow-hidden flex flex-col h-full"
     >
       <div className="relative aspect-4/3 bg-slate-100 overflow-hidden">
         <img
@@ -41,16 +41,16 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
           className={cn("w-full h-full object-cover transition-transform duration-500 group-hover:scale-105", complet && "opacity-75")}
         />
         {complet && (
-          <span className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-dark/85 text-white px-2.5 py-1 text-xs font-bold rounded-full">
+          <span className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-night/85 text-white px-2.5 py-1 text-xs font-bold rounded-full">
             <CalendarX size={13} aria-hidden /> {t("completDates")}
           </span>
         )}
         {peuDeChoix && (
-          <span className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-amber-500 text-dark px-2.5 py-1 text-xs font-bold rounded-full">
+          <span className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-amber-500 text-night px-2.5 py-1 text-xs font-bold rounded-full">
             <Flame size={13} aria-hidden /> {t("plusQue", { nombre: dispo!.unites_restantes })}
           </span>
         )}
-        <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full text-dark shadow-xs">
+        <span className="absolute top-3 left-3 bg-surface/90 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full text-dark shadow-xs">
           <LibelleType type={property.type} />
         </span>
         <FavoriteButton
@@ -87,7 +87,7 @@ export default function PropertyCard({ property, query = "", onFavoriteChange }:
           </p>
         )}
         <p className="mt-auto pt-3 text-sm" title={t("detailPrix", { prix: formatPrice(prix), frais: formatPrice(frais) })}>
-          <span className="font-heading font-bold text-primary">{formatPrice(total)}</span>
+          <span className="font-heading font-bold text-brand">{formatPrice(total)}</span>
           <span className="text-gray-500 text-xs"> {t("parNuitFraisInclus")}</span>
         </p>
       </div>

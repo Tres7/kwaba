@@ -58,15 +58,15 @@ export default function DevenirHotePage() {
 
   const cta =
     status === "loading" || (status === "authenticated" && !me) ? null : acces ? (
-      <Link href="/hote/espace" className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50">{t(me?.candidature_hote === "ouverte" ? "reprendre" : "acceder")}</Link>
+      <Link href="/hote/espace" className="inline-block bg-white text-primary dark:bg-gray-900 dark:text-primary-800 font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800">{t(me?.candidature_hote === "ouverte" ? "reprendre" : "acceder")}</Link>
     ) : me?.candidature_hote === "refusee" ? (
       <p className="max-w-xl mx-auto bg-white/10 rounded-2xl px-5 py-4 text-sm text-white">{t("refusee", { motif: me.candidature_motif })}</p>
     ) : status === "authenticated" ? (
-      <button onClick={commencer} disabled={loading} className="bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 disabled:opacity-60">
+      <button onClick={commencer} disabled={loading} className="bg-white text-primary dark:bg-gray-900 dark:text-primary-800 font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60">
         {loading ? t("activation") : t("activer")}
       </button>
     ) : (
-      <Link href="/register?role=hote" className="inline-block bg-white text-primary font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50">{t("creerCompte")}</Link>
+      <Link href="/register?role=hote" className="inline-block bg-white text-primary dark:bg-gray-900 dark:text-primary-800 font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800">{t("creerCompte")}</Link>
     );
 
   return (
@@ -93,9 +93,9 @@ export default function DevenirHotePage() {
         <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl text-center mb-10">{t("commentCaMarche")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {STEPS.map(({ icon: Icon, id }, i) => (
-            <div key={id} className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100">
+            <div key={id} className="bg-surface rounded-3xl p-6 shadow-xs border border-gray-100">
               <div className="flex items-center gap-3 mb-4">
-                <span className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center"><Icon size={20} /></span>
+                <span className="w-10 h-10 rounded-full bg-primary/10 text-brand flex items-center justify-center"><Icon size={20} /></span>
                 <span className="text-sm font-bold text-muted">{t("etape", { numero: i + 1 })}</span>
               </div>
               <h3 className="font-heading font-bold text-dark text-lg mb-2">{t(`etapes.${id}.titre`)}</h3>
@@ -109,8 +109,8 @@ export default function DevenirHotePage() {
           <p className="text-gray-500 text-center max-w-2xl mx-auto mb-8">{t("tarifs.intro")}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {TAUX.map((cle) => (
-              <div key={cle} className="bg-white rounded-3xl p-5 border border-gray-100 text-center">
-                <p className="font-heading font-bold text-primary text-3xl">{texteTaux[cle]}</p>
+              <div key={cle} className="bg-surface rounded-3xl p-5 border border-gray-100 text-center">
+                <p className="font-heading font-bold text-brand text-3xl">{texteTaux[cle]}</p>
                 <p className="font-semibold text-dark text-sm mt-1">{t(`tarifs.taux.${cle}.titre`)}</p>
                 <p className="text-gray-500 text-xs mt-1 leading-relaxed">{t(`tarifs.taux.${cle}.texte`)}</p>
               </div>
@@ -124,16 +124,16 @@ export default function DevenirHotePage() {
           </div>
 
           <div className="mt-6 bg-primary/5 rounded-3xl p-5 md:p-6 flex flex-col sm:flex-row gap-4 sm:items-center">
-            <span className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0"><Car size={22} /></span>
+            <span className="w-12 h-12 rounded-full bg-primary/10 text-brand flex items-center justify-center shrink-0"><Car size={22} /></span>
             <div className="flex-1">
               <p className="font-heading font-bold text-dark">{t("tarifs.mobilite.titre")}</p>
               <p className="text-sm text-gray-600 mt-1 leading-relaxed">{t("tarifs.mobilite.texte")}</p>
             </div>
-            <a href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(t("tarifs.mobilite.sujet"))}`} className="text-sm font-bold text-primary hover:underline whitespace-nowrap">{t("tarifs.mobilite.cta")}</a>
+            <a href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(t("tarifs.mobilite.sujet"))}`} className="text-sm font-bold text-brand hover:underline whitespace-nowrap">{t("tarifs.mobilite.cta")}</a>
           </div>
         </div>
 
-        <div className="mt-12 bg-white rounded-3xl p-6 md:p-8 border border-gray-100">
+        <div className="mt-12 bg-surface rounded-3xl p-6 md:p-8 border border-gray-100">
           <h3 className="font-heading font-bold text-dark text-lg mb-4">{t("ceQuIlFaut")}</h3>
           <ul className="grid sm:grid-cols-2 gap-3 text-sm text-gray-600">
             {["compte", "identite", "photos", "prix", "capacite"].map((cle) => t(`besoins.${cle}`)).map((item) => (

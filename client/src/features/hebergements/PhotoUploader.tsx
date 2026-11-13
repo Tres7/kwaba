@@ -147,10 +147,10 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
           dragOver ? "border-primary bg-primary/5" : error ? "border-red-300 bg-red-50/40" : "border-gray-200 bg-gray-50/60"
         )}
       >
-        <ImagePlus size={28} className="mx-auto text-primary mb-2" />
+        <ImagePlus size={28} className="mx-auto text-brand mb-2" />
         <p className="text-sm text-dark font-medium">
           <span className="hidden sm:inline">{t("glissez")} </span>
-          <span className="text-primary font-bold underline-offset-2 hover:underline">
+          <span className="text-brand font-bold underline-offset-2 hover:underline">
             <span className="sm:hidden">{t("ajouterPhotos")}</span><span className="hidden sm:inline">{t("parcourez")}</span>
           </span>
         </p>
@@ -188,16 +188,16 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30 text-white">
                     <Loader2 size={20} className="animate-spin" />
                     <div className="w-2/3 h-1.5 bg-white/40 rounded-full overflow-hidden">
-                      <div className="h-full bg-white transition-all" style={{ width: `${item.progress}%` }} />
+                      <div className="h-full bg-surface transition-all" style={{ width: `${item.progress}%` }} />
                     </div>
                   </div>
                 )}
 
                 {item.status === "error" && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-red-900/70 text-white p-2 text-center">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-red-900/70 dark:bg-red-950/70 text-white p-2 text-center">
                     <TriangleAlert size={18} />
                     <p className="text-[11px] leading-tight">{item.error}</p>
-                    <button type="button" onClick={() => retry(item)} className="inline-flex items-center gap-1 mt-1 px-2.5 py-1 rounded-full bg-white text-dark text-xs font-semibold">
+                    <button type="button" onClick={() => retry(item)} className="inline-flex items-center gap-1 mt-1 px-2.5 py-1 rounded-full bg-surface text-dark text-xs font-semibold">
                       <RotateCcw size={12} aria-hidden /> {t("reessayer")}
                     </button>
                   </div>
@@ -208,22 +208,22 @@ export default function PhotoUploader({ value, onChange, onBusyChange, error, fi
                     <div className="flex gap-1">
                       {item.status === "done" && (
                         <>
-                          <button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label={t("gauche")} className="w-7 h-7 rounded-full bg-white/90 text-dark flex items-center justify-center disabled:opacity-40"><ArrowLeft size={14} /></button>
-                          <button type="button" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label={t("droite")} className="w-7 h-7 rounded-full bg-white/90 text-dark flex items-center justify-center disabled:opacity-40"><ArrowRight size={14} /></button>
+                          <button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label={t("gauche")} className="w-7 h-7 rounded-full bg-surface/90 text-dark flex items-center justify-center disabled:opacity-40"><ArrowLeft size={14} /></button>
+                          <button type="button" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label={t("droite")} className="w-7 h-7 rounded-full bg-surface/90 text-dark flex items-center justify-center disabled:opacity-40"><ArrowRight size={14} /></button>
                           {index !== 0 && (
-                            <button type="button" onClick={() => makeCover(index)} aria-label={t("definirCouverture")} title={t("definirCouverture")} className="w-7 h-7 rounded-full bg-white/90 text-primary flex items-center justify-center"><Star size={14} /></button>
+                            <button type="button" onClick={() => makeCover(index)} aria-label={t("definirCouverture")} title={t("definirCouverture")} className="w-7 h-7 rounded-full bg-surface/90 text-brand flex items-center justify-center"><Star size={14} /></button>
                           )}
                         </>
                       )}
                     </div>
-                    <button type="button" onClick={() => remove(item)} aria-label={t("retirer")} className="w-7 h-7 rounded-full bg-white/90 text-red-600 flex items-center justify-center"><Trash2 size={14} /></button>
+                    <button type="button" onClick={() => remove(item)} aria-label={t("retirer")} className="w-7 h-7 rounded-full bg-surface/90 text-red-600 flex items-center justify-center"><Trash2 size={14} /></button>
                   </div>
                 )}
               </div>
               {onLegende && item.status === "done" && (
                 <select value={legendes?.[item.url] ?? ""} onChange={(e) => onLegende(item.url, e.target.value)}
                   aria-label={t("pieceDeLaPhoto", { numero: index + 1 })}
-                  className={cn("w-full rounded-lg border px-2 py-2 text-sm bg-white text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20",
+                  className={cn("w-full rounded-lg border px-2 py-2 text-sm bg-surface text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20",
                     legendes?.[item.url] ? "border-gray-200" : "border-secondary/60 text-gray-500")}>
                   <option value="" disabled>{t("quellePiece")}</option>
                   {pieces.map((code) => <option key={code} value={code}>{libellePiece(code, tPieces)}</option>)}

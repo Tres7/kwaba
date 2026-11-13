@@ -129,14 +129,14 @@ export default function ChampCorrige(props: ChampCorrigeProps) {
       {/* Announced by screen readers when the number changes; the list itself is not read again at each check */}
       <p className="sr-only" aria-live="polite">{fautes.length > 0 ? t("resume", { nombre: fautes.length }) : ""}</p>
       {fautes.length > 0 && (
-        <div className="mt-2 rounded-2xl border border-gray-200 bg-white p-3">
+        <div className="mt-2 rounded-2xl border border-gray-200 bg-surface p-3">
           <div className="flex items-center justify-between gap-3">
             <p className="flex items-center gap-2 text-sm font-semibold text-dark">
-              <SpellCheck size={16} className="text-primary shrink-0" aria-hidden /> {t("resume", { nombre: fautes.length })}
+              <SpellCheck size={16} className="text-brand shrink-0" aria-hidden /> {t("resume", { nombre: fautes.length })}
             </p>
             {corrigeables > 1 && (
               <button type="button" onClick={() => { onValeur(toutCorriger()); setCurseur(null); }}
-                className="text-sm font-semibold text-primary hover:underline min-h-9 px-1">
+                className="text-sm font-semibold text-brand hover:underline min-h-9 px-1">
                 {t("toutCorriger")}
               </button>
             )}
@@ -156,7 +156,7 @@ export default function ChampCorrige(props: ChampCorrigeProps) {
                   {faute.remplacements.map((remplacement) => (
                     <button key={remplacement} type="button" onClick={() => remplacer(faute, remplacement)}
                       aria-label={remplacement.trim() ? t("remplacerPar", { mot: remplacement }) : t("corriger")}
-                      className="min-h-9 px-3 rounded-full bg-primary-50 text-primary text-sm font-semibold hover:bg-primary-100 transition-colors">
+                      className="min-h-9 px-3 rounded-full bg-primary-50 text-brand text-sm font-semibold hover:bg-primary-100 transition-colors">
                       {remplacement.trim() ? remplacement : t("corriger")}
                     </button>
                   ))}
@@ -169,7 +169,7 @@ export default function ChampCorrige(props: ChampCorrigeProps) {
             ))}
           </ul>
           {ordre.length > MAX_AFFICHEES && (
-            <button type="button" onClick={() => setToutVoir((v) => !v)} className="mt-2 text-sm font-semibold text-primary hover:underline min-h-9 px-1">
+            <button type="button" onClick={() => setToutVoir((v) => !v)} className="mt-2 text-sm font-semibold text-brand hover:underline min-h-9 px-1">
               {toutVoir ? t("voirMoins") : t("voirLesAutres", { nombre: ordre.length - MAX_AFFICHEES })}
             </button>
           )}

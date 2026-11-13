@@ -29,7 +29,7 @@ function PageOrganisation() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-center px-6">
         <p className="font-heading font-bold text-xl text-dark">{t("introuvable")}</p>
-        <Link href="/give" className="text-primary font-bold hover:underline">{t("voirOng")}</Link>
+        <Link href="/give" className="text-brand font-bold hover:underline">{t("voirOng")}</Link>
       </div>
     );
   }
@@ -48,14 +48,14 @@ function PageOrganisation() {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={o.image} alt="" className="w-full h-full object-cover opacity-80" />
         )}
-        <Link href="/give" className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/90 text-dark text-sm font-bold px-3 py-1.5 rounded-full">
+        <Link href="/give" className="absolute top-4 left-4 flex items-center gap-1.5 bg-surface/90 text-dark text-sm font-bold px-3 py-1.5 rounded-full">
           <ArrowLeft size={15} /> Kwa-Ba Give
         </Link>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-10 relative grid lg:grid-cols-[1fr_24rem] gap-6 items-start">
         <div className="space-y-6 min-w-0">
-          <section className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6">
+          <section className="bg-background rounded-3xl border border-gray-100 p-5 sm:p-6">
             <div className="flex items-start gap-4">
               {o.logo && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -71,15 +71,15 @@ function PageOrganisation() {
             </div>
             <p className="text-dark mt-4 whitespace-pre-line">{o.description}</p>
             {urlExterneSure(o.site_web) && (
-              <a href={urlExterneSure(o.site_web)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-primary hover:underline">
+              <a href={urlExterneSure(o.site_web)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-brand hover:underline">
                 {t("site")} <ExternalLink size={14} /><span className="sr-only"> ({tG("nouvelOnglet")})</span>
               </a>
             )}
           </section>
 
-          <section aria-labelledby="verif-titre" className="bg-white rounded-3xl border-2 border-primary/20 p-5 sm:p-6">
+          <section aria-labelledby="verif-titre" className="bg-background rounded-3xl border-2 border-primary/20 p-5 sm:p-6">
             <h2 id="verif-titre" className="flex items-center gap-2 font-heading font-bold text-dark text-lg">
-              <BadgeCheck size={20} className="text-primary" /> {t("verifieeLe", { date: formatDate(o.verifiee_le, { day: "numeric", month: "long", year: "numeric" }) })}
+              <BadgeCheck size={20} className="text-brand" /> {t("verifieeLe", { date: formatDate(o.verifiee_le, { day: "numeric", month: "long", year: "numeric" }) })}
             </h2>
             <p className="text-sm text-gray-600 mt-2">{t("enregistrement")} <span className="font-mono text-dark">{o.numero_enregistrement}</span></p>
             {o.verification && <p className="text-sm text-dark mt-2 whitespace-pre-line">{o.verification}</p>}
@@ -97,7 +97,7 @@ function PageOrganisation() {
                 {o.projets.map((p) => {
                   const pourcentage = p.objectif ? Math.min(100, Math.round((p.collecte / p.objectif) * 100)) : null;
                   return (
-                    <li key={p.id} className={cn("bg-white rounded-2xl border-2 overflow-hidden flex flex-col", projetId === p.id ? "border-primary" : "border-gray-100")}>
+                    <li key={p.id} className={cn("bg-surface rounded-2xl border-2 overflow-hidden flex flex-col", projetId === p.id ? "border-primary" : "border-gray-100")}>
                       {p.image && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={p.image} alt="" className="w-full h-32 object-cover" />
@@ -116,7 +116,7 @@ function PageOrganisation() {
                           </div>
                         )}
                         <button type="button" onClick={() => choisir(projetId === p.id ? null : p.id)}
-                          className="mt-3 text-sm font-bold text-primary text-left hover:underline">
+                          className="mt-3 text-sm font-bold text-brand text-left hover:underline">
                           {projetId === p.id ? t("donnerGeneral") : t("soutenirProjet")}
                         </button>
                       </div>
@@ -130,7 +130,7 @@ function PageOrganisation() {
           <section id="reversements" aria-labelledby="reversements-titre" className="scroll-mt-24">
             <h2 id="reversements-titre" className="font-heading font-bold text-dark text-xl mb-3">{t("reversements")}</h2>
             {o.reversements.length === 0 ? (
-              <p className="bg-white rounded-2xl border border-gray-100 p-5 text-sm text-gray-600">
+              <p className="bg-surface rounded-2xl border border-gray-100 p-5 text-sm text-gray-600">
                 {t("aucunReversement")}
               </p>
             ) : (

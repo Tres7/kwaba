@@ -40,13 +40,13 @@ export default function RejoindrePage() {
 
   return (
     <div className="bg-light min-h-[70vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8 text-center">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center"><Users size={26} /></div>
+      <div className="w-full max-w-md bg-surface rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8 text-center">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 text-brand flex items-center justify-center"><Users size={26} /></div>
         {isError ? (
           <>
             <h1 className="font-heading font-bold text-dark text-xl mt-4">{t("introuvable")}</h1>
             <p className="text-sm text-gray-600 mt-2">{apiErrorMessage(error, t("lienInvalide"))} {t("demanderLien")}</p>
-            <Link href="/together" className="inline-block mt-6 text-primary font-bold hover:underline">{t("decouvrir")}</Link>
+            <Link href="/together" className="inline-block mt-6 text-brand font-bold hover:underline">{t("decouvrir")}</Link>
           </>
         ) : !v ? (
           <div className="h-40 skeleton rounded-2xl mt-4" />
@@ -55,7 +55,7 @@ export default function RejoindrePage() {
             <p className="text-sm text-gray-600 mt-4">{t("invite", { nom: v.organisateur })}</p>
             <h1 className="font-heading font-bold text-dark text-2xl mt-1">{v.nom}</h1>
             <p className="flex items-center justify-center gap-1.5 text-sm text-gray-600 mt-2">
-              <MapPin size={14} className="text-primary" /> {v.destination}
+              <MapPin size={14} className="text-brand" /> {v.destination}
               {v.date_debut && v.date_fin && <> · {formatDate(v.date_debut)} → {formatDate(v.date_fin)}</>}
             </p>
             <p className="text-sm text-gray-600 mt-1">{t("membresPourLinstant", { nombre: v.nb_membres })}</p>

@@ -46,12 +46,12 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
     <div className="grid lg:grid-cols-5 gap-6">
       <div className="lg:col-span-3 space-y-3">
         {v.reservations.length === 0 ? (
-          <p className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-600">{t("aucuneResa")}</p>
+          <p className="bg-surface rounded-2xl border border-gray-100 p-8 text-center text-gray-600">{t("aucuneResa")}</p>
         ) : v.reservations.map((r) => (
-          <article key={r.id} className="bg-white rounded-2xl border border-gray-100 p-5">
+          <article key={r.id} className="bg-surface rounded-2xl border border-gray-100 p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <Link href={`/hebergements/${r.hebergement_id}`} className="font-heading font-bold text-dark hover:text-primary">{r.hebergement}</Link>
+                <Link href={`/hebergements/${r.hebergement_id}`} className="font-heading font-bold text-dark hover:text-brand">{r.hebergement}</Link>
                 <p className="text-sm text-gray-600">{[r.adresse, r.ville].filter(Boolean).join(", ")}</p>
               </div>
               <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full", r.statut === "confirmed" ? "bg-green-100 text-green-800" : r.statut === "pending" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-700")}>
@@ -74,7 +74,7 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
                   </>
                 ) : (
                   <button onClick={() => agir(() => demanderAuGroupe(v.id, r.id), t("paiementDemandeToast"))}
-                    className="px-3 py-1.5 rounded-full border border-primary/40 text-primary text-xs font-bold hover:bg-primary/5">{t("demanderAuGroupe")}</button>
+                    className="px-3 py-1.5 rounded-full border border-primary/40 text-brand text-xs font-bold hover:bg-primary/5">{t("demanderAuGroupe")}</button>
                 )}
               </div>
             )}
@@ -87,7 +87,7 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
           </article>
         ))}
         {aPartager.length > 0 && (
-          <section className="bg-white rounded-2xl border border-dashed border-gray-300 p-5">
+          <section className="bg-background rounded-2xl border border-dashed border-gray-300 p-5">
             <h3 className="font-bold text-dark text-sm">{t("partagerResa")}</h3>
             <ul className="mt-2 space-y-2">
               {aPartager.map((r) => (
@@ -103,7 +103,7 @@ export default function Reservations({ v, appliquer, recharger }: SectionVoyage)
           </section>
         )}
       </div>
-      <section className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5 h-fit">
+      <section className="lg:col-span-2 bg-background rounded-2xl border border-gray-100 p-5 h-fit">
         <label htmlFor="v-notes" className="font-heading font-bold text-dark">{t("infosPratiques")}</label>
         <p className="text-xs text-gray-600 mt-1">{t("infosPratiquesTexte")}</p>
         <textarea id="v-notes" rows={8} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={4000}

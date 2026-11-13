@@ -14,7 +14,7 @@ export default function ListeMissions({ chargement, erreur, vide, children }: {
       ) : erreur ? (
         <p className="bg-red-50 text-red-700 rounded-2xl p-4 text-sm">Impossible de charger les missions (accès réservé aux agents de terrain).</p>
       ) : Children.count(children) === 0 ? (
-        <p className="bg-white rounded-2xl p-8 text-center text-gray-500 border border-gray-100">{vide}</p>
+        <p className="bg-surface rounded-2xl p-8 text-center text-gray-500 border border-gray-100">{vide}</p>
       ) : (
         children
       )}
