@@ -79,6 +79,16 @@
     "euro": "Euro (€)",
     "euroTexte": "Prix affichés en euros à titre indicatif ; le paiement reste en FCFA"
   },
+  "theme": {
+    "choose": "Choisir le thème",
+    "title": "Apparence",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Appareil",
+    "lightText": "Fond clair, en toutes circonstances",
+    "darkText": "Fond sombre, plus reposant le soir",
+    "systemText": "Suit le réglage de votre téléphone ou ordinateur"
+  },
   "roles": {
     "voyageur": "Voyageur",
     "hote": "Hôte",

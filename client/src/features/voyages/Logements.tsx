@@ -62,21 +62,21 @@ export default function Logements({ v, appliquer, recharger }: SectionVoyage) {
       )}
 
       {v.propositions.length === 0 ? (
-        <p className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-600">{t("aucunePropo")}</p>
+        <p className="bg-surface rounded-2xl border border-gray-100 p-8 text-center text-gray-600">{t("aucunePropo")}</p>
       ) : (
         <ul className="space-y-3">
           {v.propositions.map((p) => {
             const h = p.hebergement;
             const monChoix = v.mon_vote === p.id;
             return (
-              <li key={p.id} className={cn("bg-white rounded-2xl border p-4 flex flex-col sm:flex-row gap-4", monChoix ? "border-primary" : "border-gray-100")}>
+              <li key={p.id} className={cn("bg-surface rounded-2xl border p-4 flex flex-col sm:flex-row gap-4", monChoix ? "border-primary" : "border-gray-100")}>
                 <Link href={`/hebergements/${h.id}`} className="sm:w-40 h-32 shrink-0">
                   <img src={h.image_url || FALLBACK_IMAGE} alt={h.name} className="w-full h-full object-cover rounded-xl" />
                 </Link>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <Link href={`/hebergements/${h.id}`} className="font-heading font-bold text-dark hover:text-primary">{h.name}</Link>
+                      <Link href={`/hebergements/${h.id}`} className="font-heading font-bold text-dark hover:text-brand">{h.name}</Link>
                       <p className="text-sm text-gray-600">{h.city} · {t("persMax", { nombre: h.max_guests })} · {t("prixNuit", { prix: formatPrice(h.price_per_night) })}</p>
                       <RatingBadge rating={h.rating} count={h.review_count} className="mt-1" />
                     </div>
@@ -100,7 +100,7 @@ export default function Logements({ v, appliquer, recharger }: SectionVoyage) {
                       onClick={() => action(() => (monChoix ? retirerVote(v.id) : voter(v.id, p.id)))}
                       aria-pressed={monChoix}
                       className={cn("flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold",
-                        monChoix ? "bg-primary text-white" : "border border-primary/40 text-primary hover:bg-primary/5")}
+                        monChoix ? "bg-primary text-white" : "border border-primary/40 text-brand hover:bg-primary/5")}
                     >
                       <Vote size={15} /> {t("votes", { nombre: p.votes })}{monChoix && <span className="sr-only"> ({t("votreChoix")})</span>}
                     </button>
@@ -123,9 +123,9 @@ export default function Logements({ v, appliquer, recharger }: SectionVoyage) {
         </ul>
       )}
 
-      <section className="bg-white rounded-2xl border border-gray-100 p-5">
+      <section className="bg-background rounded-2xl border border-gray-100 p-5">
         <button onClick={() => setOuvert(!ouvert)} aria-expanded={ouvert} className="flex items-center gap-2 font-heading font-bold text-dark">
-          <Plus size={18} className="text-primary" /> {t("proposerLogement")}
+          <Plus size={18} className="text-brand" /> {t("proposerLogement")}
         </button>
         {ouvert && (
           <div className="mt-4">

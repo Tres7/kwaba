@@ -112,7 +112,7 @@ export default function AmenityBadge({ amenity }: AmenityBadgeProps) {
   const interdit = REGLES.some((r) => r.non.id === amenity);
   return (
     <div className="flex items-center gap-3 bg-light-muted rounded-xl px-3 py-2.5">
-      <span className={cn("relative h-8 w-8 rounded-lg bg-white shadow-xs flex items-center justify-center shrink-0", interdit ? "text-gray-500" : "text-primary")}>
+      <span className={cn("relative h-8 w-8 rounded-lg bg-surface shadow-xs flex items-center justify-center shrink-0", interdit ? "text-gray-500" : "text-brand")}>
         <Icone size={20} weight="duotone" aria-hidden />
         {interdit && amenity !== "non_fumeur" && <span aria-hidden className="absolute w-6 h-0.5 bg-gray-500 rotate-45 rounded-full" />}
       </span>

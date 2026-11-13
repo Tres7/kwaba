@@ -74,7 +74,7 @@ export default function FavoriteButton({ hebergementId, initial, onChange, varia
       aria-label={isFavorite ? t("retirer") : t("ajouter")}
       aria-pressed={isFavorite}
       className={cn(
-        "zone-tactile p-2 bg-white/90 backdrop-blur-xs rounded-full shadow-xs transition-colors hover:bg-white",
+        "zone-tactile p-2 bg-surface/90 backdrop-blur-xs rounded-full shadow-xs transition-colors hover:bg-surface",
         isFavorite ? "text-red-600" : "text-gray-500 hover:text-red-600",
         className
       )}

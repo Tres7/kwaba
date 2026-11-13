@@ -10,7 +10,7 @@ export default function PolitiqueAnnulation({ politique, compact = false }: { po
     <>
       <p className="text-sm text-dark"><strong>{t(`${politique}.nom`)}</strong> : {t(`${politique}.regle`)}</p>
       <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">{t("reflexion")}</p>
-      <Link href="/remboursement" className="inline-block text-xs text-primary font-semibold hover:underline mt-1.5">{t("details")}</Link>
+      <Link href="/remboursement" className="inline-block text-xs text-brand font-semibold hover:underline mt-1.5">{t("details")}</Link>
     </>
   );
   if (compact) {
@@ -22,7 +22,7 @@ export default function PolitiqueAnnulation({ politique, compact = false }: { po
     );
   }
   return (
-    <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+    <section className="bg-background rounded-2xl shadow-card p-5 sm:p-6">
       <h2 className="font-heading font-bold text-dark text-xl mb-3">{t("titre")}</h2>
       {contenu}
     </section>

@@ -16,7 +16,7 @@ export default function ChiffresImpact({ impact, clair = false }: { impact: Impa
   return (
     <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {cases.map((c) => (
-        <div key={c.label} className={clair ? "bg-white/10 rounded-2xl p-4" : "bg-white rounded-2xl border border-gray-100 p-4"}>
+        <div key={c.label} className={clair ? "bg-white/10 rounded-2xl p-4" : "bg-surface rounded-2xl border border-gray-100 p-4"}>
           <dt className={clair ? "text-xs text-white/80" : "text-xs text-gray-600"}>{c.label}</dt>
           <dd className={clair ? "font-heading font-bold text-lg text-white mt-1" : "font-heading font-bold text-lg text-dark mt-1"}>{c.valeur}</dd>
         </div>

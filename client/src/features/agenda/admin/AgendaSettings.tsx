@@ -13,7 +13,7 @@ import { formatDuration } from "../time";
 import type { AgendaSettingsValues } from "../types";
 
 const UPDATED = new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Lome", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
-const inputClass = "w-20 sm:w-24 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const inputClass = "w-20 sm:w-24 px-3 py-2 border border-gray-200 rounded-xl text-right tabular-nums text-base sm:text-sm bg-surface focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 function display(field: SettingField, value: number): string {
   return field.kind === "duration" ? formatDuration(value) : `${value} ${field.unit?.(value) ?? ""}`.trim();
@@ -62,7 +62,7 @@ export default function AgendaSettings() {
       </p>
 
       {SECTIONS.map((section) => (
-        <section key={section.title} className="bg-white rounded-2xl border border-gray-100 p-5">
+        <section key={section.title} className="bg-background rounded-2xl border border-gray-100 p-5">
           <h2 className="font-heading font-bold text-dark mb-2">{section.title}</h2>
           <div className="divide-y divide-gray-100">
             {section.fields.map((field) => (

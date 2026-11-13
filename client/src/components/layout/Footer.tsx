@@ -5,6 +5,7 @@ import { Mail } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import Logo from "@/components/layout/Logo";
 import SelecteurLangue from "@/components/layout/SelecteurLangue";
+import ThemeSelector from "@/components/layout/ThemeSelector";
 import { MentionDevise, SelecteurDevise } from "@/components/layout/Devise";
 import GererCookiesBouton from "@/components/legal/GererCookiesBouton";
 import { useConfigPublique } from "@/providers/PublicConfigProvider";
@@ -64,7 +65,7 @@ export default function Footer() {
   const reglages = useReglagesSite().data;
   const { contactEmail: CONTACT_EMAIL } = useConfigPublique();
   return (
-    <footer className="bg-white border-t border-gray-100">
+    <footer className="bg-background border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
@@ -73,12 +74,13 @@ export default function Footer() {
             <div className="mt-4 flex flex-wrap gap-2">
               <SelecteurLangue complet />
               <SelecteurDevise complet />
+              <ThemeSelector />
             </div>
             <MentionDevise className="mt-2" />
             <ul className="mt-4 space-y-1.5 text-sm text-gray-600" aria-label={t("contact")}>
               <li className="flex items-center gap-2">
-                <Mail size={15} className="text-primary shrink-0" />
-                <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-primary">{CONTACT_EMAIL}</a>
+                <Mail size={15} className="text-brand shrink-0" />
+                <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-brand">{CONTACT_EMAIL}</a>
               </li>
             </ul>
           </div>
@@ -88,7 +90,7 @@ export default function Footer() {
               <ul className="space-y-2">
                 {filtrerLiens(col.links, reglages?.modules).map((l) => (
                   <li key={l.href}>
-                    <Link href={l.href} className="text-sm text-gray-600 hover:text-primary transition-colors">{l.nom ?? t(`liens.${l.label}`)}</Link>
+                    <Link href={l.href} className="text-sm text-gray-600 hover:text-brand transition-colors">{l.nom ?? t(`liens.${l.label}`)}</Link>
                   </li>
                 ))}
               </ul>
@@ -101,9 +103,9 @@ export default function Footer() {
           <nav aria-label={t("informationsLegales")}>
             <ul className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
               {LEGAL.map((l) => (
-                <li key={l.href}><Link href={l.href} className="text-gray-600 hover:text-primary underline-offset-2 hover:underline">{t(`legal.${l.label}`)}</Link></li>
+                <li key={l.href}><Link href={l.href} className="text-gray-600 hover:text-brand underline-offset-2 hover:underline">{t(`legal.${l.label}`)}</Link></li>
               ))}
-              {reglages?.mesure_audience && <li><GererCookiesBouton className="text-gray-600 hover:text-primary underline-offset-2 hover:underline" /></li>}
+              {reglages?.mesure_audience && <li><GererCookiesBouton className="text-gray-600 hover:text-brand underline-offset-2 hover:underline" /></li>}
             </ul>
           </nav>
         </div>

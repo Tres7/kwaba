@@ -42,14 +42,14 @@ const CATEGORIES = TYPES_LOGEMENT.slice(0, 6);
 
 const FEATURES = [
   // Kwa-Ba brand colours: green, amber, orange, slate
-  { title: "paiement", icon: WalletIcon, color: "text-primary ring-primary/20" },
+  { title: "paiement", icon: WalletIcon, color: "text-brand ring-primary/20" },
   { title: "instantanee", icon: LightningIcon, color: "text-secondary ring-secondary/20" },
   { title: "contact", icon: ChatsCircleIcon, color: "text-accent ring-accent/30" },
   { title: "annulation", icon: ArrowCounterClockwiseIcon, color: "text-dark ring-dark/15" },
 ];
 
 const GARANTIES = [
-  { title: "verifies", icon: SealCheckIcon, color: "text-primary ring-primary/20" },
+  { title: "verifies", icon: SealCheckIcon, color: "text-brand ring-primary/20" },
   { title: "garantie", icon: ShieldCheckIcon, color: "text-secondary ring-secondary/20" },
   { title: "equipe", icon: UsersThreeIcon, color: "text-accent ring-accent/30" },
   { title: "versement", icon: ClockCountdownIcon, color: "text-dark ring-dark/15" },
@@ -92,12 +92,12 @@ function HeroSearch() {
   return (
     <form method="post"
       onSubmit={submit}
-      className="animate-fade-up-delay-2 bg-white rounded-3xl md:rounded-full p-2 max-w-4xl mx-auto shadow-card flex flex-col md:flex-row md:items-center divide-y md:divide-y-0 md:divide-x divide-gray-100"
+      className="animate-fade-up-delay-2 bg-surface rounded-3xl md:rounded-full p-2 max-w-4xl mx-auto shadow-card flex flex-col md:flex-row md:items-center divide-y md:divide-y-0 md:divide-x divide-gray-100"
     >
       <label className={fieldClass}>
         <span className={labelClass}>{t("destination")}</span>
         <span className="flex items-center gap-2 mt-1">
-          <MapPin size={16} className="text-primary shrink-0" />
+          <MapPin size={16} className="text-brand shrink-0" />
           <ChampDestination
             value={city} onChange={setCity} onVille={setCity}
             placeholder={t("ouAllezVous")} ariaLabel={t("destination")}
@@ -161,7 +161,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       <Suspense><WelcomeToast /></Suspense>
 
       <section className="relative pt-16 pb-36 md:pt-28 md:pb-48 px-4 sm:px-6 text-white min-h-[560px] md:min-h-[620px] flex items-center justify-center overflow-hidden">
@@ -178,8 +178,8 @@ export default function HomePage() {
             />
           );
         })}
-        <div className="absolute inset-0 z-1 bg-dark/45" />
-        <div className="absolute bottom-0 left-0 right-0 h-40 md:h-52 bg-linear-to-b from-transparent to-white z-2" />
+        <div className="absolute inset-0 z-1 bg-night/45" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 md:h-52 bg-linear-to-b from-transparent to-background z-2" />
 
         <div className="w-full max-w-5xl mx-auto text-center relative z-10">
           <h1 className="animate-fade-up font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight sm:leading-none mb-4 drop-shadow-md">
@@ -209,7 +209,7 @@ export default function HomePage() {
               <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl">{t("destinationsPopulaires")}</h2>
               <p className="text-gray-500 text-sm mt-1">{t("destinationsTexte")}</p>
             </div>
-            <Link href="/recherche" aria-label={t("voirDestinations")} className="relative zone-tactile flex items-center gap-1 text-primary text-sm font-bold hover:underline shrink-0">
+            <Link href="/recherche" aria-label={t("voirDestinations")} className="relative zone-tactile flex items-center gap-1 text-brand text-sm font-bold hover:underline shrink-0">
               {t("voirTout")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -223,7 +223,7 @@ export default function HomePage() {
                 <motion.div key={dest.city} variants={cardVariants}>
                   <Link href={`/recherche?city=${encodeURIComponent(dest.city)}`} className="block relative h-44 md:h-64 rounded-[2rem] overflow-hidden group shadow-xs bg-slate-200">
                     <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url('${dest.image_url}')` }} />
-                    <div className="absolute inset-0 bg-linear-to-t from-dark/80 via-dark/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-night/80 via-night/20 to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
                       <h3 className="text-white font-heading font-bold text-base md:text-lg leading-tight md:leading-7">{dest.city}</h3>
                       <p className="text-white/80 text-xs mt-1 font-medium">
@@ -245,9 +245,9 @@ export default function HomePage() {
             <Link
               key={type}
               href={`/recherche?type=${type}`}
-              className="bg-white px-4 md:px-6 py-3 md:py-4 rounded-full border border-gray-100 shadow-xs flex items-center gap-3 hover:border-primary/40 hover:shadow-sm transition-all"
+              className="bg-surface px-4 md:px-6 py-3 md:py-4 rounded-full border border-gray-100 shadow-xs flex items-center gap-3 hover:border-primary/40 hover:shadow-sm transition-all"
             >
-              <span className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-primary-50 text-primary"><Icon size={22} strokeWidth={1.75} aria-hidden /></span>
+              <span className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-primary-50 text-brand"><Icon size={22} strokeWidth={1.75} aria-hidden /></span>
               <span className="font-bold text-dark text-sm">{TYPE_LABELS[type]}</span>
             </Link>
             );
@@ -258,7 +258,7 @@ export default function HomePage() {
         <section>
           <div className="flex items-end justify-between mb-6 md:mb-8 gap-4">
             <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl">{t("mieuxNotes")}</h2>
-            <Link href="/recherche?sort=note" aria-label={t("voirMieuxNotes")} className="relative zone-tactile flex items-center gap-1 text-primary text-sm font-bold hover:underline shrink-0">
+            <Link href="/recherche?sort=note" aria-label={t("voirMieuxNotes")} className="relative zone-tactile flex items-center gap-1 text-brand text-sm font-bold hover:underline shrink-0">
               {t("voirTout")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -283,7 +283,7 @@ export default function HomePage() {
 
         <AvisVoyageurs hebergements={recommended} />
 
-        <section className="py-12 bg-white rounded-[2rem] md:rounded-[3rem] px-6 md:px-8 text-center">
+        <section className="py-12 bg-background rounded-[2rem] md:rounded-[3rem] px-6 md:px-8 text-center">
           <h2 className="font-heading font-bold text-dark text-2xl md:text-3xl mb-3">{t("pourquoi")}</h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-sm mb-10 md:mb-16">
             {t("pourquoiTexte")}
@@ -291,7 +291,7 @@ export default function HomePage() {
           <motion.div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8" variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}>
             {FEATURES.map((feat) => (
               <motion.div key={feat.title} variants={cardVariants} className="flex flex-col items-center text-center">
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white ring-1 shadow-xs flex items-center justify-center mb-4 md:mb-6 ${feat.color}`}>
+                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-surface ring-1 shadow-xs flex items-center justify-center mb-4 md:mb-6 ${feat.color}`}>
                   <feat.icon className="w-9 h-9 md:w-11 md:h-11" weight="duotone" aria-hidden />
                 </div>
                 <h3 className="font-bold text-dark text-lg mb-2">{t(`atouts.${feat.title}.titre`)}</h3>
@@ -302,7 +302,7 @@ export default function HomePage() {
           <motion.div className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8" variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}>
             {GARANTIES.map((garantie) => (
               <motion.div key={garantie.title} variants={cardVariants} className="flex flex-col items-center text-center">
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white ring-1 shadow-xs flex items-center justify-center mb-4 md:mb-6 ${garantie.color}`}>
+                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-surface ring-1 shadow-xs flex items-center justify-center mb-4 md:mb-6 ${garantie.color}`}>
                   <garantie.icon className="w-9 h-9 md:w-11 md:h-11" weight="duotone" aria-hidden />
                 </div>
                 <h3 className="font-bold text-dark text-lg mb-2">{t(`garanties.${garantie.title}.titre`)}</h3>
@@ -328,7 +328,7 @@ export default function HomePage() {
               ))}
             </ul>
           </div>
-          <Link href="/hote" className="bg-white text-primary hover:bg-gray-50 px-8 py-4 rounded-full font-bold transition-colors shadow-lg shrink-0">
+          <Link href="/hote" className="bg-white text-primary dark:bg-gray-900 dark:text-primary-800 hover:bg-gray-50 dark:hover:bg-gray-800 px-8 py-4 rounded-full font-bold transition-colors shadow-lg shrink-0">
             {t("commencer")}
           </Link>
         </div>

@@ -55,7 +55,7 @@ export default function AlerteDisponibilite({ hebergementId, checkIn, checkOut, 
   if (!ouvert && !connecte) {
     return (
       <button type="button" onClick={() => setOuvert(true)}
-        className="w-full mb-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/5">
+        className="w-full mb-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary text-brand text-sm font-semibold hover:bg-primary/5">
         <BellRing size={16} aria-hidden /> {t("bouton")}
       </button>
     );
@@ -64,7 +64,7 @@ export default function AlerteDisponibilite({ hebergementId, checkIn, checkOut, 
   if (connecte) {
     return (
       <button type="button" onClick={() => creer()} disabled={envoi}
-        className="w-full mb-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary/5 disabled:opacity-50">
+        className="w-full mb-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary text-brand text-sm font-semibold hover:bg-primary/5 disabled:opacity-50">
         <BellRing size={16} aria-hidden /> {envoi ? "..." : t("bouton")}
       </button>
     );

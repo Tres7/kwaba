@@ -5,7 +5,8 @@ import { AttributionControl, Map as CarteGl, NavigationControl, setWorkerUrl, ty
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapPinOff } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { STYLE_CARTE } from "./style";
+import { useTheme } from "next-themes";
+import { BRAND_GREEN, DARK_MAP_STYLE, STYLE_CARTE } from "./style";
 
 // A separate file in MapLibre 6: webpack publishes it with the site, so the CSP only needs 'self'
 setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).href);
@@ -22,6 +23,8 @@ export function useCarte(options: Omit<MapOptions, "container" | "style">) {
   const conteneur = useRef<HTMLDivElement>(null);
   const [carte, setCarte] = useState<CarteGl | null>(null);
   const [panne, setPanne] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const style = resolvedTheme === "dark" ? DARK_MAP_STYLE : resolvedTheme ? STYLE_CARTE : null;
   // Starting view: later changes go through the map itself
   const depart = useRef({
     ...options,
@@ -37,7 +40,7 @@ export function useCarte(options: Omit<MapOptions, "container" | "style">) {
   });
 
   useEffect(() => {
-    if (!conteneur.current) return;
+    if (!conteneur.current || !style) return;
     let instance: CarteGl;
     try {
       instance = new CarteGl({
@@ -60,15 +63,15 @@ export function useCarte(options: Omit<MapOptions, "container" | "style">) {
     instance.addControl(new NavigationControl({ showCompass: false }), "top-right");
     // On the left: required credits, and the Concierge button floats on the right
     instance.addControl(new AttributionControl({ compact: true }), "bottom-left");
-    instance.setStyle(STYLE_CARTE);
+    instance.setStyle(style);
     return () => {
       clearTimeout(delai);
       setCarte(null);
       instance.remove();
     };
-  }, []);
+  }, [style]);
 
-  return { conteneur, carte, panne };
+  return { conteneur, carte, panne, brandColor: resolvedTheme === "dark" ? BRAND_GREEN.dark : BRAND_GREEN.light };
 }
 
 /** Frame of a map: rounded controls, placeholder while it loads, message if it cannot be shown. */

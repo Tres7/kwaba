@@ -128,7 +128,7 @@ function RechercheContent() {
             key={id}
             onClick={() => pushParams({ type: id })}
             aria-pressed={params.type === id}
-            className={cn("flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors", params.type === id ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}
+            className={cn("flex items-center gap-1.5 px-3 py-2 rounded-full text-sm border transition-colors", params.type === id ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200 hover:border-primary/40")}
           >
             {Icone && <Icone size={15} aria-hidden />}
             {id ? TYPE_LABELS[id] : t("types.tous")}
@@ -153,14 +153,14 @@ function RechercheContent() {
               key={id}
               onClick={() => basculerEquipement(id)}
               aria-pressed={equipements.includes(id)}
-              className={cn("px-3 py-1.5 rounded-full text-sm border transition-colors", equipements.includes(id) ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}
+              className={cn("px-3 py-1.5 rounded-full text-sm border transition-colors", equipements.includes(id) ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200 hover:border-primary/40")}
             >
               {label}
             </button>
           ))}
         </div>
         <button type="button" onClick={() => setTousEquipements((v) => !v)} aria-expanded={tousEquipements}
-          className="mt-2 text-sm font-bold text-primary hover:underline">
+          className="mt-2 text-sm font-bold text-brand hover:underline">
           {tousEquipements ? t("moinsEquipements") : t("plusEquipements")}
         </button>
       </div>
@@ -195,7 +195,7 @@ function RechercheContent() {
       {activeCount > 0 && (
         <button
           onClick={() => { setPriceMin(""); setPriceMax(""); pushParams({ type: "", sort: "", price_min: "", price_max: "", petit_dejeuner: "", equipements: "" }); }}
-          className="w-full text-sm font-semibold text-gray-500 hover:text-primary"
+          className="w-full text-sm font-semibold text-gray-500 hover:text-brand"
         >
           {t("effacerFiltres")}
         </button>
@@ -205,9 +205,9 @@ function RechercheContent() {
 
   return (
     <div className="min-h-screen bg-light">
-      <div className="bg-white border-b border-gray-100 shadow-xs px-4 sm:px-6 py-4">
+      <div className="bg-surface border-b border-gray-100 shadow-xs px-4 sm:px-6 py-4">
         <form method="post" onSubmit={submitSearch} className="max-w-7xl mx-auto grid grid-cols-2 lg:flex gap-2 sm:gap-3 items-stretch">
-          <label className="col-span-2 lg:flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-white focus-within:border-primary transition-colors">
+          <label className="col-span-2 lg:flex-1 flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 bg-surface focus-within:border-primary transition-colors">
             <Search size={16} className="text-muted shrink-0" />
             <ChampDestination
               value={city} onChange={setCity}
@@ -237,9 +237,9 @@ function RechercheContent() {
         <div className={cn("flex", carte ? "flex-col lg:flex-row lg:gap-6" : "gap-8")}>
           {!carte && (
             <aside className="w-64 shrink-0 hidden lg:block">
-              <div className="bg-white rounded-2xl shadow-card p-5 sticky top-24">
+              <div className="bg-surface rounded-2xl shadow-card p-5 sticky top-24">
                 <div className="flex items-center gap-2 mb-5">
-                  <SlidersHorizontal size={16} className="text-primary" />
+                  <SlidersHorizontal size={16} className="text-brand" />
                   <h2 className="font-heading font-semibold text-dark">{t("filtres")}</h2>
                 </div>
                 {filtersPanel}
@@ -271,14 +271,14 @@ function RechercheContent() {
                 {avecDates && (
                   <button onClick={() => pushParams({ disponibles: params.disponibles ? "" : "true" })} aria-pressed={Boolean(params.disponibles)}
                     className={cn("flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border",
-                      params.disponibles ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200")}>
+                      params.disponibles ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200")}>
                     {t("disponiblesUniquement")}
                   </button>
                 )}
-                <button onClick={() => setCarte((c) => !c)} aria-pressed={carte} className="flex items-center gap-2 border border-gray-200 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark">
+                <button onClick={() => setCarte((c) => !c)} aria-pressed={carte} className="flex items-center gap-2 border border-gray-200 bg-surface rounded-full px-4 py-2 text-sm font-semibold text-dark">
                   {carte ? <List size={15} /> : <IconeCarte size={15} />} {carte ? t("masquerCarte") : t("afficherCarte")}
                 </button>
-                <button onClick={() => setFiltersOpen(true)} className={cn("flex items-center gap-2 border border-gray-200 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark", !carte && "lg:hidden")}>
+                <button onClick={() => setFiltersOpen(true)} className={cn("flex items-center gap-2 border border-gray-200 bg-surface rounded-full px-4 py-2 text-sm font-semibold text-dark", !carte && "lg:hidden")}>
                   <SlidersHorizontal size={15} /> {t("filtres")}{activeCount > 0 && <span className="bg-primary text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">{activeCount}</span>}
                 </button>
               </div>
@@ -290,9 +290,9 @@ function RechercheContent() {
             {/* On a phone, the map replaces the list */}
             <div className={cn(carte && "hidden lg:block")}>
               {isError ? (
-                <div className="bg-white rounded-2xl shadow-card p-12 text-center">
+                <div className="bg-surface rounded-2xl shadow-card p-12 text-center">
                   <p className="text-dark font-semibold mb-2">{t("erreurChargement")}</p>
-                  <button onClick={() => refetch()} className="text-primary font-bold hover:underline">{t("reessayer")}</button>
+                  <button onClick={() => refetch()} className="text-brand font-bold hover:underline">{t("reessayer")}</button>
                 </div>
               ) : isLoading ? (
                 <div className={grille}>
@@ -301,13 +301,13 @@ function RechercheContent() {
               ) : results.length === 0 && aucunLogement ? (
                 <BandeauBientot />
               ) : results.length === 0 ? (
-                <div className="bg-white rounded-2xl shadow-card p-10 sm:p-16 text-center">
+                <div className="bg-surface rounded-2xl shadow-card p-10 sm:p-16 text-center">
                   <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <Search size={28} className="text-primary" />
+                    <Search size={28} className="text-brand" />
                   </div>
                   <p className="text-dark font-heading font-semibold text-xl mb-2">{t("aucunResultat")}</p>
                   <p className="text-muted">{t("aucunResultatTexte")}</p>
-                  <button onClick={() => router.push(pathname)} className="mt-4 text-primary font-bold hover:underline">{t("voirTous")}</button>
+                  <button onClick={() => router.push(pathname)} className="mt-4 text-brand font-bold hover:underline">{t("voirTous")}</button>
                 </div>
               ) : (
                 <section aria-labelledby="liste-resultats" className={grille}>
@@ -327,10 +327,10 @@ function RechercheContent() {
             <div className="fixed inset-0 z-50 bg-light-muted lg:z-auto lg:sticky lg:top-24 lg:flex-1 lg:h-[calc(100dvh-14rem)] lg:min-h-112 lg:rounded-2xl lg:overflow-hidden lg:shadow-card">
               <CarteResultats logements={results} query={stayQuery} ville={params.city} survol={survol} />
               <div className="lg:hidden absolute top-3 left-3 flex gap-2">
-                <button onClick={() => setCarte(false)} className="flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark shadow-md">
+                <button onClick={() => setCarte(false)} className="flex items-center gap-2 bg-surface rounded-full px-4 py-2 text-sm font-semibold text-dark shadow-md">
                   <List size={15} /> {t("masquerCarte")}
                 </button>
-                <button onClick={() => setFiltersOpen(true)} className="flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-semibold text-dark shadow-md">
+                <button onClick={() => setFiltersOpen(true)} className="flex items-center gap-2 bg-surface rounded-full px-4 py-2 text-sm font-semibold text-dark shadow-md">
                   <SlidersHorizontal size={15} /> {t("filtres")}{activeCount > 0 && <span className="bg-primary text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">{activeCount}</span>}
                 </button>
               </div>
@@ -342,7 +342,7 @@ function RechercheContent() {
       {filtersOpen && (
         <div className={cn("fixed inset-0 z-60", !carte && "lg:hidden")} role="dialog" aria-modal="true" aria-label={t("filtres")}>
           <div className="absolute inset-0 bg-black/40" onClick={() => setFiltersOpen(false)} />
-          <div className="absolute bottom-0 inset-x-0 bg-white rounded-t-3xl p-5 pb-8 max-h-[85vh] overflow-y-auto lg:top-0 lg:right-auto lg:w-96 lg:max-h-none lg:rounded-none lg:rounded-r-3xl">
+          <div className="absolute bottom-0 inset-x-0 bg-surface rounded-t-3xl p-5 pb-8 max-h-[85vh] overflow-y-auto lg:top-0 lg:right-auto lg:w-96 lg:max-h-none lg:rounded-none lg:rounded-r-3xl">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-heading font-bold text-lg text-dark">{t("filtres")}</h2>
               <button onClick={() => setFiltersOpen(false)} className="p-2 -mr-2" aria-label={t("fermer")}><X size={20} /></button>

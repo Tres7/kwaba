@@ -23,7 +23,7 @@ export default function PhoneBooking({ listingId }: { listingId: string }) {
   if (planned) {
     return (
       <div className="mt-4 rounded-2xl bg-primary/10 p-4">
-        <p className="flex items-center gap-2 font-bold text-primary">
+        <p className="flex items-center gap-2 font-bold text-brand">
           <CalendarCheck size={18} aria-hidden /> Visite prévue le {PLANNED.format(new Date(planned.start))} à {hourMinute(planned.start)}
         </p>
         <p className="text-sm text-dark mt-1">
@@ -31,7 +31,7 @@ export default function PhoneBooking({ listingId }: { listingId: string }) {
           {planned.mine ? ", dans votre agenda." : planned.agent ? ` avec ${planned.agent.name}.` : "."}
         </p>
         {planned.mine && (
-          <Link href={`/agent/agenda/${planned.id}`} className="inline-block mt-2 text-sm font-semibold text-primary underline">
+          <Link href={`/agent/agenda/${planned.id}`} className="inline-block mt-2 text-sm font-semibold text-brand underline">
             Voir le rendez-vous
           </Link>
         )}
@@ -41,14 +41,14 @@ export default function PhoneBooking({ listingId }: { listingId: string }) {
 
   if (booked) {
     return (
-      <p className="mt-4 rounded-2xl bg-primary/10 text-primary text-sm font-semibold p-4">
+      <p className="mt-4 rounded-2xl bg-primary/10 text-brand text-sm font-semibold p-4">
         Visite enregistrée et confirmée à l&apos;hôte. <Link href="/agent/agenda" className="underline">Voir mon agenda</Link>
       </p>
     );
   }
 
   return (
-    <form className="mt-4 rounded-2xl bg-white border border-gray-100 shadow-xs p-4" onSubmit={(e) => {
+    <form className="mt-4 rounded-2xl bg-surface border border-gray-100 shadow-xs p-4" onSubmit={(e) => {
       e.preventDefault();
       book.mutate(undefined, {
         onSuccess: () => { setBooked(true); toast.success("Visite confirmée par téléphone."); },

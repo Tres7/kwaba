@@ -28,7 +28,7 @@ function Montant({ m }: { m: MouvementFinance }) {
 
 function Chiffre({ libelle, montant, aide, accent }: { libelle: string; montant: number; aide: string; accent?: boolean }) {
   return (
-    <div className={`rounded-2xl p-4 ${accent ? "bg-primary text-white" : "bg-white border border-gray-100"}`}>
+    <div className={`rounded-2xl p-4 ${accent ? "bg-primary text-white" : "bg-surface border border-gray-100"}`}>
       <p className={`text-xs font-semibold ${accent ? "text-white/80" : "text-muted"}`}>{libelle}</p>
       <p className="font-heading font-bold text-xl mt-1 tabular-nums">{formatPrice(montant)}</p>
       <p className={`text-xs mt-0.5 ${accent ? "text-white/80" : "text-muted"}`}>{aide}</p>
@@ -55,7 +55,7 @@ export default function GrandLivre() {
             Lu le {formatDate(new Date(dataUpdatedAt).toISOString())} à {new Date(dataUpdatedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
           </p>
         )}
-        <button onClick={() => refetch()} disabled={isFetching} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold disabled:opacity-50 sm:ml-auto">
+        <button onClick={() => refetch()} disabled={isFetching} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-surface text-sm font-semibold disabled:opacity-50 sm:ml-auto">
           <RefreshCw size={16} aria-hidden className={isFetching ? "animate-spin" : ""} /> Actualiser
         </button>
       </div>
@@ -75,7 +75,7 @@ export default function GrandLivre() {
             </div>
             <ul className="grid sm:grid-cols-2 gap-2 text-sm">
               {d.invariants.map((i) => (
-                <li key={i.invariant} className={`flex items-start justify-between gap-3 rounded-xl px-3 py-2 ${i.anomalies ? "bg-white text-red-800 font-semibold" : "bg-white/70 text-dark"}`}>
+                <li key={i.invariant} className={`flex items-start justify-between gap-3 rounded-xl px-3 py-2 ${i.anomalies ? "bg-surface text-red-800 font-semibold" : "bg-surface/70 text-dark"}`}>
                   <span><span className="text-muted font-normal">{i.invariant}</span> · {i.libelle}</span>
                   <span className="tabular-nums whitespace-nowrap">{i.anomalies ? `${i.anomalies} anomalie${i.anomalies > 1 ? "s" : ""}` : "OK"}</span>
                 </li>
@@ -95,7 +95,7 @@ export default function GrandLivre() {
             </p>
           )}
 
-          <section className="bg-white rounded-2xl border border-gray-100 p-5">
+          <section className="bg-background rounded-2xl border border-gray-100 p-5">
             <h2 className="font-heading font-bold text-dark mb-3">Sommes dues, par partenaire</h2>
             {d.du_aux_partenaires.length === 0 ? <p className="text-sm text-muted">Kwa-Ba ne doit rien à personne.</p> : (
               <ul className="divide-y divide-gray-50 text-sm">
@@ -112,7 +112,7 @@ export default function GrandLivre() {
             )}
           </section>
 
-          <section className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+          <section className="bg-background rounded-2xl border border-gray-100 overflow-x-auto">
             <h2 className="font-heading font-bold text-dark px-5 pt-5">Dernières lignes du grand livre</h2>
             <p className="text-xs text-muted px-5 mb-3">Une ligne écrite ne se modifie jamais : une erreur se corrige par une ligne inverse.</p>
             {/* Phone: one card per line, the amount always in view */}

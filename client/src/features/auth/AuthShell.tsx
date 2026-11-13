@@ -12,10 +12,10 @@ interface AuthShellProps {
 /** Shared layout of sign-in / sign-up / verification: form + visual panel (desktop). */
 export default function AuthShell({ image, title, subtitle, reverse = false, children }: AuthShellProps) {
   return (
-    <div className={cn("min-h-screen flex bg-white", reverse && "flex-row-reverse")}>
+    <div className={cn("min-h-screen flex bg-surface", reverse && "flex-row-reverse")}>
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
-        <div className="absolute inset-0 bg-linear-to-br from-primary/80 via-primary/60 to-orange-900/70" />
+        <div className="absolute inset-0 bg-linear-to-br from-primary/80 via-primary/60 to-orange-900/70 dark:to-orange-950/70" />
         <div className="relative z-10 flex flex-col justify-between p-12 h-full w-full">
           <Logo inverted />
           <div className="text-white max-w-md">

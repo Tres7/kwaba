@@ -142,7 +142,7 @@ export default function Visionneuse({ photos, depart, nom, legende, action, onCl
     setChargees((c) => photosAcharger(c, i, total));
   };
 
-  const fleche = "absolute top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/50 sm:bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-opacity focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white aria-disabled:opacity-30 aria-disabled:cursor-default";
+  const fleche = "absolute top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/50 sm:bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-opacity focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-surface aria-disabled:opacity-30 aria-disabled:cursor-default";
   const legendeCourante = legende?.(photos[index]);
 
   return createPortal(
@@ -156,7 +156,7 @@ export default function Visionneuse({ photos, depart, nom, legende, action, onCl
           <span className="sr-only">{t("position", { numero: index + 1, total })}</span>
         </p>
         <button ref={boutonFermer} type="button" onClick={quitter} aria-label={t("fermer")}
-          className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-white/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white">
+          className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-white/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-surface">
           <X size={24} aria-hidden />
         </button>
       </div>

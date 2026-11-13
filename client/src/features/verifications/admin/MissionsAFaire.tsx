@@ -54,7 +54,7 @@ function AFaire() {
           <button key={t.code} type="button" onClick={() => setType(t.code)} aria-pressed={type === t.code}
             className={type === t.code
               ? "shrink-0 px-4 py-2 rounded-full bg-primary text-white text-sm font-bold"
-              : "shrink-0 px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-semibold text-dark"}>
+              : "shrink-0 px-4 py-2 rounded-full bg-surface border border-gray-200 text-sm font-semibold text-dark"}>
             {t.court}
           </button>
         ))}
@@ -64,7 +64,7 @@ function AFaire() {
         <span className="sr-only">Rechercher par nom, ville ou adresse</span>
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nom, ville ou quartier"
-          className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          className="w-full pl-11 pr-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
       </label>
 
       <ListeMissions chargement={isLoading} erreur={isError} vide="Rien à faire pour le moment : toutes les missions sont prises ou terminées.">

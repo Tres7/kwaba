@@ -57,7 +57,7 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
   return (
     <div className="space-y-5">
       <header>
-        <p className="text-xs font-bold uppercase tracking-wide text-primary">{t("surtitre")}</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-brand">{t("surtitre")}</p>
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark mt-1">{contrat.titre}</h1>
         <p className="text-sm text-gray-600 mt-1">
           {contrat.reference ? `${t("reference")} ${contrat.reference} · ` : ""}{t("pour", { nom: contrat.partie_nom })}
@@ -82,16 +82,16 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
       {langue() === "en" && <p className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-3">{t("enFrancais")}</p>}
 
       <article aria-label={contrat.titre} tabIndex={0}
-        className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 max-h-[65vh] overflow-y-auto focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary" lang="fr">
+        className="bg-surface rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 max-h-[65vh] overflow-y-auto focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary" lang="fr">
         {contrat.blocs.map((b, i) => b.type === "titre"
-          ? <h2 key={i} className="font-heading font-bold text-primary text-base mt-5 first:mt-0 mb-1.5">{b.texte}</h2>
+          ? <h2 key={i} className="font-heading font-bold text-brand text-base mt-5 first:mt-0 mb-1.5">{b.texte}</h2>
           : <p key={i} className="text-sm text-dark leading-relaxed mb-3 whitespace-pre-line text-justify">{b.texte}</p>)}
       </article>
 
       {/* Host agreement not issued yet (it is at signature): no PDF yet */}
       {contrat.reference && (
         <button type="button" onClick={telecharger} disabled={telechargement}
-          className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full border border-gray-200 bg-white text-sm font-semibold text-dark hover:border-primary hover:text-primary disabled:opacity-60">
+          className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full border border-gray-200 bg-surface text-sm font-semibold text-dark hover:border-primary hover:text-brand disabled:opacity-60">
           {telechargement ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <FileDown size={16} aria-hidden />}
           {signe ? t("telechargerSigne") : t("telechargerProjet")}
         </button>
@@ -99,12 +99,12 @@ export default function LectureSignature({ contrat, onSigner, onTelecharger }: {
 
       {!signe && !contrat.expire && contrat.statut === "a_signer" && (
         <form method="post" onSubmit={(e) => { e.preventDefault(); if (!envoi) signer(); }}
-          className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 space-y-5">
-          <h2 className="font-heading font-bold text-lg text-dark flex items-center gap-2"><PenLine size={20} className="text-primary" aria-hidden /> {t("signerTitre")}</h2>
+          className="bg-surface rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 space-y-5">
+          <h2 className="font-heading font-bold text-lg text-dark flex items-center gap-2"><PenLine size={20} className="text-brand" aria-hidden /> {t("signerTitre")}</h2>
           <label className="block">
             <span className="block text-sm font-semibold text-dark mb-1.5">{t("nomComplet")}</span>
             <input value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="name" placeholder={contrat.partie_nom}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              className="w-full px-4 py-3 bg-surface border border-gray-200 rounded-xl text-base text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
           </label>
           <div>
             <span className="block text-sm font-semibold text-dark mb-1.5" id="libelle-signature">{t("votreSignature")}</span>

@@ -1,3 +1,12 @@
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c1311" },
+  ],
+};
+
 /**
  * The <html> and <body> tags are rendered by app/[locale]/layout.tsx (site, FR or EN)
  * and by app/backoffice/layout.tsx: this way a language change rebuilds the whole page.

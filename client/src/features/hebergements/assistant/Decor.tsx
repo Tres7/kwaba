@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 
 /** Colour of each phase: the same on the welcome screen and on every screen of the phase. */
 const TEINTES = {
-  0: "bg-primary text-light",
-  1: "bg-primary text-light",
-  2: "bg-accent text-dark",
+  0: "bg-primary text-white",
+  1: "bg-primary text-white",
+  2: "bg-accent text-night",
   3: "bg-primary-800 text-accent",
 } as const;
 
@@ -38,7 +38,7 @@ export function Motif() {
   const id = `motif-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const masque = "radial-gradient(circle, transparent 15%, #000 75%)";
   return (
-    <svg aria-hidden className="absolute inset-0 h-full w-full text-primary/9" style={{ maskImage: masque, WebkitMaskImage: masque }}>
+    <svg aria-hidden className="absolute inset-0 h-full w-full text-brand/9" style={{ maskImage: masque, WebkitMaskImage: masque }}>
       <defs>
         <pattern id={id} width="44" height="44" patternUnits="userSpaceOnUse">
           <path d="M22 6 38 22 22 38 6 22Z" fill="none" stroke="currentColor" strokeWidth="1.5" />

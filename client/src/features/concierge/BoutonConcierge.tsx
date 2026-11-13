@@ -24,13 +24,13 @@ export default function BoutonConcierge() {
         href="/concierge"
         aria-label={`Concierge ${t("ia")}`}
         className={cn(
-          "fixed z-40 right-4 sm:right-6 flex items-center gap-2.5 rounded-full bg-white border border-gray-200 p-1.5 sm:pr-5 shadow-card-hover hover:border-primary/40 hover:-translate-y-0.5 transition-all",
+          "fixed z-40 right-4 sm:right-6 flex items-center gap-2.5 rounded-full bg-surface border border-gray-200 p-1.5 sm:pr-5 shadow-card-hover hover:border-primary/40 hover:-translate-y-0.5 transition-all",
           barreReservation ? "bottom-24 lg:bottom-6" : "bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-6",
         )}
       >
         <span className="relative shrink-0">
           <IconeKwaba taille={44} className="rounded-full" />
-          <span aria-hidden className="sm:hidden absolute -top-1 -right-1 rounded-full bg-accent text-dark text-[10px] font-bold leading-none px-1.5 py-1 ring-2 ring-white">
+          <span aria-hidden className="sm:hidden absolute -top-1 -right-1 rounded-full bg-accent text-night text-[10px] font-bold leading-none px-1.5 py-1 ring-2 ring-surface">
             {t("ia")}
           </span>
         </span>

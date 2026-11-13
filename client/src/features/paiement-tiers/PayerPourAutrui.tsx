@@ -55,15 +55,15 @@ export default function PayerPourAutrui({ cle, charger, demarrer }: {
   return (
     <div className="bg-light min-h-[70vh]">
       <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-        <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8" aria-live="polite">
+        <div className="bg-surface rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8" aria-live="polite">
           {isError ? (
             <div className="text-center py-4">
               <p className="font-heading font-bold text-xl text-dark">{t("introuvable")}</p>
               <p className="text-sm text-gray-600 mt-2">{apiErrorMessage(error, t("introuvableTexte"))}</p>
-              <Link href="/" className="inline-block mt-6 text-primary font-bold hover:underline">{t("accueil")}</Link>
+              <Link href="/" className="inline-block mt-6 text-brand font-bold hover:underline">{t("accueil")}</Link>
             </div>
           ) : !apercu ? (
-            <div className="flex justify-center py-10"><Loader2 size={32} className="animate-spin text-primary" /></div>
+            <div className="flex justify-center py-10"><Loader2 size={32} className="animate-spin text-brand" /></div>
           ) : (
             <>
               <div className="text-center">
@@ -100,7 +100,7 @@ export default function PayerPourAutrui({ cle, charger, demarrer }: {
                         <button
                           key={id} type="button" aria-pressed={moyenChoisi === id} onClick={() => setMoyen(id)}
                           className={cn("flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-xs font-bold transition-colors",
-                            moyenChoisi === id ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-dark hover:border-primary/40")}
+                            moyenChoisi === id ? "border-primary bg-primary/5 text-brand" : "border-gray-200 text-dark hover:border-primary/40")}
                         >
                           <Icon size={20} /> {tRes(`moyens.${label}`)}
                         </button>
@@ -123,9 +123,9 @@ export default function PayerPourAutrui({ cle, charger, demarrer }: {
               )}
 
               <ul className="mt-6 space-y-2 text-xs text-gray-600">
-                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary shrink-0 mt-0.5" />{t("garantieRemboursement")}</li>
-                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary shrink-0 mt-0.5" />{t("garantieRecu")}</li>
-                <li className="flex gap-2"><ShieldCheck size={14} className="text-primary shrink-0 mt-0.5" />{t("garantieConfidentialite", { voyageur: apercu.voyageur })}</li>
+                <li className="flex gap-2"><ShieldCheck size={14} className="text-brand shrink-0 mt-0.5" />{t("garantieRemboursement")}</li>
+                <li className="flex gap-2"><ShieldCheck size={14} className="text-brand shrink-0 mt-0.5" />{t("garantieRecu")}</li>
+                <li className="flex gap-2"><ShieldCheck size={14} className="text-brand shrink-0 mt-0.5" />{t("garantieConfidentialite", { voyageur: apercu.voyageur })}</li>
               </ul>
             </>
           )}

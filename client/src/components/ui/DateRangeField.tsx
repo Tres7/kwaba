@@ -44,7 +44,7 @@ export default function DateRangeField({ checkIn, checkOut, onChange, variant = 
     >
       <span className="block text-[11px] font-bold text-dark uppercase tracking-wide">{titre}</span>
       <span className="flex items-center gap-2 mt-1">
-        <Calendar size={16} className="text-primary shrink-0 hidden sm:block" />
+        <Calendar size={16} className="text-brand shrink-0 hidden sm:block" />
         <span className={cn("text-base md:text-sm font-medium truncate", valeur ? "text-dark" : "text-gray-400")}>{libelle(valeur)}</span>
       </span>
     </button>
@@ -52,7 +52,7 @@ export default function DateRangeField({ checkIn, checkOut, onChange, variant = 
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      <div className={cn("flex divide-x divide-gray-100", variant === "field" && "border border-gray-200 rounded-xl bg-white overflow-hidden", open && variant === "field" && "border-primary ring-2 ring-primary/20")}>
+      <div className={cn("flex divide-x divide-gray-100", variant === "field" && "border border-gray-200 rounded-xl bg-surface overflow-hidden", open && variant === "field" && "border-primary ring-2 ring-primary/20")}>
         {moitie(t("arrivee"), checkIn)}
         {moitie(t("depart"), checkOut)}
       </div>

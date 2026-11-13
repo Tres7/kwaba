@@ -10,7 +10,7 @@ import ThemeProvider from "@/providers/ThemeProvider";
 import SplashScreen from "@/components/layout/SplashScreen";
 import SynchroLangue from "@/components/layout/SynchroLangue";
 import { DeviseProvider } from "@/components/layout/Devise";
-import { Toaster } from "sonner";
+import ThemedToaster from "@/components/layout/ThemedToaster";
 import { headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -80,18 +80,12 @@ export default async function Document({ locale, children }: { locale: Langue; c
             <Providers>
               <ConsentProvider>
               {/* Skip link: first element reached with the keyboard */}
-              <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-200 focus:px-4 focus:py-3 focus:rounded-xl focus:bg-dark focus:text-white focus:font-bold">
+              <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-200 focus:px-4 focus:py-3 focus:rounded-xl focus:bg-dark focus:text-inverse focus:font-bold">
                 {t("allerAuContenu")}
               </a>
               <SplashScreen />
               <DeviseProvider>{children}</DeviseProvider>
-              <Toaster
-                position="top-center"
-                richColors
-                toastOptions={{
-                  style: { fontFamily: "var(--font-inter)" },
-                }}
-              />
+              <ThemedToaster />
               </ConsentProvider>
             </Providers>
           </AuthProvider>

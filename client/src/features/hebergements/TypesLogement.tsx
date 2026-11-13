@@ -76,11 +76,11 @@ export default function TypesLogementPage() {
           {types.map((u) => edition === u.id ? (
             <FormulaireType key={u.id} hebergementId={id} type={u} onFin={() => { setEdition(null); rafraichir(); }} onAnnuler={() => setEdition(null)} />
           ) : (
-            <article key={u.id} className={cn("bg-white rounded-3xl shadow-card p-5", u.actif === false && "opacity-60")}>
+            <article key={u.id} className={cn("bg-surface rounded-3xl shadow-card p-5", u.actif === false && "opacity-60")}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="font-heading font-bold text-dark flex items-center gap-2">
-                    <BedDouble size={16} className="text-primary shrink-0" /> <span className="truncate">{u.nom}</span>
+                    <BedDouble size={16} className="text-brand shrink-0" /> <span className="truncate">{u.nom}</span>
                     {u.actif === false && <span className="text-[11px] font-semibold bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">{t("inactif")}</span>}
                   </h2>
                   <p className="text-sm text-gray-600 mt-1 flex flex-wrap gap-x-3 gap-y-1">
@@ -105,7 +105,7 @@ export default function TypesLogementPage() {
             <FormulaireType hebergementId={id} onFin={() => { setEdition(null); rafraichir(); }} onAnnuler={() => setEdition(null)} />
           ) : (
             <button onClick={() => setEdition("nouveau")}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-3xl border-2 border-dashed border-gray-200 text-primary font-semibold hover:border-primary/50">
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-3xl border-2 border-dashed border-gray-200 text-brand font-semibold hover:border-primary/50">
               <Plus size={18} /> {t("ajouter")}
             </button>
           )}
@@ -143,7 +143,7 @@ function FormulaireType({ hebergementId, type, onFin, onAnnuler }: {
 
   const champ = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm outline-hidden focus:border-primary";
   return (
-    <form onSubmit={enregistrer} className="bg-white rounded-3xl shadow-card p-5 space-y-4">
+    <form onSubmit={enregistrer} className="bg-surface rounded-3xl shadow-card p-5 space-y-4">
       <h2 className="font-heading font-bold text-dark">{type ? t("modifierTitre") : t("ajouter")}</h2>
       <label className="block">
         <span className="text-sm font-medium text-dark">{t("nom")}</span>

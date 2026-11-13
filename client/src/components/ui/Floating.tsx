@@ -62,7 +62,7 @@ const Floating = forwardRef<HTMLDivElement, FloatingProps>(function Floating(
         ref={ref} role="dialog" aria-label={label}
         style={enFeuille ? undefined : { top: pos.top, left: pos.left, width: pos.w }}
         className={cn(
-          "fixed z-90 bg-white shadow-card-hover border border-gray-100",
+          "fixed z-90 bg-surface shadow-card-hover border border-gray-100",
           enFeuille ? "inset-x-0 bottom-0 max-h-[85vh] overflow-auto rounded-t-3xl p-5" : "rounded-2xl max-h-[calc(100vh-6rem)] overflow-auto",
           className,
         )}

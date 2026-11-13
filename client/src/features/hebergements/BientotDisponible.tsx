@@ -79,7 +79,7 @@ export function PrevenezMoi({ compact }: { compact?: boolean }) {
       <div className="flex flex-col sm:flex-row gap-2">
         <input id={compact ? "bientot-email-bandeau" : "bientot-email"} type="email" required autoComplete="email" value={email}
           onChange={(e) => setEmail(e.target.value)} placeholder={t("email")}
-          className="flex-1 min-w-0 px-4 py-3 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          className="flex-1 min-w-0 px-4 py-3 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary" />
         <button type="submit" disabled={etat === "envoi"}
           className="inline-flex items-center justify-center gap-2 min-h-[48px] px-5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-600 disabled:opacity-60 whitespace-nowrap">
           {etat === "envoi" && <Loader2 size={16} className="animate-spin" aria-hidden />} {t("prevenir")}
@@ -167,7 +167,7 @@ export default function BientotDisponible() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div ref={panneau} role="dialog" aria-modal="true" aria-labelledby="bientot-titre" aria-describedby="bientot-texte"
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }} transition={{ duration: 0.25, ease: "easeOut" }}
-            className="relative w-full sm:max-w-md max-h-[92dvh] overflow-y-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-card-hover">
+            className="relative w-full sm:max-w-md max-h-[92dvh] overflow-y-auto bg-surface rounded-t-3xl sm:rounded-3xl shadow-card-hover">
             <div className="relative bg-linear-to-br from-primary to-primary-600 text-white px-6 pt-8 pb-7 text-center">
               <button type="button" onClick={fermer} aria-label={t("fermer")}
                 className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:bg-white/15">
@@ -186,8 +186,8 @@ export default function BientotDisponible() {
                   {services.map(({ href, icone: Icone, libelle }) => (
                     <li key={href}>
                       <Link href={href} onClick={fermer}
-                        className="flex flex-col items-center gap-1.5 min-h-[76px] justify-center rounded-2xl border border-gray-100 bg-light px-2 py-3 text-center text-xs font-semibold text-dark hover:border-primary hover:text-primary transition-colors">
-                        <Icone size={20} className="text-primary" aria-hidden /> {libelle}
+                        className="flex flex-col items-center gap-1.5 min-h-[76px] justify-center rounded-2xl border border-gray-100 bg-light px-2 py-3 text-center text-xs font-semibold text-dark hover:border-primary hover:text-brand transition-colors">
+                        <Icone size={20} className="text-brand" aria-hidden /> {libelle}
                       </Link>
                     </li>
                   ))}
@@ -195,7 +195,7 @@ export default function BientotDisponible() {
               </div>
               <p className="text-sm text-center text-gray-600">
                 {t("proprietaire")}{" "}
-                <Link href="/hote" onClick={fermer} className="font-bold text-primary underline">{t("devenirHote")}</Link>
+                <Link href="/hote" onClick={fermer} className="font-bold text-brand underline">{t("devenirHote")}</Link>
               </p>
             </div>
           </motion.div>
@@ -212,9 +212,9 @@ export function BandeauBientot() {
   const aucunLogement = useAucunLogement();
   if (!aucunLogement) return null;
   return (
-    <section aria-labelledby="bandeau-bientot" className="bg-white border border-primary/15 rounded-3xl p-5 sm:p-6 shadow-xs">
+    <section aria-labelledby="bandeau-bientot" className="bg-background border border-primary/15 rounded-3xl p-5 sm:p-6 shadow-xs">
       <div className="flex items-start gap-4">
-        <span className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><Home size={22} aria-hidden /></span>
+        <span className="w-11 h-11 rounded-2xl bg-primary/10 text-brand flex items-center justify-center shrink-0"><Home size={22} aria-hidden /></span>
         <div className="flex-1 min-w-0 space-y-3">
           <div>
             <h2 id="bandeau-bientot" className="font-heading font-bold text-dark text-lg">{t("titre")}</h2>

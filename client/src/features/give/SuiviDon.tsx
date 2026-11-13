@@ -33,7 +33,7 @@ function RetourDon() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-center px-6">
         <p className="font-heading font-bold text-xl text-dark">{t("introuvable")}</p>
-        <Link href="/profil/dons" className="text-primary font-bold hover:underline">{t("mesDons")}</Link>
+        <Link href="/profil/dons" className="text-brand font-bold hover:underline">{t("mesDons")}</Link>
       </div>
     );
   }
@@ -44,7 +44,7 @@ function RetourDon() {
 
   return (
     <div className="bg-light min-h-[70vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-xl bg-white rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8" aria-live="polite">
+      <div className="w-full max-w-xl bg-surface rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8" aria-live="polite">
         {don.statut === "paye" ? (
           <div className="text-center">
             <div className="w-16 h-16 mx-auto rounded-full bg-secondary/10 text-secondary flex items-center justify-center"><HandHeart size={30} /></div>
@@ -55,7 +55,7 @@ function RetourDon() {
           </div>
         ) : enAttente ? (
           <div className="text-center">
-            <Loader2 size={36} className="mx-auto animate-spin text-primary" />
+            <Loader2 size={36} className="mx-auto animate-spin text-brand" />
             <h1 className="font-heading font-bold text-dark text-xl mt-4">{t("confirmation")}</h1>
             <p className="text-sm text-gray-600 mt-2">{t("mobileMoney")}</p>
           </div>
@@ -76,12 +76,12 @@ function RetourDon() {
             <dd className="text-dark">{formatPrice(don.frais)} ({don.couvre_frais ? t("ajoutes") : t("deduits")})</dd>
           </div>
           <div className="flex justify-between gap-3"><dt className="text-gray-600">{t("debite")}</dt><dd className="font-bold text-dark">{formatPrice(don.total)}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-gray-600">{t("reverse")}</dt><dd className="font-bold text-primary">{formatPrice(don.montant_ong)}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-gray-600">{t("reverse")}</dt><dd className="font-bold text-brand">{formatPrice(don.montant_ong)}</dd></div>
         </dl>
 
         {don.statut === "paye" && don.date_reversement && (
           <p className="flex gap-2 mt-4 text-sm text-gray-600">
-            <CalendarClock size={16} className="text-primary shrink-0 mt-0.5" />
+            <CalendarClock size={16} className="text-brand shrink-0 mt-0.5" />
             {t("calendrier", { date: formatDate(don.date_reversement, { day: "numeric", month: "long", year: "numeric" }) })}
           </p>
         )}
@@ -89,8 +89,8 @@ function RetourDon() {
         {don.statut === "paye" && <Documents objet="don" id={don.id} className="justify-center mt-4" />}
 
         <div className="flex flex-wrap justify-center gap-4 mt-6 text-sm font-bold">
-          <Link href="/profil/dons" className="flex items-center gap-1.5 text-primary hover:underline"><CheckCircle size={15} /> {t("mesDons")}</Link>
-          <Link href="/give" className="text-primary hover:underline">{t("autres")}</Link>
+          <Link href="/profil/dons" className="flex items-center gap-1.5 text-brand hover:underline"><CheckCircle size={15} /> {t("mesDons")}</Link>
+          <Link href="/give" className="text-brand hover:underline">{t("autres")}</Link>
         </div>
       </div>
     </div>

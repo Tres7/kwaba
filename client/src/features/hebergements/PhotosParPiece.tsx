@@ -17,7 +17,7 @@ export default function PhotosParPiece({ photos, legendes, nom, onAgrandir }: {
   const tVisionneuse = useTranslations("visionneuse");
   if (!legendes || !Object.keys(legendes).length) return null;
   return (
-    <section className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+    <section className="bg-background rounded-2xl shadow-card p-5 sm:p-6">
       <h2 className="font-heading font-bold text-dark text-xl mb-4">{t("titre")}</h2>
       <div className="space-y-5">
         {photosParPiece(photos, legendes).map(([piece, urls]) => {

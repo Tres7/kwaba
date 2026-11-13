@@ -74,7 +74,7 @@ export default function AgentAgenda() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden lg:inline-flex bg-white rounded-xl p-1 shadow-xs" role="tablist" aria-label="Affichage">
+          <div className="hidden lg:inline-flex bg-surface rounded-xl p-1 shadow-xs" role="tablist" aria-label="Affichage">
             {([["week", "Semaine"], ["month", "Mois"]] as const).map(([code, label]) => (
               <button key={code} type="button" role="tab" aria-selected={view === code} onClick={() => setView(code)}
                 className={cn("px-4 py-2 rounded-lg text-sm font-bold", view === code ? "bg-primary text-white" : "text-dark")}>
@@ -83,26 +83,26 @@ export default function AgentAgenda() {
             ))}
           </div>
           <button type="button" onClick={() => setSelected(today)}
-            className="hidden lg:block px-4 py-2.5 rounded-xl bg-white shadow-xs text-sm font-bold text-dark">Aujourd&apos;hui</button>
+            className="hidden lg:block px-4 py-2.5 rounded-xl bg-surface shadow-xs text-sm font-bold text-dark">Aujourd&apos;hui</button>
           <button type="button" onClick={() => move(-1)} aria-label="Période précédente"
-            className="w-11 h-11 rounded-xl bg-white shadow-xs flex items-center justify-center text-dark"><ChevronLeft size={20} /></button>
+            className="w-11 h-11 rounded-xl bg-surface shadow-xs flex items-center justify-center text-dark"><ChevronLeft size={20} /></button>
           <button type="button" onClick={() => move(1)} aria-label="Période suivante"
-            className="w-11 h-11 rounded-xl bg-white shadow-xs flex items-center justify-center text-dark"><ChevronRight size={20} /></button>
+            className="w-11 h-11 rounded-xl bg-surface shadow-xs flex items-center justify-center text-dark"><ChevronRight size={20} /></button>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <Link href="/agent/agenda/disponibilites"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-xs text-sm font-semibold text-dark">
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface shadow-xs text-sm font-semibold text-dark">
           <CalendarCog size={16} aria-hidden /> Mes disponibilités
         </Link>
         {isAdmin && (
           <>
             <Link href="/agent/agenda/couverture"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-xs text-sm font-semibold text-dark">
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface shadow-xs text-sm font-semibold text-dark">
               <MapPin size={16} aria-hidden /> Couverture par ville
             </Link>
-            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white shadow-xs text-sm">
+            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface shadow-xs text-sm">
               <Users size={16} aria-hidden className="text-gray-500" />
               <span className="sr-only">Agenda affiché</span>
               <select value={agent} onChange={(e) => setAgent(e.target.value)} className="bg-transparent font-semibold text-dark py-0.5">
@@ -144,7 +144,7 @@ function NextVisitBanner({ appointment, now, showAgent }: { appointment: Appoint
   return (
     <section className="hidden lg:flex mt-6 items-center justify-between gap-6 rounded-3xl bg-primary text-white px-8 py-6">
       <div className="min-w-0">
-        <span className="inline-block rounded-full bg-accent text-dark text-sm font-bold px-3 py-1">
+        <span className="inline-block rounded-full bg-accent text-night text-sm font-bold px-3 py-1">
           Prochaine visite · {inTime(minutes)}
         </span>
         <Link href={`/agent/agenda/${appointment.id}`} className="block font-heading font-bold text-2xl mt-3 truncate hover:underline">
@@ -158,7 +158,7 @@ function NextVisitBanner({ appointment, now, showAgent }: { appointment: Appoint
       </div>
       {detail && (
         <a href={itineraryUrl(detail.position, detail.address, detail.city)} target="_blank" rel="noopener noreferrer"
-          className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white text-primary font-bold px-6 py-4">
+          className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white text-primary dark:bg-gray-900 dark:text-primary-800 font-bold px-6 py-4">
           <Navigation size={20} aria-hidden /> Lancer l&apos;itinéraire
         </a>
       )}
@@ -178,12 +178,12 @@ function DayStrip({ week, selected, today, days, onSelect }: {
           <button key={key} type="button" role="tab" aria-selected={isSelected} onClick={() => onSelect(key)}
             aria-label={`${capitalize(LONG_DAY.format(asDate(key)))}, ${count} visite${count > 1 ? "s" : ""}`}
             className={cn("rounded-2xl py-3 flex flex-col items-center gap-1.5 shadow-xs",
-              isSelected ? "bg-primary text-white" : "bg-white text-dark", key === today && !isSelected && "ring-2 ring-primary/30")}>
+              isSelected ? "bg-primary text-white" : "bg-surface text-dark", key === today && !isSelected && "ring-2 ring-primary/30")}>
             <span className={cn("text-xs font-semibold", isSelected ? "text-white/80" : "text-gray-500")}>{DAY_LETTERS[i]}</span>
             <span className="font-heading font-bold text-xl">{asDate(key).getUTCDate()}</span>
             <span className="flex gap-0.5 h-1.5" aria-hidden>
               {Array.from({ length: Math.min(count, 4) }, (_, n) => (
-                <span key={n} className={cn("w-1.5 h-1.5 rounded-full", isSelected ? "bg-white" : "bg-primary")} />
+                <span key={n} className={cn("w-1.5 h-1.5 rounded-full", isSelected ? "bg-surface" : "bg-primary")} />
               ))}
             </span>
           </button>
@@ -224,10 +224,10 @@ function DayList({ day, today, appointments, states, now, loading, showAgent }: 
 
 function StateBadge({ state, appointment, now }: { state: VisitState; appointment: Appointment; now: Date }) {
   if (state === "done") {
-    return <span className="inline-flex items-center gap-1 text-sm font-bold text-primary"><CheckCircle2 size={16} aria-hidden /> Terminée</span>;
+    return <span className="inline-flex items-center gap-1 text-sm font-bold text-brand"><CheckCircle2 size={16} aria-hidden /> Terminée</span>;
   }
   if (state === "next") {
-    return <span className="inline-block rounded-full bg-accent text-dark text-sm font-bold px-3 py-0.5">Prochaine · {inTime(minutesUntil(appointment.start, now))}</span>;
+    return <span className="inline-block rounded-full bg-accent text-night text-sm font-bold px-3 py-0.5">Prochaine · {inTime(minutesUntil(appointment.start, now))}</span>;
   }
   if (state === "cancelled") return <span className="text-sm font-bold text-red-700">Annulée</span>;
   if (state === "past") return <span className="text-sm font-bold text-amber-800">Décision à rendre</span>;
@@ -241,7 +241,7 @@ function VisitCard({ appointment, state, now, showAgent }: {
   const { data: detail } = useAppointment(isNext ? appointment.id : "");
   return (
     <div className={cn("flex-1 min-w-0 rounded-3xl p-5 shadow-xs",
-      isNext ? "bg-primary text-white" : "bg-white text-dark", state === "cancelled" && "opacity-60")}>
+      isNext ? "bg-primary text-white" : "bg-surface text-dark", state === "cancelled" && "opacity-60")}>
       <Link href={`/agent/agenda/${appointment.id}`} className="block">
         <StateBadge state={state} appointment={appointment} now={now} />
         <p className={cn("font-heading font-bold text-lg truncate", state !== "upcoming" && "mt-1.5", state === "cancelled" && "line-through")}>
@@ -255,7 +255,7 @@ function VisitCard({ appointment, state, now, showAgent }: {
       </Link>
       {isNext && detail && (
         <a href={itineraryUrl(detail.position, detail.address, detail.city)} target="_blank" rel="noopener noreferrer"
-          className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-white text-primary font-bold py-3.5">
+          className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-white text-primary dark:bg-gray-900 dark:text-primary-800 font-bold py-3.5">
           <Navigation size={18} aria-hidden /> Lancer l&apos;itinéraire
         </a>
       )}
@@ -276,7 +276,7 @@ function WeekGrid({ week, today, days, states, now, showAgent }: {
   const nowMinutes = minutesOfDay(now.toISOString());
 
   return (
-    <section className="mt-6 rounded-3xl bg-white shadow-xs p-6" aria-label="Semaine">
+    <section className="mt-6 rounded-3xl bg-background shadow-xs p-6" aria-label="Semaine">
       <div className="flex items-center gap-6 text-sm text-dark mb-4 pl-14">
         <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-sm bg-gray-200" /> Terminée</span>
         <span className="inline-flex items-center gap-2"><span className="w-3.5 h-3.5 rounded-sm bg-primary" /> Prochaine</span>
@@ -315,8 +315,8 @@ function WeekGrid({ week, today, days, states, now, showAgent }: {
                   className={cn("absolute inset-x-1 rounded-xl px-2.5 py-1.5 overflow-hidden text-xs leading-tight",
                     state === "next" && "bg-primary text-white",
                     (state === "done" || state === "past") && "bg-gray-200/70 text-dark",
-                    state === "upcoming" && "bg-white border-2 border-primary text-dark",
-                    state === "cancelled" && "bg-white border border-dashed border-gray-300 text-gray-400 line-through")}
+                    state === "upcoming" && "bg-surface border-2 border-primary text-dark",
+                    state === "cancelled" && "bg-surface border border-dashed border-gray-300 text-gray-400 line-through")}
                   style={{ top: top(minutesOfDay(a.start)) + 2, height }}>
                   <span className="block font-bold truncate">{hourMinute(a.start)} {a.title}</span>
                   <span className={cn("block truncate", state === "next" ? "text-white/85" : "text-gray-500")}>
@@ -338,7 +338,7 @@ function MonthGrid({ selected, today, days, onSelect }: {
 }) {
   const month = selected.slice(0, 7);
   return (
-    <section className="mt-6 rounded-3xl bg-white shadow-xs p-4 sm:p-6" aria-label="Mois">
+    <section className="mt-6 rounded-3xl bg-background shadow-xs p-4 sm:p-6" aria-label="Mois">
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500 mb-2">
         {DAY_SHORT.map((d) => <span key={d}>{d}</span>)}
       </div>
@@ -349,7 +349,7 @@ function MonthGrid({ selected, today, days, onSelect }: {
             <button key={key} type="button" onClick={() => onSelect(key)}
               className={cn("aspect-square sm:aspect-auto sm:h-20 rounded-xl p-1.5 flex flex-col items-center sm:items-start text-sm",
                 key.slice(0, 7) === month ? "text-dark" : "text-gray-300", key === today ? "bg-primary/10" : "hover:bg-gray-50")}>
-              <span className={cn("font-bold", key === today && "text-primary")}>{asDate(key).getUTCDate()}</span>
+              <span className={cn("font-bold", key === today && "text-brand")}>{asDate(key).getUTCDate()}</span>
               {count > 0 && (
                 <span className="mt-auto rounded-full bg-primary text-white text-[11px] font-bold px-1.5 sm:px-2 py-0.5">
                   {count}<span className="hidden sm:inline"> visite{count > 1 ? "s" : ""}</span>

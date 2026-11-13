@@ -18,7 +18,7 @@ export default function ContenuFr() {
             <strong>Kwa-Ba n&apos;utilise aucun cookie de publicité ni de réseau social.</strong> La mesure d&apos;audience ne
             fonctionne qu&apos;avec votre accord.
           </p>
-          <GererCookiesBouton className="mt-2 px-5 py-3 rounded-xl bg-dark text-white text-sm font-bold">Gérer mes choix de cookies</GererCookiesBouton>
+          <GererCookiesBouton className="mt-2 px-5 py-3 rounded-xl bg-dark text-inverse text-sm font-bold">Gérer mes choix de cookies</GererCookiesBouton>
         </>
       }
       sections={[

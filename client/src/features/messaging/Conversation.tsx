@@ -174,7 +174,7 @@ export default function ChatPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <p className="text-muted">{t("introuvable")}</p>
-        <Link href="/messages" className="text-primary font-medium hover:underline">{t("retour")}</Link>
+        <Link href="/messages" className="text-brand font-medium hover:underline">{t("retour")}</Link>
       </div>
     );
   }
@@ -185,11 +185,11 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-light flex flex-col">
-      <div className="max-w-4xl w-full mx-auto flex flex-col flex-1 min-h-0 bg-white md:border-x border-light shadow-xs">
+      <div className="max-w-4xl w-full mx-auto flex flex-col flex-1 min-h-0 bg-surface md:border-x border-light shadow-xs">
         {/* Header */}
-        <div className="bg-white border-b border-light px-6 py-4 flex items-center justify-between gap-4 shrink-0 sticky top-0 z-10">
+        <div className="bg-surface border-b border-light px-6 py-4 flex items-center justify-between gap-4 shrink-0 sticky top-0 z-10">
           <div className="flex items-center gap-4 min-w-0">
-            <button onClick={() => router.push("/messages")} className="text-dark hover:text-primary transition-colors p-1.5 -ml-1.5 rounded-full hover:bg-light">
+            <button onClick={() => router.push("/messages")} className="text-dark hover:text-brand transition-colors p-1.5 -ml-1.5 rounded-full hover:bg-light">
               <ArrowLeft size={22} />
             </button>
             <div className="w-12 h-12 bg-linear-to-br from-primary to-primary-600 rounded-full flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
@@ -206,7 +206,7 @@ export default function ChatPage() {
                 {conversation.hebergement && (
                   <>
                     {" • "}
-                    <Link href={`/hebergements/${conversation.hebergement.id}`} className="hover:text-primary hover:underline">
+                    <Link href={`/hebergements/${conversation.hebergement.id}`} className="hover:text-brand hover:underline">
                       {conversation.hebergement.name}
                     </Link>
                   </>
@@ -218,7 +218,7 @@ export default function ChatPage() {
 
         {/* Messaging rules: contact details hidden, traveller anonymous before payment */}
         <div className="bg-primary/5 border-b border-primary/10 px-4 md:px-6 py-2.5 text-xs text-dark space-y-1 shrink-0">
-          <p className="flex gap-2"><ShieldCheck size={15} className="text-primary shrink-0 mt-px" aria-hidden /> {t("securite")}</p>
+          <p className="flex gap-2"><ShieldCheck size={15} className="text-brand shrink-0 mt-px" aria-hidden /> {t("securite")}</p>
           {!conversation.booked && (
             <p className="flex gap-2 text-muted">
               <EyeOff size={15} className="shrink-0 mt-px" aria-hidden />
@@ -250,7 +250,7 @@ export default function ChatPage() {
                 "max-w-[75%] md:max-w-[65%] px-5 py-3.5 text-[15px] leading-relaxed relative group",
                 msg.is_own
                   ? "bg-primary text-white rounded-2xl rounded-br-sm shadow-md"
-                  : "bg-white text-dark shadow-card rounded-2xl rounded-bl-sm border border-gray-100",
+                  : "bg-surface text-dark shadow-card rounded-2xl rounded-bl-sm border border-gray-100",
                 msg.pending && "opacity-60"
               )}>
                 <p className="whitespace-pre-wrap wrap-break-word">{msg.content}</p>
@@ -281,7 +281,7 @@ export default function ChatPage() {
         </div>
 
         {/* Input */}
-        <div className="bg-white border-t border-light px-4 md:px-6 py-4 shrink-0 mt-auto">
+        <div className="bg-surface border-t border-light px-4 md:px-6 py-4 shrink-0 mt-auto">
           {sendError && (
             <p className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-4 py-2 mb-3">{sendError}</p>
           )}
@@ -298,7 +298,7 @@ export default function ChatPage() {
               {confirming && (
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   <span className="font-semibold">{tm("confirmQuestion")}</span>
-                  <button type="button" onClick={() => sendMessage(true)} className="px-3 py-1 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700">
+                  <button type="button" onClick={() => sendMessage(true)} className="px-3 py-1 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700 dark:hover:bg-amber-500">
                     {tm("confirmSend")}
                   </button>
                   <button type="button" onClick={() => setConfirming(false)} className="px-3 py-1 rounded-lg font-semibold hover:bg-amber-100">
@@ -322,7 +322,7 @@ export default function ChatPage() {
                 maxLength={2000}
                 placeholder={t("placeholder")}
                 aria-label={t("votreMessage")}
-                className="w-full bg-light border border-transparent focus:border-primary/20 focus:bg-white rounded-full pl-5 pr-12 py-3.5 text-sm text-dark outline-hidden placeholder:text-muted transition-all shadow-xs"
+                className="w-full bg-light border border-transparent focus:border-primary/20 focus:bg-surface rounded-full pl-5 pr-12 py-3.5 text-sm text-dark outline-hidden placeholder:text-muted transition-all shadow-xs"
               />
             </div>
             <button

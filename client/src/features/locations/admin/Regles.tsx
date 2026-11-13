@@ -44,7 +44,7 @@ export default function Regles() {
 
   if (isLoading) return <div className="h-64 skeleton rounded-2xl" />;
   return (
-    <form method="post" onSubmit={enregistrer} className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-4 max-w-2xl">
+    <form method="post" onSubmit={enregistrer} className="bg-surface rounded-2xl border border-gray-100 p-5 sm:p-6 space-y-4 max-w-2xl">
       {!regles && <p className="text-sm bg-amber-50 text-amber-900 rounded-xl p-3">La location n&apos;est pas encore proposée sur le site : enregistrez ces règles pour l&apos;ouvrir.</p>}
       {erreurs.detail && <p role="alert" className="text-sm text-red-700 bg-red-50 rounded-xl p-3">{erreurs.detail}</p>}
       <div className="grid sm:grid-cols-2 gap-4">

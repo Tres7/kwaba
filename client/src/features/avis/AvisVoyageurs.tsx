@@ -55,21 +55,21 @@ export default function AvisVoyageurs({ hebergements }: { hebergements: Hebergem
         {cites.map(({ avis, h }) => {
           const nom = `${avis.auteur.prenom} ${avis.auteur.initiale}`.trim();
           return (
-            <li key={avis.id} className="relative bg-white rounded-2xl border border-gray-100 shadow-xs p-6 flex flex-col">
+            <li key={avis.id} className="relative bg-surface rounded-2xl border border-gray-100 shadow-xs p-6 flex flex-col">
               <QuotesIcon size={36} weight="fill" className="absolute top-5 right-5 text-primary-100" aria-hidden />
               <p className="flex gap-0.5 text-accent" aria-label={`${avis.note}/5`}>
                 {[1, 2, 3, 4, 5].map((n) => <StarIcon key={n} size={16} weight={n <= avis.note ? "fill" : "regular"} aria-hidden />)}
               </p>
               <blockquote className="mt-3 text-dark text-[15px] leading-relaxed line-clamp-5">{avis.commentaire}</blockquote>
               <div className="mt-auto pt-5 flex items-center gap-3">
-                <span className="h-10 w-10 rounded-full bg-primary-50 text-primary font-bold text-sm flex items-center justify-center overflow-hidden shrink-0">
+                <span className="h-10 w-10 rounded-full bg-primary-50 text-brand font-bold text-sm flex items-center justify-center overflow-hidden shrink-0">
                   {avis.auteur.avatar_url ? <img src={avis.auteur.avatar_url} alt="" className="w-full h-full object-cover" /> : initials(nom)}
                 </span>
                 <span className="min-w-0 text-sm">
                   <span className="block font-semibold text-dark">{nom}</span>
                   <span className="flex items-center gap-1 text-gray-500 min-w-0">
                     <SealCheckIcon size={14} weight="fill" className="text-secondary shrink-0" aria-label={tAvis("sejourVerifie")} />
-                    <Link href={`/hebergements/${h.id}`} className="truncate hover:text-primary hover:underline">{h.name}, {h.city}</Link>
+                    <Link href={`/hebergements/${h.id}`} className="truncate hover:text-brand hover:underline">{h.name}, {h.city}</Link>
                   </span>
                 </span>
               </div>

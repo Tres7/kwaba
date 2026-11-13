@@ -14,7 +14,7 @@ export default function FavorisPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <div className="mb-8 flex items-center gap-4">
-        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-white shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
+        <Link href="/profil" aria-label={t("retourProfil")} className="w-10 h-10 rounded-full bg-surface shadow-xs flex items-center justify-center text-dark hover:bg-light-muted transition-colors shrink-0">
           <ArrowLeft size={20} />
         </Link>
         <div>
@@ -30,13 +30,13 @@ export default function FavorisPage() {
           {[0, 1, 2, 3].map((i) => <div key={i} className="h-72 skeleton rounded-2xl" />)}
         </div>
       ) : isError ? (
-        <div className="bg-white rounded-3xl shadow-card p-12 text-center">
+        <div className="bg-surface rounded-3xl shadow-card p-12 text-center">
           <p className="text-dark font-semibold mb-2">{t("erreur")}</p>
-          <button onClick={() => refetch()} className="text-primary font-bold hover:underline">{t("reessayer")}</button>
+          <button onClick={() => refetch()} className="text-brand font-bold hover:underline">{t("reessayer")}</button>
         </div>
       ) : favoris.length === 0 ? (
-        <div className="bg-white rounded-3xl shadow-card p-8 sm:p-12 flex flex-col items-center gap-6 text-center">
-          <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center text-primary/50">
+        <div className="bg-surface rounded-3xl shadow-card p-8 sm:p-12 flex flex-col items-center gap-6 text-center">
+          <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center text-brand/50">
             <Heart size={40} />
           </div>
           <div className="max-w-sm">

@@ -27,16 +27,16 @@ interface AdminTableProps<T> {
 export default function AdminTable<T>({ colonnes, lignes, cle, titreMobile, actions, chargement, erreur, onReessayer }: AdminTableProps<T>) {
   if (erreur) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+      <div className="bg-surface rounded-2xl border border-gray-100 p-10 text-center">
         <p className="text-dark font-semibold mb-2">Impossible de charger les données.</p>
-        {onReessayer && <button onClick={onReessayer} className="text-primary font-bold hover:underline">Réessayer</button>}
+        {onReessayer && <button onClick={onReessayer} className="text-brand font-bold hover:underline">Réessayer</button>}
       </div>
     );
   }
   if (chargement && !lignes) return <div className="space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-16 skeleton rounded-2xl" />)}</div>;
   if (!lignes?.length) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-muted">
+      <div className="bg-surface rounded-2xl border border-gray-100 p-10 text-center text-muted">
         <SearchX size={28} className="mx-auto mb-2 text-gray-300" />
         Aucun résultat pour ces critères.
       </div>
@@ -45,7 +45,7 @@ export default function AdminTable<T>({ colonnes, lignes, cle, titreMobile, acti
 
   return (
     <div className={cn("transition-opacity", chargement && "opacity-60")}>
-      <div className="hidden md:block bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+      <div className="hidden md:block bg-surface rounded-2xl border border-gray-100 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-gray-100">
@@ -66,7 +66,7 @@ export default function AdminTable<T>({ colonnes, lignes, cle, titreMobile, acti
 
       <ul className="md:hidden space-y-3">
         {lignes.map((l) => (
-          <li key={cle(l)} className="bg-white rounded-2xl border border-gray-100 p-4">
+          <li key={cle(l)} className="bg-surface rounded-2xl border border-gray-100 p-4">
             <div className="font-semibold text-dark">{titreMobile(l)}</div>
             <dl className="mt-3 space-y-1.5 text-sm">
               {colonnes.filter((c) => !c.masquerMobile).map((c) => (
@@ -93,9 +93,9 @@ export function Pagination({ page, count, pageSize, onChange }: { page: number; 
     <div className="flex items-center justify-between gap-3 mt-4 text-sm">
       <p className="text-muted">{debut}–{fin} sur {count}</p>
       <div className="flex items-center gap-2">
-        <button onClick={() => onChange(page - 1)} disabled={page <= 1} aria-label="Page précédente" className="w-9 h-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center disabled:opacity-40"><ChevronLeft size={16} /></button>
+        <button onClick={() => onChange(page - 1)} disabled={page <= 1} aria-label="Page précédente" className="w-9 h-9 rounded-xl border border-gray-200 bg-surface flex items-center justify-center disabled:opacity-40"><ChevronLeft size={16} /></button>
         <span className="text-dark font-medium tabular-nums">{page} / {pages}</span>
-        <button onClick={() => onChange(page + 1)} disabled={page >= pages} aria-label="Page suivante" className="w-9 h-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center disabled:opacity-40"><ChevronRight size={16} /></button>
+        <button onClick={() => onChange(page + 1)} disabled={page >= pages} aria-label="Page suivante" className="w-9 h-9 rounded-xl border border-gray-200 bg-surface flex items-center justify-center disabled:opacity-40"><ChevronRight size={16} /></button>
       </div>
     </div>
   );
@@ -107,7 +107,7 @@ export function SearchInput({ value, onChange, placeholder }: { value: string; o
       <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
       <input
         type="search" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} aria-label={placeholder}
-        className="w-full h-full min-h-[46px] pl-10 pr-3 border border-gray-200 rounded-xl bg-white text-base sm:text-sm outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20"
+        className="w-full h-full min-h-[46px] pl-10 pr-3 border border-gray-200 rounded-xl bg-surface text-base sm:text-sm outline-hidden focus:border-primary focus:ring-2 focus:ring-primary/20"
       />
     </label>
   );

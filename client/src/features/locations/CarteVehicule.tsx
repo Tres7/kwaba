@@ -13,7 +13,7 @@ function Galerie({ photos, nom }: { photos: string[]; nom: string }) {
   const [index, setIndex] = useState(0);
   if (!photos.length) return <Car size={56} className="text-gray-300" aria-hidden />;
   const aller = (i: number) => rail.current?.scrollTo({ left: i * rail.current.clientWidth, behavior: "smooth" });
-  const fleche = "absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-dark shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity";
+  const fleche = "absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-surface/90 text-dark shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity";
   return (
     <div className="relative w-full h-full group">
       <div ref={rail} className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
@@ -44,7 +44,7 @@ export default function CarteVehicule({ c, formule, prixChauffeur, onChoisir }: 
   const t = useTranslations("location");
   const propose = formule === "avec_chauffeur" ? c.formules.avec_chauffeur : c.formules.sans_chauffeur;
   return (
-    <article className="bg-white rounded-3xl border border-gray-100 shadow-xs overflow-hidden flex flex-col">
+    <article className="bg-surface rounded-3xl border border-gray-100 shadow-xs overflow-hidden flex flex-col">
       <div className="h-40 bg-gray-50 flex items-center justify-center relative">
         <Galerie photos={c.photos?.length ? c.photos : c.image ? [c.image] : []} nom={c.nom} />
         {formule === "sans_chauffeur" && c.caution === 0 && (
@@ -52,7 +52,7 @@ export default function CarteVehicule({ c, formule, prixChauffeur, onChoisir }: 
         )}
       </div>
       <div className="p-5 flex flex-col flex-1">
-        <p className="text-xs font-bold uppercase tracking-wide text-primary">{t(`gammes.${c.gamme}`)}</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-brand">{t(`gammes.${c.gamme}`)}</p>
         <h2 className="font-heading font-bold text-dark text-lg mt-1">{c.nom}</h2>
         {c.exemple_modele && <p className="text-sm text-gray-500">{c.exemple_modele}{c.annee ? ` · ${c.annee}` : ""}</p>}
         <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 mt-3">

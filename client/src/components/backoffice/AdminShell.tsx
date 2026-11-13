@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Activity, ArrowLeft, BookOpen, CalendarCheck, CalendarCog, CalendarRange, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
+import ThemeSelector from "@/components/layout/ThemeSelector";
 import { cn } from "@/lib/utils";
 import { useDroitsAdmin } from "@/features/users";
 import { AlerteVerifications, useCompteursVerification } from "@/features/verifications";
@@ -53,40 +54,41 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   // Closes the mobile panel after every navigation
   useEffect(() => setMenuOuvert(false), [pathname]);
 
-  if (status === "loading") return <div className="min-h-screen bg-gray-50" />;
+  if (status === "loading") return <div className="min-h-screen bg-canvas" />;
 
   // The middleware already filters; second check on the page (the backend remains the only judge: 403 otherwise)
   if (session?.user?.role !== "admin") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center bg-gray-50">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center bg-canvas">
         <ShieldAlert size={40} className="text-red-600" />
         <p className="font-heading font-bold text-xl text-dark">Accès réservé aux administrateurs</p>
-        <Link href="/" className="text-primary font-bold hover:underline">Retour au site</Link>
+        <Link href="/" className="text-brand font-bold hover:underline">Retour au site</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:flex">
-      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 bg-white border-r border-gray-100 sticky top-0 h-screen p-5">
+    <div className="min-h-screen bg-canvas lg:flex">
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 bg-surface border-r border-gray-100 sticky top-0 h-screen p-5">
         <Logo size="sm" />
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted mt-2 mb-8">Back-office</p>
         <nav className="space-y-1 flex-1" aria-label="Back-office">
           {menu.map(({ href, label, icon: Icon, compteur }) => (
-            <Link key={href} href={href} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium", actif(href) ? "bg-primary/10 text-primary" : "text-dark hover:bg-gray-50")}>
+            <Link key={href} href={href} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium", actif(href) ? "bg-primary/10 text-brand dark:bg-gray-100 dark:text-dark" : "text-dark hover:bg-gray-50")}>
               <Icon size={18} /> {label}
               {compteur && <Pastille nombre={enAttente} className="ml-auto" />}
             </Link>
           ))}
         </nav>
         <div className="border-t border-gray-100 pt-4">
+          <ThemeSelector className="mb-3" />
           <p className="text-xs text-muted truncate">{session.user.email}</p>
-          <Link href="/" className="mt-2 flex items-center gap-2 text-sm font-medium text-dark hover:text-primary"><ArrowLeft size={15} /> Retour au site</Link>
+          <Link href="/" className="mt-2 flex items-center gap-2 text-sm font-medium text-dark hover:text-brand"><ArrowLeft size={15} /> Retour au site</Link>
         </div>
       </aside>
 
       <div className="flex-1 min-w-0">
-        <header className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-100">
+        <header className="lg:hidden sticky top-0 z-40 bg-background border-b border-gray-100">
           <div className="flex items-center gap-2 px-4 h-14">
             <button onClick={() => setMenuOuvert(true)} aria-haspopup="dialog" aria-expanded={menuOuvert}
               aria-label={enAttente > 0 ? `Ouvrir le menu du back-office (${enAttente} vérification${enAttente > 1 ? "s" : ""} en attente)` : "Ouvrir le menu du back-office"}
@@ -107,7 +109,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             {menu.map(({ href, label, icon: Icon, compteur }) => (
               <DrawerItem key={href}>
                 <Link href={href} onClick={() => setMenuOuvert(false)}
-                  className={cn("flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-colors", actif(href) ? "bg-primary/10 text-primary" : "text-dark hover:bg-gray-50")}>
+                  className={cn("flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-colors", actif(href) ? "bg-primary/10 text-brand dark:bg-gray-100 dark:text-dark" : "text-dark hover:bg-gray-50")}>
                   <Icon size={18} /> {label}
                   {compteur && <Pastille nombre={enAttente} className="ml-auto" />}
                 </Link>
@@ -115,6 +117,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             ))}
           </nav>
           <DrawerItem className="mt-4 pt-4 border-t border-gray-100">
+            <ThemeSelector full className="mx-3 mb-3" />
             <p className="text-xs text-muted truncate px-3">{session.user.email}</p>
             <Link href="/" className="mt-2 flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium text-dark hover:bg-gray-50"><ArrowLeft size={18} /> Retour au site</Link>
           </DrawerItem>
@@ -130,8 +133,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 function Pastille({ nombre, petite, className }: { nombre: number; petite?: boolean; className?: string }) {
   if (nombre <= 0) return null;
   return (
-    <span className={cn("rounded-full bg-orange-700 text-white font-bold tabular-nums flex items-center justify-center",
-      petite ? "min-w-[18px] h-[18px] px-1 text-[10px] ring-2 ring-white" : "min-w-[22px] h-[22px] px-1.5 text-xs", className)}>
+    <span className={cn("rounded-full bg-orange-700 dark:bg-orange-600 text-white font-bold tabular-nums flex items-center justify-center",
+      petite ? "min-w-[18px] h-[18px] px-1 text-[10px] ring-2 ring-surface" : "min-w-[22px] h-[22px] px-1.5 text-xs", className)}>
       {nombre > 99 ? "99+" : nombre}
       <span className="sr-only"> en attente</span>
     </span>

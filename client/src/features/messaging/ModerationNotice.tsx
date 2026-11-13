@@ -89,7 +89,7 @@ export default function ModerationNotice({ status, onChange }: { status: Moderat
               {s.contest_status ? (
                 <span className="text-muted">{t(`contestStatus.${s.contest_status}`)}</span>
               ) : (
-                <button type="button" onClick={() => setContesting(s)} className="font-semibold text-primary hover:underline">
+                <button type="button" onClick={() => setContesting(s)} className="font-semibold text-brand hover:underline">
                   {t("contest")}
                 </button>
               )}

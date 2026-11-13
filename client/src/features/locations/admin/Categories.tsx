@@ -125,7 +125,7 @@ export default function Categories() {
             const papiersExpires = expire(c.assurance_fin) || expire(c.visite_technique_fin);
             return (
               <li key={c.id}>
-                <button type="button" onClick={() => ouvrir(c)} className="w-full text-left bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-card transition-shadow">
+                <button type="button" onClick={() => ouvrir(c)} className="w-full text-left bg-surface rounded-2xl border border-gray-100 overflow-hidden hover:shadow-card transition-shadow">
                   <div className="relative h-32 bg-gray-100 flex items-center justify-center">
                     {c.photos[0]
                       // eslint-disable-next-line @next/next/no-img-element

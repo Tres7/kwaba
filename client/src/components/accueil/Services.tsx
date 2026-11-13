@@ -41,16 +41,16 @@ export default function Services() {
             {/* Phones: compact rows (icon beside the text); larger screens: cards */}
             <Link
               href={href}
-              className="group h-full flex items-start gap-4 sm:flex-col sm:items-stretch sm:gap-0 rounded-2xl p-4 sm:p-5 md:p-6 bg-white border border-gray-100 shadow-xs hover:shadow-card hover:border-primary/20 transition-all"
+              className="group h-full flex items-start gap-4 sm:flex-col sm:items-stretch sm:gap-0 rounded-2xl p-4 sm:p-5 md:p-6 bg-surface border border-gray-100 shadow-xs hover:shadow-card hover:border-primary/20 transition-all"
             >
-              <span className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center sm:mb-4 bg-primary-50 text-primary">
+              <span className="h-12 w-12 shrink-0 rounded-xl flex items-center justify-center sm:mb-4 bg-primary-50 text-brand">
                 <Icone size={26} weight="duotone" aria-hidden />
               </span>
               <span className="flex flex-col min-w-0">
                 <span className="font-heading font-bold text-base sm:text-lg text-dark">{t(`${cle}.titre`)}</span>
                 <span className="text-sm leading-relaxed mt-1 sm:mt-1.5 text-gray-600">{t(`${cle}.texte`)}</span>
               </span>
-              <span className="mt-auto pt-4 hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-primary">
+              <span className="mt-auto pt-4 hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-brand">
                 {t("decouvrir")} <ArrowRightIcon size={16} weight="bold" className="transition-transform group-hover:translate-x-1" aria-hidden />
               </span>
             </Link>

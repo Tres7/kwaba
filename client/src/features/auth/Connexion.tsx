@@ -133,7 +133,7 @@ function LoginForm() {
             }
           />
           <div className="text-right mt-2">
-            <Link href="/mot-de-passe-oublie" onClick={() => retenirEmail(email.trim().toLowerCase())} className="relative zone-tactile text-xs text-primary font-medium hover:underline">
+            <Link href="/mot-de-passe-oublie" onClick={() => retenirEmail(email.trim().toLowerCase())} className="relative zone-tactile text-xs text-brand font-medium hover:underline">
               {t("mdpOublie")}
             </Link>
           </div>
@@ -152,7 +152,7 @@ function LoginForm() {
 
       <p className="mt-8 text-center text-sm text-gray-500">
         {t("pasDeCompte")}{" "}
-        <Link href="/register" className="relative zone-tactile font-bold text-primary hover:underline">{t("creerCompte")}</Link>
+        <Link href="/register" className="relative zone-tactile font-bold text-brand hover:underline">{t("creerCompte")}</Link>
       </p>
     </>
   );

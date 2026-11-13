@@ -41,7 +41,7 @@ interface Pastille {
 }
 
 function dessinerPastille({ element, complet, groupe }: Pastille, actif: boolean) {
-  const repos = complet ? "bg-gray-100 text-gray-500" : groupe ? "bg-dark text-white hover:scale-105" : "bg-white text-dark hover:scale-105";
+  const repos = complet ? "bg-gray-100 text-gray-500" : groupe ? "bg-dark text-inverse hover:scale-105" : "bg-surface text-dark hover:scale-105";
   element.className = cn(PASTILLE, actif ? "bg-primary text-white scale-110" : repos);
   if (element.parentElement) element.parentElement.style.zIndex = actif ? "2" : "";
 }
@@ -148,12 +148,12 @@ export default function CarteResultats({ logements, query, ville, survol }: {
     <CadreCarte conteneur={conteneur} charge={!!carte} panne={panne}>
       {carte && !panne && <BoutonRelief carte={carte} />}
       {carte && !panne && (points.length === 0 || sansPosition > 0) && (
-        <p className="absolute top-16 lg:top-3 left-3 right-14 sm:right-auto sm:max-w-xs rounded-xl bg-white/95 px-3 py-2 text-xs font-semibold text-dark shadow-md">
+        <p className="absolute top-16 lg:top-3 left-3 right-14 sm:right-auto sm:max-w-xs rounded-xl bg-surface/95 px-3 py-2 text-xs font-semibold text-dark shadow-md">
           {points.length === 0 ? t("aucunLogement") : t("sansPosition", { nombre: sansPosition })}
         </p>
       )}
       {apercu && (
-        <div className="absolute inset-x-3 bottom-9 sm:inset-x-auto sm:left-3 sm:w-80 rounded-2xl bg-white shadow-card-hover">
+        <div className="absolute inset-x-3 bottom-9 sm:inset-x-auto sm:left-3 sm:w-80 rounded-2xl bg-surface shadow-card-hover">
           <Link href={`/hebergements/${apercu.id}${query}`} className="flex overflow-hidden rounded-2xl">
             <img src={apercu.image_url || FALLBACK_IMAGE} alt="" className="w-28 shrink-0 object-cover" />
             <div className="min-w-0 flex-1 p-3 pr-8">
@@ -164,13 +164,13 @@ export default function CarteResultats({ logements, query, ville, survol }: {
               </p>
               <RatingBadge rating={apercu.rating} count={apercu.review_count} className="mt-1" />
               <p className="mt-1 text-sm">
-                <span className="font-heading font-bold text-primary">{formatPrice(prixNuit(apercu))}</span>
+                <span className="font-heading font-bold text-brand">{formatPrice(prixNuit(apercu))}</span>
                 <span className="text-xs text-gray-500"> {tl("parNuitFraisInclus")}</span>
               </p>
             </div>
           </Link>
           <button type="button" onClick={() => setChoisi(null)} aria-label={t("fermer")}
-            className="absolute top-1.5 right-1.5 rounded-full bg-white/90 p-1 text-dark hover:bg-gray-100">
+            className="absolute top-1.5 right-1.5 rounded-full bg-surface/90 p-1 text-dark hover:bg-gray-100">
             <X size={15} aria-hidden />
           </button>
         </div>

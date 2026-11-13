@@ -19,7 +19,7 @@ export default function CarteMission({ mission, action, historique }: {
       {mission.photo ? (
         <img src={mission.photo} alt="" className="w-16 h-16 rounded-xl object-cover bg-gray-100 shrink-0" />
       ) : (
-        <span className="w-16 h-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><Icone size={26} aria-hidden /></span>
+        <span className="w-16 h-16 rounded-xl bg-primary/10 text-brand flex items-center justify-center shrink-0"><Icone size={26} aria-hidden /></span>
       )}
       <span className="flex-1 min-w-0">
         <span className="block text-[11px] font-bold uppercase tracking-wide text-gray-500">{mission.type_libelle}</span>
@@ -36,7 +36,7 @@ export default function CarteMission({ mission, action, historique }: {
   );
 
   return (
-    <article className="bg-white rounded-2xl border border-gray-100 shadow-xs">
+    <article className="bg-surface rounded-2xl border border-gray-100 shadow-xs">
       <div className="flex items-center gap-3 p-3 sm:p-4">
         {historique ? (
           <div className="flex-1 min-w-0 flex items-center gap-3">{contenu}</div>
@@ -65,7 +65,7 @@ function Etat({ etat, historique }: { etat: NonNullable<MissionResume["mission"]
   }
   return (
     <span className={cn("inline-flex items-center gap-1 mt-1.5 text-xs font-bold rounded-full px-2 py-0.5",
-      etat.moi ? "bg-primary/10 text-primary" : "bg-amber-50 text-amber-800")}>
+      etat.moi ? "bg-primary/10 text-brand" : "bg-amber-50 text-amber-800")}>
       <UserRound size={12} aria-hidden /> {etat.moi ? "Vous vous en occupez" : `Pris par ${etat.agent?.nom ?? "un agent"}`}
     </span>
   );

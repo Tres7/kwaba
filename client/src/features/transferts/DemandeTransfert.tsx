@@ -34,7 +34,7 @@ const BROUILLON = "kwaba_transfert_brouillon";
 // The draft holds a phone number: a tab left open does not keep it for long
 const DUREE_BROUILLON_MS = 30 * 60 * 1000;
 
-const champ = "w-full py-3 px-4 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const champ = "w-full py-3 px-4 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 function TransfertContent() {
   const { formatFcfa, formatPrice } = useFormat();
@@ -176,7 +176,7 @@ function TransfertContent() {
 
       <form method="post" onSubmit={reserver} noValidate className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10">
         <div className="lg:col-span-3 space-y-6">
-          <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-5">
+          <section className="bg-background rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-5">
             <h2 className="font-heading font-bold text-dark text-xl">{t("votreVol")}</h2>
             {reservation && (
               <p className="text-sm text-dark bg-primary/5 rounded-xl px-4 py-3">
@@ -209,7 +209,7 @@ function TransfertContent() {
             </div>
           </section>
 
-          <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8">
+          <section className="bg-background rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8">
             <h2 className="font-heading font-bold text-dark text-xl">{t("vehicule")}</h2>
             {!aeroport || !arrivee ? (
               <>
@@ -249,7 +249,7 @@ function TransfertContent() {
                         <Car size={22} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={cn("font-bold text-sm", actif ? "text-primary" : "text-dark")}>{t(`vehicules.${o.categorie}.nom`)}</p>
+                        <p className={cn("font-bold text-sm", actif ? "text-brand" : "text-dark")}>{t(`vehicules.${o.categorie}.nom`)}</p>
                         <p className="text-xs text-gray-600">{t(`vehicules.${o.categorie}.description`)}</p>
                         <p className="flex items-center gap-3 text-xs text-gray-600 mt-1">
                           <span className="flex items-center gap-1"><Users size={12} /> {o.passagers}</span>
@@ -268,7 +268,7 @@ function TransfertContent() {
             )}
           </section>
 
-          <section className="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-4">
+          <section className="bg-background rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-8 space-y-4">
             <h2 className="font-heading font-bold text-dark text-xl">{t("destinationContact")}</h2>
             <FormField label={t("adresseDestination")} id="t-destination" value={destination} onChange={(e) => setDestination(e.target.value)}
               placeholder={t("adressePlaceholder")} error={erreurs.destination} required />
@@ -284,7 +284,7 @@ function TransfertContent() {
         </div>
 
         <aside className="lg:col-span-2">
-          <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6 lg:sticky lg:top-28 space-y-5">
+          <div className="bg-surface rounded-3xl shadow-card border border-gray-100 p-5 sm:p-6 lg:sticky lg:top-28 space-y-5">
             <h2 className="font-heading font-bold text-dark text-lg">{t("recapitulatif")}</h2>
             {choix ? (
               <dl className="text-sm space-y-2">
@@ -292,7 +292,7 @@ function TransfertContent() {
                 <div className="flex justify-between gap-3"><dt className="text-gray-600">{t("passagersBagages")}</dt><dd className="font-medium text-dark">{passagers} · {bagages}</dd></div>
                 <div className="flex justify-between items-center gap-3 pt-3 border-t border-gray-100">
                   <dt className="font-heading font-bold text-dark text-base">{t("total")}</dt>
-                  <dd className="text-right"><span className="block font-heading font-bold text-primary text-2xl">{formatPrice(choix.prix)}</span><MontantDebite montant={choix.prix} /></dd>
+                  <dd className="text-right"><span className="block font-heading font-bold text-brand text-2xl">{formatPrice(choix.prix)}</span><MontantDebite montant={choix.prix} /></dd>
                 </div>
               </dl>
             ) : (
@@ -306,7 +306,7 @@ function TransfertContent() {
                   {moyensDispo.map(({ id, label, icon: Icon }) => (
                     <button key={id} type="button" aria-pressed={moyenChoisi === id} onClick={() => setMoyen(id)}
                       className={cn("flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-xs font-bold transition-colors",
-                        moyenChoisi === id ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-dark hover:border-primary/40")}>
+                        moyenChoisi === id ? "border-primary bg-primary/5 text-brand" : "border-gray-200 text-dark hover:border-primary/40")}>
                       <Icon size={18} /> {tRes(`moyens.${label}`)}
                     </button>
                   ))}
@@ -328,7 +328,7 @@ function TransfertContent() {
             </button>
             {!connecte && <p className="text-xs text-gray-600 text-center leading-relaxed">{t("connexionDerniere")}</p>}
             <p className="text-xs text-gray-600 text-center leading-relaxed">
-              {t.rich("infoChauffeur", { cgu: (x) => <Link href="/cgv" className="text-primary font-medium">{x}</Link> })}
+              {t.rich("infoChauffeur", { cgu: (x) => <Link href="/cgv" className="text-brand font-medium">{x}</Link> })}
             </p>
           </div>
         </aside>

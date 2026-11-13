@@ -30,7 +30,7 @@ function Documents() {
         {ONGLETS.map((o) => (
           <button key={o.id} role="tab" aria-selected={onglet === o.id} onClick={() => router.replace(`${pathname}?onglet=${o.id}`)}
             className={cn("relative zone-tactile pb-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors",
-              onglet === o.id ? "text-primary border-primary" : "text-gray-500 border-transparent hover:text-dark")}>
+              onglet === o.id ? "text-brand border-primary" : "text-gray-500 border-transparent hover:text-dark")}>
             {o.label}
           </button>
         ))}

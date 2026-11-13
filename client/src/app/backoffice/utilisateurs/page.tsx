@@ -70,7 +70,7 @@ function Utilisateurs() {
       titre: "Utilisateur", masquerMobile: true,
       cellule: (u) => (
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="w-9 h-9 rounded-full bg-primary/10 text-brand text-xs font-bold flex items-center justify-center shrink-0 overflow-hidden">
             {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" /> : initials(nom(u))}
           </div>
           <div className="min-w-0">

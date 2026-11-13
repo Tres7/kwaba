@@ -85,7 +85,7 @@ function PaiementContent() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-6 text-center">
         <p className="font-heading font-bold text-xl text-dark">{t("introuvable")}</p>
-        <Link href="/profil/reservations" className="text-primary font-bold hover:underline">{t("voirMesReservations")}</Link>
+        <Link href="/profil/reservations" className="text-brand font-bold hover:underline">{t("voirMesReservations")}</Link>
       </div>
     );
   }
@@ -99,9 +99,9 @@ function PaiementContent() {
   return (
     <div className="bg-light min-h-[70vh]">
       <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-        <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8" aria-live="polite">
+        <div className="bg-surface rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8" aria-live="polite">
           {!statut || statut.reservation === "confirmed" ? (
-            <Etat icone={<Loader2 size={32} className="animate-spin text-primary" />} titre={t("verification")} />
+            <Etat icone={<Loader2 size={32} className="animate-spin text-brand" />} titre={t("verification")} />
           ) : statut.reservation === "cancelled" ? (
             <Etat
               icone={<XCircle size={32} className="text-red-600" />}
@@ -118,7 +118,7 @@ function PaiementContent() {
             </Etat>
           ) : enAttente && !attenteLongue ? (
             <Etat
-              icone={<Loader2 size={32} className="animate-spin text-primary" />}
+              icone={<Loader2 size={32} className="animate-spin text-brand" />}
               titre={t("attente")}
               texte={t("attenteTexte")}
             />
@@ -165,7 +165,7 @@ function PaiementContent() {
                     <button
                       key={id} type="button" aria-pressed={moyenChoisi === id} onClick={() => setMoyen(id)}
                       className={cn("flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-xs font-bold transition-colors",
-                        moyenChoisi === id ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-dark hover:border-primary/40")}
+                        moyenChoisi === id ? "border-primary bg-primary/5 text-brand" : "border-gray-200 text-dark hover:border-primary/40")}
                     >
                       <Icon size={20} /> {tRes(`moyens.${label}`)}
                     </button>

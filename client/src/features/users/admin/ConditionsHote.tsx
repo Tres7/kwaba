@@ -68,7 +68,7 @@ export default function ConditionsHote({ hote, onFermer }: { hote: AdminUser | n
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-bold text-dark uppercase tracking-wide">Programme Fondateurs (5 %)</p>
-            <button type="button" onClick={sixMois} className="text-xs font-semibold text-primary hover:underline">6 mois à partir d&apos;aujourd&apos;hui</button>
+            <button type="button" onClick={sixMois} className="text-xs font-semibold text-brand hover:underline">6 mois à partir d&apos;aujourd&apos;hui</button>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Champ label="Début"><Saisie type="date" value={form.fondateur_debut} onChange={(e) => setForm({ ...form, fondateur_debut: e.target.value })} /></Champ>

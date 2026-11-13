@@ -24,7 +24,7 @@ export default function MesLocations() {
       <ul className="space-y-3">
         {data.map((l) => (
           <li key={l.id}>
-            <Link href={`/location/${l.id}`} className="flex items-center justify-between gap-3 bg-white rounded-2xl border border-gray-100 p-4 hover:border-primary/30">
+            <Link href={`/location/${l.id}`} className="flex items-center justify-between gap-3 bg-surface rounded-2xl border border-gray-100 p-4 hover:border-primary/30">
               <span className="min-w-0">
                 <span className="block font-semibold text-dark truncate">{l.libelle} · {l.lieu_prise_detail.ville}</span>
                 <span className="block text-sm text-gray-500">{formatDate(l.debut_locale)} → {formatDate(l.fin_locale)} · <span className="font-mono text-xs">{l.reference}</span></span>

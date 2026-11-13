@@ -63,7 +63,7 @@ export default function Reversements() {
     { titre: "Statut", cellule: (r) => (
       <div className="flex flex-col items-start gap-1">
         <Pill ton={r.statut === "effectue" ? "vert" : "orange"}>{r.statut_libelle}</Pill>
-        {urlExterneSure(r.justificatif) && <a href={urlExterneSure(r.justificatif)} target="_blank" rel="noreferrer" className="relative zone-tactile text-xs text-primary font-semibold inline-flex items-center gap-1">Preuve <ExternalLink size={11} /></a>}
+        {urlExterneSure(r.justificatif) && <a href={urlExterneSure(r.justificatif)} target="_blank" rel="noreferrer" className="relative zone-tactile text-xs text-brand font-semibold inline-flex items-center gap-1">Preuve <ExternalLink size={11} /></a>}
       </div>
     ) },
   ];

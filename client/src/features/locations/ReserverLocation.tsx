@@ -21,7 +21,7 @@ function Puce({ actif, onClick, children }: { actif: boolean; onClick: () => voi
   return (
     <button type="button" aria-pressed={actif} onClick={onClick}
       className={cn("relative zone-tactile px-4 py-2 rounded-full text-sm font-semibold border transition-colors whitespace-nowrap",
-        actif ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200 hover:border-primary/40")}>
+        actif ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200 hover:border-primary/40")}>
       {children}
     </button>
   );
@@ -56,8 +56,8 @@ export default function LocationPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">{[0, 1, 2].map((i) => <div key={i} className="h-80 skeleton rounded-3xl" />)}</div>
         ) : !catalogue?.active ? (
-          <div className="bg-white rounded-3xl border border-gray-100 p-10 text-center mt-8">
-            <Car size={40} className="mx-auto text-primary" aria-hidden />
+          <div className="bg-surface rounded-3xl border border-gray-100 p-10 text-center mt-8">
+            <Car size={40} className="mx-auto text-brand" aria-hidden />
             <p className="font-heading font-bold text-dark text-xl mt-4">{t("bientot")}</p>
             <p className="text-gray-600 mt-2">{t("bientotAide")}</p>
             <Link href="/transfert" className="inline-block mt-5 px-6 py-3 rounded-xl bg-primary text-white font-bold">{tNav("transfertAeroport")}</Link>
@@ -69,7 +69,7 @@ export default function LocationPage() {
         ) : (
           <>
             <div className="mt-8 space-y-4">
-              <div className="inline-flex flex-wrap bg-white border border-gray-200 rounded-3xl sm:rounded-full p-1" role="group" aria-label={t("formule")}>
+              <div className="inline-flex flex-wrap bg-surface border border-gray-200 rounded-3xl sm:rounded-full p-1" role="group" aria-label={t("formule")}>
                 {formules.map((f) => (
                   <button key={f} type="button" aria-pressed={formule === f} onClick={() => setFormule(f)}
                     className={cn("relative zone-tactile px-5 py-2 rounded-full text-sm font-bold transition-colors", formule === f ? "bg-primary text-white" : "text-dark")}>
@@ -105,7 +105,7 @@ export default function LocationPage() {
                 <FormulaireLocation catalogue={catalogue} categorie={null} formule="chauffeur_seul" onChanger={() => setFormule("avec_chauffeur")} />
               </div>
             ) : visibles.length === 0 ? (
-              <p className="bg-white rounded-3xl border border-gray-100 p-10 text-center text-gray-500 mt-6">{t("aucun")}</p>
+              <p className="bg-surface rounded-3xl border border-gray-100 p-10 text-center text-gray-500 mt-6">{t("aucun")}</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
                 {visibles.map((c) => (

@@ -135,7 +135,7 @@ export default function Factures() {
             </div>
           ))}
           {erreurLignes && <p role="alert" className="text-xs text-red-600">{erreurLignes}</p>}
-          <button type="button" onClick={() => setLignes((ls) => [...ls, LIGNE_VIDE])} className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+          <button type="button" onClick={() => setLignes((ls) => [...ls, LIGNE_VIDE])} className="flex items-center gap-1.5 text-sm font-semibold text-brand">
             <Plus size={15} aria-hidden /> Ajouter une ligne
           </button>
         </fieldset>

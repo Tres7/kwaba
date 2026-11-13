@@ -63,7 +63,7 @@ export default function Tarifs() {
           modification importante aux clients 30 jours à l&apos;avance.
         </span>
       </p>
-      <section className="bg-white rounded-2xl border border-gray-100 p-5">
+      <section className="bg-background rounded-2xl border border-gray-100 p-5">
         <h2 className="font-heading font-bold text-dark mb-4">Taux</h2>
         <div className="divide-y divide-gray-100">
           {TAUX.map(({ cle, libelle, aide }) => (
@@ -80,7 +80,7 @@ export default function Tarifs() {
           ))}
         </div>
       </section>
-      <section className="bg-white rounded-2xl border border-gray-100 p-5">
+      <section className="bg-background rounded-2xl border border-gray-100 p-5">
         <h2 className="font-heading font-bold text-dark mb-1">Frais de ménage</h2>
         <p className="text-xs text-muted mb-3">Par séjour et par logement, reversés en totalité à l&apos;hôte.</p>
         <div className="divide-y divide-gray-100">

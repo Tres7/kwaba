@@ -31,7 +31,7 @@ export default function Panneau({ ouvert, titre, onFermer, onValider, envoi, lib
         method="post"
         role="dialog" aria-modal="true" aria-labelledby="panneau-titre"
         onSubmit={(e) => { e.preventDefault(); if (!envoi) onValider?.(); }}
-        className="relative w-full sm:max-w-lg max-h-[92dvh] sm:max-h-none bg-white rounded-t-3xl sm:rounded-none flex flex-col shadow-card-hover"
+        className="relative w-full sm:max-w-lg max-h-[92dvh] sm:max-h-none bg-surface rounded-t-3xl sm:rounded-none flex flex-col shadow-card-hover"
       >
         <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
           <h2 id="panneau-titre" className="font-heading font-bold text-dark text-lg">{titre}</h2>
@@ -56,7 +56,7 @@ export default function Panneau({ ouvert, titre, onFermer, onValider, envoi, lib
   );
 }
 
-const champClasse = "w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
+const champClasse = "w-full px-3 py-2.5 bg-surface border border-gray-200 rounded-xl text-base sm:text-sm text-dark focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary";
 
 /** Labelled field with its error below it. */
 export function Champ({ label, erreur, aide, children, className }: {

@@ -57,9 +57,9 @@ export default function MessagesPage() {
         ) : error ? (
           <p className="text-muted text-center py-16">{t("erreurChargement")}</p>
         ) : conversations.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-card p-10 sm:p-16 flex flex-col items-center gap-4 border border-light text-center">
+          <div className="bg-surface rounded-3xl shadow-card p-10 sm:p-16 flex flex-col items-center gap-4 border border-light text-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-              <MessageCircle size={36} className="text-primary" />
+              <MessageCircle size={36} className="text-brand" />
             </div>
             <p className="text-dark font-heading font-bold text-xl">{t("aucune")}</p>
             <p className="text-muted text-base">{t("aucuneTexte")}</p>
@@ -77,7 +77,7 @@ export default function MessagesPage() {
                 <Link
                   key={conv.id}
                   href={`/messages/${conv.id}`}
-                  className="group flex items-center gap-5 bg-white rounded-2xl p-5 hover:bg-light/40 transition-all duration-300 border border-transparent hover:border-light"
+                  className="group flex items-center gap-5 bg-surface rounded-2xl p-5 hover:bg-light/40 transition-all duration-300 border border-transparent hover:border-light"
                 >
                   <div className="relative shrink-0">
                     <div className="w-16 h-16 bg-linear-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-soft overflow-hidden">
@@ -88,20 +88,20 @@ export default function MessagesPage() {
                       )}
                     </div>
                     {unread && (
-                      <span className="absolute -top-1 -right-1 min-w-6 h-6 px-1.5 bg-primary text-white text-xs font-bold rounded-full border-2 border-white flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 min-w-6 h-6 px-1.5 bg-primary text-white text-xs font-bold rounded-full border-2 border-surface flex items-center justify-center">
                         {conv.unread_count > 9 ? "9+" : conv.unread_count}
                       </span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline mb-1 gap-3">
-                      <p className="font-heading font-bold text-dark text-lg truncate group-hover:text-primary transition-colors">
+                      <p className="font-heading font-bold text-dark text-lg truncate group-hover:text-brand transition-colors">
                         {name}
                         <span className="ml-2 text-xs font-medium text-muted">{conv.my_role === "host" ? t("voyageur") : t("hote")}</span>
                       </p>
                       <p className="text-muted text-xs font-medium shrink-0">{formatTime(conv.last_message_at, format)}</p>
                     </div>
-                    <p className="text-primary text-sm font-medium mb-1 truncate">{conv.hebergement?.name ?? t("supprime")}</p>
+                    <p className="text-brand text-sm font-medium mb-1 truncate">{conv.hebergement?.name ?? t("supprime")}</p>
                     <p className={cn("text-sm truncate", unread ? "text-dark font-semibold" : "text-muted")}>
                       {conv.last_message
                         ? `${conv.last_message.is_own ? t("vous") : ""}${conv.last_message.content}`

@@ -40,13 +40,13 @@ export default function ContratHotePage() {
   return (
     <div className="bg-light min-h-[70vh] px-4 py-8 sm:py-12">
       <div className="max-w-3xl mx-auto">
-        <Link href="/hote/espace" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary mb-6 hover:underline">
+        <Link href="/hote/espace" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand mb-6 hover:underline">
           <ArrowLeft size={16} aria-hidden /> {t("retourEspace")}
         </Link>
         {isLoading ? (
           <div className="h-96 skeleton rounded-3xl" aria-busy="true" />
         ) : isError || !data ? (
-          <div className="bg-white rounded-3xl border border-gray-100 p-8 text-center">
+          <div className="bg-surface rounded-3xl border border-gray-100 p-8 text-center">
             <FileClock size={40} className="mx-auto text-gray-400" aria-hidden />
             <p className="mt-4 text-dark font-semibold">
               {estErreurApi(error) && error.response?.status === 403 ? t("reserveHotes") : t("indisponible")}

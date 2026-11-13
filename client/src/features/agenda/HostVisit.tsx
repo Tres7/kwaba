@@ -47,7 +47,7 @@ export default function HostVisit() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <Link href="/hote/espace" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+      <Link href="/hote/espace" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand">
         <ArrowLeft size={16} aria-hidden /> {t("back")}
       </Link>
       <h1 className="font-heading font-bold text-2xl sm:text-3xl text-dark mt-3">{t("title")}</h1>
@@ -57,7 +57,7 @@ export default function HostVisit() {
       {isLoading && <p className="mt-8 text-sm text-gray-500">{t("loading")}</p>}
       {isError && <p className="mt-8 text-sm text-red-700">{t("error")}</p>}
       {data && data.listings.length === 0 && (
-        <div className="mt-8 rounded-2xl bg-white border border-gray-100 p-6 text-center">
+        <div className="mt-8 rounded-2xl bg-surface border border-gray-100 p-6 text-center">
           <p className="font-bold text-dark">{t("empty")}</p>
           <p className="text-sm text-gray-500 mt-1">{t("emptyHelp")}</p>
         </div>
@@ -89,7 +89,7 @@ export default function HostVisit() {
               return (
                 <li key={listing.id}>
                   <button type="button" onClick={() => toggle(listing)} aria-pressed={isSelected} disabled={disabled}
-                    className={cn("w-full flex items-center gap-3 rounded-2xl bg-white border p-3 text-left",
+                    className={cn("w-full flex items-center gap-3 rounded-2xl bg-surface border p-3 text-left",
                       isSelected ? "border-primary ring-2 ring-primary/20" : "border-gray-100", disabled && "opacity-50")}>
                     <img src={listing.image_url || FALLBACK_IMAGE} alt="" className="w-16 h-16 rounded-xl object-cover bg-gray-100 shrink-0" />
                     <span className="flex-1 min-w-0">
@@ -138,13 +138,13 @@ function AppointmentCard({ appointment, onMove }: { appointment: HostAppointment
         {appointment.origin === "phone" && <span className="inline-flex items-center gap-1"><Phone size={14} aria-hidden /> {t("byPhone")}</span>}
       </p>
       {appointment.on_the_way_at && (
-        <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-accent text-dark text-sm font-bold px-3 py-1">
+        <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-accent text-night text-sm font-bold px-3 py-1">
           <Navigation size={14} aria-hidden /> {t("onTheWay")}
         </p>
       )}
       <div className="mt-4">
         {appointment.movable ? (
-          <button type="button" onClick={onMove} className="rounded-xl bg-white text-primary font-bold px-4 py-2.5 text-sm">{t("move")}</button>
+          <button type="button" onClick={onMove} className="rounded-xl bg-white text-primary dark:bg-gray-900 dark:text-primary-800 font-bold px-4 py-2.5 text-sm">{t("move")}</button>
         ) : (
           <p className="text-xs text-white/80">{t("notMovable")}</p>
         )}
@@ -178,7 +178,7 @@ function SlotPicker(props: PickerProps) {
   });
 
   return (
-    <section className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-xs p-4 sm:p-5">
+    <section className="mt-5 rounded-2xl bg-background border border-gray-100 shadow-xs p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-heading font-bold text-dark">{props.mode === "book" ? t("chooseSlot") : t("moveTitle")}</h3>
         <span className="text-sm text-gray-500">{formatDuration(props.minutes)}</span>

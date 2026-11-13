@@ -68,20 +68,20 @@ export default function ProfilPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-3xl shadow-card overflow-hidden border border-gray-100">
+            <div className="bg-surface rounded-3xl shadow-card overflow-hidden border border-gray-100">
               <div className="bg-linear-to-r from-primary to-accent h-24 sm:h-28" />
               <div className="px-6 pb-6 -mt-12 text-center">
-                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-soft mx-auto mb-4 border-4 border-white overflow-hidden">
+                <div className="w-24 h-24 bg-surface rounded-full flex items-center justify-center shadow-soft mx-auto mb-4 border-4 border-surface overflow-hidden">
                   {session?.user?.image ? (
                     <img src={session.user.image} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-primary font-heading font-bold text-3xl">{initials(fullName)}</span>
+                    <span className="text-brand font-heading font-bold text-3xl">{initials(fullName)}</span>
                   )}
                 </div>
                 <h1 className="font-heading font-bold text-dark text-xl sm:text-2xl wrap-break-word">{fullName || <span className="inline-block w-40 h-6 skeleton rounded-sm" />}</h1>
                 <p className="text-muted text-sm mt-1 break-all">{me?.email ?? session?.user?.email}</p>
                 <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">{ROLE_LABELS[role]}</span>
+                  <span className="bg-primary/10 text-brand text-xs font-bold px-3 py-1 rounded-full">{ROLE_LABELS[role]}</span>
                   {me?.is_verified && <span className="flex items-center gap-1 bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full"><BadgeCheck size={12} /> {t("verifie")}</span>}
                 </div>
                 {me?.date_joined && (
@@ -90,7 +90,7 @@ export default function ProfilPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-card p-6 border border-gray-100 grid grid-cols-3 lg:grid-cols-1 gap-4 lg:gap-0 lg:divide-y lg:divide-gray-100">
+            <div className="bg-surface rounded-3xl shadow-card p-6 border border-gray-100 grid grid-cols-3 lg:grid-cols-1 gap-4 lg:gap-0 lg:divide-y lg:divide-gray-100">
               {[
                 { label: t("stats.sejours"), value: stays },
                 { label: t("stats.aVenir"), value: upcoming },
@@ -113,13 +113,13 @@ export default function ProfilPage() {
                 </p>
                 <div className="mt-3 space-y-2">
                   {aEvaluer.map((s) => (
-                    <Link key={s.reservation_id} href={`/profil/reservations/${s.reservation_id}/avis`} className="flex items-center gap-3 bg-white rounded-2xl p-3 hover:shadow-xs transition-shadow">
+                    <Link key={s.reservation_id} href={`/profil/reservations/${s.reservation_id}/avis`} className="flex items-center gap-3 bg-surface rounded-2xl p-3 hover:shadow-xs transition-shadow">
                       <img src={s.hebergement.image_url || FALLBACK_IMAGE} alt="" className="w-14 h-12 rounded-xl object-cover shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-dark text-sm truncate">{s.hebergement.name}</p>
                         <p className="text-xs text-muted">{t("departLe", { date: formatDate(s.check_out) })}</p>
                       </div>
-                      <span className="text-sm font-bold text-primary shrink-0">{t("noter")}</span>
+                      <span className="text-sm font-bold text-brand shrink-0">{t("noter")}</span>
                     </Link>
                   ))}
                 </div>
@@ -127,26 +127,26 @@ export default function ProfilPage() {
             )}
 
             {menuSections.map((section) => (
-              <div key={section.title} className="bg-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
+              <div key={section.title} className="bg-surface rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
                 <h2 className="px-6 sm:px-8 py-4 border-b border-gray-100 bg-light-muted/50 font-heading font-bold text-dark uppercase tracking-wider text-xs">{section.title}</h2>
                 <div className="divide-y divide-gray-100">
                   {section.items.map(({ icon: Icon, label, href, desc }) => (
                     <Link key={href} href={href} className="group flex items-center gap-4 px-6 sm:px-8 py-4 hover:bg-light-muted/50 transition-colors">
                       <div className="w-11 h-11 bg-primary/5 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                        <Icon size={20} className="text-primary" />
+                        <Icon size={20} className="text-brand" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-heading font-bold text-dark text-[15px] group-hover:text-primary transition-colors">{label}</p>
+                        <p className="font-heading font-bold text-dark text-[15px] group-hover:text-brand transition-colors">{label}</p>
                         <p className="text-muted text-sm mt-0.5 truncate">{desc}</p>
                       </div>
-                      <ChevronRight size={18} className="text-muted shrink-0 group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                      <ChevronRight size={18} className="text-muted shrink-0 group-hover:translate-x-1 group-hover:text-brand transition-all" />
                     </Link>
                   ))}
                 </div>
               </div>
             ))}
 
-            <button onClick={() => signOut({ callbackUrl: locale === "en" ? "/en" : "/" })} className="group w-full bg-white rounded-3xl shadow-soft border border-gray-100 flex items-center gap-4 px-6 sm:px-8 py-4 hover:bg-red-50/50 transition-colors">
+            <button onClick={() => signOut({ callbackUrl: locale === "en" ? "/en" : "/" })} className="group w-full bg-surface rounded-3xl shadow-soft border border-gray-100 flex items-center gap-4 px-6 sm:px-8 py-4 hover:bg-red-50/50 transition-colors">
               <div className="w-11 h-11 bg-red-50 rounded-2xl flex items-center justify-center shrink-0">
                 <LogOut size={20} className="text-red-600" />
               </div>

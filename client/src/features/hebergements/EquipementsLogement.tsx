@@ -48,7 +48,7 @@ export default function EquipementsLogement({ amenities }: { amenities: string[]
           ))}
           {visibles.length < groupes.length || deplie ? (
             <button type="button" onClick={() => setDeplie((d) => !d)} aria-expanded={deplie}
-              className="text-sm font-bold text-primary hover:underline">
+              className="text-sm font-bold text-brand hover:underline">
               {deplie ? t("voirMoinsEquipements") : t("voirTousEquipements", { nombre: equipements.length })}
             </button>
           ) : null}

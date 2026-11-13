@@ -75,7 +75,7 @@ function ResetForm() {
   return (
     <>
       <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-        <KeyRound size={26} className="text-primary" />
+        <KeyRound size={26} className="text-brand" />
       </div>
       <h1 className="font-heading font-bold text-3xl text-dark mb-2">{t("mdpOublieTitre")}</h1>
       <p className="text-gray-500 text-sm mb-8">
@@ -102,14 +102,14 @@ function ResetForm() {
           <button type="submit" disabled={loading || code.length !== 6} className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-button disabled:opacity-50 text-sm">
             {loading ? t("enregistrementEnCours") : t("changerMdp")}
           </button>
-          <button type="button" onClick={() => requestCode()} disabled={loading} className="w-full text-sm font-bold text-primary hover:underline disabled:opacity-50">
+          <button type="button" onClick={() => requestCode()} disabled={loading} className="w-full text-sm font-bold text-brand hover:underline disabled:opacity-50">
             {t("renvoyerUnCode")}
           </button>
         </form>
       )}
 
       <p className="mt-8 text-center text-sm text-gray-500">
-        <Link href="/login" className="font-bold text-primary hover:underline">{t("retourConnexion")}</Link>
+        <Link href="/login" className="font-bold text-brand hover:underline">{t("retourConnexion")}</Link>
       </p>
     </>
   );

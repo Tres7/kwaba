@@ -84,7 +84,7 @@ export default function Chauffeurs() {
               return (
                 <button key={a.code} type="button" aria-pressed={actif}
                   onClick={() => setForm({ ...form, aeroports: actif ? form.aeroports.filter((x) => x !== a.code) : [...form.aeroports, a.code] })}
-                  className={cn("relative zone-tactile px-3 py-1.5 rounded-full text-sm border", actif ? "bg-primary text-white border-primary" : "bg-white text-dark border-gray-200")}>
+                  className={cn("relative zone-tactile px-3 py-1.5 rounded-full text-sm border", actif ? "bg-primary text-white border-primary" : "bg-surface text-dark border-gray-200")}>
                   {a.ville} ({a.code})
                 </button>
               );

@@ -53,9 +53,9 @@ export default function EstimateurRevenus({ partenaire: partenaireImpose, prix: 
     { libelle: t("revenuEstime"), valeur: formatFcfa(revenu), fort: true },
   ];
 
-  const champ = "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base sm:text-sm text-dark outline-hidden focus:ring-4 focus:ring-primary/10";
+  const champ = "w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-base sm:text-sm text-dark outline-hidden focus:ring-4 focus:ring-primary/10";
   return (
-    <div className={cn("bg-white rounded-3xl p-5 md:p-6 border border-gray-100", className)}>
+    <div className={cn("bg-surface rounded-3xl p-5 md:p-6 border border-gray-100", className)}>
       {!partenaireImpose && (
         <fieldset>
           <legend className="text-xs font-bold text-dark uppercase tracking-wide mb-2">{t("type")}</legend>

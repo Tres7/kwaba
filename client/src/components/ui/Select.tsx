@@ -63,7 +63,7 @@ export default function Select<T extends string>({ value, onChange, options, lab
         aria-activedescendant={open ? `${listId}-${actif}` : undefined}
         onClick={() => (open ? setOpen(false) : ouvrir())} onKeyDown={onKeyDown}
         className={cn(
-          "w-full flex items-center gap-2 text-left border border-gray-200 rounded-xl px-4 py-3 bg-white hover:border-gray-300 transition-colors",
+          "w-full flex items-center gap-2 text-left border border-gray-200 rounded-xl px-4 py-3 bg-surface hover:border-gray-300 transition-colors",
           open && "border-primary ring-2 ring-primary/20",
           buttonClassName,
         )}
@@ -82,7 +82,7 @@ export default function Select<T extends string>({ value, onChange, options, lab
               <li
                 key={o.value} id={`${listId}-${i}`} role="option" aria-selected={selectionne}
                 onClick={() => choisir(o)} onMouseEnter={() => setActif(i)}
-                className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-sm", i === actif && "bg-gray-50", selectionne && "font-semibold text-primary")}
+                className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer text-sm", i === actif && "bg-gray-50", selectionne && "font-semibold text-brand")}
               >
                 <span className="flex-1 min-w-0">
                   <span className="block truncate">{o.label}</span>

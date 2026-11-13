@@ -38,7 +38,7 @@ export default function BrouillonsHote({ brouillons, onReprendre }: {
         {brouillons.map((b) => {
           const { pourcentage } = completude(b.donnees);
           return (
-            <li key={b.id} className="bg-white rounded-2xl border border-dashed border-gray-300 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <li key={b.id} className="bg-surface rounded-2xl border border-dashed border-gray-300 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1 min-w-0">
                 <p className="font-heading font-bold text-dark truncate">{b.donnees.name || t("sansTitre")}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{t("modifie", { date: formatDate(b.modifie_le) })}</p>

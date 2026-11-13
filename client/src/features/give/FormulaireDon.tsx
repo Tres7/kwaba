@@ -65,7 +65,7 @@ export default function FormulaireDon({ organisation, projetId }: { organisation
   };
 
   return (
-    <section id="don" aria-labelledby="don-titre" className="bg-white rounded-3xl border border-gray-100 shadow-card p-5 sm:p-6 space-y-5 scroll-mt-24">
+    <section id="don" aria-labelledby="don-titre" className="bg-background rounded-3xl border border-gray-100 shadow-card p-5 sm:p-6 space-y-5 scroll-mt-24">
       <div>
         <h2 id="don-titre" className="font-heading font-bold text-dark text-xl">{t("titre")}</h2>
         <p className="text-sm text-gray-600 mt-1">
@@ -124,17 +124,17 @@ export default function FormulaireDon({ organisation, projetId }: { organisation
             <dt className="font-bold text-dark">{t("vousPayez")}</dt>
             <dd className="font-bold text-dark">{formatFcfa(calcul.total)}{moyenChoisi === "paypal" && <> ({euros(calcul.total)})</>}</dd>
           </div>
-          <div className="flex justify-between gap-3"><dt className="font-bold text-primary">{t("ongRecoit")}</dt><dd className="font-bold text-primary">{formatFcfa(calcul.montantOng)}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="font-bold text-brand">{t("ongRecoit")}</dt><dd className="font-bold text-brand">{formatFcfa(calcul.montantOng)}</dd></div>
         </dl>
         <p className="flex gap-2 px-4 py-3 text-gray-600">
-          <CalendarClock size={16} className="text-primary shrink-0 mt-0.5" />
+          <CalendarClock size={16} className="text-brand shrink-0 mt-0.5" />
           <span>{t.rich("calendrier", { date: formatDate(dateReversement(config.jour_reversement).toISOString()), strong: (x) => <strong className="text-dark">{x}</strong> })}</span>
         </p>
         <p className="flex gap-2 px-4 py-3 text-gray-600">
-          <ShieldCheck size={16} className="text-primary shrink-0 mt-0.5" />
+          <ShieldCheck size={16} className="text-brand shrink-0 mt-0.5" />
           <span>
             {t("donnees")}{" "}
-            <Link href="/confidentialite" className="font-semibold text-primary hover:underline">{t("politique")}</Link>
+            <Link href="/confidentialite" className="font-semibold text-brand hover:underline">{t("politique")}</Link>
           </span>
         </p>
       </div>
@@ -159,7 +159,7 @@ export default function FormulaireDon({ organisation, projetId }: { organisation
               {moyensDispo.map(({ id, label, icon: Icon }) => (
                 <button key={id} type="button" aria-pressed={moyenChoisi === id} onClick={() => setMoyen(id)}
                   className={cn("flex flex-col items-center gap-1 rounded-xl border-2 py-2.5 text-xs font-bold transition-colors",
-                    moyenChoisi === id ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-dark hover:border-primary/40")}>
+                    moyenChoisi === id ? "border-primary bg-primary/5 text-brand" : "border-gray-200 text-dark hover:border-primary/40")}>
                   <Icon size={18} /> {tRes(`moyens.${label}`)}
                 </button>
               ))}
