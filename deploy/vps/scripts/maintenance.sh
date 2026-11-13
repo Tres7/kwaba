@@ -11,6 +11,8 @@ case "${1:-}" in
     log "Jetons expirés purgés"
     # Temporary admins who no longer sign in: those who do lose their rights at their next request
     kwaba_compose run --rm --no-deps api python manage.py retirer_admins_expires
+    kwaba_compose run --rm --no-deps api python manage.py purge_activity
+    log "Journal d'activité purgé (plus de 12 mois)"
     ;;
   renew-certs)
     kwaba_compose --profile tools run --rm certbot renew --webroot -w /var/www/certbot --quiet
