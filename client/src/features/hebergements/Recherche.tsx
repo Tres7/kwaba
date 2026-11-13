@@ -248,11 +248,12 @@ function RechercheContent() {
           )}
 
           <div className={cn("flex-1 min-w-0", carte && "lg:flex-none lg:w-[55%] xl:w-1/2")}>
-            <div className="flex items-center justify-between gap-3 mb-6">
+            {/* Below md the buttons go under the title and may wrap: on one line they made the page wider than a phone screen */}
+            <div className="flex flex-col gap-3 mb-6 md:flex-row md:items-center md:justify-between">
               {isLoading ? (
                 <p className="text-muted text-sm">{t("rechercheEnCours")}</p>
               ) : (
-                <div>
+                <div className="min-w-0">
                 <h1 className="text-dark font-medium">
                   <span className="font-heading font-bold text-2xl">{results.length}</span>{" "}
                   {t("hebergements", { nombre: results.length })}
@@ -266,7 +267,7 @@ function RechercheContent() {
                 )}
                 </div>
               )}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 md:shrink-0">
                 {avecDates && (
                   <button onClick={() => pushParams({ disponibles: params.disponibles ? "" : "true" })} aria-pressed={Boolean(params.disponibles)}
                     className={cn("flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border",
