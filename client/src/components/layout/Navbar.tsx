@@ -18,13 +18,13 @@ import { filtrerLiens, useReglagesSite } from "@/lib/site";
 
 const UNREAD_POLL_INTERVAL_MS = 10_000;
 
+// Links of the full bar (from 1280 px); every page is also in the menu (below 1280 px) and in the footer
 const NAV_LINKS = [
   { href: "/recherche", label: "hebergements" },
   { href: "/decouvrir", label: "experiences" },
-  // Shown only on large screens (otherwise the bar overflows); always present in the mobile menu and the footer
-  { href: "/transfert", label: "transferts", large: true },
-  { href: "/together", label: "together", large: true },
-  { href: "/give", label: "give", large: true },
+  { href: "/transfert", label: "transferts" },
+  { href: "/together", label: "together" },
+  { href: "/give", label: "give" },
   { href: "/hote", label: "devenirHote" },
 ];
 
@@ -79,8 +79,8 @@ export default function Navbar() {
   const t = useTranslations("nav");
   const tRoles = useTranslations("roles");
   const [mobileOpen, setMobileOpen] = useState(false);
-  // Screens from 1024 to 1535 px: the bar has no room for a readable search field next to the links;
-  // a magnifier opens the full-width search under the bar
+  // Screens from 1280 to 1535 px: the bar has no room for a readable search field next to the links;
+  // a magnifier opens the full-width search under the bar (always shown below 1280 px)
   const [rechercheOuverte, setRechercheOuverte] = useState(false);
   const { data: session, status } = useSession();
   const authenticated = status === "authenticated" && !!session && !session.error;
@@ -131,22 +131,24 @@ export default function Navbar() {
           <SearchForm />
         </div>
 
-        <div className="hidden md:flex items-center gap-5 lg:gap-6">
+        {/* Full bar only from 1280 px: below, links, language, currency and account did not fit (the page became
+            wider than the screen on tablets and small laptops) and are in the menu */}
+        <div className="hidden xl:flex items-center gap-5 2xl:gap-6">
           <button
             type="button" onClick={() => setRechercheOuverte((o) => !o)}
             aria-expanded={rechercheOuverte} aria-controls="recherche-barre" aria-label={t("rechercherDestination")}
-            className={cn("hidden lg:flex 2xl:hidden w-10 h-10 rounded-full items-center justify-center border transition-colors",
+            className={cn("hidden xl:flex 2xl:hidden w-10 h-10 rounded-full items-center justify-center border transition-colors",
               rechercheOuverte ? "border-primary text-primary bg-primary/5" : "border-gray-200 text-dark hover:border-primary hover:text-primary")}
           >
             <Search size={18} />
           </button>
 
-          <nav className="flex items-center gap-4 lg:gap-5" aria-label={t("navigationPrincipale")}>
-            {liensBarre.map(({ href, label, large }) => (
+          <nav className="flex items-center gap-4 2xl:gap-5" aria-label={t("navigationPrincipale")}>
+            {liensBarre.map(({ href, label }) => (
               <Link
                 key={href}
                 href={isHost && href === "/hote" ? "/hote/espace" : href}
-                className={cn("text-sm font-medium transition-colors whitespace-nowrap", large && "hidden xl:inline",
+                className={cn("text-sm font-medium transition-colors whitespace-nowrap",
                   pathname.startsWith(href) ? "text-primary" : "text-dark hover:text-primary")}
               >
                 {isHost && href === "/hote" ? labelHote : t(label)}
@@ -163,13 +165,14 @@ export default function Navbar() {
             {authenticated ? (
               <>
                 {isAgent && (
-                  <Link href="/agent" className="flex items-center gap-1.5 text-xs font-bold text-white bg-primary rounded-full px-3 py-1.5 hover:bg-primary/90 whitespace-nowrap">
-                    <ClipboardCheck size={14} /> {t("espaceAgent")}
+                  // Icon only: with their labels, these two buttons never fit in the bar next to the links (the icon keeps its name)
+                  <Link href="/agent" aria-label={t("espaceAgent")} title={t("espaceAgent")} className="flex items-center text-xs font-bold text-white bg-primary rounded-full px-3 py-1.5 hover:bg-primary/90">
+                    <ClipboardCheck size={14} />
                   </Link>
                 )}
                 {isAdmin && (
-                  <Link href="/backoffice" className="flex items-center gap-1.5 text-xs font-bold text-dark border border-gray-200 rounded-full px-3 py-1.5 hover:border-primary hover:text-primary">
-                    <ShieldCheck size={14} /> Back-office
+                  <Link href="/backoffice" aria-label="Back-office" title="Back-office" className="flex items-center text-xs font-bold text-dark border border-gray-200 rounded-full px-3 py-1.5 hover:border-primary hover:text-primary">
+                    <ShieldCheck size={14} />
                   </Link>
                 )}
                 <Link href="/messages" className="relative p-2 text-gray-500 hover:text-primary transition-colors" aria-label={unread ? t("messagesNonLus", { nombre: unread }) : t("messages")}>
@@ -181,7 +184,7 @@ export default function Navbar() {
                   )}
                 </Link>
                 <Link href="/profil" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <div className="text-right hidden xl:block">
+                  <div className="text-right hidden min-[1700px]:block">
                     <p className="text-xs font-bold text-dark leading-tight max-w-[140px] truncate">{session.user?.name ?? t("monProfil")}</p>
                     <p className="text-[10px] text-gray-500">{roleLabel}</p>
                   </div>
@@ -205,7 +208,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="flex md:hidden items-center gap-1">
+        <div className="flex xl:hidden items-center gap-1">
           {authenticated && (
             <Link href="/messages" className="relative zone-tactile p-2 text-dark" aria-label={t("messages")}>
               <MessageCircle size={22} />
@@ -218,8 +221,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Search under the bar: always on tablets, on demand (magnifier) from 1024 to 1535 px */}
-      <div id="recherche-barre" className={cn("hidden md:block lg:hidden px-6 pb-3", rechercheOuverte && "lg:block 2xl:hidden")}>
+      {/* Search under the bar: always from 768 to 1279 px, on demand (magnifier) from 1280 to 1535 px */}
+      <div id="recherche-barre" className={cn("hidden md:block xl:hidden px-6 pb-3", rechercheOuverte && "xl:block 2xl:hidden")}>
         <div className="max-w-2xl mx-auto">
           <SearchForm focus={rechercheOuverte} onDone={() => setRechercheOuverte(false)} />
         </div>
