@@ -21,6 +21,12 @@
   --color-primary-800: #072a27;
   --color-primary-900: #05201d;
   --color-primary: #0e4d47;
+  --color-brand: #0e4d47;
+
+  --color-surface: #ffffff;
+  --color-canvas: var(--color-gray-50);
+  --color-inverse: #ffffff;
+  --color-night: #1f2937;
 
   --color-dark: #1f2937;
   --color-dark-muted: #475569;
@@ -81,7 +87,7 @@
 }
 
 @utility glass {
-  @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-soft;
+  @apply bg-surface/70 backdrop-blur-lg border border-white/20 shadow-soft;
 }
 
 @utility glass-dark {
@@ -94,7 +100,7 @@
 
 @layer base {
   html, body {
-    @apply bg-white text-dark font-body antialiased;
+    @apply bg-background text-dark font-body antialiased;
     scroll-behavior: smooth;
   }
 
@@ -121,15 +127,113 @@
   :root {
     --background: #ffffff;
     --foreground: #1E293B;
+    color-scheme: light;
   }
 
   .dark {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-  }
+    color-scheme: dark;
+    --background: #0c1311;
+    --foreground: #f1f5f3;
 
-  .dark body {
-    @apply bg-[#0f172a] text-slate-100;
+    --color-surface: #121b18;
+    --color-canvas: #0c1311;
+    --color-inverse: #0c1311;
+    --color-brand: #5ccbb0;
+
+    --color-primary: #14705f;
+    --color-primary-50: #12241f;
+    --color-primary-100: #173029;
+    --color-primary-200: #1f4a40;
+
+    --color-dark: #f1f5f3;
+    --color-dark-muted: #a5b2ad;
+    --color-light: #0c1311;
+    --color-light-muted: #18231f;
+    --color-muted: #94a39d;
+    --color-secondary: #e0892b;
+
+    --color-gray-50: #151f1c;
+    --color-gray-100: #1c2825;
+    --color-gray-200: #26342f;
+    --color-gray-300: #34443e;
+    --color-gray-400: #727f7a;
+    --color-gray-500: #94a39d;
+    --color-gray-600: #a5b2ad;
+    --color-gray-700: #c2ccc8;
+    --color-gray-800: #dbe3e0;
+    --color-gray-900: #eef3f1;
+
+    --color-red-50: #271917;
+    --color-red-100: #391d1b;
+    --color-red-200: #5b2423;
+    --color-red-700: #fca5a5;
+    --color-red-800: #fecaca;
+    --color-red-900: #fee2e2;
+    --color-amber-50: #282410;
+    --color-amber-100: #3b2f10;
+    --color-amber-200: #5e440f;
+    --color-amber-700: #fcd34d;
+    --color-amber-800: #fde68a;
+    --color-amber-900: #fef3c7;
+    --color-green-50: #0f281a;
+    --color-green-100: #103720;
+    --color-green-200: #14512c;
+    --color-green-700: #86efac;
+    --color-green-800: #bbf7d0;
+    --color-green-900: #dcfce7;
+    --color-emerald-50: #0c271e;
+    --color-emerald-100: #0d3427;
+    --color-emerald-200: #0d4d38;
+    --color-emerald-700: #6ee7b7;
+    --color-emerald-800: #a7f3d0;
+    --color-emerald-900: #d1fae5;
+    --color-orange-50: #281f12;
+    --color-orange-100: #3b2612;
+    --color-orange-200: #5f3513;
+    --color-orange-700: #fdba74;
+    --color-orange-800: #fed7aa;
+    --color-orange-900: #ffedd5;
+    --color-blue-50: #12202c;
+    --color-blue-100: #15293f;
+    --color-blue-200: #1c3a61;
+    --color-blue-700: #93c5fd;
+    --color-blue-800: #bfdbfe;
+    --color-blue-900: #dbeafe;
+    --color-sky-50: #0c252b;
+    --color-sky-100: #0c303c;
+    --color-sky-200: #0d465d;
+    --color-sky-700: #7dd3fc;
+    --color-sky-800: #bae6fd;
+    --color-sky-900: #e0f2fe;
+    --color-rose-50: #28181a;
+    --color-rose-100: #3a1c20;
+    --color-rose-200: #5d222c;
+    --color-rose-700: #fda4af;
+    --color-rose-800: #fecdd3;
+    --color-rose-900: #ffe4e6;
+    --color-violet-50: #1b1c2c;
+    --color-violet-100: #25223f;
+    --color-violet-200: #382d61;
+    --color-violet-700: #c4b5fd;
+    --color-violet-800: #ddd6fe;
+    --color-violet-900: #ede9fe;
+    --color-teal-50: #0d2723;
+    --color-teal-100: #0e342f;
+    --color-teal-200: #0f4d45;
+    --color-teal-700: #5eead4;
+    --color-teal-800: #99f6e4;
+    --color-teal-900: #ccfbf1;
+    --color-yellow-50: #272610;
+    --color-yellow-100: #38330f;
+    --color-yellow-200: #5a4b0e;
+    --color-yellow-700: #fde047;
+    --color-yellow-800: #fef08a;
+    --color-yellow-900: #fef9c3;
+
+    --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+    --shadow-card-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.6);
+    --shadow-button: 0 4px 14px 0 rgba(0, 0, 0, 0.45);
   }
 
   * {
@@ -214,10 +318,28 @@
   }
 
   .dark .skeleton {
-    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background: linear-gradient(90deg, #151f1c 25%, #1f2b27 50%, #151f1c 75%);
     background-size: 400px 100%;
     animation: shimmer 1.4s ease-in-out infinite;
   }
+}
+
+.dark .maplibregl-ctrl-group {
+  background: var(--color-surface);
+}
+.dark .maplibregl-ctrl-group button + button {
+  border-top-color: var(--color-gray-200);
+}
+.dark .maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
+.dark .maplibregl-ctrl-attrib,
+.dark .maplibregl-ctrl-attrib-button {
+  background-color: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  color: var(--color-gray-500);
+}
+.dark .maplibregl-ctrl-attrib a {
+  color: var(--color-gray-500);
 }
 
 /* ─── Accessibility ────────────────────────────────────────── */
@@ -232,6 +354,14 @@
 .bg-secondary:focus-visible {
   outline-color: #1E293B;
   box-shadow: 0 0 0 2px #fff;
+}
+.dark :focus-visible {
+  outline-color: #5ccbb0;
+}
+.dark .bg-primary:focus-visible,
+.dark .bg-dark:focus-visible,
+.dark .bg-secondary:focus-visible {
+  box-shadow: 0 0 0 2px #0c1311;
 }
 
 /* Touch target of at least 44 × 44 px (WCAG 2.5.8, Apple HIG) without changing the look:
