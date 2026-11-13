@@ -4,14 +4,16 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from django.db.models import Count, Exists, OuterRef, Q
+from django.utils import timezone
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
 from .infrastructure.persistence.models import UserModel
 
 __all__ = [
     'Compte', 'ROLES', 'attacher', 'candidatures_refusees', 'compte', 'comptes', 'comptes_actifs', 'comptes_de_role',
-    'compte_demo', 'condition_compte_actif', 'emails_actifs', 'hote_ou_candidat', 'hotes_et_candidats', 'ids_actifs',
-    'ids_par_recherche', 'passer_hote', 'peut_gerer_annonces', 'retirer_role_hote', 'revoquer_jetons', 'statistiques',
+    'compte_demo', 'condition_compte_actif', 'emails_actifs', 'emails_admins_section', 'hote_ou_candidat',
+    'hotes_et_candidats', 'ids_actifs', 'ids_par_recherche', 'passer_hote', 'peut_gerer_annonces', 'retirer_role_hote',
+    'revoquer_jetons', 'statistiques',
 ]
 
 ROLES = [code for code, _ in UserModel.ROLE_CHOICES]
@@ -150,6 +152,17 @@ def emails_actifs(roles: Iterable[str], limite: int | None = None) -> list[str]:
     emails = UserModel.objects.filter(role__in=list(roles), is_active=True).order_by('date_joined').values_list(
         'email', flat=True)
     return list(emails[:limite] if limite else emails)
+
+
+def emails_admins_section(section: str) -> list[str]:
+    """Active admins who see a back-office section (securite.permissions.a_acces_section): super admins, admins
+    without limits and admins granted that section, whose access has not ended."""
+    maintenant = timezone.now()
+    return list(
+        UserModel.objects.filter(role='admin', is_active=True)
+        .filter(Q(is_superuser=True) | Q(admin_sections__isnull=True) | Q(admin_sections__contains=[section]))
+        .filter(Q(admin_expire_le__isnull=True) | Q(admin_expire_le__gt=maintenant))
+        .order_by('date_joined').values_list('email', flat=True))
 
 
 def statistiques(depuis: datetime) -> dict:

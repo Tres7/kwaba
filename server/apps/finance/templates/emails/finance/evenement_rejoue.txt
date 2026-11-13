@@ -1,0 +1,10 @@
+{% autoescape off %}Bonjour,
+
+Un événement du prestataire de paiement déjà enregistré dans le grand livre (ligne n° {{ mouvement_id }}, nature {{ nature }}) a été reçu une nouvelle fois, avec un montant différent. La nouvelle version n'a pas été écrite : le grand livre garde la première.
+
+Que faire : comparer la ligne avec le relevé du prestataire lors du rapprochement du jour. Si le premier montant était faux, le corriger par une ligne inverse.
+
+Cet email ne contient ni montant ni nom de personne.
+
+Kwa-Ba, module finance
+{% endautoescape %}
