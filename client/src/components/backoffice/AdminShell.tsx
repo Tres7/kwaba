@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CalendarCheck, CalendarCog, CalendarRange, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
+import { Activity, ArrowLeft, CalendarCheck, CalendarCog, CalendarRange, Car, ClipboardCheck, Compass, FileText, HandHeart, Home, Landmark, LayoutDashboard, Menu, Percent, Plane, ShieldAlert, Star, Users } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import MobileDrawer, { DrawerItem } from "@/components/layout/MobileDrawer";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ const NAV: { href: string; label: string; icon: typeof Users; section: string; c
   { href: "/backoffice/reservations", label: "Réservations", icon: CalendarCheck, section: "reservations" },
   { href: "/backoffice/avis", label: "Avis", icon: Star, section: "avis" },
   { href: "/backoffice/anti-fraude", label: "Anti-fraude", icon: ShieldAlert, section: "anti-fraude" },
+  { href: "/backoffice/activity", label: "Journal d'activité", icon: Activity, section: "", permission: "activity_log" },
   { href: "/backoffice/transferts", label: "Transferts aéroport", icon: Plane, section: "transferts" },
   { href: "/backoffice/location", label: "Location de voiture", icon: Car, section: "location" },
   { href: "/backoffice/experiences", label: "Expériences", icon: Compass, section: "experiences" },
@@ -42,7 +43,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const { data: droits } = useDroitsAdmin(estAdmin);
   // Limited admin: only their sections (the API refuses the others anyway)
   const menu = droits
-    ? NAV.filter((n) => droits.sections.includes(n.section) && (!n.permission || droits.permissions.includes(n.permission)))
+    ? NAV.filter((n) => (!n.section || droits.sections.includes(n.section))
+      && (!n.permission || droits.permissions.includes(n.permission)))
     : NAV.filter((n) => !n.permission);
   const { data: compteurs } = useCompteursVerification(estAdmin && (droits?.sections.includes("verifications") ?? false));
   const enAttente = compteurs?.total ?? 0;
