@@ -4,7 +4,7 @@ import pytest
 
 from apps.agenda import api as agenda
 from apps.agenda.models import AgendaSettingsModel, AppointmentModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 
 from .conftest import at, in_days
 
@@ -27,7 +27,7 @@ def test_a_change_is_audited_with_before_and_after(super_admin, client_for):
     response = client_for(super_admin).put(URL, {'notice_hours': 48, 'max_per_day': 4}, format='json')
     assert response.status_code == 200
     assert response.data['values']['notice_hours'] == 48 and response.data['updated_by']
-    entry = JournalAuditModel.objects.get(action='agenda_settings_changed')
+    entry = ActivityEntryModel.objects.get(action='agenda_settings_changed')
     assert entry.details['changes'] == {'notice_hours': {'before': 24, 'after': 48}}
 
 
@@ -81,4 +81,4 @@ def test_a_super_admin_grants_the_permission(super_admin, make_user, client_for)
 
 def test_super_admins_have_every_permission(super_admin, client_for):
     assert set(client_for(super_admin).get('/api/v1/admin/droits/').data['permissions']) == {
-        'agenda_settings', 'validate_without_visit'}
+        'agenda_settings', 'validate_without_visit', 'activity_log'}

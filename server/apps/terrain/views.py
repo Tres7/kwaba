@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.permissions import a_acces_section
 from apps.users import api as users
 
@@ -170,8 +170,10 @@ class _ActionMission(APIView):
             mission = getattr(services, self.action)(type_mission, cible, request.user)
         except services.MissionErreur as exc:
             return Response({'detail': str(exc)}, status=exc.code)
-        journaliser(f'mission_{"prise" if self.action == "prendre" else "relachee"}', request, utilisateur=request.user,
-                    type=type_mission, cible=str(cible), agent=str(mission.agent_id or ''))
+        activity.record(f'mission_{"prise" if self.action == "prendre" else "relachee"}', request, actor=request.user,
+                        target=activity.Target('account' if type_mission == 'piece' else 'listing', str(cible),
+                                               mission.titre),
+                        type=type_mission, cible=str(cible), agent=str(mission.agent_id or ''))
         return Response(_mission_json(mission, request.user))
 
 

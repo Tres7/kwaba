@@ -39,7 +39,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO kwaba_app;
 
 -- Audit log: the application adds rows but can neither change nor delete them
-REVOKE UPDATE, DELETE ON securite_journal_audit FROM kwaba_app;
+REVOKE UPDATE, DELETE ON activity_entry FROM kwaba_app;
 
 -- Hosts' pre-registration proofs (contrats_preinscription): same rule as the audit log.
 -- The table is created by the contrats 0005 migration: run this script again after that migration.

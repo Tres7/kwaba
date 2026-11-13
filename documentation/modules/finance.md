@@ -12,7 +12,7 @@ Chaque mouvement d'argent est écrit **une seule fois**, dans une table en ajout
 | --- | --- |
 | `domain/` | `entities.py` (`Ligne`, `Ecriture`, `Mouvement`, `Referentiels`, sens, états d'un mois), `rules.py` (contrôle d'une ligne, ligne inverse, mois comptable), `exceptions.py` (`MouvementRefuse`, `RestitutionRefusee`). Python pur, sans Django |
 | `application/` | `ports.py` (`GrandLivre`, `Parametres`, `Restitutions`, `Alertes`, `Journal`, `TransactionManager`, `Clock`), `service.py` (`GrandLivreService`, `RestitutionService`) |
-| `infrastructure/` | `persistence/models.py` (tables), `persistence/repositories.py` (écriture, idempotence, verrous consultatifs, traduction des refus de la base), `persistence/sql_restitutions.py` (vues et fonctions SQL, source unique), `persistence/restitutions.py` (leur lecture), `notifications/alertes.py` (emails par `notifications.api`), `journal.py` (journal d'audit de `securite`), `checks.py` (contrôle `finance.E001`), `clock.py`, `container.py` |
+| `infrastructure/` | `persistence/models.py` (tables), `persistence/repositories.py` (écriture, idempotence, verrous consultatifs, traduction des refus de la base), `persistence/sql_restitutions.py` (vues et fonctions SQL, source unique), `persistence/restitutions.py` (leur lecture), `notifications/alertes.py` (emails par `notifications.api`), `journal.py` (journal d'activité, module `activity`), `checks.py` (contrôle `finance.E001`), `clock.py`, `container.py` |
 | `api.py` | fonctions simples qui délèguent aux services ; données simples en entrée et en sortie |
 | `migrations/` | `0001` tables, `0002` référentiels du fichier, `0003` garde-fous (triggers). Les vues et fonctions ne sont pas dans une migration : supprimées avant chaque `migrate`, recréées après depuis `sql_restitutions.py` (`apps.py`) |
 
@@ -76,7 +76,7 @@ Si un module ouvert écrirait dans une offre ou une nature inactive, ses paiemen
 | --- | --- |
 | Mouvement refusé (FIN-01.4) | email « [Kwa-Ba Finance] Mouvement refusé par le grand livre » via `notifications.api.send_mail`, gabarit `templates/emails/finance/mouvement_refuse.txt` |
 | Événement du prestataire rejoué avec un autre montant | email « Événement de paiement rejoué avec un autre montant », gabarit `evenement_rejoue.txt` |
-| Correction d'une ligne | journal d'audit de `securite`, action `ecriture_corrigee` (auteur, ligne, ligne inverse, motif) |
+| Correction d'une ligne | journal d'activité (module `activity`, `activity.api.record`), action `ecriture_corrigee` (auteur, ligne, ligne inverse, motif), lisible dans Back-office → Journal d'activité |
 
 Destinataires des emails : les administrateurs actifs qui voient la section « Finances » du back-office (`users.api.emails_admins_section('finances')` : super admins, admins sans limite, admins à qui la section est ouverte, accès non expiré). Pour que le référent financier les reçoive, lui ouvrir un compte admin limité à cette section. Les emails partent tout de suite (un refus annule en général la transaction de l'appelant) ; un échec d'envoi ne fait jamais échouer l'action. Ils ne contiennent ni montant ni nom de personne (NFF-05) ; la trace technique reste dans le journal des conteneurs (logger `apps.finance`).
 
@@ -154,7 +154,7 @@ Le fichier a été traduit dans notre architecture : modèles Django et migratio
 | T05 accepte les deux sens (le fichier : sortie seulement) | L'argent d'un remboursement décidé est dû au voyageur (entrée) jusqu'à son envoi (sortie) |
 | Un fonds de tiers peut attendre la personne (type obligatoire, identifiant facultatif) | Le chauffeur d'un transfert n'est attribué qu'après le paiement |
 | Compte d'argent et moyen PayPal présents, inactifs | PayPal est éteint au lancement : un paiement PayPal est refusé plutôt que laissé hors du grand livre |
-| Journal des actions : celui de `securite` au lieu de `finance_journal_action` | Un seul journal d'audit, déjà en ajout seul pour l'application |
+| Journal des actions : le journal d'activité (module `activity`) au lieu de `finance_journal_action` | Un seul journal d'audit, en ajout seul pour l'application |
 | Pas de `finance_sequence_piece` ni de `finance_prochain_numero` | Les numéros de facture viennent déjà de `documents` (`SequenceFactureModel`, verrou à chaque émission) ; le lot F3 l'étend aux autres séries |
 | Pas encore de `finance_caution`, `finance_validation`, ni de `tarifs_snapshot` | Créés avec leur brique : cautions de location (F2), double validation (FIN-13), ventilation au paiement (FIN-03) |
 

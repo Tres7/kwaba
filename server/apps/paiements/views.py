@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.users import api as users
 
 from . import fedapay, paypal, services, tarifs
@@ -63,11 +63,11 @@ class WebhookFedaPayView(APIView):
         if not secret and not settings.DEBUG:
             # Without a secret, anyone could call this endpoint: refused outside development
             logger.error("Webhook FedaPay refusé : FEDAPAY_WEBHOOK_SECRET n'est pas configurée")
-            journaliser('webhook_refuse', request, motif='secret_absent')
+            activity.record('webhook_refuse', request, motif='secret_absent')
             return Response({'detail': 'Webhook non configuré.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         if secret and not fedapay.signature_valide(corps, request.headers.get('X-FEDAPAY-SIGNATURE', ''), secret):
             logger.warning("Webhook FedaPay rejeté : signature invalide")
-            journaliser('webhook_refuse', request, motif='signature_invalide')
+            activity.record('webhook_refuse', request, motif='signature_invalide')
             return Response({'detail': 'Signature invalide.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             evenement = json.loads(corps or b'{}')
@@ -152,8 +152,8 @@ class ProfilVersementView(APIView):
         serializer.save(hote_id=request.user.pk)
         if ancien != (serializer.instance.operateur, serializer.instance.numero):
             # Changing the account that receives the money is the action targeted after an account takeover: it is logged
-            journaliser('profil_versement_modifie', request, utilisateur=request.user,
-                        operateur=serializer.instance.operateur, numero_fin=serializer.instance.numero[-2:])
+            activity.record('profil_versement_modifie', request, actor=request.user,
+                            operateur=serializer.instance.operateur, numero_fin=serializer.instance.numero[-2:])
             # Scheduled payouts start again from zero toward the new account: those blocked for lack of a profile, and
             # those whose tries failed toward the previous one. A failed payout ("echoue") stays with the administrators,
             # who were alerted: they may have paid it by hand.

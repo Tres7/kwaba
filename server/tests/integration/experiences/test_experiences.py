@@ -8,7 +8,7 @@ from PIL import Image
 from rest_framework.test import APIClient
 
 from apps.experiences.models import ExperienceModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 
 PUBLIC = '/api/v1/experiences/'
 ADMIN = '/api/v1/admin/experiences/'
@@ -89,7 +89,7 @@ def test_ajout_modification_publication_suppression(admin):
 
     assert admin.delete(url).status_code == 204
     assert not ExperienceModel.objects.filter(pk=experience['id']).exists()
-    actions = set(JournalAuditModel.objects.filter(details__objet='experience').values_list('action', flat=True))
+    actions = set(ActivityEntryModel.objects.filter(details__objet='experience').values_list('action', flat=True))
     assert actions == {'backoffice_creation', 'backoffice_modification', 'backoffice_suppression'}
 
 

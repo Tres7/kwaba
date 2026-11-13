@@ -9,7 +9,7 @@ from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.response import Response
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import VueAdmin
 
 from . import finances, tarifs
@@ -80,9 +80,9 @@ class TarifsView(VueAdmin):
             for code, montant in menage.items():
                 FraisMenageModel.objects.update_or_create(type_logement=code, defaults={'montant': montant})
         apres = _tarifs_json()
-        journaliser('tarifs_modifies', request, utilisateur=request.user,
-                    avant={**avant['taux'], **{f'menage_{k}': v for k, v in avant['frais_menage'].items()}},
-                    apres={**apres['taux'], **{f'menage_{k}': v for k, v in apres['frais_menage'].items()}})
+        activity.record('tarifs_modifies', request, actor=request.user,
+                        avant={**avant['taux'], **{f'menage_{k}': v for k, v in avant['frais_menage'].items()}},
+                        apres={**apres['taux'], **{f'menage_{k}': v for k, v in apres['frais_menage'].items()}})
         return Response(apres)
 
 
@@ -127,6 +127,6 @@ class FinancesExportView(VueAdmin):
             reponse = HttpResponse(finances.en_pdf(donnees), content_type='application/pdf')
         reponse['Content-Disposition'] = f'attachment; filename="{nom}.{format_export}"'
         reponse['Cache-Control'] = 'no-store'
-        journaliser('finances_exportees', request, utilisateur=request.user, format=format_export,
-                    debut=str(debut), fin=str(fin))
+        activity.record('finances_exportees', request, actor=request.user, format=format_export,
+                        debut=str(debut), fin=str(fin))
         return reponse

@@ -8,7 +8,7 @@ from apps.agenda.domain import rules
 from apps.agenda.domain.entities import CANCELLED
 from apps.agenda.domain.settings import BOUNDS, DEFAULT_TIMEZONE, AgendaSettings, InvalidSettings
 from apps.agenda.infrastructure.container import agenda_service
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import VueAdmin
 from apps.securite.permissions import has_special_permission
 from apps.users import api as users
@@ -46,7 +46,7 @@ class AgendaSettingsView(VueAdmin):
         diff = {name: {'before': value, 'after': after[name]} for name, value in before.as_dict().items()
                 if after[name] != value}
         if diff:
-            journaliser('agenda_settings_changed', request, utilisateur=request.user, changes=diff)
+            activity.record('agenda_settings_changed', request, actor=request.user, changes=diff)
         return Response(_settings_json(stored))
 
 

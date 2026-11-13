@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.paiements.api import operateurs_du_pays
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 from apps.users import api as users
@@ -71,8 +71,8 @@ class TarifsView(APIView):
             for t in tarifs.validated_data:
                 TarifTransfertModel.objects.update_or_create(aeroport=aeroport, categorie=t['categorie'],
                                                              defaults={'prix': t['prix'], 'actif': t['actif']})
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="tarifs_transfert", id=code,
-                    tarifs={t['categorie']: t['prix'] for t in tarifs.validated_data})
+        activity.record("backoffice_modification", request, actor=request.user, objet="tarifs_transfert", id=code,
+                        tarifs={t['categorie']: t['prix'] for t in tarifs.validated_data})
         return Response(AeroportSerializer(AeroportModel.objects.prefetch_related('tarifs').get(pk=code)).data)
 
 
@@ -169,8 +169,8 @@ class TransfertAttribuerView(APIView):
             services.assigner_chauffeur(t, chauffeur)
         except services.TransfertErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="transfert", id=str(t.pk),
-                    libelle=t.reference, chauffeur=f"{chauffeur.prenom} {chauffeur.nom}")
+        activity.record("backoffice_modification", request, actor=request.user, objet="transfert", id=str(t.pk),
+                        libelle=t.reference, chauffeur=f"{chauffeur.prenom} {chauffeur.nom}")
         return Response(_transfert(_transferts().get(pk=pk)))
 
 
@@ -189,7 +189,7 @@ class TransfertAnnulerView(APIView):
             rembourse = services.annuler(t, par='plateforme')
         except services.TransfertErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="transfert", id=str(t.pk),
-                    libelle=t.reference, operation="annulation", rembourse=rembourse, motif=motif)
+        activity.record("backoffice_modification", request, actor=request.user, objet="transfert", id=str(t.pk),
+                        libelle=t.reference, operation="annulation", rembourse=rembourse, motif=motif)
         return Response(_transfert(_transferts().get(pk=pk)))
 

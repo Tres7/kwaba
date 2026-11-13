@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from apps.contrats import api as contrats
 from apps.hebergements import api as hebergements
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.users import api as users
 from apps.verifications.models import PieceIdentiteModel
 
@@ -29,12 +29,12 @@ class Command(BaseCommand):
             voyageurs += not candidature
             self.stdout.write(f"{hote.email} : voyageur{', candidature ouverte' if candidature else ''}")
             if appliquer and users.retirer_role_hote(hote.id, candidature):
-                journaliser('role_modifie', utilisateur=hote.id, email=hote.email, avant='hote', apres='voyageur',
-                            candidature=candidature)
+                activity.record('role_modifie', target=activity.Target('account', str(hote.id), hote.email),
+                                avant='hote', apres='voyageur', candidature=candidature)
 
         bilan = f"{gardes} hôte(s) gardé(s), {candidats} candidat(s), {voyageurs} repassé(s) voyageur."
         if appliquer:
-            journaliser('roles_hotes_migres', gardes=gardes, candidats=candidats, voyageurs=voyageurs)
+            activity.record('roles_hotes_migres', gardes=gardes, candidats=candidats, voyageurs=voyageurs)
             self.stdout.write(self.style.SUCCESS(f"{bilan} Changements écrits."))
         else:
             self.stdout.write(self.style.WARNING(f"{bilan} Simulation : relancer avec --appliquer pour écrire."))

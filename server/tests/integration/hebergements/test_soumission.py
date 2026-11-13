@@ -6,7 +6,7 @@ import pytest
 from apps.contrats.models import PreinscriptionModel
 from apps.hebergements.models import BrouillonAnnonceModel, HebergementModel, HebergementPhotoModel
 from apps.paiements.models import ProfilVersementModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.users.infrastructure.persistence.models import UserModel
 from apps.verifications.models import PieceIdentiteModel
 
@@ -185,4 +185,4 @@ class TestDeclarations:
 
     def test_audit_trail_of_a_role_is_not_touched_by_the_sending(self, client_for, candidat, pret):
         _soumettre(client_for(candidat), pret)
-        assert not JournalAuditModel.objects.filter(action='role_modifie').exists()
+        assert not ActivityEntryModel.objects.filter(action='role_modifie').exists()

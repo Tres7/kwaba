@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from apps.paiements.api import operateurs_du_pays
 from apps.transferts import api as transferts
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 from apps.users import api as users
@@ -45,8 +45,8 @@ class ParametresView(APIView):
         serializer = ParametresSerializer(params, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="regles_location",
-                    champs=sorted(request.data.keys()))
+        activity.record("backoffice_modification", request, actor=request.user, objet="regles_location",
+                        champs=sorted(request.data.keys()))
         return Response(serializer.data)
 
 
@@ -107,8 +107,8 @@ def _photos(request, categorie):
 
 
 def _journal_photos(request, categorie, **details):
-    journaliser("backoffice_modification", request, utilisateur=request.user, objet="categorie_vehicule",
-                id=str(categorie.pk), libelle=str(categorie), champs=['photos'], **details)
+    activity.record("backoffice_modification", request, actor=request.user, objet="categorie_vehicule",
+                    id=str(categorie.pk), libelle=str(categorie), champs=['photos'], **details)
 
 
 class PhotosCategorieView(APIView):
@@ -322,9 +322,9 @@ class LocationAttribuerView(APIView):
             services.attribuer(loc, **d)
         except services.LocationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="location", id=str(loc.pk),
-                    libelle=loc.reference, partenaire=getattr(d['partenaire'], 'nom', ''),
-                    chauffeur=f"{d['chauffeur']['prenom']} {d['chauffeur']['nom']}" if d['chauffeur'] else '')
+        activity.record("backoffice_modification", request, actor=request.user, objet="location", id=str(loc.pk),
+                        libelle=loc.reference, partenaire=getattr(d['partenaire'], 'nom', ''),
+                        chauffeur=f"{d['chauffeur']['prenom']} {d['chauffeur']['nom']}" if d['chauffeur'] else '')
         return Response(_location(_locations().get(pk=pk)))
 
 
@@ -347,8 +347,8 @@ class LocationCautionView(APIView):
             services.retenir_caution(loc, **donnees.validated_data)
         except services.LocationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="location", id=str(loc.pk),
-                    libelle=loc.reference, operation="retenue_caution", **donnees.validated_data)
+        activity.record("backoffice_modification", request, actor=request.user, objet="location", id=str(loc.pk),
+                        libelle=loc.reference, operation="retenue_caution", **donnees.validated_data)
         return Response(_location(_locations().get(pk=pk)))
 
 
@@ -367,6 +367,6 @@ class LocationAnnulerView(APIView):
             rembourse = services.annuler(loc, par='plateforme')
         except services.LocationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="location", id=str(loc.pk),
-                    libelle=loc.reference, operation="annulation", rembourse=rembourse, motif=motif)
+        activity.record("backoffice_modification", request, actor=request.user, objet="location", id=str(loc.pk),
+                        libelle=loc.reference, operation="annulation", rembourse=rembourse, motif=motif)
         return Response(_location(_locations().get(pk=pk)))

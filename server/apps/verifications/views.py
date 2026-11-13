@@ -10,7 +10,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.hebergements import api as hebergements
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.permissions import a_acces_section
 from apps.terrain import api as terrain
 from apps.users import api as users
@@ -156,8 +156,8 @@ class PieceDecisionView(APIView):
             return Response({'detail': str(exc)}, status=exc.code)
         except services.VerificationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('identite_verifiee' if piece.statut == 'verifiee' else 'identite_refusee', request,
-                    utilisateur=request.user, hote=str(hote.pk), hote_email=hote.email)
+        activity.record('identite_verifiee' if piece.statut == 'verifiee' else 'identite_refusee', request,
+                        actor=request.user, hote=str(hote.pk), hote_email=hote.email)
         return Response(_piece_json(piece))
 
 
@@ -208,12 +208,13 @@ class DecisionView(APIView):
             return Response({'detail': str(exc)}, status=exc.code)
         except (services.VerificationErreur, FichierInvalide) as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('annonce_verifiee' if visite.decision == 'validee' else 'annonce_refusee', request,
-                    utilisateur=request.user, hebergement=str(pk))
+        activity.record('annonce_verifiee' if visite.decision == 'validee' else 'annonce_refusee', request,
+                        actor=request.user, hebergement=str(pk), annonce=hebergement['name'])
         if visite.decision == 'validee' and visite.latitude is not None:
             # The agent's position replaces the host's point: traced with the gap, to spot hosts who misplace theirs
-            journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk), source='visite',
-                        ecart_m=visite.ecart_m, precision_m=visite.precision_m)
+            activity.record('position_corrigee', request, actor=request.user, hebergement=str(pk),
+                            annonce=hebergement['name'], source='visite', ecart_m=visite.ecart_m,
+                            precision_m=visite.precision_m)
         return Response({'decision': visite.decision, 'statut': 'verifiee' if visite.decision == 'validee' else 'refusee'},
                         status=status.HTTP_201_CREATED)
 
@@ -242,8 +243,8 @@ class PhotosDecisionView(APIView):
             return Response({'detail': str(exc)}, status=exc.code)
         except services.VerificationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('photos_controlees', request, utilisateur=request.user, hebergement=str(pk),
-                    retirees=len(resultat['retirees']))
+        activity.record('photos_controlees', request, actor=request.user, hebergement=str(pk),
+                        annonce=annonce['name'], retirees=len(resultat['retirees']))
         return Response({'retirees': resultat['retirees'], 'images': resultat['images']})
 
 
@@ -263,7 +264,7 @@ class FichierPieceView(APIView):
                 detail = ("Ce fichier est perdu. Refusez la pièce avec un motif qui demande à l'hôte de la renvoyer : "
                           "il sera prévenu par email.")
             return Response({'detail': detail}, status=status.HTTP_410_GONE)
-        journaliser('piece_consultee', request, utilisateur=request.user, hote=str(piece.hote_id))
+        activity.record('piece_consultee', request, actor=request.user, hote=str(piece.hote_id))
         pdf = piece.type_contenu == 'application/pdf'
         reponse = FileResponse(piece.fichier.open('rb'), content_type=piece.type_contenu or 'application/octet-stream',
                                as_attachment=pdf, filename=f"piece-identite.{'pdf' if pdf else 'jpg'}")
@@ -329,7 +330,8 @@ class CorrectionPositionView(APIView):
     permission_classes = [EstVerificateur]
 
     def post(self, request, pk):
-        if not hebergements.fiche(pk):
+        annonce = hebergements.fiche(pk)
+        if not annonce:
             return Response({'detail': 'Annonce introuvable.'}, status=status.HTTP_404_NOT_FOUND)
         source = str(request.data.get('source', ''))
         try:
@@ -339,6 +341,7 @@ class CorrectionPositionView(APIView):
             )
         except services.VerificationErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('position_corrigee', request, utilisateur=request.user, hebergement=str(pk), source=source,
-                    ecart_m=resultat['ecart_m'], precision_m=resultat['precision_m'])
+        activity.record('position_corrigee', request, actor=request.user, hebergement=str(pk),
+                        annonce=annonce['name'], source=source, ecart_m=resultat['ecart_m'],
+                        precision_m=resultat['precision_m'])
         return Response({**resultat, 'latitude': float(resultat['latitude']), 'longitude': float(resultat['longitude'])})

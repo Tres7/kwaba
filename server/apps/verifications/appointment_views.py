@@ -8,7 +8,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.agenda import api as agenda
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.users import api as users
 
 from . import appointments
@@ -90,7 +90,8 @@ class BookView(APIView):
             appointment = appointments.book(request.user, _ids(request.data.get('listings')), start)
         except appointments.AppointmentError as exc:
             return _refused(exc)
-        journaliser('visit_booked', request, utilisateur=request.user, appointment=str(appointment.id))
+        activity.record('visit_booked', request, actor=request.user, appointment=str(appointment.id),
+                        title=appointment.title)
         return Response(appointments.host_appointment_json(appointment), status=201)
 
 
@@ -118,7 +119,8 @@ class MoveView(APIView):
             appointment = appointments.move(request.user, pk, start)
         except appointments.AppointmentError as exc:
             return _refused(exc)
-        journaliser('visit_moved', request, utilisateur=request.user, appointment=str(appointment.id))
+        activity.record('visit_moved', request, actor=request.user, appointment=str(appointment.id),
+                        title=appointment.title)
         return Response(appointments.host_appointment_json(appointment))
 
 
@@ -134,7 +136,8 @@ class BookByPhoneView(APIView):
             appointment = appointments.book_by_phone(request.user, listing_ids, start)
         except appointments.AppointmentError as exc:
             return _refused(exc)
-        journaliser('visit_booked_by_phone', request, utilisateur=request.user, appointment=str(appointment.id))
+        activity.record('visit_booked_by_phone', request, actor=request.user, appointment=str(appointment.id),
+                        title=appointment.title)
         return Response(agenda.summary(appointment), status=201)
 
 
@@ -146,7 +149,8 @@ class CancelView(APIView):
             appointment = appointments.cancel(request.user, pk, str(request.data.get('reason', '')))
         except appointments.AppointmentError as exc:
             return _refused(exc)
-        journaliser('visit_cancelled', request, utilisateur=request.user, appointment=str(appointment.id))
+        activity.record('visit_cancelled', request, actor=request.user, appointment=str(appointment.id),
+                        title=appointment.title)
         return Response(agenda.summary(appointment))
 
 
@@ -161,8 +165,9 @@ class PostCheckView(APIView):
             appointment = appointments.post_check(request.user, pk, compliant, str(request.data.get('reason', '')))
         except appointments.AppointmentError as exc:
             return _refused(exc)
-        journaliser('visit_post_check', request, utilisateur=request.user, appointment=str(appointment.id),
-                    compliant=compliant)
+        activity.record('visit_post_check', request, actor=request.user, appointment=str(appointment.id),
+                        title=appointment.title,
+                        compliant=compliant)
         return Response(agenda.summary(appointment))
 
 
@@ -174,6 +179,7 @@ class ReassignView(APIView):
             appointment = appointments.reassign(request.user, pk, request.data.get('agent_id'))
         except appointments.AppointmentError as exc:
             return _refused(exc)
-        journaliser('visit_reassigned', request, utilisateur=request.user, appointment=str(appointment.id),
-                    agent=str(appointment.agent_id))
+        activity.record('visit_reassigned', request, actor=request.user, appointment=str(appointment.id),
+                        title=appointment.title,
+                        agent=str(appointment.agent_id))
         return Response(agenda.summary(appointment))

@@ -12,7 +12,7 @@ from django.utils import timezone
 from apps.finance import api as finance
 from apps.finance.models import (CompteArgentModel, CorrespondanceHistoModel, MouvementModel, NatureModel,
                                  OffreModel, ParametreHistoModel, ParametreModel, PeriodeModel, RapportModel)
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 
 HOTE = str(uuid.uuid4())  # third party ids are text in the ledger
 RESERVATION = uuid.uuid4()
@@ -166,8 +166,8 @@ def test_a_correction_goes_to_the_audit_log(make_user):
 
     inverse = finance.contre_passer(pk, motif='Doublon de saisie', par_id=admin.pk)
 
-    entree = JournalAuditModel.objects.get(action='ecriture_corrigee')
-    assert (entree.utilisateur_id, entree.details) == (
+    entree = ActivityEntryModel.objects.get(action='ecriture_corrigee')
+    assert (entree.actor_id, entree.details) == (
         admin.pk, {'mouvement': pk, 'ligne_inverse': inverse, 'motif': 'Doublon de saisie'})
 
 
