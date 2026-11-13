@@ -7,9 +7,8 @@ import { useTranslations } from "next-intl";
 import { CENTRE_LOME, arrondi, centreDeVille, type PointCarte } from "./geometrie";
 import { CadreCarte, useCarte } from "./useCarte";
 
-const VERT_KWABA = "#0E4D47";
 const ZOOM_PRECIS = 17;
-const boutonClass = "inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-dark hover:border-primary/40 disabled:opacity-60";
+const boutonClass = "inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-surface px-3 py-2 text-sm font-semibold text-dark hover:border-primary/40 disabled:opacity-60";
 
 /** Host form: the exact position of the listing, placed on the map. `ville` moves the map while no pin is placed. */
 export default function ChoixPosition({ valeur, onChange, ville }: {
@@ -19,19 +18,24 @@ export default function ChoixPosition({ valeur, onChange, ville }: {
 }) {
   const t = useTranslations("carte.choix");
   const depart = valeur ?? centreDeVille(ville) ?? CENTRE_LOME;
-  const { conteneur, carte, panne } = useCarte({ center: [depart.lng, depart.lat], zoom: valeur ? 16 : 12 });
+  const { conteneur, carte, panne, brandColor } = useCarte({ center: [depart.lng, depart.lat], zoom: valeur ? 16 : 12 });
   const repere = useRef<Marker | null>(null);
   const [localisation, setLocalisation] = useState<"" | "en_cours" | "refus">("");
+
+  useEffect(() => () => {
+    repere.current?.remove();
+    repere.current = null;
+  }, [carte]);
 
   useEffect(() => {
     if (!carte || !valeur) return;
     if (!repere.current) {
-      const marqueur = new Marker({ color: VERT_KWABA, draggable: true }).setLngLat([valeur.lng, valeur.lat]).addTo(carte);
+      const marqueur = new Marker({ color: brandColor, draggable: true }).setLngLat([valeur.lng, valeur.lat]).addTo(carte);
       marqueur.on("dragend", () => onChange(arrondi(marqueur.getLngLat())));
       repere.current = marqueur;
     }
     repere.current.setLngLat([valeur.lng, valeur.lat]);
-  }, [carte, valeur, onChange]);
+  }, [carte, valeur, onChange, brandColor]);
 
   useEffect(() => {
     if (!carte) return;
