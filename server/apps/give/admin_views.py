@@ -10,7 +10,7 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import ChampPhoto, FicheAdmin, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 from apps.users import api as users
@@ -101,8 +101,8 @@ class ProjetsView(ListeAdmin):
     def perform_create(self, serializer):
         organisation = OrganisationModel.objects.get(pk=self.kwargs['pk'])
         projet = serializer.save(organisation=organisation)
-        journaliser("backoffice_creation", self.request, utilisateur=self.request.user, objet="projet",
-                    id=str(projet.pk), libelle=projet.titre)
+        activity.record("backoffice_creation", self.request, actor=self.request.user, objet="projet",
+                        id=str(projet.pk), libelle=projet.titre)
 
 
 class ProjetView(FicheAdmin):
@@ -140,8 +140,8 @@ class ReversementsPreparerView(APIView):
 
     def post(self, request):
         n = services.preparer_reversements()
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="reversements",
-                    operation="preparation", dons=n)
+        activity.record("backoffice_modification", request, actor=request.user, objet="reversements",
+                        operation="preparation", dons=n)
         return Response({'dons': n})
 
 
@@ -179,8 +179,8 @@ class ReversementEffectuerView(APIView):
         r.save(update_fields=['justificatif', 'note'])
         services.marquer_effectue(r, moyen=d['moyen'], reference_operation=d['reference_operation'],
                                   effectue_le=d.get('effectue_le'))
-        journaliser("backoffice_modification", request, utilisateur=request.user, objet="reversement", id=str(r.pk),
-                    libelle=r.reference, operation="effectue", montant=r.montant, ong=r.organisation.nom)
+        activity.record("backoffice_modification", request, actor=request.user, objet="reversement", id=str(r.pk),
+                        libelle=r.reference, operation="effectue", montant=r.montant, ong=r.organisation.nom)
         return Response(_reversement(ReversementModel.objects.select_related('organisation').get(pk=pk), request))
 
 

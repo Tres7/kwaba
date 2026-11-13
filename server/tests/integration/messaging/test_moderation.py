@@ -8,7 +8,8 @@ from apps.messaging.infrastructure.persistence import moderation_retention
 from apps.messaging.infrastructure.persistence.models import (
     MessageModel, MessageReportModel, NotificationOutboxModel, SanctionModel,
 )
-from apps.securite.models import AlerteFraudeModel, JournalAuditModel
+from apps.activity.models import ActivityEntryModel, ActivityHoldModel
+from apps.securite.models import AlerteFraudeModel
 
 CONVERSATIONS = '/api/v1/messaging/conversations/'
 MODERATION = '/api/v1/messaging/moderation/'
@@ -230,7 +231,7 @@ class TestSanctions:
         detail = client_for(admin).get(f'{ADMIN}reports/{report_id}/').data
         assert detail['author']['email'] == host.email and detail['reporter']['email'] == guest.email
         assert detail['context'][-1]['content'] == INSULT
-        assert JournalAuditModel.objects.filter(action='report_viewed', details__report=report_id).exists()
+        assert ActivityEntryModel.objects.filter(action='report_viewed', details__report=report_id).exists()
 
     def test_ladder_up_to_suspension(self, client_for, admin, host, thread, reported, django_capture_on_commit_callbacks):
         ids = reported(5)
@@ -308,7 +309,7 @@ class TestSanctions:
                                       format='json').status_code == 200
         assert client_for(admin).post(f'{ADMIN}sanctions/{suspension.id}/lift/', {}, format='json').status_code == 200
         assert send(client_for(host), thread, "Bonjour").status_code == 201
-        assert JournalAuditModel.objects.filter(action='sanction_lifted').count() == 2
+        assert ActivityEntryModel.objects.filter(action='sanction_lifted').count() == 2
 
 
 class TestRetention:
@@ -321,6 +322,7 @@ class TestRetention:
         confirm(client_for(admin), confirmed)
         confirm(client_for(admin), held)
         client_for(admin).post(f'{ADMIN}reports/{held}/legal-hold/', {'hold': True}, format='json')
+        assert ActivityHoldModel.objects.filter(target_kind='report', target_id=str(held)).exists()
 
         now = timezone.now()
         moderation_retention.purge(now + datetime.timedelta(days=91))

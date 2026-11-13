@@ -4,7 +4,7 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .audit import journaliser
+from apps.activity import api as activity
 from .permissions import EstAdministrateur
 from .photos import InvalidPhoto, normalize_photo
 
@@ -35,14 +35,14 @@ class Journalise:
 
     def perform_create(self, serializer):
         objet = serializer.save()
-        journaliser("backoffice_creation", self.request, utilisateur=self.request.user,
-                    objet=self.nom_objet, id=str(objet.pk), libelle=str(objet))
+        activity.record("backoffice_creation", self.request, actor=self.request.user,
+                        objet=self.nom_objet, id=str(objet.pk), libelle=str(objet))
 
     def perform_update(self, serializer):
         objet = serializer.save()
-        journaliser("backoffice_modification", self.request, utilisateur=self.request.user,
-                    objet=self.nom_objet, id=str(objet.pk), libelle=str(objet),
-                    champs=sorted(k for k in self.request.data.keys() if k in serializer.fields))
+        activity.record("backoffice_modification", self.request, actor=self.request.user,
+                        objet=self.nom_objet, id=str(objet.pk), libelle=str(objet),
+                        champs=sorted(k for k in self.request.data.keys() if k in serializer.fields))
 
 
 class ListeAdmin(Journalise, generics.ListCreateAPIView):

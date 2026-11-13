@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.http import HttpResponse
 
-from .audit import journaliser
+from apps.activity import api as activity
 from .limites import Tentatives, ip_client
 
 MAX_ECHECS_IP = 20
@@ -20,7 +20,7 @@ def connexion_admin(request, extra_context=None):
         Tentatives(f"admin:email:{email}", MAX_ECHECS_EMAIL, FENETRE),
     ]
     if not all([c.essayer() for c in compteurs]):
-        journaliser('admin_connexion_echec', request, email=email, bloque=True)
+        activity.record('admin_connexion_echec', request, email=email, bloque=True)
         attente = max(c.attente for c in compteurs)
         reponse = HttpResponse(
             f"Trop de tentatives de connexion. Réessayez dans {attente // 60 + 1} minutes.", status=429,
@@ -33,5 +33,5 @@ def connexion_admin(request, extra_context=None):
         for c in compteurs:
             c.reussite()
     else:
-        journaliser('admin_connexion_echec', request, email=email)
+        activity.record('admin_connexion_echec', request, email=email)
     return reponse

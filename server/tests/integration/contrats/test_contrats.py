@@ -16,7 +16,7 @@ from apps.contrats.models import ContratModel, ModeleContratModel
 from apps.documents.models import ParametresSocieteModel
 from apps.give.models import OrganisationModel
 from apps.locations.models import PartenaireLocationModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 from apps.transferts.models import ChauffeurModel
 from apps.verifications.models import PieceIdentiteModel
 
@@ -98,7 +98,7 @@ def test_hote_signe_son_contrat_depuis_son_espace(client_for, make_user, societe
     destinataires = {d for m in mail.outbox for d in m.to}
     assert {hote.email, 'contact@kwa-ba.com'} <= destinataires
     assert all(m.attachments and m.attachments[-1][0] == f'contrat-{contrat.reference}.pdf' for m in mail.outbox if 'signé' in m.subject)
-    assert JournalAuditModel.objects.filter(action='contrat_signe').exists()
+    assert ActivityEntryModel.objects.filter(action='contrat_signe').exists()
 
     _pdf(client.get(f'{C}hote/pdf/'))
     assert client.post(f'{C}hote/signer/', corps, format='json').status_code == 400  # already signed

@@ -2,7 +2,7 @@
 from django.db.models import Case, F, Value, When
 from django.utils import timezone
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 
 from .infrastructure.persistence.models import UserModel
 
@@ -32,6 +32,6 @@ def _retirer(admins) -> int:
         admin_sections=None, admin_permissions=[], admin_expire_le=None, role_avant_admin='',
     )
     for compte in comptes:
-        journaliser('admin_expire', utilisateur=compte['pk'], email=compte['email'],
-                    apres=compte['role_avant_admin'] or 'voyageur')
+        activity.record('admin_expire', target=activity.Target('account', str(compte['pk']), compte['email']),
+                        apres=compte['role_avant_admin'] or 'voyageur')
     return nombre

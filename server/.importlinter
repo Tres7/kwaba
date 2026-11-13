@@ -29,12 +29,13 @@ ignore_imports =
     apps.** -> apps.*.api
 
 [importlinter:contract:noyau-partage]
-name = securite, notifications et export ne dépendent d'aucun module métier
+name = securite, notifications, export et activity ne dépendent d'aucun module métier
 type = forbidden
 source_modules =
     apps.securite
     apps.notifications
     apps.export
+    apps.activity
 forbidden_modules =
     apps.agenda
     apps.avis

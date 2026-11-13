@@ -13,7 +13,7 @@ from apps.agenda.domain.settings import PER_DAY_CEILING
 from apps.agenda.infrastructure import ics
 from apps.agenda.infrastructure.container import agenda_service, current_settings
 from apps.export import api as export
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.permissions import a_acces_section
 from apps.users import api as users
 
@@ -233,7 +233,8 @@ class OnTheWayView(APIView):
             appointment = agenda_service().on_the_way(pk, request.user.pk)
         except AgendaError as exc:
             return _error(exc)
-        journaliser('visit_on_the_way', request, utilisateur=request.user, appointment=str(appointment.id))
+        activity.record('visit_on_the_way', request, actor=request.user, appointment=str(appointment.id),
+                        title=appointment.title)
         return Response(_appointment_json(appointment))
 
 
@@ -262,7 +263,7 @@ class FeedView(APIView):
 
     def post(self, request):
         token = agenda_service().regenerate_token(request.user.pk)
-        journaliser('agenda_feed_regenerated', request, utilisateur=request.user)
+        activity.record('agenda_feed_regenerated', request, actor=request.user)
         return Response({'url': _feed_url(token)})
 
 

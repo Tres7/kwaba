@@ -2,7 +2,7 @@
 from rest_framework import generics, serializers
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import ChampPhoto, Journalise, ListeAdmin
 from apps.securite.permissions import EstAdministrateur
 
@@ -43,8 +43,8 @@ class ExperienceAdminView(Journalise, generics.RetrieveUpdateDestroyAPIView):
     queryset = ExperienceModel.objects.all()
 
     def perform_destroy(self, instance):
-        journaliser("backoffice_suppression", self.request, utilisateur=self.request.user, objet=self.nom_objet,
-                    id=str(instance.pk), libelle=str(instance))
+        activity.record("backoffice_suppression", self.request, actor=self.request.user, objet=self.nom_objet,
+                        id=str(instance.pk), libelle=str(instance))
         fichier = instance.image
         instance.delete()
         if fichier:

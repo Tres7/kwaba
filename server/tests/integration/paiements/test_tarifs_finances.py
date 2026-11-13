@@ -9,7 +9,7 @@ from apps.contrats import services as contrats
 from apps.contrats.models import ModeleContratModel
 from apps.paiements.models import FraisMenageModel, PaiementModel, ReglagesTarifsModel, RemboursementModel, VersementModel
 from apps.reservations.models import ReservationModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 
 TARIFS = '/api/v1/admin/paiements/tarifs/'
 FINANCES = '/api/v1/admin/paiements/finances/'
@@ -53,7 +53,7 @@ class TestTarifs:
         assert api_client.get('/api/v1/paiements/config/').data['frais_voyageur'] == 0.07
         avant.refresh_from_db()
         assert avant.frais_service == 3000
-        journal = JournalAuditModel.objects.get(action='tarifs_modifies')
+        journal = ActivityEntryModel.objects.get(action='tarifs_modifies')
         assert (journal.details['avant']['frais_voyageur'], journal.details['apres']['frais_voyageur']) == (6.0, 7.0)
 
     def test_commissions_and_cleaning_fee(self, admin, client_for, make_user, make_hebergement):
@@ -121,7 +121,7 @@ class TestFinances:
         assert csv.splitlines()[0].startswith('Date;Mouvement') and 'Encaissement;Séjour' in csv and ';-46000;4000;Planifié' in csv
         pdf = admin.get(f'{FINANCES}pdf/')
         assert pdf['Content-Type'] == 'application/pdf' and pdf.content.startswith(b'%PDF')
-        assert JournalAuditModel.objects.filter(action='finances_exportees').count() == 2
+        assert ActivityEntryModel.objects.filter(action='finances_exportees').count() == 2
 
     def test_period_checked(self, admin):
         assert admin.get(FINANCES, {'debut': '2026-11-10', 'fin': '2026-11-01'}).status_code == 400

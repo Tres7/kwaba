@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.models import AlerteFraudeModel
 from apps.securite.permissions import EstAdministrateur
 from apps.users import api as users
@@ -69,6 +69,7 @@ class AlerteTraiteeView(APIView):
         alerte.traitee, alerte.traitee_le, alerte.traitee_par_id = True, timezone.now(), request.user.pk
         alerte.note = str(request.data.get('note', ''))[:1000]
         alerte.save(update_fields=['traitee', 'traitee_le', 'traitee_par_id', 'note'])
-        journaliser('backoffice_modification', request, utilisateur=request.user, objet='alerte_fraude', id=str(alerte.pk),
-                    champs=['traitee'])
+        activity.record('backoffice_modification', request, actor=request.user, objet='alerte_fraude',
+                        id=str(alerte.pk),
+                        champs=['traitee'])
         return Response(_alerte(alerte, users.compte(alerte.utilisateur_id)))

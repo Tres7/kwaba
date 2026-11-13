@@ -24,6 +24,7 @@ SECTIONS_ADMIN = {
 SPECIAL_PERMISSIONS = {
     'agenda_settings': "Réglages de l'agenda",
     'validate_without_visit': 'Valider une annonce sans visite',
+    'activity_log': "Journal d'activité",
 }
 
 # Start of the path after /api/v1/admin/ → section. A route listed nowhere is refused to a limited admin
@@ -46,7 +47,7 @@ _ROUTES_SECTIONS = {
     'agenda/': 'verifications',
 }
 # Open to every admin, whatever their sections
-ROUTES_TOUS_ADMINS = ('droits/',)
+ROUTES_TOUS_ADMINS = ('droits/', 'activity/')
 
 
 def section_de(chemin: str) -> str | None:

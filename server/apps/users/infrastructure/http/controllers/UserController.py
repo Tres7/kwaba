@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.images import MESSAGE as IMAGE_REFUSEE, url_image_autorisee
 from apps.users.application.dto.dto import UpdateProfileDTO
 from apps.users.application.service.UserService import UserService
@@ -87,7 +87,7 @@ class MeView(APIView):
             # No session must be able to renew its tokens anymore
             from apps.users.infrastructure.http.controllers.AuthController import revoquer_jetons
             revoquer_jetons(request.user.id)
-            journaliser('compte_desactive', request, utilisateur=request.user)
+            activity.record('compte_desactive', request, actor=request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except UserNotFoundException as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -105,5 +105,5 @@ class CandidatureHoteView(APIView):
         ouverte = UserModel.objects.filter(pk=utilisateur.pk, role='voyageur').exclude(candidature_hote='ouverte').update(
             candidature_hote='ouverte')
         if ouverte:
-            journaliser('candidature_ouverte', request, utilisateur=utilisateur)
+            activity.record('candidature_ouverte', request, actor=utilisateur)
         return Response(_payload(_service().get_by_id(utilisateur.id)))

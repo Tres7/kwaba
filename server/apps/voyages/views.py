@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from config.prelancement import verifier_ouverture
 
 from apps.hebergements import api as hebergements
@@ -454,8 +454,8 @@ class DemandePaiementGroupeView(_PaiementDuGroupe):
             reservations_api.ouvrir_paiement_au_groupe(lien.reservation_id, request.user.id, voyage.id)
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('paiement_tiers_groupe', request, utilisateur=request.user, reservation=str(lien.reservation_id),
-                    voyage=str(voyage.id))
+        activity.record('paiement_tiers_groupe', request, actor=request.user, reservation=str(lien.reservation_id),
+                        voyage=str(voyage.id))
         return Response(detail(voyage, request.user, request))
 
     def delete(self, request, pk, lien_id):
@@ -490,6 +490,6 @@ class PaiementGroupeView(_PaiementDuGroupe):
                                                         request.data.get('moyen') or 'mobile_money')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('paiement_tiers_demarre', request, utilisateur=request.user, reservation=str(lien.reservation_id),
-                    voyage=str(voyage.id))
+        activity.record('paiement_tiers_demarre', request, actor=request.user, reservation=str(lien.reservation_id),
+                        voyage=str(voyage.id))
         return Response({'url': url})

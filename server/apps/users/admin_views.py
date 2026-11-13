@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from apps.hebergements import api as hebergements
 from apps.paiements import api as paiements
 from apps.reservations import api as reservations
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import VueAdmin, booleen as _booleen, introuvable as _introuvable, paginer as _paginer
 from apps.securite.permissions import SECTIONS_ADMIN, SPECIAL_PERMISSIONS
 
@@ -31,10 +31,10 @@ def _modifier_candidature(request, cible, valeur, motif) -> str | None:
         if len(motif) < MIN_MOTIF:
             return f"Expliquez le motif du refus ({MIN_MOTIF} caractères au moins)."
         cible.candidature_hote, cible.candidature_motif = 'refusee', motif
-        journaliser('candidature_refusee', request, utilisateur=request.user, cible_id=str(cible.pk), motif=motif)
+        activity.record('candidature_refusee', request, actor=request.user, cible_id=str(cible.pk), motif=motif)
     elif valeur == 'ouverte' and cible.candidature_hote == 'refusee':
         cible.candidature_hote, cible.candidature_motif = 'ouverte', ''
-        journaliser('candidature_ouverte', request, utilisateur=request.user, cible_id=str(cible.pk))
+        activity.record('candidature_ouverte', request, actor=request.user, cible_id=str(cible.pk))
     else:
         return "Cette candidature ne peut pas être modifiée ainsi."
     return None
@@ -156,7 +156,7 @@ class UtilisateurDetailView(VueAdmin):
             if erreur:
                 return Response({'candidature': [erreur]}, status=status.HTTP_400_BAD_REQUEST)
         if 'role' in donnees and role != cible.role:
-            journaliser('role_modifie', request, utilisateur=request.user, avant=cible.role, apres=role, **trace)
+            activity.record('role_modifie', request, actor=request.user, avant=cible.role, apres=role, **trace)
             if role == 'admin':
                 cible.role_avant_admin = cible.role
             elif cible.role == 'admin':
@@ -168,18 +168,19 @@ class UtilisateurDetailView(VueAdmin):
         if limites:
             for champ, valeur in limites.items():
                 setattr(cible, champ, valeur)
-            journaliser('droits_admin_modifies', request, utilisateur=request.user, sections=cible.admin_sections,
-                        permissions=cible.admin_permissions,
-                        expire_le=cible.admin_expire_le.isoformat() if cible.admin_expire_le else None, **trace)
+            activity.record('droits_admin_modifies', request, actor=request.user, sections=cible.admin_sections,
+                            permissions=cible.admin_permissions,
+                            expire_le=cible.admin_expire_le.isoformat() if cible.admin_expire_le else None, **trace)
         if 'is_active' in donnees and actif != cible.is_active:
             cible.is_active = actif
-            journaliser('compte_desactive' if not actif else 'compte_reactive', request, utilisateur=request.user, **trace)
+            activity.record('compte_desactive' if not actif else 'compte_reactive', request, actor=request.user,
+                            **trace)
         if 'conditions' in donnees:
             erreur = paiements.modifier_conditions_hote(cible, donnees.get('conditions'), request.user)
             if erreur:
                 return Response({'conditions': [erreur]}, status=status.HTTP_400_BAD_REQUEST)
-            journaliser('backoffice_modification', request, utilisateur=request.user, objet='conditions_hote',
-                        id=str(cible.pk), champs=['categorie', 'fondateur_debut', 'fondateur_fin'])
+            activity.record('backoffice_modification', request, actor=request.user, objet='conditions_hote',
+                            id=str(cible.pk), champs=['categorie', 'fondateur_debut', 'fondateur_fin'])
         cible.save(update_fields=['role', 'is_active', 'candidature_hote', 'candidature_motif', 'admin_sections',
                                   'admin_permissions', 'admin_expire_le', 'role_avant_admin'])
         if not cible.is_active:

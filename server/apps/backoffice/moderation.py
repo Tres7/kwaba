@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from apps.messaging import api as messaging
 from apps.securite import fraude
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.securite.backoffice import nom
 from apps.securite.permissions import EstAdministrateur
 from apps.users import api as users
@@ -35,7 +35,7 @@ class ReportDetailView(APIView):
     def get(self, request, pk):
         def detail():
             report = messaging.report_detail(pk)
-            journaliser('report_viewed', request, utilisateur=request.user, report=pk)
+            activity.record('report_viewed', request, actor=request.user, report=pk)
             return {**report, 'reporter': _person(report['reporter_id']), 'author': _person(report['author_id'])}
         return _run(detail)
 
@@ -46,7 +46,7 @@ class ReportConfirmView(APIView):
     def post(self, request, pk):
         def confirm():
             sanction = messaging.confirm_report(request.user.pk, pk, _note(request))
-            journaliser('report_confirmed', request, utilisateur=request.user, report=pk, step=sanction['step'])
+            activity.record('report_confirmed', request, actor=request.user, report=pk, step=sanction['step'])
             return sanction
         return _run(confirm)
 
@@ -57,7 +57,7 @@ class ReportRejectView(APIView):
     def post(self, request, pk):
         def reject():
             report = messaging.reject_report(request.user.pk, pk, _note(request))
-            journaliser('report_rejected', request, utilisateur=request.user, report=pk)
+            activity.record('report_rejected', request, actor=request.user, report=pk)
             return {'id': report['id'], 'status': report['status']}
         return _run(reject)
 
@@ -71,7 +71,8 @@ class ReportLegalHoldView(APIView):
         def change():
             report = messaging.set_legal_hold(pk, hold)
             fraude.set_legal_hold('report', pk, hold)
-            journaliser('legal_hold_changed', request, utilisateur=request.user, report=pk, hold=hold)
+            activity.record('legal_hold_changed', request, actor=request.user, report=pk, hold=hold)
+            activity.hold('report', pk, hold)
             return {'id': report['id'], 'legal_hold': report['legal_hold']}
         return _run(change)
 
@@ -94,7 +95,7 @@ class ContestReviewView(APIView):
 
         def review():
             sanction = messaging.review_contest(request.user.pk, pk, accept, _note(request))
-            journaliser('contest_reviewed', request, utilisateur=request.user, sanction=pk, accepted=accept)
+            activity.record('contest_reviewed', request, actor=request.user, sanction=pk, accepted=accept)
             return sanction
         return _run(review)
 
@@ -110,7 +111,7 @@ class SanctionLiftView(APIView):
 
         def lift():
             sanction = messaging.lift_sanction(pk, ends_at)
-            journaliser('sanction_lifted', request, utilisateur=request.user, sanction=pk,
-                        ends_at=sanction['ends_at'].isoformat())
+            activity.record('sanction_lifted', request, actor=request.user, sanction=pk,
+                            ends_at=sanction['ends_at'].isoformat())
             return sanction
         return _run(lift)

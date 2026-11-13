@@ -6,7 +6,7 @@ import pytest
 from django.contrib.auth import get_user_model
 
 from apps.hebergements.models import HebergementModel
-from apps.securite.models import JournalAuditModel
+from apps.activity.models import ActivityEntryModel
 
 POSITIONS = '/api/v1/verifications/positions/'
 POINT_HOTE = (Decimal('6.130000'), Decimal('1.220000'))
@@ -49,9 +49,10 @@ def test_coordonnees_collees_remplacent_le_point_et_l_annonce_reste_en_ligne(age
     assert (annonce.latitude, annonce.longitude) == (Decimal('6.140000'), Decimal('1.220000'))
     assert annonce.statut_verification == 'verifiee' and annonce.position_relevee_le
     assert [h['id'] for h in api_client.get('/api/v1/hebergements/').data['results']] == [str(annonce.id)]
-    trace = JournalAuditModel.objects.get(action='position_corrigee')
-    assert trace.details == {'hebergement': str(annonce.id), 'source': 'texte', 'ecart_m': reponse.data['ecart_m'],
-                             'precision_m': None}
+    trace = ActivityEntryModel.objects.get(action='position_corrigee')
+    assert trace.details == {'hebergement': str(annonce.id), 'annonce': annonce.name, 'source': 'texte',
+                             'ecart_m': reponse.data['ecart_m'], 'precision_m': None}
+    assert (trace.target_kind, trace.target_id, trace.target_label) == ('listing', str(annonce.id), annonce.name)
     # Done: no longer in the list of positions to measure
     assert agent.get(POSITIONS).data['a_relever'] == 0
     assert agent.get(POSITIONS, {'toutes': '1'}).data['results'][0]['position_relevee_le']

@@ -1,7 +1,7 @@
 """Super admins (the directors) are managed here only, never through the API: a stolen account cannot create one."""
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 from apps.users.infrastructure.persistence.models import UserModel
 
 
@@ -26,5 +26,6 @@ class Command(BaseCommand):
             compte.admin_sections = compte.admin_expire_le = None
             compte.role_avant_admin = ''
         compte.save(update_fields=['is_superuser', 'is_staff', 'role', 'admin_sections', 'admin_expire_le', 'role_avant_admin'])
-        journaliser('super_admin_retire' if retirer else 'super_admin_nomme', utilisateur=compte)
+        activity.record('super_admin_retire' if retirer else 'super_admin_nomme',
+                        target=activity.Target('account', str(compte.pk), compte.email))
         self.stdout.write(f"{compte.email} : super administrateur {'retiré' if retirer else 'nommé'}.")

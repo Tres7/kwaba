@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/v1/experiences/', include('apps.experiences.urls')),
     path('api/v1/correcteur/', include('apps.correcteur.urls')),
     path('api/v1/admin/agenda/', include('apps.agenda.infrastructure.http.admin_urls')),
+    path('api/v1/admin/activity/', include('apps.activity.infrastructure.http.admin_urls')),
     path('api/v1/admin/paiements/', include('apps.paiements.admin_urls')),
     path('api/v1/admin/documents/', include('apps.documents.admin_urls')),
     path('api/v1/admin/contrats/', include('apps.contrats.admin_urls')),

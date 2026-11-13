@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from config.prelancement import verifier_ouverture
 from apps.paiements import api as paiements
-from apps.securite.audit import journaliser
+from apps.activity import api as activity
 
 from . import paiement, tiers
 from .models import DemandePaiementModel, ReservationModel
@@ -104,7 +104,7 @@ class DemandeTiersView(_LimiteEcritures, APIView):
             demande, jeton = tiers.creer_lien(reservation)
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('paiement_tiers_lien', request, utilisateur=request.user, reservation=str(reservation.pk))
+        activity.record('paiement_tiers_lien', request, actor=request.user, reservation=str(reservation.pk))
         # The only time the link is given: only its fingerprint is kept
         return Response({**_etat_demande(demande), 'lien': f"{settings.FRONTEND_URL}/payer/{jeton}"},
                         status=status.HTTP_201_CREATED)
@@ -139,7 +139,7 @@ class PaiementTiersView(_LimiteEcritures, APIView):
             url = tiers.payer(demande, request.user, request.data.get('moyen') or 'mobile_money')
         except paiements.PaiementErreur as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        journaliser('paiement_tiers_demarre', request, utilisateur=request.user, reservation=str(demande.reservation_id))
+        activity.record('paiement_tiers_demarre', request, actor=request.user, reservation=str(demande.reservation_id))
         return Response({'url': url})
 
 
