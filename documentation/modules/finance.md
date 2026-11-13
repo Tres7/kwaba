@@ -18,6 +18,28 @@ Chaque mouvement d'argent est écrit **une seule fois**, dans une table en ajout
 
 `server/.importlinter` (contrat `finance-couches`) interdit au domaine et à l'application d'importer l'infrastructure.
 
+## Ce qui écrit dans le grand livre aujourd'hui : les séjours (FIN-03)
+
+Chaque événement d'argent d'un séjour payé en ligne écrit ses lignes dans la transaction de l'action (`apps/paiements/grand_livre.py`) :
+
+| Événement | Lignes | Où |
+| --- | --- | --- |
+| Paiement accepté | T01 prix des nuits et T02 ménage (dus à l'hôte ou à l'hôtel), R01 frais de service ; référence de la transaction FedaPay, moyen (Moov, Mixx, carte) | `reservations/paiement.py`, `paiement_recu` |
+| Paiement refusé tout de suite (payé deux fois, réservation annulée entre-temps, dates prises) | T05 entrée : dû au voyageur | `paiements.services.rembourser` |
+| Arrivée du voyageur (14 h le jour d'arrivée) | T01 sortie et R02 (particulier) ou R03 (hôtel) : la commission devient un produit | `reservations/paiement.py`, `constater_commissions`, une fois par séjour (`commission_constatee_le`) |
+| Annulation | T02 et T01 sortie de ce qui est rendu, R01 rectifié si les frais sont rendus, R08 pour la part de Kwa-Ba sur les nuits retenues (cas FF-02), puis T05 entrée | `paiements.services.annuler_paiement_reservation` |
+| Frais réduits après le paiement (Pack Séjour + Chauffeur) | R01 rectifié (ligne inverse puis nouveau montant), puis T05 entrée de la différence | `reservations.api.reduire_frais_pack_sejour` |
+| Remboursement envoyé | T05 sortie | `paiements.services` (FedaPay et PayPal) |
+| Versement à l'hôte envoyé | T09 sortie | `paiements.services.synchroniser_payout` |
+
+Les montants sont ceux figés sur la réservation à sa création : un taux changé ensuite ne modifie rien (FA-11). Un séjour payé avant le grand livre, ou payé hors ligne, n'y a aucune ligne : il n'en reçoit jamais après coup (aucune sortie de ce qui n'est jamais entré). Les réservations existantes sont marquées par la migration `reservations 0012`.
+
+À venir, sur le même modèle : transferts (chauffeur « à désigner » jusqu'à son attribution) et locations de voiture (propriétaire, chauffeur, caution C01 à C03). Kwa-Ba Give n'écrit rien tant que ses natures ne sont pas décidées.
+
+## Écran du back-office
+
+**Back-office → Grand livre** (section « Finances », lecture seule) : contrôle des invariants (vert, ou rouge avec le nombre d'anomalies), les trois soldes qui ne se mélangent jamais (revenu de Kwa-Ba du mois, dû aux partenaires, dû aux voyageurs, cautions détenues), solde de chaque compte d'argent, sommes dues par partenaire (nom et email) et les 50 dernières lignes. Sur téléphone, chaque ligne est une carte, montant en vue. API : `GET /api/v1/admin/finance/grand-livre/`.
+
 ## Écrire une ligne
 
 ```python
@@ -88,15 +110,15 @@ Concurrence : pas de verrou de ligne sur le grand livre (le rôle de l'applicati
 
 | Exigence | État |
 | --- | --- |
-| FIN-01.1 une ligne par événement d'argent | Table et natures en place. Les paiements, arrivées, versements et remboursements y écriront à la PR suivante (FIN-03) |
+| FIN-01.1 une ligne par événement d'argent | Séjours : fait (paiement, arrivée, annulation, remboursement, versement). Transferts et locations : PR suivante |
 | FIN-01.2 axes de chaque ligne | Fait |
 | FIN-01.3 ajout seul, correction par ligne inverse | Fait, refus par la base (trigger et droits) |
 | FIN-01.4 code inconnu refusé, alerte | Fait, alerte aux admins « Finances » |
 | FIN-01.5 entiers, arrondi chez Kwa-Ba | Entiers : fait. L'arrondi appartient au calcul de la ventilation (FIN-03) : il arrondit au franc le plus proche, comme les neuf cas de référence |
-| FIN-01.6 même transaction | Interface faite ; branchement avec FIN-03 |
+| FIN-01.6 même transaction | Fait pour les séjours (testé : une action qui échoue ne laisse aucune ligne) |
 | FIN-01.7 idempotence | Fait |
 | FIN-02 rapprochement à trois voies | Tables du relevé et du rapprochement, règle « pas de donnée = anomalie » : faites. Connexion FedaPay, frais réels, écran : lot F2 |
-| FIN-03 ventilation figée au paiement | Prochaine PR |
+| FIN-03 ventilation figée au paiement | Séjours : fait (FIN-03.1, 03.3, 03.5 ; les montants figés à la réservation tiennent lieu d'instantané, FA-11). Écran du détail d'une réservation (FIN-03.4) : à venir |
 | FIN-04 sommes dues aux partenaires | Vue faite. Écran, échéances, alertes, gel des versements : lot F2 |
 | FIN-05 registre des cautions | Vue par réservation ou location. Registre des cautions de location : lot F2 ; séjours : projet séparé |
 | FIN-06 fonds de garantie | Taux à 0 ; natures G sans compte (bloquent la clôture, I12) : lot F4, après l'expert-comptable |
@@ -128,6 +150,10 @@ Le fichier a été traduit dans notre architecture : modèles Django et migratio
 | Invariant I10 ajouté à la vue de contrôle (ligne écrite dans un mois après son verrouillage) | Il figurait au cahier, pas dans la vue |
 | Fonds de tiers sans tiers, caution sans réservation ni location : refusés | Compte auxiliaire (FIN-07.1), registre des cautions (FIN-05.1) |
 | Rapprochement du jour : identifiant propre et unicité (jour, compte) au lieu d'une clé primaire double | Habitude de nos modèles |
+| `tiers_id` en texte (le fichier : entier) | Un compte est un UUID, un chauffeur ou un loueur un numéro ; le grand livre ne connaît pas leurs modules |
+| T05 accepte les deux sens (le fichier : sortie seulement) | L'argent d'un remboursement décidé est dû au voyageur (entrée) jusqu'à son envoi (sortie) |
+| Un fonds de tiers peut attendre la personne (type obligatoire, identifiant facultatif) | Le chauffeur d'un transfert n'est attribué qu'après le paiement |
+| Compte d'argent et moyen PayPal présents, inactifs | PayPal est éteint au lancement : un paiement PayPal est refusé plutôt que laissé hors du grand livre |
 | Journal des actions : celui de `securite` au lieu de `finance_journal_action` | Un seul journal d'audit, déjà en ajout seul pour l'application |
 | Pas de `finance_sequence_piece` ni de `finance_prochain_numero` | Les numéros de facture viennent déjà de `documents` (`SequenceFactureModel`, verrou à chaque émission) ; le lot F3 l'étend aux autres séries |
 | Pas encore de `finance_caution`, `finance_validation`, ni de `tarifs_snapshot` | Créés avec leur brique : cautions de location (F2), double validation (FIN-13), ventilation au paiement (FIN-03) |
@@ -152,5 +178,6 @@ Les natures G01 et G02 (fonds de garantie) n'ont pas de compte SYSCOHADA : une l
 ## Tests
 
 - `server/tests/unit/finance/` : règles du domaine et cas d'usage avec des adaptateurs factices, sans base.
+- `server/tests/integration/finance/test_sejours.py` : un séjour à travers le vrai parcours de paiement (paiement, arrivée, annulation gratuite et tardive, annulation après l'arrivée, paiement après annulation, versement, Pack Séjour, taux changé ensuite, argent antérieur au grand livre) ; `test_backoffice.py` : l'écran et ses droits.
 - `server/tests/integration/finance/test_schema.py` : chaque vue, fonction et trigger existe et répond ; les vues disparaissent avant un `migrate` et reviennent après ; contrôle `finance.E001` et invariant I14.
 - `server/tests/integration/finance/` (PostgreSQL réelle) : série FB (immuabilité, idempotence, refus, y compris par un `INSERT`, `UPDATE` ou `DELETE` direct en base), FI-02, destinataires des alertes, journal des corrections, les neuf cas de référence du prompt développeurs au franc près, les trois soldes, la partie double du cas de référence (note 12, section 8.4), les invariants et la clôture.

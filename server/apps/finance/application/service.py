@@ -1,6 +1,7 @@
 """Use cases of the finance module: write movements in the ledger, correct them, read the parameters and the
 reports."""
 import uuid
+from dataclasses import replace
 from datetime import date
 from decimal import Decimal
 from typing import Iterable
@@ -68,6 +69,27 @@ class GrandLivreService:
             self.journal.correction(par_id, mouvement_id, pk, ecriture.ligne.motif)
         return pk
 
+    def rectifier(self, nature: str, nouveau_montant: int, *, motif: str, origine: str, objet: dict,
+                  par_id: uuid.UUID | None = None) -> list[int]:
+        """Brings the amount of a nature for an object (booking, transfer, rental) to `nouveau_montant`: its lines in
+        force are cancelled by inverse lines, and a new line carries the right amount (none if 0). Every line stays
+        visible (FIN-01.3). For example, service fees lowered from 6 to 3 % after the payment."""
+        if type(nouveau_montant) is not int or nouveau_montant < 0:
+            raise MouvementRefuse('Le nouveau montant doit être un nombre entier de francs CFA, positif ou nul.')
+        with self.tx.atomic():
+            lignes = self.grand_livre.lignes_en_vigueur(nature, **objet)
+            if not lignes:
+                raise MouvementRefuse(f'Aucune ligne {nature} en vigueur pour cet objet : rien à rectifier.')
+            ids = [self.contre_passer(m.id, motif=motif, origine=origine, par_id=par_id) for m in lignes]
+            if nouveau_montant:
+                nouvelle = replace(lignes[0].ligne, montant=nouveau_montant, motif=motif, date_evenement=None,
+                                   externe_reference=None)
+                ids += self.enregistrer([nouvelle], origine=origine, par_id=par_id)
+            return ids
+
+    def a_des_lignes(self, **filtres) -> bool:
+        return self.grand_livre.a_des_lignes(**filtres)
+
     def parametre(self, cle: str) -> Decimal:
         """Value in force of a steered parameter (FIN-16). An unknown or inactive key is an error: an offer not open
         yet has no value to read."""
@@ -124,6 +146,9 @@ class RestitutionService:
 
     def du_aux_partenaires(self) -> list[dict]:
         return self.restitutions.du_aux_partenaires()
+
+    def derniers_mouvements(self, limite: int = 50) -> list[dict]:
+        return self.restitutions.derniers_mouvements(max(1, min(limite, 500)))
 
     def cautions_detenues(self) -> list[dict]:
         return self.restitutions.cautions_detenues()

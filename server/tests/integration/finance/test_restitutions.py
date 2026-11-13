@@ -13,7 +13,7 @@ from django.utils import timezone
 from apps.finance import api as finance
 from apps.finance.models import CompteArgentModel, PeriodeModel, RapportModel, RapprochementJourModel
 
-HOTE = uuid.uuid4()
+HOTE = str(uuid.uuid4())  # third party ids are text in the ledger
 APPORTEUR = uuid.uuid4()
 
 
@@ -150,7 +150,7 @@ def test_three_balances_never_mix():
 
 def test_balances_of_two_hosts_are_kept_apart():
     """FE-01: three bookings on two hosts give two balances."""
-    autre = uuid.uuid4()
+    autre = str(uuid.uuid4())
     sejour(CAS[0], ref='TX-A')
     sejour(CAS[0], ref='TX-B')
     sejour(CAS[1], hote=autre, ref='TX-C')

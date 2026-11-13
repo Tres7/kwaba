@@ -24,11 +24,12 @@ from apps.finance.infrastructure.container import grand_livre_service, restituti
 __all__ = [
     'ENTREE', 'SORTIE', 'Ligne', 'MouvementRefuse', 'RestitutionRefusee',
     # Writing
-    'declarer_ecritures', 'enregistrer', 'contre_passer',
+    'declarer_ecritures', 'enregistrer', 'contre_passer', 'rectifier', 'a_des_lignes',
     # Reference
     'mois_de', 'parametre',
     # Reports
-    'balance_generale', 'cautions_detenues', 'controle_equilibre', 'controle_invariants', 'du_aux_partenaires',
+    'balance_generale', 'cautions_detenues', 'controle_equilibre', 'controle_invariants', 'derniers_mouvements',
+    'du_aux_partenaires',
     'ecritures', 'marge_par_offre', 'peut_on_cloturer', 'rapport', 'soldes_comptes_argent', 'synthese',
 ]
 
@@ -53,6 +54,23 @@ def contre_passer(mouvement_id: int, *, motif: str, origine: str = 'correction',
                   par_id: uuid.UUID | None = None) -> int:
     """Cancels a line by an inverse line; the id of the inverse line."""
     return grand_livre_service().contre_passer(mouvement_id, motif=motif, origine=origine, par_id=par_id)
+
+
+def rectifier(nature: str, nouveau_montant: int, *, motif: str, origine: str, reservation_id=None, transfert_id=None,
+              location_id=None, par_id: uuid.UUID | None = None) -> list[int]:
+    """Brings the amount of a nature for a booking, a transfer or a rental to `nouveau_montant`, by inverse lines and
+    a new line; the ids of the lines written."""
+    objet = {'reservation_id': reservation_id, 'transfert_id': transfert_id, 'location_id': location_id}
+    return grand_livre_service().rectifier(nature, nouveau_montant, motif=motif, origine=origine, objet=objet,
+                                           par_id=par_id)
+
+
+def a_des_lignes(*, externe_reference: str | None = None, reservation_id=None, transfert_id=None,
+                 location_id=None) -> bool:
+    """Is there a line of this external event, or of this booking, transfer or rental, in the ledger? Money older than
+    the ledger has none: it is not written afterwards."""
+    return grand_livre_service().a_des_lignes(externe_reference=externe_reference, reservation_id=reservation_id,
+                                              transfert_id=transfert_id, location_id=location_id)
 
 
 def parametre(cle: str) -> Decimal:
@@ -86,6 +104,11 @@ def rapport(code: str, debut: date, fin: date) -> list[dict]:
 def du_aux_partenaires() -> list[dict]:
     """What Kwa-Ba owes each partner now: {tiers_type, tiers_id, solde_du}."""
     return restitution_service().du_aux_partenaires()
+
+
+def derniers_mouvements(limite: int = 50) -> list[dict]:
+    """The latest lines of the ledger, newest first (500 at most)."""
+    return restitution_service().derniers_mouvements(limite)
 
 
 def cautions_detenues() -> list[dict]:

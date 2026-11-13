@@ -63,6 +63,8 @@ def reduire_frais_pack_sejour(reservation_id: uuid.UUID, voyageur_id: uuid.UUID)
         return 0, ''
     r.frais_service, r.total_price = nouveaux_frais, r.prix_nuits + nouveaux_frais + (r.frais_menage or 0)
     r.save(update_fields=['frais_service', 'total_price'])
+    # Ledger: R01 brought to the reduced fees; the difference is then refunded (owed to the traveller)
+    paiements.frais_rectifies(r, nouveaux_frais, 'Pack Séjour + Chauffeur : frais de service réduits')
     return ecart, r.reference
 
 

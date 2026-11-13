@@ -75,6 +75,8 @@ def paiement_recu(paiement):
     reservation.annule_par, reservation.annule_le = '', None
     reservation.save(update_fields=['status', 'expire_le', 'annule_par', 'annule_le'])
     paiements.planifier_versement_hote(reservation)
+    # Ledger: nights and cleaning owed to the host, service fees to Kwa-Ba (same transaction, FIN-01.6)
+    paiements.encaisser_sejour(paiement, reservation)
 
 
 def annuler(reservation, par: str) -> int:
@@ -107,9 +109,30 @@ def expirer() -> int:
     return expirees
 
 
+def constater_commissions(maintenant=None) -> int:
+    """Ledger: the commission of a paid stay becomes Kwa-Ba's revenue at the traveller's arrival (FIN-03). Each stay
+    once (commission_constatee_le); stays never paid online are only marked."""
+    maintenant = maintenant or timezone.now()
+    arrivees = ReservationModel.objects.filter(status='confirmed', commission_constatee_le__isnull=True,
+                                               check_in__lte=timezone.localdate(maintenant))
+    constatees = 0
+    for reservation in arrivees[:200]:
+        if paiements.arrivee(reservation) > maintenant:
+            continue
+        with transaction.atomic():
+            reservation = ReservationModel.objects.select_for_update().get(pk=reservation.pk)
+            if reservation.commission_constatee_le or reservation.status != 'confirmed':
+                continue
+            constatees += paiements.commission_a_l_arrivee(reservation)
+            reservation.commission_constatee_le = maintenant
+            reservation.save(update_fields=['commission_constatee_le'])
+    return constatees
+
+
 def passe() -> dict:
     # After the expiries of this pass: the dates they freed are checked at once
-    return {'reservations_expirees': expirer(), **hebergements.passe_alertes()}
+    return {'reservations_expirees': expirer(), 'commissions_constatees': constater_commissions(),
+            **hebergements.passe_alertes()}
 
 
 def decrire(reservation_id) -> dict | None:
@@ -138,9 +161,14 @@ def _revenu(ids) -> dict:
             for r in ReservationModel.objects.filter(pk__in=list(ids)).only('frais_service', 'commission_hote')}
 
 
+def _offre(reservation_id) -> str:
+    return paiements.offre_sejour(ReservationModel.objects.get(pk=reservation_id))
+
+
 PRODUIT_PAYE = ProduitPaye(
     type='reservation',
     revenu=_revenu,
+    offre=_offre,
     decrire=decrire,
     paiement_recu=paiement_recu,
     passe=passe,

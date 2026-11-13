@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from apps.users import api as users
 
-from . import notifications, tarifs
+from . import grand_livre, notifications, tarifs
 from .documents import recu_paiement
 from .models import ConditionsHoteModel, PaiementModel, ProfilVersementModel, RemboursementModel
 from .operateurs import OPERATEUR_CHOICES, PAYS_CHOICES, operateurs_du_pays
@@ -26,7 +26,27 @@ __all__ = [
     'reservation_possible', 'synchroniser_paiement', 'synchroniser_payout', 'texte_politique', 'total_sejour',
     'devis_sejour', 'frais_reduits', 'frais_reduits_sejour', 'montants_de', 'hotes_deja_visites', 'rembourser_en_partie',
     'paye_par_un_tiers', 'statut_paiement_de',
+    # Ledger of the finance module (grand_livre.py)
+    'arrivee', 'commission_a_l_arrivee', 'encaisser_sejour', 'frais_rectifies', 'offre_sejour',
 ]
+
+arrivee = tarifs.arrivee
+offre_sejour = grand_livre.offre_sejour
+frais_rectifies = grand_livre.frais_rectifies
+
+
+def encaisser_sejour(paiement, reservation) -> None:
+    """Ledger: the split of a stay paid and confirmed, in the payment's transaction."""
+    grand_livre.encaisser(paiement, grand_livre.parts_sejour(reservation))
+
+
+def commission_a_l_arrivee(reservation) -> bool:
+    """Ledger: at the arrival, the commission of a paid stay becomes Kwa-Ba's revenue. False if never paid online."""
+    paiement = _paiement_reussi('reservation', reservation.pk)
+    if paiement is None:
+        return False
+    grand_livre.commission_a_l_arrivee(reservation, paiement)
+    return True
 
 # Emails of the products paid online (stays, transfers, rentals, donations): same sending rules as the payment emails
 envoyer_email = notifications._envoyer

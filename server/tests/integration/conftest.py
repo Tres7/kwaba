@@ -28,6 +28,16 @@ def _paiement_hors_ligne(settings):
 
 
 @pytest.fixture(autouse=True)
+def _paypal_au_grand_livre(db):
+    # PayPal is off at launch: its account and method are inactive in the ledger (finance 0006). The tests of its
+    # flows switch it on, like its keys; tests/integration/finance checks the refusal when it is off
+    from apps.finance.models import CompteArgentModel, MoyenPaiementModel
+
+    CompteArgentModel.objects.filter(code='PAYPAL').update(actif=True)
+    MoyenPaiementModel.objects.filter(code='PAYPAL').update(actif=True)
+
+
+@pytest.fixture(autouse=True)
 def _site_ouvert(settings):
     # Site open by default, whatever a local server/.env says; pre-launch tests turn it on themselves
     settings.PRELANCEMENT = False

@@ -53,6 +53,9 @@ class ReservationModel(models.Model):
     # Stay terms frozen at booking, as the traveller accepted them: the host may change the listing afterwards.
     # The bookings made before were given the listing's values of the day (migration 0010).
     politique_annulation = models.CharField(max_length=10, blank=True, default='', db_default='')
+    # Ledger (finance): when the commission became Kwa-Ba's revenue, at the arrival. Set on the existing bookings by
+    # the migration that added it: their payments are older than the ledger
+    commission_constatee_le = models.DateTimeField(null=True, blank=True)
     arrivee_a_partir = models.TimeField(null=True, blank=True)
     depart_avant = models.TimeField(null=True, blank=True)
     petit_dejeuner = models.CharField(max_length=10, blank=True, default='', db_default='')

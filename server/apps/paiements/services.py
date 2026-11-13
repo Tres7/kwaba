@@ -21,7 +21,7 @@ from django.utils import timezone
 from apps.users import api as users
 from config import prelancement
 
-from . import fedapay, paypal, tarifs
+from . import fedapay, grand_livre, paypal, tarifs
 from .models import PaiementModel, ProfilVersementModel, RemboursementModel, VersementModel
 from .registre import PRODUITS
 
@@ -209,6 +209,8 @@ def _paiement_reussi(paiement_id, donnees: dict):
             paiement.telephone, paiement.pays_telephone = _telephone(donnees)
         paiement.save()
         logger.info("Paiement reçu : %s FCFA pour %s", paiement.montant, paiement.reference)
+        # Ledger: a refund decided by the product right now (paid twice, cancelled meanwhile) classifies this money
+        paiement.nouvel_encaissement = True
 
         # The module of the paid object handles it (confirmation, refund if paid twice or cancelled meanwhile…)
         PRODUITS[paiement.type_objet].paiement_recu(paiement)
@@ -248,10 +250,14 @@ def rembourser(paiement, montant: int, motif: str):
         else:
             # Mobile Money: FedaPay does not give the charged number, it is asked to the traveller
             statut = 'attente_numero'
-    return RemboursementModel.objects.create(
-        reservation_id=paiement.reservation_id, transfert_id=paiement.transfert_id, location_id=paiement.location_id,
-        paiement=paiement, montant=montant, motif=motif, statut=statut, derniere_erreur=erreur,
-    )
+    with transaction.atomic():
+        remboursement = RemboursementModel.objects.create(
+            reservation_id=paiement.reservation_id, transfert_id=paiement.transfert_id, location_id=paiement.location_id,
+            paiement=paiement, montant=montant, motif=motif, statut=statut, derniere_erreur=erreur,
+        )
+        # The money is owed to the traveller from now on (ledger, T05)
+        grand_livre.du_au_voyageur(remboursement)
+    return remboursement
 
 
 def indiquer_numero_remboursement(type_objet: str, objet_id, pays: str, operateur: str, numero: str) -> int:
@@ -293,6 +299,9 @@ def annuler_paiement_reservation(reservation, par: str) -> int:
     elif versement and versement.statut in ('en_cours', 'envoye'):
         logger.warning("Annulation de %s après le versement à l'hôte : à régulariser", reservation.reference)
 
+    # Ledger: what is given back leaves the host's money and the fees, then is owed to the traveller (rembourser)
+    grand_livre.annulation_sejour(reservation, paiement, bareme,
+                                  commission_constatee=bool(getattr(reservation, 'commission_constatee_le', None)))
     rembourser(paiement, bareme.rembourse_voyageur, motif)
     return bareme.rembourse_voyageur
 
@@ -375,7 +384,13 @@ def synchroniser_payout(ligne):
         ligne.statut = 'echoue' if ligne.tentatives >= MAX_TENTATIVES else 'planifie'
     else:
         return
-    ligne.save()
+    with transaction.atomic():
+        ligne.save()
+        if statut == 'envoye' and isinstance(ligne, VersementModel):
+            paiement = PaiementModel.objects.filter(reservation_id=ligne.reservation_id, statut='reussi').order_by(
+                'cree_le').first()
+            if paiement:
+                grand_livre.versement_hote_envoye(ligne, paiement)
 
 
 COMPTE_DESACTIVE = "Compte de l'hôte désactivé : versement suspendu tant que le compte n'est pas réactivé."
@@ -471,7 +486,10 @@ def _rembourser_paypal(remboursement: RemboursementModel) -> int:
     except paypal.PayPalErreur as exc:
         remboursement.derniere_erreur = str(exc)
         remboursement.statut = 'a_traiter' if remboursement.tentatives >= MAX_TENTATIVES else 'a_envoyer'
-    remboursement.save()
+    with transaction.atomic():
+        remboursement.save()
+        if remboursement.statut == 'envoye':
+            grand_livre.remboursement_envoye(remboursement)
     return 1 if remboursement.statut in ('en_cours', 'envoye') else 0
 
 
@@ -483,7 +501,9 @@ def synchroniser_remboursement(remboursement: RemboursementModel):
             return
         if statut == 'COMPLETED':
             remboursement.statut, remboursement.envoye_le = 'envoye', timezone.now()
-            remboursement.save()
+            with transaction.atomic():
+                remboursement.save()
+                grand_livre.remboursement_envoye(remboursement)
         elif statut in ('FAILED', 'CANCELLED'):
             remboursement.statut, remboursement.derniere_erreur = 'a_traiter', f"Remboursement PayPal {statut}"
             remboursement.save()
@@ -500,7 +520,10 @@ def synchroniser_remboursement(remboursement: RemboursementModel):
         remboursement.derniere_erreur = str(donnees.get('last_error_code') or 'Remboursement refusé par FedaPay')
     else:
         return
-    remboursement.save()
+    with transaction.atomic():
+        remboursement.save()
+        if statut == 'envoye':
+            grand_livre.remboursement_envoye(remboursement)
 
 
 def passe() -> dict:

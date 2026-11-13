@@ -55,7 +55,7 @@ def test_a_valid_line_gets_its_month_and_clean_texts():
     ({'compte_argent': 'BANQUE_EXP'}, 'inactif'),
     ({'tiers_type': 'bailleur'}, 'inactif'),
     ({'moyen_paiement': 'PAYPAL'}, 'inconnu'),
-    ({'tiers_id': None}, 'vont ensemble'),
+    ({'tiers_type': None}, 'va avec son type'),
     ({'tiers_type': None, 'tiers_id': None}, 'exige le tiers'),
     ({'nature': 'C01', 'tiers_type': None, 'tiers_id': None}, 'réservation ou la location'),
     ({'nature': 'C03', 'sens': SORTIE, 'tiers_type': None, 'tiers_id': None, 'location_id': uuid.uuid4()},
@@ -104,3 +104,9 @@ def test_open_modules_writing_to_inactive_codes_are_listed():
 
     assert ecarts == ['Le module sans_chauffeur est ouvert mais écrirait dans : offre VOITURE_SANS, nature R18 '
                       '(inactive ou inconnue).']
+
+
+def test_partner_money_may_wait_for_its_person():
+    """The driver of a transfer is assigned after the payment: the share is owed to « a driver » until then."""
+    ecriture = preparer_(ligne(tiers_id=None))
+    assert (ecriture.ligne.tiers_type, ecriture.ligne.tiers_id) == ('hote', None)
