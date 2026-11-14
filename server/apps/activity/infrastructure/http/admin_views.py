@@ -1,9 +1,6 @@
-import csv
-import io
 import uuid
 from datetime import date, datetime, time, timedelta
 
-from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework.response import Response
 
@@ -11,6 +8,7 @@ from apps.activity.application.ports import SearchQuery
 from apps.activity.domain import catalogue
 from apps.activity.domain.entities import Target
 from apps.activity.infrastructure.container import activity_service
+from apps.export.api import csv_response
 from apps.securite.backoffice import VueAdmin
 from apps.securite.limites import ip_client
 from apps.securite.permissions import has_special_permission
@@ -150,21 +148,18 @@ class ActivityExportView(ActivityAdmin):
             return Response({'detail': str(exc)}, status=400)
         service = activity_service()
         entries, people = service.search(query)
-        buffer = io.StringIO()
-        writer = csv.writer(buffer, delimiter=';')
-        writer.writerow(['date', 'action', 'categorie', 'niveau', 'auteur', 'email', 'ip', 'cible', 'resume'])
+        rows = []
         for entry in entries:
             row = _entry_json(entry, people)
             actor = row['actor'] or {}
             target = row['target'] or {}
-            writer.writerow([
+            rows.append([
                 timezone.localtime(entry.created_at).isoformat(timespec='seconds'), row['label'], row['category_label'],
                 catalogue.LEVELS[row['level']], actor.get('name', ''), actor.get('email', ''), row['ip'] or '',
                 f"{target.get('kind_label', '')} {target.get('label', '')}".strip(), row['summary'],
             ])
         service.record('activity_exported', actor=request.user, ip=ip_client(request),
                        details={'rows': len(entries), 'filters': dict(request.query_params.items())})
-        response = HttpResponse('﻿' + buffer.getvalue(), content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = f'attachment; filename="journal-activite-{timezone.localdate()}.csv"'
-        response['Cache-Control'] = 'private, no-store'
-        return response
+        # Names, labels and summaries come from users: csv_response writes a cell starting like a formula as text
+        return csv_response(['date', 'action', 'categorie', 'niveau', 'auteur', 'email', 'ip', 'cible', 'resume'], rows,
+                            f'journal-activite-{timezone.localdate()}.csv')
