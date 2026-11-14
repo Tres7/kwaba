@@ -135,6 +135,11 @@ class TestExport:
         exported = ActivityEntryModel.objects.get(action='activity_exported')
         assert exported.actor_id == super_admin.pk and exported.details['rows'] == 1
 
+    def test_cells_starting_like_a_formula_are_written_as_text(self, client):
+        _entry('role_modifie', actor_email='=HYPERLINK("http://x.tg")')
+        content = client.get(f'{URL}export/', {'level': 'sensitive'}).content.decode('utf-8-sig')
+        assert "'=HYPERLINK" in content and ';=HYPERLINK' not in content and ';"=HYPERLINK' not in content
+
 
 class TestAccess:
     def test_super_admins_and_granted_admins_only(self, make_user, client_for):
